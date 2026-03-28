@@ -186,7 +186,7 @@ namespace neogfx
                 iXMax = max;
             }
             else
-                iXMin = &iData.back().x();
+                iXMax = &iData.back().x();
             return *iXMax;
         }
         [[nodiscard]] y_type const& y_min() const final
@@ -667,20 +667,25 @@ namespace neogfx
                 {
                     this->update();
                 });
-            if (aAppearance && iSeriesAppearances.find(aAppearance) == iSeriesAppearances.end())
+            if (aAppearance)
             {
-                iSeriesAppearances.insert(aAppearance);
-                iSink += aAppearance->changed([&]()
-                    {
-                        this->update();
-                    });
+                auto existingAppearance = std::find_if(iSeriesAppearanceMap.begin(), iSeriesAppearanceMap.end(), [&](auto const& e) { return e.second == aAppearance; });
+                if (existingAppearance == iSeriesAppearanceMap.end())
+                    iSink += aAppearance->changed([&]()
+                        {
+                            this->update();
+                        });
+                iSeriesAppearanceMap[newSeries] = aAppearance;
             }
-            iSeriesAppearanceMap[newSeries] = aAppearance;
             return newSeries;
         }
         void erase_series(series_index aIndex) final
         {
-            iSeries.as_std_vector().erase(std::next(iSeries.as_std_vector().begin(), aIndex));
+            auto existingSeries = std::next(iSeries.as_std_vector().begin(), aIndex);
+            auto existingSeriesAppearance = iSeriesAppearanceMap.find(*existingSeries);
+            iSeries.as_std_vector().erase(existingSeries);
+            if (existingSeriesAppearance != iSeriesAppearanceMap.end())
+                iSeriesAppearanceMap.erase(existingSeriesAppearance);
             invalidate_cache();
             this->update();
         }
@@ -823,10 +828,11 @@ namespace neogfx
         void set_x_axis(i_ref_ptr<i_graph_axis<x_abstract_type>> const& aAxis = ref_ptr<i_graph_axis<x_abstract_type>>{}) final
         {
             iXAxis = aAxis;
-            iSink += iXAxis->changed([&]()
-                {
-                    this->update();
-                });
+            if (iXAxis)
+                iSink += iXAxis->changed([&]()
+                    {
+                        this->update();
+                    });
         }
         [[nodiscard]] i_graph_axis<y_abstract_type>& y_axis() const final
         {
@@ -837,10 +843,11 @@ namespace neogfx
         void set_y_axis(i_ref_ptr<i_graph_axis<y_abstract_type>> const& aAxis = ref_ptr<i_graph_axis<y_abstract_type>>{}) final
         {
             iYAxis = aAxis;
-            iSink += iYAxis->changed([&]()
-                {
-                    this->update();
-                });
+            if (iYAxis)
+                iSink += iYAxis->changed([&]()
+                    {
+                        this->update();
+                    });
         }
     public:
         [[nodiscard]] i_renderer const& renderer() const final
@@ -965,7 +972,6 @@ namespace neogfx
         std::optional<mat33> iViewTransformToPx;
         mutable optional<graph_series_appearance> iStyleBasedSeriesAppearance;
         mutable optional<graph_series_appearance> iDefaultSeriesAppearance;
-        std::set<ref_ptr<graph_series_appearance>> iSeriesAppearances;
         std::map<ref_ptr<series_type>, ref_ptr<graph_series_appearance>> iSeriesAppearanceMap;
         struct view_min_max
         {
