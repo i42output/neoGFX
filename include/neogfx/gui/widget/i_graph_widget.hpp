@@ -257,11 +257,13 @@ namespace neogfx
         {
             string result;
             x_to_text(aX, result);
+            return result;
         }
         string y_to_text(y_type const& aY) const
         {
             string result;
             y_to_text(aY, result);
+            return result;
         }
     };
 
