@@ -377,7 +377,31 @@ namespace neogfx
         optional_font iFont;
     };
 
-    template <typename X = double, typename Y = double>
+    template <typename T>
+    class default_graph_datum_traits
+    {
+    public:
+        using type = T;
+    private:
+        template <typename T, typename = void>
+        struct is_text_like : std::false_type {};
+        template <typename T>
+        struct is_text_like<T, std::void_t<decltype(to_string(std::declval<const T&>()))>> : std::true_type {};
+        template <typename T>
+        static constexpr bool is_text_like_v = is_text_like<T>::value;
+    public:
+        static string to_text(type const& v)
+        {
+            if constexpr (std::is_same_v<type, std::string> || std::is_same_v<type, string>)
+                return v;
+            else if constexpr (is_text_like_v<type>)
+                return to_string(v);
+            else
+                throw unknown_graph_datum_type();
+        }
+    };
+
+    template <typename X = double, typename Y = double, typename XTraits = default_graph_datum_traits<X>, typename YTraits = default_graph_datum_traits<Y>>
     class graph_renderer : public reference_counted<i_graph_renderer<abstract_t<X>, abstract_t<Y>>>
     {
     public:
@@ -387,14 +411,9 @@ namespace neogfx
     public:
         using x_type = X;
         using y_type = Y;
+        using x_traits = XTraits;
+        using y_traits = YTraits;
         using i_series = i_graph_series<x_abstract_type, y_abstract_type>;
-    private:
-        template <typename T, typename = void>
-        struct is_text_like : std::false_type {};
-        template <typename T>
-        struct is_text_like<T, std::void_t<decltype(to_string(std::declval<const T&>()))>> : std::true_type {};
-        template <typename T>
-        static constexpr bool is_text_like_v = is_text_like<T>::value;
     public:
         graph_renderer()
         {
@@ -427,33 +446,11 @@ namespace neogfx
         }
         void render_x_label(x_abstract_type const& aX, i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
-            aGc.draw_text(aLabelOrigin - x_label_extents(aX, aWidget, aGc, aElement) / 2.0, x_to_text(aX), aWidget.x_axis().font(), aWidget.palette_color(color_role::Text));
+            aGc.draw_text(aLabelOrigin - x_label_extents(aX, aWidget, aGc, aElement) / 2.0, x_traits::to_text(aX), aWidget.x_axis().font(), aWidget.palette_color(color_role::Text));
         }
         void render_y_label(y_abstract_type const& aY, i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
-            aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, y_to_text(aY), aWidget.y_axis().font(), aWidget.palette_color(color_role::Text));
-        }
-        // text
-    public:
-        using abstract_type::x_to_text;
-        void x_to_text(x_abstract_type const& aX, i_string& aText) const override
-        {
-            if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
-                aText = aX;
-            else if constexpr (is_text_like_v<x_type>)
-                aText = to_string(aX);
-            else
-                throw unknown_graph_datum_type();
-        }
-        using abstract_type::y_to_text;
-        void y_to_text(y_abstract_type const& aY, i_string& aText) const override
-        {
-            if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
-                aText = aY;
-            else if constexpr (is_text_like_v<y_type>)
-                aText = to_string(aY);
-            else
-                throw unknown_graph_datum_type();
+            aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, y_traits::to_text(aY), aWidget.y_axis().font(), aWidget.palette_color(color_role::Text));
         }
         // metrics
     public:
@@ -528,11 +525,11 @@ namespace neogfx
         }
         [[nodiscard]] size x_label_extents(x_abstract_type const& aX, i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
         {
-            return aGc.text_extent(x_to_text(aX), aWidget.x_axis().font());
+            return aGc.text_extent(x_traits::to_text(aX), aWidget.x_axis().font());
         }
         [[nodiscard]] size y_label_extents(y_abstract_type const& aY, i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
         {
-            return aGc.text_extent(y_to_text(aY), aWidget.y_axis().font());
+            return aGc.text_extent(y_traits::to_text(aY), aWidget.y_axis().font());
         }
         [[nodiscard]] scalar x_tick_length_px(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget) const override
         {
@@ -567,7 +564,7 @@ namespace neogfx
         std::optional<scalar> iYTickLength_px;
     };
 
-    template <typename X = double, typename Y = double>
+    template <typename X = double, typename Y = double, typename XTraits = default_graph_datum_traits<X>, typename YTraits = default_graph_datum_traits<Y>>
     class graph_widget : public widget<i_graph_widget<abstract_t<X>, abstract_t<Y>>>
     {
         using base_type = widget<i_graph_widget<abstract_t<X>, abstract_t<Y>>>;
@@ -578,6 +575,8 @@ namespace neogfx
     public:
         using x_type = X;
         using y_type = Y;
+        using x_traits = XTraits;
+        using y_traits = YTraits;
         using i_datum = typename abstract_type::i_datum;
         using i_series = typename abstract_type::i_series;
         using datum_type = graph_datum<x_type, y_type>;
@@ -585,7 +584,7 @@ namespace neogfx
         using series_container = vector<ref_ptr<series_type>>;
         using series_index = typename series_container::size_type;
         using i_renderer = typename abstract_type::i_renderer;
-        using renderer_type = graph_renderer<x_type, y_type>;
+        using renderer_type = graph_renderer<x_type, y_type, x_traits, y_traits>;
     public:
         graph_widget(graph_widget_type aType = graph_widget_type::Line, graph_widget_flags aFlags = graph_widget_flags::None) :
             base_type{}, iType{ aType }, iFlags{ aFlags }
