@@ -89,8 +89,8 @@ namespace neogfx
     public:
         using x_type = X;
         using y_type = Y;
-        using i_datum = i_graph_datum<X, Y>;
-        using datum = graph_datum<X, Y>;
+        using i_datum = i_graph_datum<x_abstract_type, y_abstract_type>;
+        using datum = graph_datum<x_type, y_type>;
         using index_type = typename vector<datum>::size_type;
     public:
         define_declared_event(DataChanged, data_changed);
@@ -159,11 +159,16 @@ namespace neogfx
                 throw no_graph_series_data();
             if (iXMin != nullptr)
                 return *iXMin;
-            x_type const* min = &iData.front().x();
-            for (auto const& d : iData)
-                if (d.x() < *min)
-                    min = &d.x();
-            iXMin = min;
+            if constexpr (std::is_arithmetic_v<x_type>)
+            {
+                x_type const* min = &iData.front().x();
+                for (auto const& d : iData)
+                    if (d.x() < *min)
+                        min = &d.x();
+                iXMin = min;
+            }
+            else
+                iXMin = &iData.front().x();
             return *iXMin;
         }
         [[nodiscard]] x_type const& x_max() const final
@@ -172,24 +177,35 @@ namespace neogfx
                 throw no_graph_series_data();
             if (iXMax != nullptr)
                 return *iXMax;
-            x_type const* max = &iData.front().x();
-            for (auto const& d : iData)
-                if (d.x() >= *max)
-                    max = &d.x();
-            iXMax = max;
+            if constexpr (std::is_arithmetic_v<x_type>)
+            {
+                x_type const* max = &iData.front().x();
+                for (auto const& d : iData)
+                    if (d.x() >= *max)
+                        max = &d.x();
+                iXMax = max;
+            }
+            else
+                iXMin = &iData.back().x();
             return *iXMax;
         }
         [[nodiscard]] y_type const& y_min() const final
         {
+
             if (no_data())
                 throw no_graph_series_data();
             if (iYMin != nullptr)
                 return *iYMin;
-            y_type const* min = &iData.front().y();
-            for (auto const& d : iData)
-                if (d.y() < *min)
-                    min = &d.y();
-            iYMin = min;
+            if constexpr (std::is_arithmetic_v<y_type>)
+            {
+                y_type const* min = &iData.front().y();
+                for (auto const& d : iData)
+                    if (d.y() < *min)
+                        min = &d.y();
+                iYMin = min;
+            }
+            else
+                iYMin = &iData.front().y();
             return *iYMin;
         }
         [[nodiscard]] y_type const& y_max() const final
@@ -198,11 +214,16 @@ namespace neogfx
                 throw no_graph_series_data();
             if (iYMax != nullptr)
                 return *iYMax;
-            y_type const* max = &iData.front().y();
-            for (auto const& d : iData)
-                if (d.y() >= *max)
-                    max = &d.y();
-            iYMax = max;
+            if constexpr (std::is_arithmetic_v<y_type>)
+            {
+                y_type const* max = &iData.front().y();
+                for (auto const& d : iData)
+                    if (d.y() >= *max)
+                        max = &d.y();
+                iYMax = max;
+            }
+            else
+                iYMax = &iData.back().y();
             return *iYMax;
         }
     public:
@@ -366,12 +387,12 @@ namespace neogfx
     public:
         using x_type = X;
         using y_type = Y;
-        using i_series = i_graph_series<X, Y>;
+        using i_series = i_graph_series<x_abstract_type, y_abstract_type>;
     private:
         template <typename T, typename = void>
         struct is_text_like : std::false_type {};
         template <typename T>
-        struct is_text_like<T, std::void_t<decltype(std::declval<to_string(std::declval<const T&>())>)>> : std::true_type {};
+        struct is_text_like<T, std::void_t<decltype(to_string(std::declval<const T&>()))>> : std::true_type {};
         template <typename T>
         static constexpr bool is_text_like_v = is_text_like<T>::value;
     public:
@@ -380,42 +401,42 @@ namespace neogfx
         }
         // render
     public:
-        void render(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
+        void render(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc) const override
         {
             render_plot(aWidget, aGc);
             render_x_axis(aWidget, aGc);
             render_y_axis(aWidget, aGc);
         }
-        void render_plot(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
+        void render_plot(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc) const override
         {
             for (auto const& s : aWidget.series())
                 if (s->visible())
                     render_series(aWidget, aGc, *s);
         }
-        void render_series(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, i_series const& aSeries) const override
+        void render_series(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc, i_series const& aSeries) const override
         {
             // todo
         }
-        void render_x_axis(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
+        void render_x_axis(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc) const override
         {
             // todo
         }
-        void render_y_axis(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
+        void render_y_axis(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc) const override
         {
             // todo
         }
-        void render_x_label(x_abstract_type const& aX, i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
+        void render_x_label(x_abstract_type const& aX, i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
             aGc.draw_text(aLabelOrigin - x_label_extents(aX, aWidget, aGc, aElement) / 2.0, x_to_text(aX), aWidget.x_axis().font(), aWidget.palette_color(color_role::Text));
         }
-        void render_y_label(y_abstract_type const& aY, i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
+        void render_y_label(y_abstract_type const& aY, i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
             aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, y_to_text(aY), aWidget.y_axis().font(), aWidget.palette_color(color_role::Text));
         }
         // text
     public:
         using abstract_type::x_to_text;
-        void x_to_text(x_type const& aX, i_string& aText) const override
+        void x_to_text(x_abstract_type const& aX, i_string& aText) const override
         {
             if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
                 aText = aX;
@@ -425,7 +446,7 @@ namespace neogfx
                 throw unknown_graph_datum_type();
         }
         using abstract_type::y_to_text;
-        void y_to_text(y_type const& aY, i_string& aText) const override
+        void y_to_text(y_abstract_type const& aY, i_string& aText) const override
         {
             if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
                 aText = aY;
@@ -436,14 +457,14 @@ namespace neogfx
         }
         // metrics
     public:
-        [[nodiscard]] rect plot_area(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
+        [[nodiscard]] rect plot_area(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc) const override
         {
             auto const& cr = aWidget.client_rect(false);
             point const topLeft{ y_axis_area(aWidget, aGc).right(), cr.top() };
             point const bottomRight{ cr.right(), x_axis_area(aWidget, aGc).top() };
             return rect{ topLeft, bottomRight - topLeft };
         }
-        [[nodiscard]] rect x_axis_area(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
+        [[nodiscard]] rect x_axis_area(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc) const override
         {
             auto const& cr = aWidget.client_rect(false);
             size extents;
@@ -467,14 +488,14 @@ namespace neogfx
                 else
                 {
                     for (auto const& s : aWidget.series())
-                        for (auto const& d : s.data())
+                        for (auto const& d : s->data())
                             extents.cy = std::max(extents.cy, x_label_extents(d.x(), aWidget, aGc, graph_rendering_element::AxisLabel).cy);
                 }
             }
             extents.cy += x_tick_length_px(aWidget);
             return cr.with_cy(extents.cy).with_y(cr.bottom() - extents.cy);
         }
-        [[nodiscard]] rect y_axis_area(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
+        [[nodiscard]] rect y_axis_area(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc) const override
         {
             auto const& cr = aWidget.client_rect(false);
             size extents;
@@ -498,22 +519,22 @@ namespace neogfx
                 else
                 {
                     for (auto const& s : aWidget.series())
-                        for (auto const& d : s.data())
+                        for (auto const& d : s->data())
                             extents.cx = std::max(extents.cx, y_label_extents(d.y(), aWidget, aGc, graph_rendering_element::AxisLabel).cx);
                 }
             }
             extents.cx += y_tick_length_px(aWidget);
             return cr.with_cx(extents.cx);
         }
-        [[nodiscard]] size x_label_extents(x_abstract_type const& aX, i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
+        [[nodiscard]] size x_label_extents(x_abstract_type const& aX, i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
         {
             return aGc.text_extent(x_to_text(aX), aWidget.x_axis().font());
         }
-        [[nodiscard]] size y_label_extents(y_abstract_type const& aY, i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
+        [[nodiscard]] size y_label_extents(y_abstract_type const& aY, i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
         {
             return aGc.text_extent(y_to_text(aY), aWidget.y_axis().font());
         }
-        [[nodiscard]] scalar x_tick_length_px(i_graph_widget<x_type, y_type> const& aWidget) const override
+        [[nodiscard]] scalar x_tick_length_px(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget) const override
         {
             if (iXTickLength_px.has_value())
                 return iXTickLength_px.value();
@@ -527,7 +548,7 @@ namespace neogfx
         {
             iXTickLength_px = std::nullopt;
         }
-        [[nodiscard]] scalar y_tick_length_px(i_graph_widget<x_type, y_type> const& aWidget) const override
+        [[nodiscard]] scalar y_tick_length_px(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget) const override
         {
             if (iYTickLength_px.has_value())
                 return iYTickLength_px.value();
@@ -559,12 +580,12 @@ namespace neogfx
         using y_type = Y;
         using i_datum = typename abstract_type::i_datum;
         using i_series = typename abstract_type::i_series;
-        using datum_type = graph_datum<X, Y>;
-        using series_type = graph_series<X, Y>;
+        using datum_type = graph_datum<x_type, y_type>;
+        using series_type = graph_series<x_type, y_type>;
         using series_container = vector<ref_ptr<series_type>>;
         using series_index = typename series_container::size_type;
         using i_renderer = typename abstract_type::i_renderer;
-        using renderer_type = graph_renderer<X, Y>;
+        using renderer_type = graph_renderer<x_type, y_type>;
     public:
         graph_widget(graph_widget_type aType = graph_widget_type::Line, graph_widget_flags aFlags = graph_widget_flags::None) :
             base_type{}, iType{ aType }, iFlags{ aFlags }
@@ -679,7 +700,10 @@ namespace neogfx
                     if (!iXMin.has_value())
                         iXMin = s->x_min();
                     else
-                        iXMin = std::min(iXMin.value(), s->x_min());
+                    {
+                        if constexpr (std::is_arithmetic_v<x_type>)
+                            iXMin = std::min(iXMin.value(), s->x_min());
+                    }
                 }
             }
             if (!iXMin.has_value() && !aIgnoreVisibility)
@@ -703,7 +727,12 @@ namespace neogfx
                     if (!iXMax.has_value())
                         iXMax = s->x_max();
                     else
-                        iXMax = std::max(iXMax.value(), s->x_max());
+                    {
+                        if constexpr (std::is_arithmetic_v<x_type>)
+                            iXMax = std::max(iXMax.value(), s->x_max());
+                        else
+                            iXMax = s->x_max();
+                    }
                 }
             }
             if (!iXMax.has_value() && !aIgnoreVisibility)
@@ -727,7 +756,10 @@ namespace neogfx
                     if (!iYMin.has_value())
                         iYMin = s->y_min();
                     else
-                        iYMin = std::min(iYMin.value(), s->y_min());
+                    {
+                        if constexpr (std::is_arithmetic_v<y_type>)
+                            iYMin = std::min(iYMin.value(), s->y_min());
+                    }
                 }
             }
             if (!iYMin.has_value() && !aIgnoreVisibility)
@@ -751,7 +783,12 @@ namespace neogfx
                     if (!iYMax.has_value())
                         iYMax = s->y_max();
                     else
-                        iYMax = std::max(iYMax.value(), s->y_max());
+                    {
+                        if constexpr (std::is_arithmetic_v<y_type>)
+                            iYMax = std::max(iYMax.value(), s->y_max());
+                        else
+                            iYMax = s->y_max();
+                    }
                 }
             }
             if (!iYMax.has_value() && !aIgnoreVisibility)
@@ -777,13 +814,13 @@ namespace neogfx
             return series(aIndex).y_max();
         }
     public:
-        [[nodiscard]] i_graph_axis<x_type>& x_axis() const final
+        [[nodiscard]] i_graph_axis<x_abstract_type>& x_axis() const final
         {
             if (!iXAxis)
                 throw graph_axis_undefined();
             return *iXAxis;
         }
-        void set_x_axis(i_ref_ptr<i_graph_axis<x_type>> const& aAxis = ref_ptr<i_graph_axis<x_type>>{}) final
+        void set_x_axis(i_ref_ptr<i_graph_axis<x_abstract_type>> const& aAxis = ref_ptr<i_graph_axis<x_abstract_type>>{}) final
         {
             iXAxis = aAxis;
             iSink += iXAxis->changed([&]()
@@ -791,13 +828,13 @@ namespace neogfx
                     this->update();
                 });
         }
-        [[nodiscard]] i_graph_axis<y_type>& y_axis() const final
+        [[nodiscard]] i_graph_axis<y_abstract_type>& y_axis() const final
         {
             if (!iYAxis)
                 throw graph_axis_undefined();
             return *iYAxis;
         }
-        void set_y_axis(i_ref_ptr<i_graph_axis<y_type>> const& aAxis = ref_ptr<i_graph_axis<y_type>>{}) final
+        void set_y_axis(i_ref_ptr<i_graph_axis<y_abstract_type>> const& aAxis = ref_ptr<i_graph_axis<y_abstract_type>>{}) final
         {
             iYAxis = aAxis;
             iSink += iYAxis->changed([&]()
@@ -922,8 +959,8 @@ namespace neogfx
         mutable std::optional<x_type> iXMax;
         mutable std::optional<y_type> iYMin;
         mutable std::optional<y_type> iYMax;
-        ref_ptr<i_graph_axis<x_type>> iXAxis;
-        ref_ptr<i_graph_axis<y_type>> iYAxis;
+        ref_ptr<i_graph_axis<x_abstract_type>> iXAxis;
+        ref_ptr<i_graph_axis<y_abstract_type>> iYAxis;
         ref_ptr<i_renderer> iRenderer;
         std::optional<mat33> iViewTransformToPx;
         mutable optional<graph_series_appearance> iStyleBasedSeriesAppearance;
