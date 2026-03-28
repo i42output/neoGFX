@@ -383,12 +383,12 @@ namespace neogfx
     public:
         using type = T;
     private:
-        template <typename T, typename = void>
+        template <typename U, typename = void>
         struct is_text_like : std::false_type {};
-        template <typename T>
-        struct is_text_like<T, std::void_t<decltype(to_string(std::declval<const T&>()))>> : std::true_type {};
-        template <typename T>
-        static constexpr bool is_text_like_v = is_text_like<T>::value;
+        template <typename U>
+        struct is_text_like<U, std::void_t<decltype(to_string(std::declval<const U&>()))>> : std::true_type {};
+        template <typename U>
+        static constexpr bool is_text_like_v = is_text_like<U>::value;
     public:
         static string to_text(type const& v)
         {
