@@ -380,31 +380,31 @@ namespace neogfx
         }
         // render
     public:
-        void render(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
+        void render(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
         {
             render_plot(aWidget, aGc);
             render_x_axis(aWidget, aGc);
             render_y_axis(aWidget, aGc);
         }
-        void render_plot(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
+        void render_plot(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
         {
             for (auto const& s : aWidget.series())
                 if (s->visible())
                     render_series(aWidget, aGc, *s);
         }
-        void render_series(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, i_series const& aSeries) const override
+        void render_series(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, i_series const& aSeries) const override
         {
             // todo
         }
-        void render_x_axis(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
+        void render_x_axis(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
         {
             // todo
         }
-        void render_y_axis(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
+        void render_y_axis(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
         {
             // todo
         }
-        void render_x_label(x_abstract_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
+        void render_x_label(x_abstract_type const& aX, i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
             if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
                 aGc.draw_text(aLabelOrigin - x_label_extents(aX, aWidget, aGc, aElement) / 2.0, aX, aWidget.x_axis().font(), aWidget.palette_color(color_role::Text));
@@ -413,7 +413,7 @@ namespace neogfx
             else
                 throw unknown_graph_datum_type();
         }
-        void render_y_label(y_abstract_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
+        void render_y_label(y_abstract_type const& aY, i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
             if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
                 aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, aY, aWidget.y_axis().font(), aWidget.palette_color(color_role::Text));
@@ -424,22 +424,64 @@ namespace neogfx
         }
         // metrics
     public:
-        [[nodiscard]] rect plot_area(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
+        [[nodiscard]] rect plot_area(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
         {
-            // todo
-            return rect{};
+            auto const& cr = aWidget.client_rect(false);
+            point const topLeft{ y_axis_area(aWidget, aGc).right(), cr.top() };
+            point const bottomRight{ cr.right(), x_axis_area(aWidget, aGc).top() };
+            return rect{ topLeft, bottomRight - topLeft };
         }
-        [[nodiscard]] rect x_axis_area(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
+        [[nodiscard]] rect x_axis_area(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
         {
-            // todo
-            return rect{};
+            auto const& cr = aWidget.client_rect(false);
+            x_type xMin;
+            x_type xMax;
+            y_type ignore;
+            aWidget.get_view(xMin, xMax, ignore, ignore);
+            size extents;
+            if (aWidget.x_axis().has_major_tick())
+            {
+                auto const& majorTick = aWidget.x_axis().major_tick();
+                if constexpr (std::is_arithmetic_v<x_type>)
+                {
+                    using calc_type = std::conditional_t<std::is_floating_point_v<x_type>, x_type, double>;
+                    auto tick = static_cast<x_type>(std::ceil(static_cast<calc_type>(xMin) / static_cast<calc_type>(majorTick)) * static_cast<calc_type>(majorTick));
+                    while (tick >= xMin && tick <= xMax)
+                    {
+                        extents.cy = std::max(extents.cy, x_label_extents(tick, aWidget, aGc, graph_rendering_element::AxisLabel).cy);
+                        tick += majorTick;
+                    }
+                }
+            }
+            extents.cy += x_tick_length_px(aWidget);
+            return cr.with_cy(extents.cy).with_y(cr.bottom() - extents.cy);
         }
-        [[nodiscard]] rect y_axis_area(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
+        [[nodiscard]] rect y_axis_area(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
         {
-            // todo
-            return rect{};
+            auto const& cr = aWidget.client_rect(false);
+            y_type yMin;
+            y_type yMax;
+            x_type ignore;
+            aWidget.get_view(ignore, ignore, yMin, yMax);
+            size extents;
+            if (aWidget.y_axis().has_major_tick())
+            {
+                auto const& majorTick = aWidget.y_axis().major_tick();
+                if constexpr (std::is_arithmetic_v<y_type>)
+                {
+                    using calc_type = std::conditional_t<std::is_floating_point_v<y_type>, y_type, double>;
+                    auto tick = static_cast<y_type>(std::ceil(static_cast<calc_type>(yMin) / static_cast<calc_type>(majorTick)) * static_cast<calc_type>(majorTick));
+                    while (tick >= yMin && tick <= yMax)
+                    {
+                        extents.cx = std::max(extents.cx, y_label_extents(tick, aWidget, aGc, graph_rendering_element::AxisLabel).cx);
+                        tick += majorTick;
+                    }
+                }
+            }
+            extents.cx += y_tick_length_px(aWidget);
+            return cr.with_cx(extents.cx);
         }
-        [[nodiscard]] size x_label_extents(x_abstract_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
+        [[nodiscard]] size x_label_extents(x_abstract_type const& aX, i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
         {
             if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
                 return aGc.text_extent(aX, aWidget.x_axis_font());
@@ -448,7 +490,7 @@ namespace neogfx
             else
                 throw unknown_graph_datum_type();
         }
-        [[nodiscard]] size y_label_extents(y_abstract_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
+        [[nodiscard]] size y_label_extents(y_abstract_type const& aY, i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
         {
             if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
                 return aGc.text_extent(aY, aWidget.y_axis_font());
@@ -457,7 +499,37 @@ namespace neogfx
             else
                 throw unknown_graph_datum_type();
         }
+        [[nodiscard]] scalar x_tick_length_px(i_graph_widget<x_type, y_type> const& aWidget) const override
+        {
+            if (iXTickLength_px.has_value())
+                return iXTickLength_px.value();
+            return aWidget.dpi_scale(size{ 4.0, 4.0 }).cx;
+        }
+        void set_x_tick_length_px(scalar aLength_px) override
+        {
+            iXTickLength_px = aLength_px;
+        }
+        void clear_x_tick_length_px() override
+        {
+            iXTickLength_px = std::nullopt;
+        }
+        [[nodiscard]] scalar y_tick_length_px(i_graph_widget<x_type, y_type> const& aWidget) const override
+        {
+            if (iYTickLength_px.has_value())
+                return iYTickLength_px.value();
+            return aWidget.dpi_scale(size{ 4.0, 4.0 }).cy;
+        }
+        void set_y_tick_length_px(scalar aLength_px) override
+        {
+            iYTickLength_px = aLength_px;
+        }
+        void clear_y_tick_length_px() override
+        {
+            iYTickLength_px = std::nullopt;
+        }
     private:
+        std::optional<scalar> iXTickLength_px;
+        std::optional<scalar> iYTickLength_px;
     };
 
     template <typename X = double, typename Y = double>
