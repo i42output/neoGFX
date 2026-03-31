@@ -117,13 +117,13 @@ namespace neogfx
         {
         case neogfx::alignment::Left:
         case neogfx::alignment::Justify:
-            textPosition.x = 0.0;
+            textPosition.x = client_rect(false).left();
             break;
         case neogfx::alignment::Center:
-            textPosition.x = std::floor((client_rect().width() - textSize.cx) / 2.0);
+            textPosition.x = std::floor(client_rect(false).left() + (client_rect(false).width() - textSize.cx) / 2.0);
             break;
         case neogfx::alignment::Right:
-            textPosition.x = std::floor((client_rect().width() - textSize.cx));
+            textPosition.x = std::floor((client_rect(false).right() - textSize.cx));
             break;
         default:
             break;
@@ -131,13 +131,13 @@ namespace neogfx
         switch (iAlignment & neogfx::alignment::Vertical)
         {
         case neogfx::alignment::Top:
-            textPosition.y = 0.0;
+            textPosition.y = client_rect(false).top();
             break;
         case neogfx::alignment::VCenter:
-            textPosition.y = std::floor((client_rect().height() - textSize.cy) / 2.0);
+            textPosition.y = std::floor(client_rect(false).top() + (client_rect(false).height() - textSize.cy) / 2.0);
             break;
         case neogfx::alignment::Bottom:
-            textPosition.y = std::floor((client_rect().height() - textSize.cy));
+            textPosition.y = std::floor((client_rect(false).bottom() - textSize.cy));
             break;
         default:
             break;

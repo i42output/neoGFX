@@ -76,4 +76,16 @@ namespace neogfx
         virtual neogfx::text_format text_format() const = 0;
         virtual void set_text_format(const optional_text_format& aTextAppearance) = 0;
     };
+
+    template<typename... TextWidgets>
+    inline void align_baselines(TextWidgets&... aTextWidgets)
+    {
+        scalar maxDescender = 0.0;
+        ((maxDescender = std::max(maxDescender, std::abs(aTextWidgets.font().descender()))), ...);
+        ((aTextWidgets.set_padding(
+            aTextWidgets.padding().with_bottom(
+                aTextWidgets.padding().bottom +
+                (units_converter{ aTextWidgets }.from_device_units(maxDescender - std::abs(aTextWidgets.font().descender())))
+            ))), ...);
+    }
 }

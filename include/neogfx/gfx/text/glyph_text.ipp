@@ -312,7 +312,7 @@ namespace neogfx
     inline basic_glyph_text_content<Container, ConstIterator, Iterator>&
     basic_glyph_text_content<Container, ConstIterator, Iterator>::align_baselines()
     {
-        auto result = align_baselines(begin(), end());
+        auto result = this->align_baselines(begin(), end());
         iMajorFont = result.majorFont;
         iBaseline = result.baseline;
         return *this;

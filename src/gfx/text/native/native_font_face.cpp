@@ -182,9 +182,8 @@ namespace neogfx
         if (!FT_IS_SCALABLE(iHandle.freetypeFace))
             return 0.0;
 
-        FT_Pos position26_6 =
-            FT_MulFix(iHandle.freetypeFace->underline_position,
-                iHandle.freetypeFace->size->metrics.y_scale);
+        FT_Pos const position26_6 =
+            FT_MulFix(iHandle.freetypeFace->underline_position, iMetrics->y_scale);
 
         double const position_px = position26_6 / 64.0;
         return std::min(position_px, -underline_thickness());

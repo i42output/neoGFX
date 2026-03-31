@@ -601,6 +601,7 @@
     <ClCompile Include="..\..\..\src\gui\window\native\virtual_surface.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\virtual_window.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\windows_window.cpp" />
+    <ClCompile Include="..\..\..\src\hid\display.cpp" />
     <ClCompile Include="..\..\..\src\hid\hid_devices.cpp" />
     <ClCompile Include="..\..\..\src\hid\keyboard.cpp" />
     <ClCompile Include="..\..\..\src\hid\mouse.cpp" />

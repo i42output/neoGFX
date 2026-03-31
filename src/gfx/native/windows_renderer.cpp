@@ -118,6 +118,22 @@ namespace neogfx
             return true;
         }
 
+#ifdef DEBUG_GL
+        static void APIENTRY gl_debug_callback(
+            GLenum source,
+            GLenum type,
+            GLuint id,
+            GLenum severity,
+            GLsizei length,
+            const GLchar* message,
+            const void* userParam)
+        {
+            OutputDebugStringA("GL: ");
+            OutputDebugStringA(message);
+            OutputDebugStringA("\n");
+        }
+#endif
+
         HGLRC create_opengl_context(HDC hDC, HGLRC hShareContext = nullptr)
         {
             if (hDC == NULL)
@@ -127,6 +143,10 @@ namespace neogfx
             {
                 WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
                 WGL_CONTEXT_MINOR_VERSION_ARB, 0,
+#ifdef DEBUG_GL
+                WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                WGL_CONTEXT_FLAGS_ARB,         WGL_CONTEXT_DEBUG_BIT_ARB,
+#endif
                 0, 0
             };
 
@@ -136,6 +156,12 @@ namespace neogfx
 
             if (!::wglMakeCurrent(hDC, hRC))
                 throw renderer::failed_to_activate_opengl_context(GetLastErrorText());
+
+#ifdef DEBUG_GL
+            glEnable(GL_DEBUG_OUTPUT);
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+            glDebugMessageCallback(gl_debug_callback, nullptr);
+#endif
 
             return hRC;
         }

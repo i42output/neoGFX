@@ -637,7 +637,7 @@ namespace neogfx
         }
         neogfx::margin margin() const override
         {
-            return Margin != std::nullopt ? *Margin : neogfx::margin{};
+            return Margin != std::nullopt ? units_converter{ *this }.from_device_units(*Margin) : neogfx::margin{};
         }
         void set_margin(optional_margin const& aMargin, bool aUpdateLayout = true) override
         {
@@ -675,19 +675,19 @@ namespace neogfx
         neogfx::padding padding() const override
         {
             if (Padding != std::nullopt)
-                return *Padding;
+                return units_converter{ *this }.from_device_units(*Padding);
             auto& self = as_layout_item();
             auto const& ssPadding = self.style_sheet_value("." + class_name(), "padding", std::vector<length>{});
             switch (ssPadding.size())
             {
             case 1:
-                return neogfx::padding{ ssPadding[0], ssPadding[0], ssPadding[0], ssPadding[0] };
+                return units_converter{ *this }.from_device_units(neogfx::padding{ ssPadding[0], ssPadding[0], ssPadding[0], ssPadding[0] });
             case 2:
-                return neogfx::padding{ ssPadding[1], ssPadding[0], ssPadding[1], ssPadding[0] };
+                return units_converter{ *this }.from_device_units(neogfx::padding{ ssPadding[1], ssPadding[0], ssPadding[1], ssPadding[0] });
             case 3:
-                return neogfx::padding{ ssPadding[1], ssPadding[0], ssPadding[1], ssPadding[2] };
+                return units_converter{ *this }.from_device_units(neogfx::padding{ ssPadding[1], ssPadding[0], ssPadding[1], ssPadding[2] });
             case 4:
-                return neogfx::padding{ ssPadding[3], ssPadding[0], ssPadding[1], ssPadding[2] };
+                return units_converter{ *this }.from_device_units(neogfx::padding{ ssPadding[3], ssPadding[0], ssPadding[1], ssPadding[2] });
             }
             return neogfx::padding{};
         }

@@ -289,7 +289,6 @@
     <ClCompile Include="..\..\..\src\gui\window\context_menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\window.cpp" />
-    <ClCompile Include="..\..\..\src\hid\display.cpp" />
     <ClCompile Include="..\..\..\src\hid\game_controller.cpp" />
     <ClCompile Include="..\..\..\src\hid\game_controllers.cpp" />
     <ClCompile Include="..\..\..\src\hid\window_manager.cpp" />
