@@ -76,6 +76,17 @@ namespace neogfx
             return size_constraint::Minimum;
     }
 
+    padding text_widget::padding() const
+    {
+        auto result = widget::padding();
+        if (is_aligning_to())
+        {
+            scalar const otherDescender = aligning_to().font().descender();
+            result.bottom = aligning_to().padding().bottom + -(otherDescender - font().descender());
+        }
+        return result;
+    }
+
     size text_widget::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (widget::has_minimum_size())
@@ -271,6 +282,36 @@ namespace neogfx
             iAlignment = aAlignment;
             if (aUpdateLayout)
                 update_layout();
+        }
+    }
+
+    bool text_widget::is_aligning_to() const
+    {
+        return iAlignmentTo != nullptr;
+    }
+
+    i_text_widget const& text_widget::aligning_to() const
+    {
+        if (iAlignmentTo == nullptr)
+            throw text_widget_not_aligning_to();
+        return *iAlignmentTo;
+    }
+
+    void text_widget::align_to(i_text_widget const& aOtherWidget)
+    {
+        if (iAlignmentTo != &aOtherWidget)
+        {
+            iAlignmentTo = &aOtherWidget;
+            update_layout();
+        }
+    }
+
+    void text_widget::stop_alignment_to()
+    {
+        if (iAlignmentTo != nullptr)
+        {
+            iAlignmentTo = nullptr;
+            update_layout();
         }
     }
 

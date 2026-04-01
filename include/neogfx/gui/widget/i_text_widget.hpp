@@ -24,6 +24,8 @@
 
 namespace neogfx
 {
+    struct text_widget_not_aligning_to : std::logic_error { text_widget_not_aligning_to() : std::logic_error{ "text_widget_not_aligning_to" } {} };
+
     enum class text_widget_type
     {
         SingleLine,
@@ -63,29 +65,21 @@ namespace neogfx
     public:
         virtual i_string const& text() const = 0;
         virtual void set_text(i_string const& aText) = 0;
-        virtual void set_size_hint(const size_hint& aSizeHint) = 0;
+        virtual void set_size_hint(size_hint const& aSizeHint) = 0;
         virtual bool multi_line() const = 0;
         virtual text_widget_flags flags() const = 0;
         virtual void set_flags(text_widget_flags aFlags) = 0;
         virtual neogfx::alignment alignment() const = 0;
         virtual void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) = 0;
+        virtual bool is_aligning_to() const = 0;
+        virtual i_text_widget const& aligning_to() const = 0;
+        virtual void align_to(i_text_widget const& aOtherWidget) = 0;
+        virtual void stop_alignment_to() = 0;
         virtual bool has_text_color() const = 0;
         virtual color text_color() const = 0;
-        virtual void set_text_color(const optional_color& aTextColor) = 0;
+        virtual void set_text_color(optional_color const& aTextColor) = 0;
         virtual bool has_text_format() const = 0;
         virtual neogfx::text_format text_format() const = 0;
-        virtual void set_text_format(const optional_text_format& aTextAppearance) = 0;
+        virtual void set_text_format(optional_text_format const& aTextAppearance) = 0;
     };
-
-    template<typename... TextWidgets>
-    inline void align_baselines(TextWidgets&... aTextWidgets)
-    {
-        scalar maxDescender = 0.0;
-        ((maxDescender = std::max(maxDescender, std::abs(aTextWidgets.font().descender()))), ...);
-        ((aTextWidgets.set_padding(
-            aTextWidgets.padding().with_bottom(
-                aTextWidgets.padding().bottom +
-                (units_converter{ aTextWidgets }.from_device_units(maxDescender - std::abs(aTextWidgets.font().descender())))
-            ))), ...);
-    }
 }

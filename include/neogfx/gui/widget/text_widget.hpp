@@ -40,6 +40,7 @@ namespace neogfx
         ~text_widget();
     public:
         neogfx::size_policy size_policy() const override;
+        neogfx::padding padding() const override;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
         void paint(i_graphics_context& aGc) const override;
@@ -50,18 +51,22 @@ namespace neogfx
     public:
         i_string const& text() const override;
         void set_text(i_string const& aText) override;
-        void set_size_hint(const size_hint& aSizeHint) override;
+        void set_size_hint(size_hint const& aSizeHint) override;
         bool multi_line() const override;
         text_widget_flags flags() const override;
         void set_flags(text_widget_flags aFlags) override;
         neogfx::alignment alignment() const override;
         void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
+        bool is_aligning_to() const override;
+        i_text_widget const& aligning_to() const override;
+        void align_to(i_text_widget const& aOtherWidget) override;
+        void stop_alignment_to() override;
         bool has_text_color() const override;
         color text_color() const override;
-        void set_text_color(const optional_color& aTextColor) override;
+        void set_text_color(optional_color const& aTextColor) override;
         bool has_text_format() const override;
         neogfx::text_format text_format() const override;
-        void set_text_format(const optional_text_format& aTextAppearance) override;
+        void set_text_format(optional_text_format const& aTextAppearance) override;
     protected:
         size text_extent() const;
         size size_hint_extent() const;
@@ -79,6 +84,7 @@ namespace neogfx
         text_widget_type iType;
         text_widget_flags iFlags;
         neogfx::alignment iAlignment;
+        i_text_widget const* iAlignmentTo = nullptr;
         optional_text_format iTextAppearance;
         widget_timer iAnimator;
         sink iSink;
