@@ -301,9 +301,14 @@ namespace neogfx
     {
         if (iAlignmentTo != aOtherWidget)
         {
-            // todo: search for cycle in a chain (i.e. n > 2)
-            if (aOtherWidget && aOtherWidget->is_aligning_to() && &aOtherWidget->aligning_to() == this)
-                throw text_widget_alignment_cycle();
+            if (aOtherWidget != nullptr)
+            {
+                i_text_widget const* other = aOtherWidget.ptr();
+                if (other->is_aligning_to())
+                    for (auto next = &other->aligning_to(); next->is_aligning_to(); next = &next->aligning_to())
+                        if (next == other || next == this)
+                            throw text_widget_alignment_cycle();
+            }
             iAlignmentTo = aOtherWidget;
             update_layout();
         }
