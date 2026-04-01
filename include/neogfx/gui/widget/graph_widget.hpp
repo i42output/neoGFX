@@ -85,8 +85,8 @@ namespace neogfx
     public:
         using x_abstract_type = abstract_t<X>;
         using y_abstract_type = abstract_t<Y>;
-        using abstract_type = i_graph_series<x_abstract_type, y_abstract_type>;
-        using abstract_container_type = abstract_t<ContainerType>;
+        using container_abstract_type = abstract_t<ContainerType>;
+        using abstract_type = i_graph_series<x_abstract_type, y_abstract_type, container_abstract_type>;
     public:
         using x_type = X;
         using y_type = Y;
@@ -118,7 +118,7 @@ namespace neogfx
         {
             return iData;
         }
-        void set_data(abstract_container_type const& aData) final
+        void set_data(container_abstract_type const& aData) final
         {
             iData = aData;
             if (!iUpdating)
