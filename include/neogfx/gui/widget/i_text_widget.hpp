@@ -25,6 +25,7 @@
 namespace neogfx
 {
     struct text_widget_not_aligning_to : std::logic_error { text_widget_not_aligning_to() : std::logic_error{ "text_widget_not_aligning_to" } {} };
+    struct text_widget_alignment_cycle : std::logic_error { text_widget_alignment_cycle() : std::logic_error{ "text_widget_alignment_cycle" } {} };
 
     enum class text_widget_type
     {
@@ -60,6 +61,8 @@ namespace neogfx
     class i_text_widget : public i_widget
     {
     public:
+        using abstract_type = i_text_widget;
+    public:
         declare_event(text_changed)
         declare_event(text_geometry_changed)
     public:
@@ -73,7 +76,7 @@ namespace neogfx
         virtual void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) = 0;
         virtual bool is_aligning_to() const = 0;
         virtual i_text_widget const& aligning_to() const = 0;
-        virtual void align_to(i_text_widget const& aOtherWidget) = 0;
+        virtual void align_to(i_ref_ptr<i_text_widget const> const& aOtherWidget) = 0;
         virtual void stop_alignment_to() = 0;
         virtual bool has_text_color() const = 0;
         virtual color text_color() const = 0;
@@ -81,5 +84,11 @@ namespace neogfx
         virtual bool has_text_format() const = 0;
         virtual neogfx::text_format text_format() const = 0;
         virtual void set_text_format(optional_text_format const& aTextAppearance) = 0;
+        // helpers
+    public:
+        void align_to(i_text_widget const& aOther)
+        {
+            align_to(ref_ptr<i_text_widget const>{ ref_ptr<i_text_widget const>{}, &aOther });
+        }
     };
 }

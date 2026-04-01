@@ -59,7 +59,8 @@ namespace neogfx
         void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
         bool is_aligning_to() const override;
         i_text_widget const& aligning_to() const override;
-        void align_to(i_text_widget const& aOtherWidget) override;
+        using i_text_widget::align_to;
+        void align_to(i_ref_ptr<i_text_widget const> const& aOtherWidget) override;
         void stop_alignment_to() override;
         bool has_text_color() const override;
         color text_color() const override;
@@ -84,7 +85,7 @@ namespace neogfx
         text_widget_type iType;
         text_widget_flags iFlags;
         neogfx::alignment iAlignment;
-        i_text_widget const* iAlignmentTo = nullptr;
+        ref_ptr<i_text_widget const> iAlignmentTo;
         optional_text_format iTextAppearance;
         widget_timer iAnimator;
         sink iSink;

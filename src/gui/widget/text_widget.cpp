@@ -297,11 +297,14 @@ namespace neogfx
         return *iAlignmentTo;
     }
 
-    void text_widget::align_to(i_text_widget const& aOtherWidget)
+    void text_widget::align_to(i_ref_ptr<i_text_widget const> const& aOtherWidget)
     {
-        if (iAlignmentTo != &aOtherWidget)
+        if (iAlignmentTo != aOtherWidget)
         {
-            iAlignmentTo = &aOtherWidget;
+            // todo: search for cycle in a chain (i.e. n > 2)
+            if (aOtherWidget && aOtherWidget->is_aligning_to() && &aOtherWidget->aligning_to() == this)
+                throw text_widget_alignment_cycle();
+            iAlignmentTo = aOtherWidget;
             update_layout();
         }
     }
