@@ -66,7 +66,7 @@ namespace neogfx
         virtual ~i_graph_datum() = default;
     };
 
-    template <typename X = double, typename Y = double>
+    template <typename X = double, typename Y = double, typename ContainerType = i_vector<i_graph_datum<X, Y>>>
     class i_graph_series : public i_reference_counted
     {
     public:
@@ -75,15 +75,16 @@ namespace neogfx
         using x_type = X;
         using y_type = Y;
         using i_datum = i_graph_datum<X, Y>;
-        using index_type = typename i_vector<i_datum>::size_type;
+        using container_type = ContainerType;
+        using index_type = typename container_type::size_type;
     public:
         declare_event(data_changed);
         declare_event(visibility_changed);
         declare_event(appearance_changed);
     public:
         [[nodiscard]] virtual bool no_data() const = 0;
-        [[nodiscard]] virtual i_vector<i_datum> const& data() const = 0;
-        virtual void set_data(i_vector<i_datum> const& aData) = 0;
+        [[nodiscard]] virtual container_type const& data() const = 0;
+        virtual void set_data(container_type const& aData) = 0;
         virtual void push_back(i_datum const& aDatum) = 0;
         virtual void insert(index_type aIndex, i_datum const& aDatum) = 0;
         virtual void erase(index_type aIndex) = 0;

@@ -79,19 +79,21 @@ namespace neogfx
         y_type iY;
     };
 
-    template <typename X = double, typename Y = double>
-    class graph_series : public reference_counted<i_graph_series<abstract_t<X>, abstract_t<Y>>>
+    template <typename X = double, typename Y = double, typename ContainerType = vector<graph_datum<X, Y>>>
+    class graph_series : public reference_counted<i_graph_series<abstract_t<X>, abstract_t<Y>, abstract_t<ContainerType>>>
     {
     public:
         using x_abstract_type = abstract_t<X>;
         using y_abstract_type = abstract_t<Y>;
         using abstract_type = i_graph_series<x_abstract_type, y_abstract_type>;
+        using abstract_container_type = abstract_t<ContainerType>;
     public:
         using x_type = X;
         using y_type = Y;
         using i_datum = i_graph_datum<x_abstract_type, y_abstract_type>;
         using datum = graph_datum<x_type, y_type>;
-        using index_type = typename vector<datum>::size_type;
+        using container_type = ContainerType;
+        using index_type = typename container_type::size_type;
     public:
         define_declared_event(DataChanged, data_changed);
         define_declared_event(VisibilityChanged, visibility_changed);
@@ -112,11 +114,11 @@ namespace neogfx
         {
             return iData.empty();
         }
-        [[nodiscard]] vector<datum> const& data() const final
+        [[nodiscard]] container_type const& data() const final
         {
             return iData;
         }
-        void set_data(i_vector<i_datum> const& aData) final
+        void set_data(abstract_container_type const& aData) final
         {
             iData = aData;
             if (!iUpdating)
@@ -274,7 +276,7 @@ namespace neogfx
         }
     private:
         bool iUpdating = false;
-        vector<datum> iData;
+        container_type iData;
         optional<string> iName;
         bool iVisible = true;
         mutable x_type const* iXMin = nullptr;
