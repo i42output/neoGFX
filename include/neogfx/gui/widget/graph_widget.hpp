@@ -27,6 +27,7 @@
 namespace neogfx
 {
     struct no_graph_series_data : std::logic_error { no_graph_series_data() : std::logic_error{ "neogfx::no_graph_series_data" } {} };
+    struct unregistered_graph_series_update : std::logic_error { unregistered_graph_series_update() : std::logic_error{ "neogfx::unregistered_graph_series_update" } {} };
     struct unknown_graph_datum_type : std::logic_error { unknown_graph_datum_type() : std::logic_error{ "neogfx::unknown_graph_datum_type" } {} };
     struct graph_axis_undefined : std::logic_error { graph_axis_undefined() : std::logic_error{ "neogfx::graph_axis_undefined" } {} };
 
@@ -116,6 +117,12 @@ namespace neogfx
         }
         [[nodiscard]] container_type const& data() const final
         {
+            return iData;
+        }
+        [[nodiscard]] container_type& data() final
+        {
+            if (!iUpdating)
+                throw unregistered_graph_series_update();
             return iData;
         }
         void set_data(container_abstract_type const& aData) final
@@ -403,67 +410,68 @@ namespace neogfx
         }
     };
 
-    template <typename X = double, typename Y = double, typename XTraits = default_graph_datum_traits<X>, typename YTraits = default_graph_datum_traits<Y>>
-    class graph_renderer : public reference_counted<i_graph_renderer<abstract_t<X>, abstract_t<Y>>>
+    template <typename X = double, typename Y = double, typename ContainerType = vector<graph_datum<X, Y>>, typename XTraits = default_graph_datum_traits<X>, typename YTraits = default_graph_datum_traits<Y>>
+    class graph_renderer : public reference_counted<i_graph_renderer<abstract_t<X>, abstract_t<Y>, abstract_t<ContainerType>>>
     {
     public:
         using x_abstract_type = abstract_t<X>;
         using y_abstract_type = abstract_t<Y>;
-        using abstract_type = i_graph_renderer<x_abstract_type, y_abstract_type>;
+        using container_abstract_type = abstract_t<ContainerType>;
+        using abstract_type = i_graph_renderer<x_abstract_type, y_abstract_type, container_abstract_type>;
     public:
         using x_type = X;
         using y_type = Y;
         using x_traits = XTraits;
         using y_traits = YTraits;
-        using i_series = i_graph_series<x_abstract_type, y_abstract_type>;
+        using i_series = i_graph_series<x_abstract_type, y_abstract_type, container_abstract_type>;
     public:
         graph_renderer()
         {
         }
         // render
     public:
-        void render(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc) const override
+        void render(i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type> const& aWidget, i_graphics_context& aGc) const override
         {
             render_plot(aWidget, aGc);
             render_x_axis(aWidget, aGc);
             render_y_axis(aWidget, aGc);
         }
-        void render_plot(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc) const override
+        void render_plot(i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type> const& aWidget, i_graphics_context& aGc) const override
         {
             for (auto const& s : aWidget.series())
                 if (s->visible())
                     render_series(aWidget, aGc, *s);
         }
-        void render_series(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc, i_series const& aSeries) const override
+        void render_series(i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type> const& aWidget, i_graphics_context& aGc, i_series const& aSeries) const override
         {
             // todo
         }
-        void render_x_axis(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc) const override
+        void render_x_axis(i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type> const& aWidget, i_graphics_context& aGc) const override
         {
             // todo
         }
-        void render_y_axis(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc) const override
+        void render_y_axis(i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type> const& aWidget, i_graphics_context& aGc) const override
         {
             // todo
         }
-        void render_x_label(x_abstract_type const& aX, i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
+        void render_x_label(x_abstract_type const& aX, i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
             aGc.draw_text(aLabelOrigin - x_label_extents(aX, aWidget, aGc, aElement) / 2.0, x_traits::to_text(aX), aWidget.x_axis().font(), aWidget.palette_color(color_role::Text));
         }
-        void render_y_label(y_abstract_type const& aY, i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
+        void render_y_label(y_abstract_type const& aY, i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
             aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, y_traits::to_text(aY), aWidget.y_axis().font(), aWidget.palette_color(color_role::Text));
         }
         // metrics
     public:
-        [[nodiscard]] rect plot_area(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc) const override
+        [[nodiscard]] rect plot_area(i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type> const& aWidget, i_graphics_context& aGc) const override
         {
             auto const& cr = aWidget.client_rect(false);
             point const topLeft{ y_axis_area(aWidget, aGc).right(), cr.top() };
             point const bottomRight{ cr.right(), x_axis_area(aWidget, aGc).top() };
             return rect{ topLeft, bottomRight - topLeft };
         }
-        [[nodiscard]] rect x_axis_area(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc) const override
+        [[nodiscard]] rect x_axis_area(i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type> const& aWidget, i_graphics_context& aGc) const override
         {
             auto const& cr = aWidget.client_rect(false);
             size extents;
@@ -494,7 +502,7 @@ namespace neogfx
             extents.cy += x_tick_length_px(aWidget);
             return cr.with_cy(extents.cy).with_y(cr.bottom() - extents.cy);
         }
-        [[nodiscard]] rect y_axis_area(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc) const override
+        [[nodiscard]] rect y_axis_area(i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type> const& aWidget, i_graphics_context& aGc) const override
         {
             auto const& cr = aWidget.client_rect(false);
             size extents;
@@ -525,15 +533,15 @@ namespace neogfx
             extents.cx += y_tick_length_px(aWidget);
             return cr.with_cx(extents.cx);
         }
-        [[nodiscard]] size x_label_extents(x_abstract_type const& aX, i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
+        [[nodiscard]] size x_label_extents(x_abstract_type const& aX, i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
         {
             return aGc.text_extent(x_traits::to_text(aX), aWidget.x_axis().font());
         }
-        [[nodiscard]] size y_label_extents(y_abstract_type const& aY, i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
+        [[nodiscard]] size y_label_extents(y_abstract_type const& aY, i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
         {
             return aGc.text_extent(y_traits::to_text(aY), aWidget.y_axis().font());
         }
-        [[nodiscard]] scalar x_tick_length_px(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget) const override
+        [[nodiscard]] scalar x_tick_length_px(i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type> const& aWidget) const override
         {
             if (iXTickLength_px.has_value())
                 return iXTickLength_px.value();
@@ -547,7 +555,7 @@ namespace neogfx
         {
             iXTickLength_px = std::nullopt;
         }
-        [[nodiscard]] scalar y_tick_length_px(i_graph_widget<x_abstract_type, y_abstract_type> const& aWidget) const override
+        [[nodiscard]] scalar y_tick_length_px(i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type> const& aWidget) const override
         {
             if (iYTickLength_px.has_value())
                 return iYTickLength_px.value();
@@ -566,27 +574,29 @@ namespace neogfx
         std::optional<scalar> iYTickLength_px;
     };
 
-    template <typename X = double, typename Y = double, typename XTraits = default_graph_datum_traits<X>, typename YTraits = default_graph_datum_traits<Y>>
-    class graph_widget : public widget<i_graph_widget<abstract_t<X>, abstract_t<Y>>>
+    template <typename X = double, typename Y = double, typename ContainerType = vector<graph_datum<X, Y>>, typename XTraits = default_graph_datum_traits<X>, typename YTraits = default_graph_datum_traits<Y>>
+    class graph_widget : public widget<i_graph_widget<abstract_t<X>, abstract_t<Y>, abstract_t<ContainerType>>>
     {
         using base_type = widget<i_graph_widget<abstract_t<X>, abstract_t<Y>>>;
     public:
         using x_abstract_type = abstract_t<X>;
         using y_abstract_type = abstract_t<Y>;
-        using abstract_type = i_graph_widget<x_abstract_type, y_abstract_type>;
+        using container_abstract_type = abstract_t<ContainerType>;
+        using abstract_type = i_graph_widget<x_abstract_type, y_abstract_type, container_abstract_type>;
     public:
         using x_type = X;
         using y_type = Y;
+        using container_type = ContainerType;
         using x_traits = XTraits;
         using y_traits = YTraits;
         using i_datum = typename abstract_type::i_datum;
         using i_series = typename abstract_type::i_series;
         using datum_type = graph_datum<x_type, y_type>;
-        using series_type = graph_series<x_type, y_type>;
+        using series_type = graph_series<x_type, y_type, container_type>;
         using series_container = vector<ref_ptr<series_type>>;
         using series_index = typename series_container::size_type;
         using i_renderer = typename abstract_type::i_renderer;
-        using renderer_type = graph_renderer<x_type, y_type, x_traits, y_traits>;
+        using renderer_type = graph_renderer<x_type, y_type, container_type, x_traits, y_traits>;
     public:
         graph_widget(graph_widget_type aType = graph_widget_type::Line, graph_widget_flags aFlags = graph_widget_flags::None) :
             base_type{}, iType{ aType }, iFlags{ aFlags }
