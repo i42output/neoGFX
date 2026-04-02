@@ -72,13 +72,13 @@ namespace neogfx
     };
 
     template <typename X = double, typename Y = double>
-    class graph_datum : public i_graph_datum<abstract_t<X>, abstract_t<Y>>
+    class graph_datum : public i_graph_datum<maybe_abstract_t<X>, maybe_abstract_t<Y>>
     {
     public:
-        using abstract_type = i_graph_datum<abstract_t<X>, abstract_t<Y>>;
+        using abstract_type = i_graph_datum<maybe_abstract_t<X>, maybe_abstract_t<Y>>;
     public:
-        using x_abstract_type = abstract_t<X>;
-        using y_abstract_type = abstract_t<Y>;
+        using x_abstract_type = maybe_abstract_t<X>;
+        using y_abstract_type = maybe_abstract_t<Y>;
     public:
         using x_type = X;
         using y_type = Y;
@@ -155,7 +155,7 @@ namespace neogfx
         y_type iY;
     };
 
-    template <typename X, typename Y, bool = !std::is_same_v<abstract_t<X>, void> && !std::is_same_v<abstract_t<Y>, void>>
+    template <typename X, typename Y, bool = !std::is_same_v<abstract_t<X>, void> || !std::is_same_v<abstract_t<Y>, void>>
     struct graph_datum_cracker;
     template <typename X, typename Y>
     struct graph_datum_cracker<X, Y, true> { using datum_type = graph_datum<X, Y>; };
@@ -172,10 +172,10 @@ namespace neogfx
         using y_type = Y;
         using datum_type = graph_datum_t<X, Y>;
         using container_type = ContainerType;
-        using x_abstract_type = abstract_t<x_type>;
-        using y_abstract_type = abstract_t<y_type>;
+        using x_abstract_type = maybe_abstract_t<x_type>;
+        using y_abstract_type = maybe_abstract_t<y_type>;
         using datum_abstract_type = maybe_abstract_t<datum_type>;
-        using container_abstract_type = abstract_t<container_type>;
+        using container_abstract_type = maybe_abstract_t<container_type>;
     private:
         template <typename U, typename = void>
         struct is_text_like : std::false_type {};
@@ -401,7 +401,7 @@ namespace neogfx
         using y_type = Y;
         using traits_type = Traits;
     public:
-        using i_datum = abstract_t<typename Traits::datum_type>;
+        using i_datum = maybe_abstract_t<typename Traits::datum_type>;
         using i_series = i_graph_series<x_type, y_type, traits_type>;
         using series_container = i_vector<i_ref_ptr<i_series>>;
         using series_index = typename series_container::size_type;
