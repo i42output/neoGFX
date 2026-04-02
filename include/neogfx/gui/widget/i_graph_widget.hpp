@@ -24,6 +24,11 @@
 
 namespace neogfx
 {
+    struct no_graph_series_data : std::logic_error { no_graph_series_data() : std::logic_error{ "neogfx::no_graph_series_data" } {} };
+    struct unregistered_graph_series_update : std::logic_error { unregistered_graph_series_update() : std::logic_error{ "neogfx::unregistered_graph_series_update" } {} };
+    struct unknown_graph_datum_type : std::logic_error { unknown_graph_datum_type() : std::logic_error{ "neogfx::unknown_graph_datum_type" } {} };
+    struct graph_axis_undefined : std::logic_error { graph_axis_undefined() : std::logic_error{ "neogfx::graph_axis_undefined" } {} };
+
     enum class graph_widget_type
     {
         Line
@@ -66,7 +71,140 @@ namespace neogfx
         virtual ~i_graph_datum() = default;
     };
 
-    template <typename X = double, typename Y = double, typename ContainerType = i_vector<i_graph_datum<X, Y>>>
+    template <typename X = double, typename Y = double>
+    class graph_datum : public i_graph_datum<abstract_t<X>, abstract_t<Y>>
+    {
+    public:
+        using abstract_type = i_graph_datum<abstract_t<X>, abstract_t<Y>>;
+    public:
+        using x_abstract_type = abstract_t<X>;
+        using y_abstract_type = abstract_t<Y>;
+    public:
+        using x_type = X;
+        using y_type = Y;
+    public:
+        graph_datum() :
+            iX{}, iY{}
+        {}
+        graph_datum(graph_datum const& aOther) :
+            iX{ aOther.iX }, iY{ aOther.iY }
+        {}
+        graph_datum(abstract_type const& aOther) :
+            iX{ aOther.x() }, iY{ aOther.y() }
+        {}
+        graph_datum(x_type const& aX, y_type const& aY) :
+            iX{ aX }, iY{ aY }
+        {}
+    public:
+        [[nodiscard]] x_type const& x() const final
+        {
+            return iX;
+        }
+        [[nodiscard]] y_type const& y() const final
+        {
+            return iY;
+        }
+        void set_x(x_abstract_type const& aX) final
+        {
+            iX = aX;
+        }
+        void set_y(y_abstract_type const& aY) final
+        {
+            iY = aY;
+        }
+    private:
+        x_type iX;
+        y_type iY;
+    };
+
+    template <typename X = double, typename Y = double>
+    class plain_graph_datum
+    {
+    public:
+        using x_type = X;
+        using y_type = Y;
+    public:
+        plain_graph_datum() :
+            iX{}, iY{}
+        {}
+        plain_graph_datum(plain_graph_datum const& aOther) :
+            iX{ aOther.iX }, iY{ aOther.iY }
+        {}
+        plain_graph_datum(x_type const& aX, y_type const& aY) :
+            iX{ aX }, iY{ aY }
+        {}
+    public:
+        [[nodiscard]] x_type const& x() const
+        {
+            return iX;
+        }
+        [[nodiscard]] y_type const& y() const
+        {
+            return iY;
+        }
+        void set_x(x_type const& aX)
+        {
+            iX = aX;
+        }
+        void set_y(y_type const& aY)
+        {
+            iY = aY;
+        }
+    private:
+        x_type iX;
+        y_type iY;
+    };
+
+    template <typename X, typename Y, bool = !std::is_same_v<abstract_t<X>, void> && !std::is_same_v<abstract_t<Y>, void>>
+    struct graph_datum_cracker;
+    template <typename X, typename Y>
+    struct graph_datum_cracker<X, Y, true> { using datum_type = graph_datum<X, Y>; };
+    template <typename X, typename Y>
+    struct graph_datum_cracker<X, Y, false> { using datum_type = plain_graph_datum<X, Y>; };
+    template <typename X, typename Y>
+    using graph_datum_t = typename graph_datum_cracker<X, Y>::datum_type;
+
+    template <typename X, typename Y, typename ContainerType = vector<graph_datum_t<X, Y>>>
+    class default_graph_traits
+    {
+    public:
+        using x_type = X;
+        using y_type = Y;
+        using datum_type = graph_datum_t<X, Y>;
+        using container_type = ContainerType;
+        using x_abstract_type = abstract_t<x_type>;
+        using y_abstract_type = abstract_t<y_type>;
+        using datum_abstract_type = maybe_abstract_t<datum_type>;
+        using container_abstract_type = abstract_t<container_type>;
+    private:
+        template <typename U, typename = void>
+        struct is_text_like : std::false_type {};
+        template <typename U>
+        struct is_text_like<U, std::void_t<decltype(to_string(std::declval<const U&>()))>> : std::true_type {};
+        template <typename U>
+        static constexpr bool is_text_like_v = is_text_like<U>::value;
+    public:
+        template <typename U>
+        static string to_text(U const& v)
+        {
+            if constexpr (std::is_same_v<U, std::string> || std::is_same_v<U, string>)
+                return v;
+            else if constexpr (is_text_like_v<U>)
+                return to_string(v);
+            else
+                throw unknown_graph_datum_type();
+        }
+        static string x_to_text(x_type const& x)
+        {
+            return to_text(x);
+        }
+        static string y_to_text(y_type const& y)
+        {
+            return to_text(y);
+        }
+    };
+
+    template <typename X, typename Y, typename Traits>
     class i_graph_series : public i_reference_counted
     {
     public:
@@ -74,8 +212,9 @@ namespace neogfx
     public:
         using x_type = X;
         using y_type = Y;
-        using i_datum = i_graph_datum<X, Y>;
-        using container_type = ContainerType;
+        using traits_type = Traits;
+        using i_datum = typename traits_type::datum_abstract_type;
+        using container_type = typename traits_type::container_abstract_type;
         using index_type = typename container_type::size_type;
     public:
         declare_event(data_changed);
@@ -107,11 +246,11 @@ namespace neogfx
         virtual ~i_graph_series() = default;
     };
 
-    template <typename X, typename Y>
+    template <typename X, typename Y, typename Traits>
     class scoped_graph_series_update
     {
     public:
-        scoped_graph_series_update(i_graph_series<X, Y>& aSeries) :
+        scoped_graph_series_update(i_graph_series<X, Y, Traits>& aSeries) :
             iSeries{ aSeries }
         {
             iSeries.start_update();
@@ -121,7 +260,7 @@ namespace neogfx
             iSeries.end_update();
         }
     private:
-        i_graph_series<X, Y>& iSeries;
+        i_graph_series<X, Y, Traits>& iSeries;
     };
 
     class i_graph_series_appearance : public i_reference_counted
@@ -208,7 +347,7 @@ namespace neogfx
         virtual void set_font(optional_font const& aFont = {}) = 0;
     };
 
-    template <typename X = double, typename Y = double, typename ContainerType = i_vector<i_graph_datum<X, Y>>>
+    template <typename X, typename Y, typename Traits>
     class i_graph_widget;
         
     enum class graph_rendering_element
@@ -218,7 +357,7 @@ namespace neogfx
         DatumHoverLabel
     };
 
-    template <typename X = double, typename Y = double, typename ContainerType = i_vector<i_graph_datum<X, Y>>>
+    template <typename X, typename Y, typename Traits>
     class i_graph_renderer : public i_reference_counted
     {
     public:
@@ -226,33 +365,33 @@ namespace neogfx
     public:
         using x_type = X;
         using y_type = Y;
-        using container_type = ContainerType;
-        using i_series = i_graph_series<x_type, y_type, container_type>;
+        using traits_type = Traits;
+        using i_series = i_graph_series<x_type, y_type, traits_type>;
         // render
     public:
-        virtual void render(i_graph_widget<x_type, y_type, container_type> const& aWidget, i_graphics_context& aGc) const = 0;
-        virtual void render_plot(i_graph_widget<x_type, y_type, container_type> const& aWidget, i_graphics_context& aGc) const = 0;
-        virtual void render_series(i_graph_widget<x_type, y_type, container_type> const& aWidget, i_graphics_context& aGc, i_series const& aSeries) const = 0;
-        virtual void render_x_axis(i_graph_widget<x_type, y_type, container_type> const& aWidget, i_graphics_context& aGc) const = 0;
-        virtual void render_y_axis(i_graph_widget<x_type, y_type, container_type> const& aWidget, i_graphics_context& aGc) const = 0;
-        virtual void render_x_label(x_type const& aX, i_graph_widget<x_type, y_type, container_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element) const = 0;
-        virtual void render_y_label(y_type const& aY, i_graph_widget<x_type, y_type, container_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element) const = 0;
+        virtual void render(i_graph_widget<x_type, y_type, traits_type> const& aWidget, i_graphics_context& aGc) const = 0;
+        virtual void render_plot(i_graph_widget<x_type, y_type, traits_type> const& aWidget, i_graphics_context& aGc) const = 0;
+        virtual void render_series(i_graph_widget<x_type, y_type, traits_type> const& aWidget, i_graphics_context& aGc, i_series const& aSeries) const = 0;
+        virtual void render_x_axis(i_graph_widget<x_type, y_type, traits_type> const& aWidget, i_graphics_context& aGc) const = 0;
+        virtual void render_y_axis(i_graph_widget<x_type, y_type, traits_type> const& aWidget, i_graphics_context& aGc) const = 0;
+        virtual void render_x_label(x_type const& aX, i_graph_widget<x_type, y_type, traits_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element) const = 0;
+        virtual void render_y_label(y_type const& aY, i_graph_widget<x_type, y_type, traits_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element) const = 0;
         // metrics
     public:
-        [[nodiscard]] virtual rect plot_area(i_graph_widget<x_type, y_type, container_type> const& aWidget, i_graphics_context& aGc) const = 0;
-        [[nodiscard]] virtual rect x_axis_area(i_graph_widget<x_type, y_type, container_type> const& aWidget, i_graphics_context& aGc) const = 0;
-        [[nodiscard]] virtual rect y_axis_area(i_graph_widget<x_type, y_type, container_type> const& aWidget, i_graphics_context& aGc) const = 0;
-        [[nodiscard]] virtual size x_label_extents(x_type const& aX, i_graph_widget<x_type, y_type, container_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element) const = 0;
-        [[nodiscard]] virtual size y_label_extents(y_type const& aY, i_graph_widget<x_type, y_type, container_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element) const = 0;
-        [[nodiscard]] virtual scalar x_tick_length_px(i_graph_widget<x_type, y_type, container_type> const& aWidget) const = 0;
+        [[nodiscard]] virtual rect plot_area(i_graph_widget<x_type, y_type, traits_type> const& aWidget, i_graphics_context& aGc) const = 0;
+        [[nodiscard]] virtual rect x_axis_area(i_graph_widget<x_type, y_type, traits_type> const& aWidget, i_graphics_context& aGc) const = 0;
+        [[nodiscard]] virtual rect y_axis_area(i_graph_widget<x_type, y_type, traits_type> const& aWidget, i_graphics_context& aGc) const = 0;
+        [[nodiscard]] virtual size x_label_extents(x_type const& aX, i_graph_widget<x_type, y_type, traits_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element) const = 0;
+        [[nodiscard]] virtual size y_label_extents(y_type const& aY, i_graph_widget<x_type, y_type, traits_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element) const = 0;
+        [[nodiscard]] virtual scalar x_tick_length_px(i_graph_widget<x_type, y_type, traits_type> const& aWidget) const = 0;
         virtual void set_x_tick_length_px(scalar aLength_px) = 0;
         virtual void clear_x_tick_length_px() = 0;
-        [[nodiscard]] virtual scalar y_tick_length_px(i_graph_widget<x_type, y_type, container_type> const& aWidget) const = 0;
+        [[nodiscard]] virtual scalar y_tick_length_px(i_graph_widget<x_type, y_type, traits_type> const& aWidget) const = 0;
         virtual void set_y_tick_length_px(scalar aLength_px) = 0;
         virtual void clear_y_tick_length_px() = 0;
     };
 
-    template <typename X, typename Y, typename ContainerType>
+    template <typename X, typename Y, typename Traits>
     class i_graph_widget : public i_widget
     {
     public:
@@ -260,12 +399,13 @@ namespace neogfx
     public:
         using x_type = X;
         using y_type = Y;
-        using container_type = ContainerType;
-        using i_datum = i_graph_datum<x_type, y_type>;
-        using i_series = i_graph_series<x_type, y_type, container_type>;
+        using traits_type = Traits;
+    public:
+        using i_datum = abstract_t<typename Traits::datum_type>;
+        using i_series = i_graph_series<x_type, y_type, traits_type>;
         using series_container = i_vector<i_ref_ptr<i_series>>;
         using series_index = typename series_container::size_type;
-        using i_renderer = i_graph_renderer<x_type, y_type, container_type>;
+        using i_renderer = i_graph_renderer<x_type, y_type, traits_type>;
     public:
         [[nodiscard]] virtual graph_widget_type type() const = 0;
         virtual void set_type(graph_widget_type aType) = 0;
