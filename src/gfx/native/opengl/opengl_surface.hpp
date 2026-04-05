@@ -62,10 +62,13 @@ namespace neogfx
         void set_destroying() override;
         void set_destroyed() override;
     private:
-        GLuint iFrameBuffer;
+        bool need_to_create_frame_buffer() const;
+        void create_frame_buffer() const;
+    private:
+        mutable GLuint iFrameBuffer;
         mutable optional_texture iFrameBufferTexture;
-        GLuint iDepthStencilBuffer;
-        size iFrameBufferExtents;
+        mutable GLuint iDepthStencilBuffer;
+        mutable size iFrameBufferExtents;
         mutable std::unique_ptr<graphics_operation::i_queue> iQueue;
     };
 }

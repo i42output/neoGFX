@@ -150,6 +150,8 @@ namespace neogfx
         cache_uniform(uTextureMultisample)
         cache_uniform(uTextureExtents)
         cache_uniform(uTextureEffect)
+        texture iDummyTexture;
+        texture iDummyTextureMS;
     };
 
     class standard_filter_shader : public standard_fragment_shader<i_filter_shader>

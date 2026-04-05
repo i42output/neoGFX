@@ -35,6 +35,10 @@
 #include "opengl/opengl_surface.hpp"
 #include "windows_renderer.hpp"
 
+#ifndef NDEBUG
+#define DEBUG_GL
+#endif
+
 namespace neogfx
 {
     namespace native::windows

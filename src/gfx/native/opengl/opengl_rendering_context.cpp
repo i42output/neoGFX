@@ -1186,7 +1186,7 @@ namespace neogfx
 
                     rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Rect);
 
-                    maybeVertexArrays.emplace(as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawRectOps.cend() - aDrawRectOps.cbegin())));
+                    maybeVertexArrays.emplace(as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawRectOps.cend() - aDrawRectOps.cbegin())));
                 }
 
                 auto& vertexArrays = maybeVertexArrays.value();
@@ -1204,7 +1204,7 @@ namespace neogfx
                         {},
                         function,
                         vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
-                        vec4{},
+                        vec4f{},
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
                             !logical_operation_active() && !snap_to_pixel() ?
@@ -1724,6 +1724,57 @@ namespace neogfx
                 function });
     }
 
+    void opengl_rendering_context::fill_shape(const game::mesh& aMesh, const vec3& aPosition, const brush& aFill)
+    {
+        if (std::holds_alternative<std::monostate>(aFill))
+            return;
+
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
+        if (std::holds_alternative<gradient>(aFill))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
+
+        {
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this };
+
+            auto const& pos = (aPosition + origin().to_vec3()).as<float>();
+            auto const& vertices = aMesh.vertices;
+            auto const& uv = aMesh.uv;
+            vec3f min, max;
+            if (std::holds_alternative<gradient>(aFill))
+            {
+                min = vertices[0].xyz;
+                max = min;
+                for (auto const& v : vertices)
+                {
+                    min.x = std::min(min.x, v.x + pos.x);
+                    max.x = std::max(max.x, v.x + pos.x);
+                    min.y = std::min(min.y, v.y + pos.y);
+                    max.y = std::max(max.y, v.y + pos.y);
+                }
+            }
+            auto const function = to_function(*this, aFill, rect{ point{ min.x, min.y }, size{ max.x - min.x, max.y - min.y } });
+            if (!vertexArrays.room_for(aMesh.faces.size() * 3u))
+                vertexArrays.draw_and_execute();
+            for (auto const& f : aMesh.faces)
+            {
+                for (auto vi : f)
+                {
+                    auto const& v = vertices[vi];
+                    vertexArrays.push_back({
+                        v + pos,
+                        std::holds_alternative<color>(aFill) ?
+                            static_variant_cast<color>(aFill).as<float>() :
+                            vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
+                        uv[vi],
+                        function });
+                }
+            }
+        }
+    }
+
     void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer, const mat44& aTransformation)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
@@ -1811,57 +1862,6 @@ namespace neogfx
             for (auto& d : tDrawables)
                 d.clear();
             tLock.reset();
-        }
-    }
-
-    void opengl_rendering_context::fill_shape(const game::mesh& aMesh, const vec3& aPosition, const brush& aFill)
-    {
-        if (std::holds_alternative<std::monostate>(aFill))
-            return;
-
-        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
-
-        neolib::scoped_flag snap{ iSnapToPixel, false };
-
-        if (std::holds_alternative<gradient>(aFill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
-
-        {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this };
-
-            auto const& pos = (aPosition + origin().to_vec3()).as<float>();
-            auto const& vertices = aMesh.vertices;
-            auto const& uv = aMesh.uv;
-            vec3f min, max;
-            if (std::holds_alternative<gradient>(aFill))
-            {
-                min = vertices[0].xyz;
-                max = min;
-                for (auto const& v : vertices)
-                {
-                    min.x = std::min(min.x, v.x + pos.x);
-                    max.x = std::max(max.x, v.x + pos.x);
-                    min.y = std::min(min.y, v.y + pos.y);
-                    max.y = std::max(max.y, v.y + pos.y);
-                }
-            }
-            auto const function = to_function(*this, aFill, rect{ point{ min.x, min.y }, size{ max.x - min.x, max.y - min.y } });
-            if (!vertexArrays.room_for(aMesh.faces.size() * 3u))
-                vertexArrays.draw_and_execute();
-            for (auto const& f : aMesh.faces)
-            {
-                for (auto vi : f)
-                {
-                    auto const& v = vertices[vi];
-                    vertexArrays.push_back({
-                        v + pos,
-                        std::holds_alternative<color>(aFill) ? 
-                            static_variant_cast<color>(aFill).as<float>() : 
-                            vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
-                        uv[vi],
-                        function });
-                }
-            }
         }
     }
 
@@ -2336,6 +2336,7 @@ namespace neogfx
     {
         if (!aMeshRenderer.render)
             return;
+
         mesh_drawable drawable
         {
             aMeshFilter,

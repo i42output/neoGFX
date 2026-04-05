@@ -301,8 +301,7 @@ namespace neogfx
         {
             GLint previousBindingHandle;
             glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &previousBindingHandle));
-            if (previousBindingHandle != gl_handle_cast<GLint>(aBuffer.handle()))
-                glCheck(glBindBuffer(GL_ARRAY_BUFFER, aBuffer.handle()));
+            glCheck(glBindBuffer(GL_ARRAY_BUFFER, aBuffer.handle()));
             GLuint index;
             glCheck(index = glGetAttribLocation(to_gl_handle<GLuint>(iShaderProgram.handle()), iVariableName.c_str()));
             if (index != -1)
@@ -438,6 +437,8 @@ namespace neogfx
                     vertex_type::offset::st,
                     aShaderProgram,
                     standard_vertex_attribute_name(vertex_buffer_type::UV));
+            else
+                iVertexTextureCoordAttribArray = std::nullopt;
             if (aShaderProgram.supports(vertex_buffer_type::Function0))
                 iVertexFunction0AttribArray.emplace(
                     false,
@@ -445,6 +446,8 @@ namespace neogfx
                     vertex_type::offset::xyzw,
                     aShaderProgram,
                     standard_vertex_attribute_name(vertex_buffer_type::Function0));
+            else
+                iVertexFunction0AttribArray = std::nullopt;
             if (aShaderProgram.supports(vertex_buffer_type::Function1))
                 iVertexFunction1AttribArray.emplace(
                     false,
@@ -452,6 +455,8 @@ namespace neogfx
                     vertex_type::offset::abcd,
                     aShaderProgram,
                     standard_vertex_attribute_name(vertex_buffer_type::Function1));
+            else
+                iVertexFunction1AttribArray = std::nullopt;
             if (aShaderProgram.supports(vertex_buffer_type::Function2))
                 iVertexFunction2AttribArray.emplace(
                     false,
@@ -459,6 +464,8 @@ namespace neogfx
                     vertex_type::offset::efgh,
                     aShaderProgram,
                     standard_vertex_attribute_name(vertex_buffer_type::Function2));
+            else
+                iVertexFunction2AttribArray = std::nullopt;
             if (aShaderProgram.supports(vertex_buffer_type::Function3))
                 iVertexFunction3AttribArray.emplace(
                     false,
@@ -466,6 +473,8 @@ namespace neogfx
                     vertex_type::offset::ijkl,
                     aShaderProgram,
                     standard_vertex_attribute_name(vertex_buffer_type::Function3));
+            else
+                iVertexFunction3AttribArray = std::nullopt;
             if (aShaderProgram.supports(vertex_buffer_type::Function4))
                 iVertexFunction4AttribArray.emplace(
                     false,
@@ -473,6 +482,8 @@ namespace neogfx
                     vertex_type::offset::mnop,
                     aShaderProgram,
                     standard_vertex_attribute_name(vertex_buffer_type::Function4));
+            else
+                iVertexFunction4AttribArray = std::nullopt;
             if (aShaderProgram.supports(vertex_buffer_type::Function5))
                 iVertexFunction5AttribArray.emplace(
                     false,
@@ -480,6 +491,8 @@ namespace neogfx
                     vertex_type::offset::abcd2,
                     aShaderProgram,
                     standard_vertex_attribute_name(vertex_buffer_type::Function5));
+            else
+                iVertexFunction5AttribArray = std::nullopt;
             if (aShaderProgram.supports(vertex_buffer_type::Function6))
                 iVertexFunction6AttribArray.emplace(
                     false,
@@ -487,6 +500,8 @@ namespace neogfx
                     vertex_type::offset::efgh2,
                     aShaderProgram,
                     standard_vertex_attribute_name(vertex_buffer_type::Function6));
+            else
+                iVertexFunction6AttribArray = std::nullopt;
             if (aShaderProgram.type() == shader_program_type::Standard)
                 static_cast<i_standard_vertex_shader&>(aShaderProgram.vertex_shader()).set_transformation_matrix(iTransformation);
             vertex_buffer::attach_shader(aContext, aShaderProgram);

@@ -85,7 +85,9 @@ namespace neogfx
     }
 
     standard_texture_shader::standard_texture_shader(std::string const& aName) :
-        standard_fragment_shader<i_texture_shader>{ aName }
+        standard_fragment_shader<i_texture_shader>{ aName },
+        iDummyTexture{ size{ 1.0, 1.0 }, 1.0, texture_sampling::Normal },
+        iDummyTextureMS{ size{ 1.0, 1.0 }, 1.0, texture_sampling::Multisample }
     {
         disable();
         set_uniform("tex"_s, sampler2D{1});
@@ -110,6 +112,8 @@ namespace neogfx
     void standard_texture_shader::clear_texture()
     {
         enable();
+        iDummyTexture.bind(1);
+        iDummyTextureMS.bind(2);
         uTextureEnabled = false;
         uTextureEffect = shader_effect::None;
         uTextureDataFormat = texture_data_format::RGBA;
@@ -279,6 +283,7 @@ namespace neogfx
         uShapeEnabled = false;
         uShape = shader_shape::None;
         iShapeVertices = aShaderProgram.create_ssbo<vec4f>("bShapeVertices"_s);
+        iShapeVertices->alloc(1);
         disable();
     }
 

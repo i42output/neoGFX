@@ -235,14 +235,18 @@ namespace neogfx
             {
                 if (aCount == 0u)
                     return;
+
                 iDrawOnExit = false;
+
                 auto const skipCount = aSkip.skipCount ? std::max<std::size_t>(*aSkip.skipCount, 1u) : 1u;
                 auto const vertexCount = vertices().size();
                 if (static_cast<std::size_t>(iStart) + aCount > vertexCount)
                     throw invalid_draw_count();
                 if (static_cast<std::size_t>(iStart) == vertexCount)
                     return;
+
                 iParent.rendering_engine().vertex_buffer(iProvider).attach_shader(iParent, iParent.rendering_engine().active_shader_program());
+
                 if (!iUseBarrier)
                 {
                     glCheck(glDrawArrays(GL_TRIANGLES, iStart, static_cast<GLsizei>(aCount)));
@@ -250,10 +254,7 @@ namespace neogfx
                 }
                 else
                 {
-                    if (iUseBarrier)
-                    {
-                        glCheck(glTextureBarrier());
-                    }
+                    glCheck(glTextureBarrier());
                     auto const pvc = primitive_vertex_count();
                     auto chunk = pvc * skipCount;
                     while (aCount > 0)
@@ -262,10 +263,7 @@ namespace neogfx
                         glCheck(glDrawArrays(GL_TRIANGLES, iStart, static_cast<GLsizei>(amount)));
                         iStart += static_cast<GLint>(amount);
                         aCount -= amount;
-                        if (iUseBarrier)
-                        {
-                            glCheck(glTextureBarrier());
-                        }
+                        glCheck(glTextureBarrier());
                     } 
                 }
             }
