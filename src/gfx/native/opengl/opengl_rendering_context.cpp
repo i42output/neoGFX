@@ -1042,7 +1042,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Line);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawLineOps.cend() - aDrawLineOps.cbegin())) };
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawLineOps.cend() - aDrawLineOps.cbegin())) };
 
             for (auto op = aDrawLineOps.cbegin(); op != aDrawLineOps.cend(); ++op)
             {
@@ -1091,7 +1091,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Triangle);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawTriangleOps.cend() - aDrawTriangleOps.cbegin()))};
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawTriangleOps.cend() - aDrawTriangleOps.cbegin()))};
 
             for (auto op = aDrawTriangleOps.cbegin(); op != aDrawTriangleOps.cend(); ++op)
             {
@@ -1237,7 +1237,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::RoundedRect);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawRoundedRectOps.cend() - aDrawRoundedRectOps.cbegin()))};
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawRoundedRectOps.cend() - aDrawRoundedRectOps.cbegin()))};
 
             for (auto op = aDrawRoundedRectOps.cbegin(); op != aDrawRoundedRectOps.cend(); ++op)
             {
@@ -1289,7 +1289,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::EllipseRect);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawEllpseRectOps.cend() - aDrawEllpseRectOps.cbegin())) };
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllpseRectOps.cend() - aDrawEllpseRectOps.cbegin())) };
 
             for (auto op = aDrawEllpseRectOps.cbegin(); op != aDrawEllpseRectOps.cend(); ++op)
             {
@@ -1352,7 +1352,7 @@ namespace neogfx
 
                     rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Checkerboard);
 
-                    maybeVertexArrays.emplace(as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u));
+                    maybeVertexArrays.emplace(as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u));
 
                     auto& vertexArrays = maybeVertexArrays.value();
 
@@ -1406,7 +1406,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Ellipse);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawEllipseOps.cend() - aDrawEllipseOps.cbegin()))};
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllipseOps.cend() - aDrawEllipseOps.cbegin()))};
 
             for (auto op = aDrawEllipseOps.cbegin(); op != aDrawEllipseOps.cend(); ++op)
             {
@@ -1457,7 +1457,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Circle);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawCircleOps.cend() - aDrawCircleOps.cbegin()))};
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawCircleOps.cend() - aDrawCircleOps.cbegin()))};
 
             for (auto op = aDrawCircleOps.cbegin(); op != aDrawCircleOps.cend(); ++op)
             {
@@ -1508,7 +1508,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Pie);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawPieOps.cend() - aDrawPieOps.cbegin()))};
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawPieOps.cend() - aDrawPieOps.cbegin()))};
 
             for (auto op = aDrawPieOps.cbegin(); op != aDrawPieOps.cend(); ++op)
             {
@@ -1559,7 +1559,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Arc);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawArcOps.cend() - aDrawArcOps.cbegin()))};
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawArcOps.cend() - aDrawArcOps.cbegin()))};
 
             for (auto op = aDrawArcOps.cbegin(); op != aDrawArcOps.cend(); ++op)
             {

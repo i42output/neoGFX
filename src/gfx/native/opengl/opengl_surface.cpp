@@ -71,7 +71,6 @@ namespace neogfx
         if (static_cast<GLuint>(currentFramebuffer) != iFrameBuffer)
         {
             glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
-            glCheck(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
         }
 
         std::optional<GLint> attachedFboTexture;
