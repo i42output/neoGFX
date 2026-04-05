@@ -283,6 +283,7 @@ namespace neogfx
         uShapeEnabled = false;
         uShape = shader_shape::None;
         iShapeVertices = aShaderProgram.create_ssbo<vec4f>("bShapeVertices"_s);
+        // Always ensure SSBO is mapped to prevent Intel integrated graphics driver crash for shapes that don't need it...
         iShapeVertices->alloc(1);
         disable();
     }
