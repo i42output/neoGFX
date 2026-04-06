@@ -226,6 +226,10 @@ namespace neogfx
         virtual void clear(color const& aColor, std::optional<scalar> const& aZpos = std::optional<scalar>{}) = 0;
         virtual void clear_depth_buffer() = 0;
         virtual void clear_stencil_buffer() = 0;
+        virtual void enable_stencil_test() = 0;
+        virtual void disable_stencil_test() = 0;
+        virtual void enable_stencil_update(std::int32_t aRef = 1) = 0;
+        virtual void disable_stencil_update() = 0;
         virtual void blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::Blit) = 0;
         virtual void blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) = 0;
         // gradient
@@ -744,6 +748,25 @@ namespace neogfx
         ~scoped_scissor()
         {
             iGc.pop_scissor();
+        }
+    private:
+        i_graphics_context& iGc;
+    };
+
+    class scoped_stencil_update
+    {
+    public:
+        scoped_stencil_update(i_graphics_context& aGc, bool aClearStencilBuffer = true) :
+            iGc{ aGc }
+        {
+            if (aClearStencilBuffer)
+                iGc.clear_stencil_buffer();
+            iGc.enable_stencil_test();
+            iGc.enable_stencil_update();
+        }
+        ~scoped_stencil_update()
+        {
+            iGc.disable_stencil_update();
         }
     private:
         i_graphics_context& iGc;

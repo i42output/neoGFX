@@ -128,13 +128,23 @@ namespace neogfx
         bool is_subpixel_rendering_on() const final;
         void subpixel_rendering_on() final;
         void subpixel_rendering_off() final;
+        // canvas
+    public:
         void clear(color const& aColor, std::optional<scalar> const& aZpos = std::optional<scalar>{}) final;
         void clear_depth_buffer() final;
         void clear_stencil_buffer() final;
+        void enable_stencil_test() final;
+        void disable_stencil_test() final;
+        void enable_stencil_update(std::int32_t aRef = 1) final;
+        void disable_stencil_update() final;
         void blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::Blit) final;
         void blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) final;
+        // gradient
+    public:
         void clear_gradient() final;
         void set_gradient(gradient const& aGradient, rect const& aBoundingBox) final;
+        // shape
+    public:
         void set_pixel(point const& aPoint, color const& aColor) final;
         void draw_pixel(point const& aPoint, color const& aColor) final;
         void draw_line(point const& aFrom, point const& aTo, pen const& aPen) final;

@@ -549,6 +549,18 @@ namespace neogfx
             case graphics_operation::operation_type::ClearStencilBuffer:
                 clear_stencil_buffer();
                 break;
+            case graphics_operation::operation_type::EnableStencilTest:
+                enable_stencil_test();
+                break;
+            case graphics_operation::operation_type::DisableStencilTest:
+                disable_stencil_test();
+                break;
+            case graphics_operation::operation_type::EnableStencilUpdate:
+                enable_stencil_update(static_variant_cast<const graphics_operation::enable_stencil_update&>(*(std::prev(opBatch.cend()))).ref);
+                break;
+            case graphics_operation::operation_type::DisableStencilUpdate:
+                disable_stencil_update();
+                break;
             case graphics_operation::operation_type::SetGradient:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                     set_gradient(static_variant_cast<const graphics_operation::set_gradient&>(*op).gradient);
@@ -985,9 +997,43 @@ namespace neogfx
 
     void opengl_rendering_context::clear_stencil_buffer()
     {
-        glCheck(glStencilMask(static_cast<GLuint>(-1)));
-        glCheck(glClearStencil(0xFF));
+        glCheck(glStencilMask(0xFF));
+        glCheck(glClearStencil(0));
         glCheck(glClear(GL_STENCIL_BUFFER_BIT));
+    }
+
+    void opengl_rendering_context::enable_stencil_test()
+    {
+        glCheck(glEnable(GL_STENCIL_TEST));
+    }
+
+    void opengl_rendering_context::disable_stencil_test()
+    {
+        glCheck(glDisable(GL_STENCIL_TEST));
+    }
+
+    void opengl_rendering_context::enable_stencil_update(std::int32_t aRef)
+    {
+        if (iStencilRef.has_value())
+            throw std::logic_error("neogfx::opengl_rendering_context: enable_stencil_update called without matching disable_stencil_update");
+        iStencilRef = aRef;
+        glCheck(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
+        glCheck(glDepthMask(GL_FALSE));
+        glCheck(glStencilFunc(GL_ALWAYS, static_cast<GLint>(*iStencilRef), 0xFF));
+        glCheck(glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE));
+        glCheck(glStencilMask(0xFF));
+    }
+
+    void opengl_rendering_context::disable_stencil_update()
+    {
+        if (!iStencilRef.has_value())
+            throw std::logic_error("neogfx::opengl_rendering_context: disable_stencil_update called without matching enable_stencil_update");
+        glCheck(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
+        glCheck(glDepthMask(GL_TRUE));
+        glCheck(glStencilFunc(GL_EQUAL, static_cast<GLint>(*iStencilRef), 0xFF));
+        glCheck(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
+        glCheck(glStencilMask(0x00));
+        iStencilRef = std::nullopt;
     }
 
     void opengl_rendering_context::set_pixel(const point& aPoint, const color& aColor)

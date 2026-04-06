@@ -154,6 +154,23 @@ namespace neogfx
         {
         };
 
+        struct enable_stencil_test
+        {
+        };
+
+        struct disable_stencil_test
+        {
+        };
+
+        struct enable_stencil_update
+        {
+            std::int32_t ref;
+        };
+
+        struct disable_stencil_update
+        {
+        };
+
         struct clear_gradient
         {
         };
@@ -346,6 +363,10 @@ namespace neogfx
             clear,
             clear_depth_buffer,
             clear_stencil_buffer,
+            enable_stencil_test,
+            disable_stencil_test,
+            enable_stencil_update,
+            disable_stencil_update,
             clear_gradient,
             set_gradient,
             set_pixel,
@@ -397,6 +418,10 @@ namespace neogfx
             Clear,
             ClearDepthBuffer,
             ClearStencilBuffer,
+            EnableStencilTest,
+            DisableStencilTest,
+            EnableStencilUpdate,
+            DisableStencilUpdate,
             ClearGradient,
             SetGradient,
             SetPixel,

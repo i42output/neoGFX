@@ -1109,6 +1109,26 @@ namespace neogfx
         rendering_context().enqueue(graphics_operation::clear_stencil_buffer{});
     }
 
+    void graphics_context::enable_stencil_test()
+    {
+        rendering_context().enqueue(graphics_operation::enable_stencil_test{});
+    }
+
+    void graphics_context::disable_stencil_test()
+    {
+        rendering_context().enqueue(graphics_operation::disable_stencil_test{});
+    }
+
+    void graphics_context::enable_stencil_update(std::int32_t aRef)
+    {
+        rendering_context().enqueue(graphics_operation::enable_stencil_update{ aRef });
+    }
+
+    void graphics_context::disable_stencil_update()
+    {
+        rendering_context().enqueue(graphics_operation::disable_stencil_update{});
+    }
+
     void graphics_context::blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, neogfx::blending_mode aBlendingMode)
     {
         blit(aDestinationRect, aSource.render_target().target_texture(), aSourceRect, aBlendingMode);

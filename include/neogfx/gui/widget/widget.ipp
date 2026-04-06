@@ -1271,7 +1271,8 @@ namespace neogfx
         if (!aIncludeNonClient)
             clipRect = clipRect.intersection(view().viewport());
         if (!widget::is_root())
-            clipRect = clipRect.intersection(to_client_coordinates(parent().to_window_coordinates(parent().default_clip_rect((widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient))));
+            clipRect = clipRect.intersection(to_client_coordinates(parent().to_window_coordinates(
+                parent().default_clip_rect((widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient))));
         return *(cachedRect = clipRect);
     }
 
