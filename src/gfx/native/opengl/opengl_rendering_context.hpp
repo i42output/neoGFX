@@ -275,6 +275,7 @@ namespace neogfx
         void clear(const color& aColor);
         void clear_depth_buffer();
         void clear_stencil_buffer();
+        void fill_stencil_buffer();
         void enable_stencil_test();
         void disable_stencil_test();
         void enable_stencil_update(std::int32_t aRef);

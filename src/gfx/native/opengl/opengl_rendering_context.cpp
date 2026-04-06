@@ -999,7 +999,14 @@ namespace neogfx
     void opengl_rendering_context::clear_stencil_buffer()
     {
         glCheck(glStencilMask(0xFF));
-        glCheck(glClearStencil(iStencilRef.value_or(0)));
+        glCheck(glClearStencil(0));
+        glCheck(glClear(GL_STENCIL_BUFFER_BIT));
+    }
+
+    void opengl_rendering_context::fill_stencil_buffer()
+    {
+        glCheck(glStencilMask(0xFF));
+        glCheck(glClearStencil(static_cast<GLint>(iStencilRef.value_or(1))));
         glCheck(glClear(GL_STENCIL_BUFFER_BIT));
     }
 
@@ -1237,7 +1244,7 @@ namespace neogfx
                             push_scissor(drawOp.rect);
                             clear(static_variant_cast<color>(drawOp.fill));
                             if (iUpdatingStencil)
-                                clear_stencil_buffer();
+                                fill_stencil_buffer();
                             pop_scissor();
                         }
                         continue;
