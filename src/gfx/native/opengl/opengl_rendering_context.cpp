@@ -1005,8 +1005,10 @@ namespace neogfx
 
     void opengl_rendering_context::fill_stencil_buffer()
     {
+        if (!iStencilRef.has_value())
+            throw std::logic_error("neogfx::opengl_rendering_context: fill_stencil_buffer called without active stencil ref");
         glCheck(glStencilMask(0xFF));
-        glCheck(glClearStencil(static_cast<GLint>(iStencilRef.value_or(1))));
+        glCheck(glClearStencil(static_cast<GLint>(*iStencilRef)));
         glCheck(glClear(GL_STENCIL_BUFFER_BIT));
     }
 
