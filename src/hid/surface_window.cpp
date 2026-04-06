@@ -551,6 +551,12 @@ namespace neogfx
     void surface_window::native_window_render(const rect& aInvalidatedArea) const
     {
         graphics_context gc{ *this };
+
+        {
+            scoped_stencil_update ssu{ gc };
+            gc.fill_rect(aInvalidatedArea, color::Black);
+        }
+
         as_widget().render_ex(gc);
     }
 

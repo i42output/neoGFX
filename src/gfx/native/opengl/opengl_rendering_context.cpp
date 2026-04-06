@@ -444,6 +444,7 @@ namespace neogfx
         scoped_render_target srt{ render_target() };
         set_blending_mode(blending_mode());
         apply_scissor();
+        apply_stencil();
 
         for (auto batchStart = queue().begin(); batchStart != queue().end();)
         {
@@ -998,42 +999,65 @@ namespace neogfx
     void opengl_rendering_context::clear_stencil_buffer()
     {
         glCheck(glStencilMask(0xFF));
-        glCheck(glClearStencil(0));
+        glCheck(glClearStencil(iStencilRef.value_or(0)));
         glCheck(glClear(GL_STENCIL_BUFFER_BIT));
     }
 
     void opengl_rendering_context::enable_stencil_test()
     {
-        glCheck(glEnable(GL_STENCIL_TEST));
+        iStencilEnabled = true;
+        apply_stencil();
     }
 
     void opengl_rendering_context::disable_stencil_test()
     {
-        glCheck(glDisable(GL_STENCIL_TEST));
+        iStencilEnabled = false;
+        apply_stencil();
     }
 
     void opengl_rendering_context::enable_stencil_update(std::int32_t aRef)
     {
-        if (iStencilRef.has_value())
+        if (iUpdatingStencil)
             throw std::logic_error("neogfx::opengl_rendering_context: enable_stencil_update called without matching disable_stencil_update");
+        iUpdatingStencil = true;
         iStencilRef = aRef;
-        glCheck(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
-        glCheck(glDepthMask(GL_FALSE));
-        glCheck(glStencilFunc(GL_ALWAYS, static_cast<GLint>(*iStencilRef), 0xFF));
-        glCheck(glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE));
-        glCheck(glStencilMask(0xFF));
+        apply_stencil();
     }
 
     void opengl_rendering_context::disable_stencil_update()
     {
-        if (!iStencilRef.has_value())
+        if (!iUpdatingStencil)
             throw std::logic_error("neogfx::opengl_rendering_context: disable_stencil_update called without matching enable_stencil_update");
-        glCheck(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
-        glCheck(glDepthMask(GL_TRUE));
-        glCheck(glStencilFunc(GL_EQUAL, static_cast<GLint>(*iStencilRef), 0xFF));
-        glCheck(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
-        glCheck(glStencilMask(0x00));
-        iStencilRef = std::nullopt;
+        iUpdatingStencil = false;
+        apply_stencil();
+    }
+
+    void opengl_rendering_context::apply_stencil()
+    {
+        if (iStencilEnabled)
+        {
+            glCheck(glEnable(GL_STENCIL_TEST));
+            if (iUpdatingStencil)
+            {
+                glCheck(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
+                glCheck(glDepthMask(GL_FALSE));
+                glCheck(glStencilFunc(GL_ALWAYS, iStencilRef.value_or(1), 0xFF));
+                glCheck(glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE));
+                glCheck(glStencilMask(0xFF));
+            }
+            else
+            {
+                glCheck(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
+                glCheck(glDepthMask(GL_TRUE));
+                glCheck(glStencilFunc(GL_EQUAL, iStencilRef.value_or(1), 0xFF));
+                glCheck(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
+                glCheck(glStencilMask(0x00));
+            }
+        }
+        else
+        {
+            glCheck(glDisable(GL_STENCIL_TEST));
+        }
     }
 
     void opengl_rendering_context::set_pixel(const point& aPoint, const color& aColor)
@@ -1212,6 +1236,8 @@ namespace neogfx
                         {
                             push_scissor(drawOp.rect);
                             clear(static_variant_cast<color>(drawOp.fill));
+                            if (iUpdatingStencil)
+                                clear_stencil_buffer();
                             pop_scissor();
                         }
                         continue;

@@ -279,6 +279,7 @@ namespace neogfx
         void disable_stencil_test();
         void enable_stencil_update(std::int32_t aRef);
         void disable_stencil_update();
+        void apply_stencil();
         void set_pixel(const point& aPoint, const color& aColor);
         void draw_pixel(const point& aPoint, const color& aColor);
         void draw_pixels(const graphics_operation::batch& aFillRectOps);
@@ -340,6 +341,8 @@ namespace neogfx
         std::vector<rect> iScissorRects;
         mutable optional_rect iScissorRect;
         bool iApplyingScissor = false;
+        bool iStencilEnabled = false;
+        bool iUpdatingStencil = false;
         std::optional<std::int32_t> iStencilRef;
         GLint iPreviousTexture;
         font iLastDrawGlyphFallbackFont;
