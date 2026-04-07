@@ -87,9 +87,10 @@ namespace neogfx
         double potential_fps() const override;
     public:
         void invalidate(const rect& aInvalidatedRect) override;
-        bool has_invalidated_area() const override;
-        const rect& invalidated_area() const override;
-        rect validate() override;
+        bool has_invalidated_areas() const override;
+        vector<rect> const& invalidated_areas() const override;
+        rect const& invalidated_area() const override;
+        void validate() override;
         bool can_render() const override;
         void pause() override;
         void resume() override;
@@ -111,7 +112,8 @@ namespace neogfx
         mutable std::optional<pixel_format_t> iPixelFormat;
         neogfx::logical_coordinate_system iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
-        std::optional<rect> iInvalidatedArea;
+        vector<rect> iInvalidatedAreas;
+        mutable std::optional<rect> iInvalidatedArea;
         std::uint64_t iFrameCounter;
         typedef std::chrono::time_point<std::chrono::high_resolution_clock> frame_time_point;
         typedef std::pair<frame_time_point, frame_time_point> frame_times;

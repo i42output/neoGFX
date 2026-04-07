@@ -1250,7 +1250,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline bool widget<Interface>::requires_update() const
     {
-        return surface().has_invalidated_area() && !surface().invalidated_area().intersection(non_client_rect()).empty();
+        return surface().has_invalidated_areas() && surface().is_area_invalid(non_client_rect());
     }
 
     template <WidgetInterface Interface>
@@ -1258,7 +1258,7 @@ namespace neogfx
     {
         if (!requires_update())
             throw no_update_rect();
-        return to_client_coordinates(surface().invalidated_area().intersection(non_client_rect()));
+        return to_client_coordinates(surface().invalid_area(non_client_rect()));
     }
 
     template <WidgetInterface Interface>

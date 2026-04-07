@@ -94,9 +94,10 @@ namespace neogfx
         double potential_fps() const final;
     public:
         void invalidate(const rect& aInvalidatedRect) final;
-        bool has_invalidated_area() const final;
-        const rect& invalidated_area() const final;
-        rect validate() final;
+        bool has_invalidated_areas() const final;
+        i_vector<rect> const& invalidated_areas() const final;
+        rect const& invalidated_area() const final;
+        void validate() final;
         bool can_render() const final;
         void render(bool aOOBRequest = false) final;
         void pause() final;

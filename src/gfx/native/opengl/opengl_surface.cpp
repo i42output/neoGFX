@@ -144,7 +144,7 @@ namespace neogfx
         GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
         glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
 
-        glCheck(surface_window().native_window_render(invalidated_area()));
+        glCheck(surface_window().native_window_render(invalidated_areas()));
 
         rendering_engine().execute_vertex_buffers();
 

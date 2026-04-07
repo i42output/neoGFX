@@ -238,32 +238,51 @@ namespace neogfx
     {
         if (aInvalidatedRect.cx != 0.0 && aInvalidatedRect.cy != 0.0)
         {
-            if (!has_invalidated_area())
-                iInvalidatedArea = aInvalidatedRect.ceil();
-            else
-                iInvalidatedArea = invalidated_area().combined(aInvalidatedRect).ceil();
+            for (auto& area : iInvalidatedAreas)
+                if (!area.intersection(aInvalidatedRect).empty())
+                {
+                    area.combine(aInvalidatedRect);
+                    return;
+                }
+            iInvalidatedAreas.push_back(aInvalidatedRect);
         }
     }
 
-    bool native_surface::has_invalidated_area() const
+    bool native_surface::has_invalidated_areas() const
     {
-        return iInvalidatedArea != std::nullopt;
+        return !iInvalidatedAreas.empty();
     }
 
-    const rect& native_surface::invalidated_area() const
+    vector<rect> const& native_surface::invalidated_areas() const
     {
-        if (has_invalidated_area())
-            return *iInvalidatedArea;
+        if (has_invalidated_areas())
+            return iInvalidatedAreas;
         throw no_invalidated_area();
     }
 
-    rect native_surface::validate()
+    rect const& native_surface::invalidated_area() const
     {
-        if (has_invalidated_area())
+        if (has_invalidated_areas())
         {
-            rect validatedArea = invalidated_area();
+            if (!iInvalidatedArea.has_value())
+            {
+                rect area = invalidated_areas().front();
+                for (auto a = std::next(invalidated_areas().as_std_vector().begin()); a != invalidated_areas().as_std_vector().end(); ++a)
+                    area.combine(*a);
+                iInvalidatedArea = area;
+            }
+            return iInvalidatedArea.value();
+        }
+        throw no_invalidated_area();
+    }
+
+    void native_surface::validate()
+    {
+        if (has_invalidated_areas())
+        {
+            iInvalidatedAreas.clear();
             iInvalidatedArea = std::nullopt;
-            return validatedArea;
+            return;
         }
         throw no_invalidated_area();
     }
@@ -314,7 +333,7 @@ namespace neogfx
             }
         }
 
-        if (!has_invalidated_area())
+        if (!has_invalidated_areas())
         {
             debug_message("no invalidated area");
             return;

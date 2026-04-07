@@ -246,19 +246,24 @@ namespace neogfx
             as_widget().update(aInvalidatedRect);
     }
 
-    bool surface_window::has_invalidated_area() const
+    bool surface_window::has_invalidated_areas() const
     {
-        return native_surface().has_invalidated_area();
+        return native_surface().has_invalidated_areas();
     }
 
-    const rect& surface_window::invalidated_area() const
+    i_vector<rect> const& surface_window::invalidated_areas() const
+    {
+        return native_surface().invalidated_areas();
+    }
+
+    rect const& surface_window::invalidated_area() const
     {
         return native_surface().invalidated_area();
     }
 
-    rect surface_window::validate()
+    void surface_window::validate()
     {
-        return native_surface().validate();
+        native_surface().validate();
     }
 
     double surface_window::rendering_priority() const
@@ -548,13 +553,14 @@ namespace neogfx
         return as_widget().ready_to_render();
     }
 
-    void surface_window::native_window_render(const rect& aInvalidatedArea) const
+    void surface_window::native_window_render(i_vector<rect> const& aInvalidatedAreas) const
     {
         graphics_context gc{ *this };
 
         {
             scoped_stencil_update ssu{ gc };
-            gc.fill_rect(aInvalidatedArea, color::Black);
+            for (auto const& area : aInvalidatedAreas)
+                gc.fill_rect(area, color::Black);
         }
 
         as_widget().render_ex(gc);

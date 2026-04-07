@@ -241,19 +241,24 @@ namespace neogfx
         return parent().invalidate(aInvalidatedRect);
     }
 
-    bool virtual_surface::has_invalidated_area() const
+    bool virtual_surface::has_invalidated_areas() const
     {
-        return parent().has_invalidated_area();
+        return parent().has_invalidated_areas();
     }
 
-    const rect& virtual_surface::invalidated_area() const
+    i_vector<rect> const& virtual_surface::invalidated_areas() const
+    {
+        return parent().invalidated_areas();
+    }
+
+    rect const& virtual_surface::invalidated_area() const
     {
         return parent().invalidated_area();
     }
 
-    rect virtual_surface::validate()
+    void virtual_surface::validate()
     {
-        return parent().validate();
+        parent().validate();
     }
 
     bool virtual_surface::can_render() const

@@ -92,9 +92,10 @@ namespace neogfx
         virtual double z_order() const = 0;
         virtual void layout_surface() = 0;
         virtual void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true) = 0;
-        virtual bool has_invalidated_area() const = 0;
-        virtual const rect& invalidated_area() const = 0;
-        virtual rect validate() = 0;
+        virtual bool has_invalidated_areas() const = 0;
+        virtual i_vector<rect> const& invalidated_areas() const = 0;
+        virtual rect const& invalidated_area() const = 0;
+        virtual void validate() = 0;
         virtual double rendering_priority() const = 0;
         virtual void render_surface() = 0;
         virtual void pause_rendering() = 0;
@@ -111,5 +112,29 @@ namespace neogfx
         virtual void set_surface_opacity(double aOpacity) = 0;
         virtual double surface_transparency() const = 0;
         virtual void set_surface_transparency(double aTransparency) = 0;
+    public:
+        bool is_area_invalid(rect const& aArea) const
+        {
+            for (auto const& invalidatedArea : invalidated_areas())
+                if (!invalidatedArea.intersection(aArea).empty())
+                    return true;
+            return false;
+        }
+        rect invalid_area(rect const& aArea) const
+        {
+            std::optional<rect> result;
+            for (auto const& invalidatedArea : invalidated_areas())
+            {
+                auto const intersection = invalidatedArea.intersection(aArea);
+                if (!intersection.empty())
+                {
+                    if (!result.has_value())
+                        result = intersection;
+                    else
+                        result->combine(intersection);
+                }
+            }
+            return result.value();
+        }
     };
 }

@@ -70,7 +70,7 @@ namespace neogfx
         virtual void native_window_moved() = 0;
         virtual double native_window_rendering_priority() const = 0;
         virtual bool native_window_ready_to_render() const = 0;
-        virtual void native_window_render(const rect& aInvalidatedRect) const = 0;
+        virtual void native_window_render(i_vector<rect> const& aInvalidatedAreas) const = 0;
         virtual void native_window_dismiss_children() = 0;
         virtual void native_window_mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier) = 0;
         virtual void native_window_mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) = 0;

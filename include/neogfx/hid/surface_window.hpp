@@ -77,9 +77,10 @@ namespace neogfx
         double z_order() const final;
         void layout_surface() final;
         void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true) final;
-        bool has_invalidated_area() const final;
-        const rect& invalidated_area() const final;
-        rect validate() final;
+        bool has_invalidated_areas() const final;
+        i_vector<rect> const& invalidated_areas() const final;
+        rect const& invalidated_area() const final;
+        void validate() final;
         double rendering_priority() const final;
         void render_surface() final;
         void pause_rendering() final;
@@ -125,7 +126,7 @@ namespace neogfx
         void native_window_moved() final;
         double native_window_rendering_priority() const final;
         bool native_window_ready_to_render() const final;
-        void native_window_render(const rect& aInvalidatedRect) const final;
+        void native_window_render(i_vector<rect> const& aInvalidatedAreas) const final;
         void native_window_dismiss_children() final;
         void native_window_mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier) final;
         void native_window_mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) final;

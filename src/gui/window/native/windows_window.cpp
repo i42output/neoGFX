@@ -520,7 +520,7 @@ namespace neogfx
                 return;
             if (!aOOBRequest)
                 attachment().render(aOOBRequest);
-            else if (attachment().has_invalidated_area())
+            else if (attachment().has_invalidated_areas())
             {
                 auto const invalidatedArea = attachment().invalidated_area().as<LONG>();
                 RECT const rect{ invalidatedArea.left(), invalidatedArea.top(), invalidatedArea.right(), invalidatedArea.bottom() };

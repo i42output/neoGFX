@@ -48,9 +48,10 @@ namespace neogfx
         virtual double potential_fps() const = 0;
     public:
         virtual void invalidate(const rect& aInvalidatedRect) = 0;
-        virtual bool has_invalidated_area() const = 0;
-        virtual const rect& invalidated_area() const = 0;
-        virtual rect validate() = 0;
+        virtual bool has_invalidated_areas() const = 0;
+        virtual i_vector<rect> const& invalidated_areas() const = 0;
+        virtual rect const& invalidated_area() const = 0;
+        virtual void validate() = 0;
         virtual bool can_render() const = 0;
         virtual void render(bool aOOBRequest = false) = 0;
         virtual void pause() = 0;
