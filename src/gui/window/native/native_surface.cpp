@@ -238,6 +238,7 @@ namespace neogfx
     {
         if (aInvalidatedRect.cx != 0.0 && aInvalidatedRect.cy != 0.0)
         {
+            iInvalidatedArea = std::nullopt;
             for (auto& area : iInvalidatedAreas)
                 if (!area.intersection(aInvalidatedRect).empty())
                 {
