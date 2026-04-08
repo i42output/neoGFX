@@ -50,8 +50,8 @@ namespace neogfx
     public:
         const button_map_type& button_map(const hid_device_uuid& aProductId) const final;
     public:
-        abstract_t<neolib::vector<ref_ptr<i_game_controller>>>::iterator add_device(i_game_controller& aController) final;
-        abstract_t<neolib::vector<ref_ptr<i_game_controller>>>::iterator remove_device(i_game_controller& aController) final;
+        maybe_abstract_t<neolib::vector<ref_ptr<i_game_controller>>>::iterator add_device(i_game_controller& aController) final;
+        maybe_abstract_t<neolib::vector<ref_ptr<i_game_controller>>>::iterator remove_device(i_game_controller& aController) final;
     private:
         void load_database();
     private:

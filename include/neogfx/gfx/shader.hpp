@@ -309,10 +309,10 @@ namespace neogfx
                             switch (u.value().which())
                             {
                             case shader_data_type::FloatArray:
-                                uniformDefinition = "    float %I%["_s + to_string(u.value().get<abstract_t<shader_float_array>>().size()) +"];\n"_s;
+                                uniformDefinition = "    float %I%["_s + to_string(u.value().get<maybe_abstract_t<shader_float_array>>().size()) +"];\n"_s;
                                 break;
                             case shader_data_type::DoubleArray:
-                                uniformDefinition = "    double %I%["_s + to_string(u.value().get<abstract_t<shader_double_array>>().size()) +"];\n"_s;
+                                uniformDefinition = "    double %I%["_s + to_string(u.value().get<maybe_abstract_t<shader_double_array>>().size()) +"];\n"_s;
                                 break;
                             default:
                                 if (!u.singular())

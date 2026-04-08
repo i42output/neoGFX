@@ -37,7 +37,7 @@ namespace neogfx
         using item = ref_ptr<i_dockable>;
         using item_list = neolib::vector<item>;
     private:
-        using abstract_item = abstract_t<item>;
+        using abstract_item = maybe_abstract_t<item>;
     public:
         dock(i_widget& aParent, dock_area aArea, optional_size const& aInitialSize = {}, optional_size const& aInitialWeight = {});
         dock(i_layout& aLayout, dock_area aArea, optional_size const& aInitialSize = {}, optional_size const& aInitialWeight = {});

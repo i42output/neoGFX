@@ -195,13 +195,13 @@ namespace neogfx
         virtual shader_uniform_location location() const = 0;
         virtual void set_location(shader_uniform_location aLocation) = 0;
         virtual void clear_location() = 0;
-        virtual const abstract_t<shader_value_type>& value() const = 0;
-        virtual abstract_t<shader_value_type>& mutable_value() = 0;
-        virtual void set_value(const abstract_t<shader_value_type>& aValue) = 0;
+        virtual const maybe_abstract_t<shader_value_type>& value() const = 0;
+        virtual maybe_abstract_t<shader_value_type>& mutable_value() = 0;
+        virtual void set_value(const maybe_abstract_t<shader_value_type>& aValue) = 0;
         virtual bool is_dirty() const = 0;
         virtual void clean() const = 0;
         virtual void set_dirty() const = 0;
-        virtual bool different_type_to(const abstract_t<shader_value_type>& aValue) const = 0;
+        virtual bool different_type_to(const maybe_abstract_t<shader_value_type>& aValue) const = 0;
     public:
         template <typename T>
         void set_value(const T& aValue)
@@ -352,16 +352,16 @@ namespace neogfx
             if (has_location())
                 iPlacement = std::monostate{};
         }
-        const abstract_t<shader_value_type>& value() const final 
+        const maybe_abstract_t<shader_value_type>& value() const final 
         { 
             return iValue; 
         }
-        abstract_t<shader_value_type>& mutable_value() final
+        maybe_abstract_t<shader_value_type>& mutable_value() final
         {
             iDirty = true;
             return iValue;
         }
-        void set_value(const abstract_t<shader_value_type>& aValue) final
+        void set_value(const maybe_abstract_t<shader_value_type>& aValue) final
         { 
             if (iValue != aValue)
             {
@@ -381,18 +381,18 @@ namespace neogfx
         {
             iDirty = true;
         }
-        bool different_type_to(const abstract_t<shader_value_type>& aValue) const
+        bool different_type_to(const maybe_abstract_t<shader_value_type>& aValue) const
         {
             if (value().which() != aValue.which())
                 return true;
             switch (value().which())
             {
             case shader_data_type::FloatArray:
-                return value().get<abstract_t<shader_float_array>>().size() !=
-                    aValue.get<abstract_t<shader_float_array>>().size();
+                return value().get<maybe_abstract_t<shader_float_array>>().size() !=
+                    aValue.get<maybe_abstract_t<shader_float_array>>().size();
             case shader_data_type::DoubleArray:
-                return value().get<abstract_t<shader_double_array>>().size() !=
-                    aValue.get<abstract_t<shader_double_array>>().size();
+                return value().get<maybe_abstract_t<shader_double_array>>().size() !=
+                    aValue.get<maybe_abstract_t<shader_double_array>>().size();
             default:
                 return false;
             }
@@ -505,7 +505,7 @@ namespace neogfx
     public:
         typedef i_shader abstract_type;
     public:
-        typedef abstract_t<shader_value_type> value_type;
+        typedef maybe_abstract_t<shader_value_type> value_type;
         typedef neolib::i_vector<i_shader_uniform> uniform_list;
         typedef neolib::i_set<i_shader_variable> variable_list;
     public:

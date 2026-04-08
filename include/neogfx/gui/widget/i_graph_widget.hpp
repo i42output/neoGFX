@@ -155,7 +155,7 @@ namespace neogfx
         y_type iY;
     };
 
-    template <typename X, typename Y, bool = !std::is_same_v<abstract_t<X>, void> || !std::is_same_v<abstract_t<Y>, void>>
+    template <typename X, typename Y, bool = !std::is_same_v<maybe_abstract_t<X>, void> || !std::is_same_v<maybe_abstract_t<Y>, void>>
     struct graph_datum_cracker;
     template <typename X, typename Y>
     struct graph_datum_cracker<X, Y, true> { using datum_type = graph_datum<X, Y>; };

@@ -68,7 +68,7 @@ namespace neogfx
         return iButtonMaps[aProductId];
     }
 
-    abstract_t<game_controllers::controller_list>::iterator game_controllers::add_device(i_game_controller& aController)
+    maybe_abstract_t<game_controllers::controller_list>::iterator game_controllers::add_device(i_game_controller& aController)
     {
         std::optional<game_player> newPlayer;
         if (iAutoAssign)
@@ -88,7 +88,7 @@ namespace neogfx
         return newController;
     }
 
-    abstract_t<game_controllers::controller_list>::iterator game_controllers::remove_device(i_game_controller& aController)
+    maybe_abstract_t<game_controllers::controller_list>::iterator game_controllers::remove_device(i_game_controller& aController)
     {
         neolib::ref_ptr<i_game_controller> detached{ aController };
         auto existing = std::find(iControllers.begin(), iControllers.end(), detached);

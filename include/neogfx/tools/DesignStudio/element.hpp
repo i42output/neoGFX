@@ -86,7 +86,7 @@ namespace neogfx::DesignStudio
         using typename i_element::no_layout_item;
         using typename i_element::no_caddy;
     public:
-        typedef abstract_t<base_type> abstract_type;
+        typedef maybe_abstract_t<base_type> abstract_type;
         typedef neolib::vector<ref_ptr<i_element>> children_t;
     public:
         element(i_element_library const& aLibrary, i_project& aProject, i_string const& aType, element_group aGroup = default_element_group<Type>()) :

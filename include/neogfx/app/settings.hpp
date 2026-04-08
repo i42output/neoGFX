@@ -38,7 +38,7 @@ define_setting_type(neogfx::extended_font)
 namespace neogfx
 {
     template <typename Elem, typename Traits>
-    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const neolib::abstract_t<extended_font>& aExtendedFont)
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const maybe_abstract_t<extended_font>& aExtendedFont)
     {
         aStream << "[";
         aStream << aExtendedFont.first();
@@ -49,7 +49,7 @@ namespace neogfx
     }
 
     template <typename Elem, typename Traits>
-    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, neolib::abstract_t<extended_font>& aExtendedFont)
+    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, maybe_abstract_t<extended_font>& aExtendedFont)
     {
         char ignore;
         aStream >> ignore;

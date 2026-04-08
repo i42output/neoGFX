@@ -35,7 +35,7 @@ namespace neogfx
     public:
         typedef i_vertex_shader abstract_type;
     public:
-        typedef neolib::i_map<i_string, abstract_t<shader_variable>*> attribute_map;
+        typedef neolib::i_map<i_string, maybe_abstract_t<shader_variable>*> attribute_map;
     public:
         virtual const attribute_map& attributes() const = 0;
         virtual void clear_attribute(const i_string& aName) = 0;

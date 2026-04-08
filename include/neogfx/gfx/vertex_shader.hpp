@@ -33,7 +33,7 @@ namespace neogfx
     {
         typedef shader<Base> base_type;
     public:
-        typedef neolib::map<string, abstract_t<shader_variable>*> attribute_map;
+        typedef neolib::map<string, maybe_abstract_t<shader_variable>*> attribute_map;
     public:
         vertex_shader(std::string const& aName) :
             base_type{ shader_type::Vertex, aName }

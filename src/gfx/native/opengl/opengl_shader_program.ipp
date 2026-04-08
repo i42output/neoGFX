@@ -268,8 +268,8 @@ namespace neogfx
                                     dataSize = sizeof(v[0][0]) * 4 * 4;
                                 }
                                 else if constexpr (
-                                    std::is_same_v<abstract_t<shader_float_array>, data_type> || 
-                                    std::is_same_v<abstract_t<shader_double_array>, data_type>)
+                                    std::is_same_v<maybe_abstract_t<shader_float_array>, data_type> || 
+                                    std::is_same_v<maybe_abstract_t<shader_double_array>, data_type>)
                                 {
                                     src = v.data();
                                     dataSize = sizeof(v[0]) * v.size();

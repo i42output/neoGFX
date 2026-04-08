@@ -126,14 +126,14 @@ namespace neogfx::nrc
             return do_get_array_data(neolib::string{ aKey });
         }
         template <typename T>
-        const abstract_t<T>& get(std::string const& aKey) const
+        const maybe_abstract_t<T>& get(std::string const& aKey) const
         {
-            return get_data(aKey).get<abstract_t<T>>();
+            return get_data(aKey).get<maybe_abstract_t<T>>();
         }
         template <typename T>
-        abstract_t<T>& get(std::string const& aKey)
+        maybe_abstract_t<T>& get(std::string const& aKey)
         {
-            return get_data(aKey).get<abstract_t<T>>();
+            return get_data(aKey).get<maybe_abstract_t<T>>();
         }
         template <typename T>
         neolib::optional<T> get_optional(std::string const& aKey) const
@@ -143,7 +143,7 @@ namespace neogfx::nrc
                 if constexpr (std::is_integral_v<T> && !std::is_same_v<T, bool>)
                     return static_cast<T>(get_data(aKey).get<std::int64_t>());
                 else
-                    return get_data(aKey).get<abstract_t<T>>();
+                    return get_data(aKey).get<maybe_abstract_t<T>>();
             }
             else
                 return neolib::optional<T>{};
@@ -157,18 +157,18 @@ namespace neogfx::nrc
                 return neolib::optional<T>{};
         }
         template <typename T, typename U>
-        const abstract_t<T>& get(std::string const& aKey, const U& aDefault) const
+        const maybe_abstract_t<T>& get(std::string const& aKey, const U& aDefault) const
         {
             if (data_exists(aKey))
-                return get_data(aKey).get<abstract_t<T>>();
+                return get_data(aKey).get<maybe_abstract_t<T>>();
             else
                 return aDefault;
         }
         template <typename T, typename U>
-        abstract_t<T>& get(std::string const& aKey, U& aDefault)
+        maybe_abstract_t<T>& get(std::string const& aKey, U& aDefault)
         {
             if (data_exists(aKey))
-                return get_data(aKey).get<abstract_t<T>>();
+                return get_data(aKey).get<maybe_abstract_t<T>>();
             else
                 return aDefault;
         }

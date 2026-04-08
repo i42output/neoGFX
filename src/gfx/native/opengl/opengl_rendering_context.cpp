@@ -1226,7 +1226,7 @@ namespace neogfx
                         std::holds_alternative<std::monostate>(drawOp.fill)))
                 {
                     bool optimise = false;
-                    if (!logical_operation_active() && iOpacity == 1.0)
+                    if (!logical_operation_active() && iOpacity == 1.0 && (!iStencilEnabled || iUpdatingStencil))
                     {
                         auto const penWidth = drawOp.pen.width();
                         if (penWidth == 0.0)
