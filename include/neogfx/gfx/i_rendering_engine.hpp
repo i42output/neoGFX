@@ -164,6 +164,10 @@ namespace neogfx
         virtual i_ping_pong_buffer& ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) = 0;
         virtual i_ping_pong_buffer& ping_pong_buffer2(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) = 0;
     public:
+        virtual bool is_stencil_based_invalidation_on() const = 0;
+        virtual void stencil_based_invalidation_on() = 0;
+        virtual void stencil_based_invalidation_off() = 0;
+    public:
         virtual bool is_subpixel_rendering_on() const = 0;
         virtual void subpixel_rendering_on() = 0;
         virtual void subpixel_rendering_off() = 0;

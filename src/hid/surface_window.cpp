@@ -557,6 +557,7 @@ namespace neogfx
     {
         graphics_context gc{ *this };
 
+        if (iRenderingEngine.is_stencil_based_invalidation_on())
         {
             scoped_stencil_update ssu{ gc };
             for (auto const& area : aInvalidatedAreas)

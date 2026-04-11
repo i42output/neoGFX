@@ -78,6 +78,7 @@ namespace neogfx
         iRenderer{ aRenderer },
         iLimitFrameRate{ true },
         iFrameRateLimit{ 60u },
+        iStencilBasedInvalidation{ false },
         iSubpixelRendering{ false }
     {
 #ifdef _WIN32
@@ -310,6 +311,21 @@ namespace neogfx
             iPingPongBuffer2s.emplace();
         auto& pingPongBuffer = create_ping_pong_buffer(*iPingPongBuffer2s, aExtents, aPreviousExtents, aSampling);
         return pingPongBuffer;
+    }
+
+    bool opengl_renderer::is_stencil_based_invalidation_on() const
+    {
+        return iStencilBasedInvalidation;
+    }
+
+    void opengl_renderer::stencil_based_invalidation_on()
+    {
+        iStencilBasedInvalidation = true;
+    }
+
+    void opengl_renderer::stencil_based_invalidation_off()
+    {
+        iStencilBasedInvalidation = false;
     }
 
     bool opengl_renderer::is_subpixel_rendering_on() const

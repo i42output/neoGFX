@@ -150,9 +150,14 @@ namespace neogfx
         i_ping_pong_buffer& ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) override;
         i_ping_pong_buffer& ping_pong_buffer2(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) override;
     public:
+        bool is_stencil_based_invalidation_on() const override;
+        void stencil_based_invalidation_on() override;
+        void stencil_based_invalidation_off() override;
+    public:
         bool is_subpixel_rendering_on() const override;
         void subpixel_rendering_on() override;
         void subpixel_rendering_off() override;
+    public:
         bool frame_rate_limited() const override;
         void enable_frame_rate_limiter(bool aEnable) override;
         std::uint32_t frame_rate_limit() const override;
@@ -171,6 +176,7 @@ namespace neogfx
         mutable shader_program_list iShaderPrograms;
         bool iLimitFrameRate;
         std::uint32_t iFrameRateLimit;
+        bool iStencilBasedInvalidation;
         bool iSubpixelRendering;
         typedef std::unordered_map<i_vertex_provider*, opengl_vertex_buffer<>> vertex_buffers_map;
         mutable vertex_buffers_map iVertexBuffers;
