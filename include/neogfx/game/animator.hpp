@@ -44,6 +44,8 @@ namespace neogfx::game
     public:
         bool apply() final;
     public:
+        bool external_animation() const;
+        void set_external_animation(bool aExternalAnimation);
         void update_animations();
     public:
         struct meta
@@ -59,5 +61,7 @@ namespace neogfx::game
                 return sName;
             }
         };
+    private:
+        std::atomic<bool> iExternalAnimation = false;
     };
 }   

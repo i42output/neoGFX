@@ -67,6 +67,16 @@ namespace neogfx::game
         return true;
     }
 
+    bool animator::external_animation() const
+    {
+        return iExternalAnimation.load();
+    }
+
+    void animator::set_external_animation(bool aExternalAnimation)
+    {
+        iExternalAnimation.store(aExternalAnimation);
+    }
+
     void animator::update_animations()
     {
         thread_local auto const& time = ecs().system<game::time>();
@@ -79,7 +89,7 @@ namespace neogfx::game
         auto& cache = ecs().component<mesh_render_cache>();
         auto const& worldClock = ecs().shared_component<game::clock>()[0];
 
-        if (!filters.entities().empty())
+        if (!filters.entities().empty() || external_animation())
             Animate(now);
 
         for (auto entity : filters.entities())
