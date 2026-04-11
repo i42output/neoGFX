@@ -175,6 +175,7 @@ namespace neogfx
 
     class i_layout_item;
     class i_widget;
+    class i_texture;
 
     namespace debug
     {
@@ -188,6 +189,7 @@ namespace neogfx
             virtual i_layout_item*& layout_item() = 0;
             virtual i_widget*& render_item() = 0;
             virtual bool& render_geometry_text() = 0;
+            virtual i_texture*& texture() = 0;
         public:
             static uuid const& iid() { static uuid const sIid{ 0x84f45a79, 0xbb98, 0x4b3a, 0xbec1, { 0xa, 0x7e, 0x25, 0x71, 0xf4, 0xd5 } }; return sIid; }
         };

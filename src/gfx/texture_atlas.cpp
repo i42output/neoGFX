@@ -57,7 +57,7 @@ namespace neogfx
     {
         auto newSpace = allocate_space(aImage.extents(), aImage.dpi_scale_factor(), aImage.sampling(), aImage.data_format());
         auto nextId = iTextureManager.allocate_texture_id();
-        auto entry = iEntries.emplace(std::piecewise_construct, std::forward_as_tuple(nextId), std::forward_as_tuple(newSpace.first, nextId, newSpace.first->first, newSpace.second, aImage.extents()));
+        auto entry = iEntries.emplace(std::piecewise_construct, std::forward_as_tuple(nextId), std::forward_as_tuple(newSpace.first, aImage.uri(), nextId, newSpace.first->first, newSpace.second, aImage.extents()));
         entry.first->second.texture->set_pixels(aImage);
         return *entry.first->second.texture;
     }
@@ -66,7 +66,7 @@ namespace neogfx
     {
         auto newSpace = allocate_space(aImagePart.extents(), aImage.dpi_scale_factor(), aImage.sampling(), aImage.data_format());
         auto nextId = iTextureManager.allocate_texture_id();
-        auto entry = iEntries.emplace(std::piecewise_construct, std::forward_as_tuple(nextId), std::forward_as_tuple(newSpace.first, nextId, newSpace.first->first, newSpace.second, aImagePart.extents()));
+        auto entry = iEntries.emplace(std::piecewise_construct, std::forward_as_tuple(nextId), std::forward_as_tuple(newSpace.first, aImage.uri(), nextId, newSpace.first->first, newSpace.second, aImagePart.extents()));
         entry.first->second.texture->set_pixels(aImage, aImagePart);
         return *entry.first->second.texture;
     }

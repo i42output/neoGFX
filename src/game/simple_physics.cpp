@@ -89,7 +89,6 @@ namespace neogfx::game
         auto nextTime = previousTime + currentTimestep;
         while ((previousTime = iWorldClock.time.load()) <= now)
         {
-            didWork = true;
             auto elapsedTime = static_cast<float>(from_step_time(nextTime - previousTime));
             this->start_update(1);
             iGameWorld.ApplyingPhysics(previousTime);
@@ -106,6 +105,7 @@ namespace neogfx::game
                 auto const& entity1Info = iInfos.entity_record_no_lock(entity1);
                 if (entity1Info.destroyed)
                     continue; // todo: add support for skip iterators
+                didWork = true;
                 vec3f totalForce = rigidBody1.mass * uniformGravity;
                 if (useUniversalGravitation)
                 {
@@ -139,7 +139,8 @@ namespace neogfx::game
                 iCollisionDetector.apply();
                 iTime.apply();
             }
-            iGameWorld.PhysicsApplied(previousTime);
+            if (didWork)
+                iGameWorld.PhysicsApplied(previousTime);
             iWorldClock.time.store(nextTime);
             currentTimestep = std::min(static_cast<i64>(currentTimestep * iWorldClock.timestepGrowth), 
                 std::max(iWorldClock.timestep, iWorldClock.maximumTimestep));

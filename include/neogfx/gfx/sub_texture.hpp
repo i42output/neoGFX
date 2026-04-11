@@ -38,6 +38,7 @@ namespace neogfx
         // construction
     public:
         sub_texture(texture_id aAtlasId, i_texture& aAtlasTexture, rect const& aAtlasLocation, size const& aExtents);
+        sub_texture(i_string const& aUri, texture_id aAtlasId, i_texture& aAtlasTexture, rect const& aAtlasLocation, size const& aExtents);
         sub_texture(sub_texture const& aSubTexture);
         sub_texture(i_sub_texture const& aSubTexture);
         sub_texture(i_sub_texture const& aSubTexture, const rect& aAtlasLocation);
@@ -86,6 +87,7 @@ namespace neogfx
         // attributes
     private:
         bool iChild = false;
+        std::optional<string> iUri;
         texture_id iAtlasId;
         i_texture* iAtlasTexture;
         rect iAtlasLocation;

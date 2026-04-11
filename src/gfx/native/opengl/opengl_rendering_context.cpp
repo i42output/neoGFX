@@ -2487,6 +2487,7 @@ namespace neogfx
             auto& meshRenderer = *meshDrawable.renderer;
             if (!meshRenderer.render)
                 continue;
+
             auto& meshFilter = *meshDrawable.filter;
             thread_local game::mesh_render_cache ignore;
             ignore = {};
@@ -2496,8 +2497,12 @@ namespace neogfx
             auto const& faces = mesh.faces;
             auto const& material = meshRenderer.material;
             vec4f const defaultColor{ 1.0f, 1.0f, 1.0f, 1.0f };
+
             auto add_item = [&](vec2u32& cacheIndices, game::scene_layer aItemLayer, auto const& mesh, auto const& material, auto const& faces)
             {
+                if (aItemLayer != aLayer)
+                    return false;
+
                 auto const function = material.gradient != std::nullopt && material.gradient->boundingBox ?
                     vec4f{
                         material.gradient->boundingBox->min.x, material.gradient->boundingBox->min.y,
@@ -2507,6 +2512,7 @@ namespace neogfx
                             meshRenderer.filter->boundingBox->min.x, meshRenderer.filter->boundingBox->min.y,
                             meshRenderer.filter->boundingBox->max.x, meshRenderer.filter->boundingBox->max.y } :
                         vec4f{};
+
                 if (meshRenderCache.state != game::cache_state::Clean)
                 {
                     if (patch_drawable::has_texture(meshRenderer, material))
@@ -2565,19 +2571,18 @@ namespace neogfx
                     cacheIndices[0] = static_cast<std::uint32_t>(vertexStartIndex);
                     cacheIndices[1] = static_cast<std::uint32_t>(nextIndex);
                 }
-                if (aItemLayer == aLayer)
-                {
-                    patchDrawable.items.emplace_back(meshDrawable, cacheIndices[0], cacheIndices[1], material, faces);
-                    return true;
-                }
-                else
-                    return false;
+
+                patchDrawable.items.emplace_back(meshDrawable, cacheIndices[0], cacheIndices[1], material, faces);
+
+                return true;
             };
+
 #if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
             if (meshDrawable.entity != game::null_entity &&
                 dynamic_cast<game::i_ecs&>(aVertexProvider).component<game::entity_info>().entity_record(meshDrawable.entity).debug)
                 service<debug::logger>() << neolib::logger::severity::Debug << "Adding service<i_debug>().layout_item() entity drawable..." << std::endl;
 #endif // NEOGFX_DEBUG
+
             bool addedPrimaryMesh = false;
             if (!faces.empty())
                 addedPrimaryMesh = add_item(meshRenderCache.meshVertexArrayIndices, meshRenderer.layer, mesh, material, faces);
@@ -2610,12 +2615,12 @@ namespace neogfx
 
         auto const logicalCoordinates = logical_coordinates();
 
+        i_texture const* previousTexture = nullptr;
+
         for (auto item = aPatch.items.begin(); item != aPatch.items.end();)
         {
             auto& vertexBuffer = static_cast<opengl_vertex_buffer<>&>(service<i_rendering_engine>().vertex_buffer(*aPatch.provider));
             auto& vertices = vertexBuffer.vertices();
-
-            std::optional<GLint> previousTexture;
 
             auto const& batchRenderer = *item->meshDrawable->renderer;
             auto const& batchMaterial = *item->material;
@@ -2675,11 +2680,14 @@ namespace neogfx
             {
                 auto const& texture = *service<i_texture_manager>().find_texture(item->texture().id.cookie());
 
-                glCheck(glActiveTexture(sampling != texture_sampling::Multisample ? GL_TEXTURE1 : GL_TEXTURE2));
+                if (previousTexture != &texture)
+                {
+                    if (previousTexture != nullptr)
+                        previousTexture->unbind();
+                    texture.bind(sampling != texture_sampling::Multisample ? 1 : 2);
+                    previousTexture = &texture;
+                }
 
-                previousTexture.emplace(0);
-                glCheck(glGetIntegerv(sampling != texture_sampling::Multisample ? GL_TEXTURE_BINDING_2D : GL_TEXTURE_BINDING_2D_MULTISAMPLE, &*previousTexture));
-                glCheck(glBindTexture(sampling != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(texture.native_handle())));
                 if (sampling != texture_sampling::Multisample)
                 {
                     glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? 
@@ -2727,11 +2735,11 @@ namespace neogfx
 
             item = next;
 
-            if (previousTexture != std::nullopt)
-                glCheck(glBindTexture(sampling != texture_sampling::Multisample ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(*previousTexture)));
-
             disable_sample_shading();
         }
+
+        if (previousTexture != nullptr)
+            previousTexture->unbind();
     }
 
     void opengl_rendering_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect)

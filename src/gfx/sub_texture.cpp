@@ -31,20 +31,26 @@ namespace neogfx
         service<i_texture_manager>().add_sub_texture(*this);
     }
 
+    sub_texture::sub_texture(i_string const& aUri, texture_id aAtlasId, i_texture& aAtlasTexture, rect const& aAtlasLocation, size const& aExtents) :
+        iUri{ aUri }, iAtlasId{ aAtlasId }, iAtlasTexture{ &aAtlasTexture }, iAtlasLocation{ aAtlasLocation }, iStorageExtents{ aAtlasTexture.storage_extents() }, iExtents{ aExtents }
+    {
+        service<i_texture_manager>().add_sub_texture(*this);
+    }
+
     sub_texture::sub_texture(sub_texture const& aSubTexture) :
-        iChild{ true }, iAtlasId{ aSubTexture.atlas_id() }, iAtlasTexture{ &aSubTexture.atlas_texture() }, iAtlasLocation{ aSubTexture.atlas_location() }, iStorageExtents{ aSubTexture.storage_extents() }, iExtents{ aSubTexture.extents() }
+        iChild{ true }, iUri{ aSubTexture.uri() }, iAtlasId{ aSubTexture.atlas_id() }, iAtlasTexture{ &aSubTexture.atlas_texture() }, iAtlasLocation{ aSubTexture.atlas_location() }, iStorageExtents{ aSubTexture.storage_extents() }, iExtents{ aSubTexture.extents() }
     {
         add_ref();
     }
 
     sub_texture::sub_texture(i_sub_texture const& aSubTexture) :
-        iChild{ true }, iAtlasId{ aSubTexture.atlas_id() }, iAtlasTexture{ &aSubTexture.atlas_texture() }, iAtlasLocation{ aSubTexture.atlas_location() }, iStorageExtents{ aSubTexture.storage_extents() }, iExtents{ aSubTexture.extents() }
+        iChild{ true }, iUri{ aSubTexture.uri() }, iAtlasId{ aSubTexture.atlas_id() }, iAtlasTexture{ &aSubTexture.atlas_texture() }, iAtlasLocation{ aSubTexture.atlas_location() }, iStorageExtents{ aSubTexture.storage_extents() }, iExtents{ aSubTexture.extents() }
     {
         add_ref();
     }
 
     sub_texture::sub_texture(i_sub_texture const& aSubTexture, rect const& aAtlasLocation) :
-        iChild{ true }, iAtlasId{ aSubTexture.atlas_id() }, iAtlasTexture{ &aSubTexture.atlas_texture() }, iAtlasLocation{ aAtlasLocation }, iStorageExtents{ aSubTexture.storage_extents() }, iExtents{ aAtlasLocation.extents() }
+        iChild{ true }, iUri{ aSubTexture.uri() }, iAtlasId{ aSubTexture.atlas_id() }, iAtlasTexture{ &aSubTexture.atlas_texture() }, iAtlasLocation{ aAtlasLocation }, iStorageExtents{ aSubTexture.storage_extents() }, iExtents{ aAtlasLocation.extents() }
     {
         add_ref();
     }
@@ -92,6 +98,8 @@ namespace neogfx
 
     i_string const& sub_texture::uri() const
     {
+        if (iUri.has_value())
+            return iUri.value();
         return native_texture().uri();
     }
 

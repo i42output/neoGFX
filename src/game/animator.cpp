@@ -72,14 +72,15 @@ namespace neogfx::game
         thread_local auto const& time = ecs().system<game::time>();
         auto now = time.world_time();
 
-        Animate(now);
-
         scoped_component_data_lock<animation_filter> lock{ ecs() };
 
         auto& infos = ecs().component<entity_info>();
         auto& filters = ecs().component<animation_filter>();
         auto& cache = ecs().component<mesh_render_cache>();
         auto const& worldClock = ecs().shared_component<game::clock>()[0];
+
+        if (!filters.entities().empty())
+            Animate(now);
 
         for (auto entity : filters.entities())
         {

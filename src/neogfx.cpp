@@ -43,11 +43,16 @@ namespace neogfx::debug
         {
             return iRenderGeometryText;
         }
+        i_texture*& texture() final
+        {
+            return iTexture;
+        }
     private:
         void* iItem = nullptr;
         i_layout_item* iLayoutItem = nullptr;
         i_widget* iRenderItem = nullptr;
         bool iRenderGeometryText = false;
+        i_texture* iTexture = nullptr;
     };
 #endif // NEOGFX_DEBUG
 }
