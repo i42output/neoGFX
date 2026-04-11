@@ -70,6 +70,18 @@ namespace neogfx
         Float
     };
 
+    enum class reserved_texture_unit : std::uint32_t
+    {
+        Reserved0       = 0,
+        Tex             = 1,
+        TexMS           = 2,
+        ColorSampler    = 3,
+        FilterSampler   = 4,
+        FilterKernel    = 5,
+        Reserved1       = 6,
+        RenderTarget    = 7
+    };
+
     class i_sub_texture;
     class i_image;
 

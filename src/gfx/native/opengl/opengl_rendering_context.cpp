@@ -2684,7 +2684,7 @@ namespace neogfx
                 {
                     if (previousTexture != nullptr)
                         previousTexture->unbind();
-                    texture.bind(sampling != texture_sampling::Multisample ? 1 : 2);
+                    texture.bind(sampling != texture_sampling::Multisample ? static_cast<std::uint32_t>(reserved_texture_unit::Tex) : static_cast<std::uint32_t>(reserved_texture_unit::TexMS));
                     previousTexture = &texture;
                 }
 

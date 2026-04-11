@@ -71,10 +71,10 @@ namespace neogfx
         uGradientColorCount = static_cast<int>(colorsSampler.data().extents().cx);
         uGradientColorRow = static_cast<int>(aGradient.colors().sampler_row());
         uGradientFilterSize = static_cast<int>(filterSampler.data().extents().cx);
-        colorsSampler.data().bind(3);
-        filterSampler.data().bind(4);
-        uGradientColors = sampler2DRect{ 3 };
-        uGradientFilter = sampler2DRect{ 4 };
+        colorsSampler.data().bind(static_cast<std::uint32_t>(reserved_texture_unit::ColorSampler));
+        filterSampler.data().bind(static_cast<std::uint32_t>(reserved_texture_unit::FilterSampler));
+        uGradientColors = sampler2DRect{ static_cast<std::uint32_t>(reserved_texture_unit::ColorSampler) };
+        uGradientFilter = sampler2DRect{ static_cast<std::uint32_t>(reserved_texture_unit::FilterSampler) };
         uGradientEnabled = true;
     }
 
@@ -90,8 +90,8 @@ namespace neogfx
         iDummyTextureMS{ size{ 1.0, 1.0 }, 1.0, texture_sampling::Multisample }
     {
         disable();
-        set_uniform("tex"_s, sampler2D{1});
-        set_uniform("texMS"_s, sampler2DMS{2});
+        set_uniform("tex"_s, sampler2D{ static_cast<std::uint32_t>(reserved_texture_unit::Tex) });
+        set_uniform("texMS"_s, sampler2DMS{ static_cast<std::uint32_t>(reserved_texture_unit::TexMS) });
         uTextureEffect = shader_effect::None;
     }
 
@@ -112,8 +112,8 @@ namespace neogfx
     void standard_texture_shader::clear_texture()
     {
         enable();
-        iDummyTexture.bind(1);
-        iDummyTextureMS.bind(2);
+        iDummyTexture.bind(static_cast<std::uint32_t>(reserved_texture_unit::Tex));
+        iDummyTextureMS.bind(static_cast<std::uint32_t>(reserved_texture_unit::TexMS));
         uTextureEnabled = false;
         uTextureEffect = shader_effect::None;
         uTextureDataFormat = texture_data_format::RGBA;
@@ -185,8 +185,8 @@ namespace neogfx
         if (iActiveKernel && iActiveKernel != &kernelData)
             iActiveKernel->unbind();
         iActiveKernel = &kernelData;
-        kernelData.bind(5);
-        uFilterKernel = sampler2DRect{ 5 };
+        kernelData.bind(static_cast<std::uint32_t>(reserved_texture_unit::FilterKernel));
+        uFilterKernel = sampler2DRect{ static_cast<std::uint32_t>(reserved_texture_unit::FilterKernel) };
     }
 
     standard_glyph_shader::standard_glyph_shader(std::string const& aName) :
@@ -214,10 +214,10 @@ namespace neogfx
         enable();
         bool subpixelRender = subpixel(aGlyphChar) && aText.glyph(aGlyphChar).subpixel();
         if (subpixelRender)
-            aContext.render_target().target_texture().bind(7);
+            aContext.render_target().target_texture().bind(static_cast<std::uint32_t>(reserved_texture_unit::RenderTarget));
         uGlyphRenderTargetExtents = aContext.render_target().extents().to_vec2().as<std::int32_t>();
         uGlyphGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
-        uGlyphRenderOutput = sampler2DMS{ 7 };
+        uGlyphRenderOutput = sampler2DMS{ static_cast<std::uint32_t>(reserved_texture_unit::RenderTarget) };
         uGlyphSubpixel = aText.glyph(aGlyphChar).subpixel();
         uGlyphSubpixelFormat = subpixelRender ? aContext.subpixel_format() : subpixel_format::None;
         uGlyphEnabled = true;
