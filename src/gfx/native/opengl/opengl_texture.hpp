@@ -31,10 +31,16 @@ namespace neogfx
 {
     class i_texture_manager;
 
+    struct texture_binding
+    {
+        i_texture const* texture;
+        std::uint32_t unit;
+    };
+
     struct texture_binding_pool
     {
-        std::vector<std::uint32_t> unbound = { 20u, 21u, 22u, 23u, 24u, 25u, 26u, 27u, 28u, 29u };
-        std::vector<std::uint32_t> bound;
+        std::vector<texture_binding> unbound = { { nullptr, 20u }, { nullptr, 21u }, { nullptr, 22u }, { nullptr, 23u }, { nullptr, 24u }, { nullptr, 25u }, { nullptr, 26u }, { nullptr, 27u }, { nullptr, 28u }, { nullptr, 29u } };
+        std::vector<texture_binding> bound;
     };
 
     inline texture_binding_pool& texture_bindings()

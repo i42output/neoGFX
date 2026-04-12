@@ -279,6 +279,8 @@ namespace neogfx
     template <typename T>
     opengl_texture<T>::~opengl_texture()
     {
+        unbind();
+
         if (iFrameBuffer != 0)
         {
             glCheck(glDeleteRenderbuffers(1, &iDepthStencilBuffer));
@@ -565,7 +567,7 @@ namespace neogfx
         }
         if (texture_bindings().unbound.empty())
             throw std::logic_error("neogfx::opengl_texture::bind: texture bindings pool exhausted");
-        bind(texture_bindings().unbound.front());
+        bind(texture_bindings().unbound.front().unit);
     }
 
     template <typename T>
@@ -575,14 +577,16 @@ namespace neogfx
         {
             if (iBoundTextureUnit.value() == aTextureUnit)
             {
-                glCheck(glActiveTexture(GL_TEXTURE0 + aTextureUnit));
-                // Following check is needed as we currently do not track texture bindings in texture manager...
-                GLint currentlyBoundTexture = 0;
-                glCheck(glGetIntegerv(to_gl_binding_enum(sampling()), &currentlyBoundTexture));
-                if (currentlyBoundTexture == static_cast<GLint>(reinterpret_cast<std::intptr_t>(handle())))
-                    return;
+                auto existingPoolEntry = std::find_if(texture_bindings().bound.begin(), texture_bindings().bound.end(), [&](auto const& e) { return e.unit == iBoundTextureUnit.value(); });
+                if (existingPoolEntry != texture_bindings().bound.end())
+                {
+                    if (existingPoolEntry->texture == this)
+                        return;
+                    existingPoolEntry->texture->unbind();
+                }
             }
-            unbind();
+            else
+                unbind();
         }
         glCheck(glActiveTexture(GL_TEXTURE0 + aTextureUnit));
         GLint previousTexture = 0;
@@ -590,10 +594,10 @@ namespace neogfx
         glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle()))));
         iBoundTextureUnit = aTextureUnit;
         iPreviouslyBoundTexture = previousTexture;
-        auto existingPoolEntry = std::find(texture_bindings().unbound.begin(), texture_bindings().unbound.end(), iBoundTextureUnit.value());
+        auto existingPoolEntry = std::find_if(texture_bindings().unbound.begin(), texture_bindings().unbound.end(), [&](auto const& e) { return e.unit == iBoundTextureUnit.value(); });
         if (existingPoolEntry != texture_bindings().unbound.end())
             texture_bindings().unbound.erase(existingPoolEntry);
-        texture_bindings().bound.push_back(iBoundTextureUnit.value());
+        texture_bindings().bound.emplace_back(this, iBoundTextureUnit.value());
     }
 
     template <typename T>
@@ -603,10 +607,10 @@ namespace neogfx
             return;
         glCheck(glActiveTexture(GL_TEXTURE0 + iBoundTextureUnit.value()));
         glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(iPreviouslyBoundTexture.value())));
-        auto existingPoolEntry = std::find(texture_bindings().bound.begin(), texture_bindings().bound.end(), iBoundTextureUnit.value());
-        if (existingPoolEntry != texture_bindings().bound.end())
+        auto existingPoolEntry = std::find_if(texture_bindings().bound.begin(), texture_bindings().bound.end(), [&](auto const& e) { return e.unit == iBoundTextureUnit.value(); });
+        if (existingPoolEntry != texture_bindings().bound.end() && existingPoolEntry->texture == this)
             texture_bindings().bound.erase(existingPoolEntry);
-        texture_bindings().unbound.push_back(iBoundTextureUnit.value());
+        texture_bindings().unbound.emplace_back(nullptr, iBoundTextureUnit.value());
         iBoundTextureUnit = std::nullopt;
         iPreviouslyBoundTexture = std::nullopt;
     }
