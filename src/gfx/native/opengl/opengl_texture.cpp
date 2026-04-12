@@ -579,7 +579,7 @@ namespace neogfx
                 // Following check is needed as we currently do not track texture bindings in texture manager...
                 GLint currentlyBoundTexture = 0;
                 glCheck(glGetIntegerv(to_gl_binding_enum(sampling()), &currentlyBoundTexture));
-                if (currentlyBoundTexture == static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle())))
+                if (currentlyBoundTexture == static_cast<GLint>(reinterpret_cast<std::intptr_t>(handle())))
                     return;
             }
             unbind();
