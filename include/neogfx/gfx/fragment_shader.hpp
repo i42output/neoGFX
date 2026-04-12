@@ -186,8 +186,6 @@ namespace neogfx
         void clear_glyph() final;
         void set_first_glyph(const i_rendering_context& aContext, const glyph_text& aText, const glyph_char& aGlyphChar) final;
     private:
-        cache_uniform(uGlyphRenderTargetExtents)
-        cache_uniform(uGlyphGuiCoordinates)
         cache_uniform(uGlyphRenderOutput)
         cache_uniform(uGlyphSubpixel)
         cache_uniform(uGlyphSubpixelFormat)

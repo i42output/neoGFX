@@ -215,8 +215,6 @@ namespace neogfx
         bool subpixelRender = subpixel(aGlyphChar) && aText.glyph(aGlyphChar).subpixel();
         if (subpixelRender)
             aContext.render_target().target_texture().bind(static_cast<std::uint32_t>(reserved_texture_unit::RenderTarget));
-        uGlyphRenderTargetExtents = aContext.render_target().extents().to_vec2().as<std::int32_t>();
-        uGlyphGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
         uGlyphRenderOutput = sampler2DMS{ static_cast<std::uint32_t>(reserved_texture_unit::RenderTarget) };
         uGlyphSubpixel = aText.glyph(aGlyphChar).subpixel();
         uGlyphSubpixelFormat = subpixelRender ? aContext.subpixel_format() : subpixel_format::None;

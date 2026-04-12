@@ -1,9 +1,6 @@
 ivec2 render_position()
 {
-    if (uGlyphGuiCoordinates)
-        return ivec2(Coord.x, uGlyphRenderTargetExtents.y - Coord.y);
-    else
-        return ivec2(Coord.xy);
+    return ivec2(gl_FragCoord);
 }
                 
 vec3 output_pixel()

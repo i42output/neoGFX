@@ -107,7 +107,6 @@ namespace neogfx
         widget_timer iAnimator;
         std::uint32_t iAnimationFrame;
         push_button_style iStyle;
-        optional_color iFaceColor;
         optional_color iBorderColor;
         optional_color iOuterBorderColor;
         optional_color iHoverColor;

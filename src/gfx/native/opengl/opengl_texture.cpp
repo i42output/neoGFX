@@ -749,6 +749,7 @@ namespace neogfx
             }
             glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
             glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
+            glCheck(glClearDepth(1.0));
             glCheck(glClear(GL_DEPTH_BUFFER_BIT));
         }
         else

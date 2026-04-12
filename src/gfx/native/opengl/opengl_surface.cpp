@@ -132,6 +132,7 @@ namespace neogfx
         glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(target_texture().native_texture().native_handle())));
         glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
 
+        glCheck(glClearDepth(1.0));
         glCheck(glClear(GL_DEPTH_BUFFER_BIT));
         
         GLenum status;

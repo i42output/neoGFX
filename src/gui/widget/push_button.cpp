@@ -450,23 +450,19 @@ namespace neogfx
 
     bool push_button::has_face_color() const
     {
-        return iFaceColor.has_value();
+        return has_base_color();
     }
 
     color push_button::face_color() const
     {
-        if (has_face_color())
-            return iFaceColor.value();
+        if (has_base_color())
+            return base_color();
         return iStyleSheetFaceColor.value();
     }
 
     void push_button::set_face_color(const optional_color& aFaceColor)
     {
-        if (iFaceColor != aFaceColor)
-        {
-            iFaceColor = aFaceColor;
-            update();
-        }
+        set_base_color(aFaceColor);
     }
 
     bool push_button::has_hover_color() const
