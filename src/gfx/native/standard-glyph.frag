@@ -1,11 +1,11 @@
 ivec2 render_position()
 {
-    return ivec2(gl_FragCoord);
+    return ivec2(gl_FragCoord.xy);
 }
                 
-vec3 output_pixel()
+vec3 output_pixel(int sampleIndex)
 {
-    return texelFetch(uGlyphRenderOutput, render_position(), 0).rgb;
+    return texelFetch(uGlyphRenderOutput, render_position(), sampleIndex).rgb;
 }
                 
 void standard_glyph_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
@@ -29,10 +29,10 @@ void standard_glyph_shader(inout vec4 color, inout vec4 function0, inout vec4 fu
                     color = vec4(color.xyz, color.a * a);
                     break;
                 case 1: // RGBHorizontal
-                    color = vec4(color.rgb * aaaAlpha.rgb * color.a + output_pixel() * (vec3(1.0, 1.0, 1.0) - aaaAlpha.rgb * color.a), 1.0);
+                    color = vec4(color.rgb * aaaAlpha.rgb * color.a + output_pixel(gl_SampleID) * (vec3(1.0, 1.0, 1.0) - aaaAlpha.rgb * color.a), 1.0);
                     break;
                 case 2: // BGRHorizontal
-                    color = vec4(color.rgb * aaaAlpha.bgr * color.a + output_pixel() * (vec3(1.0, 1.0, 1.0) - aaaAlpha.bgr * color.a), 1.0);
+                    color = vec4(color.rgb * aaaAlpha.bgr * color.a + output_pixel(gl_SampleID) * (vec3(1.0, 1.0, 1.0) - aaaAlpha.bgr * color.a), 1.0);
                     break;
                 }
             }
