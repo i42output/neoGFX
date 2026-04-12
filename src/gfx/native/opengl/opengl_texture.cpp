@@ -567,7 +567,7 @@ namespace neogfx
         }
         if (texture_bindings().unbound.empty())
             throw std::logic_error("neogfx::opengl_texture::bind: texture bindings pool exhausted");
-        bind(texture_bindings().unbound.front().unit);
+        bind(texture_bindings().unbound.begin()->first());
     }
 
     template <typename T>
@@ -577,12 +577,12 @@ namespace neogfx
         {
             if (iBoundTextureUnit.value() == aTextureUnit)
             {
-                auto existingPoolEntry = std::find_if(texture_bindings().bound.begin(), texture_bindings().bound.end(), [&](auto const& e) { return e.unit == iBoundTextureUnit.value(); });
+                auto existingPoolEntry = texture_bindings().bound.find(iBoundTextureUnit.value());
                 if (existingPoolEntry != texture_bindings().bound.end())
                 {
-                    if (existingPoolEntry->texture == this)
+                    if (existingPoolEntry->second() == this)
                         return;
-                    existingPoolEntry->texture->unbind();
+                    existingPoolEntry->second()->unbind();
                 }
             }
             else
@@ -594,10 +594,10 @@ namespace neogfx
         glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle()))));
         iBoundTextureUnit = aTextureUnit;
         iPreviouslyBoundTexture = previousTexture;
-        auto existingPoolEntry = std::find_if(texture_bindings().unbound.begin(), texture_bindings().unbound.end(), [&](auto const& e) { return e.unit == iBoundTextureUnit.value(); });
+        auto existingPoolEntry = texture_bindings().unbound.find(iBoundTextureUnit.value());
         if (existingPoolEntry != texture_bindings().unbound.end())
             texture_bindings().unbound.erase(existingPoolEntry);
-        texture_bindings().bound.emplace_back(this, iBoundTextureUnit.value());
+        texture_bindings().bound.emplace(iBoundTextureUnit.value(), this);
     }
 
     template <typename T>
@@ -607,10 +607,10 @@ namespace neogfx
             return;
         glCheck(glActiveTexture(GL_TEXTURE0 + iBoundTextureUnit.value()));
         glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(iPreviouslyBoundTexture.value())));
-        auto existingPoolEntry = std::find_if(texture_bindings().bound.begin(), texture_bindings().bound.end(), [&](auto const& e) { return e.unit == iBoundTextureUnit.value(); });
-        if (existingPoolEntry != texture_bindings().bound.end() && existingPoolEntry->texture == this)
+        auto existingPoolEntry = texture_bindings().bound.find(iBoundTextureUnit.value());
+        if (existingPoolEntry != texture_bindings().bound.end() && existingPoolEntry->second() == this)
             texture_bindings().bound.erase(existingPoolEntry);
-        texture_bindings().unbound.emplace_back(nullptr, iBoundTextureUnit.value());
+        texture_bindings().unbound.emplace(iBoundTextureUnit.value(), nullptr);
         iBoundTextureUnit = std::nullopt;
         iPreviouslyBoundTexture = std::nullopt;
     }

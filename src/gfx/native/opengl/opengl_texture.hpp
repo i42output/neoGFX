@@ -31,16 +31,12 @@ namespace neogfx
 {
     class i_texture_manager;
 
-    struct texture_binding
-    {
-        i_texture const* texture;
-        std::uint32_t unit;
-    };
+    using texture_unit = std::uint32_t;
 
     struct texture_binding_pool
     {
-        std::vector<texture_binding> unbound = { { nullptr, 20u }, { nullptr, 21u }, { nullptr, 22u }, { nullptr, 23u }, { nullptr, 24u }, { nullptr, 25u }, { nullptr, 26u }, { nullptr, 27u }, { nullptr, 28u }, { nullptr, 29u } };
-        std::vector<texture_binding> bound;
+        neolib::unordered_flat_map<texture_unit, i_texture const *> unbound = { { 20u, nullptr }, { 21u, nullptr }, { 22u, nullptr }, { 23u, nullptr }, { 24u, nullptr }, { 25u, nullptr }, { 26u, nullptr }, { 27u, nullptr }, { 28u, nullptr }, { 29u, nullptr } };
+        neolib::unordered_flat_map<texture_unit, i_texture const *> bound;
     };
 
     inline texture_binding_pool& texture_bindings()
