@@ -154,6 +154,10 @@ namespace neogfx
         void stencil_based_invalidation_on() override;
         void stencil_based_invalidation_off() override;
     public:
+        bool is_render_queue_optimization_on() const override;
+        void render_queue_optimization_on() override;
+        void render_queue_optimization_off() override;
+    public:
         bool is_subpixel_rendering_on() const override;
         void subpixel_rendering_on() override;
         void subpixel_rendering_off() override;
@@ -177,6 +181,7 @@ namespace neogfx
         bool iLimitFrameRate;
         std::uint32_t iFrameRateLimit;
         bool iStencilBasedInvalidation;
+        bool iRenderQueueOptimisation;
         bool iSubpixelRendering;
         typedef std::unordered_map<i_vertex_provider*, opengl_vertex_buffer<>> vertex_buffers_map;
         mutable vertex_buffers_map iVertexBuffers;

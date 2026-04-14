@@ -475,11 +475,11 @@
                                     }
                                     check_box: {
                                         id: checkPassword
-                                        text: "Password"
+                                        text: "Password / Invalidation Method"
                                     }
                                     check_box: {
                                         id: checkColumns
-                                        text: "Columns"
+                                        text: "Columns / Render Queue Optimisation"
                                     }
                                     check_box: {
                                         id: checkGroupBoxCheckable

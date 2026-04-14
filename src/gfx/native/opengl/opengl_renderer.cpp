@@ -79,6 +79,7 @@ namespace neogfx
         iLimitFrameRate{ true },
         iFrameRateLimit{ 60u },
         iStencilBasedInvalidation{ false },
+        iRenderQueueOptimisation{ false },
         iSubpixelRendering{ false }
     {
 #ifdef _WIN32
@@ -326,6 +327,21 @@ namespace neogfx
     void opengl_renderer::stencil_based_invalidation_off()
     {
         iStencilBasedInvalidation = false;
+    }
+
+    bool opengl_renderer::is_render_queue_optimization_on() const
+    {
+        return iRenderQueueOptimisation;
+    }
+
+    void opengl_renderer::render_queue_optimization_on()
+    {
+        iRenderQueueOptimisation = true;
+    }
+
+    void opengl_renderer::render_queue_optimization_off()
+    {
+        iRenderQueueOptimisation = false;
     }
 
     bool opengl_renderer::is_subpixel_rendering_on() const

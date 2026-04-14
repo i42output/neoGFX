@@ -333,12 +333,15 @@ int main(int argc, char* argv[])
         {
             window.textField2.hint().set_text("Enter password"_s);
             window.textField2.input_box().set_password(true);
+            ng::service<ng::i_rendering_engine>().stencil_based_invalidation_on();
+
         });
         window.checkPassword.Unchecked([&]()
         {
             window.textField2.hint().set_text("Enter text"_s);
             window.textField2.input_box().set_password(false);
-        });
+            ng::service<ng::i_rendering_engine>().stencil_based_invalidation_off();
+            });
         window.checkGroupBoxCheckable.checked([&window]()
         {
             window.groupBox.set_checkable(true);
@@ -364,12 +367,14 @@ int main(int argc, char* argv[])
                         ng::text_effect{ ng::text_effect_type::Outline, ng::color::White } });
                 window.textEdit.set_column(2, cs);
             });
+            ng::service<ng::i_rendering_engine>().render_queue_optimization_on();
         });
         window.checkColumns.Unchecked([&]()
         {
             window.checkPassword.enable();
             window.textEdit.remove_columns();
             sink1 = std::nullopt;
+            ng::service<ng::i_rendering_engine>().render_queue_optimization_off();
         });
         window.checkKerning.Toggled([&app, &window]()
         {

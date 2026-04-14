@@ -438,219 +438,272 @@ namespace neogfx
 
         neolib::scoped_flag sf{ iInFlush };
 
-        if (queue().empty())
+        std::size_t const queueSize = queue().size();
+
+#if defined(NEOGFX_DEBUG)
+        service<debug::logger>() << neolib::logger::severity::Info << "Render queue size: " << queueSize << std::endl;
+        std::vector<std::pair<graphics_operation::operation_type, std::size_t>> batches;
+        batches.clear();
+#endif // NEOGFX_DEBUG
+
+        if (queueSize == 0u)
             return;
+
+        thread_local std::vector<graphics_operation::queue_batch_item> optimisedQueue;
+        optimisedQueue.clear();
+
+        std::int32_t ordinal = 1;
+
+        thread_local std::vector<rect> clipRegionStack;
+        clipRegionStack.clear();
+
+        for (auto& queueEntry : queue())
+        {
+            auto const opType = static_cast<graphics_operation::operation_type>(queueEntry.index());
+            switch (opType)
+            {
+            case graphics_operation::PushScissor:
+                clipRegionStack.push_back(static_variant_cast<const graphics_operation::push_scissor&>(queueEntry).rect);
+                break;
+            case graphics_operation::PopScissor:
+                if (clipRegionStack.empty())
+                    throw std::logic_error("neogfx::opengl_rendering_context::flush: unmatched PopScissor");
+                clipRegionStack.pop_back();
+                break;
+            }
+            optimisedQueue.emplace_back(&queueEntry, ordinal++, !clipRegionStack.empty() ? clipRegionStack.back() : std::optional<rect>{});
+        }
+
+        if (service<i_rendering_engine>().is_render_queue_optimization_on())
+        {
+            // todo...
+            std::stable_sort(optimisedQueue.begin(), optimisedQueue.end(), [](auto const& lhs, auto const& rhs)
+                {
+                    return lhs->index() < rhs->index();
+                });
+        }
 
         scoped_render_target srt{ render_target() };
         set_blending_mode(blending_mode());
         apply_scissor();
         apply_stencil();
 
-        for (auto batchStart = queue().begin(); batchStart != queue().end();)
+        for (auto batchStart = optimisedQueue.begin(); batchStart != optimisedQueue.end();)
         {
             auto batchEnd = std::next(batchStart);
-            while (batchEnd != queue().end() && graphics_operation::batchable(*batchStart, *batchEnd))
+            while (batchEnd != optimisedQueue.end() && graphics_operation::batchable(**batchStart, **batchEnd))
                 ++batchEnd;
             graphics_operation::batch const opBatch{ &*batchStart, &*batchStart + (batchEnd - batchStart) };
+            auto const opType = static_cast<graphics_operation::operation_type>((**opBatch.cbegin()).index());
+            batches.push_back(std::make_pair(opType, batchEnd - batchStart));
             batchStart = batchEnd;
-            switch (opBatch.cbegin()->index())
+            switch (opType)
             {
-            case graphics_operation::operation_type::SetLogicalCoordinateSystem:
+            case graphics_operation::SetLogicalCoordinateSystem:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
-                    set_logical_coordinate_system(static_variant_cast<const graphics_operation::set_logical_coordinate_system&>(*op).system);
+                    set_logical_coordinate_system(static_variant_cast<const graphics_operation::set_logical_coordinate_system&>(**op).system);
                 break;
-            case graphics_operation::operation_type::SetLogicalCoordinates:
+            case graphics_operation::SetLogicalCoordinates:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
-                    set_logical_coordinates(static_variant_cast<const graphics_operation::set_logical_coordinates&>(*op).coordinates);
+                    set_logical_coordinates(static_variant_cast<const graphics_operation::set_logical_coordinates&>(**op).coordinates);
                 break;
-            case graphics_operation::operation_type::SetOrigin:
+            case graphics_operation::SetOrigin:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
-                    set_origin(static_variant_cast<const graphics_operation::set_origin&>(*op).origin);
+                    set_origin(static_variant_cast<const graphics_operation::set_origin&>(**op).origin);
                 break;
-            case graphics_operation::operation_type::SetViewport:
+            case graphics_operation::SetViewport:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
-                    auto const& setViewport = static_variant_cast<const graphics_operation::set_viewport&>(*op);
+                    auto const& setViewport = static_variant_cast<const graphics_operation::set_viewport&>(**op);
                     if (setViewport.viewport)
                         render_target().set_viewport(setViewport.viewport.value().as<std::int32_t>());
                     else
                         render_target().set_viewport(rect{ render_target().target_origin(), render_target().extents() }.as<std::int32_t>());
                 }
                 break;
-            case graphics_operation::operation_type::ScissorOn:
+            case graphics_operation::ScissorOn:
                 scissor_on();
                 break;
-            case graphics_operation::operation_type::ScissorOff:
+            case graphics_operation::ScissorOff:
                 scissor_off();
                 break;
-            case graphics_operation::operation_type::PushScissor:
+            case graphics_operation::PushScissor:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
-                    push_scissor(static_variant_cast<const graphics_operation::push_scissor&>(*op).rect);
+                    push_scissor(static_variant_cast<const graphics_operation::push_scissor&>(**op).rect);
                 break;
-            case graphics_operation::operation_type::PopScissor:
+            case graphics_operation::PopScissor:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
                     (void)op;
                     pop_scissor();
                 }
                 break;
-            case graphics_operation::operation_type::SnapToPixelOn:
+            case graphics_operation::SnapToPixelOn:
                 set_snap_to_pixel(true);
                 break;
-            case graphics_operation::operation_type::SnapToPixelOff:
+            case graphics_operation::SnapToPixelOff:
                 set_snap_to_pixel(false);
                 break;
-            case graphics_operation::operation_type::SetFrontFace:
-                set_front_face(static_variant_cast<const graphics_operation::set_front_face&>(*(std::prev(opBatch.cend()))).frontFace);
+            case graphics_operation::SetFrontFace:
+                set_front_face(static_variant_cast<const graphics_operation::set_front_face&>(**(std::prev(opBatch.cend()))).frontFace);
                 break;
-             case graphics_operation::operation_type::SetCullFaces:
-                set_face_culling(static_variant_cast<const graphics_operation::set_face_culling&>(*(std::prev(opBatch.cend()))).culling);
+             case graphics_operation::SetCullFaces:
+                set_face_culling(static_variant_cast<const graphics_operation::set_face_culling&>(**(std::prev(opBatch.cend()))).culling);
                 break;
-            case graphics_operation::operation_type::SetOpacity:
-                set_opacity(static_variant_cast<const graphics_operation::set_opacity&>(*(std::prev(opBatch.cend()))).opacity);
+            case graphics_operation::SetOpacity:
+                set_opacity(static_variant_cast<const graphics_operation::set_opacity&>(**(std::prev(opBatch.cend()))).opacity);
                 break;
-            case graphics_operation::operation_type::SetBlendingMode:
-                set_blending_mode(static_variant_cast<const graphics_operation::set_blending_mode&>(*(std::prev(opBatch.cend()))).blendingMode);
+            case graphics_operation::SetBlendingMode:
+                set_blending_mode(static_variant_cast<const graphics_operation::set_blending_mode&>(**(std::prev(opBatch.cend()))).blendingMode);
                 break;
-            case graphics_operation::operation_type::SetSmoothingMode:
-                set_smoothing_mode(static_variant_cast<const graphics_operation::set_smoothing_mode&>(*(std::prev(opBatch.cend()))).smoothingMode);
+            case graphics_operation::SetSmoothingMode:
+                set_smoothing_mode(static_variant_cast<const graphics_operation::set_smoothing_mode&>(**(std::prev(opBatch.cend()))).smoothingMode);
                 break;
-            case graphics_operation::operation_type::PushLogicalOperation:
+            case graphics_operation::PushLogicalOperation:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
-                    push_logical_operation(static_variant_cast<const graphics_operation::push_logical_operation&>(*op).logicalOperation);
+                    push_logical_operation(static_variant_cast<const graphics_operation::push_logical_operation&>(**op).logicalOperation);
                 break;
-            case graphics_operation::operation_type::PopLogicalOperation:
+            case graphics_operation::PopLogicalOperation:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
                     (void)op;
                     pop_logical_operation();
                 }
                 break;
-            case graphics_operation::operation_type::LineStippleOn:
+            case graphics_operation::LineStippleOn:
                 {
-                    auto const& lso = static_variant_cast<const graphics_operation::line_stipple_on&>(*(std::prev(opBatch.cend())));
+                    auto const& lso = static_variant_cast<const graphics_operation::line_stipple_on&>(**(std::prev(opBatch.cend())));
                     line_stipple_on(lso.stipple);
                 }
                 break;
-            case graphics_operation::operation_type::LineStippleOff:
+            case graphics_operation::LineStippleOff:
                 line_stipple_off();
                 break;
-            case graphics_operation::operation_type::SubpixelRenderingOn:
+            case graphics_operation::SubpixelRenderingOn:
                 subpixel_rendering_on();
                 break;
-            case graphics_operation::operation_type::SubpixelRenderingOff:
+            case graphics_operation::SubpixelRenderingOff:
                 subpixel_rendering_off();
                 break;
-            case graphics_operation::operation_type::Clear:
-                clear(static_variant_cast<const graphics_operation::clear&>(*(std::prev(opBatch.cend()))).color);
+            case graphics_operation::Clear:
+                clear(static_variant_cast<const graphics_operation::clear&>(**(std::prev(opBatch.cend()))).color);
                 break;
-            case graphics_operation::operation_type::ClearDepthBuffer:
+            case graphics_operation::ClearDepthBuffer:
                 clear_depth_buffer();
                 break;
-            case graphics_operation::operation_type::ClearStencilBuffer:
+            case graphics_operation::ClearStencilBuffer:
                 clear_stencil_buffer();
                 break;
-            case graphics_operation::operation_type::EnableStencilTest:
+            case graphics_operation::EnableStencilTest:
                 enable_stencil_test();
                 break;
-            case graphics_operation::operation_type::DisableStencilTest:
+            case graphics_operation::DisableStencilTest:
                 disable_stencil_test();
                 break;
-            case graphics_operation::operation_type::EnableStencilUpdate:
-                enable_stencil_update(static_variant_cast<const graphics_operation::enable_stencil_update&>(*(std::prev(opBatch.cend()))).ref);
+            case graphics_operation::EnableStencilUpdate:
+                enable_stencil_update(static_variant_cast<const graphics_operation::enable_stencil_update&>(**(std::prev(opBatch.cend()))).ref);
                 break;
-            case graphics_operation::operation_type::DisableStencilUpdate:
+            case graphics_operation::DisableStencilUpdate:
                 disable_stencil_update();
                 break;
-            case graphics_operation::operation_type::SetGradient:
+            case graphics_operation::SetGradient:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
-                    set_gradient(static_variant_cast<const graphics_operation::set_gradient&>(*op).gradient);
+                    set_gradient(static_variant_cast<const graphics_operation::set_gradient&>(**op).gradient);
                 break;
-            case graphics_operation::operation_type::ClearGradient:
+            case graphics_operation::ClearGradient:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                     clear_gradient();
                 break;
-            case graphics_operation::operation_type::SetPixel:
-                for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
-                    set_pixel(static_variant_cast<const graphics_operation::set_pixel&>(*op).point, static_variant_cast<const graphics_operation::set_pixel&>(*op).color);
+            case graphics_operation::SetPixel:
+                set_pixel(opBatch);
                 break;
-            case graphics_operation::operation_type::Blit:
+            case graphics_operation::Blit:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
-                    auto const& args = static_variant_cast<const graphics_operation::blit&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::blit&>(**op);
                     blit(args.destinationRect, args.texture, args.sourceRect, args.blendingMode);
                 }
                 break;
-            case graphics_operation::operation_type::DrawPixel:
+            case graphics_operation::DrawPixel:
                 draw_pixels(opBatch);
                 break;
-            case graphics_operation::operation_type::DrawLine:
+            case graphics_operation::DrawLine:
                 draw_lines(opBatch);
                 break;
-            case graphics_operation::operation_type::DrawTriangle:
+            case graphics_operation::DrawTriangle:
                 draw_triangles(opBatch);
                 break;
-            case graphics_operation::operation_type::DrawRect:
+            case graphics_operation::DrawRect:
                 draw_rects(opBatch);
                 break;
-            case graphics_operation::operation_type::DrawRoundedRect:
+            case graphics_operation::DrawRoundedRect:
                 draw_rounded_rects(opBatch);
                 break;
-            case graphics_operation::operation_type::DrawEllipseRect:
+            case graphics_operation::DrawEllipseRect:
                 draw_ellipse_rects(opBatch);
                 break;
-            case graphics_operation::operation_type::DrawCheckerboard:
+            case graphics_operation::DrawCheckerboard:
                 draw_checkerboards(opBatch);
                 break;
-            case graphics_operation::operation_type::DrawCircle:
+            case graphics_operation::DrawCircle:
                 draw_circles(opBatch);
                 break;
-            case graphics_operation::operation_type::DrawEllipse:
+            case graphics_operation::DrawEllipse:
                 draw_ellipses(opBatch);
                 break;
-            case graphics_operation::operation_type::DrawPie:
+            case graphics_operation::DrawPie:
                 draw_pies(opBatch);
                 break;
-            case graphics_operation::operation_type::DrawArc:
+            case graphics_operation::DrawArc:
                 draw_arcs(opBatch);
                 break;
-            case graphics_operation::operation_type::DrawCubicBezier:
+            case graphics_operation::DrawCubicBezier:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
-                    auto const& args = static_variant_cast<const graphics_operation::draw_cubic_bezier&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::draw_cubic_bezier&>(**op);
                     draw_cubic_bezier(args.p0 + origin(), args.p1 + origin(), args.p2 + origin(), args.p3 + origin(), args.pen);
                 }
                 break;
-            case graphics_operation::operation_type::DrawPath:
+            case graphics_operation::DrawPath:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
-                    auto const& args = static_variant_cast<const graphics_operation::draw_path&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::draw_path&>(**op);
                     draw_path(args.path, args.shape, args.boundingRect, args.pen, args.fill);
                 }
                 break;
-            case graphics_operation::operation_type::DrawShape:
+            case graphics_operation::DrawShape:
                 draw_shapes(opBatch);
                 break;
-            case graphics_operation::operation_type::DrawEntities:
+            case graphics_operation::DrawEntities:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
-                    auto const& args = static_variant_cast<const graphics_operation::draw_entities&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::draw_entities&>(**op);
                     draw_entities(args.ecs, args.layer, args.transformation);
                 }
                 break;
-            case graphics_operation::operation_type::DrawGlyph:
+            case graphics_operation::DrawGlyph:
                 draw_glyphs(opBatch);
                 break;
-            case graphics_operation::operation_type::DrawMesh:
+            case graphics_operation::DrawMesh:
                 // todo: use draw_meshes
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
-                    auto const& args = static_variant_cast<const graphics_operation::draw_mesh&>(*op);
+                    auto const& args = static_variant_cast<const graphics_operation::draw_mesh&>(**op);
                     draw_mesh(args.mesh, args.material, args.transformation, args.filter);
                 }
                 break;
             }
         }
+
+#if defined(NEOGFX_DEBUG)
+        service<debug::logger>() << neolib::logger::severity::Info << "Render queue batch count: " << batches.size() << std::endl;
+        service<debug::logger>() << neolib::logger::severity::Info << "Render queue batch sizes (>1): ";
+        for (auto const& batch : batches)
+            if (batch.second > 1)
+                service<debug::logger>() << "[" << to_string(batch.first) << ":" << batch.second << "]";
+        service<debug::logger>() << std::endl;
+#endif // NEOGFX_DEBUG
+
         queue().clear();
     }
 
@@ -1069,17 +1122,22 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::set_pixel(const point& aPoint, const color& aColor)
+    void opengl_rendering_context::set_pixel(const graphics_operation::batch& aSetPixelOps)
     {
         /* todo: faster alternative to this... */
         disable_anti_alias daa{ *this };
-        draw_pixel(aPoint, aColor.with_alpha(1.0));
+        for (auto const& op : aSetPixelOps)
+        {
+            auto& drawOp = static_variant_cast<const graphics_operation::set_pixel&>(*op);
+            draw_pixel(drawOp.point, drawOp.color.with_alpha(1.0));
+        }
     }
 
     void opengl_rendering_context::draw_pixel(const point& aPoint, const color& aColor)
     {
-        graphics_operation::operation op{ graphics_operation::draw_pixel{ aPoint, aColor } };
-        draw_pixels(graphics_operation::batch{ &op, &op + 1 });
+        graphics_operation::operation const op{ graphics_operation::draw_pixel{ aPoint, aColor } };
+        graphics_operation::queue_batch_item const qbi{ &op, 1, std::nullopt };
+        draw_pixels(graphics_operation::batch{ &qbi, &qbi + 1 });
     }
 
     void opengl_rendering_context::draw_pixels(const graphics_operation::batch& aDrawPixelOps)
@@ -1095,7 +1153,7 @@ namespace neogfx
 
             for (auto op = aDrawPixelOps.cbegin(); op != aDrawPixelOps.cend(); ++op)
             {
-                auto& drawOp = static_variant_cast<const graphics_operation::draw_pixel&>(*op);
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_pixel&>(**op);
                 auto rectVertices = rect_vertices<vec3f>(rect{ drawOp.point + origin(), size{1.0, 1.0} }, mesh_type::Triangles);
                 for (auto const& v : rectVertices)
                     vertexArrays.push_back({ v,
@@ -1110,8 +1168,9 @@ namespace neogfx
 
     void opengl_rendering_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
     {
-        graphics_operation::operation op{ graphics_operation::draw_line{ aFrom, aTo, aPen } };
-        draw_lines(graphics_operation::batch{ &op, &op + 1 });
+        graphics_operation::operation const op{ graphics_operation::draw_line{ aFrom, aTo, aPen } };
+        graphics_operation::queue_batch_item const qbi{ &op, 1, std::nullopt };
+        draw_lines(graphics_operation::batch{ &qbi, &qbi + 1 });
     }
 
     void opengl_rendering_context::draw_lines(const graphics_operation::batch& aDrawLineOps)
@@ -1125,7 +1184,7 @@ namespace neogfx
 
             for (auto op = aDrawLineOps.cbegin(); op != aDrawLineOps.cend(); ++op)
             {
-                auto& drawOp = static_variant_cast<const graphics_operation::draw_line&>(*op);
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_line&>(**op);
                 auto const& adjust = (drawOp.pen.anti_aliased() || static_cast<std::int32_t>(drawOp.pen.width()) % 2 == 0 ? point{} : point{0.5, 0.5});
                 auto const& from = drawOp.from + origin() + adjust;
                 auto const& to = drawOp.to + origin() + adjust;
@@ -1160,7 +1219,7 @@ namespace neogfx
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        auto& firstOp = static_variant_cast<const graphics_operation::draw_triangle&>(*aDrawTriangleOps.cbegin());
+        auto& firstOp = static_variant_cast<const graphics_operation::draw_triangle&>(**aDrawTriangleOps.cbegin());
 
         if (std::holds_alternative<gradient>(firstOp.fill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
@@ -1174,7 +1233,7 @@ namespace neogfx
 
             for (auto op = aDrawTriangleOps.cbegin(); op != aDrawTriangleOps.cend(); ++op)
             {
-                auto& drawOp = static_variant_cast<const graphics_operation::draw_triangle&>(*op);
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_triangle&>(**op);
                 auto const& p0 = drawOp.p0 + origin();
                 auto const& p1 = drawOp.p1 + origin();
                 auto const& p2 = drawOp.p2 + origin();
@@ -1217,7 +1276,7 @@ namespace neogfx
 
             for (auto op = aDrawRectOps.cbegin(); op != aDrawRectOps.cend(); ++op)
             {
-                auto& drawOp = static_variant_cast<const graphics_operation::draw_rect&>(*op);
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_rect&>(**op);
                 auto const& rc = drawOp.rect + origin();
 
                 if (rc.top_left().z == 0.0 && rc.bottom_right().z == 0.0 &&
@@ -1258,7 +1317,7 @@ namespace neogfx
                     usp.emplace(*this, rendering_engine().default_shader_program(), iOpacity);
                     snap.emplace(iSnapToPixelUsesOffset, false);
 
-                    auto& firstOp = static_variant_cast<const graphics_operation::draw_rect&>(*aDrawRectOps.cbegin());
+                    auto& firstOp = static_variant_cast<const graphics_operation::draw_rect&>(**aDrawRectOps.cbegin());
 
                     if (std::holds_alternative<gradient>(firstOp.fill))
                         rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
@@ -1308,7 +1367,7 @@ namespace neogfx
 
         neolib::scoped_flag snap{ iSnapToPixelUsesOffset, false };
 
-        auto& firstOp = static_variant_cast<const graphics_operation::draw_rounded_rect&>(*aDrawRoundedRectOps.cbegin());
+        auto& firstOp = static_variant_cast<const graphics_operation::draw_rounded_rect&>(**aDrawRoundedRectOps.cbegin());
 
         if (std::holds_alternative<gradient>(firstOp.fill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
@@ -1322,7 +1381,7 @@ namespace neogfx
 
             for (auto op = aDrawRoundedRectOps.cbegin(); op != aDrawRoundedRectOps.cend(); ++op)
             {
-                auto& drawOp = static_variant_cast<const graphics_operation::draw_rounded_rect&>(*op);
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_rounded_rect&>(**op);
                 auto const& rc = drawOp.rect + origin();
                 auto const sdfRect = snap_to_pixel() ? rc.deflated(drawOp.pen.width() / 2.0) : rc;
                 auto const boundingRect = rc.inflated(drawOp.pen.width() / 2.0);
@@ -1360,7 +1419,7 @@ namespace neogfx
 
         neolib::scoped_flag snap{ iSnapToPixelUsesOffset, false };
 
-        auto& firstOp = static_variant_cast<const graphics_operation::draw_ellipse_rect&>(*aDrawEllpseRectOps.cbegin());
+        auto& firstOp = static_variant_cast<const graphics_operation::draw_ellipse_rect&>(**aDrawEllpseRectOps.cbegin());
 
         if (std::holds_alternative<gradient>(firstOp.fill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
@@ -1374,7 +1433,7 @@ namespace neogfx
 
             for (auto op = aDrawEllpseRectOps.cbegin(); op != aDrawEllpseRectOps.cend(); ++op)
             {
-                auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse_rect&>(*op);
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse_rect&>(**op);
                 auto const& rc = drawOp.rect + origin();
                 auto const sdfRect = snap_to_pixel() ? rc.deflated(drawOp.pen.width() / 2.0) : rc;
                 auto const boundingRect = rc.inflated(drawOp.pen.width() / 2.0);
@@ -1422,7 +1481,7 @@ namespace neogfx
                     usp.emplace(*this, rendering_engine().default_shader_program(), iOpacity);
                     snap.emplace(iSnapToPixelUsesOffset, false);
 
-                    auto& drawOp = static_variant_cast<const graphics_operation::draw_checkerboard&>(*op);
+                    auto& drawOp = static_variant_cast<const graphics_operation::draw_checkerboard&>(**op);
                     auto const& rc = drawOp.rect + origin();
                     auto& fill = (pass == 0u ? drawOp.fill1 : drawOp.fill2);
 
@@ -1477,7 +1536,7 @@ namespace neogfx
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        auto& firstOp = static_variant_cast<const graphics_operation::draw_ellipse&>(*aDrawEllipseOps.cbegin());
+        auto& firstOp = static_variant_cast<const graphics_operation::draw_ellipse&>(**aDrawEllipseOps.cbegin());
 
         if (std::holds_alternative<gradient>(firstOp.fill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
@@ -1491,7 +1550,7 @@ namespace neogfx
 
             for (auto op = aDrawEllipseOps.cbegin(); op != aDrawEllipseOps.cend(); ++op)
             {
-                auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse&>(*op);
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse&>(**op);
                 auto const& center = drawOp.center + origin();
                 auto boundingRect = rect{ center - point{ std::max(drawOp.radiusA, drawOp.radiusB), std::max(drawOp.radiusA, drawOp.radiusB) }, size{ std::max(drawOp.radiusA, drawOp.radiusB) * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
@@ -1528,7 +1587,7 @@ namespace neogfx
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        auto& firstOp = static_variant_cast<const graphics_operation::draw_circle&>(*aDrawCircleOps.cbegin());
+        auto& firstOp = static_variant_cast<const graphics_operation::draw_circle&>(**aDrawCircleOps.cbegin());
 
         if (std::holds_alternative<gradient>(firstOp.fill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
@@ -1542,7 +1601,7 @@ namespace neogfx
 
             for (auto op = aDrawCircleOps.cbegin(); op != aDrawCircleOps.cend(); ++op)
             {
-                auto& drawOp = static_variant_cast<const graphics_operation::draw_circle&>(*op);
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_circle&>(**op);
                 auto const& center = drawOp.center + origin();
                 auto boundingRect = rect{ center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
@@ -1579,7 +1638,7 @@ namespace neogfx
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        auto& firstOp = static_variant_cast<const graphics_operation::draw_pie&>(*aDrawPieOps.cbegin());
+        auto& firstOp = static_variant_cast<const graphics_operation::draw_pie&>(**aDrawPieOps.cbegin());
 
         if (std::holds_alternative<gradient>(firstOp.fill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
@@ -1593,7 +1652,7 @@ namespace neogfx
 
             for (auto op = aDrawPieOps.cbegin(); op != aDrawPieOps.cend(); ++op)
             {
-                auto& drawOp = static_variant_cast<const graphics_operation::draw_pie&>(*op);
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_pie&>(**op);
                 auto const& center = drawOp.center + origin();
                 auto boundingRect = rect{ center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
@@ -1630,7 +1689,7 @@ namespace neogfx
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        auto& firstOp = static_variant_cast<const graphics_operation::draw_arc&>(*aDrawArcOps.cbegin());
+        auto& firstOp = static_variant_cast<const graphics_operation::draw_arc&>(**aDrawArcOps.cbegin());
 
         if (std::holds_alternative<gradient>(firstOp.fill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
@@ -1644,7 +1703,7 @@ namespace neogfx
 
             for (auto op = aDrawArcOps.cbegin(); op != aDrawArcOps.cend(); ++op)
             {
-                auto& drawOp = static_variant_cast<const graphics_operation::draw_arc&>(*op);
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_arc&>(**op);
                 auto const& center = drawOp.center + origin();
                 auto boundingRect = rect{ center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
@@ -1764,7 +1823,7 @@ namespace neogfx
     {
         for (auto const& op : aDrawShapeOps)
         {
-            auto const& shapeOp = static_variant_cast<const graphics_operation::draw_shape&>(op);
+            auto const& shapeOp = static_variant_cast<const graphics_operation::draw_shape&>(*op);
             fill_shape(shapeOp.mesh, shapeOp.position, shapeOp.fill);
             draw_shape(shapeOp.mesh, shapeOp.position, shapeOp.pen);
         }
@@ -1966,7 +2025,7 @@ namespace neogfx
 
         for (auto op = aDrawGlyphOps.cbegin(); op != aDrawGlyphOps.cend(); ++op)
         {
-            auto& drawOp = static_variant_cast<const graphics_operation::draw_glyphs&>(*op);
+            auto& drawOp = static_variant_cast<const graphics_operation::draw_glyphs&>(**op);
             auto a = drawOp.attributes.begin();
             for (auto g = drawOp.begin; g != drawOp.end; ++g)
             {

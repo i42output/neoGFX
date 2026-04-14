@@ -463,6 +463,16 @@ namespace neogfx
             using vector<operation>::vector;
         };
 
-        using batch = std::ranges::subrange<operation const*>;
+        struct queue_batch_item
+        {
+            operation const* op;
+            std::int32_t ordinal;
+            std::optional<rect> clipRegion;
+
+            operation const& operator*() const { return *op; }
+            operation const* operator->() const { return op; }
+        };
+
+        using batch = std::ranges::subrange<queue_batch_item const*>;
     }
 }

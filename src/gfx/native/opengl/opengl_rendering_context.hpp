@@ -281,7 +281,7 @@ namespace neogfx
         void enable_stencil_update(std::int32_t aRef);
         void disable_stencil_update();
         void apply_stencil();
-        void set_pixel(const point& aPoint, const color& aColor);
+        void set_pixel(const graphics_operation::batch& aSetPixelOps);
         void draw_pixel(const point& aPoint, const color& aColor);
         void draw_pixels(const graphics_operation::batch& aFillRectOps);
         void draw_line(const point& aFrom, const point& aTo, const pen& aPen);
