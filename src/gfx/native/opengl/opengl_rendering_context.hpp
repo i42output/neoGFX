@@ -222,6 +222,7 @@ namespace neogfx
         rect rendering_area(bool aConsiderScissor = true) const final;
     public:
         graphics_operation::queue& queue() const final;
+        graphics_operation::optimised_queue const& optimised_queue() const;
         void enqueue(const graphics_operation::operation& aOperation) final;
         void flush() final;
     public:

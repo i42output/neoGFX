@@ -27,23 +27,18 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/object.hpp>
-#include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/gfx/texture.hpp>
+#include <neogfx/gfx/render_target.hpp>
 #include <neogfx/hid/i_native_surface.hpp>
+#include <neogfx/gui/widget/timer.hpp>
 
 namespace neogfx
 {
     class i_surface_window;
 
-    class native_surface : public reference_counted<object<i_native_surface>>
+    class native_surface : public reference_counted<render_target<object<i_native_surface>>>
     {
-        typedef reference_counted<object<i_native_surface>> base_type;
-    public:
-        define_declared_event(TargetActivating, target_activating)
-        define_declared_event(TargetActivated, target_activated)
-        define_declared_event(TargetDeactivating, target_deactivating)
-        define_declared_event(TargetDeactivated, target_deactivated)
-        define_declared_event(TargetDestroying, target_destroying)
+        using base_type = reference_counted<render_target<object<i_native_surface>>>;
     public:
         struct bad_pause_count : std::logic_error { bad_pause_count() : std::logic_error("neogfx::native_surface::bad_pause_count") {} };
     public:

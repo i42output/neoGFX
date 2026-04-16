@@ -216,9 +216,19 @@ namespace neogfx
         return parent().create_rendering_context(aWidget, aBlendingMode);
     }
 
-    graphics_operation::i_queue& virtual_surface::graphics_operation_queue() const
+    graphics_operation::i_queue& virtual_surface::render_queue() const
     {
-        return parent().graphics_operation_queue();
+        return parent().render_queue();
+    }
+
+    graphics_operation::i_optimised_queue const& virtual_surface::optimised_render_queue() const
+    {
+        return parent().optimised_render_queue();
+    }
+
+    void virtual_surface::clear_render_queues() const
+    {
+        return parent().clear_render_queues();
     }
 
     std::uint64_t virtual_surface::frame_counter() const

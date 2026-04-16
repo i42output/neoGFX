@@ -35,12 +35,6 @@ namespace neogfx
     class vulkan_texture : public native_texture
     {
     public:
-        define_declared_event(TargetActivating, target_activating)
-        define_declared_event(TargetActivated, target_activated)
-        define_declared_event(TargetDeactivating, target_deactivating)
-        define_declared_event(TargetDeactivated, target_deactivated)
-        define_declared_event(TargetDestroying, target_destroying)
-    public:
         struct unsupported_color_format : std::runtime_error { unsupported_color_format() : std::runtime_error("neogfx::vulkan_texture::unsupported_color_format") {} };
         struct multisample_texture_initialization_unsupported : std::logic_error { multisample_texture_initialization_unsupported() : std::logic_error("neogfx::vulkan_texture::multisample_texture_initialization_unsupported") {} };
     public:
@@ -84,7 +78,6 @@ namespace neogfx
         dimension em_size() const final;
     public:
         std::unique_ptr<i_rendering_context> create_rendering_context(blending_mode aBlendingMode = blending_mode::Default) const final;
-        graphics_operation::i_queue& vulkan_texture<T>::graphics_operation_queue() const final;
     public:
         void bind() const final;
         void bind(std::uint32_t aTextureUnit) const final;

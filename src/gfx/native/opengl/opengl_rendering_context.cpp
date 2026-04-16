@@ -423,7 +423,12 @@ namespace neogfx
 
     graphics_operation::queue& opengl_rendering_context::queue() const
     {
-        return static_cast<graphics_operation::queue&>(iTarget.graphics_operation_queue());
+        return static_cast<graphics_operation::queue&>(iTarget.render_queue());
+    }
+
+    graphics_operation::optimised_queue const& opengl_rendering_context::optimised_queue() const
+    {
+        return static_cast<graphics_operation::optimised_queue const&>(iTarget.optimised_render_queue());
     }
 
     void opengl_rendering_context::enqueue(const graphics_operation::operation& aOperation)
@@ -438,50 +443,11 @@ namespace neogfx
 
         neolib::scoped_flag sf{ iInFlush };
 
-        std::size_t const queueSize = queue().size();
-
-#if defined(NEOGFX_DEBUG)
-        service<debug::logger>() << neolib::logger::severity::Info << "Render queue size: " << queueSize << std::endl;
-        std::vector<std::pair<graphics_operation::operation_type, std::size_t>> batches;
-        batches.clear();
-#endif // NEOGFX_DEBUG
+        auto const& optimisedQueue = optimised_queue();
+        std::size_t const queueSize = optimisedQueue.size();
 
         if (queueSize == 0u)
             return;
-
-        thread_local std::vector<graphics_operation::queue_batch_item> optimisedQueue;
-        optimisedQueue.clear();
-
-        std::int32_t ordinal = 1;
-
-        thread_local std::vector<rect> clipRegionStack;
-        clipRegionStack.clear();
-
-        for (auto& queueEntry : queue())
-        {
-            auto const opType = static_cast<graphics_operation::operation_type>(queueEntry.index());
-            switch (opType)
-            {
-            case graphics_operation::PushScissor:
-                clipRegionStack.push_back(static_variant_cast<const graphics_operation::push_scissor&>(queueEntry).rect);
-                break;
-            case graphics_operation::PopScissor:
-                if (clipRegionStack.empty())
-                    throw std::logic_error("neogfx::opengl_rendering_context::flush: unmatched PopScissor");
-                clipRegionStack.pop_back();
-                break;
-            }
-            optimisedQueue.emplace_back(&queueEntry, ordinal++, !clipRegionStack.empty() ? clipRegionStack.back() : std::optional<rect>{});
-        }
-
-        if (service<i_rendering_engine>().is_render_queue_optimization_on())
-        {
-            // todo...
-            std::stable_sort(optimisedQueue.begin(), optimisedQueue.end(), [](auto const& lhs, auto const& rhs)
-                {
-                    return lhs->index() < rhs->index();
-                });
-        }
 
         scoped_render_target srt{ render_target() };
         set_blending_mode(blending_mode());
@@ -495,7 +461,6 @@ namespace neogfx
                 ++batchEnd;
             graphics_operation::batch const opBatch{ &*batchStart, &*batchStart + (batchEnd - batchStart) };
             auto const opType = static_cast<graphics_operation::operation_type>((**opBatch.cbegin()).index());
-            batches.push_back(std::make_pair(opType, batchEnd - batchStart));
             batchStart = batchEnd;
             switch (opType)
             {
@@ -547,7 +512,7 @@ namespace neogfx
             case graphics_operation::SetFrontFace:
                 set_front_face(static_variant_cast<const graphics_operation::set_front_face&>(**(std::prev(opBatch.cend()))).frontFace);
                 break;
-             case graphics_operation::SetCullFaces:
+            case graphics_operation::SetCullFaces:
                 set_face_culling(static_variant_cast<const graphics_operation::set_face_culling&>(**(std::prev(opBatch.cend()))).culling);
                 break;
             case graphics_operation::SetOpacity:
@@ -621,7 +586,8 @@ namespace neogfx
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
                     auto const& args = static_variant_cast<const graphics_operation::blit&>(**op);
-                    blit(args.destinationRect, args.texture, args.sourceRect, args.blendingMode);
+                    set_origin((*op).origin);
+                    blit(args.destinationRect, *args.texture, args.sourceRect, args.blendingMode);
                 }
                 break;
             case graphics_operation::DrawPixel:
@@ -661,13 +627,15 @@ namespace neogfx
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
                     auto const& args = static_variant_cast<const graphics_operation::draw_cubic_bezier&>(**op);
-                    draw_cubic_bezier(args.p0 + origin(), args.p1 + origin(), args.p2 + origin(), args.p3 + origin(), args.pen);
+                    set_origin((*op).origin);
+                    draw_cubic_bezier(args.p0, args.p1, args.p2, args.p3, args.pen);
                 }
                 break;
             case graphics_operation::DrawPath:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
                     auto const& args = static_variant_cast<const graphics_operation::draw_path&>(**op);
+                    set_origin((*op).origin);
                     draw_path(args.path, args.shape, args.boundingRect, args.pen, args.fill);
                 }
                 break;
@@ -678,7 +646,8 @@ namespace neogfx
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
                     auto const& args = static_variant_cast<const graphics_operation::draw_entities&>(**op);
-                    draw_entities(args.ecs, args.layer, args.transformation);
+                    set_origin((*op).origin);
+                    draw_entities(*args.ecs, args.layer, args.transformation);
                 }
                 break;
             case graphics_operation::DrawGlyph:
@@ -689,22 +658,14 @@ namespace neogfx
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
                     auto const& args = static_variant_cast<const graphics_operation::draw_mesh&>(**op);
+                    set_origin((*op).origin);
                     draw_mesh(args.mesh, args.material, args.transformation, args.filter);
                 }
                 break;
             }
         }
 
-#if defined(NEOGFX_DEBUG)
-        service<debug::logger>() << neolib::logger::severity::Info << "Render queue batch count: " << batches.size() << std::endl;
-        service<debug::logger>() << neolib::logger::severity::Info << "Render queue batch sizes (>1): ";
-        for (auto const& batch : batches)
-            if (batch.second > 1)
-                service<debug::logger>() << "[" << to_string(batch.first) << ":" << batch.second << "]";
-        service<debug::logger>() << std::endl;
-#endif // NEOGFX_DEBUG
-
-        queue().clear();
+        iTarget.clear_render_queues();
     }
 
     bool opengl_rendering_context::redirecting() const
@@ -1136,7 +1097,7 @@ namespace neogfx
     void opengl_rendering_context::draw_pixel(const point& aPoint, const color& aColor)
     {
         graphics_operation::operation const op{ graphics_operation::draw_pixel{ aPoint, aColor } };
-        graphics_operation::queue_batch_item const qbi{ &op, 1, std::nullopt };
+        graphics_operation::queue_batch_item const qbi{ &op, 1, {} };
         draw_pixels(graphics_operation::batch{ &qbi, &qbi + 1 });
     }
 
@@ -1154,7 +1115,7 @@ namespace neogfx
             for (auto op = aDrawPixelOps.cbegin(); op != aDrawPixelOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_pixel&>(**op);
-                auto rectVertices = rect_vertices<vec3f>(rect{ drawOp.point + origin(), size{1.0, 1.0} }, mesh_type::Triangles);
+                auto rectVertices = rect_vertices<vec3f>(rect{ drawOp.point + op->origin, size{1.0, 1.0} }, mesh_type::Triangles);
                 for (auto const& v : rectVertices)
                     vertexArrays.push_back({ v,
                             vec4f{{
@@ -1169,7 +1130,7 @@ namespace neogfx
     void opengl_rendering_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
     {
         graphics_operation::operation const op{ graphics_operation::draw_line{ aFrom, aTo, aPen } };
-        graphics_operation::queue_batch_item const qbi{ &op, 1, std::nullopt };
+        graphics_operation::queue_batch_item const qbi{ &op, 1, {} };
         draw_lines(graphics_operation::batch{ &qbi, &qbi + 1 });
     }
 
@@ -1186,8 +1147,8 @@ namespace neogfx
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_line&>(**op);
                 auto const& adjust = (drawOp.pen.anti_aliased() || static_cast<std::int32_t>(drawOp.pen.width()) % 2 == 0 ? point{} : point{0.5, 0.5});
-                auto const& from = drawOp.from + origin() + adjust;
-                auto const& to = drawOp.to + origin() + adjust;
+                auto const& from = drawOp.from + op->origin + adjust;
+                auto const& to = drawOp.to + op->origin + adjust;
                 auto boundingRect = rect{ from.min(to), from.max(to) }.inflated(drawOp.pen.width());
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
@@ -1234,9 +1195,9 @@ namespace neogfx
             for (auto op = aDrawTriangleOps.cbegin(); op != aDrawTriangleOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_triangle&>(**op);
-                auto const& p0 = drawOp.p0 + origin();
-                auto const& p1 = drawOp.p1 + origin();
-                auto const& p2 = drawOp.p2 + origin();
+                auto const& p0 = drawOp.p0 + op->origin;
+                auto const& p1 = drawOp.p1 + op->origin;
+                auto const& p2 = drawOp.p2 + op->origin;
                 auto boundingRect = rect{ p0.min(p1.min(p2)), p0.max(p1.max(p2)) }.inflated(drawOp.pen.width());
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
@@ -1277,7 +1238,7 @@ namespace neogfx
             for (auto op = aDrawRectOps.cbegin(); op != aDrawRectOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_rect&>(**op);
-                auto const& rc = drawOp.rect + origin();
+                auto const& rc = drawOp.rect + op->origin;
 
                 if (rc.top_left().z == 0.0 && rc.bottom_right().z == 0.0 &&
                     ((std::holds_alternative<color>(drawOp.fill) && 
@@ -1382,7 +1343,7 @@ namespace neogfx
             for (auto op = aDrawRoundedRectOps.cbegin(); op != aDrawRoundedRectOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_rounded_rect&>(**op);
-                auto const& rc = drawOp.rect + origin();
+                auto const& rc = drawOp.rect + op->origin;
                 auto const sdfRect = snap_to_pixel() ? rc.deflated(drawOp.pen.width() / 2.0) : rc;
                 auto const boundingRect = rc.inflated(drawOp.pen.width() / 2.0);
                 auto const vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
@@ -1434,7 +1395,7 @@ namespace neogfx
             for (auto op = aDrawEllpseRectOps.cbegin(); op != aDrawEllpseRectOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse_rect&>(**op);
-                auto const& rc = drawOp.rect + origin();
+                auto const& rc = drawOp.rect + op->origin;
                 auto const sdfRect = snap_to_pixel() ? rc.deflated(drawOp.pen.width() / 2.0) : rc;
                 auto const boundingRect = rc.inflated(drawOp.pen.width() / 2.0);
                 auto const vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
@@ -1482,7 +1443,7 @@ namespace neogfx
                     snap.emplace(iSnapToPixelUsesOffset, false);
 
                     auto& drawOp = static_variant_cast<const graphics_operation::draw_checkerboard&>(**op);
-                    auto const& rc = drawOp.rect + origin();
+                    auto const& rc = drawOp.rect + op->origin;
                     auto& fill = (pass == 0u ? drawOp.fill1 : drawOp.fill2);
 
                     if (std::holds_alternative<gradient>(fill))
@@ -1551,7 +1512,7 @@ namespace neogfx
             for (auto op = aDrawEllipseOps.cbegin(); op != aDrawEllipseOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse&>(**op);
-                auto const& center = drawOp.center + origin();
+                auto const& center = drawOp.center + op->origin;
                 auto boundingRect = rect{ center - point{ std::max(drawOp.radiusA, drawOp.radiusB), std::max(drawOp.radiusA, drawOp.radiusB) }, size{ std::max(drawOp.radiusA, drawOp.radiusB) * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
@@ -1602,7 +1563,7 @@ namespace neogfx
             for (auto op = aDrawCircleOps.cbegin(); op != aDrawCircleOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_circle&>(**op);
-                auto const& center = drawOp.center + origin();
+                auto const& center = drawOp.center + op->origin;
                 auto boundingRect = rect{ center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
@@ -1653,7 +1614,7 @@ namespace neogfx
             for (auto op = aDrawPieOps.cbegin(); op != aDrawPieOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_pie&>(**op);
-                auto const& center = drawOp.center + origin();
+                auto const& center = drawOp.center + op->origin;
                 auto boundingRect = rect{ center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
@@ -1704,7 +1665,7 @@ namespace neogfx
             for (auto op = aDrawArcOps.cbegin(); op != aDrawArcOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_arc&>(**op);
-                auto const& center = drawOp.center + origin();
+                auto const& center = drawOp.center + op->origin;
                 auto boundingRect = rect{ center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
@@ -1739,6 +1700,11 @@ namespace neogfx
         if (!aPen.width())
             return;
 
+        auto const p0 = aP0 + origin();
+        auto const p1 = aP1 + origin();
+        auto const p2 = aP2 + origin();
+        auto const p3 = aP3 + origin();
+
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::CubicBezier);
@@ -1749,7 +1715,7 @@ namespace neogfx
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u) };
 
-            auto boundingRect = rect{ aP0.min(aP1.min(aP2.min(aP3))), aP0.max(aP1.max(aP2.max(aP3))) }.inflated(aPen.width());
+            auto boundingRect = rect{ p0.min(p1.min(p2.min(p3))), p0.max(p1.max(p2.max(p3))) }.inflated(aPen.width());
             auto const function = to_function(*this, aPen.color(), boundingRect);
             auto rectVertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
             if (aPen.width())
@@ -1760,8 +1726,8 @@ namespace neogfx
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(aPen.color()) ? 0.0f : 1.0f },
                         {},
                         function,
-                        vec4{ aP0.x, aP0.y, aP1.x, aP1.y }.as<float>(),
-                        vec4{ aP2.x, aP2.y, aP3.x, aP3.y }.as<float>(),
+                        vec4{ p0.x, p0.y, p1.x, p1.y }.as<float>(),
+                        vec4{ p2.x, p2.y, p3.x, p3.y }.as<float>(),
                         vec4{ 0.0, 0.0, 0.0, aPen.width() }.as<float>() });
         }
     }

@@ -426,6 +426,7 @@ namespace neogfx
             bind();
             GLint previousPackAlignment;
             GLint previousPackRowLength;
+            glCheck(glActiveTexture(GL_TEXTURE0 + iBoundTextureUnit.value()));
             glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment));
             glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, aPackAlignment));
             glCheck(glGetIntegerv(GL_UNPACK_ROW_LENGTH, &previousPackRowLength));
@@ -550,19 +551,11 @@ namespace neogfx
     }
 
     template <typename T>
-    graphics_operation::i_queue& opengl_texture<T>::graphics_operation_queue() const
-    {
-        if (iQueue == nullptr)
-            iQueue = std::make_unique<graphics_operation::queue>();
-        return *iQueue;
-    }
-
-    template <typename T>
     void opengl_texture<T>::bind() const
     {
         if (iBoundTextureUnit.has_value())
         {
-            glCheck(glActiveTexture(GL_TEXTURE0 + iBoundTextureUnit.value()));
+            bind(iBoundTextureUnit.value());
             return;
         }
         if (texture_bindings().unbound.empty())

@@ -496,12 +496,6 @@ namespace neogfx
     }
 
     template <typename T>
-    graphics_operation::i_queue& vulkan_texture<T>::graphics_operation_queue() const
-    {
-        TODO;
-    }
-
-    template <typename T>
     void vulkan_texture<T>::bind() const
     {
         TODO;

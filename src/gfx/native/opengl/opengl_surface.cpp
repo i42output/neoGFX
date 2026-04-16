@@ -164,13 +164,6 @@ namespace neogfx
         return std::make_unique<opengl_rendering_context>(*this, aWidget, aBlendingMode);
     }
 
-    graphics_operation::i_queue& opengl_surface::graphics_operation_queue() const
-    {
-        if (iQueue == nullptr)
-            iQueue = std::make_unique<graphics_operation::queue>();
-        return *iQueue;
-    }
-
     void opengl_surface::set_destroying()
     {
         if (!is_alive())

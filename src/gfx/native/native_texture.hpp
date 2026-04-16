@@ -23,11 +23,13 @@
 
 #include <map>
 
+#include <neogfx/gfx/render_target.hpp>
+
 #include "i_native_texture.hpp"
 
 namespace neogfx
 {
-    class native_texture : public reference_counted<i_native_texture>
+    class native_texture : public reference_counted<render_target<i_native_texture>>
     {
     public:
         typedef i_native_texture abstract_type;

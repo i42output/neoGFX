@@ -386,7 +386,7 @@ namespace neogfx
 
     void graphics_context::blit(rect const& aDestinationRect, i_texture const& aTexture, rect const& aSourceRect, neogfx::blending_mode aBlendingMode)
     {
-        rendering_context().enqueue(graphics_operation::blit{ to_device_units(aDestinationRect), aTexture, to_device_units(aSourceRect), aBlendingMode });
+        rendering_context().enqueue(graphics_operation::blit{ to_device_units(aDestinationRect), &aTexture, to_device_units(aSourceRect), aBlendingMode });
     }
 
     bool graphics_context::gradient_set() const
@@ -571,7 +571,7 @@ namespace neogfx
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         rendering_context().enqueue(
             graphics_operation::draw_entities{
-                aEcs,
+                &aEcs,
                 aLayer,
                 mat44{
                     { toDeviceUnits.x, 0.0, 0.0, 0.0 },

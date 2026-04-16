@@ -189,7 +189,7 @@ namespace neogfx
         struct blit
         {
             rect destinationRect;
-            i_texture const& texture;
+            i_texture const* texture;
             rect sourceRect;
             blending_mode blendingMode;
         };
@@ -314,7 +314,7 @@ namespace neogfx
 
         struct draw_entities
         {
-            game::i_ecs& ecs;
+            game::i_ecs* ecs;
             game::scene_layer layer;
             mat44 transformation;
         };
@@ -392,57 +392,57 @@ namespace neogfx
 
         enum operation_type
         {
-            Invalid = 0,
-            SetLogicalCoordinateSystem,
-            SetLogicalCoordinates,
-            SetOrigin,
-            SetViewport,
-            SetViewTransformation,
-            ScissorOn,
-            ScissorOff,
-            PushScissor,
-            PopScissor,
-            SnapToPixelOn,
-            SnapToPixelOff,
-            SetFrontFace,
-            SetCullFaces,
-            SetOpacity,
-            SetBlendingMode,
-            SetSmoothingMode,
-            PushLogicalOperation,
-            PopLogicalOperation,
-            LineStippleOn,
-            LineStippleOff,
-            SubpixelRenderingOn,
-            SubpixelRenderingOff,
-            Clear,
-            ClearDepthBuffer,
-            ClearStencilBuffer,
-            EnableStencilTest,
-            DisableStencilTest,
-            EnableStencilUpdate,
-            DisableStencilUpdate,
-            ClearGradient,
-            SetGradient,
-            SetPixel,
-            Blit,
-            DrawPixel,
-            DrawLine,
-            DrawTriangle,
-            DrawRect,
-            DrawRoundedRect,
-            DrawEllipseRect,
-            DrawCheckerboard,
-            DrawCircle,
-            DrawEllipse,
-            DrawPie,
-            DrawArc,
-            DrawCubicBezier,
-            DrawPath,
-            DrawShape,
-            DrawEntities,
-            DrawGlyph,
-            DrawMesh
+            Invalid                     = 0,
+            SetLogicalCoordinateSystem  = 1,
+            SetLogicalCoordinates       = 2,
+            SetOrigin                   = 3,
+            SetViewport                 = 4,
+            SetViewTransformation       = 5,
+            ScissorOn                   = 6,
+            ScissorOff                  = 7,
+            PushScissor                 = 8,
+            PopScissor                  = 9,
+            SnapToPixelOn               = 10,
+            SnapToPixelOff              = 11,
+            SetFrontFace                = 12,
+            SetCullFaces                = 13,
+            SetOpacity                  = 14,
+            SetBlendingMode             = 15,
+            SetSmoothingMode            = 16,
+            PushLogicalOperation        = 17,
+            PopLogicalOperation         = 18,
+            LineStippleOn               = 19,
+            LineStippleOff              = 20,
+            SubpixelRenderingOn         = 21,
+            SubpixelRenderingOff        = 22,
+            Clear                       = 23,
+            ClearDepthBuffer            = 24,
+            ClearStencilBuffer          = 25,
+            EnableStencilTest           = 26,
+            DisableStencilTest          = 27,
+            EnableStencilUpdate         = 28,
+            DisableStencilUpdate        = 29,
+            ClearGradient               = 30,
+            SetGradient                 = 31,
+            SetPixel                    = 32,
+            Blit                        = 33,
+            DrawPixel                   = 34,
+            DrawLine                    = 35,
+            DrawTriangle                = 36,
+            DrawRect                    = 37,
+            DrawRoundedRect             = 38,
+            DrawEllipseRect             = 39,
+            DrawCheckerboard            = 40,
+            DrawCircle                  = 41,
+            DrawEllipse                 = 42,
+            DrawPie                     = 43,
+            DrawArc                     = 44,
+            DrawCubicBezier             = 45,
+            DrawPath                    = 46,
+            DrawShape                   = 47,
+            DrawEntities                = 48,
+            DrawGlyph                   = 49,
+            DrawMesh                    = 50
         };
 
         std::string to_string(operation_type aOpType);
@@ -451,27 +451,22 @@ namespace neogfx
         bool batchable(text_format const& aLeft, text_format const& aRight);
         bool batchable(i_glyph_text const& lhsText, i_glyph_text const& rhsText, glyph_char const& lhs, glyph_char const& rhs);
 
-        class i_queue
-        {
-        public:
-            virtual ~i_queue() = default;
-        };
-
-        class queue : public i_queue, public std::vector<operation>
-        {
-        public:
-            using vector<operation>::vector;
-        };
+        using i_queue = i_vector<maybe_abstract_t<operation>>;
+        using queue = vector<operation>;
 
         struct queue_batch_item
         {
             operation const* op;
             std::int32_t ordinal;
+            point origin;
             std::optional<rect> clipRegion;
 
             operation const& operator*() const { return *op; }
             operation const* operator->() const { return op; }
         };
+
+        using i_optimised_queue = i_vector<maybe_abstract_t<queue_batch_item>>;
+        using optimised_queue = vector<queue_batch_item>;
 
         using batch = std::ranges::subrange<queue_batch_item const*>;
     }
