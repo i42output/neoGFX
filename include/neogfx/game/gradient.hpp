@@ -31,6 +31,8 @@ namespace neogfx::game
         neolib::cookie_ref_ptr id;
         std::optional<aabb_2df> boundingBox;
 
+        auto operator<=>(gradient const&) const = default;
+
         struct meta : i_component_data::meta
         {
             static const neolib::uuid& id()

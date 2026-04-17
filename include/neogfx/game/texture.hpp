@@ -43,6 +43,31 @@ namespace neogfx::game
         vec2f extents;
         optional_aabb_2df subTexture;
 
+        bool operator==(const texture& rhs) const
+        {
+            if (sampling != rhs.sampling)
+                return false;
+            auto const& lhsTexture = *service<i_texture_manager>().find_texture(id.cookie());
+            auto const& rhsTexture = *service<i_texture_manager>().find_texture(rhs.id.cookie());
+            return lhsTexture.native_handle() == rhsTexture.native_handle();
+        }
+
+        bool operator<(const texture& rhs) const
+        {
+            if (sampling != rhs.sampling)
+                return sampling < rhs.sampling;
+            auto const& lhsTexture = *service<i_texture_manager>().find_texture(id.cookie());
+            auto const& rhsTexture = *service<i_texture_manager>().find_texture(rhs.id.cookie());
+            return lhsTexture.native_handle() < rhsTexture.native_handle();
+        }
+
+        auto operator<=>(const texture& rhs) const
+        {
+            if (*this == rhs) return std::weak_ordering::equivalent;
+            if (*this < rhs)  return std::weak_ordering::less;
+            return std::weak_ordering::greater;
+        }
+
         struct meta : i_component_data::meta
         {
             static const neolib::uuid& id()

@@ -457,6 +457,8 @@ namespace neogfx
         apply_scissor();
         apply_stencil();
 
+        std::vector<std::pair<graphics_operation::operation_type, std::size_t>> batches;
+
         for (auto batchStart = optimisedQueue.begin(); batchStart != optimisedQueue.end();)
         {
             auto batchEnd = std::next(batchStart);
@@ -464,6 +466,7 @@ namespace neogfx
                 ++batchEnd;
             graphics_operation::batch const opBatch{ &*batchStart, &*batchStart + (batchEnd - batchStart) };
             auto const opType = static_cast<graphics_operation::operation_type>((**opBatch.cbegin()).index());
+            batches.emplace_back(opType, std::distance(batchStart, batchEnd));
             batchStart = batchEnd;
             switch (opType)
             {
@@ -670,6 +673,10 @@ namespace neogfx
                 break;
             }
         }
+
+        for (auto const& batch : batches)
+            std::cerr << "[" << to_string(batch.first) << ":" << batch.second << "]";
+        std::cerr << std::endl;
 
         iTarget.clear_render_queues();
     }
@@ -2565,6 +2572,7 @@ namespace neogfx
             ignore = {};
             auto const& meshRenderCache = (meshDrawable.entity != null_entity ? cache->entity_record_no_lock(meshDrawable.entity, true) : ignore);
             auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
+            auto const& origin = meshDrawable.origin.to_vec3().as<float>();
             auto const& transformation = meshDrawable.transformation;
             auto const& faces = mesh.faces;
             auto const& material = meshRenderer.material;
@@ -2620,7 +2628,7 @@ namespace neogfx
                     {
                         for (auto faceVertexIndex : face)
                         {
-                            auto const& xyz = (transformation? *transformation * mesh.vertices[faceVertexIndex] : mesh.vertices[faceVertexIndex]);
+                            auto const& xyz = (transformation? *transformation * mesh.vertices[faceVertexIndex] : mesh.vertices[faceVertexIndex]) + origin;
                             auto const& rgba = (material.color != std::nullopt ? material.color->rgba : defaultColor);
                             auto const& uv = (patch_drawable::has_texture(meshRenderer, material) ?
                                 (mesh.uv[faceVertexIndex].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0f / textureStorageExtents) : vec2f{});
@@ -2695,13 +2703,7 @@ namespace neogfx
 
             auto const& batchRenderer = *item->meshDrawable->renderer;
             auto const& batchMaterial = *item->material;
-
-            if (!originTranslatedTransformation || originTranslatedTransformation->first != item->meshDrawable->origin)
-            {
-                originTranslatedTransformation.emplace(item->meshDrawable->origin, aTransformation.as<float>());
-                apply_translation(originTranslatedTransformation->second, item->meshDrawable->origin.to_vec3().as<float>());
-            }
-            auto const& transformation = originTranslatedTransformation->second;
+            auto const& transformation = aTransformation.as<float>();
 
             auto calc_bounding_rect = [&vertices, &aPatch](const patch_drawable::item& aItem) -> rect
             {

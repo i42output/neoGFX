@@ -32,6 +32,8 @@ namespace neogfx::game
     {
         vec4f rgba;
 
+        auto operator<=>(color const&) const = default;
+
         struct meta : i_component_data::meta
         {
             static const neolib::uuid& id()
@@ -68,9 +70,4 @@ namespace neogfx::game
             }
         };
     };
-
-    inline bool operator==(const color& lhs, const color& rhs)
-    {
-        return lhs.rgba == rhs.rgba;
-    }
 }

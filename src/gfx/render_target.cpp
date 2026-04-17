@@ -74,8 +74,16 @@ namespace neogfx
                         return lhs->index() < rhs->index();
                     else if (!graphics_operation::batchable(*lhs, *rhs))
                         return &*lhs < &*rhs;
-                    else
-                        return lhs.ordinal < rhs.ordinal;
+                    else if (std::holds_alternative<graphics_operation::draw_mesh>(*lhs))
+                    {
+                        auto const& leftMesh = std::get<graphics_operation::draw_mesh>(*lhs);
+                        auto const& rightMesh = std::get<graphics_operation::draw_mesh>(*rhs);
+                        if (leftMesh.material < rightMesh.material)
+                            return true;
+                        else if (leftMesh.material > rightMesh.material)
+                            return false;
+                    }
+                    return lhs.ordinal < rhs.ordinal;
                 });
         }
     }

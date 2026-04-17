@@ -44,6 +44,8 @@ namespace neogfx::game
         std::optional<shader_effect> shaderEffect;
         bool subpixel;
 
+        auto operator<=>(material const&) const = default;
+
         struct meta : i_component_data::meta
         {
             static const neolib::uuid& id()
