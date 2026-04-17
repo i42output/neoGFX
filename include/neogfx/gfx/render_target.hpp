@@ -26,6 +26,15 @@
 
 namespace neogfx
 {
+    struct render_queue_context
+    {
+        point origin;
+        std::vector<rect> clipRegionStack;
+        bool scissorOn = false;
+    };
+
+    void optimise_render_queue(render_queue_context& aContext, graphics_operation::queue const& aInput, graphics_operation::optimised_queue& aOutput);
+
     template <typename T>
     concept RenderTargetInterface = std::is_base_of_v<i_render_target, T>;
 
@@ -41,64 +50,19 @@ namespace neogfx
     public:
         graphics_operation::i_queue& render_queue() const final
         {
-            iOptimisedQueue.clear();
+            if (iOptimisedQueueExtant)
+                throw std::logic_error("neogfx::render_target::render_queue: optimised render queue extant!");
+
             return iQueue;
         }
         graphics_operation::i_optimised_queue const& optimised_render_queue() const final
         {
-            if (!iOptimisedQueue.empty())
+            if (iOptimisedQueueExtant)
                 return iOptimisedQueue;
 
-            bool const optimiseQueue = service<i_rendering_engine>().is_render_queue_optimization_on();
+            iOptimisedQueueExtant = true;
 
-            std::int32_t ordinal = 1;
-
-            for (auto& queueEntry : render_queue())
-            {
-                auto const opType = static_cast<graphics_operation::operation_type>(queueEntry.index());
-                bool keepOp = true;
-                switch (opType)
-                {
-                case graphics_operation::ScissorOn:
-                    iScissorOn = true;
-                    keepOp = !optimiseQueue;
-                    break;
-                case graphics_operation::ScissorOff:
-                    iScissorOn = false;
-                    keepOp = !optimiseQueue;
-                    break;
-                case graphics_operation::PushScissor:
-                    iClipRegionStack.push_back(static_variant_cast<const graphics_operation::push_scissor&>(queueEntry).rect);
-                    keepOp = !optimiseQueue;
-                    break;
-                case graphics_operation::PopScissor:
-                    if (iClipRegionStack.empty())
-                        throw std::logic_error("neogfx::opengl_rendering_context::flush: unmatched PopScissor");
-                    iClipRegionStack.pop_back();
-                    keepOp = !optimiseQueue;
-                    break;
-                case graphics_operation::SetOrigin:
-                    iOrigin = static_variant_cast<const graphics_operation::set_origin&>(queueEntry).origin;
-                    keepOp = !optimiseQueue;
-                    break;
-                }
-                if (keepOp)
-                    iOptimisedQueue.emplace_back(&queueEntry, ordinal++, iOrigin, optimiseQueue && !iClipRegionStack.empty() && iScissorOn ? iClipRegionStack.back() : std::optional<rect>{});
-            }
-
-            if (service<i_rendering_engine>().is_render_queue_optimization_on())
-            {
-                // todo...
-                std::stable_sort(iOptimisedQueue.begin(), iOptimisedQueue.end(), [](auto const& lhs, auto const& rhs)
-                    {
-                        if (lhs->index() != rhs->index())
-                            return lhs->index() < rhs->index();
-                        else if (!graphics_operation::batchable(*lhs, *rhs))
-                            return &*lhs < &*rhs;
-                        else
-                            return lhs.ordinal < rhs.ordinal;
-                    });
-            }
+            optimise_render_queue(iRenderQueueContext, iQueue, iOptimisedQueue);
 
             return iOptimisedQueue;
         }
@@ -106,13 +70,13 @@ namespace neogfx
         {
             iQueue.clear();
             iOptimisedQueue.clear();
+            iOptimisedQueueExtant = false;
         }
     private:
+        mutable render_queue_context iRenderQueueContext;
         mutable graphics_operation::queue iQueue;
         mutable graphics_operation::optimised_queue iOptimisedQueue;
-        mutable point iOrigin;
-        mutable std::vector<rect> iClipRegionStack;
-        mutable bool iScissorOn = false;
+        mutable bool iOptimisedQueueExtant = false;
     };
 
 }

@@ -178,9 +178,6 @@
     <ClCompile Include="..\..\..\src\gui\widget\skin_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\render_target.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\hid\game_controllers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

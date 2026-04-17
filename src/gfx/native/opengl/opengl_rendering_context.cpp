@@ -447,7 +447,10 @@ namespace neogfx
         std::size_t const queueSize = optimisedQueue.size();
 
         if (queueSize == 0u)
+        {
+            render_target().clear_render_queues();
             return;
+        }
 
         scoped_render_target srt{ render_target() };
         set_blending_mode(blending_mode());
@@ -494,7 +497,10 @@ namespace neogfx
                 break;
             case graphics_operation::PushScissor:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
+                {
+                    set_origin((*op).origin);
                     push_scissor(static_variant_cast<const graphics_operation::push_scissor&>(**op).rect);
+                }
                 break;
             case graphics_operation::PopScissor:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
@@ -1145,6 +1151,8 @@ namespace neogfx
 
             for (auto op = aDrawLineOps.cbegin(); op != aDrawLineOps.cend(); ++op)
             {
+                set_origin(op->origin);
+
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_line&>(**op);
                 auto const& adjust = (drawOp.pen.anti_aliased() || static_cast<std::int32_t>(drawOp.pen.width()) % 2 == 0 ? point{} : point{0.5, 0.5});
                 auto const& from = drawOp.from + op->origin + adjust;
@@ -1194,6 +1202,8 @@ namespace neogfx
 
             for (auto op = aDrawTriangleOps.cbegin(); op != aDrawTriangleOps.cend(); ++op)
             {
+                set_origin(op->origin);
+
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_triangle&>(**op);
                 auto const& p0 = drawOp.p0 + op->origin;
                 auto const& p1 = drawOp.p1 + op->origin;
@@ -1237,6 +1247,8 @@ namespace neogfx
 
             for (auto op = aDrawRectOps.cbegin(); op != aDrawRectOps.cend(); ++op)
             {
+                set_origin(op->origin);
+
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_rect&>(**op);
                 auto const& rc = drawOp.rect + op->origin;
 
@@ -1342,6 +1354,8 @@ namespace neogfx
 
             for (auto op = aDrawRoundedRectOps.cbegin(); op != aDrawRoundedRectOps.cend(); ++op)
             {
+                set_origin(op->origin);
+
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_rounded_rect&>(**op);
                 auto const& rc = drawOp.rect + op->origin;
                 auto const sdfRect = snap_to_pixel() ? rc.deflated(drawOp.pen.width() / 2.0) : rc;
@@ -1394,6 +1408,8 @@ namespace neogfx
 
             for (auto op = aDrawEllpseRectOps.cbegin(); op != aDrawEllpseRectOps.cend(); ++op)
             {
+                set_origin(op->origin);
+
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse_rect&>(**op);
                 auto const& rc = drawOp.rect + op->origin;
                 auto const sdfRect = snap_to_pixel() ? rc.deflated(drawOp.pen.width() / 2.0) : rc;
@@ -1437,6 +1453,8 @@ namespace neogfx
 
             for (auto op = aDrawCheckerboardOps.cbegin(); op != aDrawCheckerboardOps.cend(); ++op)
             {
+                set_origin(op->origin);
+
                 for (std::uint32_t pass = 0u; pass <= 1u; ++pass)
                 {
                     usp.emplace(*this, rendering_engine().default_shader_program(), iOpacity);
@@ -1511,6 +1529,8 @@ namespace neogfx
 
             for (auto op = aDrawEllipseOps.cbegin(); op != aDrawEllipseOps.cend(); ++op)
             {
+                set_origin(op->origin);
+
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse&>(**op);
                 auto const& center = drawOp.center + op->origin;
                 auto boundingRect = rect{ center - point{ std::max(drawOp.radiusA, drawOp.radiusB), std::max(drawOp.radiusA, drawOp.radiusB) }, size{ std::max(drawOp.radiusA, drawOp.radiusB) * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
@@ -1562,6 +1582,8 @@ namespace neogfx
 
             for (auto op = aDrawCircleOps.cbegin(); op != aDrawCircleOps.cend(); ++op)
             {
+                set_origin(op->origin);
+
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_circle&>(**op);
                 auto const& center = drawOp.center + op->origin;
                 auto boundingRect = rect{ center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
@@ -1613,6 +1635,8 @@ namespace neogfx
 
             for (auto op = aDrawPieOps.cbegin(); op != aDrawPieOps.cend(); ++op)
             {
+                set_origin(op->origin);
+
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_pie&>(**op);
                 auto const& center = drawOp.center + op->origin;
                 auto boundingRect = rect{ center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
@@ -1664,6 +1688,8 @@ namespace neogfx
 
             for (auto op = aDrawArcOps.cbegin(); op != aDrawArcOps.cend(); ++op)
             {
+                set_origin(op->origin);
+
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_arc&>(**op);
                 auto const& center = drawOp.center + op->origin;
                 auto boundingRect = rect{ center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
@@ -1789,6 +1815,8 @@ namespace neogfx
     {
         for (auto const& op : aDrawShapeOps)
         {
+            set_origin(op.origin);
+
             auto const& shapeOp = static_variant_cast<const graphics_operation::draw_shape&>(*op);
             fill_shape(shapeOp.mesh, shapeOp.position, shapeOp.fill);
             draw_shape(shapeOp.mesh, shapeOp.position, shapeOp.pen);
@@ -1887,16 +1915,16 @@ namespace neogfx
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        thread_local std::vector<std::vector<mesh_drawable>> tDrawables;
+        thread_local std::vector<std::vector<mesh_drawable>> tMeshDrawables;
         thread_local game::scene_layer tMaxLayer = 0;
         thread_local optional_ecs_render_lock tLock;
 
-        if (tDrawables.size() <= aLayer)
-            tDrawables.resize(aLayer + 1);
+        if (tMeshDrawables.size() <= aLayer)
+            tMeshDrawables.resize(aLayer + 1);
 
         if (aLayer == 0)
         {
-            for (auto& d : tDrawables)
+            for (auto& d : tMeshDrawables)
                 d.clear();
             tLock.emplace(aEcs);
 
@@ -1923,20 +1951,22 @@ namespace neogfx
                 for (auto const& patch : meshRenderer.patches)
                     if (patch.layer.has_value())
                         tMaxLayer = std::max(tMaxLayer, patch.layer.value());
-                if (tDrawables.size() <= tMaxLayer)
-                    tDrawables.resize(tMaxLayer + 1);
+                if (tMeshDrawables.size() <= tMaxLayer)
+                    tMeshDrawables.resize(tMaxLayer + 1);
                 auto const& meshFilter = meshFilters.has_entity_record_no_lock(entity) ?
                     meshFilters.entity_record_no_lock(entity) :
                     game::current_animation_frame(animatedMeshFilters.entity_record_no_lock(entity));
-                tDrawables[meshRenderer.layer].emplace_back(
+                tMeshDrawables[meshRenderer.layer].emplace_back(
+                    origin(),
                     meshFilter,
                     meshRenderer,
                     optional_mat44f{},
                     entity);
                 for (auto const& patch : meshRenderer.patches)
                     if (patch.layer.has_value() && patch.layer.value() != meshRenderer.layer && 
-                        (tDrawables[patch.layer.value()].empty() || tDrawables[patch.layer.value()].back().entity != entity))
-                        tDrawables[patch.layer.value()].emplace_back(
+                        (tMeshDrawables[patch.layer.value()].empty() || tMeshDrawables[patch.layer.value()].back().entity != entity))
+                        tMeshDrawables[patch.layer.value()].emplace_back(
+                            origin(),
                             meshFilter,
                             meshRenderer,
                             optional_mat44f{},
@@ -1950,22 +1980,22 @@ namespace neogfx
                     auto const& animationMeshFilterTransformation = (animatedMeshFilters.has_entity_record_no_lock(entity) ?
                         to_transformation_matrix(animatedMeshFilters.entity_record_no_lock(entity)) : mat44f::identity());
                     auto const& transformation = rigidBodyTransformation * meshFilterTransformation * animationMeshFilterTransformation;
-                    tDrawables[meshRenderer.layer].back().transformation = transformation;
+                    tMeshDrawables[meshRenderer.layer].back().transformation = transformation;
                     for (auto const& patch : meshRenderer.patches)
                         if (patch.layer.has_value() && patch.layer.value() != meshRenderer.layer && 
-                            !tDrawables[patch.layer.value()].back().transformation.has_value())
-                            tDrawables[patch.layer.value()].back().transformation = transformation;
+                            !tMeshDrawables[patch.layer.value()].back().transformation.has_value())
+                            tMeshDrawables[patch.layer.value()].back().transformation = transformation;
                 }
                 if (info.debug)
-                    tDrawables[meshRenderer.layer].back().debug = true;
+                    tMeshDrawables[meshRenderer.layer].back().debug = true;
             }
         }
-        if (!tDrawables[aLayer].empty())
-            draw_meshes(tLock, dynamic_cast<i_vertex_provider&>(aEcs), aLayer, &*tDrawables[aLayer].begin(), &*tDrawables[aLayer].begin() + tDrawables[aLayer].size(), aTransformation);
+        if (!tMeshDrawables[aLayer].empty())
+            draw_meshes(tLock, dynamic_cast<i_vertex_provider&>(aEcs), aLayer, &*tMeshDrawables[aLayer].begin(), &*tMeshDrawables[aLayer].begin() + tMeshDrawables[aLayer].size(), aTransformation);
         if (aLayer >= tMaxLayer)
         {
             tMaxLayer = 0;
-            for (auto& d : tDrawables)
+            for (auto& d : tMeshDrawables)
                 d.clear();
             tLock.reset();
         }
@@ -1998,7 +2028,7 @@ namespace neogfx
                 while (a != drawOp.attributes.end() && (g - drawOp.begin) >= a->end)
                     ++a;
                 auto& glyphChar = *g;
-                drawGlyphCache.emplace_back(drawOp.point, &drawOp.glyphText.content(), &glyphChar, a != drawOp.attributes.end() && (g - drawOp.begin) >= a->start ? &a->attributes : nullptr, drawOp.showMnemonics);
+                drawGlyphCache.emplace_back(op->origin, drawOp.point, &drawOp.glyphText.content(), &glyphChar, a != drawOp.attributes.end() && (g - drawOp.begin) >= a->start ? &a->attributes : nullptr, drawOp.showMnemonics);
             }
         }
 
@@ -2040,20 +2070,32 @@ namespace neogfx
         disable_anti_alias daa{ *this };
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        thread_local std::vector<game::mesh_filter> tMeshFilters;
-        thread_local std::vector<game::mesh_renderer> tMeshRenderers;
-        thread_local std::vector<mesh_drawable> tDrawables;
+        thread_local std::size_t tNesting;
+        neolib::scoped_counter sc{ tNesting };
+
+        thread_local std::vector<std::unique_ptr<draw_glyph_arrays>> tDrawGlyphArraysStack;
+        if (tDrawGlyphArraysStack.size() < tNesting)
+            tDrawGlyphArraysStack.resize(tNesting);
+        if (tDrawGlyphArraysStack[tNesting - 1u] == nullptr)
+            tDrawGlyphArraysStack[tNesting - 1u] = std::make_unique<draw_glyph_arrays>();
+
+        auto& tDrawGlyphArrays = *tDrawGlyphArraysStack[tNesting - 1u];
+        auto& tMeshOrigins = tDrawGlyphArrays.meshOrigins;
+        auto& tMeshFilters = tDrawGlyphArrays.meshFilters;
+        auto& tMeshRenderers = tDrawGlyphArrays.meshRenderers;
+        auto& tMeshDrawables = tDrawGlyphArrays.drawables;
 
         auto draw = [&]()
         {
             for (std::size_t i = 0; i < tMeshFilters.size(); ++i)
-                tDrawables.emplace_back(tMeshFilters[i], tMeshRenderers[i]);
+                tMeshDrawables.emplace_back(tMeshOrigins[i], tMeshFilters[i], tMeshRenderers[i]);
             optional_ecs_render_lock ignore;
-            if (!tDrawables.empty())
-                draw_meshes(ignore, as_vertex_provider(), 0, &*tDrawables.begin(), &*tDrawables.begin() + tDrawables.size(), mat44::identity());
+            if (!tMeshDrawables.empty())
+                draw_meshes(ignore, as_vertex_provider(), 0, &*tMeshDrawables.begin(), &*tMeshDrawables.begin() + tMeshDrawables.size(), mat44::identity());
+            tMeshOrigins.clear();
             tMeshFilters.clear();
             tMeshRenderers.clear();
-            tDrawables.clear();
+            tMeshDrawables.clear();
         };
 
         auto bounding_rect = [&]()
@@ -2180,6 +2222,7 @@ namespace neogfx
                     {
                         auto const& mesh = to_ecs_component(drawOp.point + quadf{glyphChar.cell[0], glyphChar.cell[1], glyphChar.cell[2], glyphChar.cell[3]}, mesh_type::Triangles);
 
+                        tMeshOrigins.push_back(drawOp.origin);
                         tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
                         tMeshRenderers.push_back(
                             game::mesh_renderer{
@@ -2242,10 +2285,11 @@ namespace neogfx
 
                     auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
                     auto const& emojiTexture = emojiAtlas.emoji_texture(glyphChar.value).as_sub_texture();
-                    tMeshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
                     auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
-                        (drawOp.appearance->ignore_emoji() ? neolib::none : drawOp.appearance->ink()) : 
+                        (drawOp.appearance->ignore_emoji() ? neolib::none : drawOp.appearance->ink()) :
                         (drawOp.appearance->effect()->ignore_emoji() ? neolib::none : drawOp.appearance->effect()->color());
+                    tMeshOrigins.push_back(drawOp.origin);
+                    tMeshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
                     tMeshRenderers.push_back(game::mesh_renderer
                         {
                             game::material
@@ -2302,8 +2346,9 @@ namespace neogfx
                                     (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
 
                                 auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
-                                tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
                                 auto const& ink = drawOp.appearance->effect()->color();
+                                tMeshOrigins.push_back(drawOp.origin);
+                                tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
                                 tMeshRenderers.push_back(
                                     game::mesh_renderer{
                                         game::material{
@@ -2330,9 +2375,10 @@ namespace neogfx
                             (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
 
                         auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
-                        tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
                         auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
                             drawOp.appearance->ink() : drawOp.appearance->effect()->color();
+                        tMeshOrigins.push_back(drawOp.origin);
+                        tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
                         tMeshRenderers.push_back(
                             game::mesh_renderer{
                                 game::material{
@@ -2445,6 +2491,7 @@ namespace neogfx
 
         mesh_drawable drawable
         {
+            origin(),
             aMeshFilter,
             aMeshRenderer
         };
@@ -2633,8 +2680,7 @@ namespace neogfx
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        auto transformation = aTransformation.as<float>();
-        apply_translation(transformation, origin().to_vec3().as<float>());
+        std::optional<std::pair<point, mat44f>> originTranslatedTransformation;
 
         std::optional<use_vertex_arrays> vertexArrayUsage;
 
@@ -2649,6 +2695,13 @@ namespace neogfx
 
             auto const& batchRenderer = *item->meshDrawable->renderer;
             auto const& batchMaterial = *item->material;
+
+            if (!originTranslatedTransformation || originTranslatedTransformation->first != item->meshDrawable->origin)
+            {
+                originTranslatedTransformation.emplace(item->meshDrawable->origin, aTransformation.as<float>());
+                apply_translation(originTranslatedTransformation->second, item->meshDrawable->origin.to_vec3().as<float>());
+            }
+            auto const& transformation = originTranslatedTransformation->second;
 
             auto calc_bounding_rect = [&vertices, &aPatch](const patch_drawable::item& aItem) -> rect
             {

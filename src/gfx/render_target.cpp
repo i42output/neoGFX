@@ -21,10 +21,65 @@
 
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/i_rendering_context.hpp>
-#include <neogfx/gfx/i_render_target.hpp>
+#include <neogfx/gfx/render_target.hpp>
 
 namespace neogfx
 {
+    void optimise_render_queue(render_queue_context& aContext, graphics_operation::queue const& aInput, graphics_operation::optimised_queue& aOutput)
+    {
+        bool const optimiseQueue = service<i_rendering_engine>().is_render_queue_optimization_on();
+
+        std::int32_t ordinal = 1;
+
+        for (auto const& queueEntry : aInput)
+        {
+            auto const opType = static_cast<graphics_operation::operation_type>(queueEntry.index());
+            bool keepOp = true;
+            switch (opType)
+            {
+            case graphics_operation::ScissorOn:
+                aContext.scissorOn = true;
+                keepOp = !optimiseQueue;
+                break;
+            case graphics_operation::ScissorOff:
+                aContext.scissorOn = false;
+                keepOp = !optimiseQueue;
+                break;
+            case graphics_operation::PushScissor:
+                aContext.clipRegionStack.push_back(static_variant_cast<const graphics_operation::push_scissor&>(queueEntry).rect);
+                keepOp = !optimiseQueue;
+                break;
+            case graphics_operation::PopScissor:
+                if (aContext.clipRegionStack.empty())
+                    throw std::logic_error("neogfx::opengl_rendering_context::flush: unmatched PopScissor");
+                aContext.clipRegionStack.pop_back();
+                keepOp = !optimiseQueue;
+                break;
+            case graphics_operation::SetOrigin:
+                aContext.origin = static_variant_cast<const graphics_operation::set_origin&>(queueEntry).origin;
+                keepOp = !optimiseQueue;
+                break;
+            }
+            if (keepOp)
+                aOutput.emplace_back(&queueEntry, ordinal++, aContext.origin, 
+                    optimiseQueue && !aContext.clipRegionStack.empty() && aContext.scissorOn ? aContext.clipRegionStack.back() : std::optional<rect>{});
+        }
+
+        if (service<i_rendering_engine>().is_render_queue_optimization_on())
+        {
+            // todo...
+            std::stable_sort(aOutput.begin(), aOutput.end(), [](auto const& lhs, auto const& rhs)
+                {
+                    if (lhs->index() != rhs->index())
+                        return lhs->index() < rhs->index();
+                    else if (!graphics_operation::batchable(*lhs, *rhs))
+                        return &*lhs < &*rhs;
+                    else
+                        return lhs.ordinal < rhs.ordinal;
+                });
+        }
+    }
+
     scoped_render_target::scoped_render_target() : iRenderTarget{ nullptr }, iPreviouslyActivatedTarget{ nullptr }
     {
         iPreviouslyActivatedTarget = service<i_rendering_engine>().active_target();

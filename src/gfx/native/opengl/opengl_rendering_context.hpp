@@ -125,6 +125,7 @@ namespace neogfx
         };
         struct draw_glyph
         {
+            point origin;
             vec3f point;
             i_glyph_text* glyphText;
             glyph_char const* glyphChar;
@@ -133,17 +134,20 @@ namespace neogfx
         };
         struct mesh_drawable
         {
+            point origin;
             game::mesh_filter const* filter;
             game::mesh_renderer const* renderer;
             optional_mat44f transformation;
             game::entity_id entity;
             bool debug = false;
             mesh_drawable(
+                point const& origin,
                 game::mesh_filter const& filter, 
                 game::mesh_renderer const& renderer,
                 optional_mat44f const& transformation = {},
                 game::entity_id entity = game::null_entity
                 ) :
+                origin{ origin },
                 filter{ &filter },
                 renderer{ &renderer },
                 transformation{ transformation },
@@ -206,6 +210,13 @@ namespace neogfx
                 }
             };
             std::vector<item> items;
+        };
+        struct draw_glyph_arrays
+        {
+            std::vector<point> meshOrigins;
+            std::vector<game::mesh_filter> meshFilters;
+            std::vector<game::mesh_renderer> meshRenderers;
+            std::vector<mesh_drawable> drawables;
         };
         typedef game::scoped_component_data_lock<game::mesh_renderer, game::mesh_render_cache, game::mesh_filter, game::animation_filter, game::rigid_body> ecs_render_lock;
         typedef std::optional<ecs_render_lock> optional_ecs_render_lock;
