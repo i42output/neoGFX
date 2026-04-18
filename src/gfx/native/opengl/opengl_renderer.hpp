@@ -154,9 +154,9 @@ namespace neogfx
         void stencil_based_invalidation_on() override;
         void stencil_based_invalidation_off() override;
     public:
-        bool is_render_queue_optimization_on() const override;
-        void render_queue_optimization_on() override;
-        void render_queue_optimization_off() override;
+        bool is_rendering_queue_optimization_on() const override;
+        void rendering_queue_optimization_on() override;
+        void rendering_queue_optimization_off() override;
     public:
         bool is_subpixel_rendering_on() const override;
         void subpixel_rendering_on() override;

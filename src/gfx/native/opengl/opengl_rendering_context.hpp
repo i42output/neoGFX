@@ -232,8 +232,8 @@ namespace neogfx
         const i_render_target& render_target() const final;
         rect rendering_area(bool aConsiderScissor = true) const final;
     public:
-        graphics_operation::queue& queue() const final;
-        graphics_operation::optimised_queue const& optimised_queue() const;
+        i_rendering_queue& queue() const final;
+        i_optimised_rendering_queue const& optimised_queue() const;
         void enqueue(const graphics_operation::operation& aOperation) final;
         void flush() final;
     public:
@@ -293,27 +293,27 @@ namespace neogfx
         void enable_stencil_update(std::int32_t aRef);
         void disable_stencil_update();
         void apply_stencil();
-        void set_pixel(const graphics_operation::batch& aSetPixelOps);
+        void set_pixel(const render_batch& aSetPixelOps);
         void draw_pixel(const point& aPoint, const color& aColor);
-        void draw_pixels(const graphics_operation::batch& aFillRectOps);
+        void draw_pixels(const render_batch& aFillRectOps);
         void draw_line(const point& aFrom, const point& aTo, const pen& aPen);
-        void draw_lines(const graphics_operation::batch& aDrawLineOps);
-        void draw_triangles(const graphics_operation::batch& aDrawTriangleOps);
-        void draw_rects(const graphics_operation::batch& aDrawRectOps);
-        void draw_rounded_rects(const graphics_operation::batch& aDrawRoundedRectOps);
-        void draw_ellipse_rects(const graphics_operation::batch& aDrawEllipseRectOps);
-        void draw_checkerboards(const graphics_operation::batch& aDrawCheckerboardOps);
-        void draw_circles(const graphics_operation::batch& aDrawCircleOps);
-        void draw_ellipses(const graphics_operation::batch& aDrawEllipseOps);
-        void draw_pies(const graphics_operation::batch& aDrawPieOps);
-        void draw_arcs(const graphics_operation::batch& aDrawArcOps);
+        void draw_lines(const render_batch& aDrawLineOps);
+        void draw_triangles(const render_batch& aDrawTriangleOps);
+        void draw_rects(const render_batch& aDrawRectOps);
+        void draw_rounded_rects(const render_batch& aDrawRoundedRectOps);
+        void draw_ellipse_rects(const render_batch& aDrawEllipseRectOps);
+        void draw_checkerboards(const render_batch& aDrawCheckerboardOps);
+        void draw_circles(const render_batch& aDrawCircleOps);
+        void draw_ellipses(const render_batch& aDrawEllipseOps);
+        void draw_pies(const render_batch& aDrawPieOps);
+        void draw_arcs(const render_batch& aDrawArcOps);
         void draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen);
         void draw_path(const ssbo_range& aPath, path_shape aPathShape, const rect aBoundingRect, const pen& aPen, const brush& aFill);
-        void draw_shapes(const graphics_operation::batch& aDrawShapeOps);
+        void draw_shapes(const render_batch& aDrawShapeOps);
         void draw_shape(const game::mesh& aMesh, const vec3& aPosition, const pen& aPen);
         void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer, const mat44& aTransformation);
         void fill_shape(const game::mesh& aMesh, const vec3& aPosition, const brush& aFill);
-        void draw_glyphs(const graphics_operation::batch& aDrawGlyphOps);
+        void draw_glyphs(const render_batch& aDrawGlyphOps);
         void draw_glyphs(const draw_glyph* aBegin, const draw_glyph* aEnd);
         void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation, const std::optional<game::filter>& aFilter = {});
         void draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
@@ -323,6 +323,7 @@ namespace neogfx
     public:
         neogfx::subpixel_format subpixel_format() const final;
     private:
+        void update_state(queue_batch_item const& aQbi);
         bool applying_scissor() const;
         void apply_scissor();
         void apply_logical_operation();
@@ -337,16 +338,6 @@ namespace neogfx
         const i_render_target& iTarget;
         const i_widget* iWidget;
         bool iInFlush;
-        mutable std::optional<neogfx::logical_coordinate_system> iLogicalCoordinateSystem;
-        mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
-        point iOrigin;
-        bool iMultisample;
-        std::optional<double> iSampleShadingRate;
-        std::optional<neogfx::front_face> iFrontFace;
-        std::optional<neogfx::face_culling> iFaceCulling;
-        double iOpacity;
-        std::optional<neogfx::blending_mode> iBlendingMode;
-        std::optional<neogfx::smoothing_mode> iSmoothingMode;
         bool iSubpixelRendering;
         std::vector<logical_operation> iLogicalOperationStack;
         std::list<use_shader_program> iShaderProgramStack;
@@ -357,7 +348,8 @@ namespace neogfx
         bool iStencilEnabled = false;
         bool iUpdatingStencil = false;
         std::optional<std::int32_t> iStencilRef;
-        GLint iPreviousTexture;
+        rendering_context_fast_state iFastState;
+        rendering_context_slow_state iSlowState;
         font iLastDrawGlyphFallbackFont;
         std::optional<std::uint8_t> iLastDrawGlyphFallbackFontIndex;
         sink iSink;

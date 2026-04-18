@@ -26,14 +26,51 @@
 
 namespace neogfx
 {
-    struct render_queue_context
+    struct rendering_queue_context
     {
-        point origin;
         std::vector<rect> clipRegionStack;
         bool scissorOn = false;
+
+        std::uint64_t fastStateGeneration = 0;
+        std::uint64_t slowStateGeneration = 0;
+
+        std::vector<rendering_context_fast_state> fastState;
+        std::vector<rendering_context_fast_state const*> fastStateIndex;
+        std::vector<rendering_context_slow_state> slowState;
+        std::vector<rendering_context_slow_state const*> slowStateIndex;
+
+        std::optional<rendering_context_fast_state> lastFastState;
+        std::optional<rendering_context_slow_state> lastSlowState;
+
+        rendering_context_fast_state const* intern_state(rendering_context_fast_state const& aFastState)
+        {
+            auto it = std::lower_bound(fastStateIndex.begin(), fastStateIndex.end(), aFastState,
+                [](rendering_context_fast_state const* p, rendering_context_fast_state const& s) { return *p < s; });
+            if (it == fastStateIndex.end() || **it != aFastState)
+            {
+                auto& stored = fastState.emplace_back(aFastState);
+                fastStateIndex.insert(it, &stored);
+                stored.generation = ++fastStateGeneration;
+                return &stored;
+            }
+            return *it;
+        }
+        rendering_context_slow_state const* intern_state(rendering_context_slow_state const& aSlowState)
+        {
+            auto it = std::lower_bound(slowStateIndex.begin(), slowStateIndex.end(), aSlowState,
+                [](rendering_context_slow_state const* p, rendering_context_slow_state const& s) { return *p < s; });
+            if (it == slowStateIndex.end() || **it != aSlowState)
+            {
+                auto& stored = slowState.emplace_back(aSlowState);
+                slowStateIndex.insert(it, &stored);
+                stored.generation = ++slowStateGeneration;
+                return &stored;
+            }
+            return *it;
+        }
     };
 
-    void optimise_render_queue(render_queue_context& aContext, graphics_operation::queue const& aInput, graphics_operation::optimised_queue& aOutput);
+    void optimise_rendering_queue(rendering_queue_context& aContext, rendering_queue const& aInput, optimised_rendering_queue& aOutput);
 
     template <typename T>
     concept RenderTargetInterface = std::is_base_of_v<i_render_target, T>;
@@ -48,34 +85,71 @@ namespace neogfx
         define_declared_event(TargetDeactivated, target_deactivated)
         define_declared_event(TargetDestroying, target_destroying)
     public:
-        graphics_operation::i_queue& render_queue() const final
+        void begin_rendering() const final
+        {
+            iRenderQueueContext.lastFastState.reset();
+            iRenderQueueContext.lastSlowState.reset();
+        }
+        void end_rendering() const final
+        {
+            clear_rendering_queues(true);
+        }
+        neogfx::rendering_queue& rendering_queue() const final
         {
             if (iOptimisedQueueExtant)
-                throw std::logic_error("neogfx::render_target::render_queue: optimised render queue extant!");
+                clear_rendering_queues();
 
             return iQueue;
         }
-        graphics_operation::i_optimised_queue const& optimised_render_queue() const final
+        neogfx::optimised_rendering_queue const& optimised_rendering_queue() const final
         {
             if (iOptimisedQueueExtant)
                 return iOptimisedQueue;
 
             iOptimisedQueueExtant = true;
 
-            optimise_render_queue(iRenderQueueContext, iQueue, iOptimisedQueue);
+            iRenderQueueContext.fastState.reserve(iQueue.size() + 1u);
+            iRenderQueueContext.fastStateIndex.reserve(iQueue.size() + 1u);
+            iRenderQueueContext.slowState.reserve(iQueue.size() + 1u);
+            iRenderQueueContext.slowStateIndex.reserve(iQueue.size() + 1u);
+
+            optimise_rendering_queue(iRenderQueueContext, iQueue, iOptimisedQueue);
 
             return iOptimisedQueue;
         }
-        void clear_render_queues() const final
-        {
+    private:
+        void clear_rendering_queues(bool aEndRendering = false) const
+        { 
+            if (aEndRendering)
+            {
+                iRenderQueueContext.lastFastState.reset();
+                iRenderQueueContext.lastSlowState.reset();
+            }
+            else
+            {
+                if (!iRenderQueueContext.fastState.empty())
+                    iRenderQueueContext.lastFastState = iRenderQueueContext.fastState.back();
+                else
+                    iRenderQueueContext.lastFastState.reset();
+                if (!iRenderQueueContext.slowState.empty())
+                    iRenderQueueContext.lastSlowState = iRenderQueueContext.slowState.back();
+                else
+                    iRenderQueueContext.lastSlowState.reset();
+            }
+
+            iRenderQueueContext.fastState.clear();
+            iRenderQueueContext.fastStateIndex.clear();
+            iRenderQueueContext.slowState.clear();
+            iRenderQueueContext.slowStateIndex.clear();
+
             iQueue.clear();
             iOptimisedQueue.clear();
             iOptimisedQueueExtant = false;
         }
     private:
-        mutable render_queue_context iRenderQueueContext;
-        mutable graphics_operation::queue iQueue;
-        mutable graphics_operation::optimised_queue iOptimisedQueue;
+        mutable rendering_queue_context iRenderQueueContext;
+        mutable neogfx::rendering_queue iQueue;
+        mutable neogfx::optimised_rendering_queue iOptimisedQueue;
         mutable bool iOptimisedQueueExtant = false;
     };
 

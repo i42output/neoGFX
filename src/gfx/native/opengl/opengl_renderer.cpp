@@ -329,17 +329,17 @@ namespace neogfx
         iStencilBasedInvalidation = false;
     }
 
-    bool opengl_renderer::is_render_queue_optimization_on() const
+    bool opengl_renderer::is_rendering_queue_optimization_on() const
     {
         return iRenderQueueOptimisation;
     }
 
-    void opengl_renderer::render_queue_optimization_on()
+    void opengl_renderer::rendering_queue_optimization_on()
     {
         iRenderQueueOptimisation = true;
     }
 
-    void opengl_renderer::render_queue_optimization_off()
+    void opengl_renderer::rendering_queue_optimization_off()
     {
         iRenderQueueOptimisation = false;
     }

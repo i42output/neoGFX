@@ -1,7 +1,7 @@
 // render_target.cpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2020-2026 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -25,11 +25,17 @@
 
 namespace neogfx
 {
-    void optimise_render_queue(render_queue_context& aContext, graphics_operation::queue const& aInput, graphics_operation::optimised_queue& aOutput)
+    void optimise_rendering_queue(rendering_queue_context& aContext, rendering_queue const& aInput, optimised_rendering_queue& aOutput)
     {
-        bool const optimiseQueue = service<i_rendering_engine>().is_render_queue_optimization_on();
+        bool const optimiseQueue = service<i_rendering_engine>().is_rendering_queue_optimization_on();
+
+        auto fastState = aContext.intern_state(aContext.lastFastState.value_or(rendering_context_fast_state{}));
+        auto slowState = aContext.intern_state(aContext.lastSlowState.value_or(rendering_context_slow_state{}));
 
         std::int32_t ordinal = 1;
+
+        std::optional<point> origin;
+        std::optional<double> opacity;
 
         for (auto const& queueEntry : aInput)
         {
@@ -56,23 +62,39 @@ namespace neogfx
                 keepOp = !optimiseQueue;
                 break;
             case graphics_operation::SetOrigin:
-                aContext.origin = static_variant_cast<const graphics_operation::set_origin&>(queueEntry).origin;
-                keepOp = !optimiseQueue;
+                origin = static_variant_cast<const graphics_operation::set_origin&>(queueEntry).origin;
+                break;
+            case graphics_operation::SetOpacity:
+                opacity = static_variant_cast<const graphics_operation::set_opacity&>(queueEntry).opacity;
                 break;
             }
+            auto const clipRegion = optimiseQueue && !aContext.clipRegionStack.empty() && aContext.scissorOn ? aContext.clipRegionStack.back() : std::optional<rect>{};
+            if (fastState->clipRegion != clipRegion || 
+                (origin.has_value() && fastState->origin != origin.value()) ||
+                (opacity.has_value() && fastState->opacity != opacity.value()))
+            {
+                auto state = *fastState;
+                if (origin.has_value())
+                    state.origin = origin.value();
+                origin.reset();
+                if (opacity.has_value())
+                    state.opacity = opacity.value();
+                origin.reset();
+                state.clipRegion = clipRegion;
+                fastState = aContext.intern_state(state);
+            }
             if (keepOp)
-                aOutput.emplace_back(&queueEntry, ordinal++, aContext.origin, 
-                    optimiseQueue && !aContext.clipRegionStack.empty() && aContext.scissorOn ? aContext.clipRegionStack.back() : std::optional<rect>{});
+                aOutput.emplace_back(&queueEntry, ordinal++, fastState, slowState);
         }
 
-        if (service<i_rendering_engine>().is_render_queue_optimization_on())
+        if (service<i_rendering_engine>().is_rendering_queue_optimization_on())
         {
             // todo...
             std::stable_sort(aOutput.begin(), aOutput.end(), [](auto const& lhs, auto const& rhs)
                 {
                     if (lhs->index() != rhs->index())
                         return lhs->index() < rhs->index();
-                    else if (!graphics_operation::batchable(*lhs, *rhs))
+                    else if (!batchable(*lhs, *rhs))
                         return &*lhs < &*rhs;
                     else if (std::holds_alternative<graphics_operation::draw_mesh>(*lhs))
                     {

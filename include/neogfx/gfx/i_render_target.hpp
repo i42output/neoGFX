@@ -23,12 +23,11 @@
 
 #include <neogfx/core/device_metrics.hpp>
 #include <neogfx/gfx/primitives.hpp>
-#include <neogfx/gfx/graphics_operations.hpp>
+#include <neogfx/gfx/i_rendering_context.hpp>
 
 namespace neogfx
 {
     class i_texture;
-    class i_rendering_context;
 
     enum class render_target_type
     {
@@ -79,9 +78,10 @@ namespace neogfx
         virtual color read_pixel(const point& aPosition) const = 0;
     public:
         virtual std::unique_ptr<i_rendering_context> create_rendering_context(blending_mode aBlendingMode = blending_mode::Default) const = 0; // todo: use ref_ptr
-        virtual graphics_operation::i_queue& render_queue() const = 0;
-        virtual graphics_operation::i_optimised_queue const& optimised_render_queue() const = 0;
-        virtual void clear_render_queues() const = 0;
+        virtual void begin_rendering() const = 0;
+        virtual void end_rendering() const = 0;
+        virtual i_rendering_queue& rendering_queue() const = 0;
+        virtual i_optimised_rendering_queue const& optimised_rendering_queue() const = 0;
     };
 
     class scoped_render_target

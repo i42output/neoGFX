@@ -450,24 +450,5 @@ namespace neogfx
         bool batchable(const operation& aLeft, const operation& aRight);
         bool batchable(text_format const& aLeft, text_format const& aRight);
         bool batchable(i_glyph_text const& lhsText, i_glyph_text const& rhsText, glyph_char const& lhs, glyph_char const& rhs);
-
-        using i_queue = i_vector<maybe_abstract_t<operation>>;
-        using queue = vector<operation>;
-
-        struct queue_batch_item
-        {
-            operation const* op;
-            std::int32_t ordinal;
-            point origin;
-            std::optional<rect> clipRegion;
-
-            operation const& operator*() const { return *op; }
-            operation const* operator->() const { return op; }
-        };
-
-        using i_optimised_queue = i_vector<maybe_abstract_t<queue_batch_item>>;
-        using optimised_queue = vector<queue_batch_item>;
-
-        using batch = std::ranges::subrange<queue_batch_item const*>;
     }
 }

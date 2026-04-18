@@ -85,6 +85,7 @@ namespace neogfx
 
         vec2 bottomLeft;
         vec2 topRight;
+
         bool is_gui_orientation() const
         {
             return bottomLeft.y > topRight.y;
@@ -93,14 +94,8 @@ namespace neogfx
         {
             return !is_gui_orientation();
         }
-        friend bool operator==(const logical_coordinates& lhs, const logical_coordinates& rhs)
-        {
-            return lhs.bottomLeft == rhs.bottomLeft && lhs.topRight == rhs.topRight;
-        }
-        friend bool operator!=(const logical_coordinates& lhs, const logical_coordinates& rhs)
-        {
-            return !(lhs == rhs);
-        }
+
+        auto operator<=>(const logical_coordinates&) const = default;
     };
 
     typedef neolib::optional<logical_coordinates> optional_logical_coordinates;
@@ -1167,33 +1162,9 @@ namespace neogfx
     }
 
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline bool operator<(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
+    inline auto operator<=>(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
     {
-        return std::forward_as_tuple(left.position(), left.extents()) < std::forward_as_tuple(right.position(), right.extents());
-    }
-
-    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline bool operator==(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
-    {
-        return left.position() == right.position() && left.extents() == right.extents();
-    }
-
-    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline bool operator<=(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
-    {
-        return left < right || left == right;
-    }
-
-    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline bool operator>(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
-    {
-        return right < left;
-    }
-
-    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline bool operator>=(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
-    {
-        return right < left || left == right;
+        return std::forward_as_tuple(left.position(), left.extents()) <=> std::forward_as_tuple(right.position(), right.extents());
     }
 
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>

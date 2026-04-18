@@ -39,6 +39,7 @@
 #include <neogfx/gfx/pen.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/primitives.hpp>
+#include <neogfx/gfx/i_render_target.hpp>
 #include <neogfx/gfx/i_rendering_context.hpp>
 #include <neogfx/gfx/i_ping_pong_buffer.hpp>
 #include <neogfx/gfx/view.hpp>

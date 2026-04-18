@@ -25,12 +25,63 @@
 #include <neogfx/hid/i_display.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/graphics_operations.hpp>
-#include <neogfx/gfx/i_render_target.hpp>
 
 namespace neogfx
 {
     class i_rendering_engine;
+    class i_render_target;
     class i_gradient_shader;
+
+    struct rendering_context_state
+    {
+        std::uint64_t generation = 0;
+
+        bool operator==(rendering_context_state const&) const { return true; }
+        auto operator<=>(rendering_context_state const&) const { return std::strong_ordering::equal; }
+    };
+
+    struct rendering_context_fast_state : rendering_context_state
+    {
+        point origin;
+        std::optional<rect> clipRegion;
+        double opacity = 1.0;
+
+        bool operator==(rendering_context_fast_state const&) const = default;
+        auto operator<=>(rendering_context_fast_state const&) const = default;
+    };
+
+    struct rendering_context_slow_state : rendering_context_state
+    {
+        std::optional<logical_coordinate_system> logicalCoordinateSystem;
+        std::optional<logical_coordinates> logicalCoordinates;
+        std::optional<bool> multisample;
+        std::optional<double> sampleShadingRate;
+        std::optional<front_face> frontFace;
+        std::optional<face_culling> faceCulling;
+        std::optional<blending_mode> blendingMode;
+        std::optional<smoothing_mode> smoothingMode;
+
+        bool operator==(rendering_context_slow_state const&) const = default;
+        auto operator<=>(rendering_context_slow_state const&) const = default;
+    };
+
+    using i_rendering_queue = i_vector<maybe_abstract_t<graphics_operation::operation>>;
+    using rendering_queue = vector<graphics_operation::operation>;
+
+    struct queue_batch_item
+    {
+        graphics_operation::operation const* op;
+        std::int32_t ordinal;
+        rendering_context_fast_state const* fastState;
+        rendering_context_slow_state const* slowState;
+        graphics_operation::operation const& operator*() const { return *op; }
+        graphics_operation::operation const* operator->() const { return op; }
+    };
+
+    using i_optimised_rendering_queue = i_vector<maybe_abstract_t<queue_batch_item>>;
+    using optimised_rendering_queue = vector<queue_batch_item>;
+
+    using render_batch = std::ranges::subrange<queue_batch_item const*>;
 
     class i_rendering_context
     {
@@ -43,7 +94,7 @@ namespace neogfx
         virtual i_rendering_engine& rendering_engine() const = 0;
         virtual const i_render_target& render_target() const = 0;
         virtual rect rendering_area(bool aConsiderScissor = true) const = 0;
-        virtual graphics_operation::queue& queue() const = 0;
+        virtual i_rendering_queue& queue() const = 0;
         virtual void enqueue(graphics_operation::operation const& aOperation) = 0;
         virtual void flush() = 0;
     public:

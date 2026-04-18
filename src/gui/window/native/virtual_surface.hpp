@@ -86,9 +86,10 @@ namespace neogfx
     public:
         std::unique_ptr<i_rendering_context> create_rendering_context(blending_mode aBlendingMode) const final;
         std::unique_ptr<i_rendering_context> create_rendering_context(const i_widget& aWidget, blending_mode aBlendingMode) const final;
-        graphics_operation::i_queue& render_queue() const final;
-        graphics_operation::i_optimised_queue const& optimised_render_queue() const final;
-        void clear_render_queues() const final;
+        void begin_rendering() const final;
+        void end_rendering() const final;
+        i_rendering_queue& rendering_queue() const final;
+        i_optimised_rendering_queue const& optimised_rendering_queue() const final;
     public:
         std::uint64_t frame_counter() const final;
         double fps() const final;
