@@ -36,10 +36,10 @@ namespace neogfx
     private:
         typedef std::unique_ptr<neogfx::label> label_ptr;
         typedef std::unique_ptr<neogfx::check_box> check_box_ptr;
-        class item_container : public widget<>
+        class box : public widget<>
         {
         public:
-            item_container(group_box& aParent);
+            box(group_box& aParent);
         protected:
             void paint(i_graphics_context& aGc) const override;
         protected:
@@ -48,7 +48,8 @@ namespace neogfx
             group_box& iParent;
         };
     private:
-        static constexpr scalar DEFAULT_PADDING = 5.0;
+        static constexpr scalar DEFAULT_PADDING = 0.0;
+        static constexpr scalar DEFAULT_SPACING = 5.0;
     public:
         struct not_checkable : std::logic_error { not_checkable() : std::logic_error("neogfx::group_box::not_checkable") {} };
     public:
@@ -65,6 +66,8 @@ namespace neogfx
         bool has_check_box() const;
         const neogfx::check_box& check_box() const;
         neogfx::check_box& check_box();
+        const i_widget& item_box() const;
+        i_widget& item_box();
         void set_item_layout(i_layout& aItemLayout);
         void set_item_layout(i_ref_ptr<i_layout> const& aItemLayout);
         const i_layout& item_layout() const;
@@ -95,7 +98,7 @@ namespace neogfx
         vertical_layout iLayout;
         horizontal_layout iTitleLayout;
         std::variant<std::monostate, label_ptr, check_box_ptr> iTitle;
-        item_container iItemContainer;
+        box iBox;
         ref_ptr<i_layout> iItemLayout;
         define_property(property_category::color, optional_color, BorderColor, border_color)
         define_property(property_category::color, optional_color, FillColor, fill_color)

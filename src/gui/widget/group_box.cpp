@@ -23,37 +23,38 @@
 
 namespace neogfx
 {
-    group_box::item_container::item_container(group_box& aParent) :
+    group_box::box::box(group_box& aParent) :
         widget{ aParent.layout() }, iParent{ aParent }
     {
         set_padding(dpi_scale(size{ DEFAULT_PADDING }));
     }
 
-    void group_box::item_container::paint(i_graphics_context& aGc) const
+    void group_box::box::paint(i_graphics_context& aGc) const
     {
         widget::paint(aGc);
+
         aGc.draw_rounded_rect(client_rect(), 4.0, pen{ iParent.border_color() }, brush{ iParent.fill_color() });
     }
 
-    color group_box::item_container::palette_color(color_role aColorRole) const
+    color group_box::box::palette_color(color_role aColorRole) const
     {
         return iParent.palette_color(aColorRole);
     }
 
     group_box::group_box(std::string const& aText) : 
-        widget(), iLayout{ *this }, iTitleLayout{ iLayout }, iTitle{ std::make_unique<neogfx::label>(iTitleLayout, aText) }, iItemContainer{ *this }
+        widget(), iLayout{ *this }, iTitleLayout{ iLayout }, iTitle{ std::make_unique<neogfx::label>(iTitleLayout, aText) }, iBox{ *this }
     {
         init();
     }
 
     group_box::group_box(i_widget& aParent, std::string const& aText) :
-        widget(aParent), iLayout{ *this }, iTitleLayout{ iLayout }, iTitle{ std::make_unique<neogfx::label>(iTitleLayout, aText) }, iItemContainer{ *this }
+        widget(aParent), iLayout{ *this }, iTitleLayout{ iLayout }, iTitle{ std::make_unique<neogfx::label>(iTitleLayout, aText) }, iBox{ *this }
     {
         init();
     }
 
     group_box::group_box(i_layout& aLayout, std::string const& aText) :
-        widget(aLayout), iLayout{ *this }, iTitleLayout{ iLayout }, iTitle{ std::make_unique<neogfx::label>(iTitleLayout, aText) }, iItemContainer{ *this }
+        widget(aLayout), iLayout{ *this }, iTitleLayout{ iLayout }, iTitle{ std::make_unique<neogfx::label>(iTitleLayout, aText) }, iBox{ *this }
     {
         init();
     }
@@ -135,6 +136,16 @@ namespace neogfx
         throw not_checkable();
     }
 
+    const i_widget& group_box::item_box() const
+    {
+        return iBox;
+    }
+
+    i_widget& group_box::item_box()
+    {
+        return iBox;
+    }
+
     void group_box::set_item_layout(i_layout& aItemLayout)
     {
         set_item_layout(ref_ptr<i_layout>{ref_ptr<i_layout>{}, &aItemLayout});
@@ -143,11 +154,11 @@ namespace neogfx
     void group_box::set_item_layout(i_ref_ptr<i_layout> const& aItemLayout)
     {
         iItemLayout = aItemLayout;
-        iItemContainer.set_layout(iItemLayout);
+        iBox.set_layout(iItemLayout);
         if (!iItemLayout->has_padding())
-            iItemLayout->set_padding(neogfx::padding{});
+            iItemLayout->set_padding(dpi_scale(neogfx::padding{ DEFAULT_PADDING }));
         if (!iItemLayout->has_spacing())
-            iItemLayout->set_spacing(dpi_scale(size{ DEFAULT_PADDING }));
+            iItemLayout->set_spacing(dpi_scale(size{ DEFAULT_SPACING }));
     }
 
     const i_layout& group_box::item_layout() const
@@ -248,6 +259,6 @@ namespace neogfx
 
     void group_box::update_widgets()
     {
-        iItemContainer.enable(!is_checkable() || check_box().is_checked());
+        iBox.enable(!is_checkable() || check_box().is_checked());
     }
 }

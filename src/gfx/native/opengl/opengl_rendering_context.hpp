@@ -258,9 +258,7 @@ namespace neogfx
         void set_snap_to_pixel(bool aSnapToPixel);
         void scissor_on();
         void scissor_off();
-        void push_scissor(const rect& aRect);
-        void pop_scissor();
-        const optional_rect& scissor_rect() const;
+        std::optional<rect> const& scissor_rect() const;
         bool multisample() const;
         void set_multisample(bool aMultisample);
         void enable_sample_shading(double aSampleShadingRate);
@@ -326,6 +324,7 @@ namespace neogfx
         void update_state(queue_batch_item const& aQbi);
         bool applying_scissor() const;
         void apply_scissor();
+        void apply_scissor(std::optional<rect> const& aScissorRect);
         void apply_logical_operation();
     private:
         static standard_batching& as_vertex_provider()
@@ -342,8 +341,7 @@ namespace neogfx
         std::vector<logical_operation> iLogicalOperationStack;
         std::list<use_shader_program> iShaderProgramStack;
         std::int32_t iScissorCounter = 0;
-        std::vector<rect> iScissorRects;
-        mutable optional_rect iScissorRect;
+        bool iApplyingState = false;
         bool iApplyingScissor = false;
         bool iStencilEnabled = false;
         bool iUpdatingStencil = false;

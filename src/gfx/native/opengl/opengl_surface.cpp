@@ -149,6 +149,8 @@ namespace neogfx
 
         rendering_engine().execute_vertex_buffers();
 
+        glCheck(glDisable(GL_SCISSOR_TEST));
+
         glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
         glCheck(glBindFramebuffer(GL_READ_FRAMEBUFFER, iFrameBuffer));
         glCheck(glBlitFramebuffer(0, 0, static_cast<GLint>(extents().cx), static_cast<GLint>(extents().cy), 0, 0, static_cast<GLint>(extents().cx), static_cast<GLint>(extents().cy), GL_COLOR_BUFFER_BIT, GL_NEAREST));

@@ -29,10 +29,9 @@ namespace neogfx
     struct rendering_queue_context
     {
         std::vector<rect> clipRegionStack;
-        bool scissorOn = false;
 
-        std::uint64_t fastStateGeneration = 0;
-        std::uint64_t slowStateGeneration = 0;
+        std::uint64_t fastStateGeneration = 0u;
+        std::uint64_t slowStateGeneration = 0u;
 
         std::vector<rendering_context_fast_state> fastState;
         std::vector<rendering_context_fast_state const*> fastStateIndex;
@@ -122,6 +121,9 @@ namespace neogfx
         { 
             if (aEndRendering)
             {
+                iRenderQueueContext.clipRegionStack.clear();
+                iRenderQueueContext.fastStateGeneration = 0u;
+                iRenderQueueContext.slowStateGeneration = 0u;
                 iRenderQueueContext.lastFastState.reset();
                 iRenderQueueContext.lastSlowState.reset();
             }

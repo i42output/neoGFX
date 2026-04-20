@@ -239,7 +239,6 @@ namespace neogfx
         iSink += render_target().target_deactivating([&]() 
         { 
             flush(); 
-            glCheck(glDisable(GL_SCISSOR_TEST));
         });
         iSink += render_target().target_activating([&]()
         {
@@ -269,7 +268,6 @@ namespace neogfx
         iSink += render_target().target_deactivating([&]()
         {
             flush();
-            glCheck(glDisable(GL_SCISSOR_TEST));
         });
         iSink += render_target().target_activating([&]()
         {
@@ -300,7 +298,6 @@ namespace neogfx
         iSink += render_target().target_deactivating([&]()
         {
             flush();
-            glCheck(glDisable(GL_SCISSOR_TEST));
         });
         iSink += render_target().target_activating([&]()
         {
@@ -443,6 +440,23 @@ namespace neogfx
         queue().push_back(aOperation);
     }
 
+    inline bool batchable(queue_batch_item const& aLeft, queue_batch_item const& aRight, bool aStencilBasedInvalidation)
+    {
+        if (aLeft.fastState->clipRegion != aRight.fastState->clipRegion)
+        {
+            if (aLeft.fastState->clipRegion && aRight.fastState->clipRegion)
+            {
+                if (aLeft.fastState->clipRegion->intersects(*aRight.fastState->clipRegion))
+                    return false;
+                else if (!aStencilBasedInvalidation)
+                    return false;
+            }
+            else
+                return false;
+        }
+        return batchable(*aLeft, *aRight);
+    }
+
     void opengl_rendering_context::flush()
     {
         if (iInFlush)
@@ -456,6 +470,8 @@ namespace neogfx
         if (queueSize == 0u)
             return;
 
+        bool const stencilBasedInvalidation = service<i_rendering_engine>().is_stencil_based_invalidation_on();
+
         scoped_render_target srt{ render_target() };
         set_blending_mode(blending_mode());
         apply_scissor();
@@ -467,7 +483,7 @@ namespace neogfx
         for (auto batchStart = optimisedQueue.begin(); batchStart != optimisedQueue.end();)
         {
             auto batchEnd = std::next(batchStart);
-            while (batchEnd != optimisedQueue.end() && batchable(**batchStart, **batchEnd))
+            while (batchEnd != optimisedQueue.end() && batchable(*batchStart, *batchEnd, stencilBasedInvalidation))
                 ++batchEnd;
             render_batch const opBatch{ &*batchStart, &*batchStart + (batchEnd - batchStart) };
             auto const opType = static_cast<graphics_operation::operation_type>((**opBatch.cbegin()).index());
@@ -475,18 +491,6 @@ namespace neogfx
             batchStart = batchEnd;
             switch (opType)
             {
-            case graphics_operation::SetLogicalCoordinateSystem:
-                for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
-                    set_logical_coordinate_system(static_variant_cast<const graphics_operation::set_logical_coordinate_system&>(**op).system);
-                break;
-            case graphics_operation::SetLogicalCoordinates:
-                for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
-                    set_logical_coordinates(static_variant_cast<const graphics_operation::set_logical_coordinates&>(**op).coordinates);
-                break;
-            case graphics_operation::SetOrigin:
-                for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
-                    set_origin(static_variant_cast<const graphics_operation::set_origin&>(**op).origin);
-                break;
             case graphics_operation::SetViewport:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
@@ -497,46 +501,11 @@ namespace neogfx
                         render_target().set_viewport(rect{ render_target().target_origin(), render_target().extents() }.as<std::int32_t>());
                 }
                 break;
-            case graphics_operation::ScissorOn:
-                scissor_on();
-                break;
-            case graphics_operation::ScissorOff:
-                scissor_off();
-                break;
-            case graphics_operation::PushScissor:
-                for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
-                {
-                    update_state(*op);
-                    push_scissor(static_variant_cast<const graphics_operation::push_scissor&>(**op).rect);
-                }
-                break;
-            case graphics_operation::PopScissor:
-                for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
-                {
-                    (void)op;
-                    pop_scissor();
-                }
-                break;
             case graphics_operation::SnapToPixelOn:
                 set_snap_to_pixel(true);
                 break;
             case graphics_operation::SnapToPixelOff:
                 set_snap_to_pixel(false);
-                break;
-            case graphics_operation::SetFrontFace:
-                set_front_face(static_variant_cast<const graphics_operation::set_front_face&>(**(std::prev(opBatch.cend()))).frontFace);
-                break;
-            case graphics_operation::SetCullFaces:
-                set_face_culling(static_variant_cast<const graphics_operation::set_face_culling&>(**(std::prev(opBatch.cend()))).culling);
-                break;
-            case graphics_operation::SetOpacity:
-                set_opacity(static_variant_cast<const graphics_operation::set_opacity&>(**(std::prev(opBatch.cend()))).opacity);
-                break;
-            case graphics_operation::SetBlendingMode:
-                set_blending_mode(static_variant_cast<const graphics_operation::set_blending_mode&>(**(std::prev(opBatch.cend()))).blendingMode);
-                break;
-            case graphics_operation::SetSmoothingMode:
-                set_smoothing_mode(static_variant_cast<const graphics_operation::set_smoothing_mode&>(**(std::prev(opBatch.cend()))).smoothingMode);
                 break;
             case graphics_operation::PushLogicalOperation:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
@@ -711,52 +680,47 @@ namespace neogfx
 
     void opengl_rendering_context::update_state(queue_batch_item const& aQbi)
     {
+        neolib::scoped_flag sf{ iApplyingState };
+
         if (iFastState.generation != aQbi.fastState->generation)
+        {
             iFastState = *aQbi.fastState;
-//        if (iSlowState.generation != aQbi.slowState->generation)
-//            iSlowState = *aQbi.slowState;
+            apply_scissor();
+        }
+
+        if (iSlowState.generation != aQbi.slowState->generation)
+        {
+            iSlowState.generation = aQbi.slowState->generation;
+            if (aQbi.slowState->logicalCoordinateSystem)
+                set_logical_coordinate_system(*aQbi.slowState->logicalCoordinateSystem);
+            if (aQbi.slowState->logicalCoordinates)
+                set_logical_coordinates(*aQbi.slowState->logicalCoordinates);
+            if (aQbi.slowState->multisample)
+                set_multisample(*aQbi.slowState->multisample);
+            if (aQbi.slowState->frontFace)
+                set_front_face(*aQbi.slowState->frontFace);
+            if (aQbi.slowState->faceCulling)
+                set_face_culling(*aQbi.slowState->faceCulling);
+            if (aQbi.slowState->blendingMode)
+                set_blending_mode(*aQbi.slowState->blendingMode);
+            if (aQbi.slowState->smoothingMode)
+                set_smoothing_mode(*aQbi.slowState->smoothingMode);
+        }
     }
 
     void opengl_rendering_context::scissor_on()
     {
-        if (!applying_scissor())
-            ++iScissorCounter;
-        glCheck((applying_scissor() || iScissorCounter > 0 ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST)));
+        glCheck((applying_scissor() || iFastState.scissorCounter >= 0 ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST)));
     }
     
     void opengl_rendering_context::scissor_off()
     {
-        if (!applying_scissor())
-            --iScissorCounter;
-        glCheck((applying_scissor() || iScissorCounter <= 0 ? glDisable(GL_SCISSOR_TEST) : glEnable(GL_SCISSOR_TEST)));
+        glCheck((applying_scissor() || iFastState.scissorCounter < 0 ? glDisable(GL_SCISSOR_TEST) : glEnable(GL_SCISSOR_TEST)));
     }
 
-    void opengl_rendering_context::push_scissor(const rect& aRect)
+    std::optional<rect> const& opengl_rendering_context::scissor_rect() const
     {
-        iScissorRects.push_back(aRect + origin());
-        iScissorRect = std::nullopt;
-        apply_scissor();
-    }
-
-    void opengl_rendering_context::pop_scissor()
-    {
-        if (!iScissorRects.empty())
-            iScissorRects.pop_back();
-        iScissorRect = std::nullopt;
-        apply_scissor();
-    }
-
-    const optional_rect& opengl_rendering_context::scissor_rect() const
-    {
-        if (iScissorRect == std::nullopt && !iScissorRects.empty())
-        {
-            for (auto const& rect : iScissorRects)
-                if (iScissorRect != std::nullopt)
-                    iScissorRect = iScissorRect->intersection(rect);
-                else
-                    iScissorRect = rect;
-        }
-        return iScissorRect;
+        return iFastState.clipRegion;
     }
 
     bool opengl_rendering_context::applying_scissor() const
@@ -766,16 +730,21 @@ namespace neogfx
 
     void opengl_rendering_context::apply_scissor()
     {
+        apply_scissor(scissor_rect());
+    }
+
+    void opengl_rendering_context::apply_scissor(std::optional<rect> const& aScissorRect)
+    {
         neolib::scoped_flag sf{ iApplyingScissor };
-        auto sr = scissor_rect();
-        if (sr != std::nullopt)
+        if (aScissorRect)
         {
-            scissor_on();
-            GLint x = static_cast<GLint>(std::ceil(sr->x));
-            GLint y = static_cast<GLint>(logical_coordinates().is_gui_orientation() ? std::ceil(rendering_area(false).cy - sr->cy - sr->y) : sr->y);
-            GLsizei cx = static_cast<GLsizei>(std::ceil(sr->cx));
-            GLsizei cy = static_cast<GLsizei>(std::ceil(sr->cy));
+            auto const& sr = *aScissorRect;
+            GLint x = static_cast<GLint>(std::ceil(sr.x));
+            GLint y = static_cast<GLint>(logical_coordinates().is_gui_orientation() ? std::ceil(rendering_area(false).cy - sr.cy - sr.y) : sr.y);
+            GLsizei cx = static_cast<GLsizei>(std::ceil(sr.cx));
+            GLsizei cy = static_cast<GLsizei>(std::ceil(sr.cy));
             glCheck(glScissor(x, y, cx, cy));
+            scissor_on();
         }
         else
             scissor_off();
@@ -1300,11 +1269,11 @@ namespace neogfx
                     {
                         if (std::holds_alternative<color>(drawOp.fill))
                         {
-                            push_scissor(drawOp.rect);
+                            apply_scissor(rc.intersection(scissor_rect() ? *scissor_rect() : rc));
                             clear(static_variant_cast<color>(drawOp.fill));
                             if (iUpdatingStencil)
                                 fill_stencil_buffer();
-                            pop_scissor();
+                            apply_scissor();
                         }
                         continue;
                     }
@@ -2054,7 +2023,8 @@ namespace neogfx
                 while (a != drawOp.attributes.end() && (g - drawOp.begin) >= a->end)
                     ++a;
                 auto& glyphChar = *g;
-                drawGlyphCache.emplace_back(origin(), drawOp.point, &drawOp.glyphText.content(), &glyphChar, a != drawOp.attributes.end() && (g - drawOp.begin) >= a->start ? &a->attributes : nullptr, drawOp.showMnemonics);
+                drawGlyphCache.emplace_back(origin(), drawOp.point, &drawOp.glyphText.content(), 
+                    &glyphChar, a != drawOp.attributes.end() && (g - drawOp.begin) >= a->start ? &a->attributes : nullptr, drawOp.showMnemonics);
             }
         }
 

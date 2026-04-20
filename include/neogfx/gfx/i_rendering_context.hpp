@@ -44,6 +44,7 @@ namespace neogfx
     {
         point origin;
         std::optional<rect> clipRegion;
+        std::int32_t scissorCounter = 0;
         double opacity = 1.0;
 
         bool operator==(rendering_context_fast_state const&) const = default;

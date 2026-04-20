@@ -35,7 +35,15 @@ namespace neogfx
         std::int32_t ordinal = 1;
 
         std::optional<point> origin;
+        std::optional<std::int32_t> scissorCounterAdjust;
         std::optional<double> opacity;
+
+        std::optional<logical_coordinate_system> logicalCoordinateSystem;
+        std::optional<logical_coordinates> logicalCoordinates;
+        std::optional<front_face> frontFace;
+        std::optional<face_culling> faceCulling;
+        std::optional<blending_mode> blendingMode;
+        std::optional<smoothing_mode> smoothingMode;
 
         for (auto const& queueEntry : aInput)
         {
@@ -43,51 +51,116 @@ namespace neogfx
             bool keepOp = true;
             switch (opType)
             {
+            case graphics_operation::SetLogicalCoordinateSystem:
+                logicalCoordinateSystem = static_variant_cast<const graphics_operation::set_logical_coordinate_system&>(queueEntry).system;
+                keepOp = false;
+                break;
+            case graphics_operation::SetLogicalCoordinates:
+                logicalCoordinates = static_variant_cast<const graphics_operation::set_logical_coordinates&>(queueEntry).coordinates;
+                keepOp = false;
+                break;
+            case graphics_operation::SetFrontFace:
+                frontFace = static_variant_cast<const graphics_operation::set_front_face&>(queueEntry).frontFace;
+                keepOp = false;
+                break;
+            case graphics_operation::SetCullFaces:
+                faceCulling = static_variant_cast<const graphics_operation::set_face_culling&>(queueEntry).culling;
+                keepOp = false;
+                break;
+            case graphics_operation::SetBlendingMode:
+                blendingMode = static_variant_cast<const graphics_operation::set_blending_mode&>(queueEntry).blendingMode;
+                keepOp = false;
+                break;
+            case graphics_operation::SetSmoothingMode:
+                smoothingMode = static_variant_cast<const graphics_operation::set_smoothing_mode&>(queueEntry).smoothingMode;
+                keepOp = false;
+                break;
             case graphics_operation::ScissorOn:
-                aContext.scissorOn = true;
-                keepOp = !optimiseQueue;
+                scissorCounterAdjust = scissorCounterAdjust.value_or(0) + 1;
+                keepOp = false;
                 break;
             case graphics_operation::ScissorOff:
-                aContext.scissorOn = false;
-                keepOp = !optimiseQueue;
+                scissorCounterAdjust = scissorCounterAdjust.value_or(0) - 1;
+                keepOp = false;
                 break;
             case graphics_operation::PushScissor:
-                aContext.clipRegionStack.push_back(static_variant_cast<const graphics_operation::push_scissor&>(queueEntry).rect);
-                keepOp = !optimiseQueue;
+                if (aContext.clipRegionStack.empty())
+                    aContext.clipRegionStack.push_back(static_variant_cast<const graphics_operation::push_scissor&>(queueEntry).rect + fastState->origin);
+                else
+                    aContext.clipRegionStack.push_back(aContext.clipRegionStack.back().intersection(static_variant_cast<const graphics_operation::push_scissor&>(queueEntry).rect + fastState->origin));
+                keepOp = false;
                 break;
             case graphics_operation::PopScissor:
                 if (aContext.clipRegionStack.empty())
                     throw std::logic_error("neogfx::opengl_rendering_context::flush: unmatched PopScissor");
                 aContext.clipRegionStack.pop_back();
-                keepOp = !optimiseQueue;
+                keepOp = false;
                 break;
             case graphics_operation::SetOrigin:
                 origin = static_variant_cast<const graphics_operation::set_origin&>(queueEntry).origin;
+                keepOp = false;
                 break;
             case graphics_operation::SetOpacity:
                 opacity = static_variant_cast<const graphics_operation::set_opacity&>(queueEntry).opacity;
+                keepOp = false;
                 break;
             }
-            auto const clipRegion = optimiseQueue && !aContext.clipRegionStack.empty() && aContext.scissorOn ? aContext.clipRegionStack.back() : std::optional<rect>{};
+            
+            auto const clipRegion = !aContext.clipRegionStack.empty() ? aContext.clipRegionStack.back() : std::optional<rect>{};
+            
             if (fastState->clipRegion != clipRegion || 
-                (origin.has_value() && fastState->origin != origin.value()) ||
-                (opacity.has_value() && fastState->opacity != opacity.value()))
+                scissorCounterAdjust ||
+                (origin && fastState->origin != *origin) ||
+                (opacity && fastState->opacity != *opacity))
             {
                 auto state = *fastState;
-                if (origin.has_value())
-                    state.origin = origin.value();
-                origin.reset();
-                if (opacity.has_value())
-                    state.opacity = opacity.value();
-                origin.reset();
+                if (origin)
+                    state.origin = *origin;
                 state.clipRegion = clipRegion;
+                if (scissorCounterAdjust)
+                    state.scissorCounter += *scissorCounterAdjust;
+                if (opacity)
+                    state.opacity = *opacity;
+                origin.reset();
+                scissorCounterAdjust.reset();
+                opacity.reset();
                 fastState = aContext.intern_state(state);
             }
+            
+            if ((logicalCoordinateSystem && slowState->logicalCoordinateSystem != logicalCoordinateSystem) ||
+                (logicalCoordinates && slowState->logicalCoordinates != logicalCoordinates) ||
+                (frontFace && slowState->frontFace != frontFace) ||
+                (faceCulling && slowState->faceCulling != faceCulling) ||
+                (blendingMode && slowState->blendingMode != blendingMode) ||
+                (smoothingMode && slowState->smoothingMode != smoothingMode))
+            {
+                auto state = *slowState;
+                if (logicalCoordinateSystem)
+                    state.logicalCoordinateSystem = *logicalCoordinateSystem;
+                if (logicalCoordinates)
+                    state.logicalCoordinates = *logicalCoordinates;
+                if (frontFace)
+                    state.frontFace = *frontFace;
+                if (faceCulling)
+                    state.faceCulling = *faceCulling;
+                if (blendingMode)
+                    state.blendingMode = *blendingMode;
+                if (smoothingMode)
+                    state.smoothingMode = *smoothingMode;
+                logicalCoordinateSystem.reset();
+                logicalCoordinates.reset();
+                frontFace.reset();
+                faceCulling.reset();
+                blendingMode.reset();
+                smoothingMode.reset();
+                slowState = aContext.intern_state(state);
+            }
+            
             if (keepOp)
                 aOutput.emplace_back(&queueEntry, ordinal++, fastState, slowState);
         }
 
-        if (service<i_rendering_engine>().is_rendering_queue_optimization_on())
+        if (optimiseQueue)
         {
             // todo...
             std::stable_sort(aOutput.begin(), aOutput.end(), [](auto const& lhs, auto const& rhs)
