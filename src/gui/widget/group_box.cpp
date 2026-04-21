@@ -156,7 +156,7 @@ namespace neogfx
         iItemLayout = aItemLayout;
         iBox.set_layout(iItemLayout);
         if (!iItemLayout->has_padding())
-            iItemLayout->set_padding(dpi_scale(neogfx::padding{ DEFAULT_PADDING }));
+            iItemLayout->set_padding(dpi_scale(neogfx::padding{}));
         if (!iItemLayout->has_spacing())
             iItemLayout->set_spacing(dpi_scale(size{ DEFAULT_SPACING }));
     }

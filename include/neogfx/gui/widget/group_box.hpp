@@ -48,7 +48,7 @@ namespace neogfx
             group_box& iParent;
         };
     private:
-        static constexpr scalar DEFAULT_PADDING = 0.0;
+        static constexpr scalar DEFAULT_PADDING = 5.0;
         static constexpr scalar DEFAULT_SPACING = 5.0;
     public:
         struct not_checkable : std::logic_error { not_checkable() : std::logic_error("neogfx::group_box::not_checkable") {} };
