@@ -67,9 +67,9 @@ namespace neogfx
         dimension em_size() const final;
     public:
         neogfx::logical_coordinate_system logical_coordinate_system() const final;
-        void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) final;
+        void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const final;
         neogfx::logical_coordinates logical_coordinates() const final;
-        void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) final;
+        void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const final;
     public:
         rect_i32 viewport() const final;
         rect_i32 set_viewport(const rect_i32& aViewport) const final;
@@ -110,7 +110,7 @@ namespace neogfx
     private:
         i_rendering_engine& iRenderingEngine;
         i_surface_window& iWindow;
-        neogfx::logical_coordinate_system iLogicalCoordinateSystem;
+        mutable neogfx::logical_coordinate_system iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
         bool iDebug;
     };

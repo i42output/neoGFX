@@ -90,6 +90,12 @@ void standard_texture_shader(inout vec4 color, inout vec4 function0, inout vec4 
                 color = vec4(color.rgb * color.a, color.a);
             }
             break;
+        case SHADER_EFFECT_Blit:
+            {
+                vec4 texel = texel_at(TexCoord);
+                color = texel.rgba;
+            }
+            break;
         case SHADER_EFFECT_Filter:
             break;
         case SHADER_EFFECT_Ignore:

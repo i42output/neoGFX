@@ -60,9 +60,9 @@ namespace neogfx
         virtual size target_extents() const = 0;
     public:
         virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
-        virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
+        virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const = 0;
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;
-        virtual void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) = 0;
+        virtual void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const = 0;
     public:
         virtual rect_i32 viewport() const = 0;
         virtual rect_i32 set_viewport(const rect_i32& aViewport) const = 0;

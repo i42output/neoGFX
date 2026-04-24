@@ -64,9 +64,9 @@ namespace neogfx
         dimension em_size() const override;
     public:
         neogfx::logical_coordinate_system logical_coordinate_system() const override;
-        void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) override;
+        void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const override;
         neogfx::logical_coordinates logical_coordinates() const override;
-        void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) override;
+        void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const override;
     public:
         bool target_active() const override;
         void activate_target() const override;
@@ -105,7 +105,7 @@ namespace neogfx
         i_rendering_engine& iRenderingEngine;
         i_surface_window& iSurfaceWindow;
         mutable std::optional<pixel_format_t> iPixelFormat;
-        neogfx::logical_coordinate_system iLogicalCoordinateSystem;
+        mutable neogfx::logical_coordinate_system iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
         vector<rect> iInvalidatedAreas;
         mutable std::optional<rect> iInvalidatedArea;

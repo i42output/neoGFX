@@ -1159,15 +1159,17 @@ namespace neogfx
     void graphics_context::blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
     {   
         aSource.flush();
+
         scoped_render_target srt1{ *this };
-        scoped_blending_mode sbm1{ *this, neogfx::blending_mode::Filter };
         scoped_scissor ss1{ *this, aDestinationRect };
+        scoped_blending_mode sbm1{ *this, blending_mode::Filter };
+
         scoped_render_target srt2{ aSource };
-        scoped_blending_mode sbm2{ aSource, neogfx::blending_mode::Filter };
         scoped_scissor ss2{ aSource, aSourceRect };
-        std::int32_t passes = static_cast<std::int32_t>(aRadius);
-        if (passes % 2 == 0)
-            ++passes;
+        scoped_blending_mode sbm2{ aSource, blending_mode::Filter };
+
+        auto const passes = static_cast<std::int32_t>(aRadius);
+
         for (std::int32_t pass = 0; pass < passes; ++pass)
         {
             if (pass % 2 == 0)

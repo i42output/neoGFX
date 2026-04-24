@@ -19,8 +19,9 @@
 #define SHADER_EFFECT_ColorizeSpot 3
 #define SHADER_EFFECT_ColorizeAlpha 4
 #define SHADER_EFFECT_Monochrome 5
-#define SHADER_EFFECT_MultiplyAlpha 10
-#define SHADER_EFFECT_Filter 20
+#define SHADER_EFFECT_Blit 10
+#define SHADER_EFFECT_MultiplyAlpha 20
+#define SHADER_EFFECT_Filter 30
 #define SHADER_EFFECT_Ignore 99
 
 vec4 mix3(vec4 a, vec4 b, vec4 c, float t)

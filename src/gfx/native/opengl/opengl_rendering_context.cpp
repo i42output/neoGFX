@@ -43,6 +43,22 @@ namespace neogfx
 {
     namespace 
     {
+        inline bool uv_swap_v(logical_coordinate_system lhs, logical_coordinate_system rhs)
+        {
+            switch (lhs)
+            {
+            case neogfx::logical_coordinate_system::AutomaticGame:
+                if (rhs == neogfx::logical_coordinate_system::AutomaticGui)
+                    return true;
+                break;
+            case neogfx::logical_coordinate_system::AutomaticGui:
+                if (rhs == neogfx::logical_coordinate_system::AutomaticGame)
+                    return true;
+                break;
+            }
+            return false;
+        }
+
         template <typename T>
         class skip_iterator
         {
@@ -345,6 +361,7 @@ namespace neogfx
     void opengl_rendering_context::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
     {
         iSlowState.logicalCoordinateSystem = aSystem;
+        render_target().set_logical_coordinate_system(aSystem);
     }
 
     logical_coordinates opengl_rendering_context::logical_coordinates() const
@@ -352,28 +369,15 @@ namespace neogfx
         if (iSlowState.logicalCoordinates != std::nullopt)
             return *iSlowState.logicalCoordinates;
         auto result = render_target().logical_coordinates();
-        if (logical_coordinate_system() != render_target().logical_coordinate_system())
-        {
-            switch (logical_coordinate_system())
-            {
-            case neogfx::logical_coordinate_system::Specified:
-                break;
-            case neogfx::logical_coordinate_system::AutomaticGame:
-                if (render_target().logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
-                    std::swap(result.bottomLeft.y, result.topRight.y);
-                break;
-            case neogfx::logical_coordinate_system::AutomaticGui:
-                if (render_target().logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
-                    std::swap(result.bottomLeft.y, result.topRight.y);
-                break;
-            }
-        }
+        if (uv_swap_v(logical_coordinate_system(), render_target().logical_coordinate_system()))
+            std::swap(result.bottomLeft.y, result.topRight.y);
         return result;
     }
 
     void opengl_rendering_context::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
     {
         iSlowState.logicalCoordinates = aCoordinates;
+        render_target().set_logical_coordinates(aCoordinates);
     }
 
     point opengl_rendering_context::origin() const
@@ -405,8 +409,15 @@ namespace neogfx
     {
         scoped_blending_mode sbm{ *this, aBlendingMode };
         auto shaderEffect = shader_effect::None;
-        if (aBlendingMode == neogfx::blending_mode::FilterFinish)
+        switch (aBlendingMode)
+        {
+        case neogfx::blending_mode::None:
+            shaderEffect = shader_effect::Blit;
+            break;
+        case neogfx::blending_mode::FilterFinish:
             shaderEffect = shader_effect::MultiplyAlpha;
+            break;
+        }
         draw_texture(aDestinationRect, aTexture, aSourceRect, {}, shaderEffect);
     }
 

@@ -81,8 +81,9 @@ namespace neogfx
         ColorizeSpot    = 3,
         ColorizeAlpha   = 4,
         Monochrome      = 5,
-        MultiplyAlpha   = 10,
-        Filter          = 20,
+        Blit            = 10,
+        MultiplyAlpha   = 20,
+        Filter          = 30,
         Ignore          = 99
     };
 

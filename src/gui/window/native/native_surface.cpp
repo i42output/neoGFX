@@ -178,7 +178,7 @@ namespace neogfx
         return iLogicalCoordinateSystem;
     }
 
-    void native_surface::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
+    void native_surface::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const
     {
         iLogicalCoordinateSystem = aSystem;
     }
@@ -205,7 +205,7 @@ namespace neogfx
         return result;
     }
 
-    void native_surface::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
+    void native_surface::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const
     {
         iLogicalCoordinates = aCoordinates;
     }

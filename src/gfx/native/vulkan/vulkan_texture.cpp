@@ -574,7 +574,7 @@ namespace neogfx
     }
 
     template <typename T>
-    void vulkan_texture<T>::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
+    void vulkan_texture<T>::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const
     {
         iLogicalCoordinateSystem = aSystem;
     }
@@ -603,7 +603,7 @@ namespace neogfx
     }
 
     template <typename T>
-    void vulkan_texture<T>::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
+    void vulkan_texture<T>::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const
     {
         iLogicalCoordinates = aCoordinates;
     }
