@@ -28,6 +28,8 @@ namespace neogfx
 {
     struct rendering_queue_context
     {
+        i_render_target& renderTarget;
+
         std::vector<rect> clipRegionStack;
 
         std::uint64_t fastStateGeneration = 0u;
@@ -83,6 +85,11 @@ namespace neogfx
         define_declared_event(TargetDeactivating, target_deactivating)
         define_declared_event(TargetDeactivated, target_deactivated)
         define_declared_event(TargetDestroying, target_destroying)
+    public:
+        render_target() : 
+            iRenderQueueContext{ *this }
+        {
+        }
     public:
         void begin_rendering() const final
         {

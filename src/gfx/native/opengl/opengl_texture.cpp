@@ -784,6 +784,8 @@ namespace neogfx
 
         GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
         glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
+
+        iPixelData.clear();
         
         if (!alreadyActive)
             TargetActivated();

@@ -47,10 +47,10 @@ namespace neogfx
     {
         size previousExtents;
         auto& pingPongBuffer1 = service<i_rendering_engine>().ping_pong_buffer1(aExtents, previousExtents, aSampling);
-        pingPongBuffer1.texture().as_render_target().set_logical_coordinate_system(aContext.logical_coordinate_system());
         auto buffer1 = std::make_unique<ping_pong_buffers::attachment>(pingPongBuffer1, std::make_unique<graphics_context>(pingPongBuffer1.texture()));
         auto& gcBuffer1 = buffer1->gc();
         {
+            gcBuffer1.set_logical_coordinate_system(aContext.logical_coordinate_system());
             gcBuffer1.set_origin({});
             if (aClearColor != std::nullopt)
             {
@@ -62,10 +62,10 @@ namespace neogfx
             }
         }
         auto& pingPongBuffer2 = service<i_rendering_engine>().ping_pong_buffer2(aExtents, previousExtents, aSampling);
-        pingPongBuffer2.texture().as_render_target().set_logical_coordinate_system(aContext.logical_coordinate_system());
         auto buffer2 = std::make_unique<ping_pong_buffers::attachment>(pingPongBuffer2, std::make_unique<graphics_context>(pingPongBuffer2.texture()));
         auto& gcBuffer2 = buffer2->gc();
         {
+            gcBuffer2.set_logical_coordinate_system(aContext.logical_coordinate_system());
             gcBuffer2.set_origin({});
             if (aClearColor != std::nullopt)
             {

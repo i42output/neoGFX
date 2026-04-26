@@ -33,6 +33,14 @@ namespace neogfx
 {
     class i_window_manager;
 
+    inline frame_style default_window_frame_style(window_style aWindowStyle, frame_style aFrameStyle)
+    {
+        if (aFrameStyle != frame_style::WindowFrame || (aWindowStyle & window_style::NoDecoration) != window_style::NoDecoration)
+            return aFrameStyle;
+        else
+            return frame_style::NoFrame;
+    }
+
     class window : public decorated<scrollable_widget<framed_widget<widget<i_window>>>>
     {
         meta_object(decorated<scrollable_widget<framed_widget<widget<i_window>>>>)

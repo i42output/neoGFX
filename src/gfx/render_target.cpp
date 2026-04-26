@@ -53,10 +53,12 @@ namespace neogfx
             {
             case graphics_operation::SetLogicalCoordinateSystem:
                 logicalCoordinateSystem = static_variant_cast<const graphics_operation::set_logical_coordinate_system&>(queueEntry).system;
+                aContext.renderTarget.set_logical_coordinate_system(logicalCoordinateSystem.value());
                 keepOp = false;
                 break;
             case graphics_operation::SetLogicalCoordinates:
                 logicalCoordinates = static_variant_cast<const graphics_operation::set_logical_coordinates&>(queueEntry).coordinates;
+                aContext.renderTarget.set_logical_coordinates(logicalCoordinates.value());
                 keepOp = false;
                 break;
             case graphics_operation::SetFrontFace:
@@ -84,10 +86,15 @@ namespace neogfx
                 keepOp = false;
                 break;
             case graphics_operation::PushScissor:
-                if (aContext.clipRegionStack.empty())
-                    aContext.clipRegionStack.push_back(static_variant_cast<const graphics_operation::push_scissor&>(queueEntry).rect + fastState->origin);
-                else
-                    aContext.clipRegionStack.push_back(aContext.clipRegionStack.back().intersection(static_variant_cast<const graphics_operation::push_scissor&>(queueEntry).rect + fastState->origin));
+                {
+                    auto normalisedScissorRect = static_variant_cast<const graphics_operation::push_scissor&>(queueEntry).rect + fastState->origin;
+                    if (slowState->logicalCoordinateSystem.value_or(logical_coordinate_system::AutomaticGui) == logical_coordinate_system::AutomaticGui)
+                        normalisedScissorRect.y = aContext.renderTarget.extents().cy - normalisedScissorRect.cy - normalisedScissorRect.y;
+                    if (aContext.clipRegionStack.empty())
+                        aContext.clipRegionStack.push_back(normalisedScissorRect);
+                    else
+                        aContext.clipRegionStack.push_back(aContext.clipRegionStack.back().intersection(normalisedScissorRect));
+                }
                 keepOp = false;
                 break;
             case graphics_operation::PopScissor:

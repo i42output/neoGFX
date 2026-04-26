@@ -132,14 +132,14 @@ namespace neogfx
         glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(target_texture().native_texture().native_handle())));
         glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
 
-        glCheck(glClearDepth(1.0));
-        glCheck(glClear(GL_DEPTH_BUFFER_BIT));
-        
         GLenum status;
         glCheck(status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER));
         if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
             throw failed_to_create_framebuffer(glErrorString(status));
         
+        glCheck(glClearDepth(1.0));
+        glCheck(glClear(GL_DEPTH_BUFFER_BIT));
+
         set_viewport(rect_i32{ point_i32{ 0, 0 }, extents().as<std::int32_t>() });
         
         GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
@@ -205,7 +205,7 @@ namespace neogfx
 
         iFrameBufferExtents = size{
             iFrameBufferExtents.cx < extents().cx ? extents().cx * 1.5f : iFrameBufferExtents.cx,
-            iFrameBufferExtents.cy < extents().cy ? extents().cy * 1.5f : iFrameBufferExtents.cy }.ceil();
+            iFrameBufferExtents.cy < extents().cy ? extents().cy * 1.5f : iFrameBufferExtents.cy }.max(size{ 32, 32 }).ceil();
 
         glCheck(glGenFramebuffers(1, &iFrameBuffer));
         glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));

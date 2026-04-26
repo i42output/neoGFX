@@ -217,7 +217,7 @@ namespace neogfx
     }
 
     window::window(i_widget* aParent, const window_placement& aPlacement, const std::optional<string>& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
-        base_type{ window_style_to_decoration_style(aStyle), aScrollbarStyle, aFrameStyle },
+        base_type{ window_style_to_decoration_style(aStyle), aScrollbarStyle, default_window_frame_style(aStyle, aFrameStyle) },
         iWindowManager{ service<i_window_manager>() },
         iParentWindow{ nullptr },
         iPlacement{ aPlacement },
@@ -554,11 +554,13 @@ namespace neogfx
         base_type::resized();
         if (has_native_window())
         {
-            bool const initiallyCentered = (style() & window_style::InitiallyCentered) == window_style::InitiallyCentered;
+            bool const initiallyCentered = ((style() & window_style::InitiallyCentered) == window_style::InitiallyCentered);
+            bool const initialSizeSpecified = placement().size_specified();
+            bool const manuallyResizable = ((style() & window_style::Resize) != window_style::Resize);
             bool const eventCauseExternal = native_window().event_cause_external();
             bool const resizingOrMoving = native_window().resizing_or_moving();
             if (initiallyCentered && !eventCauseExternal && !resizingOrMoving)
-                center_on_parent((style() & window_style::Resize) != window_style::Resize);
+                center_on_parent(!manuallyResizable && !initialSizeSpecified);
         }
     }
 
@@ -733,7 +735,7 @@ namespace neogfx
     {
         layout_items();
         if (aSetMinimumSize)
-            resize(minimum_size());
+            resize(transformed_minimum_size());
         rect desktopRect{ window_manager().desktop_rect(*this) };
         move((desktopRect.extents() - window_manager().window_rect(*this).extents()) / 2.0);
     }
@@ -747,7 +749,7 @@ namespace neogfx
         {
             layout_items();
             if (aSetMinimumSize)
-                resize(minimum_size());
+                resize(transformed_minimum_size());
             rect const desktopRect{ window_manager().desktop_rect(*this) };
             rect const parentRect{ window_manager().window_rect(parent_window()) };
             rect const ourRect{ window_manager().window_rect(*this) };

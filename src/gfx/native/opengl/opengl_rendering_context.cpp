@@ -258,7 +258,7 @@ namespace neogfx
         });
         iSink += render_target().target_activating([&]()
         {
-            apply_scissor();
+            apply_state();
         });
 
         iTarget.begin_rendering();
@@ -287,7 +287,7 @@ namespace neogfx
         });
         iSink += render_target().target_activating([&]()
         {
-            apply_scissor();
+            apply_state();
         });
 
         iTarget.begin_rendering();
@@ -317,7 +317,7 @@ namespace neogfx
         });
         iSink += render_target().target_activating([&]()
         {
-            apply_scissor();
+            apply_state();
         });
 
         iTarget.begin_rendering();
@@ -484,9 +484,8 @@ namespace neogfx
         bool const stencilBasedInvalidation = service<i_rendering_engine>().is_stencil_based_invalidation_on();
 
         scoped_render_target srt{ render_target() };
-        set_blending_mode(blending_mode());
-        apply_scissor();
-        apply_stencil();
+
+        apply_state();
 
         thread_local std::vector<std::pair<graphics_operation::operation_type, std::size_t>> batches;
         batches.clear();
@@ -691,32 +690,81 @@ namespace neogfx
 
     void opengl_rendering_context::update_state(queue_batch_item const& aQbi)
     {
-        neolib::scoped_flag sf{ iApplyingState };
-
         if (iFastState.generation != aQbi.fastState->generation)
         {
             iFastState = *aQbi.fastState;
-            apply_scissor();
+            invalidate_fast_state();
         }
 
         if (iSlowState.generation != aQbi.slowState->generation)
         {
             iSlowState.generation = aQbi.slowState->generation;
-            if (aQbi.slowState->logicalCoordinateSystem)
-                set_logical_coordinate_system(*aQbi.slowState->logicalCoordinateSystem);
-            if (aQbi.slowState->logicalCoordinates)
-                set_logical_coordinates(*aQbi.slowState->logicalCoordinates);
-            if (aQbi.slowState->multisample)
-                set_multisample(*aQbi.slowState->multisample);
-            if (aQbi.slowState->frontFace)
-                set_front_face(*aQbi.slowState->frontFace);
-            if (aQbi.slowState->faceCulling)
-                set_face_culling(*aQbi.slowState->faceCulling);
-            if (aQbi.slowState->blendingMode)
-                set_blending_mode(*aQbi.slowState->blendingMode);
-            if (aQbi.slowState->smoothingMode)
-                set_smoothing_mode(*aQbi.slowState->smoothingMode);
+            if (aQbi.slowState->logicalCoordinateSystem) iSlowState.logicalCoordinateSystem = aQbi.slowState->logicalCoordinateSystem;
+            if (aQbi.slowState->logicalCoordinates) iSlowState.logicalCoordinates = aQbi.slowState->logicalCoordinates;
+            if (aQbi.slowState->multisample) iSlowState.multisample = aQbi.slowState->multisample;
+            if (aQbi.slowState->sampleShadingRate) iSlowState.sampleShadingRate = aQbi.slowState->sampleShadingRate;
+            if (aQbi.slowState->frontFace) iSlowState.frontFace = aQbi.slowState->frontFace;
+            if (aQbi.slowState->faceCulling) iSlowState.faceCulling = aQbi.slowState->faceCulling;
+            if (aQbi.slowState->blendingMode) iSlowState.blendingMode = aQbi.slowState->blendingMode;
+            if (aQbi.slowState->smoothingMode) iSlowState.smoothingMode = aQbi.slowState->smoothingMode;
+            invalidate_slow_state();
         }
+
+        apply_state();
+    }
+
+    void opengl_rendering_context::apply_state()
+    {
+        neolib::scoped_flag sf{ iApplyingState };
+
+        if (fast_state_invalid())
+        {
+            apply_scissor();
+            apply_stencil();
+
+            validate_fast_state();
+        }
+
+        if (slow_state_invalid())
+        {
+            set_multisample(multisample());
+            set_front_face(front_face());
+            set_face_culling(face_culling());
+            set_blending_mode(blending_mode());
+            set_smoothing_mode(smoothing_mode());
+
+            validate_slow_state();
+        }
+    }
+
+    bool opengl_rendering_context::fast_state_invalid() const
+    {
+        return shared_fast_state_generation().load() != iSharedFastStateGeneration;
+    }
+
+    bool opengl_rendering_context::slow_state_invalid() const
+    {
+        return shared_slow_state_generation().load() != iSharedSlowStateGeneration;
+    }
+
+    void opengl_rendering_context::invalidate_fast_state()
+    {
+        ++shared_fast_state_generation();
+    }
+
+    void opengl_rendering_context::invalidate_slow_state()
+    {
+        ++shared_slow_state_generation();
+    }
+
+    void opengl_rendering_context::validate_fast_state()
+    {
+        iSharedFastStateGeneration = shared_fast_state_generation().load();
+    }
+
+    void opengl_rendering_context::validate_slow_state()
+    {
+        iSharedSlowStateGeneration = shared_slow_state_generation().load();
     }
 
     void opengl_rendering_context::scissor_on()
@@ -751,7 +799,7 @@ namespace neogfx
         {
             auto const& sr = *aScissorRect;
             GLint x = static_cast<GLint>(std::ceil(sr.x));
-            GLint y = static_cast<GLint>(logical_coordinates().is_gui_orientation() ? std::ceil(rendering_area(false).cy - sr.cy - sr.y) : sr.y);
+            GLint y = static_cast<GLint>(std::ceil(sr.y));
             GLsizei cx = static_cast<GLsizei>(std::ceil(sr.cx));
             GLsizei cy = static_cast<GLsizei>(std::ceil(sr.cy));
             glCheck(glScissor(x, y, cx, cy));
@@ -768,7 +816,7 @@ namespace neogfx
     
     void opengl_rendering_context::set_multisample(bool aMultisample)
     {
-        if (iSlowState.multisample != aMultisample)
+        if (iSlowState.multisample != aMultisample || slow_state_invalid())
         {
             iSlowState.multisample = aMultisample;
             if (multisample())
@@ -808,7 +856,7 @@ namespace neogfx
 
     void opengl_rendering_context::set_front_face(neogfx::front_face aFrontFace)
     {
-        if (iSlowState.frontFace != aFrontFace)
+        if (iSlowState.frontFace != aFrontFace || slow_state_invalid())
         {
             iSlowState.frontFace = aFrontFace;
             switch (iSlowState.frontFace.value())
@@ -830,7 +878,7 @@ namespace neogfx
 
     void opengl_rendering_context::set_face_culling(neogfx::face_culling aCulling)
     {
-        if (iSlowState.faceCulling != aCulling)
+        if (iSlowState.faceCulling != aCulling || slow_state_invalid())
         {
             iSlowState.faceCulling = aCulling;
             switch (iSlowState.faceCulling.value())
@@ -866,7 +914,7 @@ namespace neogfx
 
     void opengl_rendering_context::set_blending_mode(neogfx::blending_mode aBlendingMode)
     {
-        if (iSlowState.blendingMode != aBlendingMode)
+        if (iSlowState.blendingMode != aBlendingMode || slow_state_invalid())
         {
             iSlowState.blendingMode = aBlendingMode;
             switch (*iSlowState.blendingMode)
@@ -910,7 +958,7 @@ namespace neogfx
 
     void opengl_rendering_context::set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode)
     {
-        if (iSlowState.smoothingMode != aSmoothingMode)
+        if (iSlowState.smoothingMode != aSmoothingMode || slow_state_invalid())
         {
             iSlowState.smoothingMode = aSmoothingMode;
             if (*iSlowState.smoothingMode == neogfx::smoothing_mode::AntiAlias)
@@ -1280,7 +1328,14 @@ namespace neogfx
                     {
                         if (std::holds_alternative<color>(drawOp.fill))
                         {
-                            apply_scissor(rc.intersection(scissor_rect() ? *scissor_rect() : rc));
+                            point const textureMargin{ 1.0, 1.0 };
+                            auto const& fixedRc = rc.with_y(
+                                logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame ?
+                                    rc.y : 
+                                    rendering_area(false).cy - rc.cy - rc.y) +
+                                        (render_target().target_type() == render_target_type::Texture ?
+                                            textureMargin : point{});
+                            apply_scissor(fixedRc.intersection(scissor_rect() ? *scissor_rect() : fixedRc));
                             clear(static_variant_cast<color>(drawOp.fill));
                             if (iUpdatingStencil)
                                 fill_stencil_buffer();
@@ -2601,18 +2656,19 @@ namespace neogfx
                         auto nextTextureId = materialTexture.id.cookie();
                         if (textureId == std::nullopt || *textureId != nextTextureId)
                         {
+                            vec2f const textureMargin{ 1.0f, 1.0f };
                             textureId = nextTextureId;
                             auto const& texture = *service<i_texture_manager>().find_texture(nextTextureId);
                             textureStorageExtents = texture.storage_extents().to_vec2().as<float>();
                             uvFixupCoefficient = materialTexture.extents;
                             if (materialTexture.type == texture_type::Texture)
-                                uvFixupOffset = vec2f{ 1.0f, 1.0f };
+                                uvFixupOffset = textureMargin;
                             else if (materialTexture.subTexture == std::nullopt)
-                                uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2().as<float>() + vec2f{1.0f, 1.0f};
+                                uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2().as<float>() + textureMargin;
                             else
-                                uvFixupOffset = materialTexture.subTexture->min + vec2f{ 1.0f, 1.0f };
+                                uvFixupOffset = materialTexture.subTexture->min + textureMargin;
                             if (texture.is_render_target() && texture.as_render_target().logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
-                                uvGui = static_cast<float>(texture.extents().to_vec2().as<float>().y / textureStorageExtents.y);
+                                uvGui = static_cast<float>((texture.extents().to_vec2().as<float>().y + textureMargin.y * 2.0f) / textureStorageExtents.y);
                         }
                     }
                     auto const vertexCount = faces.size() * 3;
@@ -2644,7 +2700,10 @@ namespace neogfx
                                 vertex.xyzw = xyzw;
                             }
                             if (uvGui)
-                                vertices[nextIndex].st.y = *uvGui - vertices[nextIndex].st.y;
+                            {
+                                auto& st = vertices[nextIndex].st;
+                                st.y = *uvGui - st.y;
+                            }
                             ++nextIndex;
                         }
                     }
@@ -2824,8 +2883,9 @@ namespace neogfx
 
     void opengl_rendering_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect)
     {
-        auto mesh = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ? 
-            to_ecs_component(aRect) : to_ecs_component(game_rect{ aRect });
+        bool const guiRect = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui &&
+            (aTexture.as_render_target().logical_coordinate_system() != neogfx::logical_coordinate_system::AutomaticGui);
+        auto mesh = guiRect ? to_ecs_component(aRect) : to_ecs_component(game_rect{ aRect });
         for (auto& uv : mesh.uv)
             uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2().as<float>() + uv.scale((aTextureRect.extents() / aTexture.extents()).to_vec2().as<float>());
         draw_mesh(

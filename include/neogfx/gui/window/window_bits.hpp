@@ -29,7 +29,7 @@ namespace neogfx
     enum class window_style : std::uint64_t
     {
         Invalid                     = 0x0000000000000000,
-        NoDecoration                = 0x0000000000000001,    // No decoration at all (useful for splash screens, for example); this style cannot be combined with others
+        NoDecoration                = 0x0000000000000001,    // No decoration at all (useful for splash screens, for example)
         TitleBar                    = 0x0000000000000002,    // The window has a titlebar
         NativeTitleBar              = 0x0000000000000004,    // The window has a native titlebar
         SystemMenu                  = 0x0000000000000008,
@@ -62,7 +62,8 @@ namespace neogfx
         Weak                        = 0x8000000000000000,
         Default                     = Main | TitleBar | SystemMenu | Menu | MinimizeBox | MaximizeBox | Resize | SizeGrip | Close | DropShadow | InitiallyCentered | InitiallyRenderable,
         DefaultDialog               = (Default | Dialog) & ~(InitiallyRenderable | Main | Menu),
-        DefaultNonResizableDialog   = DefaultDialog & ~Resize
+        DefaultNonResizableDialog   = DefaultDialog & ~Resize,
+        SplashScreen                = NoDecoration | InitiallyCentered | InitiallyRenderable
     };
 
     inline constexpr window_style operator~(window_style aStyle)
@@ -194,6 +195,7 @@ namespace neogfx
     public:
         window_placement() :
             iPositionSpecified{},
+            iSizeSpecified{},
             iNormalGeometry{},
             iIconizedGeometry{},
             iMaximizedGeometry{},
@@ -208,6 +210,7 @@ namespace neogfx
             const optional_video_mode& aVideoMode = {},
             window_state aState = window_state::Normal) :
             iPositionSpecified{ true },
+            iSizeSpecified{ true },
             iNormalGeometry{ aNormalGeometry },
             iIconizedGeometry{ aIconizedGeometry },
             iMaximizedGeometry{ aMaximizedGeometry },
@@ -223,6 +226,7 @@ namespace neogfx
             const optional_video_mode& aVideoMode = {},
             window_state aState = window_state::Normal) :
             iPositionSpecified{ true },
+            iSizeSpecified{ false },
             iNormalGeometry{ aNormalPosition },
             iIconizedGeometry{ aIconizedGeometry },
             iMaximizedGeometry{ aMaximizedGeometry },
@@ -239,6 +243,7 @@ namespace neogfx
             const optional_video_mode& aVideoMode = {},
             window_state aState = window_state::Normal) :
             iPositionSpecified{ true },
+            iSizeSpecified{ true },
             iNormalGeometry{ rect{ aNormalTopLeft, aNormalBottomRight } },
             iIconizedGeometry{ aIconizedGeometry },
             iMaximizedGeometry{ aMaximizedGeometry },
@@ -255,6 +260,7 @@ namespace neogfx
             const optional_video_mode& aVideoMode = {},
             window_state aState = window_state::Normal) :
             iPositionSpecified{ true },
+            iSizeSpecified{ true },
             iNormalGeometry{ rect{ aNormalPosition, aNormalSize } },
             iIconizedGeometry{ aIconizedGeometry },
             iMaximizedGeometry{ aMaximizedGeometry },
@@ -270,6 +276,7 @@ namespace neogfx
             const optional_video_mode& aVideoMode = {},
             window_state aState = window_state::Normal) :
             iPositionSpecified{ false },
+            iSizeSpecified{ true },
             iNormalGeometry{ aNormalGeometry },
             iIconizedGeometry{ aIconizedGeometry },
             iMaximizedGeometry{ aMaximizedGeometry },
@@ -281,6 +288,7 @@ namespace neogfx
         window_placement(
             const video_mode& aVideoMode) :
             iPositionSpecified{ true },
+            iSizeSpecified{ true },
             iNormalGeometry{ rect{ aVideoMode.resolution() } },
             iIconizedGeometry{ rect{} },
             iMaximizedGeometry{ rect{ aVideoMode.resolution() } },
@@ -293,6 +301,10 @@ namespace neogfx
         bool position_specified() const
         {
             return iPositionSpecified;
+        }
+        bool size_specified() const
+        {
+            return iSizeSpecified;
         }
         const optional_rect& normal_geometry() const
         {
@@ -370,6 +382,7 @@ namespace neogfx
         }
     private:
         bool iPositionSpecified;
+        bool iSizeSpecified;
         optional_rect iNormalGeometry;
         optional_rect iIconizedGeometry;
         optional_rect iMaximizedGeometry;

@@ -1439,6 +1439,7 @@ namespace neogfx
 
         {
             scoped_scissor scissor(aGc, nonClientClipRect);
+
             paint_non_client_after(aGc);
         }
     }

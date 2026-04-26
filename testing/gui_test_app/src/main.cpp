@@ -15,6 +15,46 @@ void signal_handler(int signal)
     std::_Exit(EXIT_FAILURE);
 }
 
+
+class window : ng::window
+{
+public:
+    window() :
+        ng::window{ ng::size{ 200.0, 200.0 }, ng::window_style::SplashScreen }
+    {
+    }
+public:
+    void render_ex(ng::i_graphics_context& aGc) const
+    {
+        static std::optional<ng::texture> tex;
+        if (!tex)
+        {
+            tex.emplace(ng::size{ 10.0 }, 1.0, ng::texture_sampling::Normal);
+            ng::graphics_context gc{ tex.value() };
+            ng::scoped_render_target srt{ gc };
+            gc.clear(ng::color::White);
+        }
+
+        {
+            ng::scoped_filter filter{ aGc, ng::blur_filter{ non_client_rect(), 4.0, ng::blurring_algorithm::Gaussian } };
+            filter.front_buffer().fill_rect(ng::rect{ ng::point{ 5.0, 5.0 }, ng::size{ 1.0 } }, ng::color::Red);
+            filter.front_buffer().fill_rect(ng::rect{ ng::point{ 10.0, 10.0 }, ng::size{ 1.0 } }, ng::color::Red.with_alpha(0.999));
+            filter.front_buffer().draw_text(ng::point{ 20.0, 20.0 }, "A", font().with_size(16.0), ng::color::Red);
+            filter.front_buffer().draw_texture(ng::point{ 40.0, 40.0}, tex.value(), ng::color::Red);
+        }
+
+        aGc.fill_rect(ng::rect{ ng::point{ 5.0, 5.0 }, ng::size{ 1.0 } }, ng::color::White);
+        aGc.fill_rect(ng::rect{ ng::point{ 10.0, 10.0 }, ng::size{ 1.0 } }, ng::color::White);
+        aGc.draw_text(ng::point{ 20.0, 20.0 }, "A", font().with_size(16.0), ng::color::White);
+        aGc.draw_texture(ng::point{ 40.0, 40.0 }, tex.value());
+    }
+    void mouse_button_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifier aKeyModifier) final
+    {
+        update();
+    }
+private:
+};
+
 int main(int argc, char* argv[])
 {
     auto previous_handler = std::signal(SIGABRT, signal_handler);
@@ -49,6 +89,10 @@ int main(int argc, char* argv[])
         app.change_style("Dark");
 
         app.plugin_manager().load_plugins();
+
+#if 0
+        window w;
+#else
 
         test::main_window window{ app };
 
@@ -1627,6 +1671,8 @@ int main(int argc, char* argv[])
             if (window.groupBox.is_checkable() && window.groupBox.check_box().is_checked())
                 window.update();
         }, std::chrono::milliseconds{ 1 } };
+
+#endif
 
         return app.exec();
     }

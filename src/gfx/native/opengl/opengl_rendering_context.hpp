@@ -322,11 +322,28 @@ namespace neogfx
         neogfx::subpixel_format subpixel_format() const final;
     private:
         void update_state(queue_batch_item const& aQbi);
+        void apply_state();
+        bool fast_state_invalid() const;
+        bool slow_state_invalid() const;
+        void invalidate_fast_state();
+        void invalidate_slow_state();
+        void validate_fast_state();
+        void validate_slow_state();
         bool applying_scissor() const;
         void apply_scissor();
         void apply_scissor(std::optional<rect> const& aScissorRect);
         void apply_logical_operation();
     private:
+        static std::atomic<std::uint64_t>& shared_fast_state_generation()
+        {
+            static std::atomic<std::uint64_t> sGeneration = {};
+            return sGeneration;
+        }
+        static std::atomic<std::uint64_t>& shared_slow_state_generation()
+        {
+            static std::atomic<std::uint64_t> sGeneration = {};
+            return sGeneration;
+        }
         static standard_batching& as_vertex_provider()
         {
             static standard_batching sProvider;
@@ -348,6 +365,8 @@ namespace neogfx
         std::optional<std::int32_t> iStencilRef;
         rendering_context_fast_state iFastState;
         rendering_context_slow_state iSlowState;
+        std::uint64_t iSharedFastStateGeneration = 0u;
+        std::uint64_t iSharedSlowStateGeneration = 0u;
         font iLastDrawGlyphFallbackFont;
         std::optional<std::uint8_t> iLastDrawGlyphFallbackFontIndex;
         sink iSink;

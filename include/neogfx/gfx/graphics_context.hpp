@@ -27,11 +27,11 @@ namespace neogfx
 {
     class graphics_context : public i_graphics_context
     {
-    public:
-        struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::graphics_context::not_implemented") {} };
     private:
         friend class generic_surface;
         // exceptions
+    public:
+        struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::graphics_context::not_implemented") {} };
         // construction
     public:
         graphics_context(i_surface const& aSurface, type aType = type::Attached);
