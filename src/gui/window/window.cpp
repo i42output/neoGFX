@@ -556,7 +556,7 @@ namespace neogfx
         {
             bool const initiallyCentered = ((style() & window_style::InitiallyCentered) == window_style::InitiallyCentered);
             bool const initialSizeSpecified = placement().size_specified();
-            bool const manuallyResizable = ((style() & window_style::Resize) != window_style::Resize);
+            bool const manuallyResizable = ((style() & window_style::Resize) == window_style::Resize);
             bool const eventCauseExternal = native_window().event_cause_external();
             bool const resizingOrMoving = native_window().resizing_or_moving();
             if (initiallyCentered && !eventCauseExternal && !resizingOrMoving)
