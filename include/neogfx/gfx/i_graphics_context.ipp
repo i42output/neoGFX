@@ -47,7 +47,7 @@ namespace neogfx
         back_buffer().flush();
         iRenderTarget = {};
         rect const drawRect{ iFilter.region.top_left() - (iSubtractRadius ? point{ iFilter.radius, iFilter.radius } : point{}), iBufferRect.extents() };
-        auto& finalBuffer = static_cast<std::int32_t>(iFilter.radius) % 2 == 0 ? front_buffer() : back_buffer();
+        auto& finalBuffer = static_cast<std::int32_t>(iFilter.radius) % 2 == 1 ? front_buffer() : back_buffer();
         iRc.blit(drawRect, finalBuffer.render_target().target_texture(), iBufferRect, blending_mode::FilterFinish);
     }
 
