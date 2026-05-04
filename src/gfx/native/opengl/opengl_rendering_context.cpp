@@ -1328,13 +1328,12 @@ namespace neogfx
                     {
                         if (std::holds_alternative<color>(drawOp.fill))
                         {
-                            point const textureMargin{ 1.0, 1.0 };
                             auto const& fixedRc = rc.with_y(
                                 logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame ?
                                     rc.y : 
                                     rendering_area(false).cy - rc.cy - rc.y) +
                                         (render_target().target_type() == render_target_type::Texture ?
-                                            textureMargin : point{});
+                                            point{ render_target().target_texture().bleed_guard() } : point{});
                             apply_scissor(fixedRc.intersection(scissor_rect() ? *scissor_rect() : fixedRc));
                             clear(static_variant_cast<color>(drawOp.fill));
                             if (iUpdatingStencil)
@@ -2415,7 +2414,9 @@ namespace neogfx
                                     game::mesh_renderer{
                                         game::material{
                                             ink_maybe_animated(drawOp, ink),
-                                            std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb_2d(glyphQuad.begin(), glyphQuad.end()))) : std::optional<game::gradient>{},
+                                            std::holds_alternative<gradient>(ink) ? 
+                                                to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb_2d(glyphQuad.begin(), glyphQuad.end()))) : 
+                                                std::optional<game::gradient>{},
                                             {},
                                             to_ecs_component(theGlyph.outline_texture()),
                                             shader_effect::Ignore
@@ -2610,10 +2611,8 @@ namespace neogfx
         }
 
         std::optional<neolib::cookie> textureId;
-        std::optional<float> uvGui;
-        vec2f textureStorageExtents;
-        vec2f uvFixupCoefficient;
-        vec2f uvFixupOffset;
+        optional_aabb_2df materialSubtexture;
+        uv_calculator const* uvCalculator = nullptr;
 
         for (auto md = aFirst; md != aLast; ++md)
         {
@@ -2654,23 +2653,16 @@ namespace neogfx
                     {
                         auto const& materialTexture = patch_drawable::texture(meshRenderer, material);
                         auto nextTextureId = materialTexture.id.cookie();
-                        if (textureId == std::nullopt || *textureId != nextTextureId)
+                        if (textureId == std::nullopt || *textureId != nextTextureId || materialSubtexture != materialTexture.subTexture)
                         {
-                            vec2f const textureMargin{ 1.0f, 1.0f };
                             textureId = nextTextureId;
+                            materialSubtexture = materialTexture.subTexture;
                             auto const& texture = *service<i_texture_manager>().find_texture(nextTextureId);
-                            textureStorageExtents = texture.storage_extents().to_vec2().as<float>();
-                            uvFixupCoefficient = materialTexture.extents;
-                            if (materialTexture.type == texture_type::Texture)
-                                uvFixupOffset = textureMargin;
-                            else if (materialTexture.subTexture == std::nullopt)
-                                uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2().as<float>() + textureMargin;
-                            else
-                                uvFixupOffset = materialTexture.subTexture->min + textureMargin;
-                            if (texture.is_render_target() && texture.as_render_target().logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
-                                uvGui = static_cast<float>((texture.extents().to_vec2().as<float>().y + textureMargin.y * 2.0f) / textureStorageExtents.y);
+                            uvCalculator = &texture.uv_calculator(materialTexture.subTexture);
                         }
                     }
+                    else
+                        uvCalculator = nullptr;
                     auto const vertexCount = faces.size() * 3;
                     auto const currentCachedVertexCount = cacheIndices[1] - cacheIndices[0];
                     auto vertexStartIndex = cacheIndices[0];
@@ -2686,8 +2678,7 @@ namespace neogfx
                         {
                             auto const& xyz = (transformation? *transformation * mesh.vertices[faceVertexIndex] : mesh.vertices[faceVertexIndex]) + origin;
                             auto const& rgba = (material.color != std::nullopt ? material.color->rgba : defaultColor);
-                            auto const& uv = (patch_drawable::has_texture(meshRenderer, material) ?
-                                (mesh.uv[faceVertexIndex].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0f / textureStorageExtents) : vec2f{});
+                            auto const& uv = (uvCalculator ? (*uvCalculator)(mesh.uv[faceVertexIndex]) : vec2f{});
                             auto const& xyzw = function;
                             if (nextIndex == vertices.size())
                                 vertices.emplace_back(xyz, rgba, uv, xyzw);
@@ -2698,11 +2689,6 @@ namespace neogfx
                                 vertex.rgba = rgba;
                                 vertex.st = uv;
                                 vertex.xyzw = xyzw;
-                            }
-                            if (uvGui)
-                            {
-                                auto& st = vertices[nextIndex].st;
-                                st.y = *uvGui - st.y;
                             }
                             ++nextIndex;
                         }
@@ -2883,11 +2869,12 @@ namespace neogfx
 
     void opengl_rendering_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect)
     {
-        bool const guiRect = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui &&
-            (aTexture.as_render_target().logical_coordinate_system() != neogfx::logical_coordinate_system::AutomaticGui);
-        auto mesh = guiRect ? to_ecs_component(aRect) : to_ecs_component(game_rect{ aRect });
+        auto mesh = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ? 
+            to_ecs_component(aRect) : to_ecs_component(game_rect{ aRect });
+        auto const& texViewport = aTexture.as_render_target().viewport();
         for (auto& uv : mesh.uv)
-            uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2().as<float>() + uv.scale((aTextureRect.extents() / aTexture.extents()).to_vec2().as<float>());
+            uv = (aTextureRect.top_left() / texViewport.extents()).to_vec2().as<float>() + 
+                uv.scale((aTextureRect.extents() / texViewport.extents()).to_vec2().as<float>());
         draw_mesh(
             mesh,
             game::material

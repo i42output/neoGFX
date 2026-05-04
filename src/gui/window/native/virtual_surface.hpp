@@ -71,8 +71,11 @@ namespace neogfx
         neogfx::logical_coordinates logical_coordinates() const final;
         void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const final;
     public:
-        rect_i32 viewport() const final;
-        rect_i32 set_viewport(const rect_i32& aViewport) const final;
+        neogfx::viewport viewport() const final;
+        bool is_default_viewport() const final;
+        void set_default_viewport() const final;
+        void set_viewport(const neogfx::viewport& aViewport) const final;
+        neogfx::viewport apply_viewport() const final;
     public:
         bool target_active() const final;
         void activate_target() const final;

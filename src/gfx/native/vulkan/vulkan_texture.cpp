@@ -379,6 +379,32 @@ namespace neogfx
     }
 
     template <typename T>
+    dimension vulkan_texture<T>::bleed_guard() const
+    {
+        return iBleedGuard.value_or(0.0);
+    }
+
+    template <typename T>
+    void vulkan_texture<T>::set_bleed_guard(i_optional<dimension> const& aWidth)
+    {
+        if (aWidth.has_value())
+        {
+            if (aWidth.value() <= MaxBleedGuardWidth)
+                iBleedGuard = aWidth.value();
+            else
+                throw std::logic_error("neogfx::vulkan_texture::set_bleed_guard: Unsupported bleed guard width");
+        }
+        else
+            iBleedGuard.reset();
+    }
+
+    template <typename T>
+    uv_calculator const& vulkan_texture<T>::uv_calculator(optional_aabb_2df const& aPart) const
+    {
+        TODO;
+    }
+
+    template <typename T>
     void vulkan_texture<T>::set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aStride, std::uint32_t aPackAlignment)
     {
         set_pixels(aRect, aPixelData, data_format(), aStride, aPackAlignment);
@@ -558,7 +584,7 @@ namespace neogfx
     template <typename T>
     point vulkan_texture<T>::target_origin() const
     {
-        return {};
+        return point{ bleed_guard() };
     }
 
     template <typename T>
@@ -609,15 +635,10 @@ namespace neogfx
     }
 
     template <typename T>
-    rect_i32 vulkan_texture<T>::viewport() const
+    viewport vulkan_texture<T>::apply_viewport() const
     {
         TODO;
-    }
-
-    template <typename T>
-    rect_i32 vulkan_texture<T>::set_viewport(const rect_i32& aViewport) const
-    {
-        TODO;
+        return {};
     }
 
     template <typename T>
@@ -630,7 +651,7 @@ namespace neogfx
             service<i_rendering_engine>().activate_context(*this);
         }
         TODO;
-        set_viewport(rect_i32{ point_i32{ 1, 1 }, extents().as<std::int32_t>() });
+        apply_viewport();
         TODO;
         if (!alreadyActive)
             TargetActivated();

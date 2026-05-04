@@ -403,6 +403,8 @@ namespace neogfx
             z{} {}
         constexpr basic_point(CoordinateType x, CoordinateType y, CoordinateType z = {}) : 
             x{ x }, y{ y }, z{ z } {}
+        explicit constexpr basic_point(CoordinateType xy) :
+            x{ xy }, y{ xy }, z{} {}
         template <typename CoordinateType2>
         constexpr basic_point(const basic_point<CoordinateType2>& aOther) :
             x{ static_cast<CoordinateType>(aOther.x) }, 
@@ -796,10 +798,12 @@ namespace neogfx
         basic_rect(const aabb_2df& aBoundingBox) : basic_rect{ aBoundingBox.min.x, aBoundingBox.min.y, aBoundingBox.max.x, aBoundingBox.max.y } {}
         basic_rect(const basic_box_areas<coordinate_type>& aBoxAreas) : basic_rect{ aBoxAreas.top_left(), aBoxAreas.bottom_right() } {}
     public:
+        basic_rect(const basic_rect& aOther) : point_type{ aOther }, size_type{ aOther } {}
         template <typename CoordinateType2, logical_coordinate_system CoordinateSystem2>
         basic_rect(const basic_rect<CoordinateType2, CoordinateSystem2>& aOther) : point_type{ aOther }, size_type{ aOther } {}
         // assignment
     public:
+        basic_rect& operator=(const basic_rect& aOther) { static_cast<point_type&>(*this) = aOther; static_cast<size_type&>(*this) = aOther; epsilon = aOther.epsilon; return *this; }
         template <typename CoordinateType2, logical_coordinate_system CoordinateSystem2>
         basic_rect& operator=(const basic_rect<CoordinateType2, CoordinateSystem2>& aOther) { static_cast<point_type&>(*this) = aOther; static_cast<size_type&>(*this) = aOther; epsilon = aOther.epsilon; return *this; }
         basic_rect& operator=(const point_type& coordinates) { static_cast<point_type&>(*this) = coordinates; return *this; }
@@ -1064,6 +1068,16 @@ namespace neogfx
     using gui_rect  = basic_rect<coordinate, logical_coordinate_system::AutomaticGui>;
     using game_rect = basic_rect<coordinate, logical_coordinate_system::AutomaticGame>;
     using rect      = gui_rect;
+
+    inline gui_rect to_gui_rect(game_rect const& aGameRect, scalar aMaxY)
+    {
+        return gui_rect{ aGameRect.top_left().with_y(aMaxY - aGameRect.top()), aGameRect.extents()};
+    }
+
+    inline game_rect to_game_rect(gui_rect const& aGuiRect, scalar aMaxY)
+    {
+        return game_rect{ aGuiRect.bottom_left().with_y(aMaxY - aGuiRect.bottom()), aGuiRect.extents() };
+    }
 
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
     inline basic_rect<CoordinateType, CoordinateSystem> operator*(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)

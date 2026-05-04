@@ -91,6 +91,27 @@ namespace neogfx
         {
         }
     public:
+        neogfx::viewport viewport() const final
+        {
+            return iViewport.value_or(neogfx::viewport{ this->target_origin(), this->target_extents() });
+        }
+        bool is_default_viewport() const final
+        {
+            return !iViewport.has_value();
+        }
+        void set_default_viewport() const override
+        {
+            iViewport = std::nullopt;
+            if (this->target_active())
+                this->apply_viewport();
+        }
+        void set_viewport(const neogfx::viewport& aViewport) const override
+        {
+            iViewport = aViewport;
+            if (this->target_active())
+                this->apply_viewport();
+        }
+    public:
         void begin_rendering() const final
         {
             iRenderQueueContext.lastFastState.reset();
@@ -156,6 +177,7 @@ namespace neogfx
             iOptimisedQueueExtant = false;
         }
     private:
+        mutable std::optional<neogfx::viewport> iViewport;
         mutable rendering_queue_context iRenderQueueContext;
         mutable neogfx::rendering_queue iQueue;
         mutable neogfx::optimised_rendering_queue iOptimisedQueue;

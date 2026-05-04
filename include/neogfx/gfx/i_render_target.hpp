@@ -37,6 +37,17 @@ namespace neogfx
 
     typedef int pixel_format_t; // todo: enum?
 
+    class viewport : public rect
+    {
+    public:
+        viewport(rect const& aOther) :
+            rect{ aOther } {}
+        using rect::rect;
+    public:
+        scalar minDepth = 0.0;
+        scalar maxDepth = 1.0;
+    };
+
     class i_render_target : public i_device_metrics
     {
     public:
@@ -64,8 +75,11 @@ namespace neogfx
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;
         virtual void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const = 0;
     public:
-        virtual rect_i32 viewport() const = 0;
-        virtual rect_i32 set_viewport(const rect_i32& aViewport) const = 0;
+        virtual neogfx::viewport viewport() const = 0;
+        virtual bool is_default_viewport() const = 0;
+        virtual void set_default_viewport() const = 0;
+        virtual void set_viewport(const neogfx::viewport& aViewport) const = 0;
+        virtual neogfx::viewport apply_viewport() const = 0;
     public:
         virtual bool target_active() const = 0;
         virtual void activate_target() const = 0;

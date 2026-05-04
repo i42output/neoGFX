@@ -1,4 +1,4 @@
-// texture_atlas.cpp
+// textue_atlas.cpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -29,6 +29,18 @@ namespace neogfx
     {
     }
 
+    dimension texture_atlas::bleed_guard() const
+    {
+        return iBleedGuard.value_or(1.0);
+    }
+    void texture_atlas::set_bleed_guard(i_optional<dimension> const& aWidth)
+    {
+        if (aWidth.has_value())
+            iBleedGuard = aWidth.value();
+        else
+            iBleedGuard.reset();
+    }
+
     const i_sub_texture& texture_atlas::sub_texture(texture_id aSubTextureId) const
     {
         auto iterEntry = iEntries.find(aSubTextureId);
@@ -50,7 +62,8 @@ namespace neogfx
         auto newSpace = allocate_space(aSize, aDpiScaleFactor, aSampling, aDataFormat);
         auto nextId = iTextureManager.allocate_texture_id();
         auto entry = iEntries.emplace(std::piecewise_construct, std::forward_as_tuple(nextId), std::forward_as_tuple(newSpace.first, nextId, newSpace.first->first, newSpace.second, aSize));
-        return *entry.first->second.texture;
+        auto& newTexture = *entry.first->second.texture;
+        return newTexture;
     }
 
     i_sub_texture& texture_atlas::create_sub_texture(const i_image& aImage)
@@ -58,8 +71,9 @@ namespace neogfx
         auto newSpace = allocate_space(aImage.extents(), aImage.dpi_scale_factor(), aImage.sampling(), aImage.data_format());
         auto nextId = iTextureManager.allocate_texture_id();
         auto entry = iEntries.emplace(std::piecewise_construct, std::forward_as_tuple(nextId), std::forward_as_tuple(newSpace.first, aImage.uri(), nextId, newSpace.first->first, newSpace.second, aImage.extents()));
-        entry.first->second.texture->set_pixels(aImage);
-        return *entry.first->second.texture;
+        auto& newTexture = *entry.first->second.texture;
+        newTexture.set_pixels(aImage);
+        return newTexture;
     }
 
     i_sub_texture& texture_atlas::create_sub_texture(const i_image& aImage, const rect& aImagePart)
@@ -67,8 +81,9 @@ namespace neogfx
         auto newSpace = allocate_space(aImagePart.extents(), aImage.dpi_scale_factor(), aImage.sampling(), aImage.data_format());
         auto nextId = iTextureManager.allocate_texture_id();
         auto entry = iEntries.emplace(std::piecewise_construct, std::forward_as_tuple(nextId), std::forward_as_tuple(newSpace.first, aImage.uri(), nextId, newSpace.first->first, newSpace.second, aImagePart.extents()));
-        entry.first->second.texture->set_pixels(aImage, aImagePart);
-        return *entry.first->second.texture;
+        auto& newTexture = *entry.first->second.texture;
+        newTexture.set_pixels(aImage, aImagePart);
+        return newTexture;
     }
 
     void texture_atlas::destroy_sub_texture(i_sub_texture& aSubTexture)
@@ -100,11 +115,11 @@ namespace neogfx
             create_page(aDpiScaleFactor, aSampling, aDataFormat);
         rect result;
         for (auto iterPage = iPages.begin(); iterPage != iPages.end(); ++iterPage)
-            if (iterPage->first.dpi_scale_factor() == aDpiScaleFactor && iterPage->first.sampling() == aSampling && iterPage->first.data_format() == aDataFormat && iterPage->second.insert(aSize + size{ 2.0, 2.0 }, result))
-                return std::make_pair(iterPage, result + point{ 1.0, 1.0 } + size{ -2.0, -2.0 });
+            if (iterPage->first.dpi_scale_factor() == aDpiScaleFactor && iterPage->first.sampling() == aSampling && iterPage->first.data_format() == aDataFormat && iterPage->second.insert(aSize + size{ bleed_guard() * 2.0 }, result))
+                return std::make_pair(iterPage, result + point{ bleed_guard() } + size{ bleed_guard() * -2.0 });
         auto iterPage = create_page(aDpiScaleFactor, aSampling, aDataFormat);
-        if (iterPage->second.insert(aSize + size{ 2.0, 2.0 }, result))
-            return std::make_pair(iterPage, result + point{ 1.0, 1.0 } + size{ -2.0, -2.0 });
+        if (iterPage->second.insert(aSize + size{ bleed_guard() * 2.0 }, result))
+            return std::make_pair(iterPage, result + point{ bleed_guard() } + size{ bleed_guard() * -2.0 });
         iPages.erase(iterPage);
         throw texture_too_big_for_atlas();
     }

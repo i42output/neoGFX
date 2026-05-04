@@ -79,11 +79,15 @@ namespace neogfx
         FilterSampler   = 4,
         FilterKernel    = 5,
         Reserved1       = 6,
-        RenderTarget    = 7
+        RenderTarget    = 7,
+
+        RESERVED_LAST   = RenderTarget
     };
 
     class i_sub_texture;
     class i_image;
+
+    constexpr dimension MaxBleedGuardWidth = 1.0;
 
     struct texture_line_segment
     {
@@ -93,6 +97,25 @@ namespace neogfx
         auto operator<=>(texture_line_segment const&) const = default;
 
         using abstract_type = texture_line_segment;
+    };
+
+    struct uv_calculator
+    {
+        vec2f logicalExtents;
+        std::variant<vec2f, aabb_2df> offsetOrPart;
+        vec2f coefficients;
+        std::optional<float> yFlip;
+
+        vec2f operator()(vec2f const& uv) const
+        {
+            vec2f const offset = (std::holds_alternative<vec2f>(offsetOrPart) ? std::get<vec2f>(offsetOrPart) : std::get<aabb_2df>(offsetOrPart).min);
+            vec2f const texelLogicalPos = uv.scale(logicalExtents);
+            vec2f const texelPos = texelLogicalPos + offset;
+            vec2f result = texelPos.scale(coefficients);
+            if (yFlip)
+                result.y = *yFlip - result.y;
+            return result;
+        }
     };
 
     class i_texture : public i_reference_counted
@@ -109,10 +132,13 @@ namespace neogfx
         virtual i_string const& uri() const = 0;
         virtual rect const& part() const = 0;
         virtual texture_type type() const = 0;
+    public:
         virtual bool is_render_target() const = 0;
         virtual const i_render_target& as_render_target() const = 0;
         virtual i_render_target& as_render_target() = 0;
+    public:
         virtual const i_sub_texture& as_sub_texture() const = 0;
+    public:
         virtual dimension dpi_scale_factor() const = 0;
         virtual neogfx::color_space color_space() const = 0;
         virtual texture_sampling sampling() const = 0;
@@ -122,6 +148,11 @@ namespace neogfx
         virtual bool is_empty() const = 0;
         virtual size extents() const = 0;
         virtual size storage_extents() const = 0;
+        virtual dimension bleed_guard() const = 0;
+        virtual void set_bleed_guard(i_optional<dimension> const& aWidth) = 0;
+    public:
+        virtual neogfx::uv_calculator const& uv_calculator(optional_aabb_2df const& aPart = {}) const = 0;
+    public:
         virtual void set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aStride = 0u, std::uint32_t aPackAlignment = 4u) = 0;
         virtual void set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aStride = 0u, std::uint32_t aPackAlignment = 4u) = 0;
         virtual void set_pixels(const i_image& aImage) = 0;
@@ -136,5 +167,11 @@ namespace neogfx
     public:
         virtual intptr_t native_handle() const = 0;
         virtual i_texture& native_texture() const = 0;
+        // helpers
+    public:
+        void set_bleed_guard(std::optional<dimension> const& aWidth)
+        {
+            set_bleed_guard(optional_dimension{ aWidth });
+        }
     };
 }

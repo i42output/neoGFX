@@ -77,18 +77,23 @@ namespace neogfx
     public:
         texture_atlas(const size& aPageSize);
     public:
-        const i_sub_texture& sub_texture(texture_id aSubTextureId) const override;
-        i_sub_texture& sub_texture(texture_id aSubTextureId) override;
-        i_sub_texture& create_sub_texture(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat = texture_data_format::RGBA) override;
-        i_sub_texture& create_sub_texture(const i_image& aImage) override;
-        i_sub_texture& create_sub_texture(const i_image& aImage, const rect& aImagePart) override;
-        void destroy_sub_texture(i_sub_texture& aSubTexture) override;
+        dimension bleed_guard() const final;
+        using i_texture_atlas::set_bleed_guard;
+        void set_bleed_guard(i_optional<dimension> const& aWidth) final;
+    public:
+        const i_sub_texture& sub_texture(texture_id aSubTextureId) const final;
+        i_sub_texture& sub_texture(texture_id aSubTextureId) final;
+        i_sub_texture& create_sub_texture(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat = texture_data_format::RGBA) final;
+        i_sub_texture& create_sub_texture(const i_image& aImage) final;
+        i_sub_texture& create_sub_texture(const i_image& aImage, const rect& aImagePart) final;
+        void destroy_sub_texture(i_sub_texture& aSubTexture) final;
     private:
         const size& page_size() const;
         pages::iterator create_page(dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat);
         std::pair<pages::iterator, rect> allocate_space(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat);
     private:
         i_texture_manager& iTextureManager;
+        std::optional<dimension> iBleedGuard;
         size iPageSize;
         pages iPages;
         entries iEntries;

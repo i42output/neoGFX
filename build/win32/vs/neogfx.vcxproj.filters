@@ -49,9 +49,6 @@
     <Filter Include="Header Files\mvc">
       <UniqueIdentifier>{ab403c25-f024-4051-9fd0-2fc94e9fff0e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\mvc">
-      <UniqueIdentifier>{23e33264-b791-4b92-926b-a62fede59b47}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\audio">
       <UniqueIdentifier>{a20c32bf-b880-486a-a596-ada01058f793}</UniqueIdentifier>
     </Filter>
@@ -1144,15 +1141,6 @@
     <ClCompile Include="..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.cpp">
       <Filter>Source Files\native\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\mvc\controller.cpp">
-      <Filter>Source Files\mvc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\mvc\view.cpp">
-      <Filter>Source Files\mvc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\mvc\view_container.cpp">
-      <Filter>Source Files\mvc</Filter>
-    </ClCompile>
     <ClCompile Include="neoGFX\x64\Tools_Debug\GeneratedFiles\icons.res.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -1325,6 +1313,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\render_target.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\game_controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\hid\game_controllers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\utility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

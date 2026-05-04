@@ -156,16 +156,31 @@ namespace neogfx
         iLogicalCoordinates = aCoordinates;
     }
 
-    rect_i32 virtual_surface::viewport() const
+    viewport virtual_surface::viewport() const
     {
         return parent().viewport();
     }
 
-    rect_i32 virtual_surface::set_viewport(const rect_i32& aViewport) const
+    bool virtual_surface::is_default_viewport() const
     {
-        return parent().set_viewport(aViewport);
+        return parent().is_default_viewport();
     }
-    
+
+    void virtual_surface::set_default_viewport() const
+    {
+        parent().set_default_viewport();
+    }
+
+    void virtual_surface::set_viewport(const neogfx::viewport& aViewport) const
+    {
+        parent().set_viewport(aViewport);
+    }
+
+    neogfx::viewport virtual_surface::apply_viewport() const
+    {
+        return parent().apply_viewport();
+    }
+
     bool virtual_surface::target_active() const
     {
         return parent().target_active();

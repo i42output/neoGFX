@@ -62,6 +62,12 @@ namespace neogfx
         bool is_empty() const final;
         size extents() const final;
         size storage_extents() const final;
+        dimension bleed_guard() const final;
+        using i_texture::set_bleed_guard;
+        void set_bleed_guard(i_optional<dimension> const& aWidth) final;
+    public:
+        neogfx::uv_calculator const& uv_calculator(optional_aabb_2df const& aPart = {}) const final;
+    public:
         void set_pixels(rect const& aRect, void const* aPixelData, std::uint32_t aStride = 0u, std::uint32_t aPackAlignment = 4u) final;
         void set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aStride = 0u, std::uint32_t aPackAlignment = 4u) final;
         void set_pixels(i_image const& aImage) final;
@@ -93,6 +99,8 @@ namespace neogfx
         rect iAtlasLocation;
         size iStorageExtents;
         size iExtents;
+        std::optional<dimension> iBleedGuard;
+        mutable std::optional<neogfx::uv_calculator> iUvCalculator;
         mutable std::map<std::tuple<texture_line_segment, rect, vec2, scalar>, vector<texture_line_segment>> iIntersectionResultCache;
     };
 

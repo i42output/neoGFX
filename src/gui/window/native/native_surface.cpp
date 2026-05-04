@@ -185,24 +185,21 @@ namespace neogfx
 
     logical_coordinates native_surface::logical_coordinates() const
     {
-        if (iLogicalCoordinates != std::nullopt)
-            return *iLogicalCoordinates;
-        neogfx::logical_coordinates result;
+        if (iLogicalCoordinates.has_value())
+            return iLogicalCoordinates.value();
+
         switch (iLogicalCoordinateSystem)
         {
-        case neogfx::logical_coordinate_system::Specified:
-            throw logical_coordinates_not_specified();
-            break;
         case neogfx::logical_coordinate_system::AutomaticGui:
-            result.bottomLeft = vec2{ 0.0, extents().cy };
-            result.topRight = vec2{ extents().cx, 0.0 };
-            break;
+            return neogfx::logical_coordinates{
+                viewport().bottom_left().as<scalar>().to_vec2(),
+                viewport().top_right().as<scalar>().to_vec2() };
         case neogfx::logical_coordinate_system::AutomaticGame:
-            result.bottomLeft = vec2{ 0.0, 0.0 };
-            result.topRight = vec2{ extents().cx, extents().cy };
-            break;
+            return neogfx::logical_coordinates{
+                to_game_rect(viewport(), viewport().extents().cy).bottom_left().as<scalar>().to_vec2(),
+                to_game_rect(viewport(), viewport().extents().cy).top_right().as<scalar>().to_vec2() };
         }
-        return result;
+        throw logical_coordinates_not_specified();
     }
 
     void native_surface::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const

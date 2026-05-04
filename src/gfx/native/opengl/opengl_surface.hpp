@@ -47,8 +47,7 @@ namespace neogfx
     public:
         const i_texture& target_texture() const override;
     public:
-        rect_i32 viewport() const override;
-        rect_i32 set_viewport(const rect_i32& aViewport) const override;
+        neogfx::viewport apply_viewport() const override;
     public:
         void do_activate_target() const override;
     public:

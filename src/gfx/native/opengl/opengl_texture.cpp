@@ -88,6 +88,11 @@ namespace neogfx
         }
     }
 
+    namespace
+    {
+        constexpr std::int32_t MaxBleedGuardWidth_i32 = static_cast<std::int32_t>(MaxBleedGuardWidth);
+    }
+
     template <typename T>
     opengl_texture<T>::opengl_texture(i_texture_manager& aManager, texture_id aId, const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, neogfx::color_space aColorSpace, const optional_color& aColor) :
         iManager{ aManager },
@@ -100,8 +105,8 @@ namespace neogfx
         iDataFormat{ aDataFormat },
         iSize{ aExtents },
         iStorageSize{ aSampling != texture_sampling::NormalMipmap ?
-            (aSampling != texture_sampling::Data ? decltype(iStorageSize){((iSize.cx + 2 - 1) / 16 + 1) * 16, ((iSize.cy + 2 - 1) / 16 + 1) * 16} : decltype(iStorageSize){iSize}) :
-            decltype(iStorageSize){size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}} },
+            (aSampling != texture_sampling::Data ? decltype(iStorageSize){((iSize.cx + MaxBleedGuardWidth_i32 * 2 - 1) / 16 + 1) * 16, ((iSize.cy + MaxBleedGuardWidth_i32 * 2 - 1) / 16 + 1) * 16} : decltype(iStorageSize){iSize}) :
+            decltype(iStorageSize){size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + MaxBleedGuardWidth_i32 * 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + MaxBleedGuardWidth_i32 * 2))), 16.0)}} },
         iHandle{ 0 },
         iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
         iFrameBuffer{ 0 },
@@ -139,11 +144,12 @@ namespace neogfx
                 thread_local std::vector<value_type> data;
                 data.clear();
                 data.resize(iStorageSize.cx * 4 * iStorageSize.cy);
+                auto const bleedGuard = static_cast<std::size_t>(bleed_guard());
                 if (aColor.has_value())
                 {
                     if constexpr (std::is_same_v<value_type, avec4u8>)
-                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
-                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+                        for (std::size_t y = bleedGuard; y < bleedGuard + iSize.cy; ++y)
+                            for (std::size_t x = bleedGuard; x < bleedGuard + iSize.cx; ++x)
                                 data[y * iStorageSize.cx + x + 0] = 
                                     value_type{
                                         aColor->red(),
@@ -152,8 +158,8 @@ namespace neogfx
                                         aColor->alpha()
                                     };
                     else if constexpr (std::is_same_v<value_type, std::array<float, 4>>)
-                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
-                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+                        for (std::size_t y = bleedGuard; y < bleedGuard + iSize.cy; ++y)
+                            for (std::size_t x = bleedGuard; x < bleedGuard + iSize.cx; ++x)
                                 data[y * iStorageSize.cx + x + 0] = 
                                     value_type{
                                         aColor->red<float>(),
@@ -195,8 +201,8 @@ namespace neogfx
         iDataFormat{ aDataFormat },
         iSize{ aImagePart.extents() },
         iStorageSize{ aImage.sampling() != texture_sampling::NormalMipmap ? 
-            (aImage.sampling() != texture_sampling::Data ? decltype(iStorageSize){((iSize.cx + 2 - 1) / 16 + 1) * 16, ((iSize.cy + 2 - 1) / 16 + 1) * 16} : decltype(iStorageSize){iSize}) :
-            decltype(iStorageSize){size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}} },
+            (aImage.sampling() != texture_sampling::Data ? decltype(iStorageSize){((iSize.cx + MaxBleedGuardWidth_i32 * 2 - 1) / 16 + 1) * 16, ((iSize.cy + MaxBleedGuardWidth_i32 * 2 - 1) / 16 + 1) * 16} : decltype(iStorageSize){iSize}) :
+            decltype(iStorageSize){size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + MaxBleedGuardWidth_i32 * 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + MaxBleedGuardWidth_i32 * 2))), 16.0)}} },
         iHandle{ 0 },
         iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
         iFrameBuffer{ 0 },
@@ -240,21 +246,22 @@ namespace neogfx
                     thread_local std::vector<value_type> data;
                     data.clear();
                     data.resize(iStorageSize.cx * 4 * iStorageSize.cy);
+                    auto const bleedGuard = static_cast<std::size_t>(bleed_guard());
                     if constexpr (std::is_same_v<value_type, avec4u8>)
                     {
                         const std::uint8_t* imageData = static_cast<const std::uint8_t*>(aImage.cpixels());
-                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
-                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+                        for (std::size_t y = bleedGuard; y < bleedGuard + iSize.cy; ++y)
+                            for (std::size_t x = bleedGuard; x < bleedGuard + iSize.cx; ++x)
                                 for (std::size_t c = 0; c < 4; ++c)
-                                    data[(iSize.cy + 1 - y) * iStorageSize.cx + x][c] = imageData[(y + imagePartOrigin.y - 1) * imageExtents.cx * 4 + (imagePartOrigin.x + x - 1) * 4 + c];
+                                    data[(iSize.cy + bleedGuard - y - 1) * iStorageSize.cx + x][c] = imageData[(y + imagePartOrigin.y - bleedGuard) * imageExtents.cx * 4 + (imagePartOrigin.x + x - bleedGuard) * 4 + c];
                     }
                     else if constexpr (std::is_same_v<value_type, std::array<float, 4>>)
                     {
                         const std::uint8_t* imageData = static_cast<const std::uint8_t*>(aImage.cpixels());
-                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
-                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
+                        for (std::size_t y = bleedGuard; y < bleedGuard + iSize.cy; ++y)
+                            for (std::size_t x = bleedGuard; x < bleedGuard + iSize.cx; ++x)
                                 for (std::size_t c = 0; c < 4; ++c)
-                                    data[(iSize.cy + 1 - y) * iStorageSize.cx + x][c] = imageData[(y + imagePartOrigin.y - 1) * imageExtents.cx * 4 + (imagePartOrigin.x + x - 1) * 4 + c] / 255.0f;
+                                    data[(iSize.cy + bleedGuard - y - 1) * iStorageSize.cx + x][c] = imageData[(y + imagePartOrigin.y - bleedGuard) * imageExtents.cx * 4 + (imagePartOrigin.x + x - bleedGuard) * 4 + c] / 255.0f;
                     }
                     glCheck(glTexImage2D(GL_TEXTURE_2D, 0, internalformat, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, format, type, &data[0]));
                     if (sampling() == texture_sampling::NormalMipmap)
@@ -412,6 +419,63 @@ namespace neogfx
     }
 
     template <typename T>
+    dimension opengl_texture<T>::bleed_guard() const
+    {
+        return iBleedGuard.value_or(0.0);
+    }
+
+    template <typename T>
+    void opengl_texture<T>::set_bleed_guard(i_optional<dimension> const& aWidth)
+    {
+        if (aWidth.has_value())
+        {
+            if (aWidth.value() <= MaxBleedGuardWidth)
+                iBleedGuard = aWidth.value();
+            else
+                throw std::logic_error("neogfx::opengl_texture::set_bleed_guard: Unsupported bleed guard width");
+        }
+        else
+            iBleedGuard.reset();
+
+        iUvCalculator.reset();
+    }
+
+    template <typename T>
+    uv_calculator const& opengl_texture<T>::uv_calculator(optional_aabb_2df const& aPart) const
+    {
+        if (iUvCalculator)
+        {
+            if (aPart)
+                iUvCalculator->offsetOrPart = *aPart;
+            else if (std::holds_alternative<aabb_2df>(iUvCalculator->offsetOrPart))
+                iUvCalculator->offsetOrPart = to_game_rect(viewport(), extents().cy).bottom_left().to_vec2().as<float>();
+            return *iUvCalculator;
+        }
+
+        auto const& logicalRect = to_game_rect(viewport(), extents().cy);
+
+        std::variant<vec2f, aabb_2df> offsetOrPart;
+        if (aPart)
+            offsetOrPart = *aPart;
+        else
+            offsetOrPart = logicalRect.bottom_left().to_vec2().as<float>();
+
+        std::optional<float> yFlip;
+        #if 0
+        if (logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
+            yFlip = static_cast<float>((extents().cy * 2.0 - logicalRect.cy) / storage_extents().cy);
+        #endif
+
+        iUvCalculator.emplace(
+            logicalRect.extents().to_vec2().as<float>(),
+            offsetOrPart,
+            1.0f / storage_extents().to_vec2().as<float>(),
+            yFlip);
+
+        return *iUvCalculator;
+    }
+
+    template <typename T>
     void opengl_texture<T>::set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aStride, std::uint32_t aPackAlignment)
     {
         set_pixels(aRect, aPixelData, iDataFormat, aStride, aPackAlignment);
@@ -420,7 +484,7 @@ namespace neogfx
     template <typename T>
     void opengl_texture<T>::set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aStride, std::uint32_t aPackAlignment)
     {
-        auto const adjustedRect = aRect + (sampling() != texture_sampling::Data ? point{ 1.0, 1.0 } : point{ 0.0, 0.0 });
+        auto const adjustedRect = aRect + (sampling() != texture_sampling::Data ? point{ bleed_guard(), bleed_guard() } : point{ 0.0, 0.0 });
         if (sampling() != texture_sampling::Multisample)
         {
             bind();
@@ -469,10 +533,11 @@ namespace neogfx
                 thread_local std::vector<std::uint8_t> data;
                 data.clear();
                 data.resize(imagePartExtents.cx * 4 * imagePartExtents.cy);
+                auto const bleedGuard = static_cast<std::size_t>(bleed_guard());
                 for (std::size_t y = 0; y < imagePartExtents.cy; ++y)
                     for (std::size_t x = 0; x < imagePartExtents.cx; ++x)
                         for (std::size_t c = 0; c < 4; ++c)
-                            data[(imagePartExtents.cy - 1 - y) * imagePartExtents.cx * 4 + x * 4 + c] = imageData[(y + imagePartOrigin.y) * imageExtents.cx * 4 + (x + imagePartOrigin.x) * 4 + c];
+                            data[(imagePartExtents.cy - bleedGuard - y) * imagePartExtents.cx * 4 + x * 4 + c] = imageData[(y + imagePartOrigin.y) * imageExtents.cx * 4 + (x + imagePartOrigin.x) * 4 + c];
                 set_pixels(rect{ point{}, imagePartExtents }, &data[0]);
             }
             break;
@@ -558,9 +623,13 @@ namespace neogfx
             bind(iBoundTextureUnit.value());
             return;
         }
-        if (texture_bindings().unbound.empty())
-            throw std::logic_error("neogfx::opengl_texture::bind: texture bindings pool exhausted");
-        bind(texture_bindings().unbound.begin()->first());
+        for (auto const& binding : texture_bindings().unbound)
+            if (static_cast<reserved_texture_unit>(binding.first()) > reserved_texture_unit::RESERVED_LAST)
+            {
+                bind(binding.first());
+                return;
+            }
+        throw std::logic_error("neogfx::opengl_texture::bind: texture bindings pool exhausted");
     }
 
     template <typename T>
@@ -653,7 +722,7 @@ namespace neogfx
     template <typename T>
     point opengl_texture<T>::target_origin() const
     {
-        return {};
+        return point{ bleed_guard() };
     }
 
     template <typename T>
@@ -672,6 +741,8 @@ namespace neogfx
     void opengl_texture<T>::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const
     {
         iLogicalCoordinateSystem = aSystem;
+
+        iUvCalculator.reset();
     }
 
     template <typename T>
@@ -679,44 +750,56 @@ namespace neogfx
     {
         if (iLogicalCoordinates.has_value())
             return iLogicalCoordinates.value();
-        neogfx::logical_coordinates result;
+
         switch (iLogicalCoordinateSystem)
         {
-        case neogfx::logical_coordinate_system::Specified:
-            throw logical_coordinates_not_specified();
-            break;
         case neogfx::logical_coordinate_system::AutomaticGui:
-            result.bottomLeft = vec2{ 0.0, extents().cy };
-            result.topRight = vec2{ extents().cx, 0.0 };
-            break;
+            return neogfx::logical_coordinates{
+                viewport().bottom_left().as<scalar>().to_vec2(),
+                viewport().top_right().as<scalar>().to_vec2() };
         case neogfx::logical_coordinate_system::AutomaticGame:
-            result.bottomLeft = vec2{ 0.0, 0.0 };
-            result.topRight = vec2{ extents().cx, extents().cy };
-            break;
+            return neogfx::logical_coordinates{ 
+                to_game_rect(viewport(), viewport().extents().cy).bottom_left().as<scalar>().to_vec2(),
+                to_game_rect(viewport(), viewport().extents().cy).top_right().as<scalar>().to_vec2() };
         }
-        return result;
+        throw logical_coordinates_not_specified();
     }
 
     template <typename T>
     void opengl_texture<T>::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const
     {
         iLogicalCoordinates = aCoordinates;
+
+        iUvCalculator.reset();
     }
 
     template <typename T>
-    rect_i32 opengl_texture<T>::viewport() const
+    void opengl_texture<T>::set_default_viewport() const
+    {
+        native_texture::set_default_viewport();
+
+        iUvCalculator.reset();
+    }
+
+    template <typename T>
+    void opengl_texture<T>::set_viewport(const neogfx::viewport& aViewport) const
+    {
+        native_texture::set_viewport(aViewport);
+
+        iUvCalculator.reset();
+    }
+
+    template <typename T>
+    viewport opengl_texture<T>::apply_viewport() const
     {
         GLint currentViewport[4];
         glCheck(glGetIntegerv(GL_VIEWPORT, currentViewport));
-        return rect_i32{ point_i32{ currentViewport[0], currentViewport[1] }, size_i32{ currentViewport[2], currentViewport[3] } };
-    }
+        auto previousViewport = to_gui_rect(game_rect{ point_i32{ currentViewport[0], currentViewport[1] }.as<scalar>(), size_i32{ currentViewport[2], currentViewport[3] }.as<scalar>() }, extents().cy);
 
-    template <typename T>
-    rect_i32 opengl_texture<T>::set_viewport(const rect_i32& aViewport) const
-    {
-        auto const oldViewport = viewport();
-        glCheck(glViewport(aViewport.x, aViewport.y, static_cast<GLsizei>(aViewport.cx), static_cast<GLsizei>(aViewport.cy)));
-        return oldViewport;
+        auto const ourViewport = to_game_rect(viewport(), extents().cy).as<std::int32_t>();
+        glCheck(glViewport(ourViewport.x, ourViewport.y, static_cast<GLsizei>(ourViewport.cx), static_cast<GLsizei>(ourViewport.cy)));
+
+        return neogfx::viewport{ previousViewport };
     }
 
     template <typename T>
@@ -780,7 +863,7 @@ namespace neogfx
         if (status != GL_FRAMEBUFFER_COMPLETE)
             throw failed_to_create_framebuffer(glErrorString(status));
 
-        set_viewport(rect_i32{ point_i32{ 1, 1 }, extents().as<std::int32_t>() });
+        apply_viewport();
 
         GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
         glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
@@ -846,7 +929,7 @@ namespace neogfx
                 return color{};
             value_type pixel;
             basic_point<GLint> pos{ aPosition };
-            pos += basic_point<GLint>{ 1, 1 };
+            pos += basic_point<GLint>{ static_cast<GLint>(bleed_guard()) };
             auto const [internalformat, format, type] = to_gl_enums(iDataFormat, kDataType);
             if (type != GL_UNSIGNED_BYTE)
                 throw std::logic_error("neogfx::opengl_texture::read_pixel: data type not yet implemented");

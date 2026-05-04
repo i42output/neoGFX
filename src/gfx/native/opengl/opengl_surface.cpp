@@ -89,7 +89,7 @@ namespace neogfx
 
         glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
         
-        set_viewport(rect_i32{ point_i32{ 0, 0 }, extents().as<std::int32_t>() });
+        apply_viewport();
         
         GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
         glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
@@ -109,18 +109,16 @@ namespace neogfx
             throw std::logic_error("opengl_surface::read_pixel: not yet implemented for multisample render targets");
     }
 
-    rect_i32 opengl_surface::viewport() const
+    viewport opengl_surface::apply_viewport() const
     {
         GLint currentViewport[4];
         glCheck(glGetIntegerv(GL_VIEWPORT, currentViewport));
-        return rect_i32{ point_i32{ currentViewport[0], currentViewport[1] }, size_i32{ currentViewport[2], currentViewport[3] } };
-    }
+        auto previousViewport = to_gui_rect(game_rect{ point_i32{ currentViewport[0], currentViewport[1] }.as<scalar>(), size_i32{ currentViewport[2], currentViewport[3] }.as<scalar>() }, extents().cy);
 
-    rect_i32 opengl_surface::set_viewport(const rect_i32& aViewport) const
-    {
-        auto const oldViewport = viewport();
-        glCheck(glViewport(aViewport.x, aViewport.y, static_cast<GLsizei>(aViewport.cx), static_cast<GLsizei>(aViewport.cy)));
-        return oldViewport;
+        auto const ourViewport = to_game_rect(viewport(), extents().cy).as<std::int32_t>();
+        glCheck(glViewport(ourViewport.x, ourViewport.y, static_cast<GLsizei>(ourViewport.cx), static_cast<GLsizei>(ourViewport.cy)));
+
+        return neogfx::viewport{ previousViewport };
     }
     
     void opengl_surface::do_render()
@@ -140,7 +138,7 @@ namespace neogfx
         glCheck(glClearDepth(1.0));
         glCheck(glClear(GL_DEPTH_BUFFER_BIT));
 
-        set_viewport(rect_i32{ point_i32{ 0, 0 }, extents().as<std::int32_t>() });
+        apply_viewport();
         
         GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
         glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));

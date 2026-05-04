@@ -8,6 +8,9 @@
     <Filter Include="Header Files">
       <UniqueIdentifier>{2601aa52-6e4c-4b6e-956a-7d788c963aa5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\mvc">
+      <UniqueIdentifier>{e9623755-2448-42c4-8d13-d580dc023e41}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\gui\widget\radio_button.cpp">
@@ -178,12 +181,6 @@
     <ClCompile Include="..\..\..\src\gui\widget\skin_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\hid\game_controllers.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\hid\game_controller.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\dialog\game_controller_dialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -249,6 +246,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\text\emoticon_translator.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mvc\controller.cpp">
+      <Filter>Source Files\mvc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mvc\view.cpp">
+      <Filter>Source Files\mvc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mvc\view_container.cpp">
+      <Filter>Source Files\mvc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -75,6 +75,12 @@ namespace neogfx
         bool is_empty() const final;
         size extents() const final;
         size storage_extents() const final;
+        dimension bleed_guard() const final;
+        using i_texture::set_bleed_guard;
+        void set_bleed_guard(i_optional<dimension> const& aWidth) final;
+    public:
+        neogfx::uv_calculator const& uv_calculator(optional_aabb_2df const& aPart = {}) const final;
+    public:
         void set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aStride = 0u, std::uint32_t aPackAlignment = 4u) final;
         void set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aStride = 0u, std::uint32_t aPackAlignment = 4u) final;
         void set_pixels(const i_image& aImage) final;
@@ -113,8 +119,9 @@ namespace neogfx
         neogfx::logical_coordinates logical_coordinates() const final;
         void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const final;
     public:
-        rect_i32 viewport() const final;
-        rect_i32 set_viewport(const rect_i32& aViewport) const final;
+        void set_default_viewport() const final;
+        void set_viewport(const neogfx::viewport& aViewport) const final;
+        neogfx::viewport apply_viewport() const final;
     public:
         bool target_active() const final;
         void activate_target() const final;
@@ -136,9 +143,11 @@ namespace neogfx
         texture_data_format iDataFormat;
         size_u32 iSize;
         size_u32 iStorageSize;
+        std::optional<dimension> iBleedGuard;
         GLuint iHandle;
         mutable neogfx::logical_coordinate_system iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
+        mutable std::optional<neogfx::uv_calculator> iUvCalculator;
         mutable std::optional<std::uint32_t> iBoundTextureUnit;
         mutable std::optional<std::int32_t> iPreviouslyBoundTexture;
         mutable GLuint iFrameBuffer;

@@ -35,8 +35,6 @@ namespace neogfx
         virtual void* handle() const = 0;
         virtual bool is_resident() const = 0;
     public:
-        virtual size extents() const = 0;
-    public:
         using i_texture::color_space;
     };
 }

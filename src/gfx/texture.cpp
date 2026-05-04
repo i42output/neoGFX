@@ -170,6 +170,23 @@ namespace neogfx
         return native_texture().storage_extents();
     }
 
+    dimension texture::bleed_guard() const
+    {
+        if (is_empty())
+            return 0.0;
+        return native_texture().bleed_guard();
+    }
+
+    void texture::set_bleed_guard(i_optional<dimension> const& aWidth)
+    {
+        native_texture().set_bleed_guard(aWidth);
+    }
+
+    uv_calculator const& texture::uv_calculator(optional_aabb_2df const& aPart) const
+    {
+        return native_texture().uv_calculator(aPart);
+    }
+
     void texture::set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aStride, std::uint32_t aPackAlignment)
     {
         native_texture().set_pixels(aRect, aPixelData, aStride, aPackAlignment);

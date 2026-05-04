@@ -41,8 +41,10 @@ namespace neogfx
         front_buffer().end_redirect();
         front_buffer().set_origin({});
         iRenderTarget.emplace(back_buffer());
+        back_buffer().blit(iBufferRect, front_buffer(), iBufferRect);
         if constexpr (std::is_same_v<Filter, blur_filter>)
             back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, iFilter.radius, iFilter.algorithm, iFilter.parameter1, iFilter.parameter2);
+        back_buffer().flush();
         iRenderTarget = {};
         rect const drawRect{ iFilter.region.top_left() - (iSubtractRadius ? point{ iFilter.radius, iFilter.radius } : point{}), iBufferRect.extents() };
         auto& finalBuffer = static_cast<std::int32_t>(iFilter.radius) % 2 == 0 ? front_buffer() : back_buffer();

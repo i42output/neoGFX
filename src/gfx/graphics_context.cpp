@@ -50,6 +50,7 @@ namespace neogfx
         auto buffer1 = std::make_unique<ping_pong_buffers::attachment>(pingPongBuffer1, std::make_unique<graphics_context>(pingPongBuffer1.texture()));
         auto& gcBuffer1 = buffer1->gc();
         {
+            gcBuffer1.set_viewport(rect{ point{}, aExtents });
             gcBuffer1.set_logical_coordinate_system(aContext.logical_coordinate_system());
             gcBuffer1.set_origin({});
             if (aClearColor != std::nullopt)
@@ -65,6 +66,7 @@ namespace neogfx
         auto buffer2 = std::make_unique<ping_pong_buffers::attachment>(pingPongBuffer2, std::make_unique<graphics_context>(pingPongBuffer2.texture()));
         auto& gcBuffer2 = buffer2->gc();
         {
+            gcBuffer2.set_viewport(rect{ point{}, aExtents });
             gcBuffer2.set_logical_coordinate_system(aContext.logical_coordinate_system());
             gcBuffer2.set_origin({});
             if (aClearColor != std::nullopt)
@@ -1137,11 +1139,12 @@ namespace neogfx
     void blur(i_graphics_context& aDestination, rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
     {
         scoped_render_target srt{ aDestination };
-        auto mesh = aDestination.logical_coordinate_system() == logical_coordinate_system::AutomaticGui ?
+        auto mesh = aDestination.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ? 
             to_ecs_component(aDestinationRect) : to_ecs_component(game_rect{ aDestinationRect });
-        auto const& source = aSource.render_target();
+        auto const& srcViewport = aSource.render_target().viewport();
         for (auto& uv : mesh.uv)
-            uv = (aSourceRect.top_left() / source.extents()).to_vec2().as<float>() + uv.scale((aSourceRect.extents() / source.extents()).to_vec2().as<float>());
+            uv = (aSourceRect.top_left() / srcViewport.extents()).to_vec2().as<float>() + 
+                uv.scale((aSourceRect.extents() / srcViewport.extents()).to_vec2().as<float>());
         aDestination.draw_mesh(
             mesh,
             game::material

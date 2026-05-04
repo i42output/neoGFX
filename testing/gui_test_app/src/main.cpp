@@ -26,33 +26,46 @@ public:
 public:
     void render_ex(ng::i_graphics_context& aGc) const
     {
-        static std::optional<ng::texture> tex;
-        if (!tex)
+        static std::optional<ng::texture> tex1;
+        if (!tex1)
         {
-            tex.emplace(ng::size{ 10.0 }, 1.0, ng::texture_sampling::Normal);
-            ng::graphics_context gc{ tex.value() };
+            tex1.emplace(ng::size{ 10.0 }, 1.0, ng::texture_sampling::Normal);
+            ng::graphics_context gc{ tex1.value() };
             ng::scoped_render_target srt{ gc };
             gc.clear(ng::color::White);
+            gc.draw_line(ng::point{ 0.0 }, ng::point{ 10.0 }, ng::color::Black);
+            gc.draw_line(ng::point{ 10.0, 0.0 }, ng::point{ 0.0, 10.0 }, ng::color::Black);
         }
 
+        std::cout << "radius: " << iRadius << std::endl;
+
+        aGc.fill_rect(client_rect(), ng::color::Grey10);
+
+        /*
         {
-            ng::scoped_filter filter{ aGc, ng::blur_filter{ non_client_rect(), 4.0, ng::blurring_algorithm::Gaussian } };
+            ng::scoped_filter filter{ aGc, ng::blur_filter{ client_rect(), iRadius, ng::blurring_algorithm::Gaussian } };
+            filter.front_buffer().draw_line(ng::point{ 0.0 }, ng::point{ 200.0 }, ng::color::Red);
+            filter.front_buffer().draw_line(ng::point{ 200.0, 0.0 }, ng::point{ 0.0, 200.0 }, ng::color::Blue);
             filter.front_buffer().fill_rect(ng::rect{ ng::point{ 5.0, 5.0 }, ng::size{ 1.0 } }, ng::color::Red);
             filter.front_buffer().fill_rect(ng::rect{ ng::point{ 10.0, 10.0 }, ng::size{ 1.0 } }, ng::color::Red.with_alpha(0.999));
             filter.front_buffer().draw_text(ng::point{ 20.0, 20.0 }, "A", font().with_size(16.0), ng::color::Red);
-            filter.front_buffer().draw_texture(ng::point{ 40.0, 40.0}, tex.value(), ng::color::Red);
+            filter.front_buffer().draw_texture(ng::point{ 40.0, 40.0}, tex1.value(), ng::color::Red);
         }
 
         aGc.fill_rect(ng::rect{ ng::point{ 5.0, 5.0 }, ng::size{ 1.0 } }, ng::color::White);
         aGc.fill_rect(ng::rect{ ng::point{ 10.0, 10.0 }, ng::size{ 1.0 } }, ng::color::White);
         aGc.draw_text(ng::point{ 20.0, 20.0 }, "A", font().with_size(16.0), ng::color::White);
-        aGc.draw_texture(ng::point{ 40.0, 40.0 }, tex.value());
+        aGc.draw_texture(ng::point{ 40.0, 40.0 }, tex1.value());
+        */
     }
     void mouse_button_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifier aKeyModifier) final
     {
+        if (++iRadius == 6.0)
+            iRadius = 0.0;
         update();
     }
 private:
+    double iRadius = 0.0;
 };
 
 int main(int argc, char* argv[])

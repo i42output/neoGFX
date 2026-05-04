@@ -27,31 +27,5 @@
 
 namespace neogfx
 {
-    inline texture colored_icon(const texture& aSource, const optional_color& aColor = {})
-    {
-        texture result{ aSource.extents(), 1.0, texture_sampling::Multisample };
-        graphics_context gc{ result };
-        scalar const outline = 4.0;
-        auto const targetRect = aColor ? rect{ point{ outline, outline }, aSource.extents() - size{ outline * 2.0 } } : rect{ point{}, aSource.extents() };
-        if (aColor)
-        {
-            // draw a black outline for a non-text color icon...
-            // todo: provide an easier way to blur any drawing primitive
-            rect const r{ point{}, size{aSource.extents()} };
-            auto pingPongBuffers = create_ping_pong_buffers(gc, aSource.extents(), texture_sampling::Multisample);
-            {
-                scoped_render_target srt{ pingPongBuffers.buffer1->gc() };
-                pingPongBuffers.buffer1->gc().draw_texture(targetRect, aSource, color::Black);
-            }
-            {
-                scoped_render_target srt{ pingPongBuffers.buffer2->gc() };
-                pingPongBuffers.buffer2->gc().blur(r, pingPongBuffers.buffer1->gc(), r, outline, blurring_algorithm::Gaussian, 5.0, 1.0);
-            }
-            scoped_render_target srt{ gc };
-            gc.blit(r, pingPongBuffers.buffer2->gc(), r);
-        }
-        scoped_render_target srt{ gc };
-        gc.draw_texture(targetRect, aSource, aColor ? *aColor : service<i_app>().current_style().palette().color(color_role::Text), shader_effect::ColorizeAlpha);
-        return result;
-    };
+    texture colored_icon(const texture& aSource, const optional_color& aColor = {}, scalar const aOutline = 4.0);
 }

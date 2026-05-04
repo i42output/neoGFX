@@ -182,6 +182,56 @@ namespace neogfx
         return iStorageExtents;
     }
 
+    dimension sub_texture::bleed_guard() const
+    {
+        return iBleedGuard.value_or(0.0);
+    }
+
+    void sub_texture::set_bleed_guard(i_optional<dimension> const& aWidth)
+    {
+        if (aWidth.has_value())
+        {
+            if (aWidth.value() <= MaxBleedGuardWidth)
+                iBleedGuard = aWidth.value();
+            else
+                throw std::logic_error("neogfx::sub_texture::set_bleed_guard: Unsupported bleed guard width");
+        }
+        else
+            iBleedGuard.reset();
+
+        iUvCalculator.reset();
+    }
+
+    uv_calculator const& sub_texture::uv_calculator(optional_aabb_2df const& aPart) const
+    {
+        if (iUvCalculator)
+        {
+            if (aPart)
+                iUvCalculator->offsetOrPart = *aPart;
+            else if (std::holds_alternative<aabb_2df>(iUvCalculator->offsetOrPart))
+                iUvCalculator->offsetOrPart = to_game_rect(atlas_location(), extents().cy).bottom_left().to_vec2().as<float>();
+            return *iUvCalculator;
+        }
+
+        auto const& logicalRect = to_game_rect(atlas_location(), extents().cy);
+
+        std::variant<vec2f, aabb_2df> offsetOrPart;
+        if (aPart)
+            offsetOrPart = *aPart;
+        else
+            offsetOrPart = logicalRect.bottom_left().to_vec2().as<float>();
+
+        auto const& atlasCalculator = native_texture().uv_calculator();
+        
+        iUvCalculator.emplace(
+            logicalRect.extents().to_vec2().as<float>(),
+            offsetOrPart,
+            atlasCalculator.coefficients,
+            atlasCalculator.yFlip);
+
+        return *iUvCalculator;
+    }
+
     void sub_texture::set_pixels(rect const& aRect, void const* aPixelData, std::uint32_t aStride, std::uint32_t aPackAlignment)
     {
         set_pixels(aRect, aPixelData, data_format(), aStride, aPackAlignment);
