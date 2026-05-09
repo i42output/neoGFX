@@ -695,10 +695,12 @@ namespace neogfx::DesignStudio
                 [](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
-                    graphics_context gc{ newTexture };
-                    gc.fill_rect(rect{ point{ 4.0, 12.0 }, size{ 120.0, 24.0 } }, color::White);
-                    gc.fill_rect(rect{ point{ 4.0, 12.0 + 24.0 + 16.0 }, size{ 120.0, 24.0 } }, color::White);
-                    gc.fill_rect(rect{ point{ 4.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 120.0, 24.0 } }, color::White);
+                    {
+                        graphics_context gc{ newTexture };
+                        gc.fill_rect(rect{ point{ 4.0, 12.0 }, size{ 120.0, 24.0 } }, color::White);
+                        gc.fill_rect(rect{ point{ 4.0, 12.0 + 24.0 + 16.0 }, size{ 120.0, 24.0 } }, color::White);
+                        gc.fill_rect(rect{ point{ 4.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 120.0, 24.0 } }, color::White);
+                    }
                     aTexture = colored_icon(newTexture, color::PowderBlue.lighter(0x20));
                 }
             },
@@ -708,10 +710,12 @@ namespace neogfx::DesignStudio
                 [](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
-                    graphics_context gc{ newTexture };
-                    gc.fill_rect(rect{ point{ 12.0, 4.0 }, size{ 24.0, 120.0 } }, color::White);
-                    gc.fill_rect(rect{ point{ 12.0 + 24.0 + 16.0, 4.0 }, size{ 24.0, 120.0 } }, color::White);
-                    gc.fill_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 4.0 }, size{ 24.0, 120.0 } }, color::White);
+                    {
+                        graphics_context gc{ newTexture };
+                        gc.fill_rect(rect{ point{ 12.0, 4.0 }, size{ 24.0, 120.0 } }, color::White);
+                        gc.fill_rect(rect{ point{ 12.0 + 24.0 + 16.0, 4.0 }, size{ 24.0, 120.0 } }, color::White);
+                        gc.fill_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 4.0 }, size{ 24.0, 120.0 } }, color::White);
+                    }
                     aTexture = colored_icon(newTexture, color::PowderBlue.lighter(0x20));
                 }
             },
@@ -721,16 +725,18 @@ namespace neogfx::DesignStudio
                 [](texture& aTexture)
                 {
                     texture newTexture{ size{ 128, 128 }, 1.0, ng::texture_sampling::Multisample };
-                    graphics_context gc{ newTexture };
-                    gc.fill_rect(rect{ point{ 12.0, 12.0 }, size{ 24.0, 24.0 } }, color::White);
-                    gc.fill_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 }, size{ 24.0, 24.0 } }, color::White);
-                    gc.fill_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 }, size{ 24.0, 24.0 } }, color::White);
-                    gc.fill_rect(rect{ point{ 12.0, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, color::White);
-                    gc.fill_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, color::White);
-                    gc.fill_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, color::White);
-                    gc.fill_rect(rect{ point{ 12.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, color::White);
-                    gc.fill_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, color::White);
-                    gc.fill_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, color::White);
+                    {
+                        graphics_context gc{ newTexture };
+                        gc.fill_rect(rect{ point{ 12.0, 12.0 }, size{ 24.0, 24.0 } }, color::White);
+                        gc.fill_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 }, size{ 24.0, 24.0 } }, color::White);
+                        gc.fill_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 }, size{ 24.0, 24.0 } }, color::White);
+                        gc.fill_rect(rect{ point{ 12.0, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, color::White);
+                        gc.fill_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, color::White);
+                        gc.fill_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 + 24.0 + 16.0 }, size{ 24.0, 24.0 } }, color::White);
+                        gc.fill_rect(rect{ point{ 12.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, color::White);
+                        gc.fill_rect(rect{ point{ 12.0 + 24.0 + 16.0, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, color::White);
+                        gc.fill_rect(rect{ point{ 12.0 + 24.0 * 2 + 16.0 * 2, 12.0 + 24.0 * 2 + 16.0 * 2 }, size{ 24.0, 24.0 } }, color::White);
+                    }
                     aTexture = colored_icon(newTexture, color::PowderBlue.lighter(0x20));
                 }
             }
