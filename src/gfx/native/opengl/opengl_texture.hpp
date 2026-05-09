@@ -133,6 +133,9 @@ namespace neogfx
         neogfx::color_space color_space() const final;
         color read_pixel(const point& aPosition) const final;
     private:
+        GLint do_bind(std::uint32_t aTextureUnit) const;
+        void do_unbind() const;
+    private:
         i_texture_manager& iManager;
         texture_id iId;
         string iUri;

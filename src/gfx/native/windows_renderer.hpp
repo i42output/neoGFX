@@ -67,12 +67,18 @@ namespace neogfx
             void enable_vsync() final;
             void disable_vsync() final;
             pixel_format_t set_pixel_format(const i_render_target& aTarget) final;
+            void push_target(const i_render_target& aTarget) final;
+            void pop_target() final;
             const i_render_target* active_target() const final;
             void activate_context(const i_render_target& aTarget) final;
             void deactivate_context() final;
             handle create_context(const i_render_target& aTarget) final;
             void destroy_context(handle aContext) final;
             void remove_target(const i_render_target& aTarget) final;
+        public:
+            neogfx::viewport viewport() const final;
+            std::optional<rect> scissor() const final;
+        public:
             void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, i_string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) final;
             void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, i_string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) final;
             void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, i_string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) final;
@@ -81,6 +87,7 @@ namespace neogfx
             void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const point& aPosition, const size& aDimensions, i_string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) final;
             bool creating_window() const final;
         public:
+            void sync() final;
             void render_now() final;
             bool use_rendering_priority() const final;
         public:
@@ -91,8 +98,9 @@ namespace neogfx
             const i_render_target* current_target() const;
         private:
             std::shared_ptr<neogfx::offscreen_window> allocate_offscreen_window(const i_render_target* aRenderTarget);
-            void deallocate_offscreen_window(const i_render_target* aRenderTarget);
-            void activate_current_target();
+            void deallocate_offscreen_window(const i_render_target& aRenderTarget);
+            void activate_target(const i_render_target& aTarget);
+            void deactivate_target(const i_render_target& aTarget);
         private:
             bool iInitialized;
             bool iVsyncEnabled;
@@ -101,7 +109,6 @@ namespace neogfx
             std::weak_ptr<offscreen_window> iDefaultOffscreenWindow;
             handle iContext;
             std::uint32_t iCreatingWindow;
-            const i_render_target* iPreviousActiveTarget;
             const i_render_target* iActiveTarget;
             std::vector<const i_render_target*> iTargetStack;
         };

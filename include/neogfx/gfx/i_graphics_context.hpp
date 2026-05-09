@@ -85,7 +85,6 @@ namespace neogfx
             std::unique_ptr<i_graphics_context> iGc;
         };
 
-        scoped_render_target srt;
         std::unique_ptr<attachment> buffer1;
         std::unique_ptr<attachment> buffer2;
     };
@@ -844,6 +843,7 @@ namespace neogfx
     public:
         i_graphics_context& front_buffer() const;
         i_graphics_context& back_buffer() const;
+        void execute();
     private:
         i_rendering_context& iRc;
         Filter iFilter;
@@ -851,6 +851,7 @@ namespace neogfx
         ping_pong_buffers iBuffers;
         std::optional<scoped_render_target> iRenderTarget;
         bool iSubtractRadius;
+        bool iExecuted = false;
     };
 
     template <typename ValueType = double, std::uint32_t W = 5>

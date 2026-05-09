@@ -14,6 +14,7 @@
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_game_controllers.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gfx/utility.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/widget/table_view.hpp>

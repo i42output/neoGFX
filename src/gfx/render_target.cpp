@@ -190,21 +190,9 @@ namespace neogfx
         }
     }
 
-    scoped_render_target::scoped_render_target() : iRenderTarget{ nullptr }, iPreviouslyActivatedTarget{ nullptr }
+    scoped_render_target::scoped_render_target(const i_render_target& aRenderTarget) : iRenderTarget{ &aRenderTarget }
     {
-        iPreviouslyActivatedTarget = service<i_rendering_engine>().active_target();
-    }
-
-    scoped_render_target::scoped_render_target(const i_render_target& aRenderTarget) : iRenderTarget{ &aRenderTarget }, iPreviouslyActivatedTarget{ nullptr }
-    {
-        iPreviouslyActivatedTarget = service<i_rendering_engine>().active_target();
-        if (iPreviouslyActivatedTarget != iRenderTarget)
-        {
-            if (iPreviouslyActivatedTarget)
-                iPreviouslyActivatedTarget->deactivate_target();
-            iRenderTarget->activate_target();
-            iRenderTarget->target_add_ref();
-        }
+        service<i_rendering_engine>().push_target(aRenderTarget);
     }
 
     scoped_render_target::scoped_render_target(const i_rendering_context& aRenderingContext) :
@@ -223,17 +211,6 @@ namespace neogfx
     {
         if (std::holds_alternative<i_rendering_context*>(iContext))
             std::get<i_rendering_context*>(iContext)->flush();
-        if (iRenderTarget && iPreviouslyActivatedTarget != iRenderTarget)
-        {
-            if (iRenderTarget->target_active())
-            {
-                iRenderTarget->target_release();
-                iRenderTarget->deactivate_target();
-            }
-            if (iPreviouslyActivatedTarget)
-                iPreviouslyActivatedTarget->activate_target();
-        }
-        else if (!iRenderTarget && iPreviouslyActivatedTarget)
-            iPreviouslyActivatedTarget->activate_target();
+        service<i_rendering_engine>().pop_target();
     }
 }

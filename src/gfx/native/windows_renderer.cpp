@@ -222,7 +222,6 @@ namespace neogfx
             iVsyncEnabled{ true },
             iContext{ nullptr },
             iCreatingWindow{ 0 },
-            iPreviousActiveTarget{ nullptr },
             iActiveTarget{ nullptr }
         {
             if (aRenderer != neogfx::renderer::None)
@@ -277,7 +276,7 @@ namespace neogfx
             if (iInitialized && opengl_renderer::renderer() != neogfx::renderer::None)
             {
                 if (iContext != nullptr)
-                    wglMakeCurrent(static_cast<HDC>(iDefaultOffscreenWindow.lock()->device_handle()), 
+                    wglMakeCurrent(static_cast<HDC>(iDefaultOffscreenWindow.lock()->device_handle()),
                         static_cast<HGLRC>(iContext));
                 opengl_renderer::cleanup();
                 if (iContext != nullptr)
@@ -316,38 +315,53 @@ namespace neogfx
             return set_pixel_format(aTarget.target_device_handle());
         }
 
+        void renderer::push_target(const i_render_target& aTarget)
+        {
+            auto const currentlyActive = active_target();
+            if (currentlyActive && currentlyActive != &aTarget)
+                currentlyActive->deactivate_target();
+            aTarget.target_add_ref();
+            aTarget.activate_target();
+            iTargetStack.push_back(&aTarget);
+        }
+
+        void renderer::pop_target()
+        {
+            auto const currentlyActive = active_target();
+            if (currentlyActive)
+            {
+                currentlyActive->target_release();
+                currentlyActive->deactivate_target();
+                iTargetStack.pop_back();
+                if (!iTargetStack.empty())
+                    iTargetStack.back()->activate_target();
+            }
+        }
+
         const i_render_target* renderer::active_target() const
         {
-            if (iTargetStack.empty())
+            if (iTargetStack.empty() || iTargetStack.back() != iActiveTarget)
                 return nullptr;
-            return iTargetStack.back();
+            return iActiveTarget;
         }
 
         void renderer::activate_context(const i_render_target& aTarget)
         {
             (void)create_context(aTarget);
 
-            iTargetStack.push_back(&aTarget);
-
             if (!iInitialized)
                 initialize();
 
-            activate_current_target();
+            activate_target(aTarget);
         }
 
         void renderer::deactivate_context()
         {
-            if (iTargetStack.empty())
+            if (!active_target())
                 throw no_target_active();
 
-            iTargetStack.pop_back();
-
-            iPreviousActiveTarget = iActiveTarget;
-
-            deallocate_offscreen_window(iPreviousActiveTarget);
-
-            activate_current_target();
-       }
+            deactivate_target(*active_target());
+        }
 
         renderer::handle renderer::create_context(const i_render_target& aTarget)
         {
@@ -376,11 +390,25 @@ namespace neogfx
 
         void renderer::remove_target(const i_render_target& aTarget)
         {
-            if (iPreviousActiveTarget == &aTarget)
-                iPreviousActiveTarget = nullptr;
             if (iActiveTarget == &aTarget)
                 iActiveTarget = nullptr;
             iTargetStack.erase(std::remove(iTargetStack.begin(), iTargetStack.end(), &aTarget), iTargetStack.end());
+        }
+
+        viewport renderer::viewport() const
+        {
+            GLint viewport[4];
+            glGetIntegerv(GL_VIEWPORT, viewport);
+            return rect{ point_i32{ viewport[0], viewport[1] }.as<scalar>(), size_i32{ viewport[2], viewport[3] }.as<scalar>() };
+        }
+
+        std::optional<rect> renderer::scissor() const
+        {
+            if (!glIsEnabled(GL_SCISSOR_TEST))
+                return std::nullopt;
+            GLint scissor[4];
+            glGetIntegerv(GL_SCISSOR_BOX, scissor);
+            return rect{ point_i32{ scissor[0], scissor[1] }.as<scalar>(), size_i32{ scissor[2], scissor[3] }.as<scalar>() };
         }
 
         void renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, i_string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult)
@@ -492,6 +520,11 @@ namespace neogfx
             return iCreatingWindow != 0;
         }
 
+        void renderer::sync()
+        {
+            glCheck(glFinish());
+        }
+
         void renderer::render_now()
         {
             service<i_surface_manager>().render_surfaces();
@@ -546,7 +579,7 @@ namespace neogfx
             ::DescribePixelFormat(static_cast<HDC>(aNativeSurfaceDevinceHandle), pixelFormat, sizeof(pfd), &pfd);
             if (!::SetPixelFormat(static_cast<HDC>(aNativeSurfaceDevinceHandle), pixelFormat, &pfd))
                 throw failed_to_set_pixel_format(GetLastErrorText());
-    
+
             return pixelFormat;
         }
 
@@ -554,7 +587,7 @@ namespace neogfx
         {
             if (!iTargetStack.empty())
                 return iTargetStack.back();
-            return iPreviousActiveTarget;
+            return nullptr;
         }
 
         std::shared_ptr<neogfx::offscreen_window> renderer::allocate_offscreen_window(const i_render_target* aRenderTarget)
@@ -576,41 +609,48 @@ namespace neogfx
             return newOffscreenWindow;
         }
 
-        void renderer::deallocate_offscreen_window(const i_render_target* aRenderTarget)
+        void renderer::deallocate_offscreen_window(const i_render_target& aRenderTarget)
         {
-            auto iterRemove = iOffscreenWindows.find(aRenderTarget);
+            if (aRenderTarget.target_in_use())
+                return;
+
+            auto iterRemove = iOffscreenWindows.find(&aRenderTarget);
             if (iterRemove != iOffscreenWindows.end())
                 iOffscreenWindows.erase(iterRemove);
         }
 
-        void renderer::activate_current_target()
+        void renderer::activate_target(const i_render_target& aTarget)
         {
-            if (iActiveTarget == current_target())
+            if (iActiveTarget == &aTarget)
                 return;
 
-            auto previouslyActive = iActiveTarget;
-            iActiveTarget = current_target();
+            iActiveTarget = &aTarget;
 
             BOOL result = FALSE;
             if (iActiveTarget->target_type() == render_target_type::Surface)
-                result = ::wglMakeCurrent(static_cast<HDC>(iActiveTarget->target_device_handle()),
-                    static_cast<HGLRC>(iContext));
+                result = ::wglMakeCurrent(static_cast<HDC>(iActiveTarget->target_device_handle()), static_cast<HGLRC>(iContext));
             else
-                result = ::wglMakeCurrent(static_cast<HDC>(allocate_offscreen_window(iActiveTarget)->device_handle()),
-                    static_cast<HGLRC>(iContext));
+                result = ::wglMakeCurrent(static_cast<HDC>(allocate_offscreen_window(iActiveTarget)->device_handle()), static_cast<HGLRC>(iContext));
 
             if (!result)
-            {
-                iActiveTarget = previouslyActive;
                 throw failed_to_activate_opengl_context(GetLastErrorText());
-            }
 
-            typedef BOOL(WINAPI * PFNWGLSWAPINTERVALEXTPROC) (int interval);
+            typedef BOOL(WINAPI* PFNWGLSWAPINTERVALEXTPROC) (int interval);
             static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(wglGetProcAddress("wglSwapIntervalEXT"));
             if (wglSwapIntervalEXT == NULL)
                 throw failed_to_get_opengl_function(GetLastErrorText());
 
             disable_vsync();
+        }
+
+        void renderer::deactivate_target(const i_render_target& aTarget)
+        {
+            if (iActiveTarget != &aTarget)
+                return;
+
+            iActiveTarget = nullptr;
+
+            deallocate_offscreen_window(aTarget);
         }
     }
 }

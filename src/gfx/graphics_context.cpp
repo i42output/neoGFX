@@ -50,12 +50,14 @@ namespace neogfx
         auto buffer1 = std::make_unique<ping_pong_buffers::attachment>(pingPongBuffer1, std::make_unique<graphics_context>(pingPongBuffer1.texture()));
         auto& gcBuffer1 = buffer1->gc();
         {
-            gcBuffer1.set_viewport(rect{ point{}, aExtents });
+            scoped_render_target srt{ gcBuffer1 };
             gcBuffer1.set_logical_coordinate_system(aContext.logical_coordinate_system());
+            auto const& viewport = aContext.logical_coordinate_system() == logical_coordinate_system::AutomaticGui ?
+                rect{ point{}, aExtents } : to_gui_rect(game_rect{ point{}, aExtents }, gcBuffer1.render_target().target_extents().cy);
+            gcBuffer1.set_viewport(viewport);
             gcBuffer1.set_origin({});
             if (aClearColor != std::nullopt)
             {
-                scoped_render_target srt{ gcBuffer1 };
                 scoped_scissor ss{ gcBuffer1, rect{ point{}, aExtents }.inflate(aClearance) };
                 gcBuffer1.clear(*aClearColor);
                 gcBuffer1.clear_depth_buffer();
@@ -66,19 +68,21 @@ namespace neogfx
         auto buffer2 = std::make_unique<ping_pong_buffers::attachment>(pingPongBuffer2, std::make_unique<graphics_context>(pingPongBuffer2.texture()));
         auto& gcBuffer2 = buffer2->gc();
         {
-            gcBuffer2.set_viewport(rect{ point{}, aExtents });
+            scoped_render_target srt{ gcBuffer2 };
             gcBuffer2.set_logical_coordinate_system(aContext.logical_coordinate_system());
+            auto const& viewport = aContext.logical_coordinate_system() == logical_coordinate_system::AutomaticGui ?
+                rect{ point{}, aExtents } : to_gui_rect(game_rect{ point{}, aExtents }, gcBuffer2.render_target().target_extents().cy);
+            gcBuffer2.set_viewport(viewport);
             gcBuffer2.set_origin({});
             if (aClearColor != std::nullopt)
             {
-                scoped_render_target srt{ gcBuffer2 };
                 scoped_scissor ss{ gcBuffer2, rect{ point{}, aExtents }.inflate(aClearance) };
                 gcBuffer2.clear(*aClearColor);
                 gcBuffer2.clear_depth_buffer();
                 gcBuffer2.clear_stencil_buffer();
             }
         }
-        return ping_pong_buffers{ {}, std::move(buffer1), std::move(buffer2) };
+        return ping_pong_buffers{ std::move(buffer1), std::move(buffer2) };
     }
 
     ssbo_range path_to_vertices(path const& aPath, path::sub_path_type const& aSubPath)
@@ -1139,6 +1143,9 @@ namespace neogfx
     void blur(i_graphics_context& aDestination, rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
     {
         scoped_render_target srt{ aDestination };
+        scoped_scissor ss1{ aDestination, aDestinationRect };
+        scoped_blending_mode sbm1{ aDestination, blending_mode::Filter };
+
         auto mesh = aDestination.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ? 
             to_ecs_component(aDestinationRect) : to_ecs_component(game_rect{ aDestinationRect });
         auto const& srcViewport = aSource.render_target().viewport();
@@ -1161,16 +1168,6 @@ namespace neogfx
 
     void graphics_context::blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
     {   
-        aSource.flush();
-
-        scoped_render_target srt1{ *this };
-        scoped_scissor ss1{ *this, aDestinationRect };
-        scoped_blending_mode sbm1{ *this, blending_mode::Filter };
-
-        scoped_render_target srt2{ aSource };
-        scoped_scissor ss2{ aSource, aSourceRect };
-        scoped_blending_mode sbm2{ aSource, blending_mode::Filter };
-
         auto const passes = static_cast<std::int32_t>(aRadius);
 
         for (std::int32_t pass = 0; pass < passes; ++pass)

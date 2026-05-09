@@ -86,12 +86,17 @@ namespace neogfx
         virtual void initialize() = 0;
         virtual void cleanup() = 0;
         virtual pixel_format_t set_pixel_format(const i_render_target& aTarget) = 0;
+        virtual void push_target(const i_render_target& aTarget) = 0;
+        virtual void pop_target() = 0;
         virtual const i_render_target* active_target() const = 0;
         virtual void activate_context(const i_render_target& aTarget) = 0;
         virtual void deactivate_context() = 0;
         virtual handle create_context(const i_render_target& aTarget) = 0;
         virtual void destroy_context(handle aContext) = 0;
         virtual void remove_target(const i_render_target& aTarget) = 0;
+    public:
+        virtual neogfx::viewport viewport() const = 0;
+        virtual std::optional<rect> scissor() const = 0;
     public:
         virtual const shader_program_list& shader_programs() const = 0;
         virtual const i_shader_program& shader_program(const neolib::i_string& aName) const = 0;
@@ -176,6 +181,7 @@ namespace neogfx
         virtual void subpixel_rendering_on() = 0;
         virtual void subpixel_rendering_off() = 0;
     public:
+        virtual void sync() = 0;
         virtual void render_now() = 0;
         virtual bool frame_rate_limited() const = 0;
         virtual void enable_frame_rate_limiter(bool aEnable) = 0;

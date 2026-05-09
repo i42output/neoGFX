@@ -38,17 +38,7 @@ namespace neogfx
     template <typename Filter>
     scoped_filter<Filter>::~scoped_filter()
     {
-        front_buffer().end_redirect();
-        front_buffer().set_origin({});
-        iRenderTarget.emplace(back_buffer());
-        back_buffer().blit(iBufferRect, front_buffer(), iBufferRect);
-        if constexpr (std::is_same_v<Filter, blur_filter>)
-            back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, iFilter.radius, iFilter.algorithm, iFilter.parameter1, iFilter.parameter2);
-        back_buffer().flush();
-        iRenderTarget = {};
-        rect const drawRect{ iFilter.region.top_left() - (iSubtractRadius ? point{ iFilter.radius, iFilter.radius } : point{}), iBufferRect.extents() };
-        auto& finalBuffer = static_cast<std::int32_t>(iFilter.radius) % 2 == 1 ? front_buffer() : back_buffer();
-        iRc.blit(drawRect, finalBuffer.render_target().target_texture(), iBufferRect, blending_mode::FilterFinish);
+        execute();
     }
 
     template <typename Filter>
@@ -61,5 +51,31 @@ namespace neogfx
     i_graphics_context& scoped_filter<Filter>::back_buffer() const
     {
         return iBuffers.buffer2->gc();
+    }
+
+    template <typename Filter>
+    void scoped_filter<Filter>::execute()
+    {
+        if (iExecuted)
+            return;
+        iExecuted = true;
+
+        front_buffer().end_redirect();
+        front_buffer().set_origin({});
+        
+        {
+            scoped_render_target srt{ back_buffer() };
+            back_buffer().blit(iBufferRect, front_buffer(), iBufferRect);
+        }
+
+        if constexpr (std::is_same_v<Filter, blur_filter>)
+            back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, iFilter.radius, iFilter.algorithm, iFilter.parameter1, iFilter.parameter2);
+        
+        rect const drawRect{ iFilter.region.top_left() - (iSubtractRadius ? point{ iFilter.radius, iFilter.radius } : point{}), iBufferRect.extents() };
+        
+        auto& finalBuffer = static_cast<std::int32_t>(iFilter.radius) % 2 == 0   ? front_buffer() : back_buffer();
+        
+        scoped_render_target srt{ iRc };
+        iRc.blit(drawRect, finalBuffer.render_target().target_texture(), iBufferRect, blending_mode::FilterFinish);
     }
 }

@@ -473,6 +473,9 @@ namespace neogfx
         if (iInFlush)
             return;
 
+        if (!render_target().target_active())
+            return;
+
         neolib::scoped_flag sf{ iInFlush };
 
         auto const& optimisedQueue = optimised_queue();
@@ -482,8 +485,6 @@ namespace neogfx
             return;
 
         bool const stencilBasedInvalidation = service<i_rendering_engine>().is_stencil_based_invalidation_on();
-
-        scoped_render_target srt{ render_target() };
 
         apply_state();
 
@@ -769,12 +770,14 @@ namespace neogfx
 
     void opengl_rendering_context::scissor_on()
     {
-        glCheck((applying_scissor() || iFastState.scissorCounter >= 0 ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST)));
+        bool const scissorOn = (applying_scissor() || iFastState.scissorCounter >= 0);
+        glCheck((scissorOn ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST)));
     }
     
     void opengl_rendering_context::scissor_off()
     {
-        glCheck((applying_scissor() || iFastState.scissorCounter < 0 ? glDisable(GL_SCISSOR_TEST) : glEnable(GL_SCISSOR_TEST)));
+        bool const scissorOff = (applying_scissor() || iFastState.scissorCounter < 0);
+        glCheck((scissorOff ? glDisable(GL_SCISSOR_TEST) : glEnable(GL_SCISSOR_TEST)));
     }
 
     std::optional<rect> const& opengl_rendering_context::scissor_rect() const
@@ -2840,6 +2843,7 @@ namespace neogfx
                     service<debug::logger>() << neolib::logger::severity::Debug << "Drawing service<i_debug>().layout_item() entity (texture)..." << std::endl;
 
 #endif // NEOGFX_DEBUG
+
                 vertexArrayUsage->draw(item->vertexArrayIndexStart, faceCount * 3);
             }
             else
@@ -2855,6 +2859,7 @@ namespace neogfx
                     service<debug::logger>() << neolib::logger::severity::Debug << "Drawing service<i_debug>().layout_item() entity (non-texture)..." << std::endl;
 
 #endif // NEOGFX_DEBUG
+
                 vertexArrayUsage->draw(item->vertexArrayIndexStart, faceCount * 3);
             }
 

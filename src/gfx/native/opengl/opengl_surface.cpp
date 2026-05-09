@@ -61,6 +61,7 @@ namespace neogfx
         glCheck(glEnable(GL_MULTISAMPLE));
         glCheck(glEnable(GL_BLEND));
         glCheck(glEnable(GL_DEPTH_TEST));
+        glCheck(glDisable(GL_DEPTH_TEST));
         glCheck(glDepthFunc(GL_LEQUAL));
 
         if (need_to_create_frame_buffer())
@@ -108,6 +109,8 @@ namespace neogfx
         else
             throw std::logic_error("opengl_surface::read_pixel: not yet implemented for multisample render targets");
     }
+
+    int nViewport = 0;
 
     viewport opengl_surface::apply_viewport() const
     {

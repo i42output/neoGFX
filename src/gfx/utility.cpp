@@ -25,6 +25,7 @@ namespace neogfx
     {
         texture result{ aSource.extents(), 1.0, texture_sampling::Multisample };
         graphics_context gc{ result };
+        scoped_render_target srt{ gc };
         rect const targetRect{ point{}, aSource.extents() };
         if (aColor)
         {
@@ -32,10 +33,7 @@ namespace neogfx
             scoped_filter sf{ gc, blur_filter{ targetRect, aOutline } };
             sf.front_buffer().draw_texture(targetRect, aSource, color::Black);
         }
-        {
-            scoped_render_target srt{ gc };
-            gc.draw_texture(targetRect, aSource, aColor ? *aColor : service<i_app>().current_style().palette().color(color_role::Text), shader_effect::ColorizeAlpha);
-        }
+        gc.draw_texture(targetRect, aSource, aColor ? *aColor : service<i_app>().current_style().palette().color(color_role::Text), shader_effect::ColorizeAlpha);
         return result;
     };
 }

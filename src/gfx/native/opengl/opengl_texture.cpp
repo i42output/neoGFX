@@ -490,7 +490,6 @@ namespace neogfx
             bind();
             GLint previousPackAlignment;
             GLint previousPackRowLength;
-            glCheck(glActiveTexture(GL_TEXTURE0 + iBoundTextureUnit.value()));
             glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment));
             glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, aPackAlignment));
             glCheck(glGetIntegerv(GL_UNPACK_ROW_LENGTH, &previousPackRowLength));
@@ -643,17 +642,17 @@ namespace neogfx
                 if (existingPoolEntry != texture_bindings().bound.end())
                 {
                     if (existingPoolEntry->second() == this)
+                    {
+                        do_bind(aTextureUnit);
                         return;
+                    }
                     existingPoolEntry->second()->unbind();
                 }
             }
             else
                 unbind();
         }
-        glCheck(glActiveTexture(GL_TEXTURE0 + aTextureUnit));
-        GLint previousTexture = 0;
-        glCheck(glGetIntegerv(to_gl_binding_enum(sampling()), &previousTexture));
-        glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle()))));
+        GLint previousTexture = do_bind(aTextureUnit);
         iBoundTextureUnit = aTextureUnit;
         iPreviouslyBoundTexture = previousTexture;
         auto existingPoolEntry = texture_bindings().unbound.find(iBoundTextureUnit.value());
@@ -663,10 +662,26 @@ namespace neogfx
     }
 
     template <typename T>
+    GLint opengl_texture<T>::do_bind(std::uint32_t aTextureUnit) const
+    {
+        glCheck(glActiveTexture(GL_TEXTURE0 + aTextureUnit));
+        GLint previousTexture = 0;
+        glCheck(glGetIntegerv(to_gl_binding_enum(sampling()), &previousTexture));
+        glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle()))));
+        return previousTexture;
+    }
+
+    template <typename T>
     void opengl_texture<T>::unbind() const
     {
         if (!iBoundTextureUnit.has_value())
             return;
+        do_unbind();
+    }
+
+    template <typename T>
+    void opengl_texture<T>::do_unbind() const
+    {
         glCheck(glActiveTexture(GL_TEXTURE0 + iBoundTextureUnit.value()));
         glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(iPreviouslyBoundTexture.value())));
         auto existingPoolEntry = texture_bindings().bound.find(iBoundTextureUnit.value());
@@ -759,8 +774,8 @@ namespace neogfx
                 viewport().top_right().as<scalar>().to_vec2() };
         case neogfx::logical_coordinate_system::AutomaticGame:
             return neogfx::logical_coordinates{ 
-                to_game_rect(viewport(), viewport().extents().cy).bottom_left().as<scalar>().to_vec2(),
-                to_game_rect(viewport(), viewport().extents().cy).top_right().as<scalar>().to_vec2() };
+                to_game_rect(viewport(), target_extents().cy).bottom_left().as<scalar>().to_vec2(),
+                to_game_rect(viewport(), target_extents().cy).top_right().as<scalar>().to_vec2() };
         }
         throw logical_coordinates_not_specified();
     }
@@ -789,6 +804,8 @@ namespace neogfx
         iUvCalculator.reset();
     }
 
+    extern int nViewport;
+
     template <typename T>
     viewport opengl_texture<T>::apply_viewport() const
     {
@@ -811,15 +828,20 @@ namespace neogfx
             TargetActivating();
             service<i_rendering_engine>().activate_context(*this);
         }
+
+        glCheck(glTextureBarrier());
+
         bind();
+
         if (iFrameBuffer == 0)
         {
             glCheck(glEnable(GL_MULTISAMPLE));
             glCheck(glEnable(GL_BLEND));
             glCheck(glEnable(GL_DEPTH_TEST));
+            glCheck(glDisable(GL_DEPTH_TEST));
             glCheck(glDepthFunc(GL_LEQUAL));
             glCheck(glGenFramebuffers(1, &iFrameBuffer));
-            glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, iFrameBuffer));
+            glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
             glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle())), 0));
             glCheck(glGenRenderbuffers(1, &iDepthStencilBuffer));
             glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
@@ -839,10 +861,10 @@ namespace neogfx
         else
         {
             GLint currentFramebuffer;
-            glCheck(glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &currentFramebuffer));
+            glCheck(glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFramebuffer));
             if (static_cast<decltype(iFrameBuffer)>(currentFramebuffer) != iFrameBuffer)
             {
-                glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, iFrameBuffer));
+                glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
             }
             GLint queryResult = 0;
             glCheck(glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &queryResult));
@@ -859,7 +881,7 @@ namespace neogfx
             glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
         }
         
-        GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE)
             throw failed_to_create_framebuffer(glErrorString(status));
 
@@ -869,6 +891,8 @@ namespace neogfx
         glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
 
         iPixelData.clear();
+
+        unbind();
         
         if (!alreadyActive)
             TargetActivated();
@@ -886,10 +910,17 @@ namespace neogfx
         if (target_active())
         {
             TargetDeactivating();
+
+            glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
+            glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0));
+
             service<i_rendering_engine>().deactivate_context();
+
             if (!target_in_use())
                 unbind();
+            
             TargetDeactivated();
+
             return;
         }
         throw not_active();
@@ -910,8 +941,7 @@ namespace neogfx
     template <typename T>
     void opengl_texture<T>::target_release() const
     {
-        if (--iTargetUseCount == 0)
-            unbind();
+        --iTargetUseCount;
     }
 
     template <typename T>

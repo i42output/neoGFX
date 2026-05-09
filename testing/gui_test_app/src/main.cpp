@@ -15,33 +15,32 @@ void signal_handler(int signal)
     std::_Exit(EXIT_FAILURE);
 }
 
-
 class window : ng::window
 {
 public:
     window() :
         ng::window{ ng::size{ 200.0, 200.0 }, ng::window_style::SplashScreen }
     {
+        tex1.emplace(ng::size{ 20.0 }, 1.0, ng::texture_sampling::Normal);
+        ng::graphics_context gc{ tex1.value() };
+        {
+            ng::scoped_render_target srt{ gc };
+            gc.fill_rect(ng::rect{ ng::point{ 5.0 }, ng::size{ 10.0 } }, ng::color::White);
+            gc.draw_line(ng::point{ 0.0 }, ng::point{ 20.0 }, ng::color::White);
+            gc.draw_line(ng::point{ 20.0, 0.0 }, ng::point{ 0.0, 20.0 }, ng::color::White);
+        }
+
+        tex2 = ng::colored_icon(*tex1, ng::color::LightGreen);
     }
 public:
     void render_ex(ng::i_graphics_context& aGc) const
     {
-        static std::optional<ng::texture> tex1;
-        if (!tex1)
-        {
-            tex1.emplace(ng::size{ 10.0 }, 1.0, ng::texture_sampling::Normal);
-            ng::graphics_context gc{ tex1.value() };
-            ng::scoped_render_target srt{ gc };
-            gc.clear(ng::color::White);
-            gc.draw_line(ng::point{ 0.0 }, ng::point{ 10.0 }, ng::color::Black);
-            gc.draw_line(ng::point{ 10.0, 0.0 }, ng::point{ 0.0, 10.0 }, ng::color::Black);
-        }
-
         std::cout << "radius: " << iRadius << std::endl;
 
-        aGc.fill_rect(client_rect(), ng::color::Grey10);
+        aGc.fill_rect(client_rect(), ng::color::Grey20);
 
-        /*
+        aGc.draw_texture(ng::point{ 100.0 }, *tex2);
+
         {
             ng::scoped_filter filter{ aGc, ng::blur_filter{ client_rect(), iRadius, ng::blurring_algorithm::Gaussian } };
             filter.front_buffer().draw_line(ng::point{ 0.0 }, ng::point{ 200.0 }, ng::color::Red);
@@ -49,14 +48,13 @@ public:
             filter.front_buffer().fill_rect(ng::rect{ ng::point{ 5.0, 5.0 }, ng::size{ 1.0 } }, ng::color::Red);
             filter.front_buffer().fill_rect(ng::rect{ ng::point{ 10.0, 10.0 }, ng::size{ 1.0 } }, ng::color::Red.with_alpha(0.999));
             filter.front_buffer().draw_text(ng::point{ 20.0, 20.0 }, "A", font().with_size(16.0), ng::color::Red);
-            filter.front_buffer().draw_texture(ng::point{ 40.0, 40.0}, tex1.value(), ng::color::Red);
+            filter.front_buffer().draw_texture(ng::point{ 40.0, 40.0}, *tex1, ng::color::Red);
         }
 
         aGc.fill_rect(ng::rect{ ng::point{ 5.0, 5.0 }, ng::size{ 1.0 } }, ng::color::White);
         aGc.fill_rect(ng::rect{ ng::point{ 10.0, 10.0 }, ng::size{ 1.0 } }, ng::color::White);
         aGc.draw_text(ng::point{ 20.0, 20.0 }, "A", font().with_size(16.0), ng::color::White);
-        aGc.draw_texture(ng::point{ 40.0, 40.0 }, tex1.value());
-        */
+        aGc.draw_texture(ng::point{ 40.0, 40.0 }, *tex1);
     }
     void mouse_button_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifier aKeyModifier) final
     {
@@ -65,6 +63,8 @@ public:
         update();
     }
 private:
+    mutable std::optional<ng::texture> tex1;
+    mutable std::optional<ng::texture> tex2;
     double iRadius = 0.0;
 };
 
@@ -1354,7 +1354,10 @@ int main(int argc, char* argv[])
         for (std::size_t i = 0; i < 4; ++i)
         {
             ng::graphics_context texGc{ tex[i] };
+            ng::scoped_render_target{ texGc };
             ng::scoped_snap_to_pixel snap{ texGc };
+            auto const viewport = ng::service<ng::i_rendering_engine>().viewport();
+            auto const scissor = ng::service<ng::i_rendering_engine>().scissor();
             test_pattern(texGc, ng::point{}, texColor[i], "Render\nTo\nTexture");
         }
 
