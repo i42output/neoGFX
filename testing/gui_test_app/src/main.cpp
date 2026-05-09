@@ -1354,10 +1354,7 @@ int main(int argc, char* argv[])
         for (std::size_t i = 0; i < 4; ++i)
         {
             ng::graphics_context texGc{ tex[i] };
-            ng::scoped_render_target{ texGc };
             ng::scoped_snap_to_pixel snap{ texGc };
-            auto const viewport = ng::service<ng::i_rendering_engine>().viewport();
-            auto const scissor = ng::service<ng::i_rendering_engine>().scissor();
             test_pattern(texGc, ng::point{}, texColor[i], "Render\nTo\nTexture");
         }
 

@@ -473,9 +473,6 @@ namespace neogfx
         if (iInFlush)
             return;
 
-        if (!render_target().target_active())
-            return;
-
         neolib::scoped_flag sf{ iInFlush };
 
         auto const& optimisedQueue = optimised_queue();
@@ -483,6 +480,11 @@ namespace neogfx
 
         if (queueSize == 0u)
             return;
+
+        std::optional<scoped_render_target> srt;
+
+        if (!render_target().target_active())
+            srt.emplace(*this);
 
         bool const stencilBasedInvalidation = service<i_rendering_engine>().is_stencil_based_invalidation_on();
 
