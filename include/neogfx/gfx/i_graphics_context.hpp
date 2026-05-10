@@ -165,6 +165,8 @@ namespace neogfx
         // construction
     public:
         virtual ~i_graphics_context() = default;
+    public:
+        virtual i_rendering_context& rendering_context() const = 0;
         // units
     public:
         virtual delta to_device_units(delta const& aValue) const = 0;

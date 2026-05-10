@@ -155,17 +155,6 @@ namespace neogfx
                 iRenderQueueContext.lastFastState.reset();
                 iRenderQueueContext.lastSlowState.reset();
             }
-            else
-            {
-                if (!iRenderQueueContext.fastState.empty())
-                    iRenderQueueContext.lastFastState = iRenderQueueContext.fastState.back();
-                else
-                    iRenderQueueContext.lastFastState.reset();
-                if (!iRenderQueueContext.slowState.empty())
-                    iRenderQueueContext.lastSlowState = iRenderQueueContext.slowState.back();
-                else
-                    iRenderQueueContext.lastSlowState.reset();
-            }
 
             iRenderQueueContext.fastState.clear();
             iRenderQueueContext.fastStateIndex.clear();

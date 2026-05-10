@@ -190,6 +190,11 @@ namespace neogfx
             virtual i_widget*& render_item() = 0;
             virtual bool& render_geometry_text() = 0;
             virtual i_texture*& texture() = 0;
+            virtual bool& flag1() = 0;
+            virtual bool& flag2() = 0;
+            virtual bool& flag3() = 0;
+            virtual bool& flag4() = 0;
+            virtual bool& flag5() = 0;
         public:
             static uuid const& iid() { static uuid const sIid{ 0x84f45a79, 0xbb98, 0x4b3a, 0xbec1, { 0xa, 0x7e, 0x25, 0x71, 0xf4, 0xd5 } }; return sIid; }
         };

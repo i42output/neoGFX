@@ -47,12 +47,37 @@ namespace neogfx::debug
         {
             return iTexture;
         }
+        bool& flag1() final
+        {
+            return iFlag1;
+        }
+        bool& flag2() final
+        {
+            return iFlag2;
+        }
+        bool& flag3() final
+        {
+            return iFlag3;
+        }
+        bool& flag4() final
+        {
+            return iFlag4;
+        }
+        bool& flag5() final
+        {
+            return iFlag5;
+        }
     private:
         void* iItem = nullptr;
         i_layout_item* iLayoutItem = nullptr;
         i_widget* iRenderItem = nullptr;
         bool iRenderGeometryText = false;
         i_texture* iTexture = nullptr;
+        bool iFlag1 = false;
+        bool iFlag2 = false;
+        bool iFlag3 = false;
+        bool iFlag4 = false;
+        bool iFlag5 = false;
     };
 #endif // NEOGFX_DEBUG
 }

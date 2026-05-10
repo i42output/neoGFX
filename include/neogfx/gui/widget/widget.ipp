@@ -1342,6 +1342,9 @@ namespace neogfx
     {
         auto& self = *this;
 
+        aGc.set_extents(self.extents());
+        aGc.set_origin(self.origin());
+
         const rect updateRect = update_rect();
         const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
 
@@ -1349,7 +1352,13 @@ namespace neogfx
 
         PaintingNonClient(aGc);
 
+        aGc.set_extents(self.extents());
+        aGc.set_origin(self.origin());
+
         paint_non_client(aGc);
+
+        aGc.set_extents(self.extents());
+        aGc.set_origin(self.origin());
 
         for (auto iterChild = iChildren.rbegin(); iterChild != iChildren.rend(); ++iterChild)
         {
@@ -1362,6 +1371,9 @@ namespace neogfx
             childWidget.render_ex(aGc);
         }
 
+        aGc.set_extents(self.extents());
+        aGc.set_origin(self.origin());
+
         PaintedNonClient(aGc);
     }
 
@@ -1369,6 +1381,9 @@ namespace neogfx
     inline void widget<Interface>::render(i_graphics_context& aGc) const
     {
         auto& self = *this;
+
+        aGc.set_extents(client_rect().extents());
+        aGc.set_origin(self.origin());
 
         const rect updateRect = update_rect();
         const rect clipRect = default_clip_rect().intersection(updateRect);
@@ -1384,7 +1399,13 @@ namespace neogfx
 
         Painting(aGc);
 
+        aGc.set_extents(client_rect().extents());
+        aGc.set_origin(self.origin());
+
         paint(aGc);
+
+        aGc.set_extents(client_rect().extents());
+        aGc.set_origin(self.origin());
 
         scoped_coordinate_system_ex scs2(aGc, self.origin(), self.extents(), logical_coordinate_system());
 
@@ -1434,8 +1455,13 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::render_non_client_after(i_graphics_context& aGc) const
     {
+        auto& self = *this;
+
         const rect updateRect = update_rect();
         const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
+
+        aGc.set_extents(self.extents());
+        aGc.set_origin(self.origin());
 
         {
             scoped_scissor scissor(aGc, nonClientClipRect);

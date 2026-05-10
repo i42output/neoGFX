@@ -188,6 +188,9 @@ namespace neogfx
                     return lhs.ordinal < rhs.ordinal;
                 });
         }
+
+        aContext.lastFastState = *fastState;
+        aContext.lastSlowState = *slowState;
     }
 
     scoped_render_target::scoped_render_target(const i_render_target& aRenderTarget) : iRenderTarget{ &aRenderTarget }

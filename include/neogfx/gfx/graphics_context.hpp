@@ -47,6 +47,7 @@ namespace neogfx
     public:
         i_rendering_engine& rendering_engine() const final;
         i_render_target const& render_target() const final;
+        i_rendering_context& rendering_context() const final;
         rect rendering_area(bool aConsiderScissor = true) const final;
         i_rendering_queue& queue() const final;
         void enqueue(graphics_operation::operation const& aOperation) final;
@@ -284,7 +285,6 @@ namespace neogfx
     protected:
         bool attached() const;
         bool active() const;
-        i_rendering_context& rendering_context() const;
         // helpers
         // attributes
     private:
