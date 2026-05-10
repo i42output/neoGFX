@@ -1101,8 +1101,11 @@ namespace neogfx
         if (aZpos == std::nullopt)
             rendering_context().enqueue(graphics_operation::clear{ aColor });
         else
-            fill_rect(rect{ render_target().target_type() == render_target_type::Surface ? 
-                point{ 0.0, 0.0, aZpos ? *aZpos : 0.0 } : point{ -1.0, -1.0 }, iRenderTarget.target_texture().storage_extents() }, aColor);
+            fill_rect(rect{ 
+                render_target().target_type() == render_target_type::Surface ? 
+                    point{ 0.0, 0.0, aZpos ? *aZpos : 0.0 } : 
+                    point{ -iRenderTarget.target_texture().bleed_guard() }, 
+                iRenderTarget.target_texture().storage_extents() }, aColor);
     }
 
     void graphics_context::clear_depth_buffer()
