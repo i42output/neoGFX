@@ -108,8 +108,11 @@ namespace neogfx
 
         vec2f operator()(vec2f const& uv) const
         {
-            vec2f const offset = (std::holds_alternative<vec2f>(offsetOrPart) ? std::get<vec2f>(offsetOrPart) : std::get<aabb_2df>(offsetOrPart).min);
-            vec2f const texelLogicalPos = uv.scale(logicalExtents);
+            vec2f const offset = (std::holds_alternative<vec2f>(offsetOrPart) ? 
+                std::get<vec2f>(offsetOrPart) : std::get<aabb_2df>(offsetOrPart).min);
+            vec2f const texelLogicalPos = uv.scale(std::holds_alternative<vec2f>(offsetOrPart) ? 
+                logicalExtents : 
+                std::get<aabb_2df>(offsetOrPart).max - std::get<aabb_2df>(offsetOrPart).min);
             vec2f const texelPos = texelLogicalPos + offset;
             vec2f result = texelPos.scale(coefficients);
             if (yFlip)
