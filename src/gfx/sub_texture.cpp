@@ -273,6 +273,12 @@ namespace neogfx
         }
     }
 
+    void sub_texture::set_pixels(color const& aColor)
+    {
+        std::vector<avec4u8> pixels{ static_cast<std::size_t>(extents().cx * extents().cy), avec4u8{ aColor.red(), aColor.green(), aColor.blue(), aColor.alpha() } };
+        set_pixels(rect{ point{}, extents() }, &pixels[0]);
+    }
+
     void sub_texture::set_pixel(point const& aPosition, color const& aColor)
     {
         native_texture().set_pixel(aPosition + atlas_location().position(), aColor);

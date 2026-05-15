@@ -544,6 +544,13 @@ namespace neogfx
     }
 
     template <typename T>
+    void opengl_texture<T>::set_pixels(const color& aColor)
+    {
+        GLfloat color[] = { aColor.red<float>(), aColor.green<float>(), aColor.blue<float>(), aColor.alpha<float>() };
+        glCheck(glClearTexImage(iHandle, 0, GL_RGBA, GL_FLOAT, color))
+    }
+
+    template <typename T>
     void opengl_texture<T>::set_pixel(const point& aPosition, const color& aColor)
     {
         avec4u8 pixel{ aColor.red(), aColor.green(), aColor.blue(), aColor.alpha() };

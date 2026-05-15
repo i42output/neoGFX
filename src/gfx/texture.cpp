@@ -223,11 +223,16 @@ namespace neogfx
         }
     }
 
+    void texture::set_pixels(const color& aColor)
+    {
+        native_texture().set_pixels(aColor);
+}
+
     void texture::set_pixel(const point& aPosition, const color& aColor)
     {
         if (is_empty())
             throw texture_empty();
-        return native_texture().set_pixel(aPosition, aColor);
+        native_texture().set_pixel(aPosition, aColor);
     }
 
     color texture::get_pixel(const point& aPosition) const

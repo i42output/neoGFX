@@ -1,4 +1,4 @@
-#version 430
+#version 460 core
 precision mediump float;
 
 layout (binding = %UNIFORM_BLOCK_INDEX%) uniform %UNIFORM_BLOCK_NAME%

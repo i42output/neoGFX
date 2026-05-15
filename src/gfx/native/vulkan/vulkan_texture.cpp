@@ -453,6 +453,13 @@ namespace neogfx
     }
 
     template <typename T>
+    void vulkan_texture<T>::set_pixels(const color& aColor)
+    {
+        std::vector<avec4u8> pixels{ static_cast<std::size_t>(extents().cx * extents().cy), avec4u8{ aColor.red(), aColor.green(), aColor.blue(), aColor.alpha() } };
+        set_pixels(rect{ point{}, extents()}, &pixels[0]);
+    }
+
+    template <typename T>
     void vulkan_texture<T>::set_pixel(const point& aPosition, const color& aColor)
     {
         avec4u8 pixel{ aColor.red(), aColor.green(), aColor.blue(), aColor.alpha() };

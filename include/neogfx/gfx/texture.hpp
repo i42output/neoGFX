@@ -75,6 +75,7 @@ namespace neogfx
         void set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aStride = 0u, std::uint32_t aPackAlignment = 4u) final;
         void set_pixels(const i_image& aImage) final;
         void set_pixels(const i_image& aImage, const rect& aImagePart) final;
+        void set_pixels(const color& aColor) final;
         void set_pixel(const point& aPosition, const color& aColor) final;
         color get_pixel(const point& aPosition) const final;
         i_vector<texture_line_segment> const& intersection(texture_line_segment const& aLine, rect const& aBoundingBox, vec2 const& aSampleSize = { 1.0, 1.0 }, scalar aTolerance = 0.0) const final;
