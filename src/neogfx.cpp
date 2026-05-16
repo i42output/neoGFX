@@ -67,6 +67,66 @@ namespace neogfx::debug
         {
             return iFlag5;
         }
+        std::int64_t& int1() final
+        {
+            return iInt1;
+        }
+        std::int64_t& int2() final
+        {
+            return iInt2;
+        }
+        std::int64_t& int3() final
+        {
+            return iInt3;
+        }
+        std::int64_t& int4() final
+        {
+            return iInt4;
+        }
+        std::int64_t& int5() final
+        {
+            return iInt5;
+        }
+        std::uint64_t& uint1() final
+        {
+            return iUint1;
+        }
+        std::uint64_t& uint2() final
+        {
+            return iUint2;
+        }
+        std::uint64_t& uint3() final
+        {
+            return iUint3;
+        }
+        std::uint64_t& uint4() final
+        {
+            return iUint4;
+        }
+        std::uint64_t& uint5() final
+        {
+            return iUint5;
+        }
+        uuid& uuid1() final
+        {
+            return iUuid1;
+        }
+        uuid& uuid2() final
+        {
+            return iUuid2;
+        }
+        uuid& uuid3() final
+        {
+            return iUuid3;
+        }
+        uuid& uuid4() final
+        {
+            return iUuid4;
+        }
+        uuid& uuid5() final
+        {
+            return iUuid5;
+        }
     private:
         void* iItem = nullptr;
         i_layout_item* iLayoutItem = nullptr;
@@ -78,6 +138,21 @@ namespace neogfx::debug
         bool iFlag3 = false;
         bool iFlag4 = false;
         bool iFlag5 = false;
+        std::int64_t iInt1 = {};
+        std::int64_t iInt2 = {};
+        std::int64_t iInt3 = {};
+        std::int64_t iInt4 = {};
+        std::int64_t iInt5 = {};
+        std::uint64_t iUint1 = {};
+        std::uint64_t iUint2 = {};
+        std::uint64_t iUint3 = {};
+        std::uint64_t iUint4 = {};
+        std::uint64_t iUint5 = {};
+        uuid iUuid1 = {};
+        uuid iUuid2 = {};
+        uuid iUuid3 = {};
+        uuid iUuid4 = {};
+        uuid iUuid5 = {};
     };
 #endif // NEOGFX_DEBUG
 }

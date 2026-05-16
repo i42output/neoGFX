@@ -195,6 +195,21 @@ namespace neogfx
             virtual bool& flag3() = 0;
             virtual bool& flag4() = 0;
             virtual bool& flag5() = 0;
+            virtual std::int64_t& int1() = 0;
+            virtual std::int64_t& int2() = 0;
+            virtual std::int64_t& int3() = 0;
+            virtual std::int64_t& int4() = 0;
+            virtual std::int64_t& int5() = 0;
+            virtual std::uint64_t& uint1() = 0;
+            virtual std::uint64_t& uint2() = 0;
+            virtual std::uint64_t& uint3() = 0;
+            virtual std::uint64_t& uint4() = 0;
+            virtual std::uint64_t& uint5() = 0;
+            virtual uuid& uuid1() = 0;
+            virtual uuid& uuid2() = 0;
+            virtual uuid& uuid3() = 0;
+            virtual uuid& uuid4() = 0;
+            virtual uuid& uuid5() = 0;
         public:
             static uuid const& iid() { static uuid const sIid{ 0x84f45a79, 0xbb98, 0x4b3a, 0xbec1, { 0xa, 0x7e, 0x25, 0x71, 0xf4, 0xd5 } }; return sIid; }
         };
