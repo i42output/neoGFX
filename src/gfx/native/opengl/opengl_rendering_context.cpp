@@ -2658,7 +2658,7 @@ namespace neogfx
                     {
                         auto const& materialTexture = patch_drawable::texture(meshRenderer, material);
                         auto nextTextureId = materialTexture.id.cookie();
-                        if (textureId == std::nullopt || *textureId != nextTextureId || materialSubtexture != materialTexture.subTexture)
+                        if (uvCalculator == nullptr || textureId == std::nullopt || *textureId != nextTextureId || materialSubtexture != materialTexture.subTexture)
                         {
                             textureId = nextTextureId;
                             materialSubtexture = materialTexture.subTexture;
@@ -2668,6 +2668,7 @@ namespace neogfx
                     }
                     else
                         uvCalculator = nullptr;
+                    
                     auto const vertexCount = faces.size() * 3;
                     auto const currentCachedVertexCount = cacheIndices[1] - cacheIndices[0];
                     auto vertexStartIndex = cacheIndices[0];
@@ -2676,7 +2677,9 @@ namespace neogfx
                         vertices.reclaim(cacheIndices[0], cacheIndices[1]);
                         vertexStartIndex = static_cast<std::uint32_t>(vertices.find_space_for(vertexCount));
                     }
+
                     auto nextIndex = vertexStartIndex;
+
                     for (auto const& face : faces)
                     {
                         for (auto faceVertexIndex : face)
@@ -2698,6 +2701,7 @@ namespace neogfx
                             ++nextIndex;
                         }
                     }
+
                     cacheIndices[0] = static_cast<std::uint32_t>(vertexStartIndex);
                     cacheIndices[1] = static_cast<std::uint32_t>(nextIndex);
                 }
@@ -2850,6 +2854,8 @@ namespace neogfx
             }
             else
             {
+                previousTexture = nullptr;
+
                 rendering_engine().default_shader_program().texture_shader().clear_texture();
 
                 if (vertexArrayUsage == std::nullopt || vertexArrayUsage->with_textures())

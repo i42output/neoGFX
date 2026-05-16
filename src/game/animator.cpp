@@ -103,10 +103,11 @@ namespace neogfx::game
             if (has_animation_frames(filter))
             {
                 auto const& frames = to_animation_frames(filter);
-                while (*filter.currentFrameStartTime + to_step_time(frames[filter.currentFrame].duration, worldClock.timestep) < now)
+                auto const currentFrame = filter.currentFrame % frames.size();
+                while (*filter.currentFrameStartTime + to_step_time(frames[currentFrame].duration, worldClock.timestep) < now)
                 {
-                    *filter.currentFrameStartTime += to_step_time(frames[filter.currentFrame % frames.size()].duration, worldClock.timestep);
-                    filter.currentFrame = (filter.currentFrame + 1u) % frames.size();
+                    *filter.currentFrameStartTime += to_step_time(frames[currentFrame].duration, worldClock.timestep);
+                    filter.currentFrame = static_cast<u32>((currentFrame + 1u) % frames.size());
                     if (filter.currentFrame == 0 && filter.autoDestroy)
                     {
                         ecs().async_destroy_entity(entity);
