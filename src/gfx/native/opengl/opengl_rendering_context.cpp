@@ -253,13 +253,21 @@ namespace neogfx
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
 
         iSink += render_target().target_deactivating([&]() 
-        { 
-            flush(); 
-        });
+            { 
+#ifdef NEOGFX_DEBUG
+                if (service<i_debug>().item() == this)
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": target_deactivating" << std::endl;
+#endif
+                flush();
+            });
         iSink += render_target().target_activating([&]()
-        {
-            apply_state();
-        });
+            {
+#ifdef NEOGFX_DEBUG
+                if (service<i_debug>().item() == this)
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": target_activating" << std::endl;
+#endif
+                apply_state();
+            });
 
         iTarget.begin_rendering();
     }
@@ -282,13 +290,21 @@ namespace neogfx
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
 
         iSink += render_target().target_deactivating([&]()
-        {
-            flush();
-        });
+            {
+#ifdef NEOGFX_DEBUG
+                if (service<i_debug>().item() == this)
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": target_deactivating" << std::endl;
+#endif
+                flush();
+            });
         iSink += render_target().target_activating([&]()
-        {
-            apply_state();
-        });
+            {
+#ifdef NEOGFX_DEBUG
+                if (service<i_debug>().item() == this)
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": target_activating" << std::endl;
+#endif
+                apply_state();
+            });
 
         iTarget.begin_rendering();
     }
@@ -312,13 +328,21 @@ namespace neogfx
         set_smoothing_mode(aOther.smoothing_mode());
 
         iSink += render_target().target_deactivating([&]()
-        {
-            flush();
-        });
+            {
+#ifdef NEOGFX_DEBUG
+                if (service<i_debug>().item() == this)
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": target_deactivating" << std::endl;
+#endif
+                flush();
+            });
         iSink += render_target().target_activating([&]()
-        {
-            apply_state();
-        });
+            {
+#ifdef NEOGFX_DEBUG
+                if (service<i_debug>().item() == this)
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": target_activating" << std::endl;
+#endif
+                apply_state();
+            });
 
         iTarget.begin_rendering();
     }
@@ -449,6 +473,12 @@ namespace neogfx
     void opengl_rendering_context::enqueue(const graphics_operation::operation& aOperation)
     {
         queue().push_back(aOperation);
+        for (auto filter : iFilters)
+            if (!filter->enqueue_graphics_operation(queue().back()))
+            {
+                queue().pop_back();
+                return;
+            }
     }
 
     inline bool batchable(queue_batch_item const& aLeft, queue_batch_item const& aRight, bool aStencilBasedInvalidation)
@@ -472,6 +502,11 @@ namespace neogfx
     {
         if (iInFlush)
             return;
+
+#ifdef NEOGFX_DEBUG
+        if (service<i_debug>().item() == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::flush()" << std::endl;
+#endif
 
         neolib::scoped_flag sf{ iInFlush };
 
@@ -669,6 +704,18 @@ namespace neogfx
             std::cerr << std::endl;
 #endif
         }
+    }
+
+    void opengl_rendering_context::add_filter(i_rendering_context_filter& aFilter)
+    {
+        iFilters.push_back(&aFilter);
+    }
+
+    void opengl_rendering_context::remove_filter(i_rendering_context_filter& aFilter)
+    {
+        auto existing = std::find(iFilters.begin(), iFilters.end(), &aFilter);
+        if (existing != iFilters.end())
+            iFilters.erase(existing);
     }
 
     bool opengl_rendering_context::redirecting() const

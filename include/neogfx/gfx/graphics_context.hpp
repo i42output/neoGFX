@@ -52,6 +52,8 @@ namespace neogfx
         i_rendering_queue& queue() const final;
         void enqueue(graphics_operation::operation const& aOperation) final;
         void flush() final;
+        void add_filter(i_rendering_context_filter& aFilter) final;
+        void remove_filter(i_rendering_context_filter& aFilter) final;
         // i_rendering_context
     public:
         bool redirecting() const final;

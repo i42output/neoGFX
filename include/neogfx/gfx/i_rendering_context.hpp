@@ -84,6 +84,12 @@ namespace neogfx
 
     using render_batch = std::ranges::subrange<queue_batch_item const*>;
 
+    class i_rendering_context_filter
+    {
+    public:
+        virtual bool enqueue_graphics_operation(graphics_operation::operation& aOperation) = 0;
+    };
+
     class i_rendering_context
     {
     public:
@@ -98,6 +104,8 @@ namespace neogfx
         virtual i_rendering_queue& queue() const = 0;
         virtual void enqueue(graphics_operation::operation const& aOperation) = 0;
         virtual void flush() = 0;
+        virtual void add_filter(i_rendering_context_filter& aFilter) = 0;
+        virtual void remove_filter(i_rendering_context_filter& aFilter) = 0;
     public:
         virtual bool redirecting() const = 0;
         virtual point redirect_origin() const = 0;

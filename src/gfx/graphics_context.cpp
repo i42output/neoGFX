@@ -243,6 +243,16 @@ namespace neogfx
             rendering_context().flush();
     }
 
+    void graphics_context::add_filter(i_rendering_context_filter& aFilter)
+    {
+        rendering_context().add_filter(aFilter);
+    }
+
+    void graphics_context::remove_filter(i_rendering_context_filter& aFilter)
+    {
+        rendering_context().remove_filter(aFilter);
+    }
+
     bool graphics_context::redirecting() const
     {
         return iRedirectOrigin.has_value();

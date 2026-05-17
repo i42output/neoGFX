@@ -236,6 +236,8 @@ namespace neogfx
         i_optimised_rendering_queue const& optimised_queue() const;
         void enqueue(const graphics_operation::operation& aOperation) final;
         void flush() final;
+        void add_filter(i_rendering_context_filter& aFilter) final;
+        void remove_filter(i_rendering_context_filter& aFilter) final;
     public:
         bool redirecting() const final;
         point redirect_origin() const final;
@@ -354,6 +356,7 @@ namespace neogfx
         const i_render_target& iTarget;
         const i_widget* iWidget;
         bool iInFlush;
+        std::vector<i_rendering_context_filter*> iFilters;
         bool iSubpixelRendering;
         std::vector<logical_operation> iLogicalOperationStack;
         std::list<use_shader_program> iShaderProgramStack;
