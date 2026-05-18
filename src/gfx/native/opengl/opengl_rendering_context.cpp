@@ -704,6 +704,8 @@ namespace neogfx
             std::cerr << std::endl;
 #endif
         }
+
+        (void)queue();
     }
 
     void opengl_rendering_context::add_filter(i_rendering_context_filter& aFilter)

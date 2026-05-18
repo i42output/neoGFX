@@ -24,16 +24,21 @@ namespace neogfx
     texture colored_icon(const texture& aSource, const optional_color& aColor, scalar const aOutline)
     {
         texture result{ aSource.extents(), 1.0, texture_sampling::Multisample };
+
         graphics_context gc{ result };
         scoped_render_target srt{ gc };
+
         rect const targetRect{ point{}, aSource.extents() };
+
         if (aColor)
         {
             // draw a black outline for a non-text color icon...
             scoped_filter sf{ gc, blur_filter{ targetRect, aOutline } };
             sf.front_buffer().draw_texture(targetRect, aSource, color::Black);
         }
+
         gc.draw_texture(targetRect, aSource, aColor ? *aColor : service<i_app>().current_style().palette().color(color_role::Text), shader_effect::ColorizeAlpha);
+
         return result;
     };
 }
