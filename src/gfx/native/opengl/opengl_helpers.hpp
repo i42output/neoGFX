@@ -399,9 +399,9 @@ namespace neogfx
             {
                 iParent.iTransformation = aTransformation;
             }
-            void execute()
+            void execute(bool aSync = false)
             {
-                iParent.execute();
+                iParent.execute(aSync);
             }
         private:
             opengl_vertex_buffer<vertex_type>& iParent;
@@ -517,12 +517,15 @@ namespace neogfx
             vertices().reclaim(aStartIndex, aEndIndex);
         }
     public:
-        void execute()
+        void execute(bool aSync = false)
         {
-            GLsync sync;
-            glCheck(sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0));
-            glCheck(glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, ~0ull));
-            glCheck(glDeleteSync(sync));
+            if (aSync)
+            {
+                GLsync sync;
+                glCheck(sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0));
+                glCheck(glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, ~0ull));
+                glCheck(glDeleteSync(sync));
+            }
         }
         void flush()
         {

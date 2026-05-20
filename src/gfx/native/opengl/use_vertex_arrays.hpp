@@ -216,7 +216,7 @@ namespace neogfx
             }
             void execute()
             {
-                iUse.execute();
+                iUse.execute(iUseBarrier);
             }
             struct skip
             {
