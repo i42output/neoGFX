@@ -519,7 +519,6 @@ namespace neogfx
     public:
         void execute(bool aSync = false)
         {
-            aSync = true; ///< @todo
             if (aSync)
             {
                 GLsync sync;

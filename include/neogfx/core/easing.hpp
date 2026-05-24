@@ -850,31 +850,63 @@ namespace neogfx
      * @return easing result
      */
     template <typename T>
-    inline T partitioned_ease(std::span<std::pair<easing, double> const> segments, T t)
+    inline T partitioned_ease(std::span<std::pair<easing, T> const> segments, T t)
     {
-        double const wTotal = std::accumulate(segments.begin(), segments.end(), 0.0,
-            [](double sum, auto const& s) { return sum + s.second; });
+        if (segments.empty()) 
+            return T{0};
 
-        double cumulative = 0.0;
+        T const wTotal = std::accumulate(segments.begin(), segments.end(), T{0},
+            [](T sum, auto const& s) { return sum + s.second; });
+
+        if (wTotal <= T{0})
+            return T{0};
+
+        T cumulative = T{0};
         for (auto const& [e, w] : segments)
         {
+            if (w <= T{0})
+            {
+                cumulative += w;
+                continue;
+            }
+
             if (t * wTotal < cumulative + w || &e == &segments.back().first)
-                return ease(e, std::clamp(static_cast<T>((t * wTotal - cumulative) / w), T{0}, T{1}));
+            {
+                auto const local = std::clamp((t * wTotal - cumulative) / w, T{0}, T{1});
+                auto const result = (cumulative + ease(e, local) * w) / wTotal;
+                return result;
+            }
             cumulative += w;
         }
 
         return ease(segments.back().first, T{1});
     }
 
+    /**
+     * @brief Partitioned easing function based on N easing segments.
+     * @author Claude (AI)
+     * @author Leigh Johnston (Human)
+     * @tparam T value type
+     * @tparam N number of partitions (segments)
+     * @param segments the partitions (segments) - easing function and weighting
+     * @param t time [0.0 .. 1.0]
+     * @return easing result
+     */
+    template <typename T, std::size_t N>
+    inline T partitioned_ease(std::span<std::pair<easing, T> const, N> segments, T t)
+    {
+        return partitioned_ease(std::span<std::pair<easing, T> const>{ segments }, t);
+    }
+        
     template <typename T>
-    inline T partitioned_ease(easing e1, easing e2, T t, double w1 = 1.0, double w2 = 1.0)
+    inline T partitioned_ease(easing e1, easing e2, T t, T w1 = T{1}, T w2 = T{1})
     {
         return partitioned_ease({ {e1,w1},{e2,w2} }, t);
     }
 
     template <typename T>
     inline T partitioned_ease(easing e1, easing e2, easing e3, easing e4, T t,
-        double w1 = 1.0, double w2 = 1.0, double w3 = 1.0, double w4 = 1.0)
+        T w1 = T{1}, T w2 = T{1}, T w3 = T{1}, T w4 = T{1})
     {
         return partitioned_ease({ {e1,w1},{e2,w2},{e3,w3},{e4,w4} }, t);
     }
