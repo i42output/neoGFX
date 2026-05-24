@@ -36,6 +36,8 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <algorithm>
+
 #include <neogfx/core/numerical.hpp>
 
 namespace neogfx
@@ -838,24 +840,43 @@ namespace neogfx
         return t < w1 / wTotal ? ease(e1, t / (w1 / wTotal)) : ease(e1 ^ easing_class::Inverted, (t - (w1 / wTotal)) / (w2 / wTotal));
     }
 
+    /**
+     * @brief Partitioned easing function based on N easing segments.
+     * @author Claude (AI)
+     * @author Leigh Johnston (Human)
+     * @tparam T value type
+     * @param segments the partitions (segments) - easing function and weighting
+     * @param t time [0.0 .. 1.0]
+     * @return easing result
+     */
     template <typename T>
-    inline T partitioned_ease(easing e1, easing e2, T t, double w1 = 1.0, double w2 = 1.0)
+    inline T partitioned_ease(std::span<std::pair<easing, double> const> segments, T t)
     {
-        auto const wTotal = w1 + w2;
-        return t < w1 / wTotal ? ease(e1, t / (w1 / wTotal)) : ease(e2, (t - (w1 / wTotal)) / (w2 / wTotal));
+        double const wTotal = std::accumulate(segments.begin(), segments.end(), 0.0,
+            [](double sum, auto const& s) { return sum + s.second; });
+
+        double cumulative = 0.0;
+        for (auto const& [e, w] : segments)
+        {
+            if (t * wTotal < cumulative + w || &e == &segments.back().first)
+                return ease(e, std::clamp(static_cast<T>((t * wTotal - cumulative) / w), T{0}, T{1}));
+            cumulative += w;
+        }
+
+        return ease(segments.back().first, T{1});
     }
 
     template <typename T>
-    inline T partitioned_ease(easing e1, easing e2, easing e3, easing e4, T t, double w1 = 1.0, double w2 = 1.0, double w3 = 1.0, double w4 = 1.0)
+    inline T partitioned_ease(easing e1, easing e2, T t, double w1 = 1.0, double w2 = 1.0)
     {
-        auto const wTotal = w1 + w2 + w3 + w4;
-        return t < w1 / wTotal ?
-            ease(e1, t / (w1 / wTotal)) :
-            t < (w1 + w2) / wTotal ?
-            ease(e2, (t - w1 / wTotal) / (w2 / wTotal)) :
-            t < (w1 + w2 + w3) / wTotal ?
-            ease(e3, (t - (w1 + w2) / wTotal) / (w3 / wTotal)) :
-            ease(e4, (t - (w1 + w2 + w3) / wTotal) / (w4 / wTotal));
+        return partitioned_ease({ {e1,w1},{e2,w2} }, t);
+    }
+
+    template <typename T>
+    inline T partitioned_ease(easing e1, easing e2, easing e3, easing e4, T t,
+        double w1 = 1.0, double w2 = 1.0, double w3 = 1.0, double w4 = 1.0)
+    {
+        return partitioned_ease({ {e1,w1},{e2,w2},{e3,w3},{e4,w4} }, t);
     }
 
     inline string to_string(easing e)
