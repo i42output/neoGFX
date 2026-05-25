@@ -67,6 +67,26 @@ namespace neogfx::debug
         {
             return iFlag5;
         }
+        void*& ptr1() final
+        {
+            return iPtr1;
+        }
+        void*& ptr2() final
+        {
+            return iPtr2;
+        }
+        void*& ptr3() final
+        {
+            return iPtr3;
+        }
+        void*& ptr4() final
+        {
+            return iPtr4;
+        }
+        void*& ptr5() final
+        {
+            return iPtr5;
+        }
         std::int64_t& int1() final
         {
             return iInt1;
@@ -138,6 +158,11 @@ namespace neogfx::debug
         bool iFlag3 = false;
         bool iFlag4 = false;
         bool iFlag5 = false;
+        void* iPtr1 = nullptr;
+        void* iPtr2 = nullptr;
+        void* iPtr3 = nullptr;
+        void* iPtr4 = nullptr;
+        void* iPtr5 = nullptr;
         std::int64_t iInt1 = {};
         std::int64_t iInt2 = {};
         std::int64_t iInt3 = {};

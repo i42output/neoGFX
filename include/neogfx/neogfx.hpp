@@ -195,6 +195,11 @@ namespace neogfx
             virtual bool& flag3() = 0;
             virtual bool& flag4() = 0;
             virtual bool& flag5() = 0;
+            virtual void*& ptr1() = 0;
+            virtual void*& ptr2() = 0;
+            virtual void*& ptr3() = 0;
+            virtual void*& ptr4() = 0;
+            virtual void*& ptr5() = 0;
             virtual std::int64_t& int1() = 0;
             virtual std::int64_t& int2() = 0;
             virtual std::int64_t& int3() = 0;
