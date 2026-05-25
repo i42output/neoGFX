@@ -214,6 +214,10 @@ namespace neogfx
                 vertices().clear();
 				iStart = 0;
             }
+            void sync()
+            {
+                iUse.sync();
+            }
             void execute()
             {
                 iUse.execute(iUseBarrier);
@@ -246,6 +250,10 @@ namespace neogfx
                     return;
 
                 iParent.rendering_engine().vertex_buffer(iProvider).attach_shader(iParent, iParent.rendering_engine().active_shader_program());
+
+                vertices().flush(iStart, aCount);
+
+                sync();
 
                 if (!iUseBarrier)
                 {

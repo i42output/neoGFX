@@ -195,11 +195,15 @@ namespace neogfx
         {
             return iBufferName;
         }
+        bool mapped() const
+        {
+            return iMemory != nullptr;
+        }
         const_pointer map() const
         {
             if (iMemory == nullptr)
             {
-                glCheck(iMemory = static_cast<value_type*>(glMapNamedBufferRange(handle(), 0, capacity() * sizeof(value_type), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_COHERENT_BIT)));
+                glCheck(iMemory = static_cast<value_type*>(glMapNamedBufferRange(handle(), 0, capacity() * sizeof(value_type), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_FLUSH_EXPLICIT_BIT)));
             }
             return iMemory;
         }
@@ -207,18 +211,20 @@ namespace neogfx
         {
             return const_cast<pointer>(to_const(*this).map());
         }
-        void flush(size_type aElements)
+        void flush(std::size_t aOffset, size_type aElements)
         {
-            if (iMemory != nullptr)
+            if (mapped())
             {
-                glCheck(glFlushMappedNamedBufferRange(handle(), 0, aElements * sizeof(value_type)));
+                glCheck(glFlushMappedNamedBufferRange(handle(), aOffset, aElements * sizeof(value_type)));
             }
+            else
+                throw std::logic_error("neogfx::opengl_buffer<T>::flush: buffer not mapped!");
         }
         void unmap()
         {
             if (iMemory != nullptr)
             {
-                flush(size());
+                flush(0, size());
                 glCheck(glUnmapNamedBuffer(handle()));
                 iMemory = nullptr;
             }
@@ -399,6 +405,10 @@ namespace neogfx
             {
                 iParent.iTransformation = aTransformation;
             }
+            void sync()
+            {
+                iParent.sync();
+            }
             void execute(bool aSync = false)
             {
                 iParent.execute(aSync);
@@ -517,23 +527,29 @@ namespace neogfx
             vertices().reclaim(aStartIndex, aEndIndex);
         }
     public:
+        void sync()
+        {
+            GLsync sync;
+            glCheck(sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0));
+            glCheck(glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, ~0ull));
+            glCheck(glDeleteSync(sync));
+        }
         void execute(bool aSync = false)
         {
             if (aSync)
-            {
-                GLsync sync;
-                glCheck(sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0));
-                glCheck(glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, ~0ull));
-                glCheck(glDeleteSync(sync));
-            }
+                sync();
         }
         void flush()
         {
             flush(vertices().size());
         }
-        void flush(std::size_t aElements)
+        void flush(std::size_t aCount)
         {
-            iBuffer.flush(aElements);
+            flush(0, aCount);
+        }
+        void flush(std::size_t aOffset, std::size_t aCount)
+        {
+            iBuffer.flush(aOffset, aCount);
         }
         vertex_array& vertices()
         {

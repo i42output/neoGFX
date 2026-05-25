@@ -293,8 +293,10 @@ namespace neogfx
         for (auto& vb : iVertexBuffers)
         {
             auto& buffer = vb.second;
-            buffer.flush();
-            buffer.execute();
+            bool const bufferMapped = buffer.vertices().mapped();
+            if (bufferMapped)
+                buffer.flush();
+            buffer.execute(bufferMapped);
         }
     }
 
