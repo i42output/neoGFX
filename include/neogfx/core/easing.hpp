@@ -898,6 +898,20 @@ namespace neogfx
         return partitioned_ease(std::span<std::pair<easing, T> const>{ segments }, t);
     }
         
+    /**
+     * @brief Partitioned easing function based on N easing segments.
+     * @author Claude (AI)
+     * @tparam T value type
+     * @param segments the partitions (segments) - easing function and weighting
+     * @param t time [0.0 .. 1.0]
+     * @return easing result
+     */
+    template <typename T>
+    inline T partitioned_ease(std::initializer_list<std::pair<easing, T>> segments, T t)
+    {
+        return partitioned_ease(std::span<std::pair<easing, T> const>{segments.begin(), segments.size()}, t);
+    }
+
     template <typename T>
     inline T partitioned_ease(easing e1, easing e2, T t, T w1 = T{1}, T w2 = T{1})
     {
