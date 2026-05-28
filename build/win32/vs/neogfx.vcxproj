@@ -477,7 +477,7 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_surface.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_texture.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_texture_manager.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\native\opengl\use_vertex_arrays.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_triangle_renderer.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan_error.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan_texture.hpp" />
@@ -569,6 +569,7 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_surface.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_texture_manager.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_triangle_renderer.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\vulkan\vulkan_error.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\vulkan\vulkan_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.cpp" />

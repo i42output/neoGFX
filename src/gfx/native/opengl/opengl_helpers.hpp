@@ -379,43 +379,6 @@ namespace neogfx
         typedef V vertex_type;
     public:
         typedef opengl_buffer<vertex_type> vertex_array;
-        class use
-        {
-        public:
-            use(opengl_vertex_buffer<V>& aParent) : iParent{ aParent }
-            {
-            }
-            ~use()
-            {
-            }
-        public:
-            const vertex_array& vertices() const
-            {
-                return iParent.iBuffer;
-            }
-            vertex_array& vertices()
-            {
-                return iParent.iBuffer;
-            }
-            const optional_mat44& transformation() const
-            {
-                return iParent.iTransformation;
-            }
-            void set_transformation(const optional_mat44& aTransformation)
-            {
-                iParent.iTransformation = aTransformation;
-            }
-            void sync()
-            {
-                iParent.sync();
-            }
-            void execute(bool aSync = false)
-            {
-                iParent.execute(aSync);
-            }
-        private:
-            opengl_vertex_buffer<vertex_type>& iParent;
-        };
     public:
         opengl_vertex_buffer(i_vertex_provider& aProvider, vertex_buffer_type aType) :
             vertex_buffer{ aProvider, aType }, iBuffer{ *this }
@@ -520,6 +483,15 @@ namespace neogfx
         void detach_shader() override
         {
             vertex_buffer::detach_shader();
+        }
+    public:
+        const optional_mat44& transformation() const
+        {
+            return iTransformation;
+        }
+        void set_transformation(const optional_mat44& aTransformation)
+        {
+            iTransformation = aTransformation;
         }
     public:
         void reclaim(std::size_t aStartIndex, std::size_t aEndIndex)

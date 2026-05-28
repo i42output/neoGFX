@@ -33,7 +33,7 @@
 #include "opengl.hpp"
 #include "opengl_error.hpp"
 #include "opengl_helpers.hpp"
-#include "use_vertex_arrays.hpp"
+#include "opengl_triangle_renderer.hpp"
 
 namespace neogfx
 {

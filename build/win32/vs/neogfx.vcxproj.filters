@@ -804,7 +804,7 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_surface.hpp">
       <Filter>Source Files\native\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\native\opengl\use_vertex_arrays.hpp">
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_triangle_renderer.hpp">
       <Filter>Source Files\native\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan_texture.hpp">
@@ -1323,6 +1323,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\utility.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_triangle_renderer.cpp">
+      <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

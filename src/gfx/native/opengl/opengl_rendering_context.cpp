@@ -187,7 +187,7 @@ namespace neogfx
             }
         }
 
-        bool emit_any_stipple(i_rendering_context& aContext, use_vertex_arrays& aInstance, bool aLoop = false)
+        bool emit_any_stipple(i_rendering_context& aContext, opengl_triangle_renderer& aInstance, bool aLoop = false)
         {
             // assumes vertices are quads (as two triangles) created with quads_to_triangles above.
             auto& stippleShader = aContext.rendering_engine().default_shader_program().stipple_shader();
@@ -1221,7 +1221,7 @@ namespace neogfx
         disable_multisample disableMultisample{ *this };
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawPixelOps.cend() - aDrawPixelOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawPixelOps.cend() - aDrawPixelOps.cbegin()))};
 
             for (auto op = aDrawPixelOps.cbegin(); op != aDrawPixelOps.cend(); ++op)
             {
@@ -1230,7 +1230,7 @@ namespace neogfx
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_pixel&>(**op);
                 auto rectVertices = rect_vertices<vec3f>(rect{ drawOp.point + origin(), size{1.0, 1.0}}, mesh_type::Triangles);
                 for (auto const& v : rectVertices)
-                    vertexArrays.push_back({ v,
+                    triangleRenderer.push_back({ v,
                             vec4f{{
                                 drawOp.color.red<float>(),
                                 drawOp.color.green<float>(),
@@ -1254,7 +1254,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Line);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawLineOps.cend() - aDrawLineOps.cbegin())) };
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawLineOps.cend() - aDrawLineOps.cbegin())) };
 
             for (auto op = aDrawLineOps.cbegin(); op != aDrawLineOps.cend(); ++op)
             {
@@ -1269,7 +1269,7 @@ namespace neogfx
                 auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
-                    vertexArrays.push_back({ v,
+                    triangleRenderer.push_back({ v,
                         std::holds_alternative<color>(drawOp.pen.color()) ?
                             static_variant_cast<color>(drawOp.pen.color()).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
@@ -1305,7 +1305,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Triangle);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawTriangleOps.cend() - aDrawTriangleOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawTriangleOps.cend() - aDrawTriangleOps.cbegin()))};
 
             for (auto op = aDrawTriangleOps.cbegin(); op != aDrawTriangleOps.cend(); ++op)
             {
@@ -1320,7 +1320,7 @@ namespace neogfx
                 auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
-                    vertexArrays.push_back({ v,
+                    triangleRenderer.push_back({ v,
                         std::holds_alternative<color>(drawOp.fill) ?
                             static_variant_cast<color>(drawOp.fill).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.fill) ? 0.0f : 1.0f },
@@ -1350,7 +1350,7 @@ namespace neogfx
         std::optional<neolib::scoped_flag> snap;
 
         {
-            std::optional<use_vertex_arrays> maybeVertexArrays;
+            std::optional<opengl_triangle_renderer> maybeVertexArrays;
 
             for (auto op = aDrawRectOps.cbegin(); op != aDrawRectOps.cend(); ++op)
             {
@@ -1415,7 +1415,7 @@ namespace neogfx
                     maybeVertexArrays.emplace(as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawRectOps.cend() - aDrawRectOps.cbegin())));
                 }
 
-                auto& vertexArrays = maybeVertexArrays.value();
+                auto& triangleRenderer = maybeVertexArrays.value();
 
                 auto const sdfRect = snap_to_pixel() ? rc.deflated(drawOp.pen.width() / 2.0) : rc;
                 auto const boundingRect = rc.inflated(drawOp.pen.width() / 2.0);
@@ -1423,7 +1423,7 @@ namespace neogfx
                 auto const function = to_function(*this, drawOp.fill, boundingRect);
 
                 for (auto const& v : vertices)
-                    vertexArrays.push_back({ v,
+                    triangleRenderer.push_back({ v,
                         std::holds_alternative<color>(drawOp.fill) ?
                             static_variant_cast<color>(drawOp.fill).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.fill) ? 0.0f : 1.0f },
@@ -1463,7 +1463,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::RoundedRect);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawRoundedRectOps.cend() - aDrawRoundedRectOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawRoundedRectOps.cend() - aDrawRoundedRectOps.cbegin()))};
 
             for (auto op = aDrawRoundedRectOps.cbegin(); op != aDrawRoundedRectOps.cend(); ++op)
             {
@@ -1477,7 +1477,7 @@ namespace neogfx
                 auto const function = to_function(*this, drawOp.fill, boundingRect);
 
                 for (auto const& v : vertices)
-                    vertexArrays.push_back({ v,
+                    triangleRenderer.push_back({ v,
                         std::holds_alternative<color>(drawOp.fill) ?
                             static_variant_cast<color>(drawOp.fill).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.fill) ? 0.0f : 1.0f },
@@ -1517,7 +1517,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::EllipseRect);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllpseRectOps.cend() - aDrawEllpseRectOps.cbegin())) };
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllpseRectOps.cend() - aDrawEllpseRectOps.cbegin())) };
 
             for (auto op = aDrawEllpseRectOps.cbegin(); op != aDrawEllpseRectOps.cend(); ++op)
             {
@@ -1531,7 +1531,7 @@ namespace neogfx
                 auto const function = to_function(*this, drawOp.fill, boundingRect);
 
                 for (auto const& v : vertices)
-                    vertexArrays.push_back({ v,
+                    triangleRenderer.push_back({ v,
                         std::holds_alternative<color>(drawOp.fill) ?
                             static_variant_cast<color>(drawOp.fill).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.fill) ? 0.0f : 1.0f },
@@ -1562,7 +1562,7 @@ namespace neogfx
         std::optional<neolib::scoped_flag> snap;
 
         {
-            std::optional<use_vertex_arrays> maybeVertexArrays;
+            std::optional<opengl_triangle_renderer> maybeVertexArrays;
 
             for (auto op = aDrawCheckerboardOps.cbegin(); op != aDrawCheckerboardOps.cend(); ++op)
             {
@@ -1586,7 +1586,7 @@ namespace neogfx
 
                     maybeVertexArrays.emplace(as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u));
 
-                    auto& vertexArrays = maybeVertexArrays.value();
+                    auto& triangleRenderer = maybeVertexArrays.value();
 
                     auto const sdfRect = snap_to_pixel() ? rc.deflated(drawOp.pen.width() / 2.0) : rc;
                     auto const boundingRect = rc.inflated(drawOp.pen.width() / 2.0);
@@ -1594,7 +1594,7 @@ namespace neogfx
                     auto const function = to_function(*this, fill, boundingRect);
 
                     for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
+                        triangleRenderer.push_back({ v,
                             std::holds_alternative<color>(fill) ?
                                 static_variant_cast<color>(fill).as<float>() :
                                 vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(fill) ? 0.0f : 1.0f },
@@ -1638,7 +1638,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Ellipse);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllipseOps.cend() - aDrawEllipseOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllipseOps.cend() - aDrawEllipseOps.cbegin()))};
 
             for (auto op = aDrawEllipseOps.cbegin(); op != aDrawEllipseOps.cend(); ++op)
             {
@@ -1651,7 +1651,7 @@ namespace neogfx
                 auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
-                    vertexArrays.push_back({ v,
+                    triangleRenderer.push_back({ v,
                         std::holds_alternative<color>(drawOp.fill) ?
                             static_variant_cast<color>(drawOp.fill).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.fill) ? 0.0f : 1.0f },
@@ -1691,7 +1691,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Circle);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawCircleOps.cend() - aDrawCircleOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawCircleOps.cend() - aDrawCircleOps.cbegin()))};
 
             for (auto op = aDrawCircleOps.cbegin(); op != aDrawCircleOps.cend(); ++op)
             {
@@ -1704,7 +1704,7 @@ namespace neogfx
                 auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
-                    vertexArrays.push_back({ v,
+                    triangleRenderer.push_back({ v,
                         std::holds_alternative<color>(drawOp.fill) ?
                             static_variant_cast<color>(drawOp.fill).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.fill) ? 0.0f : 1.0f },
@@ -1744,7 +1744,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Pie);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawPieOps.cend() - aDrawPieOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawPieOps.cend() - aDrawPieOps.cbegin()))};
 
             for (auto op = aDrawPieOps.cbegin(); op != aDrawPieOps.cend(); ++op)
             {
@@ -1757,7 +1757,7 @@ namespace neogfx
                 auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
-                    vertexArrays.push_back({ v,
+                    triangleRenderer.push_back({ v,
                         std::holds_alternative<color>(drawOp.fill) ?
                             static_variant_cast<color>(drawOp.fill).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.fill) ? 0.0f : 1.0f },
@@ -1797,7 +1797,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Arc);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawArcOps.cend() - aDrawArcOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawArcOps.cend() - aDrawArcOps.cbegin()))};
 
             for (auto op = aDrawArcOps.cbegin(); op != aDrawArcOps.cend(); ++op)
             {
@@ -1810,7 +1810,7 @@ namespace neogfx
                 auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
-                    vertexArrays.push_back({ v,
+                    triangleRenderer.push_back({ v,
                         std::holds_alternative<color>(drawOp.fill) ?
                             static_variant_cast<color>(drawOp.fill).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.fill) ? 0.0f : 1.0f },
@@ -1852,14 +1852,14 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aPen.color()));
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u) };
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u) };
 
             auto boundingRect = rect{ p0.min(p1.min(p2.min(p3))), p0.max(p1.max(p2.max(p3))) }.inflated(aPen.width());
             auto const function = to_function(*this, aPen.color(), boundingRect);
             auto rectVertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
             if (aPen.width())
                 for (auto const& v : rectVertices)
-                    vertexArrays.push_back({ v,
+                    triangleRenderer.push_back({ v,
                         std::holds_alternative<color>(aPen.color()) ?
                             static_variant_cast<color>(aPen.color()).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(aPen.color()) ? 0.0f : 1.0f },
@@ -1889,14 +1889,14 @@ namespace neogfx
                 rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Polygon);
 
                 {
-                    use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u) };
+                    opengl_triangle_renderer triangleRenderer{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u) };
 
                     auto boundingRect = aBoundingRect.inflated(aPen.width() * 2.0) + origin();
                     auto boundingRectVertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                     auto const function = to_function(*this, aPen.color(), boundingRect);
 
                     for (auto const& v : boundingRectVertices)
-                        vertexArrays.push_back({ v,
+                        triangleRenderer.push_back({ v,
                             std::holds_alternative<color>(aFill) ?
                                 static_variant_cast<color>(aFill).as<float>() :
                                 vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(aFill) ? 0.0f : 1.0f },
@@ -1955,14 +1955,14 @@ namespace neogfx
         triangles.clear();
         quads_to_triangles(quads, triangles);
 
-        use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, triangles.size() };
+        opengl_triangle_renderer triangleRenderer{ as_vertex_provider(), *this, triangles.size() };
 
         auto const function = to_function(*this, aPen.color(), bounding_rect(aMesh) + origin());
 
         auto const& pos = aPosition.as<float>() + origin().to_vec3().as<float>();
 
         for (auto const& v : triangles)
-            vertexArrays.push_back({ v + pos,
+            triangleRenderer.push_back({ v + pos,
                 std::holds_alternative<color>(aPen.color()) ? 
                     static_variant_cast<color>(aPen.color()).as<float>() : 
                     vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
@@ -1983,7 +1983,7 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this };
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider(), *this };
 
             auto const& pos = (aPosition + origin().to_vec3()).as<float>();
             auto const& vertices = aMesh.vertices;
@@ -2002,14 +2002,14 @@ namespace neogfx
                 }
             }
             auto const function = to_function(*this, aFill, rect{ point{ min.x, min.y }, size{ max.x - min.x, max.y - min.y } });
-            if (!vertexArrays.room_for(aMesh.faces.size() * 3u))
-                vertexArrays.draw_and_execute();
+            if (!triangleRenderer.room_for(aMesh.faces.size() * 3u))
+                triangleRenderer.draw_and_execute();
             for (auto const& f : aMesh.faces)
             {
                 for (auto vi : f)
                 {
                     auto const& v = vertices[vi];
-                    vertexArrays.push_back({
+                    triangleRenderer.push_back({
                         v + pos,
                         std::holds_alternative<color>(aFill) ?
                             static_variant_cast<color>(aFill).as<float>() :
@@ -2793,7 +2793,7 @@ namespace neogfx
 
         std::optional<std::pair<point, mat44f>> originTranslatedTransformation;
 
-        std::optional<use_vertex_arrays> vertexArrayUsage;
+        std::optional<opengl_triangle_renderer> triangleRenderer;
 
         auto const logicalCoordinates = logical_coordinates();
 
@@ -2889,8 +2889,8 @@ namespace neogfx
                 if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
                     enable_sample_shading(1.0);
 
-                if (vertexArrayUsage == std::nullopt || !vertexArrayUsage->with_textures())
-                    vertexArrayUsage.emplace(*aPatch.provider, *this, transformation, with_textures, 0, batchRenderer.barrier);
+                if (triangleRenderer == std::nullopt || !triangleRenderer->with_textures())
+                    triangleRenderer.emplace(*aPatch.provider, *this, transformation, with_textures, 0, batchRenderer.barrier);
 
 #if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
                 if (item->meshDrawable->entity != game::null_entity &&
@@ -2899,7 +2899,7 @@ namespace neogfx
 
 #endif // NEOGFX_DEBUG
 
-                vertexArrayUsage->draw(item->vertexArrayIndexStart, faceCount * 3);
+                triangleRenderer->draw(item->vertexArrayIndexStart, faceCount * 3);
             }
             else
             {
@@ -2907,8 +2907,8 @@ namespace neogfx
 
                 rendering_engine().default_shader_program().texture_shader().clear_texture();
 
-                if (vertexArrayUsage == std::nullopt || vertexArrayUsage->with_textures())
-                    vertexArrayUsage.emplace(*aPatch.provider, *this, transformation, 0, batchRenderer.barrier);
+                if (triangleRenderer == std::nullopt || triangleRenderer->with_textures())
+                    triangleRenderer.emplace(*aPatch.provider, *this, transformation, 0, batchRenderer.barrier);
 
 #if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
                 if (item->meshDrawable->entity != game::null_entity &&
@@ -2917,7 +2917,7 @@ namespace neogfx
 
 #endif // NEOGFX_DEBUG
 
-                vertexArrayUsage->draw(item->vertexArrayIndexStart, faceCount * 3);
+                triangleRenderer->draw(item->vertexArrayIndexStart, faceCount * 3);
             }
 
             item = next;
