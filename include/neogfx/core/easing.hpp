@@ -845,16 +845,17 @@ namespace neogfx
     template <typename T>
     inline T partitioned_ease(std::span<std::pair<easing, T> const> segments, T t)
     {
-        if (segments.empty()) 
+        if (segments.empty())
             return T{0};
 
-        T const wTotal = std::accumulate(segments.begin(), segments.end(), T{0},
+        auto const wTotal = std::accumulate(segments.begin(), segments.end(), T{0},
             [](T sum, auto const& s) { return sum + s.second; });
 
         if (wTotal <= T{0})
             return T{0};
 
-        T cumulative = T{0};
+        auto cumulative = T{0};
+        auto outputPos = ease(segments.front().first, T{0});
         for (auto const& [e, w] : segments)
         {
             if (w <= T{0})
@@ -863,12 +864,15 @@ namespace neogfx
                 continue;
             }
 
+            auto const localStart = ease(e, T{0});
+
             if (t * wTotal < cumulative + w || &e == &segments.back().first)
             {
                 auto const local = std::clamp((t * wTotal - cumulative) / w, T{0}, T{1});
-                auto const result = (cumulative + ease(e, local) * w) / wTotal;
-                return result;
+                return outputPos + (ease(e, local) - localStart) * (w / wTotal);
             }
+
+            outputPos += (ease(e, T{1}) - localStart) * (w / wTotal);
             cumulative += w;
         }
 
