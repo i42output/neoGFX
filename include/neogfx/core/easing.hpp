@@ -912,17 +912,16 @@ namespace neogfx
     }
 
     template <typename T>
-    inline std::enable_if_t<!std::is_same_v<T, easing>, T> partitioned_ease(easing e1, T t, T w1 = T{1})
+    inline std::enable_if_t<!std::is_same_v<T, easing>, T> partitioned_ease(easing e1, T t, T w1 = T{2})
     {
-        return partitioned_ease({ {e1,w1},{e1 ^ easing_class::Inverted,w1} }, t);
+        return partitioned_ease({ {e1,w1},{e1^easing_class::Inverted,w1} }, t);
     }
 
     template <typename T>
     inline std::enable_if_t<!std::is_same_v<T, easing>, T> partitioned_ease(easing e1, T t, T w1, T w2)
     {
-        return partitioned_ease({ {e1,w1},{e1 ^ easing_class::Inverted,w2} }, t);
+        return partitioned_ease({ {e1,w1},{e1^easing_class::Inverted,w2} }, t);
     }
-
 
     template <typename T>
     inline T partitioned_ease(easing e1, easing e2, T t, T w1 = T{1}, T w2 = T{1})
