@@ -1,7 +1,7 @@
 // easing.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2018, 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2018-2026 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -833,13 +833,6 @@ namespace neogfx
         return ease(e, t / d) * c + b;
     }
 
-    template <typename T>
-    inline std::enable_if_t<!std::is_same_v<T, easing>, T> partitioned_ease(easing e1, T t, double w1 = 1.0, double w2 = 1.0)
-    {
-        auto const wTotal = w1 + w2;
-        return t < w1 / wTotal ? ease(e1, t / (w1 / wTotal)) : ease(e1 ^ easing_class::Inverted, (t - (w1 / wTotal)) / (w2 / wTotal));
-    }
-
     /**
      * @brief Partitioned easing function based on N easing segments.
      * @author Claude (AI)
@@ -910,6 +903,12 @@ namespace neogfx
     inline T partitioned_ease(std::initializer_list<std::pair<easing, T>> segments, T t)
     {
         return partitioned_ease(std::span<std::pair<easing, T> const>{segments.begin(), segments.size()}, t);
+    }
+
+    template <typename T>
+    inline std::enable_if_t<!std::is_same_v<T, easing>, T> partitioned_ease(easing e1, T t, double w1 = 1.0, double w2 = 1.0)
+    {
+        return partitioned_ease({ {e1,w1},{e1^easing_class::Inverted,w2} }, t);
     }
 
     template <typename T>
