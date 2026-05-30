@@ -372,9 +372,9 @@ namespace neogfx
         Step = 0x000D,
         In = 0x0100,
         Out = 0x0200,
-        Reverse = 0x0400,
+        Reversed = 0x0400,
         InOut = In | Out,
-        OutIn = In | Out | Reverse,
+        OutIn = In | Out | Reversed,
         Inverted = 0x0800,
         Constant = 0x1000,
         CLASS_MASK = 0x00FF,
@@ -449,6 +449,57 @@ namespace neogfx
         OutInStep = static_cast<std::uint32_t>(easing_class::Step | easing_class::OutIn),
         Zero = static_cast<std::uint32_t>(easing_class::Zero | easing_class::Constant),
         One = static_cast<std::uint32_t>(easing_class::One | easing_class::Constant),
+        ReversedLinear = static_cast<std::uint32_t>(easing_class::Linear | easing_class::Reversed),
+        ReversedInLinear = static_cast<std::uint32_t>(easing_class::Linear | easing_class::In | easing_class::Reversed),
+        ReversedOutLinear = static_cast<std::uint32_t>(easing_class::Linear | easing_class::Out | easing_class::Reversed),
+        ReversedInOutLinear = static_cast<std::uint32_t>(easing_class::Linear | easing_class::InOut | easing_class::Reversed),
+        ReversedOutInLinear = static_cast<std::uint32_t>(easing_class::Linear | easing_class::OutIn | easing_class::Reversed),
+        ReversedInQuad = static_cast<std::uint32_t>(easing_class::Quad | easing_class::In | easing_class::Reversed),
+        ReversedOutQuad = static_cast<std::uint32_t>(easing_class::Quad | easing_class::Out | easing_class::Reversed),
+        ReversedInOutQuad = static_cast<std::uint32_t>(easing_class::Quad | easing_class::InOut | easing_class::Reversed),
+        ReversedOutInQuad = static_cast<std::uint32_t>(easing_class::Quad | easing_class::OutIn | easing_class::Reversed),
+        ReversedInCubic = static_cast<std::uint32_t>(easing_class::Cubic | easing_class::In | easing_class::Reversed),
+        ReversedOutCubic = static_cast<std::uint32_t>(easing_class::Cubic | easing_class::Out | easing_class::Reversed),
+        ReversedInOutCubic = static_cast<std::uint32_t>(easing_class::Cubic | easing_class::InOut | easing_class::Reversed),
+        ReversedOutInCubic = static_cast<std::uint32_t>(easing_class::Cubic | easing_class::OutIn | easing_class::Reversed),
+        ReversedInQuart = static_cast<std::uint32_t>(easing_class::Quart | easing_class::In | easing_class::Reversed),
+        ReversedOutQuart = static_cast<std::uint32_t>(easing_class::Quart | easing_class::Out | easing_class::Reversed),
+        ReversedInOutQuart = static_cast<std::uint32_t>(easing_class::Quart | easing_class::InOut | easing_class::Reversed),
+        ReversedOutInQuart = static_cast<std::uint32_t>(easing_class::Quart | easing_class::OutIn | easing_class::Reversed),
+        ReversedInQuint = static_cast<std::uint32_t>(easing_class::Quint | easing_class::In | easing_class::Reversed),
+        ReversedOutQuint = static_cast<std::uint32_t>(easing_class::Quint | easing_class::Out | easing_class::Reversed),
+        ReversedInOutQuint = static_cast<std::uint32_t>(easing_class::Quint | easing_class::InOut | easing_class::Reversed),
+        ReversedOutInQuint = static_cast<std::uint32_t>(easing_class::Quint | easing_class::OutIn | easing_class::Reversed),
+        ReversedInSine = static_cast<std::uint32_t>(easing_class::Sine | easing_class::In | easing_class::Reversed),
+        ReversedOutSine = static_cast<std::uint32_t>(easing_class::Sine | easing_class::Out | easing_class::Reversed),
+        ReversedInOutSine = static_cast<std::uint32_t>(easing_class::Sine | easing_class::InOut | easing_class::Reversed),
+        ReversedOutInSine = static_cast<std::uint32_t>(easing_class::Sine | easing_class::OutIn | easing_class::Reversed),
+        ReversedInExpo = static_cast<std::uint32_t>(easing_class::Expo | easing_class::In | easing_class::Reversed),
+        ReversedOutExpo = static_cast<std::uint32_t>(easing_class::Expo | easing_class::Out | easing_class::Reversed),
+        ReversedInOutExpo = static_cast<std::uint32_t>(easing_class::Expo | easing_class::InOut | easing_class::Reversed),
+        ReversedOutInExpo = static_cast<std::uint32_t>(easing_class::Expo | easing_class::OutIn | easing_class::Reversed),
+        ReversedInCirc = static_cast<std::uint32_t>(easing_class::Circ | easing_class::In | easing_class::Reversed),
+        ReversedOutCirc = static_cast<std::uint32_t>(easing_class::Circ | easing_class::Out | easing_class::Reversed),
+        ReversedInOutCirc = static_cast<std::uint32_t>(easing_class::Circ | easing_class::InOut | easing_class::Reversed),
+        ReversedOutInCirc = static_cast<std::uint32_t>(easing_class::Circ | easing_class::OutIn | easing_class::Reversed),
+        ReversedInElastic = static_cast<std::uint32_t>(easing_class::Elastic | easing_class::In | easing_class::Reversed),
+        ReversedOutElastic = static_cast<std::uint32_t>(easing_class::Elastic | easing_class::Out | easing_class::Reversed),
+        ReversedInOutElastic = static_cast<std::uint32_t>(easing_class::Elastic | easing_class::InOut | easing_class::Reversed),
+        ReversedOutInElastic = static_cast<std::uint32_t>(easing_class::Elastic | easing_class::OutIn | easing_class::Reversed),
+        ReversedInBack = static_cast<std::uint32_t>(easing_class::Back | easing_class::In | easing_class::Reversed),
+        ReversedOutBack = static_cast<std::uint32_t>(easing_class::Back | easing_class::Out | easing_class::Reversed),
+        ReversedInOutBack = static_cast<std::uint32_t>(easing_class::Back | easing_class::InOut | easing_class::Reversed),
+        ReversedOutInBack = static_cast<std::uint32_t>(easing_class::Back | easing_class::OutIn | easing_class::Reversed),
+        ReversedInBounce = static_cast<std::uint32_t>(easing_class::Bounce | easing_class::In | easing_class::Reversed),
+        ReversedOutBounce = static_cast<std::uint32_t>(easing_class::Bounce | easing_class::Out | easing_class::Reversed),
+        ReversedInOutBounce = static_cast<std::uint32_t>(easing_class::Bounce | easing_class::InOut | easing_class::Reversed),
+        ReversedOutInBounce = static_cast<std::uint32_t>(easing_class::Bounce | easing_class::OutIn | easing_class::Reversed),
+        ReversedInStep = static_cast<std::uint32_t>(easing_class::Step | easing_class::In | easing_class::Reversed),
+        ReversedOutStep = static_cast<std::uint32_t>(easing_class::Step | easing_class::Out | easing_class::Reversed),
+        ReversedInOutStep = static_cast<std::uint32_t>(easing_class::Step | easing_class::InOut | easing_class::Reversed),
+        ReversedOutInStep = static_cast<std::uint32_t>(easing_class::Step | easing_class::OutIn | easing_class::Reversed),
+        ReversedZero = static_cast<std::uint32_t>(easing_class::Zero | easing_class::Constant | easing_class::Reversed),
+        ReversedOne = static_cast<std::uint32_t>(easing_class::One | easing_class::Constant | easing_class::Reversed),
         InvertedLinear = static_cast<std::uint32_t>(easing_class::Linear | easing_class::Inverted),
         InvertedInLinear = static_cast<std::uint32_t>(easing_class::Linear | easing_class::In | easing_class::Inverted),
         InvertedOutLinear = static_cast<std::uint32_t>(easing_class::Linear | easing_class::Out | easing_class::Inverted),
@@ -499,7 +550,58 @@ namespace neogfx
         InvertedInOutStep = static_cast<std::uint32_t>(easing_class::Step | easing_class::InOut | easing_class::Inverted),
         InvertedOutInStep = static_cast<std::uint32_t>(easing_class::Step | easing_class::OutIn | easing_class::Inverted),
         InvertedZero = static_cast<std::uint32_t>(easing_class::Zero | easing_class::Constant | easing_class::Inverted),
-        InvertedOne = static_cast<std::uint32_t>(easing_class::One | easing_class::Constant | easing_class::Inverted)
+        InvertedOne = static_cast<std::uint32_t>(easing_class::One | easing_class::Constant | easing_class::Inverted),
+        ReversedInvertedLinear = static_cast<std::uint32_t>(easing_class::Linear | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInLinear = static_cast<std::uint32_t>(easing_class::Linear | easing_class::In | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutLinear = static_cast<std::uint32_t>(easing_class::Linear | easing_class::Out | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInOutLinear = static_cast<std::uint32_t>(easing_class::Linear | easing_class::InOut | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutInLinear = static_cast<std::uint32_t>(easing_class::Linear | easing_class::OutIn | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInQuad = static_cast<std::uint32_t>(easing_class::Quad | easing_class::In | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutQuad = static_cast<std::uint32_t>(easing_class::Quad | easing_class::Out | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInOutQuad = static_cast<std::uint32_t>(easing_class::Quad | easing_class::InOut | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutInQuad = static_cast<std::uint32_t>(easing_class::Quad | easing_class::OutIn | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInCubic = static_cast<std::uint32_t>(easing_class::Cubic | easing_class::In | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutCubic = static_cast<std::uint32_t>(easing_class::Cubic | easing_class::Out | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInOutCubic = static_cast<std::uint32_t>(easing_class::Cubic | easing_class::InOut | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutInCubic = static_cast<std::uint32_t>(easing_class::Cubic | easing_class::OutIn | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInQuart = static_cast<std::uint32_t>(easing_class::Quart | easing_class::In | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutQuart = static_cast<std::uint32_t>(easing_class::Quart | easing_class::Out | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInOutQuart = static_cast<std::uint32_t>(easing_class::Quart | easing_class::InOut | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutInQuart = static_cast<std::uint32_t>(easing_class::Quart | easing_class::OutIn | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInQuint = static_cast<std::uint32_t>(easing_class::Quint | easing_class::In | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutQuint = static_cast<std::uint32_t>(easing_class::Quint | easing_class::Out | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInOutQuint = static_cast<std::uint32_t>(easing_class::Quint | easing_class::InOut | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutInQuint = static_cast<std::uint32_t>(easing_class::Quint | easing_class::OutIn | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInSine = static_cast<std::uint32_t>(easing_class::Sine | easing_class::In | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutSine = static_cast<std::uint32_t>(easing_class::Sine | easing_class::Out | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInOutSine = static_cast<std::uint32_t>(easing_class::Sine | easing_class::InOut | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutInSine = static_cast<std::uint32_t>(easing_class::Sine | easing_class::OutIn | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInExpo = static_cast<std::uint32_t>(easing_class::Expo | easing_class::In | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutExpo = static_cast<std::uint32_t>(easing_class::Expo | easing_class::Out | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInOutExpo = static_cast<std::uint32_t>(easing_class::Expo | easing_class::InOut | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutInExpo = static_cast<std::uint32_t>(easing_class::Expo | easing_class::OutIn | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInCirc = static_cast<std::uint32_t>(easing_class::Circ | easing_class::In | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutCirc = static_cast<std::uint32_t>(easing_class::Circ | easing_class::Out | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInOutCirc = static_cast<std::uint32_t>(easing_class::Circ | easing_class::InOut | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutInCirc = static_cast<std::uint32_t>(easing_class::Circ | easing_class::OutIn | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInElastic = static_cast<std::uint32_t>(easing_class::Elastic | easing_class::In | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutElastic = static_cast<std::uint32_t>(easing_class::Elastic | easing_class::Out | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInOutElastic = static_cast<std::uint32_t>(easing_class::Elastic | easing_class::InOut | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutInElastic = static_cast<std::uint32_t>(easing_class::Elastic | easing_class::OutIn | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInBack = static_cast<std::uint32_t>(easing_class::Back | easing_class::In | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutBack = static_cast<std::uint32_t>(easing_class::Back | easing_class::Out | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInOutBack = static_cast<std::uint32_t>(easing_class::Back | easing_class::InOut | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutInBack = static_cast<std::uint32_t>(easing_class::Back | easing_class::OutIn | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInBounce = static_cast<std::uint32_t>(easing_class::Bounce | easing_class::In | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutBounce = static_cast<std::uint32_t>(easing_class::Bounce | easing_class::Out | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInOutBounce = static_cast<std::uint32_t>(easing_class::Bounce | easing_class::InOut | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutInBounce = static_cast<std::uint32_t>(easing_class::Bounce | easing_class::OutIn | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInStep = static_cast<std::uint32_t>(easing_class::Step | easing_class::In | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutStep = static_cast<std::uint32_t>(easing_class::Step | easing_class::Out | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedInOutStep = static_cast<std::uint32_t>(easing_class::Step | easing_class::InOut | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOutInStep = static_cast<std::uint32_t>(easing_class::Step | easing_class::OutIn | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedZero = static_cast<std::uint32_t>(easing_class::Zero | easing_class::Constant | easing_class::Reversed | easing_class::Inverted),
+        ReversedInvertedOne = static_cast<std::uint32_t>(easing_class::One | easing_class::Constant | easing_class::Reversed | easing_class::Inverted)
     };
 }
 
@@ -555,6 +657,57 @@ declare_enum_string(neogfx::easing, InOutStep)
 declare_enum_string(neogfx::easing, OutInStep)
 declare_enum_string(neogfx::easing, Zero)
 declare_enum_string(neogfx::easing, One)
+declare_enum_string(neogfx::easing, ReversedLinear)
+declare_enum_string(neogfx::easing, ReversedInLinear)
+declare_enum_string(neogfx::easing, ReversedOutLinear)
+declare_enum_string(neogfx::easing, ReversedInOutLinear)
+declare_enum_string(neogfx::easing, ReversedOutInLinear)
+declare_enum_string(neogfx::easing, ReversedInQuad)
+declare_enum_string(neogfx::easing, ReversedOutQuad)
+declare_enum_string(neogfx::easing, ReversedInOutQuad)
+declare_enum_string(neogfx::easing, ReversedOutInQuad)
+declare_enum_string(neogfx::easing, ReversedInCubic)
+declare_enum_string(neogfx::easing, ReversedOutCubic)
+declare_enum_string(neogfx::easing, ReversedInOutCubic)
+declare_enum_string(neogfx::easing, ReversedOutInCubic)
+declare_enum_string(neogfx::easing, ReversedInQuart)
+declare_enum_string(neogfx::easing, ReversedOutQuart)
+declare_enum_string(neogfx::easing, ReversedInOutQuart)
+declare_enum_string(neogfx::easing, ReversedOutInQuart)
+declare_enum_string(neogfx::easing, ReversedInQuint)
+declare_enum_string(neogfx::easing, ReversedOutQuint)
+declare_enum_string(neogfx::easing, ReversedInOutQuint)
+declare_enum_string(neogfx::easing, ReversedOutInQuint)
+declare_enum_string(neogfx::easing, ReversedInSine)
+declare_enum_string(neogfx::easing, ReversedOutSine)
+declare_enum_string(neogfx::easing, ReversedInOutSine)
+declare_enum_string(neogfx::easing, ReversedOutInSine)
+declare_enum_string(neogfx::easing, ReversedInExpo)
+declare_enum_string(neogfx::easing, ReversedOutExpo)
+declare_enum_string(neogfx::easing, ReversedInOutExpo)
+declare_enum_string(neogfx::easing, ReversedOutInExpo)
+declare_enum_string(neogfx::easing, ReversedInCirc)
+declare_enum_string(neogfx::easing, ReversedOutCirc)
+declare_enum_string(neogfx::easing, ReversedInOutCirc)
+declare_enum_string(neogfx::easing, ReversedOutInCirc)
+declare_enum_string(neogfx::easing, ReversedInElastic)
+declare_enum_string(neogfx::easing, ReversedOutElastic)
+declare_enum_string(neogfx::easing, ReversedInOutElastic)
+declare_enum_string(neogfx::easing, ReversedOutInElastic)
+declare_enum_string(neogfx::easing, ReversedInBack)
+declare_enum_string(neogfx::easing, ReversedOutBack)
+declare_enum_string(neogfx::easing, ReversedInOutBack)
+declare_enum_string(neogfx::easing, ReversedOutInBack)
+declare_enum_string(neogfx::easing, ReversedInBounce)
+declare_enum_string(neogfx::easing, ReversedOutBounce)
+declare_enum_string(neogfx::easing, ReversedInOutBounce)
+declare_enum_string(neogfx::easing, ReversedOutInBounce)
+declare_enum_string(neogfx::easing, ReversedInStep)
+declare_enum_string(neogfx::easing, ReversedOutStep)
+declare_enum_string(neogfx::easing, ReversedInOutStep)
+declare_enum_string(neogfx::easing, ReversedOutInStep)
+declare_enum_string(neogfx::easing, ReversedZero)
+declare_enum_string(neogfx::easing, ReversedOne)
 declare_enum_string(neogfx::easing, InvertedLinear)
 declare_enum_string(neogfx::easing, InvertedInLinear)
 declare_enum_string(neogfx::easing, InvertedOutLinear)
@@ -606,6 +759,57 @@ declare_enum_string(neogfx::easing, InvertedInOutStep)
 declare_enum_string(neogfx::easing, InvertedOutInStep)
 declare_enum_string(neogfx::easing, InvertedZero)
 declare_enum_string(neogfx::easing, InvertedOne)
+declare_enum_string(neogfx::easing, ReversedInvertedLinear)
+declare_enum_string(neogfx::easing, ReversedInvertedInLinear)
+declare_enum_string(neogfx::easing, ReversedInvertedOutLinear)
+declare_enum_string(neogfx::easing, ReversedInvertedInOutLinear)
+declare_enum_string(neogfx::easing, ReversedInvertedOutInLinear)
+declare_enum_string(neogfx::easing, ReversedInvertedInQuad)
+declare_enum_string(neogfx::easing, ReversedInvertedOutQuad)
+declare_enum_string(neogfx::easing, ReversedInvertedInOutQuad)
+declare_enum_string(neogfx::easing, ReversedInvertedOutInQuad)
+declare_enum_string(neogfx::easing, ReversedInvertedInCubic)
+declare_enum_string(neogfx::easing, ReversedInvertedOutCubic)
+declare_enum_string(neogfx::easing, ReversedInvertedInOutCubic)
+declare_enum_string(neogfx::easing, ReversedInvertedOutInCubic)
+declare_enum_string(neogfx::easing, ReversedInvertedInQuart)
+declare_enum_string(neogfx::easing, ReversedInvertedOutQuart)
+declare_enum_string(neogfx::easing, ReversedInvertedInOutQuart)
+declare_enum_string(neogfx::easing, ReversedInvertedOutInQuart)
+declare_enum_string(neogfx::easing, ReversedInvertedInQuint)
+declare_enum_string(neogfx::easing, ReversedInvertedOutQuint)
+declare_enum_string(neogfx::easing, ReversedInvertedInOutQuint)
+declare_enum_string(neogfx::easing, ReversedInvertedOutInQuint)
+declare_enum_string(neogfx::easing, ReversedInvertedInSine)
+declare_enum_string(neogfx::easing, ReversedInvertedOutSine)
+declare_enum_string(neogfx::easing, ReversedInvertedInOutSine)
+declare_enum_string(neogfx::easing, ReversedInvertedOutInSine)
+declare_enum_string(neogfx::easing, ReversedInvertedInExpo)
+declare_enum_string(neogfx::easing, ReversedInvertedOutExpo)
+declare_enum_string(neogfx::easing, ReversedInvertedInOutExpo)
+declare_enum_string(neogfx::easing, ReversedInvertedOutInExpo)
+declare_enum_string(neogfx::easing, ReversedInvertedInCirc)
+declare_enum_string(neogfx::easing, ReversedInvertedOutCirc)
+declare_enum_string(neogfx::easing, ReversedInvertedInOutCirc)
+declare_enum_string(neogfx::easing, ReversedInvertedOutInCirc)
+declare_enum_string(neogfx::easing, ReversedInvertedInElastic)
+declare_enum_string(neogfx::easing, ReversedInvertedOutElastic)
+declare_enum_string(neogfx::easing, ReversedInvertedInOutElastic)
+declare_enum_string(neogfx::easing, ReversedInvertedOutInElastic)
+declare_enum_string(neogfx::easing, ReversedInvertedInBack)
+declare_enum_string(neogfx::easing, ReversedInvertedOutBack)
+declare_enum_string(neogfx::easing, ReversedInvertedInOutBack)
+declare_enum_string(neogfx::easing, ReversedInvertedOutInBack)
+declare_enum_string(neogfx::easing, ReversedInvertedInBounce)
+declare_enum_string(neogfx::easing, ReversedInvertedOutBounce)
+declare_enum_string(neogfx::easing, ReversedInvertedInOutBounce)
+declare_enum_string(neogfx::easing, ReversedInvertedOutInBounce)
+declare_enum_string(neogfx::easing, ReversedInvertedInStep)
+declare_enum_string(neogfx::easing, ReversedInvertedOutStep)
+declare_enum_string(neogfx::easing, ReversedInvertedInOutStep)
+declare_enum_string(neogfx::easing, ReversedInvertedOutInStep)
+declare_enum_string(neogfx::easing, ReversedInvertedZero)
+declare_enum_string(neogfx::easing, ReversedInvertedOne)
 end_declare_enum(neogfx::easing)
 
 
@@ -695,117 +899,121 @@ namespace neogfx
     }
 
     template <typename T>
+    inline T standard_ease(easing e, T t)
+    {
+        switch (e)
+        {
+        case easing::Linear:
+        case easing::InLinear:
+        case easing::OutLinear:
+        case easing::InOutLinear:
+        case easing::OutInLinear:
+            return ease_linear(t);
+        case easing::InQuad:
+            return ease_in_quad(t);
+        case easing::OutQuad:
+            return ease_out_quad(t);
+        case easing::InOutQuad:
+            return ease_in_out_quad(t);
+        case easing::OutInQuad:
+            return ease_out_in_quad(t);
+        case easing::InCubic:
+            return ease_in_cubic(t);
+        case easing::OutCubic:
+            return ease_out_cubic(t);
+        case easing::InOutCubic:
+            return ease_in_out_cubic(t);
+        case easing::OutInCubic:
+            return ease_out_in_cubic(t);
+        case easing::InQuart:
+            return ease_in_quart(t);
+        case easing::OutQuart:
+            return ease_out_quart(t);
+        case easing::InOutQuart:
+            return ease_in_out_quart(t);
+        case easing::OutInQuart:
+            return ease_out_in_quart(t);
+        case easing::InQuint:
+            return ease_in_quint(t);
+        case easing::OutQuint:
+            return ease_out_quint(t);
+        case easing::InOutQuint:
+            return ease_in_out_quint(t);
+        case easing::OutInQuint:
+            return ease_out_in_quint(t);
+        case easing::InSine:
+            return ease_in_sine(t);
+        case easing::OutSine:
+            return ease_out_sine(t);
+        case easing::InOutSine:
+            return ease_in_out_sine(t);
+        case easing::OutInSine:
+            return ease_out_in_sine(t);
+        case easing::InExpo:
+            return ease_in_expo(t);
+        case easing::OutExpo:
+            return ease_out_expo(t);
+        case easing::InOutExpo:
+            return ease_in_out_expo(t);
+        case easing::OutInExpo:
+            return ease_out_in_expo(t);
+        case easing::InCirc:
+            return ease_in_circ(t);
+        case easing::OutCirc:
+            return ease_out_circ(t);
+        case easing::InOutCirc:
+            return ease_in_out_circ(t);
+        case easing::OutInCirc:
+            return ease_out_in_circ(t);
+        case easing::InElastic:
+            return ease_in_elastic(t);
+        case easing::OutElastic:
+            return ease_out_elastic(t);
+        case easing::InOutElastic:
+            return ease_in_out_elastic(t);
+        case easing::OutInElastic:
+            return ease_out_in_elastic(t);
+        case easing::InBack:
+            return ease_in_back(t);
+        case easing::OutBack:
+            return ease_out_back(t);
+        case easing::InOutBack:
+            return ease_in_out_back(t);
+        case easing::OutInBack:
+            return ease_out_in_back(t);
+        case easing::InBounce:
+            return ease_in_bounce(t);
+        case easing::OutBounce:
+            return ease_out_bounce(t);
+        case easing::InOutBounce:
+            return ease_in_out_bounce(t);
+        case easing::OutInBounce:
+            return ease_out_in_bounce(t);
+        case easing::InStep:
+            return ease_in_step(t);
+        case easing::OutStep:
+            return ease_out_step(t);
+        case easing::InOutStep:
+            return ease_in_out_step(t);
+        case easing::OutInStep:
+            return ease_out_in_step(t);
+        case easing::Zero:
+            return ease_zero(t);
+        case easing::One:
+            return ease_one(t);
+        default:
+            throw std::logic_error("neogfx::standard_ease: unknown easing type");
+        }
+    }
+
+    template <typename T>
     inline T ease(easing e, T t)
     {
-        auto standard_result = [e, t]()
-            {
-                switch (e & ~(easing_class::Inverted))
-                {
-                case easing::Linear:
-                case easing::InLinear:
-                case easing::OutLinear:
-                case easing::InOutLinear:
-                case easing::OutInLinear:
-                    return ease_linear(t);
-                case easing::InQuad:
-                    return ease_in_quad(t);
-                case easing::OutQuad:
-                    return ease_out_quad(t);
-                case easing::InOutQuad:
-                    return ease_in_out_quad(t);
-                case easing::OutInQuad:
-                    return ease_out_in_quad(t);
-                case easing::InCubic:
-                    return ease_in_cubic(t);
-                case easing::OutCubic:
-                    return ease_out_cubic(t);
-                case easing::InOutCubic:
-                    return ease_in_out_cubic(t);
-                case easing::OutInCubic:
-                    return ease_out_in_cubic(t);
-                case easing::InQuart:
-                    return ease_in_quart(t);
-                case easing::OutQuart:
-                    return ease_out_quart(t);
-                case easing::InOutQuart:
-                    return ease_in_out_quart(t);
-                case easing::OutInQuart:
-                    return ease_out_in_quart(t);
-                case easing::InQuint:
-                    return ease_in_quint(t);
-                case easing::OutQuint:
-                    return ease_out_quint(t);
-                case easing::InOutQuint:
-                    return ease_in_out_quint(t);
-                case easing::OutInQuint:
-                    return ease_out_in_quint(t);
-                case easing::InSine:
-                    return ease_in_sine(t);
-                case easing::OutSine:
-                    return ease_out_sine(t);
-                case easing::InOutSine:
-                    return ease_in_out_sine(t);
-                case easing::OutInSine:
-                    return ease_out_in_sine(t);
-                case easing::InExpo:
-                    return ease_in_expo(t);
-                case easing::OutExpo:
-                    return ease_out_expo(t);
-                case easing::InOutExpo:
-                    return ease_in_out_expo(t);
-                case easing::OutInExpo:
-                    return ease_out_in_expo(t);
-                case easing::InCirc:
-                    return ease_in_circ(t);
-                case easing::OutCirc:
-                    return ease_out_circ(t);
-                case easing::InOutCirc:
-                    return ease_in_out_circ(t);
-                case easing::OutInCirc:
-                    return ease_out_in_circ(t);
-                case easing::InElastic:
-                    return ease_in_elastic(t);
-                case easing::OutElastic:
-                    return ease_out_elastic(t);
-                case easing::InOutElastic:
-                    return ease_in_out_elastic(t);
-                case easing::OutInElastic:
-                    return ease_out_in_elastic(t);
-                case easing::InBack:
-                    return ease_in_back(t);
-                case easing::OutBack:
-                    return ease_out_back(t);
-                case easing::InOutBack:
-                    return ease_in_out_back(t);
-                case easing::OutInBack:
-                    return ease_out_in_back(t);
-                case easing::InBounce:
-                    return ease_in_bounce(t);
-                case easing::OutBounce:
-                    return ease_out_bounce(t);
-                case easing::InOutBounce:
-                    return ease_in_out_bounce(t);
-                case easing::OutInBounce:
-                    return ease_out_in_bounce(t);
-                case easing::InStep:
-                    return ease_in_step(t);
-                case easing::OutStep:
-                    return ease_out_step(t);
-                case easing::InOutStep:
-                    return ease_in_out_step(t);
-                case easing::OutInStep:
-                    return ease_out_in_step(t);
-                case easing::Zero:
-                    return ease_zero(t);
-                case easing::One:
-                    return ease_one(t);
-                default:
-                    throw std::logic_error("neogfx::easing: unknown easing type");
-                }
-            };
-        auto result = standard_result();
+        if (static_cast<easing_class>(e & easing_class::Reversed) == easing_class::Reversed)
+            t = T{1} - t;
+        auto result = standard_ease(e & ~(easing_class::Reversed | easing_class::Inverted), t);
         if (static_cast<easing_class>(e & easing_class::Inverted) == easing_class::Inverted)
-            result = 1.0 - result;
+            result = T{1} - result;
         return result;
     }
 
@@ -914,13 +1122,13 @@ namespace neogfx
     template <typename T>
     inline std::enable_if_t<!std::is_same_v<T, easing>, T> partitioned_ease(easing e1, T t, T w1 = T{2})
     {
-        return partitioned_ease({ {e1,w1},{e1^easing_class::Inverted,w1} }, t);
+        return partitioned_ease({ {e1,w1},{e1^easing_class::Reversed,w1} }, t);
     }
 
     template <typename T>
     inline std::enable_if_t<!std::is_same_v<T, easing>, T> partitioned_ease(easing e1, T t, T w1, T w2)
     {
-        return partitioned_ease({ {e1,w1},{e1^easing_class::Inverted,w2} }, t);
+        return partitioned_ease({ {e1,w1},{e1^easing_class::Reversed,w2} }, t);
     }
 
     template <typename T>
