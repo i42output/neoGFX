@@ -851,6 +851,8 @@ namespace neogfx
         auto const wTotal = std::accumulate(segments.begin(), segments.end(), T{0},
             [](T sum, auto const& s) { return sum + s.second; });
 
+        auto const scale = wTotal / static_cast<T>(segments.size());
+
         if (wTotal <= T{0})
             return T{0};
 
@@ -869,14 +871,14 @@ namespace neogfx
             if (t * wTotal < cumulative + w || &e == &segments.back().first)
             {
                 auto const local = std::clamp((t * wTotal - cumulative) / w, T{0}, T{1});
-                return outputPos + (ease(e, local) - localStart) * (w / wTotal);
+                return scale * (outputPos + (ease(e, local) - localStart) * (w / wTotal));
             }
 
             outputPos += (ease(e, T{1}) - localStart) * (w / wTotal);
             cumulative += w;
         }
 
-        return ease(segments.back().first, T{1});
+        return scale * (ease(segments.back().first, T{1}));
     }
 
     /**
@@ -910,10 +912,17 @@ namespace neogfx
     }
 
     template <typename T>
-    inline std::enable_if_t<!std::is_same_v<T, easing>, T> partitioned_ease(easing e1, T t, T w1 = T{1}, T w2 = T{1})
+    inline std::enable_if_t<!std::is_same_v<T, easing>, T> partitioned_ease(easing e1, T t, T w1 = T{1})
     {
-        return partitioned_ease({ {e1,w1},{e1^easing_class::Inverted,w2} }, t);
+        return partitioned_ease({ {e1,w1},{e1 ^ easing_class::Inverted,w1} }, t);
     }
+
+    template <typename T>
+    inline std::enable_if_t<!std::is_same_v<T, easing>, T> partitioned_ease(easing e1, T t, T w1, T w2)
+    {
+        return partitioned_ease({ {e1,w1},{e1 ^ easing_class::Inverted,w2} }, t);
+    }
+
 
     template <typename T>
     inline T partitioned_ease(easing e1, easing e2, T t, T w1 = T{1}, T w2 = T{1})
