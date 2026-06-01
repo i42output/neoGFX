@@ -233,6 +233,8 @@ namespace neogfx
 
         vertices().flush(iStart, aCount);
 
+        sync();
+
         if (!iUseBarrier)
         {
             glCheck(glDrawArrays(GL_TRIANGLES, iStart, static_cast<GLsizei>(aCount)));
@@ -240,8 +242,6 @@ namespace neogfx
         }
         else
         {
-            sync();
-
             glCheck(glTextureBarrier());
             auto const pvc = primitive_vertex_count();
             auto chunk = pvc * skipCount;
