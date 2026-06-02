@@ -24,6 +24,7 @@
 #include <strsafe.h>
 #include <GL/glew.h>
 #include <GL/wglew.h>
+#include <timeapi.h>
 
 #include <neolib/core/scoped.hpp>
 
@@ -224,6 +225,8 @@ namespace neogfx
             iCreatingWindow{ 0 },
             iActiveTarget{ nullptr }
         {
+            timeBeginPeriod(1);  // ← before anything timing-sensitive
+
             if (aRenderer != neogfx::renderer::None)
             {
                 switch (aRenderer)
@@ -285,6 +288,8 @@ namespace neogfx
                 iOffscreenWindowPool.clear();
                 ::UnregisterClass(sWindowClassName.c_str(), GetModuleHandle(NULL));
             }
+
+            timeEndPeriod(1);    // ← on exit, before process end
         }
 
         bool renderer::vsync_enabled() const
@@ -626,11 +631,15 @@ namespace neogfx
 
             iActiveTarget = &aTarget;
 
-            BOOL result = FALSE;
-            if (iActiveTarget->target_type() == render_target_type::Surface)
-                result = ::wglMakeCurrent(static_cast<HDC>(iActiveTarget->target_device_handle()), static_cast<HGLRC>(iContext));
-            else
-                result = ::wglMakeCurrent(static_cast<HDC>(allocate_offscreen_window(iActiveTarget)->device_handle()), static_cast<HGLRC>(iContext));
+            BOOL result = TRUE;
+
+            auto const hdcTarget = (iActiveTarget->target_type() == render_target_type::Surface ?
+                static_cast<HDC>(iActiveTarget->target_device_handle()) :
+                static_cast<HDC>(allocate_offscreen_window(iActiveTarget)->device_handle()));
+            auto const hdcCurrent = wglGetCurrentDC();
+            auto const hglrcCurrent = wglGetCurrentContext();
+            if (hdcCurrent != hdcTarget || hglrcCurrent != static_cast<HGLRC>(iContext))
+                result = ::wglMakeCurrent(hdcTarget, static_cast<HGLRC>(iContext));
 
             if (!result)
                 throw failed_to_activate_opengl_context(GetLastErrorText());

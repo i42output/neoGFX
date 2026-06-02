@@ -19,8 +19,18 @@ class window : ng::window
 {
 public:
     window() :
-        ng::window{ ng::size{ 200.0, 200.0 }, ng::window_style::SplashScreen }
+        ng::window{ ng::size{ 200.0, 200.0 }, ng::window_style::SplashScreen },
+        iChild{ *this }
     {
+        iChild.set_logical_coordinate_system(ng::logical_coordinate_system::AutomaticGame);
+        iChild.move(ng::point{ 10.0, 40.0 });
+        iChild.resize(ng::size{ 180.0, 150.0 });
+
+        iChild.Painting([](ng::i_graphics_context& aGc)
+            {
+                aGc.fill_rect(ng::rect{ ng::point{}, ng::size{ 10.0 } }, ng::color::Red);
+            });
+
         tex1.emplace(ng::size{ 20.0 }, 1.0, ng::texture_sampling::Normal);
         ng::graphics_context gc{ tex1.value() };
         {
@@ -33,8 +43,9 @@ public:
         tex2 = ng::colored_icon(*tex1, ng::color::LightGreen);
     }
 public:
-    void render_ex(ng::i_graphics_context& aGc) const
+    void render_ex(ng::i_graphics_context& aGc) const override
     {
+#if 0
         std::cout << "radius: " << iRadius << std::endl;
 
         aGc.fill_rect(client_rect(), ng::color::Grey20);
@@ -55,6 +66,15 @@ public:
         aGc.fill_rect(ng::rect{ ng::point{ 10.0, 10.0 }, ng::size{ 1.0 } }, ng::color::White);
         aGc.draw_text(ng::point{ 20.0, 20.0 }, "A", font().with_size(16.0), ng::color::White);
         aGc.draw_texture(ng::point{ 40.0, 40.0 }, *tex1);
+#else
+        ng::window::render_ex(aGc);
+#endif
+    }
+    void paint(ng::i_graphics_context& aGc) const override
+    {
+        auto const clientRect = client_rect(false);
+        aGc.draw_line(clientRect.top_left(), clientRect.bottom_right(), ng::color::White);
+        aGc.draw_line(clientRect.bottom_left(), clientRect.top_right(), ng::color::White);
     }
     void mouse_button_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifier aKeyModifier) final
     {
@@ -63,6 +83,7 @@ public:
         update();
     }
 private:
+    ng::widget<> iChild;
     mutable std::optional<ng::texture> tex1;
     mutable std::optional<ng::texture> tex2;
     double iRadius = 0.0;

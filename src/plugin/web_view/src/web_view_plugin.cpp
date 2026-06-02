@@ -99,7 +99,8 @@ namespace neogfx
     void web_view_plugin::init()
     {
         CefSettings settings;
-        CefString rootCachePath{ service<i_app>().info().settings_folder().to_std_string() };
+        auto const settingsFolder = service<i_app>().info().settings_folder().to_std_string();
+        CefString rootCachePath{ settingsFolder };
         settings.root_cache_path = *rootCachePath.GetWritableStruct();
         rootCachePath.Detach();
         settings.windowless_rendering_enabled = true;

@@ -370,3 +370,5 @@ Debug
 /3rdparty/freetype/freetype-demos
 /3rdparty/freetype/freetype-2.14.1-build
 /build/win32/vs/.vs/neogfx/CopilotIndices/18.0.981.45449/*.db
+/build/plugin/web_view/win32/vs/x64/Foo
+/build/plugin/web_view/win32/vs/x64/ReleaseInDebug

@@ -1411,18 +1411,18 @@ namespace neogfx
 
         PaintingChildren(aGc);
 
-        typedef std::map<std::int32_t, std::vector<i_widget const*>> widget_layers_t;
-        shared_thread_local(std::vector<std::unique_ptr<widget_layers_t>>, neogfx::widget::render, widgetLayersStack);
+        using widget_layers_t = neolib::map<std::int32_t, neolib::vector<i_widget const*>>;
+        shared_thread_local(neolib::vector<neolib::ref_ptr<widget_layers_t>>, neogfx::widget::render, widgetLayersStack);
 
         shared_thread_local(std::size_t, neogfx::widget::render, stack);
         neolib::scoped_counter<std::size_t> stackCounter{ stack };
         if (widgetLayersStack.size() < stack)
-            widgetLayersStack.push_back(std::make_unique<widget_layers_t>());
+            widgetLayersStack.push_back(neolib::make_ref<widget_layers_t>());
 
-        widget_layers_t& widgetLayers = *widgetLayersStack[stack - 1];
+        auto& widgetLayers = *widgetLayersStack[stack - 1];
 
         for (auto& layer : widgetLayers)
-            layer.second.clear();
+            layer.second().clear();
 
         for (auto iterChild = iChildren.rbegin(); iterChild != iChildren.rend(); ++iterChild)
         {
@@ -1437,7 +1437,7 @@ namespace neogfx
 
         for (auto const& layer : widgetLayers)
         {
-            for (auto const& childWidgetPtr : layer.second)
+            for (auto const& childWidgetPtr : layer.second())
             {
                 auto const& childWidget = *childWidgetPtr;
                 childWidget.render_ex(aGc);

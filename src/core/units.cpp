@@ -34,10 +34,10 @@ namespace neogfx
             return tCurrentContext;
         }
 
-        std::vector<scoped_units_context*>& scopes_for_this_thread()
+        neolib::i_vector<scoped_units_context*>& scopes_for_this_thread()
         {
-            shared_thread_local(std::vector<scoped_units_context*>, neogfx::scopes_for_this_thread, iScopes);
-            return iScopes;
+            shared_thread_local(neolib::vector<scoped_units_context*>, neogfx::scopes_for_this_thread, tScopes);
+            return tScopes;
         }
     }
 

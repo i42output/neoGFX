@@ -199,6 +199,11 @@ namespace neogfx
         iVertexBuffer.sync();
     }
     
+    void opengl_triangle_renderer::create_sync()
+    {
+        iVertexBuffer.create_sync();
+    }
+
     void opengl_triangle_renderer::execute()
     {
         iVertexBuffer.execute();
@@ -231,9 +236,9 @@ namespace neogfx
 
         iParent.rendering_engine().vertex_buffer(iProvider).attach_shader(iParent, iParent.rendering_engine().active_shader_program());
 
-        vertices().flush(iStart, aCount);
-
         sync();
+
+        vertices().flush(iStart, aCount);
 
         if (!iUseBarrier)
         {
@@ -254,6 +259,8 @@ namespace neogfx
                 glCheck(glTextureBarrier());
             }
         }
+
+        create_sync();
     }
 
     bool opengl_triangle_renderer::is_new_transformation(const optional_mat44& aTransformation) const
