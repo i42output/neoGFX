@@ -97,6 +97,12 @@ namespace neogfx
         void set_origin(point const& aOrigin) final;
         void set_viewport(optional_rect const& aViewport = {}) final;
         void set_view_transforamtion(optional_mat33 const& aViewTransforamtion = {}) final;
+        // widget
+    public:
+        bool has_render_widget() const final;
+        i_widget const& render_widget() const final;
+        void set_render_widget(i_widget const& aWidget) final;
+        void unset_render_widget() final;
         // clipping
     public:
         void scissor_on() final;
@@ -291,7 +297,8 @@ namespace neogfx
         // attributes
     private:
         type iType;
-        const i_render_target& iRenderTarget;
+        i_render_target const& iRenderTarget;
+        i_widget const* iRenderWidget = nullptr;
         mutable std::unique_ptr<i_rendering_context> iRenderingContext;
         font iDefaultFont;
         std::optional<point> iOrigin;

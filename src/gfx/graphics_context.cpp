@@ -146,9 +146,9 @@ namespace neogfx
     graphics_context::graphics_context(i_widget const& aWidget, type aType) :
         iType{ aType },
         iRenderTarget{ aWidget.surface().native_surface() },
+        iRenderWidget{ &aWidget },
         iRenderingContext{ nullptr },
         iDefaultFont{ aWidget.font() },
-        iOrigin{ aWidget.origin() },
         iExtents{ aWidget.extents() },
         iLayer{ LayerWidget },
         iSnapToPixel{ false },
@@ -160,6 +160,7 @@ namespace neogfx
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() }
     {
         set_logical_coordinate_system(aWidget.logical_coordinate_system());
+        set_origin(aWidget.origin());
     }
 
     graphics_context::graphics_context(i_texture const& aTexture, type aType) :
@@ -423,28 +424,6 @@ namespace neogfx
     void graphics_context::set_default_font(font const& aDefaultFont)
     {
         iDefaultFont = aDefaultFont;
-    }
-
-    void graphics_context::set_extents(size const& aExtents)
-    {
-        iExtents = aExtents;
-    }
-
-    point graphics_context::origin() const
-    {
-        return from_device_units(iOrigin.value_or(point{}));
-    }
-
-    void graphics_context::set_origin(point const& aOrigin)
-    {
-        auto newOrigin = to_device_units(aOrigin);
-        if (redirecting())
-            newOrigin -= to_device_units(redirect_origin());
-        if (iOrigin != newOrigin)
-        {
-            iOrigin = newOrigin;
-            rendering_context().enqueue(graphics_operation::set_origin{ iOrigin.value() });
-        }
     }
 
     void graphics_context::clear_gradient()
@@ -877,11 +856,6 @@ namespace neogfx
         return true;
     }
 
-    size graphics_context::extents() const
-    {
-        return iExtents;
-    }
-
     dimension graphics_context::horizontal_dpi() const
     {
         return iRenderTarget.horizontal_dpi();
@@ -933,6 +907,34 @@ namespace neogfx
         throw unattached();
     }
 
+    point graphics_context::origin() const
+    {
+        return from_device_units(iOrigin.value_or(point{}));
+    }
+
+    void graphics_context::set_origin(point const& aOrigin)
+    {
+        auto newOrigin = to_device_units(aOrigin);
+        if (redirecting())
+            newOrigin -= to_device_units(redirect_origin());
+        if (iOrigin != newOrigin)
+        {
+            iOrigin = newOrigin;
+            if (attached())
+                rendering_context().enqueue(graphics_operation::set_origin{ iOrigin.value() });
+        }
+    }
+
+    size graphics_context::extents() const
+    {
+        return iExtents;
+    }
+
+    void graphics_context::set_extents(size const& aExtents)
+    {
+        iExtents = aExtents;
+    }
+
     void graphics_context::set_viewport(optional_rect const& aViewport)
     {
         if (aViewport)
@@ -947,6 +949,47 @@ namespace neogfx
             rendering_context().enqueue(graphics_operation::set_view_transformation{ aViewTransforamtion.value() });
         else
             rendering_context().enqueue(graphics_operation::set_view_transformation{});
+    }
+
+    bool graphics_context::has_render_widget() const
+    {
+        return iRenderWidget != nullptr;
+    }
+
+    i_widget const& graphics_context::render_widget() const
+    {
+        if (has_render_widget())
+            return *iRenderWidget;
+        throw std::logic_error("neogfx::graphics_context::render_widget: no widget!");
+    }
+
+    void graphics_context::set_render_widget(i_widget const& aWidget)
+    {
+        if (iRenderWidget != &aWidget)
+        {
+            iRenderWidget = &aWidget;
+            set_logical_coordinate_system(aWidget.logical_coordinate_system());
+            auto renderOrigin = aWidget.origin();
+            if (logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
+            {
+                auto const renderTargetHeight = iRenderTarget.extents().cy;
+                auto const widgetHeight = aWidget.extents().cy;
+                renderOrigin.y = renderTargetHeight - (renderOrigin.y + widgetHeight);
+            }
+            set_origin(renderOrigin);
+            set_extents(aWidget.extents());
+        }
+    }
+
+    void graphics_context::unset_render_widget()
+    {
+        if (iRenderWidget != nullptr)
+        {
+            iRenderWidget = nullptr;
+            set_logical_coordinate_system(iRenderTarget.logical_coordinate_system());
+            set_origin(point{});
+            set_extents(iRenderTarget.extents());
+        }
     }
 
     void graphics_context::scissor_on()

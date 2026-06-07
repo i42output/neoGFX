@@ -35,10 +35,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (service<i_debug>().render_item() == this)
-        {
-            aGc.flush();
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::paint_non_client(), frame_color: " << frame_color() << std::endl;
-        }
 #endif // NEOGFX_DEBUG
 
         const rect frameRect{ point{ 0.0, 0.0 }, base_type::as_widget().non_client_rect().extents() };

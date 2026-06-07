@@ -467,6 +467,8 @@ namespace neogfx
         }
     };
 
+    rect apply_coordinate_system(i_widget const& aWidget, rect const& aRect);
+
     // todo: make being a layout manager a property?
     template <typename WidgetType, typename... OtherBases>
     class layout_manager : public WidgetType, public OtherBases...

@@ -89,7 +89,7 @@ namespace neogfx
                 {
                     auto normalisedScissorRect = static_variant_cast<const graphics_operation::push_scissor&>(queueEntry).rect + fastState->origin;
                     if (slowState->logicalCoordinateSystem.value_or(logical_coordinate_system::AutomaticGui) == logical_coordinate_system::AutomaticGui)
-                        normalisedScissorRect.y = aContext.renderTarget.extents().cy - normalisedScissorRect.cy - normalisedScissorRect.y;
+                        normalisedScissorRect.y = aContext.renderTarget.extents().cy - (normalisedScissorRect.cy + normalisedScissorRect.y);
                     if (aContext.clipRegionStack.empty())
                         aContext.clipRegionStack.push_back(normalisedScissorRect);
                     else

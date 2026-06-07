@@ -189,6 +189,12 @@ namespace neogfx
         virtual void set_extents(size const& aExtents) = 0;
         virtual void set_viewport(optional_rect const& aViewport = {}) = 0;
         virtual void set_view_transforamtion(optional_mat33 const& aViewTransforamtion = {}) = 0;
+        // widget
+    public:
+        virtual bool has_render_widget() const = 0;
+        virtual i_widget const& render_widget() const = 0;
+        virtual void set_render_widget(i_widget const& aWidget) = 0;
+        virtual void unset_render_widget() = 0;
         // clipping
     public:
         virtual void scissor_on() = 0;
@@ -587,32 +593,25 @@ namespace neogfx
     class scoped_coordinate_system_ex
     {
     public:
-        scoped_coordinate_system_ex(i_rendering_context& aRc, point const& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :
+        scoped_coordinate_system_ex(i_rendering_context& aRc, point const& aOrigin, logical_coordinate_system aCoordinateSystem) :
             iRc(aRc), iPreviousOrigin{ aRc.origin() }, iPreviousCoordinateSystem(aRc.logical_coordinate_system()), iPreviousCoordinates(aRc.logical_coordinates())
         {
             iRc.set_logical_coordinate_system(aCoordinateSystem);
-            apply_origin(aOrigin, aExtents);
+            iRc.set_origin(aOrigin);
         }
-        scoped_coordinate_system_ex(i_rendering_context& aRc, point const& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
+        scoped_coordinate_system_ex(i_rendering_context& aRc, point const& aOrigin, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
             iRc(aRc), iPreviousOrigin{ aRc.origin() }, iPreviousCoordinateSystem(aRc.logical_coordinate_system()), iPreviousCoordinates(aRc.logical_coordinates())
         {
             iRc.set_logical_coordinate_system(aCoordinateSystem);
             iRc.set_logical_coordinates(aCoordinates);
-            apply_origin(aOrigin, aExtents);
-        }
-        scoped_coordinate_system_ex(i_rendering_context& aRc, i_rendering_context& aSource) :
-            iRc(aRc), iPreviousOrigin{ aRc.origin() }, iPreviousCoordinateSystem(aRc.logical_coordinate_system()), iPreviousCoordinates(aRc.logical_coordinates())
-        {
-            iRc.set_logical_coordinate_system(aSource.logical_coordinate_system());
-            iRc.set_logical_coordinates(aSource.logical_coordinates());
-            iRc.set_origin(aSource.origin());
+            iRc.set_origin(aOrigin);
         }
         scoped_coordinate_system_ex(i_rendering_context& aRc, i_rendering_context const& aSource) :
             iRc(aRc), iPreviousOrigin{ aRc.origin() }, iPreviousCoordinateSystem(aRc.logical_coordinate_system()), iPreviousCoordinates(aRc.logical_coordinates())
         {
             iRc.set_logical_coordinate_system(aSource.logical_coordinate_system());
             iRc.set_logical_coordinates(aSource.logical_coordinates());
-            iRc.set_origin({});
+            iRc.set_origin(aSource.origin());
         }
         ~scoped_coordinate_system_ex()
         {
@@ -622,14 +621,6 @@ namespace neogfx
                 iRc.set_logical_coordinates(iPreviousCoordinates);
             if (iRc.origin() != iPreviousOrigin)
                 iRc.set_origin(iPreviousOrigin);
-        }
-    private:
-        void apply_origin(point const& aOrigin, const size& aExtents)
-        {
-            if (iRc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
-                iRc.set_origin(aOrigin);
-            else if (iRc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
-                iRc.set_origin(point{ aOrigin.x, iRc.render_target().extents().cy - (aOrigin.y + aExtents.cy) });
         }
     private:
         i_rendering_context& iRc;
@@ -653,6 +644,27 @@ namespace neogfx
     private:
         i_graphics_context& iGc;
         point iPreviousOrigin;
+    };
+
+    class scoped_render_widget
+    {
+    public:
+        scoped_render_widget(i_graphics_context& aGc, i_widget const& aWidget) :
+            iGc{ aGc }, iPreviousWidget{ aGc.has_render_widget() ? &aGc.render_widget() : nullptr }
+        {
+            iGc.set_render_widget(aWidget);
+
+        }
+        ~scoped_render_widget()
+        {
+            if (iPreviousWidget)
+                iGc.set_render_widget(*iPreviousWidget);
+            else
+                iGc.unset_render_widget();
+        }
+    private:
+        i_graphics_context& iGc;
+        i_widget const* iPreviousWidget;
     };
 
     class scoped_snap_to_pixel

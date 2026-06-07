@@ -32,6 +32,13 @@
 
 namespace neogfx
 {
+    rect apply_coordinate_system(i_widget const& aWidget, rect const& aRect)
+    {
+        if (aWidget.logical_coordinate_system() == logical_coordinate_system::AutomaticGame)
+            return to_game_rect(aRect, aWidget.client_rect().cy);
+        return aRect;
+    }
+
     template class widget<>;
     template class widget<i_button>;
     template class widget<i_push_button>;

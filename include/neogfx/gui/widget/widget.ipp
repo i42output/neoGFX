@@ -1299,6 +1299,8 @@ namespace neogfx
         if (!requires_update())
             return;
 
+        scoped_render_widget srw{ aGc, self };
+
         scoped_units su{ *this, units::Pixels };
 
         iDefaultNonClientClipRect = invalid;
@@ -1321,18 +1323,9 @@ namespace neogfx
 
         scoped_opacity sc{ aGc, effective_opacity() };
 
-        aGc.set_extents(self.extents());
-        aGc.set_origin(self.origin());
-
         render_non_client(aGc);
 
-        aGc.set_extents(client_rect().extents());
-        aGc.set_origin(self.origin());
-
         render(aGc);
-
-        aGc.set_extents(self.extents());
-        aGc.set_origin(self.origin());
 
         render_non_client_after(aGc);
     }
@@ -1342,23 +1335,16 @@ namespace neogfx
     {
         auto& self = *this;
 
-        aGc.set_extents(self.extents());
-        aGc.set_origin(self.origin());
+        scoped_render_widget srw{ aGc, self };
 
         const rect updateRect = update_rect();
         const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
 
-        scoped_scissor scissor(aGc, nonClientClipRect);
+        scoped_scissor scissor(aGc, apply_coordinate_system(*this, nonClientClipRect));
 
         PaintingNonClient(aGc);
 
-        aGc.set_extents(self.extents());
-        aGc.set_origin(self.origin());
-
         paint_non_client(aGc);
-
-        aGc.set_extents(self.extents());
-        aGc.set_origin(self.origin());
 
         for (auto iterChild = iChildren.rbegin(); iterChild != iChildren.rend(); ++iterChild)
         {
@@ -1371,9 +1357,6 @@ namespace neogfx
             childWidget.render_ex(aGc);
         }
 
-        aGc.set_extents(self.extents());
-        aGc.set_origin(self.origin());
-
         PaintedNonClient(aGc);
     }
 
@@ -1382,8 +1365,7 @@ namespace neogfx
     {
         auto& self = *this;
 
-        aGc.set_extents(client_rect().extents());
-        aGc.set_origin(self.origin());
+        scoped_render_widget srw{ aGc, self };
 
         const rect updateRect = update_rect();
         const rect clipRect = default_clip_rect().intersection(updateRect);
@@ -1393,21 +1375,11 @@ namespace neogfx
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::render(...): client_rect: " << client_rect() << ", origin: " << self.origin() << std::endl;
 #endif // NEOGFX_DEBUG
 
-        scoped_scissor scissor(aGc, clipRect);
-
-        scoped_coordinate_system_ex scs1(aGc, self.origin(), self.extents(), logical_coordinate_system());
+        scoped_scissor scissor(aGc, apply_coordinate_system(*this, clipRect));
 
         Painting(aGc);
 
-        aGc.set_extents(client_rect().extents());
-        aGc.set_origin(self.origin());
-
         paint(aGc);
-
-        aGc.set_extents(client_rect().extents());
-        aGc.set_origin(self.origin());
-
-        scoped_coordinate_system_ex scs2(aGc, self.origin(), self.extents(), logical_coordinate_system());
 
         PaintingChildren(aGc);
 
@@ -1444,11 +1416,6 @@ namespace neogfx
             }
         }
 
-        aGc.set_extents(client_rect().extents());
-        aGc.set_origin(self.origin());
-
-        scoped_coordinate_system_ex scs3(aGc, self.origin(), self.extents(), logical_coordinate_system());
-
         Painted(aGc);
     }
 
@@ -1457,14 +1424,13 @@ namespace neogfx
     {
         auto& self = *this;
 
+        scoped_render_widget srw{ aGc, self };
+
         const rect updateRect = update_rect();
         const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
 
-        aGc.set_extents(self.extents());
-        aGc.set_origin(self.origin());
-
         {
-            scoped_scissor scissor(aGc, nonClientClipRect);
+            scoped_scissor scissor(aGc, apply_coordinate_system(*this, nonClientClipRect));
 
             paint_non_client_after(aGc);
         }
@@ -1479,10 +1445,7 @@ namespace neogfx
 
 #ifdef NEOGFX_DEBUG
         if (service<i_debug>().render_item() == this)
-        {
-            aGc.flush();
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::paint_non_client(...), updateRect: " << updateRect << std::endl;
-        }
 #endif // NEOGFX_DEBUG
 
         if (!event_consumed(PaintBackground(aGc)))
