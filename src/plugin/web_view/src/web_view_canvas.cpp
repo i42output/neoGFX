@@ -309,6 +309,8 @@ namespace neogfx
         browser_settings.windowless_frame_rate = 60;
         if (!background_is_transparent())
             browser_settings.background_color = CefColorSetARGB(0xFF, 0xFF, 0xFF, 0xFF);
+        else
+            browser_settings.background_color = CefColorSetARGB(0x00, 0x00, 0x00, 0x00);
 
         iBrowser = CefBrowserHost::CreateBrowserSync(window_info, this, !iUrl ? CefString{} : CefString{ iUrl.value() }, browser_settings, nullptr, nullptr);
 

@@ -41,15 +41,12 @@ namespace neogfx
         using base_type = widget<i_web_view>;
         // construction
     public:
-        web_view(i_widget& aParent);
-        web_view(i_layout& aLayout);
+        web_view(i_widget& aParent, bool aTransparent = false);
+        web_view(i_layout& aLayout, bool aTransparent = false);
         ~web_view();
         // i_web_view
     public:
         void load_url(i_string const& aUrl, bool aSetFocus = true) override;
-        // widget
-    public:
-        void paint(i_graphics_context& aGc) const override;
         // own
     private:
         void init();

@@ -114,13 +114,13 @@ namespace neogfx
         iFactory = neolib::make_ref<web_view_factory>();
     }
 
-    void web_view_factory::create_canvas(i_widget& aParent, i_ref_ptr<i_web_view>& aWebView, i_optional<i_string> const& aUrl)
+    void web_view_factory::create_canvas(i_widget& aParent, i_ref_ptr<i_web_view>& aWebView, i_optional<i_string> const& aUrl, bool aTransparent)
     {
-        aWebView = neolib::make_ref<web_view_canvas>(aParent, aUrl);
+        aWebView = neolib::make_ref<web_view_canvas>(aParent, aUrl, aTransparent);
     }
 
-    void web_view_factory::create_canvas(i_layout& aLayout, i_ref_ptr<i_web_view>& aWebView, i_optional<i_string> const& aUrl)
+    void web_view_factory::create_canvas(i_layout& aLayout, i_ref_ptr<i_web_view>& aWebView, i_optional<i_string> const& aUrl, bool aTransparent)
     {
-        aWebView = neolib::make_ref<web_view_canvas>(aLayout, aUrl);
+        aWebView = neolib::make_ref<web_view_canvas>(aLayout, aUrl, aTransparent);
     }
 }

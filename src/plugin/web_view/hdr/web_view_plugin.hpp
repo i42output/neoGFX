@@ -53,7 +53,7 @@ namespace neogfx
     class web_view_factory : public neolib::reference_counted<i_web_view_factory>
     {
     public:
-        void create_canvas(i_widget& aParent, i_ref_ptr<i_web_view>& aWebView, i_optional<i_string> const& aUrl) final;
-        void create_canvas(i_layout& aLayout, i_ref_ptr<i_web_view>& aWebView, i_optional<i_string> const& aUrl) final;
+        void create_canvas(i_widget& aParent, i_ref_ptr<i_web_view>& aWebView, i_optional<i_string> const& aUrl, bool aTransparent = false) final;
+        void create_canvas(i_layout& aLayout, i_ref_ptr<i_web_view>& aWebView, i_optional<i_string> const& aUrl, bool aTransparent = false) final;
     };
 }

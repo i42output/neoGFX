@@ -28,17 +28,25 @@ namespace neogfx
 {
     template class widget<i_web_view>;
 
-    web_view::web_view(i_widget& aParent) : 
+    web_view::web_view(i_widget& aParent, bool aTransparent) :
         base_type{ aParent },
         iLayout{ *this }
     {
+        if (!aTransparent)
+            set_background_opacity(1.0);
+        else
+            set_background_opacity(0.0);
         init();
     }
 
-    web_view::web_view(i_layout& aLayout) :
+    web_view::web_view(i_layout& aLayout, bool aTransparent) :
         base_type{ aLayout },
         iLayout{ *this }
     {
+        if (!aTransparent)
+            set_background_opacity(1.0);
+        else
+            set_background_opacity(0.0);
         init();
     }
 
@@ -52,17 +60,6 @@ namespace neogfx
             iCanvas->load_url(aUrl, aSetFocus);
     }
 
-    void web_view::paint(i_graphics_context& aGc) const
-    {
-        base_type::paint(aGc);
-
-        rect canvasRect{ iLayout.position(), iLayout.extents() };
-        canvasRect.deflate(iLayout.margin());
-        canvasRect.deflate(iLayout.border());
-        canvasRect.deflate(iLayout.padding());
-        draw_alpha_background(aGc, canvasRect, 8.0_dip);
-    }
-
     void web_view::init()
     {
         set_size_policy(size_constraint::Expanding);
@@ -71,7 +68,7 @@ namespace neogfx
         try
         {
             ref_ptr<i_web_view_factory> factory{ service<i_app>() };
-            iCanvas = factory->create_canvas(iLayout);
+            iCanvas = factory->create_canvas(iLayout, {}, background_is_transparent());
         }
         catch(...)
         {
