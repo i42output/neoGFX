@@ -44,8 +44,8 @@ namespace neogfx
         using abstract_type = i_web_view;
         // construction
     public:
-        web_view_canvas(i_widget& aParent, i_optional<i_string> const& aUrl);
-        web_view_canvas(i_layout& aLayout, i_optional<i_string> const& aUrl);
+        web_view_canvas(i_widget& aParent, i_optional<i_string> const& aUrl, bool aTransparent = false);
+        web_view_canvas(i_layout& aLayout, i_optional<i_string> const& aUrl, bool aTransparent = false);
         ~web_view_canvas();
         // i_widget
     public:

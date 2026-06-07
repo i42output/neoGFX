@@ -28,17 +28,25 @@
 
 namespace neogfx
 {
-    web_view_canvas::web_view_canvas(i_widget& aParent, i_optional<i_string> const& aUrl) :
+    web_view_canvas::web_view_canvas(i_widget& aParent, i_optional<i_string> const& aUrl, bool aTransparent) :
         base_type{ aParent },
         iUrl{ aUrl.has_value() ? decltype(iUrl){ aUrl.value().to_std_string_view() } : std::nullopt }
     {
+        if (!aTransparent)
+            set_background_opacity(1.0);
+        else
+            set_background_opacity(0.0);
         init();
     }
 
-    web_view_canvas::web_view_canvas(i_layout& aLayout, i_optional<i_string> const& aUrl) :
+    web_view_canvas::web_view_canvas(i_layout& aLayout, i_optional<i_string> const& aUrl, bool aTransparent) :
         base_type{ aLayout },
         iUrl{ aUrl.has_value() ? decltype(iUrl){ aUrl.value().to_std_string_view() } : std::nullopt }
     {
+        if (!aTransparent)
+            set_background_opacity(1.0);
+        else
+            set_background_opacity(0.0);
         init();
     }
 
@@ -299,6 +307,8 @@ namespace neogfx
 
         CefBrowserSettings browser_settings;
         browser_settings.windowless_frame_rate = 60;
+        if (!background_is_transparent())
+            browser_settings.background_color = CefColorSetARGB(0xFF, 0xFF, 0xFF, 0xFF);
 
         iBrowser = CefBrowserHost::CreateBrowserSync(window_info, this, !iUrl ? CefString{} : CefString{ iUrl.value() }, browser_settings, nullptr, nullptr);
 
