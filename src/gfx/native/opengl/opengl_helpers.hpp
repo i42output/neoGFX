@@ -267,16 +267,28 @@ namespace neogfx
         std::optional<std::pair<free_blocks const*, free_blocks::const_iterator>> find_free_block(size_type aCount) const
         {
             auto probe = std::bit_ceil(aCount);
+            bool peek = std::countr_zero(probe * 2) < iFreeBlocks.size();
+            bool peeked = false;
             while (std::countr_zero(probe) < iFreeBlocks.size())
             {
-                auto& freeBlocksProbe = iFreeBlocks[std::countr_zero(probe)];
+                auto& freeBlocksProbe = iFreeBlocks[std::countr_zero(peek ? probe * 2 : probe)];
                 for (auto freeBlockProbe = freeBlocksProbe.begin(); freeBlockProbe != freeBlocksProbe.end(); ++freeBlockProbe)
                     if (freeBlockProbe->second - freeBlockProbe->first >= aCount)
                         return std::make_pair(&freeBlocksProbe, freeBlockProbe);
-                probe *= 2;
+                if (peek)
+                {
+                    peek = false;
+                    peeked = true;
+                }
+                else if (peeked)
+                {
+                    peeked = false;
+                    probe *= 4;
+                }
+                else
+                    probe *= 2;
             }
-
-            return std::nullopt;
+            return {};
         }
         std::optional<std::pair<free_blocks*, free_blocks::iterator>> find_free_block(size_type aCount)
         {
