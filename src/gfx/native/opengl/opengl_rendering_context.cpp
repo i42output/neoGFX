@@ -2723,7 +2723,8 @@ namespace neogfx
                     auto vertexStartIndex = cacheIndices[0];
                     if (vertexCount != currentCachedVertexCount || meshRenderCache.state == game::cache_state::Invalid)
                     {
-                        vertices.reclaim(cacheIndices[0], cacheIndices[1]);
+                        if (meshRenderCache.state != game::cache_state::Invalid)
+                            vertices.reclaim(cacheIndices[0], cacheIndices[1]);
                         vertexStartIndex = static_cast<std::uint32_t>(vertices.find_space_for(vertexCount));
                     }
 

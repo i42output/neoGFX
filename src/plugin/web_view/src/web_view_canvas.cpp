@@ -286,9 +286,15 @@ namespace neogfx
         iBrowser->GetHost()->SetFocus(false);
     }
 
+    bool web_view_canvas::url_loaded() const
+    {
+        return iUrlLoaded;
+    }
+
     void web_view_canvas::load_url(i_string const& aUrl, bool aSetFocus)
     {
         iUrl = aUrl.to_std_string_view();
+        iUrlLoaded = false;
         iBrowser->GetMainFrame()->LoadURL(CefString{ aUrl.to_std_string() });
         iSetFocusAfterLoad = aSetFocus;
     }
@@ -398,6 +404,7 @@ namespace neogfx
     {
         if (frame->IsMain())
         {
+            iUrlLoaded = true;
             std::string const url = frame->GetURL();
             NavigatedTo(string{ url });
         }
@@ -412,6 +419,8 @@ namespace neogfx
 
     void web_view_canvas::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, ErrorCode errorCode, const CefString& errorText, const CefString& failedUrl)
     {
+        if (frame->IsMain())
+            iUrlLoaded = false;
         iSetFocusAfterLoad = std::nullopt;
     }
 

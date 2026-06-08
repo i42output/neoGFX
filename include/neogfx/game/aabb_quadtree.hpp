@@ -364,10 +364,10 @@ namespace neogfx::game
         {
             for (auto candidate : iColliders.entities())
             {
-                auto const& candidateInfo = iInfos.entity_record(candidate);
+                auto const& candidateInfo = iInfos.entity_record_no_lock(candidate);
                 if (candidateInfo.destroyed)
                     continue;
-                auto& candidateCollider = iColliders.entity_record(candidate);
+                auto& candidateCollider = iColliders.entity_record_no_lock(candidate);
                 if (++iCollisionUpdateId == 0)
                     iCollisionUpdateId = 1;
                 iRootNode.visit(candidateCollider, [&](entity_id aHit)
@@ -376,10 +376,10 @@ namespace neogfx::game
                         return;
                     if (candidate < aHit)
                     {
-                        auto const& hitInfo = iInfos.entity_record(aHit);
+                        auto const& hitInfo = iInfos.entity_record_no_lock(aHit);
                         if (hitInfo.destroyed)
                             return;
-                        auto& hitCollider = iColliders.entity_record(aHit);
+                        auto& hitCollider = iColliders.entity_record_no_lock(aHit);
                         if ((candidateCollider.mask & hitCollider.mask) == 0 && hitCollider.collisionEventId != iCollisionUpdateId)
                         {
                             hitCollider.collisionEventId = iCollisionUpdateId;

@@ -66,6 +66,7 @@ namespace neogfx
         void focus_lost(focus_reason aFocusReason) final;
         // i_web_view
     public:
+        bool url_loaded() const final;
         void load_url(i_string const& aUrl, bool aSetFocus = true) final;
         // implementation
     private:
@@ -109,6 +110,7 @@ namespace neogfx
         void OnGotFocus(CefRefPtr<CefBrowser> browser) final;
     private:
         std::optional<std::string> iUrl;
+        bool iUrlLoaded = false;
         std::optional<bool> iSetFocusAfterLoad;
         CefRefPtr<CefBrowser> iBrowser;
         mutable ref_ptr<i_texture> iBackBuffer;

@@ -54,6 +54,13 @@ namespace neogfx
     {
     }
 
+    bool web_view::url_loaded() const
+    {
+        if (iCanvas)
+            return iCanvas->url_loaded();
+        return false;
+    }
+
     void web_view::load_url(i_string const& aUrl, bool aSetFocus)
     {
         if (iCanvas)
@@ -87,9 +94,25 @@ namespace neogfx
         }
 
         iCanvas->navigated_to([&](i_string const& aUrl)
-        {
-            NavigatedTo(aUrl);
-        });
+            {
+                NavigatedTo(aUrl);
+            });
+
+        PaintBackground([&](i_graphics_context& aGc)
+            {
+                if (!background_is_transparent())
+                {
+                    if (!iCanvas->url_loaded())
+                    {
+                        rect canvasRect{ iLayout.position(), iLayout.extents() };
+                        canvasRect.deflate(iLayout.margin());
+                        canvasRect.deflate(iLayout.border());
+                        canvasRect.deflate(iLayout.padding());
+                        draw_alpha_background(aGc, canvasRect, 8.0_dip);
+                    }
+                }
+                PaintBackground.accept();
+            });
     }
 }
 

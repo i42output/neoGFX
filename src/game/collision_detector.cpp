@@ -111,7 +111,7 @@ namespace neogfx::game
         }
         if (!iUpdated)
             return;
-        scoped_component_lock lock{ iBoxColliders };
+        scoped_component_lock lock{ iBoxColliders, iInfos };
         if ((aCycle & collision_detection_cycle::UpdateTrees) == collision_detection_cycle::UpdateTrees)
             update_broadphase();
         if ((aCycle & collision_detection_cycle::DetectCollisions) == collision_detection_cycle::DetectCollisions)
@@ -203,7 +203,7 @@ namespace neogfx::game
         if (!this->components_available())
             return;
 
-        scoped_component_lock lock{ iBoxColliders };
+        scoped_component_lock lock{ iBoxColliders, iInfos };
         iBroadphaseTree.collisions([this](entity_id e1, entity_id e2)
         {
             Collision(e1, e2);

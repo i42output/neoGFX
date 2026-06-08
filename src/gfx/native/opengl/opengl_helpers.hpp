@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <vector>
+#include <bit>
 
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
@@ -66,16 +67,19 @@ namespace neogfx
     class opengl_buffer
     {
     public:
-        typedef T value_type;
-        typedef value_type const& const_reference;
-        typedef value_type& reference;
-        typedef value_type const* const_pointer;
-        typedef value_type* pointer;
-        typedef const_pointer const_iterator;
-        typedef pointer iterator;
-        typedef std::size_t size_type;
+        using value_type = T;
+        using const_reference = value_type const&;
+        using reference = value_type&;
+        using const_pointer = value_type const*;
+        using pointer = value_type*;
+        using const_iterator = const_pointer;
+        using iterator = pointer;
+        using size_type = std::size_t;
     public:
         struct no_owner : std::logic_error { no_owner() : std::logic_error{ "neogfx::opengl_buffer::no_owner" } {} };
+    private:
+        using free_block = std::pair<size_type, size_type>;
+        using free_blocks = std::vector<free_block>;
     public:
         opengl_buffer(size_type aCapacity)
         {
@@ -155,19 +159,23 @@ namespace neogfx
         {
             return *std::prev(end());
         }
-        std::size_t find_space_for(std::size_t aCount)
+        size_type find_space_for(size_type aCount)
         {
-             // todo: optimize
-            for (auto space = iReclaimedSpace.begin(); space != iReclaimedSpace.end(); ++space)
-                if (space->second - space->first >= aCount)
-                {
-                    auto result = space->first;
-                    space->first += aCount;
-                    if (space->first == space->second)
-                        iReclaimedSpace.erase(space);
-                    return result;
-                }
-            return size();
+            auto freeBlocks = find_free_blocks(aCount);
+
+            if (!freeBlocks)
+                return size();
+             
+            auto const freeBlock = freeBlocks->back();
+            freeBlocks->pop_back();
+
+            auto result = freeBlock.first;
+
+            auto leftover = (freeBlock.second - freeBlock.first) - aCount;
+            if (leftover > 0)
+                iFreeBlocks[std::countr_zero(std::bit_ceil(leftover))].emplace_back(freeBlock.first + aCount, freeBlock.first + aCount + leftover);
+
+            return result;
         }
         void push_back(const_reference aValue)
         {
@@ -189,6 +197,7 @@ namespace neogfx
         void clear()
         {
             iSize = 0;
+            iFreeBlocks = {};
         }
     public:
         GLuint handle() const
@@ -211,7 +220,7 @@ namespace neogfx
         {
             return const_cast<pointer>(to_const(*this).map());
         }
-        void flush(std::size_t aOffset, size_type aElements)
+        void flush(size_type aOffset, size_type aElements)
         {
             if (mapped())
             {
@@ -236,7 +245,11 @@ namespace neogfx
         }
         bool room_for(size_type aExtra) const
         {
-            return aExtra <= room();
+            if (aExtra <= room())
+                return true;
+            if (find_free_blocks(aExtra))
+                return true;
+            return false;
         }
         void need(size_type aExtra)
         {
@@ -244,12 +257,32 @@ namespace neogfx
                 grow(std::max<size_type>(static_cast<size_type>((capacity() + aExtra) * 1.5), 16384));
         }
     public:
-        void reclaim(std::size_t aStartIndex, std::size_t aEndIndex)
+        void reclaim(size_type aStartIndex, size_type aEndIndex)
         {
             if (aEndIndex != aStartIndex)
-                iReclaimedSpace.push_back(std::make_pair(aStartIndex, aEndIndex));
+                iFreeBlocks[std::countr_zero(std::bit_ceil(aEndIndex - aStartIndex))].emplace_back(aStartIndex, aEndIndex);
         }
     private:
+        free_blocks const* find_free_blocks(size_type aCount) const
+        {
+            free_blocks const* freeBlocks = nullptr;
+
+            auto probe = std::bit_ceil(aCount);
+            while (!freeBlocks && std::countr_zero(probe) < iFreeBlocks.size())
+            {
+                auto& freeBlocksProbe = iFreeBlocks[std::countr_zero(probe)];
+                if (!freeBlocksProbe.empty())
+                    freeBlocks = &freeBlocksProbe;
+                else
+                    probe *= 2;
+            }
+
+            return freeBlocks;
+        }
+        free_blocks* find_free_blocks(size_type aCount)
+        {
+            return const_cast<free_blocks*>(const_cast<opengl_buffer const&>(*this).find_free_blocks(aCount));
+        }
         void grow(size_type aCapacity)
         {
             opengl_buffer<T> temp{ aCapacity };
@@ -263,7 +296,7 @@ namespace neogfx
             std::swap(iCapacity, temp.iCapacity);
             std::swap(iSize, temp.iSize);
             std::swap(iMemory, temp.iMemory);
-            std::swap(iReclaimedSpace, temp.iReclaimedSpace);
+            std::swap(iFreeBlocks, temp.iFreeBlocks);
             iOwner->buffer_grown();
         }
     private:
@@ -272,7 +305,7 @@ namespace neogfx
         size_type iSize = 0;
         mutable pointer iMemory = nullptr;
         opengl_buffer_owner* iOwner = nullptr;
-        std::vector<std::pair<std::size_t, std::size_t>> iReclaimedSpace;
+        std::array<free_blocks, 32u> iFreeBlocks;
     };
 
     template <typename T>

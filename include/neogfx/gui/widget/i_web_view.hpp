@@ -36,6 +36,7 @@ namespace neogfx
         using abstract_type = i_web_view;
         // operations
     public:
+        virtual bool url_loaded() const = 0;
         virtual void load_url(i_string const& aUrl, bool aSetFocus = true) = 0;
     };
 

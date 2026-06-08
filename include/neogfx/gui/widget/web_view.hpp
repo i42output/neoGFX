@@ -46,6 +46,7 @@ namespace neogfx
         ~web_view();
         // i_web_view
     public:
+        bool url_loaded() const override;
         void load_url(i_string const& aUrl, bool aSetFocus = true) override;
         // own
     private:
