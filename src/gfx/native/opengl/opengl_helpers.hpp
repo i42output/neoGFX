@@ -161,13 +161,14 @@ namespace neogfx
         }
         size_type find_space_for(size_type aCount)
         {
-            auto freeBlocks = find_free_blocks(aCount);
+            auto freeBlockRef = find_free_block(aCount);
 
-            if (!freeBlocks)
+            if (!freeBlockRef)
                 return size();
-             
-            auto const freeBlock = freeBlocks->back();
-            freeBlocks->pop_back();
+
+            auto const freeBlock = *freeBlockRef->second;
+            std::swap(*freeBlockRef->second, freeBlockRef->first->back());
+            freeBlockRef->first->pop_back();
 
             auto result = freeBlock.first;
 
@@ -247,7 +248,7 @@ namespace neogfx
         {
             if (aExtra <= room())
                 return true;
-            if (find_free_blocks(aExtra))
+            if (find_free_block(aExtra))
                 return true;
             return false;
         }
@@ -263,25 +264,27 @@ namespace neogfx
                 iFreeBlocks[std::countr_zero(std::bit_ceil(aEndIndex - aStartIndex))].emplace_back(aStartIndex, aEndIndex);
         }
     private:
-        free_blocks const* find_free_blocks(size_type aCount) const
+        std::optional<std::pair<free_blocks const*, free_blocks::const_iterator>> find_free_block(size_type aCount) const
         {
-            free_blocks const* freeBlocks = nullptr;
-
             auto probe = std::bit_ceil(aCount);
-            while (!freeBlocks && std::countr_zero(probe) < iFreeBlocks.size())
+            while (std::countr_zero(probe) < iFreeBlocks.size())
             {
                 auto& freeBlocksProbe = iFreeBlocks[std::countr_zero(probe)];
-                if (!freeBlocksProbe.empty())
-                    freeBlocks = &freeBlocksProbe;
-                else
-                    probe *= 2;
+                for (auto freeBlockProbe = freeBlocksProbe.begin(); freeBlockProbe != freeBlocksProbe.end(); ++freeBlockProbe)
+                    if (freeBlockProbe->second - freeBlockProbe->first >= aCount)
+                        return std::make_pair(&freeBlocksProbe, freeBlockProbe);
+                probe *= 2;
             }
 
-            return freeBlocks;
+            return std::nullopt;
         }
-        free_blocks* find_free_blocks(size_type aCount)
+        std::optional<std::pair<free_blocks*, free_blocks::iterator>> find_free_block(size_type aCount)
         {
-            return const_cast<free_blocks*>(const_cast<opengl_buffer const&>(*this).find_free_blocks(aCount));
+            auto const result = const_cast<opengl_buffer const&>(*this).find_free_block(aCount);
+            if (!result)
+                return {};
+            auto freeBlocks = const_cast<free_blocks*>(result->first);
+            return std::make_pair(freeBlocks, std::next(freeBlocks->begin(), std::distance(freeBlocks->cbegin(), result->second)));
         }
         void grow(size_type aCapacity)
         {
