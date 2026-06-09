@@ -83,9 +83,6 @@ namespace neogfx
         bool room_for(std::size_t aAmount) const;
         bool need(std::size_t aAmount);
         void draw_and_execute();
-        void sync();
-        void create_sync();
-        void execute();
         struct skip
         {
             std::optional<std::size_t> skipCount;

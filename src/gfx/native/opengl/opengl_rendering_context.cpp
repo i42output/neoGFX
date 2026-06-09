@@ -2654,7 +2654,6 @@ namespace neogfx
         auto& vertices = vertexBuffer.vertices();
         if (!vertices.room_for(vertexCount - cachedVertexCount))
         {
-            vertexBuffer.execute();
             vertices.clear();
             for (auto md = aFirst; md != aLast; ++md)
             {

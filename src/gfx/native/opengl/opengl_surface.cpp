@@ -126,6 +126,8 @@ namespace neogfx
     
     void opengl_surface::do_render()
     {
+        sync();
+
         if (need_to_create_frame_buffer())
             create_frame_buffer();
 
@@ -155,6 +157,8 @@ namespace neogfx
         glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
         glCheck(glBindFramebuffer(GL_READ_FRAMEBUFFER, iFrameBuffer));
         glCheck(glBlitFramebuffer(0, 0, static_cast<GLint>(extents().cx), static_cast<GLint>(extents().cy), 0, 0, static_cast<GLint>(extents().cx), static_cast<GLint>(extents().cy), GL_COLOR_BUFFER_BIT, GL_NEAREST));
+
+        create_sync();
     }
 
     std::unique_ptr<i_rendering_context> opengl_surface::create_rendering_context(blending_mode aBlendingMode) const
@@ -218,5 +222,22 @@ namespace neogfx
         glCheck(glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(iFrameBufferExtents.cx), static_cast<GLsizei>(iFrameBufferExtents.cy)));
         glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
         glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
+    }
+
+    void opengl_surface::sync()
+    {
+        auto const lastFrame = iFrame % FRAMES_IN_FLIGHT;
+
+        if (iFences[lastFrame])
+        {
+            glClientWaitSync(iFences[lastFrame], GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
+            glDeleteSync(iFences[lastFrame]);
+        }
+    }
+    void opengl_surface::create_sync()
+    {
+        auto const currentFrame = iFrame++ % FRAMES_IN_FLIGHT;
+
+        iFences[currentFrame] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     }
 }

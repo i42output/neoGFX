@@ -41,6 +41,8 @@ namespace neogfx
 
     class opengl_surface : public native_surface
     {
+    private:
+        static constexpr std::uint32_t FRAMES_IN_FLIGHT = 2u;
     public:
         opengl_surface(i_rendering_engine& aRenderingEngine, i_surface_window& aWindow);
         ~opengl_surface();
@@ -62,10 +64,14 @@ namespace neogfx
     private:
         bool need_to_create_frame_buffer() const;
         void create_frame_buffer() const;
+        void sync();
+        void create_sync();
     private:
         mutable GLuint iFrameBuffer;
         mutable optional_texture iFrameBufferTexture;
         mutable GLuint iDepthStencilBuffer;
         mutable size iFrameBufferExtents;
+        GLsync iFences[FRAMES_IN_FLIGHT] = {};
+        std::uint32_t iFrame = 0u;
     };
 }

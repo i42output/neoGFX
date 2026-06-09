@@ -423,8 +423,6 @@ namespace neogfx
     template <typename V = standard_vertex>
     class opengl_vertex_buffer : public vertex_buffer, private opengl_buffer_owner
     {
-    private:
-        static constexpr std::uint32_t FRAMES_IN_FLIGHT = 2u;
     public:
         typedef V vertex_type;
     public:
@@ -549,28 +547,6 @@ namespace neogfx
             vertices().reclaim(aStartIndex, aEndIndex);
         }
     public:
-        void sync()
-        {
-            auto const lastFrame = iFrame % FRAMES_IN_FLIGHT;
-
-            if (iFences[lastFrame])
-            {
-                //glClientWaitSync(iFences[lastFrame], GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
-                glWaitSync(iFences[lastFrame], 0, GL_TIMEOUT_IGNORED);
-                glDeleteSync(iFences[lastFrame]);
-            }
-        }
-        void create_sync()
-        {
-            auto const currentFrame = iFrame++ % FRAMES_IN_FLIGHT;
-
-            iFences[currentFrame] = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-        }
-        void execute(bool aSync = false)
-        {
-            if (aSync)
-                create_sync();
-        }
         void flush()
         {
             flush(vertices().size());
@@ -635,8 +611,6 @@ namespace neogfx
         std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::mnop)>> iVertexFunction4AttribArray;
         std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::abcd2)>> iVertexFunction5AttribArray;
         std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::efgh2)>> iVertexFunction6AttribArray;
-        GLsync iFences[FRAMES_IN_FLIGHT] = {};
-        std::uint32_t iFrame = 0u;
     };
 
     class use_shader_program

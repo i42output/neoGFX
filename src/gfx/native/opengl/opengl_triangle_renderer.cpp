@@ -34,8 +34,6 @@ namespace neogfx
     {
         if (!room_for(aNeed))
             draw_and_execute();
-        else if (aUseBarrier)
-            execute();
         set_transformation(optional_mat44{});
         if (!room_for(aNeed) && !need(aNeed))
             throw not_enough_room();
@@ -52,8 +50,6 @@ namespace neogfx
     {
         if (!room_for(aNeed))
             draw_and_execute();
-        else if (aUseBarrier)
-            execute();
         set_transformation(aTransformation);
         if (!room_for(aNeed) && !need(aNeed))
             throw not_enough_room();
@@ -70,8 +66,6 @@ namespace neogfx
     {
         if (!room_for(aNeed))
             draw_and_execute();
-        else if (aUseBarrier)
-            execute();
         set_transformation(optional_mat44{});
         if (!room_for(aNeed) && !need(aNeed))
             throw not_enough_room();
@@ -88,8 +82,6 @@ namespace neogfx
     {
         if (!room_for(aNeed))
             draw_and_execute();
-        else if (aUseBarrier)
-            execute();
         set_transformation(aTransformation);
         if (!room_for(aNeed) && !need(aNeed))
             throw not_enough_room();
@@ -189,26 +181,10 @@ namespace neogfx
     void opengl_triangle_renderer::draw_and_execute()
     {
         draw();
-        execute();
         vertices().clear();
         iStart = 0;
     }
     
-    void opengl_triangle_renderer::sync()
-    {
-        iVertexBuffer.sync();
-    }
-    
-    void opengl_triangle_renderer::create_sync()
-    {
-        iVertexBuffer.create_sync();
-    }
-
-    void opengl_triangle_renderer::execute()
-    {
-        iVertexBuffer.execute();
-    }
-
     void opengl_triangle_renderer::draw(const skip& aSkip)
     {
         draw(vertices().size() - static_cast<std::size_t>(iStart), aSkip);
@@ -236,8 +212,6 @@ namespace neogfx
 
         iParent.rendering_engine().vertex_buffer(iProvider).attach_shader(iParent, iParent.rendering_engine().active_shader_program());
 
-        sync();
-
         vertices().flush(iStart, aCount);
 
         if (!iUseBarrier)
@@ -259,8 +233,6 @@ namespace neogfx
                 glCheck(glTextureBarrier());
             }
         }
-
-        create_sync();
     }
 
     bool opengl_triangle_renderer::is_new_transformation(const optional_mat44& aTransformation) const

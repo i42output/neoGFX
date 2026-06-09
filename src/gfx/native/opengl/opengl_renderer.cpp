@@ -275,7 +275,6 @@ namespace neogfx
             {
                 auto& currentBuffer = (**iLastVertexBufferUsed).second;
                 currentBuffer.flush();
-                currentBuffer.execute();
             }
             iLastVertexBufferUsed = existing;
             return existing->second;
@@ -296,7 +295,6 @@ namespace neogfx
             bool const bufferMapped = buffer.vertices().mapped();
             if (bufferMapped)
                 buffer.flush();
-            buffer.execute(bufferMapped);
         }
     }
 
