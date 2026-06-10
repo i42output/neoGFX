@@ -32,7 +32,7 @@
 #include <neogfx/game/mesh_render_cache.hpp>
 #include "opengl.hpp"
 #include "opengl_error.hpp"
-#include "opengl_helpers.hpp"
+#include "opengl_vertex.hpp"
 #include "opengl_triangle_renderer.hpp"
 
 namespace neogfx

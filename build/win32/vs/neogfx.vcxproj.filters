@@ -777,7 +777,7 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_error.hpp">
       <Filter>Source Files\native\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_helpers.hpp">
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_vertex.hpp">
       <Filter>Source Files\native\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_renderer.hpp">
@@ -954,6 +954,9 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\render_target.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_vertex.ipp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1111,7 +1114,7 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_error.cpp">
       <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_helpers.cpp">
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_vertex.cpp">
       <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_renderer.cpp">

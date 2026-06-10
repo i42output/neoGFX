@@ -30,7 +30,7 @@
 #include <neogfx/gfx/i_standard_shader_program.hpp>
 #include "opengl.hpp"
 #include "opengl_texture_manager.hpp"
-#include "opengl_helpers.hpp"
+#include "opengl_vertex.hpp"
 
 namespace neogfx
 {

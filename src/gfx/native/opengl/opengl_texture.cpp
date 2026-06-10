@@ -22,7 +22,7 @@
 #include <neogfx/gfx/i_texture_manager.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include "opengl_error.hpp"
-#include "opengl_helpers.hpp"
+#include "opengl_vertex.hpp"
 #include "opengl_rendering_context.hpp"
 #include "opengl_texture.hpp"
 

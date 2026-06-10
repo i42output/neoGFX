@@ -30,7 +30,7 @@
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gfx/i_rendering_context.hpp>
 #include "opengl_surface.hpp"
-#include "opengl_helpers.hpp"
+#include "opengl_vertex.hpp"
 #include "opengl_texture.hpp"
 #include "opengl_rendering_context.hpp"
 

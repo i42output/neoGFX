@@ -1,4 +1,4 @@
-// opengl_helpers.cpp
+// opengl_vertex.cpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -19,10 +19,14 @@
 
 #include <neogfx/neogfx.hpp>
 
-#include "opengl_helpers.hpp"
+#include "opengl_vertex.hpp"
+#include "opengl_vertex.ipp"
 
 namespace neogfx
 {
+    template class opengl_buffer<standard_vertex>;
+    template class opengl_vertex_buffer<>;
+
     use_shader_program::use_shader_program(i_rendering_context& aContext, i_shader_program& aShaderProgram, scalar aOpacity) :
         iRenderingContext{ aContext },
         iCurrentProgram{ aShaderProgram },
