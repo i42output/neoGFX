@@ -26,6 +26,34 @@ namespace neogfx
 {
     template class opengl_buffer<standard_vertex>;
     template class opengl_vertex_buffer<>;
+    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::xyz)>;
+    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::rgba)>;
+    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::st)>;
+    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::xyzw)>;
+    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::abcd)>;
+    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::efgh)>;
+    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::ijkl)>;
+    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::mnop)>;
+    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::abcd2)>;
+    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::efgh2)>;
+
+    opengl_vertex_array::opengl_vertex_array()
+    {
+        glCheck(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &iPreviousVertexArrayBindingHandle));
+        glCheck(glGenVertexArrays(1, &iHandle));
+        bind();
+    }
+
+    opengl_vertex_array::~opengl_vertex_array()
+    {
+        glCheck(glBindVertexArray(iPreviousVertexArrayBindingHandle));
+        glCheck(glDeleteVertexArrays(1, &iHandle));
+    }
+
+    void opengl_vertex_array::bind()
+    {
+        glCheck(glBindVertexArray(iHandle));
+    }
 
     use_shader_program::use_shader_program(i_rendering_context& aContext, i_shader_program& aShaderProgram, scalar aOpacity) :
         iRenderingContext{ aContext },

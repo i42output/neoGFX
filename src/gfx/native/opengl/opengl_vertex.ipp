@@ -23,24 +23,6 @@
 
 namespace neogfx
 {
-    inline opengl_vertex_array::opengl_vertex_array()
-    {
-        glCheck(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &iPreviousVertexArrayBindingHandle));
-        glCheck(glGenVertexArrays(1, &iHandle));
-        bind();
-    }
-    
-    inline opengl_vertex_array::~opengl_vertex_array()
-    {
-        glCheck(glBindVertexArray(iPreviousVertexArrayBindingHandle));
-        glCheck(glDeleteVertexArrays(1, &iHandle));
-    }
-    
-    inline void opengl_vertex_array::bind()
-    {
-        glCheck(glBindVertexArray(iHandle));
-    }
-
     template <typename T>
     inline opengl_buffer<T>::opengl_buffer(size_type aCapacity)
     {
