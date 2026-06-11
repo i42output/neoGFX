@@ -243,7 +243,7 @@ namespace neogfx
     template <typename T>
     inline void opengl_buffer<T>::need(size_type aExtra)
     {
-        if (!room_for(aExtra))
+        if (aExtra > room())
             grow(std::max<size_type>(static_cast<size_type>((capacity() + aExtra) * 1.5), 16384));
     }
 
