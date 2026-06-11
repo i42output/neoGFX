@@ -207,7 +207,7 @@ namespace neogfx
     {
         if (mapped())
         {
-            glCheck(glFlushMappedNamedBufferRange(handle(), aOffset, aElements * sizeof(value_type)));
+            glCheck(glFlushMappedNamedBufferRange(handle(), aOffset * sizeof(value_type), aElements * sizeof(value_type)));
         }
         else
             throw std::logic_error("neogfx::opengl_buffer<T>::flush: buffer not mapped!");
@@ -292,22 +292,25 @@ namespace neogfx
         return std::make_pair(freeBlocks, std::next(freeBlocks->begin(), std::distance(freeBlocks->cbegin(), result->second)));
     }
 
-    template <typename T>
+    template <typename T>   
     inline void opengl_buffer<T>::grow(size_type aCapacity)
     {
-        opengl_buffer<T> temp{ aCapacity };
-        if (!empty())
+        unmap();
+
         {
-            map();
-            std::copy(begin(), end(), std::back_inserter(temp));
-            unmap();
+            opengl_buffer<T> temp{ aCapacity };
+            if (!empty())
+                glCheck(glCopyNamedBufferSubData(iBufferName, temp.iBufferName,
+                    0, 0, size() * sizeof(value_type)));
+            std::swap(iBufferName, temp.iBufferName);
+            std::swap(iCapacity, temp.iCapacity);
+            std::swap(iMemory, temp.iMemory);
         }
-        std::swap(iBufferName, temp.iBufferName);
-        std::swap(iCapacity, temp.iCapacity);
-        std::swap(iSize, temp.iSize);
-        std::swap(iMemory, temp.iMemory);
-        std::swap(iFreeBlocks, temp.iFreeBlocks);
-        iOwner->buffer_grown();
+
+        if (iOwner)
+            iOwner->buffer_grown();
+        else
+            throw no_owner{};
     }
 
     template <typename Vertex, typename Attrib>
