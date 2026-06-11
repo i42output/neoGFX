@@ -61,22 +61,7 @@ namespace neogfx
         template <typename... Args>
         void emplace_back(Args&&... args)
         {
-            if (!room_for(1))
-                draw_and_execute();
             vertices().emplace_back(std::forward<Args>(args)...);
-        }
-        template <typename Iter>
-        iterator insert(const_iterator aPos, Iter aFirst, Iter aLast)
-        {
-            if (room_for(std::distance(aFirst, aLast)))
-                return vertices().insert(aPos, aFirst, aLast);
-            else
-            {
-                draw_and_execute();
-                if (!room_for(std::distance(aFirst, aLast)))
-                    vertices().reserve(std::distance(aFirst, aLast));
-                return vertices().insert(vertices().begin(), aFirst, aLast);
-            }
         }
     public:
         std::size_t room() const;

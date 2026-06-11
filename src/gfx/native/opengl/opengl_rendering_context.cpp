@@ -2652,16 +2652,9 @@ namespace neogfx
 
         auto& vertexBuffer = static_cast<opengl_vertex_buffer<>&>(service<i_rendering_engine>().vertex_buffer(aVertexProvider));
         auto& vertices = vertexBuffer.vertices();
-        if (!vertices.room_for(vertexCount - cachedVertexCount))
-        {
-            vertices.clear();
-            for (auto md = aFirst; md != aLast; ++md)
-            {
-                auto& meshDrawable = *md;
-                if (meshDrawable.entity != null_entity)
-                    game::set_render_cache_invalid_no_lock(*cache, meshDrawable.entity);
-            }
-        }
+        auto const extra = vertexCount - cachedVertexCount;
+        if (!vertices.room_for(extra))
+            vertices.need(vertices.capacity() + extra);
 
         std::optional<neolib::cookie> textureId;
         optional_aabb_2df materialSubtexture;

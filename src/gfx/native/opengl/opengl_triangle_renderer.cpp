@@ -32,8 +32,6 @@ namespace neogfx
         iUseBarrier{ aUseBarrier },
         iDrawOnExit{ true }
     {
-        if (!room_for(aNeed))
-            draw_and_execute();
         set_transformation(optional_mat44{});
         if (!room_for(aNeed) && !need(aNeed))
             throw not_enough_room();
@@ -48,8 +46,6 @@ namespace neogfx
         iUseBarrier{ aUseBarrier },
         iDrawOnExit{ true }
     {
-        if (!room_for(aNeed))
-            draw_and_execute();
         set_transformation(aTransformation);
         if (!room_for(aNeed) && !need(aNeed))
             throw not_enough_room();
@@ -64,8 +60,6 @@ namespace neogfx
         iUseBarrier{ aUseBarrier },
         iDrawOnExit{ true }
     {
-        if (!room_for(aNeed))
-            draw_and_execute();
         set_transformation(optional_mat44{});
         if (!room_for(aNeed) && !need(aNeed))
             throw not_enough_room();
@@ -80,8 +74,6 @@ namespace neogfx
         iUseBarrier{ aUseBarrier },
         iDrawOnExit{ true }
     {
-        if (!room_for(aNeed))
-            draw_and_execute();
         set_transformation(aTransformation);
         if (!room_for(aNeed) && !need(aNeed))
             throw not_enough_room();
@@ -150,8 +142,6 @@ namespace neogfx
 
     void opengl_triangle_renderer::push_back(value_type const& aVertex)
     {
-        if (!room_for(1))
-            draw_and_execute();
         vertices().push_back(aVertex);
     }
 
