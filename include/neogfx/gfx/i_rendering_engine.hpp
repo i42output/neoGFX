@@ -165,6 +165,7 @@ namespace neogfx
         virtual const i_vertex_buffer& vertex_buffer(i_vertex_provider& aProvider) const = 0;
         virtual i_vertex_buffer& vertex_buffer(i_vertex_provider& aProvider) = 0;
         virtual void execute_vertex_buffers() = 0;
+        virtual void clear_non_cacheable_vertex_buffers() = 0;
     public:
         virtual i_ping_pong_buffer& ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) = 0;
         virtual i_ping_pong_buffer& ping_pong_buffer2(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) = 0;

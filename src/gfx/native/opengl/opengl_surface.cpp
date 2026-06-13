@@ -128,6 +128,8 @@ namespace neogfx
     {
         sync();
 
+        rendering_engine().clear_non_cacheable_vertex_buffers();
+
         if (need_to_create_frame_buffer())
             create_frame_buffer();
 

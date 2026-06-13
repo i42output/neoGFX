@@ -801,7 +801,6 @@ namespace neogfx
             cursor().set_position(iText.size(), false);
         }
 
-
         if ((iCaps & text_edit_caps::TranslateEmoticons) == text_edit_caps::TranslateEmoticons)
             service<i_emoticon_translator>().activate(*this);
 

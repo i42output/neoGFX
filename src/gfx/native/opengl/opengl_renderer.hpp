@@ -146,6 +146,7 @@ namespace neogfx
         const i_vertex_buffer& vertex_buffer(i_vertex_provider& aProvider) const override;
         i_vertex_buffer& vertex_buffer(i_vertex_provider& aProvider) override;
         void execute_vertex_buffers() override;
+        void clear_non_cacheable_vertex_buffers() override;
     public:
         i_ping_pong_buffer& ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) override;
         i_ping_pong_buffer& ping_pong_buffer2(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) override;

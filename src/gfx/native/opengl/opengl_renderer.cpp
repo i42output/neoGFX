@@ -298,6 +298,16 @@ namespace neogfx
         }
     }
 
+    void opengl_renderer::clear_non_cacheable_vertex_buffers()
+    {
+        for (auto& vb : iVertexBuffers)
+        {
+            auto& buffer = vb.second;
+            if (!buffer.vertex_provider().cacheable())
+                buffer.vertices().clear();
+        }
+    }
+
     i_ping_pong_buffer& opengl_renderer::ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
     {
         if (!iPingPongBuffer1s)
