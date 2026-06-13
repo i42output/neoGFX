@@ -225,6 +225,7 @@ namespace neogfx
             iCreatingWindow{ 0 },
             iActiveTarget{ nullptr }
         {
+            SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
             timeBeginPeriod(1);  // ← before anything timing-sensitive
 
             if (aRenderer != neogfx::renderer::None)
@@ -565,6 +566,7 @@ namespace neogfx
                 WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
                 WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
                 WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+                WGL_SUPPORT_GDI_ARB, GL_FALSE,
                 WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
                 WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
                 WGL_COLOR_BITS_ARB, 32,
@@ -582,6 +584,7 @@ namespace neogfx
 
             PIXELFORMATDESCRIPTOR pfd = {};
             ::DescribePixelFormat(static_cast<HDC>(aNativeSurfaceDevinceHandle), pixelFormat, sizeof(pfd), &pfd);
+            pfd.dwFlags &= ~PFD_SUPPORT_COMPOSITION;
             if (!::SetPixelFormat(static_cast<HDC>(aNativeSurfaceDevinceHandle), pixelFormat, &pfd))
                 throw failed_to_set_pixel_format(GetLastErrorText());
 

@@ -315,6 +315,11 @@ int main(int argc, char* argv[])
                     smc = std::nullopt;
             });
 
+        window.button5.Clicked([&]()
+            {
+                window.button5.set_text(window.textEdit.text());
+            });
+
         for (std::int32_t i = 1; i <= 100; ++i)
             window.dropList3.model().insert_item(window.dropList3.model().end(), "Example_"_t + boost::lexical_cast<std::string>(i));
         neolib::random prng;

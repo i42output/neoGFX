@@ -817,7 +817,8 @@ namespace neogfx
 
             bool hadStrongSurfaces = service<i_surface_manager>().any_strong_surfaces();
 
-            didSome = (thread().do_work(neolib::yield_type::NoYield) || didSome);
+            didSome = (thread().do_work(neolib::yield_type::NoYield, std::chrono::steady_clock::now() + std::chrono::milliseconds{ 1 }) || didSome);
+
             didSome = (do_process_events() || didSome);
 
             bool lastWindowClosed = hadStrongSurfaces && !service<i_surface_manager>().any_strong_surfaces();

@@ -25,7 +25,7 @@
 
 namespace neogfx
 {
-    widget_timer::widget_timer(i_widget& aWidget, std::function<void(widget_timer&)> aCallback, const duration_type& aDuration_s, bool aInitialWait) :
+    widget_timer::widget_timer(i_widget& aWidget, std::function<void(widget_timer&)> aCallback, const duration_type& aDuration_s, bool aInitialWait, std::source_location const& aCallbackInfo) :
         callback_timer{
             service<i_async_task>(),
             [this, &aWidget, aCallback](callback_timer& aTimer)
@@ -34,17 +34,17 @@ namespace neogfx
                     iContextDestroyed = aWidget.root().surface();
                 if (iContextDestroyed == std::nullopt || !*iContextDestroyed)
                     aCallback(*this);
-            }, aDuration_s, aInitialWait }
+            }, aDuration_s, aInitialWait, aCallbackInfo }
     {
     }
-    widget_timer::widget_timer(i_widget& aWidget, const i_lifetime& aContext, std::function<void(widget_timer&)> aCallback, const duration_type& aDuration_s, bool aInitialWait) :
+    widget_timer::widget_timer(i_widget& aWidget, const i_lifetime& aContext, std::function<void(widget_timer&)> aCallback, const duration_type& aDuration_s, bool aInitialWait, std::source_location const& aCallbackInfo) :
         callback_timer{
             service<i_async_task>(),
             aContext,
             [this, &aWidget, aCallback](callback_timer& aTimer)
             {
                 aCallback(*this);
-            }, aDuration_s, aInitialWait }
+            }, aDuration_s, aInitialWait, aCallbackInfo }
     {
     }
 }

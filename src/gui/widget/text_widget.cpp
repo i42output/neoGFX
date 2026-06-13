@@ -199,7 +199,7 @@ namespace neogfx
         {
             TextGeometryChanged();
             if (visible() || effective_size_policy().ignore_visibility())
-                update_layout(true, true);
+                update_layout();
         }
         update();
     }
@@ -228,7 +228,7 @@ namespace neogfx
             {
                 TextGeometryChanged();
                 if (visible() || effective_size_policy().ignore_visibility())
-                    update_layout(true, true);
+                    update_layout();
             }
             update();
         }
@@ -245,7 +245,7 @@ namespace neogfx
             {
                 TextGeometryChanged();
                 if (visible() || effective_size_policy().ignore_visibility())
-                    update_layout(true, true);
+                    update_layout();
             }
         }
     }
@@ -266,7 +266,7 @@ namespace neogfx
         {
             iFlags = aFlags;
             reset_cache();
-            update_layout(true, true);
+            update_layout();
         }
     }
 
@@ -425,7 +425,7 @@ namespace neogfx
         auto style_changed = [&]()
         {
             reset_cache();
-            update_layout(true, true);
+            update_layout();
             update();
         };
         iSink += service<i_app>().current_style_changed([this, style_changed](style_aspect aAspect)

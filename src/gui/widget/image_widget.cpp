@@ -137,7 +137,7 @@ namespace neogfx
         {
             ImageGeometryChanged();
             if (visible() || effective_size_policy().ignore_visibility())
-                update_layout(true, true);
+                update_layout();
         }
         update();
     }
@@ -152,7 +152,7 @@ namespace neogfx
             {
                 ImageGeometryChanged();
                 if (visible() || effective_size_policy().ignore_visibility())
-                    update_layout(true, true);
+                    update_layout();
             }
             update();
         }

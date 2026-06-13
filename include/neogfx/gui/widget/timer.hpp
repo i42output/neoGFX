@@ -32,11 +32,11 @@ namespace neogfx
     class widget_timer : public neolib::callback_timer
     {
     public:
-        widget_timer(i_widget& aWidget, std::function<void(widget_timer&)> aCallback, const duration_type& aDuration_s, bool aInitialWait = true);
+        widget_timer(i_widget& aWidget, std::function<void(widget_timer&)> aCallback, const duration_type& aDuration_s, bool aInitialWait = true, std::source_location const& aCallbackInfo = std::source_location::current());
         template <typename Context>
-        widget_timer(i_widget& aWidget, const Context& aContext, std::function<void(widget_timer&)> aCallback, const duration_type& aDuration_s, bool aInitialWait = true) :
-            widget_timer{ aWidget, dynamic_cast<const i_lifetime&>(aContext), aCallback, aDuration_s, aInitialWait } {}
-        widget_timer(i_widget& aWidget, const i_lifetime& aContext, std::function<void(widget_timer&)> aCallback, const duration_type& aDuration_s, bool aInitialWait = true);
+        widget_timer(i_widget& aWidget, const Context& aContext, std::function<void(widget_timer&)> aCallback, const duration_type& aDuration_s, bool aInitialWait = true, std::source_location const& aCallbackInfo = std::source_location::current()) :
+            widget_timer{ aWidget, dynamic_cast<const i_lifetime&>(aContext), aCallback, aDuration_s, aInitialWait, aCallbackInfo } {}
+        widget_timer(i_widget& aWidget, const i_lifetime& aContext, std::function<void(widget_timer&)> aCallback, const duration_type& aDuration_s, bool aInitialWait = true, std::source_location const& aCallbackInfo = std::source_location::current());
     public:
         std::optional<destroyed_flag> iContextDestroyed;
     };
