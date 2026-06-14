@@ -584,7 +584,6 @@ namespace neogfx
 
             PIXELFORMATDESCRIPTOR pfd = {};
             ::DescribePixelFormat(static_cast<HDC>(aNativeSurfaceDevinceHandle), pixelFormat, sizeof(pfd), &pfd);
-            pfd.dwFlags &= ~PFD_SUPPORT_COMPOSITION;
             if (!::SetPixelFormat(static_cast<HDC>(aNativeSurfaceDevinceHandle), pixelFormat, &pfd))
                 throw failed_to_set_pixel_format(GetLastErrorText());
 
