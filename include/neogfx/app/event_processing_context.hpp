@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neolib/task/time_slice.hpp>
 #include <neogfx/core/async_task.hpp>
 #include <neogfx/app/i_event_processing_context.hpp>
 
@@ -39,5 +40,6 @@ namespace neogfx
         bool process_events() override;
     private:
         std::string iName;
+        std::optional<neolib::scoped_time_slice> iSts;
     };
 }

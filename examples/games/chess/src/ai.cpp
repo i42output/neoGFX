@@ -158,9 +158,9 @@ namespace chess
     }
 
     template <typename Representation, player Player>
-    bool ai<Representation, Player>::do_work(neolib::yield_type aYieldType, std::optional<std::chrono::steady_clock::time_point> const& aDeadline)
+    bool ai<Representation, Player>::do_work(neolib::yield_type aYieldType)
     {
-        bool didWork = async_task::do_work(aYieldType, aDeadline);
+        bool didWork = async_task::do_work(aYieldType);
 
         std::unique_lock<std::mutex> lk{ iSignalMutex };
         if (!iFinished)

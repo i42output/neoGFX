@@ -62,7 +62,7 @@ namespace chess
     public:
         std::uint64_t nodes_per_second() const override;
     private:
-        bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield, std::optional<std::chrono::steady_clock::time_point> const& aDeadline = {}) override;
+        bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override;
     private:
         game_tree_node const* execute();
     private:
