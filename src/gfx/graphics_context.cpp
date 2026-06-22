@@ -986,7 +986,6 @@ namespace neogfx
         if (iRenderWidget != nullptr)
         {
             iRenderWidget = nullptr;
-            set_logical_coordinate_system(iRenderTarget.logical_coordinate_system());
             set_origin(point{});
             set_extents(iRenderTarget.extents());
         }

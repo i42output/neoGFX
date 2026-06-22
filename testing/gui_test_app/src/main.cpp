@@ -15,6 +15,22 @@ void signal_handler(int signal)
     std::_Exit(EXIT_FAILURE);
 }
 
+class test_widget : public ng::widget<>
+{
+public:
+    using widget::widget;
+public:
+    ng::logical_coordinate_system logical_coordinate_system() const final
+    {
+        return ng::logical_coordinate_system::AutomaticGame;
+    }
+public:
+    void paint(ng::i_graphics_context& aGc) const final
+    {
+        aGc.flush();
+    }
+};
+
 class window : ng::window
 {
 public:
@@ -28,16 +44,18 @@ public:
 
         iChild.Painting([](ng::i_graphics_context& aGc)
             {
-                aGc.fill_rect(ng::rect{ ng::point{}, ng::size{ 10.0 } }, ng::color::Red);
+                aGc.flush();
+                //aGc.fill_rect(ng::rect{ ng::point{}, ng::size{ 10.0 } }, ng::color::Red);
             });
 
-        tex1.emplace(ng::size{ 20.0 }, 1.0, ng::texture_sampling::Normal);
+        tex1.emplace(ng::size{ 40.0 }, 1.0, ng::texture_sampling::Normal);
         ng::graphics_context gc{ tex1.value() };
         {
             ng::scoped_render_target srt{ gc };
-            gc.fill_rect(ng::rect{ ng::point{ 5.0 }, ng::size{ 10.0 } }, ng::color::White);
-            gc.draw_line(ng::point{ 0.0 }, ng::point{ 20.0 }, ng::color::White);
-            gc.draw_line(ng::point{ 20.0, 0.0 }, ng::point{ 0.0, 20.0 }, ng::color::White);
+//            gc.fill_rect(ng::rect{ ng::point{ 5.0 }, ng::size{ 10.0 } }, ng::color::White);
+  //          gc.draw_line(ng::point{ 0.0 }, ng::point{ 20.0 }, ng::color::White);
+    //        gc.draw_line(ng::point{ 20.0, 0.0 }, ng::point{ 0.0, 20.0 }, ng::color::White);
+            gc.draw_text(ng::point{}, "A", gc.default_font().with_size(24.0), ng::color::Yellow);
         }
 
         tex2 = ng::colored_icon(*tex1, ng::color::LightGreen);
@@ -73,8 +91,9 @@ public:
     void paint(ng::i_graphics_context& aGc) const override
     {
         auto const clientRect = client_rect(false);
-        aGc.draw_line(clientRect.top_left(), clientRect.bottom_right(), ng::color::White);
-        aGc.draw_line(clientRect.bottom_left(), clientRect.top_right(), ng::color::White);
+   //     aGc.draw_line(clientRect.top_left(), clientRect.bottom_right(), ng::color::White);
+   //     aGc.draw_line(clientRect.bottom_left(), clientRect.top_right(), ng::color::White);
+        aGc.draw_texture(ng::point{ 40.0, 40.0 }, *tex1);
     }
     void mouse_button_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifier aKeyModifier) final
     {

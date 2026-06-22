@@ -175,12 +175,13 @@ namespace neogfx
         vec4f mnop;
         vec4f abcd2;
         vec4f efgh2;
+        vec3f debug;
         standard_vertex(const vec3f& xyz = vec3f{}) :
             xyz{ xyz }
         {
         }
-        standard_vertex(const vec3f& xyz, const vec4f& rgba, const vec2f& st = {}, const vec4f& xyzw = {}, const vec4f& abcd = {}, const vec4f& efgh = {}, const vec4f& ijkl = {}, const vec4f mnop = {}, const vec4f abcd2 = {}, const vec4f efgh2 = {}) :
-            xyz{ xyz }, rgba{ rgba }, st{ st }, xyzw{ xyzw }, abcd{ abcd }, efgh{ efgh }, ijkl{ ijkl }, mnop{ mnop }, abcd2{ abcd2 }, efgh2{ efgh2 }
+        standard_vertex(const vec3f& xyz, const vec4f& rgba, const vec2f& st = {}, const vec4f& xyzw = {}, const vec4f& abcd = {}, const vec4f& efgh = {}, const vec4f& ijkl = {}, const vec4f mnop = {}, const vec4f abcd2 = {}, const vec4f efgh2 = {}, const vec3f debug = {}) :
+            xyz{ xyz }, rgba{ rgba }, st{ st }, xyzw{ xyzw }, abcd{ abcd }, efgh{ efgh }, ijkl{ ijkl }, mnop{ mnop }, abcd2{ abcd2 }, efgh2{ efgh2 }, debug{ debug }
         {
         }
         struct offset
@@ -195,6 +196,7 @@ namespace neogfx
             static constexpr std::size_t mnop = ijkl + sizeof(decltype(standard_vertex::ijkl));
             static constexpr std::size_t abcd2 = mnop + sizeof(decltype(standard_vertex::mnop));
             static constexpr std::size_t efgh2 = abcd2 + sizeof(decltype(standard_vertex::abcd2));
+            static constexpr std::size_t debug = efgh2 + sizeof(decltype(standard_vertex::efgh2));
         };
     };
 
@@ -238,6 +240,7 @@ namespace neogfx
         std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::mnop)>> iVertexFunction4AttribArray;
         std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::abcd2)>> iVertexFunction5AttribArray;
         std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::efgh2)>> iVertexFunction6AttribArray;
+        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::debug)>> iVertexDebugAttribArray;
     };
 
     class use_shader_program

@@ -49,7 +49,6 @@ namespace neogfx
         ~web_view_canvas();
         // i_widget
     public:
-        neogfx::logical_coordinate_system logical_coordinate_system() const final;
         void resized() final;
         void paint(i_graphics_context& aGc) const final;
         bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier) final;

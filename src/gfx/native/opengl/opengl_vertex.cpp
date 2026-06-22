@@ -36,6 +36,7 @@ namespace neogfx
     template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::mnop)>;
     template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::abcd2)>;
     template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::efgh2)>;
+    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::debug)>;
 
     opengl_vertex_array::opengl_vertex_array()
     {

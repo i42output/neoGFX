@@ -444,6 +444,15 @@ namespace neogfx
                 standard_vertex_attribute_name(vertex_buffer_type::Function6));
         else
             iVertexFunction6AttribArray = std::nullopt;
+        if (aShaderProgram.supports(vertex_buffer_type::Debug))
+            iVertexDebugAttribArray.emplace(
+                false,
+                sizeof(vertex_type),
+                vertex_type::offset::debug,
+                aShaderProgram,
+                standard_vertex_attribute_name(vertex_buffer_type::Debug));
+        else
+            iVertexDebugAttribArray = std::nullopt;
         if (aShaderProgram.type() == shader_program_type::Standard)
             static_cast<i_standard_vertex_shader&>(aShaderProgram.vertex_shader()).set_transformation_matrix(iTransformation);
         vertex_buffer::attach_shader(aContext, aShaderProgram);
@@ -535,5 +544,7 @@ namespace neogfx
             iVertexFunction5AttribArray->update(iBuffer);
         if (iVertexFunction6AttribArray)
             iVertexFunction6AttribArray->update(iBuffer);
+        if (iVertexDebugAttribArray)
+            iVertexDebugAttribArray->update(iBuffer);
     }
 }

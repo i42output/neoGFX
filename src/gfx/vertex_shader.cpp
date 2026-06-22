@@ -37,6 +37,7 @@ namespace neogfx
         auto& function4 = add_attribute<vec4f>("VertexFunction4"_s, 7u);
         auto& function5 = add_attribute<vec4f>("VertexFunction5"_s, 8u);
         auto& function6 = add_attribute<vec4f>("VertexFunction6"_s, 9u);
+        add_attribute<vec3f>("VertexDebug"_s, 10u);
         add_out_variable<vec3f>("Coord"_s, 0u).link(coord);
         add_out_variable<vec4f>("Color"_s, 1u).link(color);
         add_out_variable<vec4f>("Function0"_s, 3u, true).link(function0);

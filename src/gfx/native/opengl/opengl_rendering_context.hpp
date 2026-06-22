@@ -42,6 +42,7 @@ namespace neogfx
     class opengl_rendering_context : public i_rendering_context
     {
     public:
+        template <typename Tag>
         class standard_batching : public i_vertex_provider
         {
         public:
@@ -346,9 +347,10 @@ namespace neogfx
             static std::atomic<std::uint64_t> sGeneration = {};
             return sGeneration;
         }
-        static standard_batching& as_vertex_provider()
+        template <typename Tag = void>
+        static standard_batching<Tag>& as_vertex_provider()
         {
-            static standard_batching sProvider;
+            static standard_batching<Tag> sProvider;
             return sProvider;
         }
     private:

@@ -21,8 +21,11 @@
 
 #include <cef/include/views/cef_window.h>
 
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/window/i_native_window.hpp>
 #include <neogfx/gui/window/window_events.hpp>
+#include <neogfx/game/mesh.hpp>
+#include <neogfx/game/ecs_helpers.hpp>
 
 #include "web_view_canvas.hpp"
 
@@ -54,11 +57,6 @@ namespace neogfx
     {
     }
 
-    logical_coordinate_system web_view_canvas::logical_coordinate_system() const
-    {
-        return neogfx::logical_coordinate_system::AutomaticGame;
-    }
-
     void web_view_canvas::resized()
     {
         base_type::resized();
@@ -71,7 +69,7 @@ namespace neogfx
         base_type::paint(aGc);
 
         auto const clientRect = client_rect(false);
-        aGc.draw_texture(clientRect, back_buffer(), rect{ point{}, clientRect.extents() });
+        aGc.draw_texture(to_ecs_component(game_rect{ clientRect }), back_buffer(), rect{ point{}, clientRect.extents() });
     }
 
     namespace
@@ -362,11 +360,13 @@ namespace neogfx
         auto const clientRect = client_rect(false);
         auto const desiredBackBufferExtents = dpi_scale(clientRect.extents());
         auto const currentBackBufferExtents = iBackBuffer ? iBackBuffer->extents() : size{};
-        if (!iBackBuffer || 
-            currentBackBufferExtents.cx < desiredBackBufferExtents.cx || 
+        if (!iBackBuffer ||
+            currentBackBufferExtents.cx < desiredBackBufferExtents.cx ||
             currentBackBufferExtents.cy < desiredBackBufferExtents.cy)
+        {
             iBackBuffer = service<i_texture_manager>().create_texture(
                 desiredBackBufferExtents.max(currentBackBufferExtents), 1.0, texture_sampling::Normal, texture_data_format::BGRA);
+        }
         return *iBackBuffer;
     }
 
