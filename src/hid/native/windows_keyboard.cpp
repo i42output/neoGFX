@@ -123,7 +123,7 @@ namespace neogfx
             ScanCode_B,              ScanCode_N,              ScanCode_M,           ScanCode_COMMA,          ScanCode_PERIOD,  ScanCode_SLASH,          ScanCode_RSHIFT,         ScanCode_PRINTSCREEN,
             ScanCode_LALT,           ScanCode_SPACE,          ScanCode_CAPSLOCK,    ScanCode_F1,             ScanCode_F2,      ScanCode_F3,             ScanCode_F4,             ScanCode_F5,
             ScanCode_F6,             ScanCode_F7,             ScanCode_F8,          ScanCode_F9,             ScanCode_F10,     ScanCode_NUMLOCKCLEAR,   ScanCode_SCROLLLOCK,     ScanCode_HOME,
-            ScanCode_UP,             ScanCode_PAGEUP,         ScanCode_KEYPAD_MINUS,    ScanCode_LEFT,           ScanCode_KEYPAD_5,    ScanCode_RIGHT,          ScanCode_KEYPAD_PLUS,        ScanCode_END,
+            ScanCode_UP,             ScanCode_PAGEUP,         ScanCode_KEYPAD_MINUS,ScanCode_LEFT,           ScanCode_KEYPAD_5,ScanCode_RIGHT,          ScanCode_KEYPAD_PLUS,    ScanCode_END,
             ScanCode_DOWN,           ScanCode_PAGEDOWN,       ScanCode_INSERT,      ScanCode_DELETE,         ScanCode_UNKNOWN, ScanCode_UNKNOWN,        ScanCode_NONUSBACKSLASH, ScanCode_F11,
             ScanCode_F12,            ScanCode_PAUSE,          ScanCode_UNKNOWN,     ScanCode_LGUI,           ScanCode_RGUI,    ScanCode_APPLICATION,    ScanCode_UNKNOWN,        ScanCode_UNKNOWN,
             ScanCode_UNKNOWN,        ScanCode_UNKNOWN,        ScanCode_UNKNOWN,     ScanCode_UNKNOWN,        ScanCode_F13,     ScanCode_F14,            ScanCode_F15,            ScanCode_F16,
@@ -409,7 +409,8 @@ namespace neogfx
 
         bool keyboard::is_key_pressed(scan_code_e aScanCode) const
         {
-            return ::GetAsyncKeyState(iKeymap[aScanCode].vk) >> 1;
+            auto const vk = iKeymap[aScanCode].vk;
+            return ::GetAsyncKeyState(vk) >> 1;
         }
 
         keyboard_locks keyboard::locks() const
@@ -476,7 +477,7 @@ namespace neogfx
                 if (scanCode == ScanCode_UNKNOWN)
                     continue;
 
-                auto vk = MapVirtualKey(i, MAPVK_VSC_TO_VK);
+                auto vk = MapVirtualKey(i, MAPVK_VSC_TO_VK_EX);
                 keymap[scanCode].vk = vk;
                 if (vk)
                 {
@@ -494,6 +495,11 @@ namespace neogfx
                 else
                     keymap[scanCode].keyCode = KeyCode_UNKNOWN;
             }
+
+            keymap[ScanCode_RALT].vk = VK_RMENU;
+            keymap[ScanCode_RALT].keyCode = static_cast<key_code_e>(NEOGFX_SCANCODE_TO_KEYCODE(ScanCode_RALT));
+            keymap[ScanCode_RCTRL].vk = VK_RCONTROL;
+            keymap[ScanCode_RCTRL].keyCode = static_cast<key_code_e>(NEOGFX_SCANCODE_TO_KEYCODE(ScanCode_RCTRL));
 
             set_keymap(keymap);
         }
