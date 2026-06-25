@@ -89,7 +89,7 @@ namespace neogfx
         virtual void target_release() const = 0;
     public:
         virtual neogfx::color_space color_space() const = 0;
-        virtual color read_pixel(const point& aPosition) const = 0;
+        virtual color read_pixel(const point& aPosition, bool aCreateCache = true) const = 0;
     public:
         virtual std::unique_ptr<i_rendering_context> create_rendering_context(blending_mode aBlendingMode = blending_mode::Default) const = 0; // todo: use ref_ptr
         virtual void begin_rendering() const = 0;

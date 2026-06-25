@@ -708,7 +708,7 @@ namespace neogfx
     }
 
     template <typename T>
-    color vulkan_texture<T>::read_pixel(const point& aPosition) const
+    color vulkan_texture<T>::read_pixel(const point& aPosition, bool aCreateCache) const
     {
         if (sampling() != neogfx::texture_sampling::Multisample)
         {

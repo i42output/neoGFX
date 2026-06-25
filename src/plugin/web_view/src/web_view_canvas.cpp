@@ -33,6 +33,7 @@ namespace neogfx
 {
     web_view_canvas::web_view_canvas(i_widget& aParent, i_optional<i_string> const& aUrl, bool aTransparent) :
         base_type{ aParent },
+        iAnimator{ *this, [this](widget_timer& aTimer) { aTimer.again(); animate(); }, std::chrono::milliseconds{ 1 } },
         iUrl{ aUrl.has_value() ? decltype(iUrl){ aUrl.value().to_std_string_view() } : std::nullopt }
     {
         if (!aTransparent)
@@ -44,6 +45,7 @@ namespace neogfx
 
     web_view_canvas::web_view_canvas(i_layout& aLayout, i_optional<i_string> const& aUrl, bool aTransparent) :
         base_type{ aLayout },
+        iAnimator{ *this, [this](widget_timer& aTimer) { aTimer.again(); animate(); }, std::chrono::milliseconds{ 1 } },
         iUrl{ aUrl.has_value() ? decltype(iUrl){ aUrl.value().to_std_string_view() } : std::nullopt }
     {
         if (!aTransparent)
@@ -61,6 +63,8 @@ namespace neogfx
     {
         base_type::resized();
 
+        back_buffer();
+
         iBrowser->GetHost()->WasResized();
     }
 
@@ -69,6 +73,7 @@ namespace neogfx
         base_type::paint(aGc);
 
         auto const clientRect = client_rect(false);
+        aGc.fill_rect(clientRect, color::Yellow);
         aGc.draw_texture(to_ecs_component(game_rect{ clientRect }), back_buffer(), rect{ point{}, clientRect.extents() });
     }
 
@@ -358,7 +363,7 @@ namespace neogfx
     {
         scoped_units_context suc{ *this };
         auto const clientRect = client_rect(false);
-        auto const desiredBackBufferExtents = dpi_scale(clientRect.extents());
+        auto const desiredBackBufferExtents = clientRect.extents();
         auto const currentBackBufferExtents = iBackBuffer ? iBackBuffer->extents() : size{};
         if (!iBackBuffer ||
             currentBackBufferExtents.cx < desiredBackBufferExtents.cx ||
@@ -367,7 +372,22 @@ namespace neogfx
             iBackBuffer = service<i_texture_manager>().create_texture(
                 desiredBackBufferExtents.max(currentBackBufferExtents), 1.0, texture_sampling::Normal, texture_data_format::BGRA);
         }
+        iBackBufferData.resize(static_cast<std::size_t>(desiredBackBufferExtents.cx * desiredBackBufferExtents.cy) * 4);
         return *iBackBuffer;
+    }
+
+    void web_view_canvas::animate()
+    {
+        auto const clientRect = client_rect(false).as<i32>();
+        for (auto const& dirtyRect : iDirtyRects)
+        {
+            back_buffer().set_pixels(
+                dirtyRect.as<scalar>(),
+                static_cast<const void*>(iBackBufferData.data() + (clientRect.cx * dirtyRect.y + dirtyRect.x) * 4),
+                clientRect.cx);
+            update(dirtyRect);
+        }
+        iDirtyRects.clear();
     }
 
     CefRefPtr<CefLoadHandler> web_view_canvas::GetLoadHandler()
@@ -463,13 +483,21 @@ namespace neogfx
 
     void web_view_canvas::OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList& dirtyRects, const void* buffer, int width, int height)
     {
+        if (type != PET_VIEW) 
+            return; ///< @todo Add popup support
+        auto const clientRect = client_rect(false).as<i32>();
         for (auto const& dirtyRect : dirtyRects)
         {
-            rect const updateRect{ basic_point<int>{ dirtyRect.x, dirtyRect.y }, basic_size<int>{ dirtyRect.width, dirtyRect.height } };
-            back_buffer().set_pixels(
-                updateRect, 
-                static_cast<std::byte const*>(buffer) + 4 * (width * dirtyRect.y + dirtyRect.x), width);
-            update(updateRect);
+            auto const safeDirtyRect = rect_i32{ basic_point<i32>{ dirtyRect.x, dirtyRect.y }, basic_size<i32>{ dirtyRect.width, dirtyRect.height } }.intersection(clientRect);
+            for (auto y = safeDirtyRect.y; y < safeDirtyRect.y + safeDirtyRect.cy; ++y)
+            {
+                auto const dstLineSegmentStart = (y * clientRect.cx + safeDirtyRect.x) * 4;
+                auto const srcLineSegmentStart = (y * width + safeDirtyRect.x) * 4;
+                auto const dst = iBackBufferData.data() + dstLineSegmentStart;
+                auto const src = static_cast<std::byte const*>(buffer) + srcLineSegmentStart;
+                std::memcpy(dst, src, safeDirtyRect.cx * 4);
+            }
+            iDirtyRects.insert(safeDirtyRect);
         }
     }
 

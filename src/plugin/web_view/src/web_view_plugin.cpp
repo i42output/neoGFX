@@ -109,7 +109,7 @@ namespace neogfx
         
         CefInitialize(CefMainArgs{}, settings, app.get(), nullptr);
 
-        iSink = service<i_async_task>().idle_work([](){ CefDoMessageLoopWork(); });
+        iSink = service<i_async_task>().idle_work([]() { CefDoMessageLoopWork(); });
 
         iFactory = neolib::make_ref<web_view_factory>();
     }

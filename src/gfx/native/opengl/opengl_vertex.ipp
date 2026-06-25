@@ -29,8 +29,11 @@ namespace neogfx
         if (aCapacity != 0)
         {
             glCheck(glCreateBuffers(1, &iBufferName));
-            glCheck(glNamedBufferStorage(iBufferName, aCapacity * sizeof(value_type), nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT));
+            glCheck(glNamedBufferStorage(iBufferName, aCapacity * sizeof(value_type), nullptr, 
+                GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT));
             iCapacity = aCapacity;
+
+            map();
         }
     }
 
@@ -190,9 +193,8 @@ namespace neogfx
     inline typename opengl_buffer<T>::const_pointer opengl_buffer<T>::map() const
     {
         if (iMemory == nullptr)
-        {
-            glCheck(iMemory = static_cast<value_type*>(glMapNamedBufferRange(handle(), 0, capacity() * sizeof(value_type), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_FLUSH_EXPLICIT_BIT)));
-        }
+            glCheck(iMemory = static_cast<value_type*>(glMapNamedBufferRange(handle(), 0, capacity() * sizeof(value_type), 
+                GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_FLUSH_EXPLICIT_BIT)));
         return iMemory;
     }
 

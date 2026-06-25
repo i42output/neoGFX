@@ -116,7 +116,7 @@ namespace neogfx
         void target_release() const final;
     public:
         neogfx::color_space color_space() const final;
-        color read_pixel(const point& aPosition) const final;
+        color read_pixel(const point& aPosition, bool aCreateCache = true) const final;
     private:
         i_texture_manager& iManager;
         texture_id iId;

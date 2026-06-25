@@ -2206,7 +2206,7 @@ namespace neogfx
                 tMeshDrawables.emplace_back(tMeshOrigins[i], tMeshFilters[i], tMeshRenderers[i]);
             optional_ecs_render_lock ignore;
             if (!tMeshDrawables.empty())
-                draw_meshes(ignore, as_vertex_provider<draw_glyph>(), 0, &*tMeshDrawables.begin(), &*tMeshDrawables.begin() + tMeshDrawables.size(), mat44::identity());
+                draw_meshes(ignore, as_vertex_provider<>(), 0, &*tMeshDrawables.begin(), &*tMeshDrawables.begin() + tMeshDrawables.size(), mat44::identity());
             tMeshOrigins.clear();
             tMeshFilters.clear();
             tMeshRenderers.clear();

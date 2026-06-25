@@ -53,7 +53,7 @@ namespace neogfx
     public:
         void do_activate_target() const override;
     public:
-        color read_pixel(const point& aPosition) const override;
+        color read_pixel(const point& aPosition, bool aCreateCache = true) const override;
         void do_render() override;
     public:
         std::unique_ptr<i_rendering_context> create_rendering_context(blending_mode aBlendingMode) const override;

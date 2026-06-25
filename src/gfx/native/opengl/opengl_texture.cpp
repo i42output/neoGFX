@@ -487,25 +487,21 @@ namespace neogfx
         auto const adjustedRect = aRect + (sampling() != texture_sampling::Data ? point{ bleed_guard(), bleed_guard() } : point{ 0.0, 0.0 });
         if (sampling() != texture_sampling::Multisample)
         {
-            bind();
             GLint previousPackAlignment;
             GLint previousPackRowLength;
             glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment));
-            glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, aPackAlignment));
             glCheck(glGetIntegerv(GL_UNPACK_ROW_LENGTH, &previousPackRowLength));
+            glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, aPackAlignment));
             glCheck(glPixelStorei(GL_UNPACK_ROW_LENGTH, aStride));
             auto const [internalformat, format, type] = to_gl_enums(aDataFormat, kDataType);
-            glCheck(glTexSubImage2D(to_gl_enum(sampling()), 0,
+            glCheck(glTextureSubImage2D(iHandle, 0,
                 static_cast<GLint>(adjustedRect.x), static_cast<GLint>(adjustedRect.y),
                 static_cast<GLsizei>(adjustedRect.cx), static_cast<GLsizei>(adjustedRect.cy),
                 format, type, aPixelData));
             if (sampling() == texture_sampling::NormalMipmap)
-            {
-                glCheck(glGenerateMipmap(to_gl_enum(sampling())));
-            }
+                glCheck(glGenerateTextureMipmap(iHandle));
             glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, previousPackAlignment));
             glCheck(glPixelStorei(GL_UNPACK_ROW_LENGTH, previousPackRowLength));
-            unbind();
             iPixelData.clear();
         }
         else
@@ -958,7 +954,7 @@ namespace neogfx
     }
 
     template <typename T>
-    color opengl_texture<T>::read_pixel(const point& aPosition) const
+    color opengl_texture<T>::read_pixel(const point& aPosition, bool aCreateCache) const
     {
         if (sampling() != neogfx::texture_sampling::Multisample)
         {
@@ -977,16 +973,37 @@ namespace neogfx
             }
             else
             {
-                if (iPixelData.empty())
+                if (aCreateCache)
                 {
-                    iPixelData.resize(static_cast<std::size_t>(storage_extents().cx) * static_cast<std::size_t>(storage_extents().cy));
-                    bind();
-                    glCheck(glGetTexImage(to_gl_enum(sampling()), 0, format, type, iPixelData.data()));
+                    if (iPixelData.empty())
+                    {
+                        iPixelData.resize(static_cast<std::size_t>(storage_extents().cx) * static_cast<std::size_t>(storage_extents().cy));
+                        bind();
+                        glCheck(glGetTexImage(to_gl_enum(sampling()), 0, format, type, iPixelData.data()));
+                    }
+                    pixel = iPixelData[static_cast<std::size_t>(pos.y * storage_extents().cx + pos.x)];
                 }
-                pixel = iPixelData[static_cast<std::size_t>(pos.y * storage_extents().cx + pos.x)];
+                else
+                {
+                    glCheck(glGetTextureSubImage(
+                        iHandle, 0,
+                        static_cast<GLint>(aPosition.x), static_cast<GLint>(aPosition.y), 0,
+                        static_cast<GLsizei>(1.0), static_cast<GLsizei>(1.0), 1,
+                        format, type,
+                        sizeof(pixel), &pixel));
+                }
             }
             if constexpr (std::is_same_v<value_type, avec4u8> || std::is_same_v<value_type, std::array<float, 4>>)
-                return color{ pixel[0], pixel[1], pixel[2], pixel[3] };
+            {
+                switch (data_format())
+                {
+                case texture_data_format::RGBA:
+                default:
+                    return color{ pixel[2], pixel[1], pixel[0], pixel[3] };
+                case texture_data_format::BGRA:
+                    return color{ pixel[0], pixel[1], pixel[2], pixel[3] };
+                }
+            }
             else
                 return color{ pixel, pixel, pixel, pixel };
         }

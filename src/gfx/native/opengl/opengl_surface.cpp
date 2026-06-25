@@ -96,7 +96,7 @@ namespace neogfx
         glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
     }
 
-    color opengl_surface::read_pixel(const point& aPosition) const
+    color opengl_surface::read_pixel(const point& aPosition, bool aCreateCache) const
     {
         if (target_texture().sampling() != neogfx::texture_sampling::Multisample)
         {

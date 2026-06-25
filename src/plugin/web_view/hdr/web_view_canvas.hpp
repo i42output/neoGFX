@@ -71,6 +71,7 @@ namespace neogfx
     private:
         void init();
         i_texture& back_buffer() const;
+        void animate();
         // CefClient
     private:
         IMPLEMENT_REFCOUNTING(web_view_canvas);
@@ -108,10 +109,13 @@ namespace neogfx
         bool OnSetFocus(CefRefPtr<CefBrowser> browser, FocusSource source) final;
         void OnGotFocus(CefRefPtr<CefBrowser> browser) final;
     private:
+        widget_timer iAnimator;
         std::optional<std::string> iUrl;
         bool iUrlLoaded = false;
         std::optional<bool> iSetFocusAfterLoad;
         CefRefPtr<CefBrowser> iBrowser;
+        mutable std::vector<std::byte> iBackBufferData;
+        std::set<rect_i32> iDirtyRects;
         mutable ref_ptr<i_texture> iBackBuffer;
         std::uint32_t iLastClickCount = 1u;
         cef_cursor_type_t iCursorType = CT_POINTER;

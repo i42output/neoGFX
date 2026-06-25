@@ -216,9 +216,9 @@ namespace neogfx
         return service<i_surface_manager>().display(iWindow).color_space();
     }
 
-    color virtual_surface::read_pixel(const point& aPosition) const
+    color virtual_surface::read_pixel(const point& aPosition, bool aCreateCache) const
     {
-        return parent().read_pixel(surface_window().surface_position() + aPosition);
+        return parent().read_pixel(surface_window().surface_position() + aPosition, aCreateCache);
     }
 
     std::unique_ptr<i_rendering_context> virtual_surface::create_rendering_context(blending_mode aBlendingMode) const
