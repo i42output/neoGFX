@@ -61,7 +61,6 @@ namespace neogfx
         glCheck(glEnable(GL_MULTISAMPLE));
         glCheck(glEnable(GL_BLEND));
         glCheck(glEnable(GL_DEPTH_TEST));
-        glCheck(glDisable(GL_DEPTH_TEST));
         glCheck(glDepthFunc(GL_LEQUAL));
 
         if (need_to_create_frame_buffer())

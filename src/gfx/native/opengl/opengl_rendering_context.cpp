@@ -1221,7 +1221,7 @@ namespace neogfx
         disable_multisample disableMultisample{ *this };
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(), *this, static_cast<std::size_t>(2u * 3u * (aDrawPixelOps.cend() - aDrawPixelOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(iTarget), *this, static_cast<std::size_t>(2u * 3u * (aDrawPixelOps.cend() - aDrawPixelOps.cbegin()))};
 
             for (auto op = aDrawPixelOps.cbegin(); op != aDrawPixelOps.cend(); ++op)
             {
@@ -1254,7 +1254,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Line);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(), *this, static_cast<std::size_t>(2u * 3u * (aDrawLineOps.cend() - aDrawLineOps.cbegin())) };
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(iTarget), *this, static_cast<std::size_t>(2u * 3u * (aDrawLineOps.cend() - aDrawLineOps.cbegin())) };
 
             for (auto op = aDrawLineOps.cbegin(); op != aDrawLineOps.cend(); ++op)
             {
@@ -1305,7 +1305,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Triangle);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(), *this, static_cast<std::size_t>(2u * 3u * (aDrawTriangleOps.cend() - aDrawTriangleOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(iTarget), *this, static_cast<std::size_t>(2u * 3u * (aDrawTriangleOps.cend() - aDrawTriangleOps.cbegin()))};
 
             for (auto op = aDrawTriangleOps.cbegin(); op != aDrawTriangleOps.cend(); ++op)
             {
@@ -1412,7 +1412,7 @@ namespace neogfx
 
                     rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Rect);
 
-                    maybeVertexArrays.emplace(as_vertex_provider<>(), *this, static_cast<std::size_t>(2u * 3u * (aDrawRectOps.cend() - aDrawRectOps.cbegin())));
+                    maybeVertexArrays.emplace(as_vertex_provider<>(iTarget), *this, static_cast<std::size_t>(2u * 3u * (aDrawRectOps.cend() - aDrawRectOps.cbegin())));
                 }
 
                 auto& triangleRenderer = maybeVertexArrays.value();
@@ -1463,7 +1463,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::RoundedRect);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(), *this, static_cast<std::size_t>(2u * 3u * (aDrawRoundedRectOps.cend() - aDrawRoundedRectOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(iTarget), *this, static_cast<std::size_t>(2u * 3u * (aDrawRoundedRectOps.cend() - aDrawRoundedRectOps.cbegin()))};
 
             for (auto op = aDrawRoundedRectOps.cbegin(); op != aDrawRoundedRectOps.cend(); ++op)
             {
@@ -1517,7 +1517,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::EllipseRect);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllpseRectOps.cend() - aDrawEllpseRectOps.cbegin())) };
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(iTarget), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllpseRectOps.cend() - aDrawEllpseRectOps.cbegin())) };
 
             for (auto op = aDrawEllpseRectOps.cbegin(); op != aDrawEllpseRectOps.cend(); ++op)
             {
@@ -1584,7 +1584,7 @@ namespace neogfx
 
                     rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Checkerboard);
 
-                    maybeVertexArrays.emplace(as_vertex_provider<>(), *this, static_cast<std::size_t>(2u * 3u));
+                    maybeVertexArrays.emplace(as_vertex_provider<>(iTarget), *this, static_cast<std::size_t>(2u * 3u));
 
                     auto& triangleRenderer = maybeVertexArrays.value();
 
@@ -1638,7 +1638,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Ellipse);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllipseOps.cend() - aDrawEllipseOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(iTarget), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllipseOps.cend() - aDrawEllipseOps.cbegin()))};
 
             for (auto op = aDrawEllipseOps.cbegin(); op != aDrawEllipseOps.cend(); ++op)
             {
@@ -1691,7 +1691,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Circle);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(), *this, static_cast<std::size_t>(2u * 3u * (aDrawCircleOps.cend() - aDrawCircleOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(iTarget), *this, static_cast<std::size_t>(2u * 3u * (aDrawCircleOps.cend() - aDrawCircleOps.cbegin()))};
 
             for (auto op = aDrawCircleOps.cbegin(); op != aDrawCircleOps.cend(); ++op)
             {
@@ -1744,7 +1744,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Pie);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(), *this, static_cast<std::size_t>(2u * 3u * (aDrawPieOps.cend() - aDrawPieOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(iTarget), *this, static_cast<std::size_t>(2u * 3u * (aDrawPieOps.cend() - aDrawPieOps.cbegin()))};
 
             for (auto op = aDrawPieOps.cbegin(); op != aDrawPieOps.cend(); ++op)
             {
@@ -1797,7 +1797,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Arc);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(), *this, static_cast<std::size_t>(2u * 3u * (aDrawArcOps.cend() - aDrawArcOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(iTarget), *this, static_cast<std::size_t>(2u * 3u * (aDrawArcOps.cend() - aDrawArcOps.cbegin()))};
 
             for (auto op = aDrawArcOps.cbegin(); op != aDrawArcOps.cend(); ++op)
             {
@@ -1852,7 +1852,7 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aPen.color()));
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(), *this, static_cast<std::size_t>(2u * 3u) };
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(iTarget), *this, static_cast<std::size_t>(2u * 3u) };
 
             auto boundingRect = rect{ p0.min(p1.min(p2.min(p3))), p0.max(p1.max(p2.max(p3))) }.inflated(aPen.width());
             auto const function = to_function(*this, aPen.color(), boundingRect);
@@ -1889,7 +1889,7 @@ namespace neogfx
                 rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Polygon);
 
                 {
-                    opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(), *this, static_cast<std::size_t>(2u * 3u) };
+                    opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(iTarget), *this, static_cast<std::size_t>(2u * 3u) };
 
                     auto boundingRect = aBoundingRect.inflated(aPen.width() * 2.0) + origin();
                     auto boundingRectVertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
@@ -1955,7 +1955,7 @@ namespace neogfx
         triangles.clear();
         quads_to_triangles(quads, triangles);
 
-        opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(), *this, triangles.size() };
+        opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(iTarget), *this, triangles.size() };
 
         auto const function = to_function(*this, aPen.color(), bounding_rect(aMesh) + origin());
 
@@ -1983,7 +1983,7 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(), *this };
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(iTarget), *this };
 
             auto const& pos = (aPosition + origin().to_vec3()).as<float>();
             auto const& vertices = aMesh.vertices;
@@ -2206,7 +2206,7 @@ namespace neogfx
                 tMeshDrawables.emplace_back(tMeshOrigins[i], tMeshFilters[i], tMeshRenderers[i]);
             optional_ecs_render_lock ignore;
             if (!tMeshDrawables.empty())
-                draw_meshes(ignore, as_vertex_provider<>(), 0, &*tMeshDrawables.begin(), &*tMeshDrawables.begin() + tMeshDrawables.size(), mat44::identity());
+                draw_meshes(ignore, as_vertex_provider<>(iTarget), 0, &*tMeshDrawables.begin(), &*tMeshDrawables.begin() + tMeshDrawables.size(), mat44::identity());
             tMeshOrigins.clear();
             tMeshFilters.clear();
             tMeshRenderers.clear();
@@ -2613,7 +2613,7 @@ namespace neogfx
             aMeshRenderer
         };
         optional_ecs_render_lock ignore;
-        draw_meshes(ignore, as_vertex_provider<>(), aMeshRenderer.layer, &drawable, &drawable + 1, aTransformation);
+        draw_meshes(ignore, as_vertex_provider<>(iTarget), aMeshRenderer.layer, &drawable, &drawable + 1, aTransformation);
     }
 
     void opengl_rendering_context::draw_meshes(optional_ecs_render_lock& aLock, i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)

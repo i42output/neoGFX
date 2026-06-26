@@ -305,6 +305,8 @@ namespace neogfx
             auto& buffer = vb.second;
             if (!buffer.vertex_provider().cacheable())
                 buffer.vertices().clear();
+            else
+                buffer.reclaim();
         }
     }
 

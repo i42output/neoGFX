@@ -73,7 +73,6 @@ namespace neogfx
         base_type::paint(aGc);
 
         auto const clientRect = client_rect(false);
-        aGc.fill_rect(clientRect, color::Yellow);
         aGc.draw_texture(to_ecs_component(game_rect{ clientRect }), back_buffer(), rect{ point{}, clientRect.extents() });
     }
 

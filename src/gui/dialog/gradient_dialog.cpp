@@ -229,7 +229,7 @@ namespace neogfx
         iTileHeightLabel{ iTile.item_layout(), "Height:"_t },
         iTileHeight{ iTile.item_layout() },
         iTileAligned{ iTile.item_layout(), "Aligned"_t },
-        iSmoothnessGroupBox{ iLayout3_2, "Smoothness (%)"_t },
+        iSmoothnessGroupBox{ iLayout3_2, "Smooth (%)"_t },
         iSmoothnessSpinBox{ iSmoothnessGroupBox.item_layout() },
         iSmoothnessSlider{ iSmoothnessGroupBox.item_layout() },
         iLayout5{ iLayout3 },

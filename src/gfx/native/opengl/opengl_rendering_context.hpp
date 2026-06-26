@@ -46,9 +46,9 @@ namespace neogfx
         class standard_batching : public i_vertex_provider
         {
         public:
-            standard_batching()
+            standard_batching() :
+                iVertexBuffer{ service<i_rendering_engine>().allocate_vertex_buffer(*this) }
             {
-                static auto& sVertexBuffer = service<i_rendering_engine>().allocate_vertex_buffer(*this);
             }
         public:
             bool cacheable() const final
@@ -63,6 +63,8 @@ namespace neogfx
             {
                 throw not_cacheable();
             }
+        private:
+            i_vertex_buffer& iVertexBuffer;
         };
         class scoped_anti_alias
         {
@@ -348,10 +350,19 @@ namespace neogfx
             return sGeneration;
         }
         template <typename Tag = void>
-        static standard_batching<Tag>& as_vertex_provider()
+        static standard_batching<Tag>& as_vertex_provider(const i_render_target& aTarget)
         {
-            static standard_batching<Tag> sProvider;
-            return sProvider;
+            if (aTarget.target_type() == render_target_type::Texture)
+            {
+                static standard_batching<Tag> sProvider;
+                return sProvider;
+            }
+            else
+            {
+                constexpr std::size_t RingBufferSize = 3u;
+                static standard_batching<Tag> sProvider[RingBufferSize];
+                return sProvider[static_cast<i_native_surface const&>(aTarget).frame_counter() % RingBufferSize];
+            }
         }
     private:
         i_rendering_engine& iRenderingEngine;

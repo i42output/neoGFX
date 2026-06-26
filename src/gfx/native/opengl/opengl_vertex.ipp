@@ -174,6 +174,7 @@ namespace neogfx
     inline void opengl_buffer<T>::clear()
     {
         iSize = 0;
+        iBlocksToFree = {};
         iFreeBlocks = {};
     }
 
@@ -246,14 +247,28 @@ namespace neogfx
     inline void opengl_buffer<T>::need(size_type aExtra)
     {
         if (aExtra > room())
-            grow(std::max<size_type>(static_cast<size_type>((capacity() + aExtra) * 1.5), 16384));
+            grow(std::max<size_type>(static_cast<size_type>((capacity() + aExtra) * 1.5), 16384u));
     }
 
     template <typename T>
     inline void opengl_buffer<T>::reclaim(size_type aStartIndex, size_type aEndIndex)
     {
         if (aEndIndex != aStartIndex)
-            iFreeBlocks[std::countr_zero(std::bit_ceil(aEndIndex - aStartIndex))].emplace_back(aStartIndex, aEndIndex);
+            iBlocksToFree[std::countr_zero(std::bit_ceil(aEndIndex - aStartIndex))].emplace_back(aStartIndex, aEndIndex);
+    }
+
+    template <typename T>
+    inline void opengl_buffer<T>::reclaim()
+    {
+        for (std::size_t bucket = 0u; bucket < iFreeBlocks.size(); ++bucket)
+        {
+            auto& dst = iFreeBlocks[bucket];
+            auto& src = iBlocksToFree[bucket];
+            dst.insert(dst.end(),
+                std::make_move_iterator(src.begin()),
+                std::make_move_iterator(src.end()));
+            src.clear();
+        }
     }
 
     template <typename T>
@@ -483,6 +498,12 @@ namespace neogfx
     inline void opengl_vertex_buffer<V>::reclaim(std::size_t aStartIndex, std::size_t aEndIndex)
     {
         vertices().reclaim(aStartIndex, aEndIndex);
+    }
+
+    template <typename V>
+    inline void opengl_vertex_buffer<V>::reclaim()
+    {
+        vertices().reclaim();
     }
 
     template <typename V>

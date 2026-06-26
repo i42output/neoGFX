@@ -143,5 +143,6 @@ namespace neogfx
         virtual void detach_shader() = 0;
     public:
         virtual void reclaim(std::size_t aStartIndex, std::size_t aEndIndex) = 0;
+        virtual void reclaim() = 0;
     };
 }

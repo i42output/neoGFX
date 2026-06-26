@@ -113,6 +113,7 @@ namespace neogfx
         void need(size_type aExtra);
     public:
         void reclaim(size_type aStartIndex, size_type aEndIndex);
+        void reclaim();
     private:
         std::optional<std::pair<free_blocks const*, free_blocks::const_iterator>> find_free_block(size_type aCount) const;
         std::optional<std::pair<free_blocks*, free_blocks::iterator>> find_free_block(size_type aCount);
@@ -123,6 +124,7 @@ namespace neogfx
         size_type iSize = 0;
         mutable pointer iMemory = nullptr;
         opengl_buffer_owner* iOwner = nullptr;
+        std::array<free_blocks, 32u> iBlocksToFree;
         std::array<free_blocks, 32u> iFreeBlocks;
     };
 
@@ -216,7 +218,8 @@ namespace neogfx
         const optional_mat44& transformation() const;
         void set_transformation(const optional_mat44& aTransformation);
     public:
-        void reclaim(std::size_t aStartIndex, std::size_t aEndIndex);
+        void reclaim(std::size_t aStartIndex, std::size_t aEndIndex) override;
+        void reclaim() override;
     public:
         void flush();
         void flush(std::size_t aCount);
