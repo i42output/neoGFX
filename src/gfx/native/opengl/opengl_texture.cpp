@@ -840,7 +840,7 @@ namespace neogfx
         {
             glCheck(glEnable(GL_MULTISAMPLE));
             glCheck(glEnable(GL_BLEND));
-            glCheck(glEnable(GL_DEPTH_TEST));
+            glCheck(glDisable(GL_DEPTH_TEST));
             glCheck(glDepthFunc(GL_LEQUAL));
             glCheck(glGenFramebuffers(1, &iFrameBuffer));
             glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));

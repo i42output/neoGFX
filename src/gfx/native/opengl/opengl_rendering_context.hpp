@@ -42,13 +42,17 @@ namespace neogfx
     class opengl_rendering_context : public i_rendering_context
     {
     public:
-        template <typename Tag>
+        template <typename Tag = void>
         class standard_batching : public i_vertex_provider
         {
         public:
             standard_batching() :
                 iVertexBuffer{ service<i_rendering_engine>().allocate_vertex_buffer(*this) }
             {
+            }
+            ~standard_batching()
+            {
+                service<i_rendering_engine>().deallocate_vertex_buffer(*this);
             }
         public:
             bool cacheable() const final
@@ -145,17 +149,18 @@ namespace neogfx
             bool debug = false;
             mesh_drawable(
                 point const& origin,
-                game::mesh_filter const& filter, 
+                game::mesh_filter const& filter,
                 game::mesh_renderer const& renderer,
                 optional_mat44f const& transformation = {},
                 game::entity_id entity = game::null_entity
-                ) :
+            ) :
                 origin{ origin },
                 filter{ &filter },
                 renderer{ &renderer },
                 transformation{ transformation },
                 entity{ entity }
-            {}
+            {
+            }
         };
         struct patch_drawable
         {
@@ -350,18 +355,19 @@ namespace neogfx
             return sGeneration;
         }
         template <typename Tag = void>
-        static standard_batching<Tag>& as_vertex_provider(const i_render_target& aTarget)
+        static standard_batching<Tag>& as_vertex_provider(opengl_rendering_context& aContext)
         {
-            if (aTarget.target_type() == render_target_type::Texture)
+            if (aContext.iTarget.target_type() == render_target_type::Surface)
             {
-                static standard_batching<Tag> sProvider;
-                return sProvider;
+                constexpr std::size_t RingBufferSize = 3u;
+                static standard_batching<Tag> sProvider[RingBufferSize];
+                return sProvider[service<i_rendering_engine>().target_activation_counter(render_target_type::Surface) % RingBufferSize];
             }
             else
             {
                 constexpr std::size_t RingBufferSize = 3u;
                 static standard_batching<Tag> sProvider[RingBufferSize];
-                return sProvider[static_cast<i_native_surface const&>(aTarget).frame_counter() % RingBufferSize];
+                return sProvider[service<i_rendering_engine>().target_activation_counter(render_target_type::Texture) % RingBufferSize];
             }
         }
     private:

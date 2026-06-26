@@ -94,6 +94,7 @@ namespace neogfx
         virtual handle create_context(const i_render_target& aTarget) = 0;
         virtual void destroy_context(handle aContext) = 0;
         virtual void remove_target(const i_render_target& aTarget) = 0;
+        virtual std::uint64_t target_activation_counter(render_target_type aTargetType) const = 0;
     public:
         virtual neogfx::viewport viewport() const = 0;
         virtual std::optional<rect> scissor() const = 0;

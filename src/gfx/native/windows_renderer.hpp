@@ -75,6 +75,7 @@ namespace neogfx
             handle create_context(const i_render_target& aTarget) final;
             void destroy_context(handle aContext) final;
             void remove_target(const i_render_target& aTarget) final;
+            std::uint64_t target_activation_counter(render_target_type aTargetType) const final;
         public:
             neogfx::viewport viewport() const final;
             std::optional<rect> scissor() const final;
@@ -111,6 +112,7 @@ namespace neogfx
             std::uint32_t iCreatingWindow;
             const i_render_target* iActiveTarget;
             std::vector<const i_render_target*> iTargetStack;
+            std::uint64_t iTargetActivationCounter[static_cast<std::size_t>(render_target_type::COUNT)] = {};
         };
     }
 }

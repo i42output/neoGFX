@@ -401,6 +401,11 @@ namespace neogfx
             iTargetStack.erase(std::remove(iTargetStack.begin(), iTargetStack.end(), &aTarget), iTargetStack.end());
         }
 
+        std::uint64_t renderer::target_activation_counter(render_target_type aTargetType) const
+        {
+            return iTargetActivationCounter[static_cast<std::size_t>(aTargetType)];
+        }
+
         viewport renderer::viewport() const
         {
             GLint viewport[4];
@@ -632,6 +637,8 @@ namespace neogfx
                 return;
 
             iActiveTarget = &aTarget;
+
+            ++iTargetActivationCounter[static_cast<std::size_t>(aTarget.target_type())];
 
             BOOL result = TRUE;
 

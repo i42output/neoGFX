@@ -66,20 +66,27 @@ namespace neogfx
 
         void ecs::destroy_entity(entity_id aEntityId, bool aNotify)
         {
-            scoped_component_data_lock<mesh_render_cache> lock{ *this };
-            if (component<mesh_render_cache>().has_entity_record(aEntityId) && service<i_rendering_engine>().vertex_buffer_allocated(*this))
+            if (cacheable())
             {
-                auto const& cacheEntry = component<mesh_render_cache>().entity_record(aEntityId);
-                service<i_rendering_engine>().vertex_buffer(*this).reclaim(cacheEntry.meshVertexArrayIndices[0], cacheEntry.meshVertexArrayIndices[1]);
-                for (auto& indices : cacheEntry.patchVertexArrayIndices)
-                    service<i_rendering_engine>().vertex_buffer(*this).reclaim(indices[0], indices[1]);
+                scoped_component_data_lock<mesh_render_cache> lock{ *this };
+                if (component<mesh_render_cache>().has_entity_record(aEntityId) && service<i_rendering_engine>().vertex_buffer_allocated(*this))
+                {
+                    auto const& cacheEntry = component<mesh_render_cache>().entity_record(aEntityId);
+                    service<i_rendering_engine>().vertex_buffer(*this).reclaim(cacheEntry.meshVertexArrayIndices[0], cacheEntry.meshVertexArrayIndices[1]);
+                    for (auto& indices : cacheEntry.patchVertexArrayIndices)
+                        service<i_rendering_engine>().vertex_buffer(*this).reclaim(indices[0], indices[1]);
+                }
             }
             base_type::destroy_entity(aEntityId, aNotify);
         }
 
         bool ecs::cacheable() const
         {
-            return true;
+            /// @todo Dedicated ECS vertex buffers are currently unavailable as they are not cacheable
+            /// across a ring buffer of multiple buffers. The default renderer ring buffer is used for 
+            /// ECS vertices instead.  Possible solution: for ECS have a single vertex buffer with a ring
+            /// of blocks to free.
+            return iCacheable && false;
         }
 
         const game::component<game::mesh_render_cache>& ecs::cache() const

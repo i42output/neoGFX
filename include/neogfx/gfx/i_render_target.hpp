@@ -29,10 +29,11 @@ namespace neogfx
 {
     class i_texture;
 
-    enum class render_target_type
+    enum class render_target_type : std::size_t
     {
-        Surface,
-        Texture
+        Surface = 0,
+        Texture = 1,
+        COUNT
     };
 
     typedef int pixel_format_t; // todo: enum?
