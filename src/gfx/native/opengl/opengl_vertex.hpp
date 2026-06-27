@@ -54,6 +54,8 @@ namespace neogfx
     template <typename T>
     class opengl_buffer
     {
+    private:
+        static constexpr std::size_t kRingBufferSize = 3u;
     public:
         using value_type = T;
         using const_reference = value_type const&;
@@ -69,8 +71,8 @@ namespace neogfx
         using free_block = std::pair<size_type, size_type>;
         using free_blocks = std::vector<free_block>;
     public:
-        opengl_buffer(size_type aCapacity);
-        opengl_buffer(opengl_buffer_owner& aOwner, size_type aCapacity = 0);
+        opengl_buffer(bool aCacheable, size_type aCapacity);
+        opengl_buffer(opengl_buffer_owner& aOwner, bool aCacheable, size_type aCapacity = 0);
         ~opengl_buffer();
     public:
         size_type capacity() const;
@@ -115,6 +117,7 @@ namespace neogfx
         void reclaim(size_type aStartIndex, size_type aEndIndex);
         void reclaim();
     private:
+        std::array<free_blocks, 32u>& blocks_to_free();
         std::optional<std::pair<free_blocks const*, free_blocks::const_iterator>> find_free_block(size_type aCount) const;
         std::optional<std::pair<free_blocks*, free_blocks::iterator>> find_free_block(size_type aCount);
         void grow(size_type aCapacity);
@@ -124,7 +127,8 @@ namespace neogfx
         size_type iSize = 0;
         mutable pointer iMemory = nullptr;
         opengl_buffer_owner* iOwner = nullptr;
-        std::array<free_blocks, 32u> iBlocksToFree;
+        bool iCacheable;
+        std::array<std::array<std::array<free_blocks, 32u>, kRingBufferSize>, static_cast<std::size_t>(render_target_type::COUNT)> iBlocksToFree;
         std::array<free_blocks, 32u> iFreeBlocks;
     };
 

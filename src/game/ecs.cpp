@@ -32,7 +32,9 @@ namespace neogfx
 {
     namespace game
     {
-        ecs::ecs(ecs_flags aCreationFlags) : base_type{ aCreationFlags }
+        ecs::ecs(ecs_flags aCreationFlags) : 
+            base_type{ aCreationFlags },
+            iCacheable{ false }
         {
             service<i_rendering_engine>().allocate_vertex_buffer(*this, vertex_buffer_type::DefaultECS);
         }
@@ -82,11 +84,7 @@ namespace neogfx
 
         bool ecs::cacheable() const
         {
-            /// @todo Dedicated ECS vertex buffers are currently unavailable as they are not cacheable
-            /// across a ring buffer of multiple buffers. The default renderer ring buffer is used for 
-            /// ECS vertices instead.  Possible solution: for ECS have a single vertex buffer with a ring
-            /// of blocks to free.
-            return iCacheable && false;
+            return iCacheable;
         }
 
         const game::component<game::mesh_render_cache>& ecs::cache() const

@@ -47,7 +47,7 @@ namespace neogfx
             const game::component<game::mesh_render_cache>& cache() const final;
             game::component<game::mesh_render_cache>& cache() final;
         private:
-            bool iCacheable = false;
+            bool iCacheable;
         };
 
         template <typename... Systems>

@@ -24,13 +24,15 @@
 namespace neogfx
 {
     template <typename T>
-    inline opengl_buffer<T>::opengl_buffer(size_type aCapacity)
+    inline opengl_buffer<T>::opengl_buffer(bool aCacheable, size_type aCapacity)
+        : iCacheable{ aCacheable }
     {
         if (aCapacity != 0)
         {
             glCheck(glCreateBuffers(1, &iBufferName));
             glCheck(glNamedBufferStorage(iBufferName, aCapacity * sizeof(value_type), nullptr, 
                 GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT));
+
             iCapacity = aCapacity;
 
             map();
@@ -38,8 +40,8 @@ namespace neogfx
     }
 
     template <typename T>
-    inline opengl_buffer<T>::opengl_buffer(opengl_buffer_owner& aOwner, size_type aCapacity) :
-        opengl_buffer{ aCapacity }
+    inline opengl_buffer<T>::opengl_buffer(opengl_buffer_owner& aOwner, bool aCacheable, size_type aCapacity) :
+        opengl_buffer{ aCacheable, aCapacity }
     {
         iOwner = &aOwner;
     }
@@ -254,7 +256,7 @@ namespace neogfx
     inline void opengl_buffer<T>::reclaim(size_type aStartIndex, size_type aEndIndex)
     {
         if (aEndIndex != aStartIndex)
-            iBlocksToFree[std::countr_zero(std::bit_ceil(aEndIndex - aStartIndex))].emplace_back(aStartIndex, aEndIndex);
+            blocks_to_free()[std::countr_zero(std::bit_ceil(aEndIndex - aStartIndex))].emplace_back(aStartIndex, aEndIndex);
     }
 
     template <typename T>
@@ -263,12 +265,21 @@ namespace neogfx
         for (std::size_t bucket = 0u; bucket < iFreeBlocks.size(); ++bucket)
         {
             auto& dst = iFreeBlocks[bucket];
-            auto& src = iBlocksToFree[bucket];
+            auto& src = blocks_to_free()[bucket];
             dst.insert(dst.end(),
                 std::make_move_iterator(src.begin()),
                 std::make_move_iterator(src.end()));
             src.clear();
         }
+    }
+
+    template <typename T>
+    inline std::array<typename opengl_buffer<T>::free_blocks, 32u>& opengl_buffer<T>::blocks_to_free()
+    {
+        auto const activeTarget = service<i_rendering_engine>().active_target();
+        auto const activeTargetType = activeTarget ? activeTarget->target_type() : render_target_type::Surface;
+        auto const ringBufferIndex = iCacheable ? service<i_rendering_engine>().target_activation_counter(activeTargetType) % kRingBufferSize : 0u;
+        return iBlocksToFree[static_cast<std::size_t>(activeTargetType)][ringBufferIndex];
     }
 
     template <typename T>
@@ -315,7 +326,7 @@ namespace neogfx
         unmap();
 
         {
-            opengl_buffer<T> temp{ aCapacity };
+            opengl_buffer<T> temp{ iCacheable, aCapacity };
             if (!empty())
                 glCheck(glCopyNamedBufferSubData(iBufferName, temp.iBufferName,
                     0, 0, size() * sizeof(value_type)));
@@ -366,7 +377,7 @@ namespace neogfx
 
     template <typename V>
     inline opengl_vertex_buffer<V>::opengl_vertex_buffer(i_vertex_provider& aProvider, vertex_buffer_type aType) :
-        vertex_buffer{ aProvider, aType }, iBuffer{ *this }
+        vertex_buffer{ aProvider, aType }, iBuffer{ *this, aProvider.cacheable() }
     {
     }
 
