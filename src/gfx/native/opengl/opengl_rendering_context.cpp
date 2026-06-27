@@ -2104,8 +2104,7 @@ namespace neogfx
         }
         if (!tMeshDrawables[aLayer].empty())
         {
-            auto& ecsVertexProvider = dynamic_cast<i_vertex_provider&>(aEcs);
-            draw_meshes(tLock, ecsVertexProvider.cacheable() ? ecsVertexProvider : as_vertex_provider<>(*this), aLayer, 
+            draw_meshes(tLock, as_vertex_provider<>(*this), aLayer, 
                 &*tMeshDrawables[aLayer].begin(), &*tMeshDrawables[aLayer].begin() + tMeshDrawables[aLayer].size(), aTransformation);
         }
         if (aLayer >= tMaxLayer)

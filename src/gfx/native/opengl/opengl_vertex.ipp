@@ -276,10 +276,15 @@ namespace neogfx
     template <typename T>
     inline std::array<typename opengl_buffer<T>::free_blocks, 32u>& opengl_buffer<T>::blocks_to_free()
     {
-        auto const activeTarget = service<i_rendering_engine>().active_target();
-        auto const activeTargetType = activeTarget ? activeTarget->target_type() : render_target_type::Surface;
-        auto const ringBufferIndex = iCacheable ? service<i_rendering_engine>().target_activation_counter(activeTargetType) % kRingBufferSize : 0u;
-        return iBlocksToFree[static_cast<std::size_t>(activeTargetType)][ringBufferIndex];
+        if (!iCacheable)
+            return iBlocksToFree[0u][0u];
+        else
+        {
+            auto const activeTarget = service<i_rendering_engine>().active_target();
+            auto const activeTargetType = activeTarget ? activeTarget->target_type() : render_target_type::Surface;
+            auto const ringBufferIndex = service<i_rendering_engine>().target_activation_counter(activeTargetType) % kRingBufferSize;
+            return iBlocksToFree[static_cast<std::size_t>(activeTargetType)][ringBufferIndex];
+        }
     }
 
     template <typename T>
