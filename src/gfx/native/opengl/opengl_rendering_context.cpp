@@ -2885,13 +2885,6 @@ namespace neogfx
                 if (triangleRenderer == std::nullopt || !triangleRenderer->with_textures())
                     triangleRenderer.emplace(*aPatch.provider, *this, transformation, with_textures, 0, batchRenderer.barrier);
 
-#if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
-                if (item->meshDrawable->entity != game::null_entity &&
-                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
-                    service<debug::logger>() << neolib::logger::severity::Debug << "Drawing service<i_debug>().layout_item() entity (texture)..." << std::endl;
-
-#endif // NEOGFX_DEBUG
-
                 triangleRenderer->draw(item->vertexArrayIndexStart, faceCount * 3);
             }
             else
@@ -2902,13 +2895,6 @@ namespace neogfx
 
                 if (triangleRenderer == std::nullopt || triangleRenderer->with_textures())
                     triangleRenderer.emplace(*aPatch.provider, *this, transformation, 0, batchRenderer.barrier);
-
-#if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
-                if (item->meshDrawable->entity != game::null_entity &&
-                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
-                    service<debug::logger>() << neolib::logger::severity::Debug << "Drawing service<i_debug>().layout_item() entity (non-texture)..." << std::endl;
-
-#endif // NEOGFX_DEBUG
 
                 triangleRenderer->draw(item->vertexArrayIndexStart, faceCount * 3);
             }
