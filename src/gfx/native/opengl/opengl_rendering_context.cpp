@@ -2759,12 +2759,6 @@ namespace neogfx
                 return true;
             };
 
-#if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
-            if (meshDrawable.entity != game::null_entity &&
-                dynamic_cast<game::i_ecs&>(aVertexProvider).component<game::entity_info>().entity_record(meshDrawable.entity).debug)
-                service<debug::logger>() << neolib::logger::severity::Debug << "Adding service<i_debug>().layout_item() entity drawable..." << std::endl;
-#endif // NEOGFX_DEBUG
-
             bool addedPrimaryMesh = false;
             if (!faces.empty())
                 addedPrimaryMesh = add_item(meshRenderCache.meshVertexArrayIndices, meshRenderer.layer, mesh, material, faces);
