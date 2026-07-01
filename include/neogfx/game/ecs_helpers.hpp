@@ -184,6 +184,10 @@ namespace neogfx
             return shader_effect::ColorizeSpot;
         case text_effect_type::Shadow:
             return shader_effect::ColorizeSpot;
+        case text_effect_type::OutlineGlow:
+            return shader_effect::ColorizeSpot;
+        case text_effect_type::OutlineShadow:
+            return shader_effect::ColorizeSpot;
         default:
             return shader_effect::None;
         }

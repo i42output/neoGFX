@@ -223,6 +223,18 @@ namespace neogfx
         OutlineShadow
     };
 
+    inline bool filtered_content_ink_is_effect_color(text_effect_type aTextEffectType)
+    {
+        switch (aTextEffectType)
+        {
+        case text_effect_type::Glow:
+        case text_effect_type::Shadow:
+            return true;
+        default:
+            return false;
+        }
+    }
+
     enum class text_animation_type : std::uint32_t
     {
         None,
@@ -424,6 +436,11 @@ namespace neogfx
     };
 
     typedef neolib::optional<text_effect> optional_text_effect;
+
+    inline bool filtered_content_ink_is_effect_color(text_effect const* aBeingFiltered)
+    {
+        return aBeingFiltered && filtered_content_ink_is_effect_color(aBeingFiltered->type());
+    }
 
     template <typename Elem, typename Traits>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const text_effect& aEffect)

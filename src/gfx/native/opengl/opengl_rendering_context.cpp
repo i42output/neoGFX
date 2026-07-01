@@ -2427,9 +2427,9 @@ namespace neogfx
 
                     auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
                     auto const& emojiTexture = emojiAtlas.emoji_texture(glyphChar.value).as_sub_texture();
-                    auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
+                    auto const& ink = !filtered_content_ink_is_effect_color(drawOp.appearance->being_filtered()) ?
                         (drawOp.appearance->ignore_emoji() ? neolib::none : drawOp.appearance->ink()) :
-                        (drawOp.appearance->effect()->ignore_emoji() ? neolib::none : drawOp.appearance->effect()->color());
+                        (drawOp.appearance->being_filtered()->ignore_emoji() ? neolib::none : drawOp.appearance->being_filtered()->color());
                     tMeshOrigins.push_back(drawOp.origin);
                     tMeshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
                     tMeshRenderers.push_back(game::mesh_renderer
@@ -2446,8 +2446,8 @@ namespace neogfx
                                 !drawOp.appearance->being_filtered() ?
                                     drawOp.appearance->ignore_emoji() ? 
                                         shader_effect::None : shader_effect::Colorize : 
-                                    !drawOp.appearance->effect() || drawOp.appearance->effect()->ignore_emoji() ?
-                                        shader_effect::None : to_ecs_component(drawOp.appearance->effect()->type())
+                                    drawOp.appearance->being_filtered()->ignore_emoji() ?
+                                        shader_effect::None : to_ecs_component(drawOp.appearance->being_filtered()->type())
                             }
                         });
                 }
@@ -2478,8 +2478,9 @@ namespace neogfx
 
                         if (stage == draw_glyphs_stage::GlyphOutline)
                         {
-                            for (auto const& textEffect : { drawOp.appearance->effect(), drawOp.appearance->effect2() })
+                            for (auto const& textEffectPtr : { &drawOp.appearance->effect(), &drawOp.appearance->effect2() })
                             {
+                                auto const& textEffect = *textEffectPtr;
                                 if (!textEffect)
                                     continue;
                                 if (theGlyph.has_outline_texture() &&
@@ -2529,8 +2530,7 @@ namespace neogfx
                             (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
 
                         auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
-                        auto const& ink = !drawOp.appearance->being_filtered() || 
-                            (drawOp.appearance->being_filtered()->type() != text_effect_type::Glow && drawOp.appearance->being_filtered()->type() != text_effect_type::Shadow) ?
+                        auto const& ink = !filtered_content_ink_is_effect_color(drawOp.appearance->being_filtered()) ?
                             drawOp.appearance->ink() : drawOp.appearance->being_filtered()->color();
                         tMeshOrigins.push_back(drawOp.origin);
                         tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
@@ -2563,8 +2563,8 @@ namespace neogfx
 
                         if (underline(glyphChar) || (drawOp.showMnemonics && neogfx::mnemonic(glyphChar)))
                         {
-                            auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
-                                drawOp.appearance->ink() : drawOp.appearance->effect()->color();
+                            auto const& ink = !filtered_content_ink_is_effect_color(drawOp.appearance->being_filtered()) ?
+                                drawOp.appearance->ink() : drawOp.appearance->being_filtered()->color();
 
                             auto const& glyphFont = glyphText.glyph_font(glyphChar);
                             auto const& shapeQuad = shape_quad(glyphFont, glyphChar);
