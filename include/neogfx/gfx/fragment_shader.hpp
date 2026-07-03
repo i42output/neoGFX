@@ -164,13 +164,14 @@ namespace neogfx
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
         void clear_filter() final;
-        void set_filter(shader_filter aFilter, scalar aArgument1 = 0.0, scalar aArgument2 = 0.0, scalar aArgument3 = 0.0, scalar aArgument4 = 0.0) final;
+        void set_filter(shader_filter aFilter, std::int32_t aPass = 0, scalar aArgument1 = 0.0, scalar aArgument2 = 0.0, scalar aArgument3 = 0.0, scalar aArgument4 = 0.0) final;
     private:
         cache_uniform(uFilterEnabled)
         cache_uniform(uFilterType)
         cache_uniform(uFilterArguments)
         cache_uniform(uFilterKernelSize)
         cache_uniform(uFilterKernel)
+        cache_uniform(uFilterPass)
         using kernels = std::map<std::pair<shader_filter, vec4>, std::optional<shader_array<float>>>;
         kernels iFilterKernels;
         i_texture* iActiveKernel = nullptr;

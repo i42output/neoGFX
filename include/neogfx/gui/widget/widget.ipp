@@ -2000,7 +2000,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline bool widget<Interface>::ignore_mouse_events(bool aConsiderAncestors) const
     {
-        return IgnoreMouseEvents || (aConsiderAncestors && consider_ancestors_for_mouse_events() && 
+        return IgnoreMouseEvents || (aConsiderAncestors && consider_ancestors_for_mouse_events() &&
             has_parent() && parent().ignore_mouse_events());
     }
 

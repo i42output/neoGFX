@@ -1195,7 +1195,7 @@ namespace neogfx
         blit(aDestinationRect, aSource.render_target().target_texture(), aSourceRect, aBlendingMode);
     }
 
-    void blur(i_graphics_context& aDestination, rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
+    void blur(std::int32_t aPass, i_graphics_context& aDestination, rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
     {
         scoped_render_target srt{ aDestination };
         scoped_scissor ss1{ aDestination, aDestinationRect };
@@ -1218,7 +1218,7 @@ namespace neogfx
                 shader_effect::Filter
             },
             optional_mat44{},
-            to_ecs_component(aAlgorithm, aParameter1, aParameter2));
+            to_ecs_component(aAlgorithm, aPass, aParameter1, aParameter2));
     }
 
     void graphics_context::blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
@@ -1238,9 +1238,9 @@ namespace neogfx
         for (std::int32_t pass = 0; pass < passes; ++pass)
         {
             if (pass % 2 == 0)
-                neogfx::blur(*this, aDestinationRect, aSource, aSourceRect, aAlgorithm, aParameter1, aParameter2);
+                neogfx::blur(0, *this, aDestinationRect, aSource, aSourceRect, aAlgorithm, aParameter1, aParameter2);
             else
-                neogfx::blur(aSource, aSourceRect, *this, aDestinationRect, aAlgorithm, aParameter1, aParameter2);
+                neogfx::blur(1, aSource, aSourceRect, *this, aDestinationRect, aAlgorithm, aParameter1, aParameter2);
         }
     }
 

@@ -68,7 +68,7 @@ namespace neogfx
         typedef i_filter_shader abstract_type;
     public:
         virtual void clear_filter() = 0;
-        virtual void set_filter(shader_filter aFilter, scalar aArgument1 = 0.0, scalar aArgument2 = 0.0, scalar aArgument3 = 0.0, scalar aArgument4 = 0.0) = 0;
+        virtual void set_filter(shader_filter aFilter, std::int32_t aPass = 0, scalar aArgument1 = 0.0, scalar aArgument2 = 0.0, scalar aArgument3 = 0.0, scalar aArgument4 = 0.0) = 0;
     };
 
     class i_glyph_shader : public i_fragment_shader

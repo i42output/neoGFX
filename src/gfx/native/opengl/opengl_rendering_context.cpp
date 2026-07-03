@@ -439,7 +439,7 @@ namespace neogfx
             shaderEffect = shader_effect::Blit;
             break;
         case neogfx::blending_mode::FilterFinish:
-            shaderEffect = shader_effect::MultiplyAlpha;
+            shaderEffect = shader_effect::None;
             break;
         }
         draw_texture(aDestinationRect, aTexture, aSourceRect, {}, shaderEffect);
@@ -954,6 +954,11 @@ namespace neogfx
                 break;
             }
         }
+    }
+
+    double opengl_rendering_context::opacity() const
+    {
+        return iFastState.opacity;
     }
 
     void opengl_rendering_context::set_opacity(double aOpacity)
@@ -2368,6 +2373,7 @@ namespace neogfx
                     for (auto effect : { 0, 1 })
                     {
                         std::optional<scoped_filter<blur_filter>> filter;
+                        scalar opacity = 1.0;
                         for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                         {
                             if (drawOp.appearance->being_filtered())
@@ -2397,14 +2403,22 @@ namespace neogfx
                                 continue;
 
                             if (!filter)
+                            {
                                 filter.emplace(*this, blur_filter{ *filterRegion, textEffect->width(), blurring_algorithm::Gaussian,
                                     textEffect->aux1(), textEffect->aux2() });
+                                opacity = textEffect->color().alpha() / 255.0;
+                            }
 
                             filter->front_buffer().draw_glyph(
                                 drawOp.point.as<scalar>() + textEffect->offset(),
                                 glyphText,
                                 glyphChar,
                                 drawOp.appearance->as_being_filtered(*textEffect));
+                        }
+                        if (filter)
+                        {
+                            scoped_opacity so{ *this, opacity * this->opacity() };
+                            filter = std::nullopt;
                         }
                     }
                 }
@@ -2478,7 +2492,7 @@ namespace neogfx
 
                         if (stage == draw_glyphs_stage::GlyphOutline)
                         {
-                            for (auto const& textEffectPtr : { &drawOp.appearance->effect(), &drawOp.appearance->effect2() })
+                            for (auto textEffectPtr : { &drawOp.appearance->effect(), &drawOp.appearance->effect2() })
                             {
                                 auto const& textEffect = *textEffectPtr;
                                 if (!textEffect)
@@ -2497,7 +2511,8 @@ namespace neogfx
                                         (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
 
                                     auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
-                                    auto const& ink = textEffect->color();
+                                    auto const& ink = textEffect->color().with_alpha(
+                                        textEffect->type() == text_effect_type::Outline ? textEffect->color().alpha() / 255.0 : 1.0);
                                     tMeshOrigins.push_back(drawOp.origin);
                                     tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
                                     tMeshRenderers.push_back(
@@ -2531,7 +2546,7 @@ namespace neogfx
 
                         auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
                         auto const& ink = !filtered_content_ink_is_effect_color(drawOp.appearance->being_filtered()) ?
-                            drawOp.appearance->ink() : drawOp.appearance->being_filtered()->color();
+                            drawOp.appearance->ink() : drawOp.appearance->being_filtered()->color().with_alpha(1.0);
                         tMeshOrigins.push_back(drawOp.origin);
                         tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
                         tMeshRenderers.push_back(
@@ -2882,7 +2897,7 @@ namespace neogfx
             if (item->meshDrawable->renderer->filter)
             {
                 auto const& filter = *item->meshDrawable->renderer->filter;
-                rendering_engine().default_shader_program().filter_shader().set_filter(filter.type, filter.arg1, filter.arg2, filter.arg3, filter.arg4);
+                rendering_engine().default_shader_program().filter_shader().set_filter(filter.type, filter.pass, filter.arg1, filter.arg2, filter.arg3, filter.arg4);
             }
             else
                 rendering_engine().default_shader_program().filter_shader().clear_filter();

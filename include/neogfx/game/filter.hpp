@@ -32,6 +32,7 @@ namespace neogfx::game
     struct filter
     {
         shader_filter type;
+        std::int32_t pass;
         float arg1;
         float arg2;
         float arg3;
@@ -52,7 +53,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 5;
+                return 7;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -61,11 +62,13 @@ namespace neogfx::game
                 case 0:
                     return component_data_field_type::Enum;
                 case 1:
+                    return component_data_field_type::Int32;
                 case 2:
                 case 3:
                 case 4:
-                    return component_data_field_type::Float32;
                 case 5:
+                    return component_data_field_type::Float32;
+                case 6:
                     return component_data_field_type::Aabb2df | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
@@ -76,6 +79,7 @@ namespace neogfx::game
                 static const string sFieldNames[] =
                 {
                     "Type",
+                    "Pass",
                     "Arg1",
                     "Arg2",
                     "Arg3",

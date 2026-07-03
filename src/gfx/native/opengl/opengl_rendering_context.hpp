@@ -130,6 +130,22 @@ namespace neogfx
             opengl_rendering_context& iParent;
             neogfx::blending_mode iPreviousBlendingMode;
         };
+        class scoped_opacity
+        {
+        public:
+            scoped_opacity(opengl_rendering_context& aParent, scalar aOpacity) :
+                iParent{ aParent }, iPreviousOpacity{ aParent.opacity()}
+            {
+                iParent.set_opacity(aOpacity);
+            }
+            ~scoped_opacity()
+            {
+                iParent.set_opacity(iPreviousOpacity);
+            }
+        private:
+            opengl_rendering_context& iParent;
+            scalar iPreviousOpacity;
+        };
         struct draw_glyph
         {
             point origin;
@@ -277,6 +293,7 @@ namespace neogfx
         void set_front_face(neogfx::front_face aFrontFace);
         neogfx::face_culling face_culling() const;
         void set_face_culling(neogfx::face_culling aCullinge);
+        double opacity() const;
         void set_opacity(double aOpacity);
         neogfx::blending_mode blending_mode() const;
         void set_blending_mode(neogfx::blending_mode aBlendingMode);

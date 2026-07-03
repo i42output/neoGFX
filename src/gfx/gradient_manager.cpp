@@ -627,7 +627,7 @@ namespace neogfx
                 iFilterQueue.pop_front();
             }
             auto const filterValues = static_gaussian_filter<float, GRADIENT_FILTER_SIZE>(static_cast<float>(aGradient.smoothness() * 10.0));
-            allocated->second.sampler().data().set_pixels(rect{ point{}, size_u32{ GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE } }, &filterValues[0][0]);
+            allocated->second.sampler().data().set_pixels(rect{ point{}, size_u32{ GRADIENT_FILTER_SIZE, 1u } }, &filterValues[0]);
         }
         auto existingQueueEntry = std::find(iFilterQueue.begin(), iFilterQueue.end(), allocated);
         if (existingQueueEntry != iFilterQueue.end())

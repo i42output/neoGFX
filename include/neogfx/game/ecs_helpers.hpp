@@ -204,14 +204,14 @@ namespace neogfx
     }
 
     template <std::floating_point ParamT>
-    inline std::optional<game::filter> to_ecs_component(blurring_algorithm aAlgorithm, ParamT aParameter1, ParamT aParameter2)
+    inline std::optional<game::filter> to_ecs_component(blurring_algorithm aAlgorithm, std::int32_t aPass, ParamT aParameter1, ParamT aParameter2)
     {
         switch (aAlgorithm)
         {
         case blurring_algorithm::None:
             return {};
         case blurring_algorithm::Gaussian:
-            return game::filter{ shader_filter::GaussianBlur, static_cast<float>(aParameter1), static_cast<float>(aParameter2) };
+            return game::filter{ shader_filter::GaussianBlur, aPass, static_cast<float>(aParameter1), static_cast<float>(aParameter2), {}, {}, {} };
         default:
             return {};
         }

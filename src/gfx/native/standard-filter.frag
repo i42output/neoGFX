@@ -9,19 +9,16 @@ void standard_filter_shader(inout vec4 color, inout vec4 function0, inout vec4 f
         case 1: // effect: GaussianBlur
             {
                 int d = uFilterKernelSize / 2;
-                if (texelFetch(uFilterKernel, ivec2(d, d)).r != 1.0)
+                vec2 axis = uFilterPass == 0 ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+                vec4 sum = vec4(0.0);
+                float weightSum = 0.0;
+                for (int f = -d; f <= d; ++f)
                 {
-                    vec4 sum = vec4(0.0, 0.0, 0.0, 0.0);
-                    for (int fy = -d; fy <= d; ++fy)
-                    {
-                        for (int fx = -d; fx <= d; ++fx)
-                        {
-                            vec4 texel = texel_at(TexCoord + vec2(fx, fy) / uTextureExtents); 
-                            sum += (texel * texelFetch(uFilterKernel, ivec2(fx + d, fy + d)).r);
-                        }
-                    }
-                    color = sum;
+                    float w = texelFetch(uFilterKernel, ivec2(f + d, 0)).r;
+                    sum += texel_at(TexCoord + (axis * float(f)) / uTextureExtents) * w;
+                    weightSum += w;
                 }
+                color = sum / weightSum;
             }
             break;
         }

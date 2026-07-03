@@ -160,13 +160,14 @@ namespace neogfx
         uFilterEnabled = false;
     }
 
-    void standard_filter_shader::set_filter(shader_filter aFilter, scalar aArgument1, scalar aArgument2, scalar aArgument3, scalar aArgument4)
+    void standard_filter_shader::set_filter(shader_filter aFilter, std::int32_t aPass, scalar aArgument1, scalar aArgument2, scalar aArgument3, scalar aArgument4)
     {
         enable();
         uFilterEnabled = true;
         uFilterType = aFilter;
+        uFilterPass = aPass;
         if (aFilter == shader_filter::GaussianBlur)
-            aArgument1 += (1u - static_cast<std::uint32_t>(aArgument1) % 2u);
+            aArgument1 = (static_cast<std::uint32_t>(aArgument1) | 1u);
         auto const arguments = vec4{ aArgument1, aArgument2, aArgument3, aArgument4 };
         uFilterArguments = arguments.as<float>();
         auto kernel = iFilterKernels.find(std::make_pair(aFilter, arguments));
@@ -176,8 +177,8 @@ namespace neogfx
             {
                 kernel = iFilterKernels.emplace(std::make_pair(aFilter, arguments), std::optional<shader_array<float>>{}).first;
                 auto const kernelValues = dynamic_gaussian_filter<float>(static_cast<std::uint32_t>(aArgument1), static_cast<float>(aArgument2));
-                kernel->second.emplace(size{ aArgument1, aArgument1 });
-                kernel->second->data().set_pixels(rect{ point{}, size{aArgument1, aArgument1} }, &kernelValues[0][0]);
+                kernel->second.emplace(size_u32{ static_cast<std::uint32_t>(aArgument1), 1u });
+                kernel->second->data().set_pixels(rect{ point{}, size_u32{ static_cast<std::uint32_t>(aArgument1), 1u } }, &kernelValues[0]);
             }
         }
         auto& kernelData = kernel->second->data();

@@ -868,61 +868,54 @@ namespace neogfx
         bool iExecuted = false;
     };
 
-    template <typename ValueType = double, std::uint32_t W = 5>
-    inline std::array<std::array<ValueType, W>, W> static_gaussian_filter(ValueType aSigma = 1.0)
+    template <typename ValueType = double, std::uint32_t W = 5u>
+    inline std::array<ValueType, W> static_gaussian_filter(ValueType aSigma = 1.0)
     {
-        static_assert(W % 2 == 1);
+        static_assert(W % 2u == 1u);
 
         constexpr std::int32_t mean = static_cast<std::int32_t>(W / 2);
-        std::array<std::array<ValueType, W>, W> kernel = {};
-        if (aSigma > 0.0)
-        {
-            ValueType sum = 0.0;
-            for (std::int32_t x = -mean; x <= mean; ++x)
-            {
-                for (std::int32_t y = -mean; y <= mean; ++y)
-                {
-                    kernel[x + mean][y + mean] =
-                        static_cast<ValueType>((1.0 / (2.0 * boost::math::constants::pi<ValueType>() * aSigma * aSigma)) * 
-                            std::exp(-((x * x + y * y) / (2.0 * aSigma * aSigma))));
-                    sum += kernel[x + mean][y + mean];
-                }
-            }
-            for (std::uint32_t x = 0; x < W; ++x)
-                for (std::uint32_t y = 0; y < W; ++y)
-                    kernel[x][y] /= sum;
-        }
-        else
-            kernel[mean][mean] = static_cast<ValueType>(1.0);
-        return kernel;
-    }
+        std::array<ValueType, W> kernel = {};
 
-    template <typename ValueType = double>
-    inline boost::multi_array<ValueType, 2> dynamic_gaussian_filter(std::uint32_t aKernelSize = 5, ValueType aSigma = 1.0)
-    {
-        assert(aKernelSize % 2 == 1);
-
-        const std::int32_t mean = static_cast<std::int32_t>(aKernelSize / 2);
-        boost::multi_array<ValueType, 2> kernel(boost::extents[aKernelSize][aKernelSize]);
         if (aSigma != 0)
         {
             ValueType sum = 0.0;
             for (std::int32_t x = -mean; x <= mean; ++x)
             {
-                for (std::int32_t y = -mean; y <= mean; ++y)
-                {
-                    kernel[x + mean][y + mean] =
-                        static_cast<ValueType>((1.0 / (2.0 * boost::math::constants::pi<ValueType>() * aSigma * aSigma)) * 
-                            std::exp(-((x * x + y * y) / (2.0 * aSigma * aSigma))));
-                    sum += kernel[x + mean][y + mean];
-                }
+                kernel[x + mean] = static_cast<ValueType>(
+                    std::exp(-(x * x) / (2.0 * aSigma * aSigma)));
+                sum += kernel[x + mean];
             }
-            for (std::uint32_t x = 0; x < aKernelSize; ++x)
-                for (std::uint32_t y = 0; y < aKernelSize; ++y)
-                    kernel[x][y] /= sum;
+            for (std::uint32_t x = 0; x < W; ++x)
+                kernel[x] /= sum;
         }
         else
-            kernel[mean][mean] = static_cast<ValueType>(1.0);
+            kernel[mean] = static_cast<ValueType>(1.0);
+
+        return kernel;
+    }
+
+    template <typename ValueType = double>
+    inline std::vector<ValueType> dynamic_gaussian_filter(std::uint32_t aKernelSize = 5u, ValueType aSigma = 1.0)
+    {
+        aKernelSize |= 1;
+
+        const std::int32_t mean = static_cast<std::int32_t>(aKernelSize / 2);
+        std::vector<ValueType> kernel(aKernelSize);
+        if (aSigma != 0)
+        {
+            ValueType sum = 0.0;
+            for (std::int32_t x = -mean; x <= mean; ++x)
+            {
+                kernel[x + mean] = static_cast<ValueType>(
+                    std::exp(-(x * x) / (2.0 * aSigma * aSigma)));
+                sum += kernel[x + mean];
+            }
+            for (std::uint32_t x = 0; x < aKernelSize; ++x)
+                kernel[x] /= sum;
+        }
+        else
+            kernel[mean] = static_cast<ValueType>(1.0);
+
         return kernel;
     }
 

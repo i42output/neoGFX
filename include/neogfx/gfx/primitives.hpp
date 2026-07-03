@@ -89,8 +89,8 @@ namespace neogfx
 
     enum class shader_filter : std::uint32_t
     {
-        None            = 0,
-        GaussianBlur    = 1
+        None                    = 0,
+        GaussianBlur            = 1
     };
 
     enum class shader_shape : std::uint32_t
@@ -617,6 +617,7 @@ namespace neogfx
             iSmartUnderline{ aOther.iSmartUnderline },
             iIgnoreEmoji{ aOther.iIgnoreEmoji },
             iEffect{ aOther.iEffect },
+            iEffect2{ aOther.iEffect2 },
             iAnimation{ aOther.iAnimation },
             iOnlyCalculateEffect{ aOther.iOnlyCalculateEffect },
             iBeingFiltered{ aOther.iBeingFiltered }
