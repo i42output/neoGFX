@@ -439,7 +439,7 @@ namespace neogfx
             shaderEffect = shader_effect::Blit;
             break;
         case neogfx::blending_mode::FilterFinish:
-            shaderEffect = shader_effect::None;
+            shaderEffect = shader_effect::MultiplyAlpha;
             break;
         }
         draw_texture(aDestinationRect, aTexture, aSourceRect, {}, shaderEffect);
@@ -2271,6 +2271,7 @@ namespace neogfx
         std::size_t normalGlyphCount = 0;
 
         optional_rect filterRegion;
+        std::optional<scoped_blending_mode> blendingMode;
 
         std::chrono::duration<double> since = std::chrono::steady_clock::now().time_since_epoch();
 
@@ -2347,8 +2348,10 @@ namespace neogfx
                         (textEffect2->type() == text_effect_type::Glow || textEffect2->type() == text_effect_type::Shadow ||
                          textEffect2->type() == text_effect_type::OutlineGlow || textEffect2->type() == text_effect_type::OutlineShadow)))
                     {
-                        if (filterRegion == std::nullopt)
+                        if (!filterRegion)
                             filterRegion = bounding_rect().value();
+                        if (!blendingMode)
+                            blendingMode.emplace(*this, blending_mode::Filter);
                     }
                         
                     if (drawOp.appearance->paper() != std::nullopt)
@@ -2492,46 +2495,52 @@ namespace neogfx
 
                         if (stage == draw_glyphs_stage::GlyphOutline)
                         {
-                            for (auto textEffectPtr : { &drawOp.appearance->effect(), &drawOp.appearance->effect2() })
+                            if (!theGlyph.has_outline_texture())
+                                continue;
+
+                            for (auto textEffect : drawOp.appearance->being_filtered() ?
+                                std::initializer_list<text_effect const*>{ drawOp.appearance->being_filtered() } : 
+                                std::initializer_list<text_effect const*>{
+                                    drawOp.appearance->effect() ? &*drawOp.appearance->effect() : nullptr,
+                                    drawOp.appearance->effect2() ? &*drawOp.appearance->effect2() : nullptr })
                             {
-                                auto const& textEffect = *textEffectPtr;
                                 if (!textEffect)
                                     continue;
-                                if (theGlyph.has_outline_texture() &&
-                                    (textEffect->type() == text_effect_type::Outline ||
-                                     textEffect->type() == text_effect_type::OutlineGlow ||
-                                     textEffect->type() == text_effect_type::OutlineShadow))
-                                {
-                                    auto const& shapeQuad = shape_quad(glyphFont, glyphChar, true);
+                                if (textEffect->type() != text_effect_type::Outline &&
+                                    !(drawOp.appearance->being_filtered() &&
+                                        (textEffect->type() != text_effect_type::OutlineGlow ||
+                                         textEffect->type() != text_effect_type::OutlineShadow)))
+                                    continue;
 
-                                    auto const& glyphQuad = quadf_2d{
-                                        (glyphChar.cell[0] + shapeQuad[0]).round(),
-                                        (glyphChar.cell[0] + shapeQuad[1]).round(),
-                                        (glyphChar.cell[0] + shapeQuad[2]).round(),
-                                        (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
+                                auto const& shapeQuad = shape_quad(glyphFont, glyphChar, true);
 
-                                    auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
-                                    auto const& ink = textEffect->color().with_alpha(
-                                        textEffect->type() == text_effect_type::Outline ? textEffect->color().alpha() / 255.0 : 1.0);
-                                    tMeshOrigins.push_back(drawOp.origin);
-                                    tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
-                                    tMeshRenderers.push_back(
-                                        game::mesh_renderer{
-                                            game::material{
-                                                ink_maybe_animated(drawOp, ink),
-                                                std::holds_alternative<gradient>(ink) ?
-                                                    to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(
-                                                        rect{ to_aabb_2d(glyphQuad.begin(), glyphQuad.end()) } + drawOp.origin)) :
-                                                    std::optional<game::gradient>{},
-                                                {},
-                                                to_ecs_component(theGlyph.outline_texture()),
-                                                shader_effect::Ignore
-                                            },
+                                auto const& glyphQuad = quadf_2d{
+                                    (glyphChar.cell[0] + shapeQuad[0]).round(),
+                                    (glyphChar.cell[0] + shapeQuad[1]).round(),
+                                    (glyphChar.cell[0] + shapeQuad[2]).round(),
+                                    (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
+
+                                auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
+                                auto const& ink = textEffect->color().with_alpha(
+                                    textEffect->type() == text_effect_type::Outline ? textEffect->color().alpha() / 255.0 : 1.0);
+                                tMeshOrigins.push_back(drawOp.origin);
+                                tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
+                                tMeshRenderers.push_back(
+                                    game::mesh_renderer{
+                                        game::material{
+                                            ink_maybe_animated(drawOp, ink),
+                                            std::holds_alternative<gradient>(ink) ?
+                                                to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(
+                                                    rect{ to_aabb_2d(glyphQuad.begin(), glyphQuad.end()) } + drawOp.origin)) :
+                                                std::optional<game::gradient>{},
                                             {},
-                                            true,
-                                            0,
-                                            {}, subpixelRender });
-                                }
+                                            to_ecs_component(theGlyph.outline_texture()),
+                                            shader_effect::Ignore
+                                        },
+                                        {},
+                                        true,
+                                        0,
+                                        {}, subpixelRender });
                             }
                             continue;
                         }

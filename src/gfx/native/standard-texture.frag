@@ -84,7 +84,7 @@ void standard_texture_shader(inout vec4 color, inout vec4 function0, inout vec4 
             }
             break;
         case SHADER_EFFECT_MultiplyAlpha:
-            {
+            {   
                 vec4 texel = texel_at(TexCoord);
                 color = texel.rgba * color;
                 color = vec4(color.rgb * color.a, color.a);

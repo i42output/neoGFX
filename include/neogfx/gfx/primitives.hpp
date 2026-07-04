@@ -874,11 +874,11 @@ namespace neogfx
         }
         text_format with_effect(optional_text_effect const& aEffect) const
         {
-            return text_format{ iInk, iPaper, aEffect, iEffect2 }.with_smart_underline(smart_underline()).with_emoji_ignored(ignore_emoji());
+            return text_format{ iInk, iPaper, aEffect, iEffect2, iAnimation }.with_smart_underline(smart_underline()).with_emoji_ignored(ignore_emoji());
         }
         text_format with_effect2(optional_text_effect const& aEffect2) const
         {
-            return text_format{ iInk, iPaper, iEffect, aEffect2 }.with_smart_underline(smart_underline()).with_emoji_ignored(ignore_emoji());
+            return text_format{ iInk, iPaper, iEffect, aEffect2, iAnimation }.with_smart_underline(smart_underline()).with_emoji_ignored(ignore_emoji());
         }
         text_format with_animation(optional_text_animation const& aAnimation) const
         {
@@ -911,7 +911,7 @@ namespace neogfx
         text_format as_being_filtered(text_effect const& aTextEffect) const
         {
             auto copy = *this;
-            copy.iBeingFiltered = &aTextEffect;
+            copy.iBeingFiltered = (iEffect && &aTextEffect == &*iEffect ? &*copy.iEffect : &*copy.iEffect2);
             return copy;
         }
         font apply(font const& aFont) const
