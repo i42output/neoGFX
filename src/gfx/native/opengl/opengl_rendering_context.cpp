@@ -2508,8 +2508,8 @@ namespace neogfx
                                     continue;
                                 if (textEffect->type() != text_effect_type::Outline &&
                                     !(drawOp.appearance->being_filtered() &&
-                                        (textEffect->type() != text_effect_type::OutlineGlow ||
-                                         textEffect->type() != text_effect_type::OutlineShadow)))
+                                        (textEffect->type() == text_effect_type::OutlineGlow ||
+                                         textEffect->type() == text_effect_type::OutlineShadow)))
                                     continue;
 
                                 auto const& shapeQuad = shape_quad(glyphFont, glyphChar, true);
