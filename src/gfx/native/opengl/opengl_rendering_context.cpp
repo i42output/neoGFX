@@ -2535,7 +2535,8 @@ namespace neogfx
                                                 std::optional<game::gradient>{},
                                             {},
                                             to_ecs_component(theGlyph.outline_texture()),
-                                            shader_effect::Ignore
+                                            filterRegion ? 
+                                                shader_effect::MultiplyAlpha : shader_effect::Ignore
                                         },
                                         {},
                                         true,
@@ -2567,7 +2568,8 @@ namespace neogfx
                                         std::optional<game::gradient>{},
                                     {},
                                     to_ecs_component(theGlyph.texture()),
-                                    shader_effect::Ignore
+                                    filterRegion ? 
+                                        shader_effect::MultiplyAlpha : shader_effect::Ignore
                                 },
                                 {},
                                 true,

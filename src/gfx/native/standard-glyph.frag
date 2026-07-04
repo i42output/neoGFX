@@ -26,7 +26,10 @@ void standard_glyph_shader(inout vec4 color, inout vec4 function0, inout vec4 fu
                 {
                 default:
                     a = (aaaAlpha.r + aaaAlpha.g + aaaAlpha.b) / 3.0;
-                    color = vec4(color.xyz * a, color.a * a);
+                    if (uTextureEffect != SHADER_EFFECT_MultiplyAlpha)
+                        color = vec4(color.xyz, color.a * a);
+                    else
+                        color = vec4(color.xyz * a, color.a * a);
                     break;
                 case 1: // RGBHorizontal
                     color = vec4(color.rgb * aaaAlpha.rgb * color.a + output_pixel(gl_SampleID) * (vec3(1.0, 1.0, 1.0) - aaaAlpha.rgb * color.a), 1.0);
@@ -42,7 +45,10 @@ void standard_glyph_shader(inout vec4 color, inout vec4 function0, inout vec4 fu
             a = texture(tex, TexCoord).r;
             if (a == 0)
                 discard;
-            color = vec4(color.xyz * a, color.a * a);
+            if (uTextureEffect != SHADER_EFFECT_MultiplyAlpha)
+                color = vec4(color.xyz, color.a * a);
+            else
+                color = vec4(color.xyz * a, color.a * a);
         }
     }
 }
