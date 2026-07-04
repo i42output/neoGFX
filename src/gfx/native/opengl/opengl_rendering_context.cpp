@@ -2221,22 +2221,26 @@ namespace neogfx
             tMeshDrawables.clear();
         };
 
+        optional_rect boundingRect;
+
         auto bounding_rect = [&]()
         {
-            optional_rect result;
-            for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
+            if (!boundingRect)
             {
-                auto const& glyphChar = *drawOp.glyphChar;
-                // todo: union of AABB of cell and shape quads(, and transform?)
-                auto const aabb = to_aabb_2d(glyphChar.cell.begin(), glyphChar.cell.end());
-                rect glyphRect{ aabb };
-                glyphRect.translate(point{ drawOp.point });
-                if (result == std::nullopt)
-                    result = glyphRect;
-                else
-                    result->combine(glyphRect);
+                for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
+                {
+                    auto const& glyphChar = *drawOp.glyphChar;
+                    // todo: union of AABB of cell and shape quads(, and transform?)
+                    auto const aabb = to_aabb_2d(glyphChar.cell.begin(), glyphChar.cell.end());
+                    rect glyphRect{ aabb };
+                    glyphRect.translate(point{ drawOp.point });
+                    if (boundingRect == std::nullopt)
+                        boundingRect = glyphRect;
+                    else
+                        boundingRect->combine(glyphRect);
+                }
             }
-            return result;
+            return boundingRect;
         };
 
         auto shape_quad = [&](font const& glyphFont, glyph_char const& glyphChar, bool outline = false)
