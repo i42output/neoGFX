@@ -2178,9 +2178,9 @@ namespace neogfx
         {
             Paper,
             SpecialEffects,
-            EmojiFinal,
-            GlyphOutline,
-            GlyphFinal,
+            Emoji,
+            Outline,
+            Body,
             Adornments
         };
     }
@@ -2324,9 +2324,9 @@ namespace neogfx
         for (auto stage : {
             draw_glyphs_stage::Paper, 
             draw_glyphs_stage::SpecialEffects, 
-            draw_glyphs_stage::EmojiFinal,
-            draw_glyphs_stage::GlyphOutline, 
-            draw_glyphs_stage::GlyphFinal,
+            draw_glyphs_stage::Emoji,
+            draw_glyphs_stage::Outline,
+            draw_glyphs_stage::Body,
             draw_glyphs_stage::Adornments })
         {
             switch (stage)
@@ -2355,7 +2355,7 @@ namespace neogfx
                         if (!filterRegion)
                             filterRegion = bounding_rect().value();
                         if (!blendingMode)
-                            blendingMode.emplace(*this, blending_mode::Filter);
+                            blendingMode.emplace(*this, drawOp.appearance->bright() ? blending_mode::Default : blending_mode::Filter);
                     }
                         
                     if (drawOp.appearance->paper() != std::nullopt)
@@ -2430,7 +2430,7 @@ namespace neogfx
                     }
                 }
                 break;
-            case draw_glyphs_stage::EmojiFinal:
+            case draw_glyphs_stage::Emoji:
                 for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                 {
                     auto& glyphChar = *drawOp.glyphChar;
@@ -2473,8 +2473,8 @@ namespace neogfx
                         });
                 }
                 break;
-            case draw_glyphs_stage::GlyphOutline:
-            case draw_glyphs_stage::GlyphFinal:
+            case draw_glyphs_stage::Outline:
+            case draw_glyphs_stage::Body:
                 {
                     bool updateGlyphShader = true;
 
@@ -2497,7 +2497,7 @@ namespace neogfx
 
                         bool const subpixelRender = subpixel(glyphChar) && theGlyph.subpixel();
 
-                        if (stage == draw_glyphs_stage::GlyphOutline)
+                        if (stage == draw_glyphs_stage::Outline)
                         {
                             if (!theGlyph.has_outline_texture())
                                 continue;
@@ -2539,7 +2539,7 @@ namespace neogfx
                                                 std::optional<game::gradient>{},
                                             {},
                                             to_ecs_component(theGlyph.outline_texture()),
-                                            filterRegion ? 
+                                            filterRegion && !textEffect->bright()  ?
                                                 shader_effect::MultiplyAlpha : shader_effect::Ignore
                                         },
                                         {},
@@ -2572,7 +2572,7 @@ namespace neogfx
                                         std::optional<game::gradient>{},
                                     {},
                                     to_ecs_component(theGlyph.texture()),
-                                    filterRegion ? 
+                                    filterRegion && !drawOp.appearance->bright()  ?
                                         shader_effect::MultiplyAlpha : shader_effect::Ignore
                                 },
                                 {},
