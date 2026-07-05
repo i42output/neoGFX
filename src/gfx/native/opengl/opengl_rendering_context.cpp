@@ -2210,12 +2210,12 @@ namespace neogfx
 
         auto draw = [&](draw_glyphs_stage aStage)
         {
-            auto passThrough = [&]() { rendering_engine().default_shader_program().texture_shader().set_pass_through(false); };
-            std::optional<neolib::scoped_cleanup<decltype(passThrough)>> scu;
+            auto passThroughCleanup = [&]() { rendering_engine().default_shader_program().texture_shader().set_pass_through(false); };
+            std::optional<neolib::scoped_cleanup<decltype(passThroughCleanup)>> scu;
             if (aStage == draw_glyphs_stage::Body || aStage == draw_glyphs_stage::Outline)
             {
                 rendering_engine().default_shader_program().texture_shader().set_pass_through(true);
-                scu.emplace(passThrough);
+                scu.emplace(passThroughCleanup);
             }
 
             for (std::size_t i = 0; i < tMeshFilters.size(); ++i)
