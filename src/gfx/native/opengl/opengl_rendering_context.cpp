@@ -2208,10 +2208,15 @@ namespace neogfx
         auto& tMeshRenderers = tDrawGlyphArrays.meshRenderers;
         auto& tMeshDrawables = tDrawGlyphArrays.drawables;
 
-        auto draw = [&]()
+        auto draw = [&](draw_glyphs_stage aStage)
         {
-            rendering_engine().default_shader_program().texture_shader().set_pass_through(true);
-            neolib::scoped_cleanup scu{ [&]() { rendering_engine().default_shader_program().texture_shader().set_pass_through(false); } };
+            auto passThrough = [&]() { rendering_engine().default_shader_program().texture_shader().set_pass_through(false); };
+            std::optional<neolib::scoped_cleanup<decltype(passThrough)>> scu;
+            if (aStage == draw_glyphs_stage::Body || aStage == draw_glyphs_stage::Outline)
+            {
+                rendering_engine().default_shader_program().texture_shader().set_pass_through(true);
+                scu.emplace(passThrough);
+            }
 
             for (std::size_t i = 0; i < tMeshFilters.size(); ++i)
                 tMeshDrawables.emplace_back(tMeshOrigins[i], tMeshFilters[i], tMeshRenderers[i]);
@@ -2664,7 +2669,7 @@ namespace neogfx
                 }
                 break;
             }
-            draw();
+            draw(stage);
         }
     }
 
