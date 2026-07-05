@@ -301,7 +301,7 @@ namespace neogfx
         {
         }
         text_effect(text_effect_type aType, const text_color& aColor, const optional_dimension& aWidth = {}, const optional_vec3& aOffset = {}, const optional_auxiliary_parameter& aAux1 = {}, const optional_auxiliary_parameter& aAux2 = {}, text_effect_flags aFlags = text_effect_flags::Default) :
-            iType{ aType }, iFlags{ text_effect_flags::Default }, iColor{ aColor }, iWidth{ aWidth }, iAux1{ aAux1 }, iAux2{ aAux2 }
+            iType{ aType }, iFlags{ aFlags }, iColor{ aColor }, iWidth{ aWidth }, iAux1{ aAux1 }, iAux2{ aAux2 }
         {
         }
     public:
@@ -666,7 +666,7 @@ namespace neogfx
         text_format(text_format const& aOther) :
             iInk{ aOther.iInk },
             iPaper{ aOther.iPaper },
-            iFlags{ text_effect_flags::IgnoreEmoji },
+            iFlags{ aOther.iFlags },
             iSmartUnderline{ aOther.iSmartUnderline },
             iEffect{ aOther.iEffect },
             iEffect2{ aOther.iEffect2 },
