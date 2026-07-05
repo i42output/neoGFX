@@ -60,6 +60,7 @@ namespace neogfx
         virtual void clear_texture() = 0;
         virtual void set_texture(const i_texture& aTexture) = 0;
         virtual void set_effect(shader_effect aEffect) = 0;
+        virtual void set_pass_through(bool aPassThrough) = 0;
     };
 
     class i_filter_shader : public i_fragment_shader

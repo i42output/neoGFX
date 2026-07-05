@@ -93,6 +93,7 @@ namespace neogfx
         set_uniform("tex"_s, sampler2D{ static_cast<std::uint32_t>(reserved_texture_unit::Tex) });
         set_uniform("texMS"_s, sampler2DMS{ static_cast<std::uint32_t>(reserved_texture_unit::TexMS) });
         uTextureEffect = shader_effect::None;
+        uTexturePassThrough = false;
     }
 
     bool standard_texture_shader::supports(vertex_buffer_type aBufferType) const
@@ -133,6 +134,11 @@ namespace neogfx
     void standard_texture_shader::set_effect(shader_effect aEffect)
     {
         uTextureEffect = aEffect;
+    }
+
+    void standard_texture_shader::set_pass_through(bool aPassThrough)
+    {
+        uTexturePassThrough = aPassThrough;
     }
 
     standard_filter_shader::standard_filter_shader(std::string const& aName) :

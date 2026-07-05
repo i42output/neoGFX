@@ -2210,11 +2210,15 @@ namespace neogfx
 
         auto draw = [&]()
         {
+            rendering_engine().default_shader_program().texture_shader().set_pass_through(true);
+            neolib::scoped_cleanup scu{ [&]() { rendering_engine().default_shader_program().texture_shader().set_pass_through(false); } };
+
             for (std::size_t i = 0; i < tMeshFilters.size(); ++i)
                 tMeshDrawables.emplace_back(tMeshOrigins[i], tMeshFilters[i], tMeshRenderers[i]);
             optional_ecs_render_lock ignore;
             if (!tMeshDrawables.empty())
                 draw_meshes(ignore, as_vertex_provider<>(*this), 0, &*tMeshDrawables.begin(), &*tMeshDrawables.begin() + tMeshDrawables.size(), mat44::identity());
+
             tMeshOrigins.clear();
             tMeshFilters.clear();
             tMeshRenderers.clear();
@@ -2847,6 +2851,7 @@ namespace neogfx
     void opengl_rendering_context::draw_patch(patch_drawable& aPatch, const mat44& aTransformation)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
+
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         std::optional<std::pair<point, mat44f>> originTranslatedTransformation;
