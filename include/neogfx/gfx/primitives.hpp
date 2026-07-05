@@ -297,11 +297,11 @@ namespace neogfx
         typedef optional<auxiliary_parameter> optional_auxiliary_parameter;
     public:
         text_effect() :
-            iType{ text_effect_type::None }, iFlags{ text_effect_flags::Default }, iColor{}, iWidth{}, iAux1{}, iAux2{}
+            iType{ text_effect_type::None }, iFlags{ text_effect_flags::Default }, iColor{}, iWidth{}, iOffset{}, iAux1{}, iAux2{}
         {
         }
         text_effect(text_effect_type aType, const text_color& aColor, const optional_dimension& aWidth = {}, const optional_vec3& aOffset = {}, const optional_auxiliary_parameter& aAux1 = {}, const optional_auxiliary_parameter& aAux2 = {}, text_effect_flags aFlags = text_effect_flags::Default) :
-            iType{ aType }, iFlags{ aFlags }, iColor{ aColor }, iWidth{ aWidth }, iAux1{ aAux1 }, iAux2{ aAux2 }
+            iType{ aType }, iFlags{ aFlags }, iColor{ aColor }, iWidth{ aWidth }, iOffset{ aOffset }, iAux1{ aAux1 }, iAux2{ aAux2 }
         {
         }
     public:
