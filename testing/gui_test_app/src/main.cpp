@@ -1,4 +1,5 @@
 ﻿#include <boost/lexical_cast.hpp>
+#include <neolib/chrono/fast_clock.hpp>
 
 #include "test.hpp"
 
@@ -1403,10 +1404,23 @@ int main(int argc, char* argv[])
             test_pattern(texGc, ng::point{}, texColor[i], "Render\nTo\nTexture");
         }
 
-        window.pageDrawing.painting([&](ng::i_graphics_context& aGc)
+        auto t0 = neolib::chrono::fast_clock::now();
+
+        window.pageDrawing.painting([&, t0](ng::i_graphics_context& aGc)
         {
-            ng::scalar t = static_cast<ng::scalar>(neolib::this_process::elapsed_us());
-                
+            ng::scalar t = std::chrono::duration_cast<std::chrono::microseconds>(neolib::chrono::fast_clock::now() - t0).count();
+
+            bool const justAnimation = ((ng::service<ng::i_keyboard>().locks() & ng::keyboard_locks::InsertLock) == ng::keyboard_locks::InsertLock);
+
+            // easing function demo
+            auto const d = 1000000.0;
+            auto const x = ng::partitioned_ease(easingItemModel.item(window.dropListEasing.selection()),
+                std::fmod(t / (justAnimation ? 8.0 : 2.0), d) / d) * (window.pageDrawing.extents().cx - logo.extents().cx);
+            aGc.draw_texture(ng::point{ x, (window.pageDrawing.extents().cy - logo.extents().cy) / 1.5 }, logo);
+
+            if (justAnimation)
+                return;
+
             aGc.draw_arc(ng::point{ 20, 70 }, 50, ng::to_rad(0 + 90.0 * 0), ng::to_rad(45.0 + 90.0 * 0), ng::pen{ ng::color::White, 3.0 }, ng::color::Chocolate);
             aGc.draw_arc(ng::point{ 20, 70 }, 40, ng::to_rad(5.0 + 90.0 * 0), ng::to_rad(50.0 + 90.0 * 0), ng::pen{ ng::color::Yellow, 3.0 });
             aGc.draw_pixel(ng::point{ 20, 70 }, ng::color::Red);
@@ -1420,10 +1434,8 @@ int main(int argc, char* argv[])
             aGc.fill_arc(ng::point{ 800, 200 }, 50, ng::to_rad(15.0 + 90.0 * 3), ng::to_rad(60.0 + 90.0 * 3), ng::color::Chocolate);
 
             aGc.draw_ellipse(ng::point{ 200, 250 }, 50, 25, ng::pen{ ng::color::White, 3.0_dip }, ng::gradient{ ng::color::ForestGreen, ng::color::Black, ng::gradient_direction::Vertical });
-            
-            {
-                aGc.flush();
 
+            {
                 ng::scoped_snap_to_pixel snap{ aGc, false };
                 ng::rect rect{ ng::point{ 150, 300 }, ng::size{ 100, 100 } };
 
@@ -1434,15 +1446,19 @@ int main(int argc, char* argv[])
 
             aGc.draw_rect(ng::rect{ ng::point{ 5, 5 }, ng::size{ 2, 2 } }, ng::color::White);
             aGc.draw_pixel(ng::point{ 7, 7 }, ng::color::Blue);
+
             aGc.draw_focus_rect(ng::rect{ ng::point{ 8, 8 }, ng::size{ 16, 16 } });
             aGc.draw_rect(ng::rect{ ng::point{ 8, 28 }, ng::size{ 16, 16 } }, ng::color::Cyan);
             aGc.draw_rect(ng::rect{ ng::point{ 8.0, 44.0 }, ng::size{ 16, 16 } }, ng::pen{ window.frame_color(), window.effective_frame_width(), false });
             aGc.fill_rect(ng::rect{ ng::point{ 8.0, 60.0 }, ng::size{ 16, 16 } }, ng::color::White);
+
             aGc.push_logical_operation(ng::logical_operation::Xor);
             aGc.fill_rect(ng::rect{ ng::point{ 6.0, 62.0 }, ng::size{ 20, 12 } }, ng::color::Red);
             aGc.pop_logical_operation();
+
             aGc.fill_rect(ng::rect{ ng::point{ 38, 8.0 }, ng::size{ 20, 17 } }, ng::color::Red);
             aGc.draw_focus_rect(ng::rect{ ng::point{ 28, 8 }, ng::size{ (ng::scalar)((int)(t / 100000) % 200), 17 } });
+
             ng::path path2;
             path2.move_to(ng::point{ 8.0, 60.0 });
             path2.line_to(ng::point{ 18.0, 60.0 });
@@ -1466,12 +1482,6 @@ int main(int argc, char* argv[])
                         aGc.draw_pixel(ng::point{ 32.0 + x, 32.0 + y }, ng::color::Black);
                     else
                         aGc.set_pixel(ng::point{ 32.0 + x, 32.0 + y }, ng::color::Goldenrod);
-
-            // easing function demo
-            auto const d = 1000000.0;
-            auto const x = ng::partitioned_ease(easingItemModel.item(window.dropListEasing.selection()), 
-                std::fmod(t / 2.0, d) / d) * (window.pageDrawing.extents().cx - logo.extents().cx);
-            aGc.draw_texture(ng::point{ x, (window.pageDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
 
             auto texLocation = ng::point{ (window.pageDrawing.extents().cx - 64.0_dip) / 2.0, (window.pageDrawing.extents().cy - logo.extents().cy) / 4.0 }.ceil();
             aGc.draw_texture(texLocation + ng::point{ 0.0_dip, 0.0_dip }, tex[0]);

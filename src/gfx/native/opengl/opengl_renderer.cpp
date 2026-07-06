@@ -308,6 +308,8 @@ namespace neogfx
             else
                 buffer.reclaim();
         }
+        for (std::size_t ssboIndex = 0u; ssboIndex < default_shader_program().ssbo_count(); ++ssboIndex)
+            default_shader_program().ssbo(ssboIndex).reclaim();
     }
 
     i_ping_pong_buffer& opengl_renderer::ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)

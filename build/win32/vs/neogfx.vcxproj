@@ -468,6 +468,8 @@
     <ClInclude Include="..\..\..\src\gfx\native\i_native_texture.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\native_texture.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_buffer.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_buffer.ipp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_error.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_vertex.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_renderer.hpp" />

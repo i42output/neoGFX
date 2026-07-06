@@ -315,6 +315,12 @@ namespace neogfx
     }
 
     template <typename Base>
+    i_ssbo& basic_opengl_shader_program<Base>::ssbo(std::size_t aIndex)
+    {
+        return *iSsbos.at_index(aIndex);
+    }
+
+    template <typename Base>
     inline void basic_opengl_shader_program<Base>::create_ssbo(i_string const& aName, shader_data_type aDataType, i_ref_ptr<i_ssbo>& aSsbo)
     {
         ssbo_id const ssboId = iSsbos.next_cookie();

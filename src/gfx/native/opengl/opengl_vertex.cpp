@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include "opengl_buffer.ipp"
 #include "opengl_vertex.hpp"
 #include "opengl_vertex.ipp"
 

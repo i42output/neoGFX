@@ -115,6 +115,7 @@ namespace neogfx
         virtual void update_uniforms(const i_rendering_context& aContext) = 0;
         virtual std::size_t ssbo_count() const = 0;
         virtual i_ssbo const& ssbo(std::size_t aIndex) const = 0;
+        virtual i_ssbo& ssbo(std::size_t aIndex) = 0;
         virtual void create_ssbo(i_string const& aName, shader_data_type aDataType, i_ref_ptr<i_ssbo>& aSsbo) = 0;
         virtual bool active() const = 0;
         virtual void activate(const i_rendering_context& aContext) = 0;

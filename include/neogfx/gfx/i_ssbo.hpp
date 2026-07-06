@@ -32,14 +32,17 @@ namespace neogfx
 
     struct ssbo_range
     {
-        std::uint32_t first;
-        std::uint32_t last;
+        using size_type = std::uint32_t;
+
+        size_type first;
+        size_type last;
     };
 
     class i_ssbo : public i_reference_counted
     {
     public:
         using abstract_type = i_ssbo;
+        using size_type = ssbo_range::size_type;
     public:
         virtual ~i_ssbo() = default;
     public:
@@ -47,10 +50,11 @@ namespace neogfx
         virtual ssbo_id id() const = 0;
         virtual shader_data_type data_type() const = 0;
     public:
-        virtual ssbo_range alloc(std::uint32_t aSize) = 0;
+        virtual ssbo_range alloc(size_type aSize) = 0;
         virtual void free(ssbo_range aRange) = 0;
         virtual void* lock(ssbo_range aRange) = 0;
         virtual void unlock(ssbo_range aRange) = 0;
+        virtual void reclaim() = 0;
     public:
         template <typename T>
         i_ssbo& as()

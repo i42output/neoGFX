@@ -34,6 +34,7 @@ namespace neogfx
     {
     public:
         using value_type = T;
+        using size_type = ssbo_range::size_type;
     public:
         ssbo(i_string const& aName, ssbo_id aId) :
             iName{ aName }, iId{ aId }
@@ -52,63 +53,9 @@ namespace neogfx
         {
             return shader_data_type_v<T>;
         }
-    public:
-        ssbo_range alloc(std::uint32_t aSize) final
-        {
-            if (!iFreeList[aSize].empty())
-            {
-                auto const result = iFreeList[aSize].back();
-                iFreeList[aSize].pop_back();
-                return result;
-            }
-            resize(size() + aSize);
-            return { static_cast<std::uint32_t>(size()) - aSize, static_cast<std::uint32_t>(size()) };
-        }
-        void free(ssbo_range aRange) final
-        {
-            iFreeList[aRange.last - aRange.first].push_back(aRange);
-        }
-    public:
-        virtual void reserve(std::size_t aCapacity)
-        {
-            iCapacity = std::max(aCapacity, iCapacity);
-        }
-        std::size_t capacity() const
-        {
-            return iCapacity;
-        }
-        bool empty() const
-        {
-            return iSize == 0u;
-        }
-        std::size_t size() const
-        {
-            return iSize;
-        }
-    public:
-        void clear()
-        {
-            resize(0);
-            for (auto& bucket : iFreeList)
-                bucket.second.clear();
-        }
-        void resize(std::size_t aSize)
-        {
-            if (aSize > capacity())
-                need(aSize - capacity());
-            iSize = aSize;
-        }
-    private:
-        void need(std::size_t aExtra)
-        {
-            reserve(static_cast<std::size_t>(capacity() * 1.5 + aExtra));
-        }
     private:
         string iName;
         ssbo_id iId;
-        std::size_t iCapacity = 0u;
-        std::size_t iSize = 0u;
-        std::unordered_map<std::size_t, std::vector<ssbo_range>> iFreeList;
     };
 
     template <typename Base = i_shader_stage>

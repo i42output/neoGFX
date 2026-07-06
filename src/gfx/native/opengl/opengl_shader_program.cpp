@@ -24,60 +24,39 @@
 namespace neogfx
 {
     template <typename T>
-    opengl_ssbo<T>::opengl_ssbo(i_string const& aName, ssbo_id aId) :
-        ssbo<T>{ aName, aId }
+    opengl_ssbo<T>::opengl_ssbo(i_string const& aName, ssbo_id aId, size_type aCapacity) :
+        ssbo<T>{ aName, aId }, opengl_buffer<T>{ false, static_cast<typename opengl_buffer<T>::size_type>(aCapacity) }
     {
-        glCheck(glGenBuffers(1, &iHandle));
-        glCheck(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, this->id(), iHandle));
     }
 
     template <typename T>
     opengl_ssbo<T>::~opengl_ssbo()
     {
-        glCheck(glDeleteBuffers(1, &iHandle));
     }
 
     template <typename T>
-    void opengl_ssbo<T>::reserve(std::size_t aCapacity)
+    ssbo_range opengl_ssbo<T>::alloc(size_type aSize)
     {
-        if (iLockCount)
-            throw ssbo_locked();
-
-        if (aCapacity <= this->capacity())
-            return;
-
-        auto const existingCapacity = this->capacity();
-
-        thread_local std::vector<T> existingData;
-        existingData.clear();
-        existingData.resize(this->size());
-        if (existingCapacity != 0u)
-        {
-            std::copy(iMappedPtr, iMappedPtr + this->size(), existingData.begin());
-            unmap();
-            glCheck(glDeleteBuffers(1, &iHandle));
-            glCheck(glGenBuffers(1, &iHandle));
-            glCheck(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, this->id(), iHandle));
-        }
-
-        glCheck(glNamedBufferStorage(iHandle, aCapacity * sizeof(T), nullptr,
-            GL_DYNAMIC_STORAGE_BIT | GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | 
-            GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT));
-        
-        ssbo<T>::reserve(aCapacity);
-        map();
-
-        if (existingCapacity != 0u)
-            std::copy(existingData.begin(), existingData.end(), iMappedPtr);
+        auto const maybeSpace = opengl_buffer<T>::find_space_for(aSize);
+        if (maybeSpace != opengl_buffer<T>::size())
+            return { static_cast<size_type>(maybeSpace), static_cast<size_type>(maybeSpace) + aSize };
+        opengl_buffer<T>::resize(opengl_buffer<T>::size() + aSize);
+        return { static_cast<size_type>(opengl_buffer<T>::size()) - aSize, static_cast<size_type>(opengl_buffer<T>::size()) };
     }
 
+    template <typename T>
+    void opengl_ssbo<T>::free(ssbo_range aRange)
+    {
+        opengl_buffer<T>::reclaim(aRange.first, aRange.last);
+    }
+    
     template <typename T>
     void* opengl_ssbo<T>::lock(ssbo_range aRange)
     {
-        if (!mapped())
+        if (!opengl_buffer<T>::mapped())
             throw std::logic_error("neogfx::opengl_ssbo<T>::lock: not mapped");
         ++iLockCount;
-        return iMappedPtr + aRange.first;
+        return opengl_buffer<T>::map() + aRange.first;
     }
 
     template <typename T>
@@ -87,31 +66,9 @@ namespace neogfx
     }
 
     template <typename T>
-    bool opengl_ssbo<T>::mapped() const
+    void opengl_ssbo<T>::reclaim()
     {
-        return iMappedPtr != nullptr;
-    }
-
-    template <typename T>
-    void opengl_ssbo<T>::map() const
-    {
-        if (iMappedPtr != nullptr)
-            throw std::logic_error("neogfx::opengl_ssbo<T>::map: already mapped");
-        glCheck(iMappedPtr = static_cast<T*>(glMapNamedBufferRange(
-            iHandle, 0, sizeof(T) * this->capacity(), 
-            GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT |
-            GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT)));
-    }
-
-    template <typename T>
-    void opengl_ssbo<T>::unmap() const
-    {
-        if (iMappedPtr == nullptr)
-            throw std::logic_error("neogfx::opengl_ssbo<T>::map: already unmapped");
-        if (!this->empty())
-            glCheck(glFlushMappedNamedBufferRange(iHandle, 0, sizeof(T) * this->size()));
-        glCheck(glUnmapNamedBuffer(iHandle));
-        iMappedPtr = nullptr;
+        opengl_buffer<T>::reclaim();
     }
 
     template class opengl_ssbo<bool>;
