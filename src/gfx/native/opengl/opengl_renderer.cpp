@@ -296,6 +296,8 @@ namespace neogfx
             if (bufferMapped)
                 buffer.flush();
         }
+        for (std::size_t ssboIndex = 0u; ssboIndex < default_shader_program().ssbo_count(); ++ssboIndex)
+            default_shader_program().ssbo(ssboIndex).flush();
     }
 
     void opengl_renderer::clear_non_cacheable_vertex_buffers()

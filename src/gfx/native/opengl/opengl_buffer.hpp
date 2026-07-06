@@ -24,11 +24,7 @@
 #include <vector>
 #include <bit>
 
-#include <neogfx/gfx/color.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
-#include <neogfx/gfx/i_rendering_context.hpp>
-#include <neogfx/gfx/i_shader_program.hpp>
-#include <neogfx/gfx/vertex_buffer.hpp>
 #include "opengl.hpp"
 
 namespace neogfx

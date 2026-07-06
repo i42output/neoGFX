@@ -28,7 +28,7 @@
 namespace neogfx
 {
     template <typename T>
-    class opengl_ssbo : public ssbo<T>, public opengl_buffer<T>
+    class opengl_ssbo : public ssbo<T>, public opengl_buffer<T>, private opengl_buffer_owner
     {
     public:
         using typename ssbo<T>::value_type;
@@ -42,6 +42,9 @@ namespace neogfx
         void* lock(ssbo_range aRange) final;
         void unlock(ssbo_range aRange) final;
         void reclaim() final;
+        void flush() final;
+    private:
+        void buffer_grown() final;
     private:
         std::uint32_t iLockCount = 0u;
     };

@@ -55,6 +55,7 @@ namespace neogfx
         virtual void* lock(ssbo_range aRange) = 0;
         virtual void unlock(ssbo_range aRange) = 0;
         virtual void reclaim() = 0;
+        virtual void flush() = 0;
     public:
         template <typename T>
         i_ssbo& as()
