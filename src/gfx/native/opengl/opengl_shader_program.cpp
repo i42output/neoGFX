@@ -25,7 +25,7 @@ namespace neogfx
 {
     template <typename T>
     opengl_ssbo<T>::opengl_ssbo(i_string const& aName, ssbo_id aId, size_type aCapacity) :
-        ssbo<T>{ aName, aId }, opengl_buffer<T>{ true, static_cast<typename opengl_buffer<T>::size_type>(aCapacity) }
+        ssbo<T>{ aName, aId }, opengl_buffer<T>{ *this, true, static_cast<typename opengl_buffer<T>::size_type>(aCapacity) }
     {
         if (opengl_buffer<T>::handle() != 0)
             buffer_grown();
@@ -64,8 +64,8 @@ namespace neogfx
     template <typename T>
     void opengl_ssbo<T>::unlock(ssbo_range aRange)
     {
-        if (--iLockCount == 0)
-            opengl_buffer<T>::flush(aRange.first, aRange.last - aRange.first);
+        opengl_buffer<T>::flush(aRange.first, aRange.last - aRange.first);
+        --iLockCount;
     }
 
     template <typename T>
