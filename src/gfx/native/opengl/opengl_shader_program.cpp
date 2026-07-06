@@ -39,13 +39,13 @@ namespace neogfx
     template <typename T>
     ssbo_range opengl_ssbo<T>::alloc(size_type aSize)
     {
-        if (iLockCount != 0u)
-            throw ssbo_locked{};
-
         auto const maybeSpace = opengl_buffer<T>::find_space_for(aSize);
         
         if (maybeSpace != opengl_buffer<T>::size())
             return { static_cast<size_type>(maybeSpace), static_cast<size_type>(maybeSpace) + aSize };
+
+        if (iLockCount != 0u && aSize > opengl_buffer<T>::room())
+            throw ssbo_locked{};
 
         opengl_buffer<T>::resize(opengl_buffer<T>::size() + aSize);
 
