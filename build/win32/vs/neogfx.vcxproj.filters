@@ -1336,6 +1336,9 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_triangle_renderer.cpp">
       <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_buffer.cpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\gfx\path.inl">
