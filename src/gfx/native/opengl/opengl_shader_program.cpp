@@ -25,9 +25,9 @@ namespace neogfx
 {
     template <typename T>
     opengl_ssbo<T>::opengl_ssbo(i_string const& aName, ssbo_id aId, size_type aCapacity) :
-        ssbo<T>{ aName, aId }, opengl_buffer<T>{ *this, true, static_cast<typename opengl_buffer<T>::size_type>(aCapacity) }
+        ssbo<T>{ aName, aId }, buffer_type{ *this, true, static_cast<typename buffer_type::size_type>(aCapacity) }
     {
-        if (opengl_buffer<T>::handle() != 0)
+        if (buffer_type::handle() != 0)
             buffer_grown();
     }
 
@@ -39,58 +39,58 @@ namespace neogfx
     template <typename T>
     ssbo_range opengl_ssbo<T>::alloc(size_type aSize)
     {
-        auto const maybeSpace = opengl_buffer<T>::find_space_for(aSize);
+        auto const maybeSpace = buffer_type::find_space_for(aSize);
         
-        if (maybeSpace != opengl_buffer<T>::size())
+        if (maybeSpace != buffer_type::size())
             return { static_cast<size_type>(maybeSpace), static_cast<size_type>(maybeSpace) + aSize };
 
-        if (iLockCount != 0u && aSize > opengl_buffer<T>::room())
+        if (iLockCount != 0u && aSize > buffer_type::room())
             throw ssbo_locked{};
 
-        opengl_buffer<T>::resize(opengl_buffer<T>::size() + aSize);
+        buffer_type::resize(buffer_type::size() + aSize);
 
-        return { static_cast<size_type>(opengl_buffer<T>::size()) - aSize, static_cast<size_type>(opengl_buffer<T>::size()) };
+        return { static_cast<size_type>(buffer_type::size()) - aSize, static_cast<size_type>(buffer_type::size()) };
     }
 
     template <typename T>
     void opengl_ssbo<T>::free(ssbo_range aRange)
     {
-        opengl_buffer<T>::reclaim(aRange.first, aRange.last);
+        buffer_type::reclaim(aRange.first, aRange.last);
     }
     
     template <typename T>
     void* opengl_ssbo<T>::lock(ssbo_range aRange)
     {
-        if (!opengl_buffer<T>::mapped())
+        if (!buffer_type::mapped())
             throw std::logic_error("neogfx::opengl_ssbo<T>::lock: not mapped");
         ++iLockCount;
-        return opengl_buffer<T>::map() + aRange.first;
+        return buffer_type::map() + aRange.first;
     }
 
     template <typename T>
     void opengl_ssbo<T>::unlock(ssbo_range aRange)
     {
-        opengl_buffer<T>::flush(aRange.first, aRange.last - aRange.first);
+        buffer_type::flush(aRange.first, aRange.last - aRange.first);
         --iLockCount;
     }
 
     template <typename T>
     void opengl_ssbo<T>::reclaim()
     {
-        opengl_buffer<T>::reclaim();
+        buffer_type::reclaim();
     }
 
     template <typename T>
     void opengl_ssbo<T>::flush()
     {
-        opengl_buffer<T>::flush(0u, opengl_buffer<T>::size());
+        buffer_type::flush(0u, buffer_type::size());
     }
 
     template <typename T>
     void opengl_ssbo<T>::buffer_grown()
     {
         glCheck(glBindBufferBase(GL_SHADER_STORAGE_BUFFER,
-            static_cast<GLuint>(this->id()), opengl_buffer<T>::handle()));
+            static_cast<GLuint>(this->id()), buffer_type::handle()));
     }
 
     template class opengl_ssbo<bool>;
@@ -112,7 +112,7 @@ namespace neogfx
     template class opengl_ssbo<vec4u32>;
     template class opengl_ssbo<mat4f>;
     template class opengl_ssbo<mat4>;
-    
+
     template class basic_opengl_shader_program<>;
     template class basic_opengl_shader_program<standard_shader_program>;
 }

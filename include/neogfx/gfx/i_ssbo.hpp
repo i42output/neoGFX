@@ -38,6 +38,39 @@ namespace neogfx
         size_type last;
     };
 
+    template <typename T>
+    struct ssbo_element { using type = T; };
+
+    template <>
+    struct ssbo_element<bool>
+    {
+        struct type
+        {
+            std::uint32_t value = 0u;   // GLSL bool is 4 bytes
+            type() = default;
+            type(bool aValue) : value{ aValue ? 1u : 0u } {}
+            type& operator=(bool aValue) { value = aValue ? 1u : 0u; return *this; }
+            operator bool() const { return value != 0u; }
+        };
+    };
+
+    template <typename T, typename Type>
+    struct ssbo_element<basic_vector<T, 3, Type>>
+    {
+        struct alignas(4 * sizeof(T)) type   // std430: vec3 aligns as vec4
+        {
+            basic_vector<T, 3, Type> value = {};
+            type() = default;
+            type(basic_vector<T, 3, Type> const& aValue) : value{ aValue } {}
+            type& operator=(basic_vector<T, 3, Type> const& aValue) { value = aValue; return *this; }
+            operator basic_vector<T, 3, Type> const& () const { return value; }
+        };
+        static_assert(sizeof(type) == 4 * sizeof(T));
+    };
+
+    template <typename T>
+    using ssbo_element_t = typename ssbo_element<T>::type;
+
     class i_ssbo : public i_reference_counted
     {
     public:
@@ -66,9 +99,9 @@ namespace neogfx
         }
     public:
         template <typename T>
-        T* lock(ssbo_range aRange)
+        ssbo_element_t<T>* lock(ssbo_range aRange)
         {
-            return static_cast<T*>(as<T>().lock(aRange));
+            return static_cast<ssbo_element_t<T>*>(as<T>().lock(aRange));
         }
     };
 
@@ -93,14 +126,14 @@ namespace neogfx
         {
             return iRange;
         }
-        T* data() const
+        ssbo_element_t<T>* data() const
         {
             return iData;
         }
     private:
         i_ssbo& iSsbo;
         ssbo_range iRange;
-        T* iData;
+        ssbo_element_t<T>* iData;
     };
 }
  

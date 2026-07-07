@@ -19,28 +19,29 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neogfx/gfx/i_ssbo.hpp>
 #include "opengl_buffer.hpp"
 #include "opengl_buffer.ipp"
 
 namespace neogfx
 {
-    template class opengl_buffer<bool>;
-    template class opengl_buffer<float>;
-    template class opengl_buffer<double>;
-    template class opengl_buffer<std::int32_t>;
-    template class opengl_buffer<std::uint32_t>;
-    template class opengl_buffer<vec2f>;
-    template class opengl_buffer<vec2>;
-    template class opengl_buffer<vec2i32>;
-    template class opengl_buffer<vec2u32>;
-    template class opengl_buffer<vec3f>;
-    template class opengl_buffer<vec3>;
-    template class opengl_buffer<vec3i32>;
-    template class opengl_buffer<vec3u32>;
-    template class opengl_buffer<vec4f>;
-    template class opengl_buffer<vec4>;
-    template class opengl_buffer<vec4i32>;
-    template class opengl_buffer<vec4u32>;
-    template class opengl_buffer<mat4f>;
-    template class opengl_buffer<mat4>;
+    template class opengl_buffer<ssbo_element_t<bool>>;
+    template class opengl_buffer<ssbo_element_t<float>>;
+    template class opengl_buffer<ssbo_element_t<double>>;
+    template class opengl_buffer<ssbo_element_t<std::int32_t>>;
+    template class opengl_buffer<ssbo_element_t<std::uint32_t>>;
+    template class opengl_buffer<ssbo_element_t<vec2f>>;
+    template class opengl_buffer<ssbo_element_t<vec2>>;
+    template class opengl_buffer<ssbo_element_t<vec2i32>>;
+    template class opengl_buffer<ssbo_element_t<vec2u32>>;
+    template class opengl_buffer<ssbo_element_t<vec3f>>;
+    template class opengl_buffer<ssbo_element_t<vec3>>;
+    template class opengl_buffer<ssbo_element_t<vec3i32>>;
+    template class opengl_buffer<ssbo_element_t<vec3u32>>;
+    template class opengl_buffer<ssbo_element_t<vec4f>>;
+    template class opengl_buffer<ssbo_element_t<vec4>>;
+    template class opengl_buffer<ssbo_element_t<vec4i32>>;
+    template class opengl_buffer<ssbo_element_t<vec4u32>>;
+    template class opengl_buffer<ssbo_element_t<mat4f>>;
+    template class opengl_buffer<ssbo_element_t<mat4>>;
 }
