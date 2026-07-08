@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neolib/core/i_enum.hpp>
+#include <neogfx/core/geometrical.hpp>
 
 namespace neogfx
 {
@@ -42,6 +43,49 @@ namespace neogfx
     };
 
     typedef optional<alignment> optional_alignment;
+
+    inline constexpr alignment operator|(alignment aLhs, alignment aRhs)
+    {
+        return static_cast<alignment>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
+    }
+
+    inline constexpr alignment operator&(alignment aLhs, alignment aRhs)
+    {
+        return static_cast<alignment>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
+    }
+
+    inline constexpr point aligned_to(point const& aFrom, size const& aExtents, alignment aAlignment, size const& aContainerExtents)
+    {
+        point alignedPos = aFrom;
+        switch (aAlignment & alignment::Horizontal)
+        {
+        case alignment::Left:
+            // do nothing
+            break;
+        case alignment::Center:
+            alignedPos.x += (aContainerExtents.cx - aExtents.cx) / 2.0;
+            break;
+        case alignment::Right:
+            alignedPos.x += (aContainerExtents.cx - aExtents.cx);
+            break;
+        case alignment::Justify:
+            // do nothing
+            break;
+        }
+        switch (aAlignment & alignment::Vertical)
+        {
+        case alignment::Top:
+            // do nothing
+            break;
+        case alignment::VCenter:
+            alignedPos.y += (aContainerExtents.cy - aExtents.cy) / 2.0;
+            break;
+        case alignment::Bottom:
+            alignedPos.y += (aContainerExtents.cy - aExtents.cy);
+            break;
+        }
+        return alignedPos;
+    }
 }
 
 begin_declare_enum(neogfx::alignment)
@@ -56,17 +100,3 @@ declare_enum_string(neogfx::alignment, Bottom)
 declare_enum_string(neogfx::alignment, Horizontal) 
 declare_enum_string(neogfx::alignment, Vertical)
 end_declare_enum(neogfx::alignment)
-
-namespace neogfx
-{
-    inline constexpr alignment operator|(alignment aLhs, alignment aRhs)
-    {
-        return static_cast<alignment>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
-    }
-
-    inline constexpr alignment operator&(alignment aLhs, alignment aRhs)
-    {
-        return static_cast<alignment>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
-    }
-
-}

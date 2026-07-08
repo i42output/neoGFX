@@ -29,7 +29,6 @@
 #include <neolib/app/i_setting_value.hpp>
 
 #include <neogfx/core/numerical.hpp>
-#include <neogfx/core/alignment.hpp>
 
 namespace neogfx
 { 
