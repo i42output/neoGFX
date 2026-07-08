@@ -1,18 +1,18 @@
-// graphics_context.hpp
+// primitives.hpp
 /*
   neogfx C++ GUI Library
-  Copyright (c) 2015 Leigh Johnston.  All Rights Reserved.
-  
+  Copyright (c) 2015,2026 Leigh Johnston.  All Rights Reserved.
+
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -74,39 +74,39 @@ namespace neogfx
 
     enum class shader_effect : std::uint32_t
     {
-        None            = 0,
-        Colorize        = 1,
+        None = 0,
+        Colorize = 1,
         ColorizeAverage = Colorize,
         ColorizeMaximum = 2,
-        ColorizeSpot    = 3,
-        ColorizeAlpha   = 4,
-        Monochrome      = 5,
-        Blit            = 10,
-        MultiplyAlpha   = 20,
-        Filter          = 30,
-        Ignore          = 99
+        ColorizeSpot = 3,
+        ColorizeAlpha = 4,
+        Monochrome = 5,
+        Blit = 10,
+        MultiplyAlpha = 20,
+        Filter = 30,
+        Ignore = 99
     };
 
     enum class shader_filter : std::uint32_t
     {
-        None                    = 0,
-        GaussianBlur            = 1
+        None = 0,
+        GaussianBlur = 1
     };
 
     enum class shader_shape : std::uint32_t
     {
-        None         = 0x00,
-        Line         = 0x01,
-        CubicBezier  = 0x02,
-        Triangle     = 0x03,
-        Rect         = 0x04,
-        Circle       = 0x05,
-        Ellipse      = 0x06,
-        Pie          = 0x07,
-        Arc          = 0x08,
-        RoundedRect  = 0x09,
-        EllipseRect  = 0x0A,
-        Polygon      = 0x0B,
+        None = 0x00,
+        Line = 0x01,
+        CubicBezier = 0x02,
+        Triangle = 0x03,
+        Rect = 0x04,
+        Circle = 0x05,
+        Ellipse = 0x06,
+        Pie = 0x07,
+        Arc = 0x08,
+        RoundedRect = 0x09,
+        EllipseRect = 0x0A,
+        Polygon = 0x0B,
         Checkerboard = 0x0C
     };
 
@@ -237,9 +237,9 @@ namespace neogfx
 
     enum class text_effect_flags : std::uint64_t
     {
-        Default     = 0x0000000000000000,
+        Default = 0x0000000000000000,
         IgnoreEmoji = 0x0000000000000001,
-        Bright      = 0x0000000000010000
+        Bright = 0x0000000000010000
     };
 
     inline constexpr text_effect_flags operator|(text_effect_flags aLhs, text_effect_flags aRhs)
@@ -558,7 +558,7 @@ namespace neogfx
         {
         }
         text_animation(text_animation_type aType, neogfx::easing aEasing = neogfx::easing::InStep, scalar aFrequency = kDefaultFrequency) :
-            iType{ aType }, iEasing{ aEasing }, iFrequency { aFrequency }
+            iType{ aType }, iEasing{ aEasing }, iFrequency{ aFrequency }
         {
         }
     public:
@@ -655,12 +655,19 @@ namespace neogfx
         struct no_animation : std::logic_error { no_animation() : std::logic_error("neogfx::text_format::no_animation") {} };
     public:
         typedef text_format abstract_type; // todo
+    private:
+        enum class filtered_effect : std::uint8_t
+        {
+            None,
+            Effect1,
+            Effect2
+        };
     public:
         text_format() :
             iFlags{ text_effect_flags::IgnoreEmoji },
             iSmartUnderline{ false },
             iOnlyCalculateEffect{ false },
-            iBeingFiltered{ nullptr }
+            iBeingFiltered{ filtered_effect::None }
         {
         }
         text_format(text_format const& aOther) :
@@ -684,7 +691,7 @@ namespace neogfx
             iEffect{ aEffect },
             iAnimation{ aAnimation },
             iOnlyCalculateEffect{ false },
-            iBeingFiltered{ nullptr }
+            iBeingFiltered{ filtered_effect::None }
         {
         }
         template <typename InkType, typename PaperType>
@@ -697,7 +704,7 @@ namespace neogfx
             iEffect2{ aEffect2 },
             iAnimation{ aAnimation },
             iOnlyCalculateEffect{ false },
-            iBeingFiltered{ nullptr }
+            iBeingFiltered{ filtered_effect::None }
         {
         }
         template <typename InkType, typename PaperType>
@@ -708,7 +715,7 @@ namespace neogfx
             iSmartUnderline{ false },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
-            iBeingFiltered{ nullptr }
+            iBeingFiltered{ filtered_effect::None }
         {
         }
         template <typename InkType, typename PaperType>
@@ -720,7 +727,7 @@ namespace neogfx
             iEffect{ aEffect },
             iEffect2{ aEffect2 },
             iOnlyCalculateEffect{ false },
-            iBeingFiltered{ nullptr }
+            iBeingFiltered{ filtered_effect::None }
         {
         }
         template <typename InkType>
@@ -730,7 +737,7 @@ namespace neogfx
             iSmartUnderline{ false },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
-            iBeingFiltered{ nullptr }
+            iBeingFiltered{ filtered_effect::None }
         {
         }
         template <typename InkType>
@@ -741,7 +748,7 @@ namespace neogfx
             iEffect{ aEffect },
             iEffect2{ aEffect2 },
             iOnlyCalculateEffect{ false },
-            iBeingFiltered{ nullptr }
+            iBeingFiltered{ filtered_effect::None }
         {
         }
         template <typename InkType>
@@ -751,7 +758,7 @@ namespace neogfx
             iSmartUnderline{ false },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
-            iBeingFiltered{ nullptr }
+            iBeingFiltered{ filtered_effect::None }
         {
         }
         template <typename InkType>
@@ -762,7 +769,7 @@ namespace neogfx
             iEffect{ aEffect },
             iEffect2{ aEffect2 },
             iOnlyCalculateEffect{ false },
-            iBeingFiltered{ nullptr }
+            iBeingFiltered{ filtered_effect::None }
         {
         }
         template <typename InkType, typename PaperType>
@@ -773,7 +780,7 @@ namespace neogfx
             iSmartUnderline{ false },
             iAnimation{ aAnimation },
             iOnlyCalculateEffect{ false },
-            iBeingFiltered{ nullptr }
+            iBeingFiltered{ filtered_effect::None }
         {
         }
         template <typename InkType>
@@ -783,7 +790,7 @@ namespace neogfx
             iSmartUnderline{ false },
             iAnimation{ aAnimation },
             iOnlyCalculateEffect{ false },
-            iBeingFiltered{ nullptr }
+            iBeingFiltered{ filtered_effect::None }
         {
         }
         template <typename InkType>
@@ -793,7 +800,7 @@ namespace neogfx
             iSmartUnderline{ false },
             iAnimation{ aAnimation },
             iOnlyCalculateEffect{ false },
-            iBeingFiltered{ nullptr }
+            iBeingFiltered{ filtered_effect::None }
         {
         }
         template <typename InkType, typename PaperType>
@@ -803,7 +810,7 @@ namespace neogfx
             iFlags{ text_effect_flags::IgnoreEmoji },
             iSmartUnderline{ false },
             iOnlyCalculateEffect{ false },
-            iBeingFiltered{ nullptr }
+            iBeingFiltered{ filtered_effect::None }
         {
         }
         template <typename InkType>
@@ -812,7 +819,7 @@ namespace neogfx
             iFlags{ text_effect_flags::IgnoreEmoji },
             iSmartUnderline{ false },
             iOnlyCalculateEffect{ false },
-            iBeingFiltered{ nullptr }
+            iBeingFiltered{ filtered_effect::None }
         {
         }
     public:
@@ -923,7 +930,15 @@ namespace neogfx
         }
         text_effect const* being_filtered() const
         {
-            return iBeingFiltered;
+            switch (iBeingFiltered)
+            {
+            case filtered_effect::Effect1:
+                return iEffect ? &*iEffect : nullptr;
+            case filtered_effect::Effect2:
+                return iEffect2 ? &*iEffect2 : nullptr;
+            default:
+                return nullptr;
+            }
         }
     public:
         text_format with_ink(text_color const& aInk) const
@@ -983,7 +998,7 @@ namespace neogfx
                 iEffect2 != std::nullopt ?
                     iEffect2->with_alpha(aAlpha) :
                     optional_text_effect{},
-                }.with_flags(flags()).with_smart_underline(smart_underline());
+            }.with_flags(flags()).with_smart_underline(smart_underline());
         }
         text_format with_alpha(double aAlpha) const
         {
@@ -998,7 +1013,12 @@ namespace neogfx
         text_format as_being_filtered(text_effect const& aTextEffect) const
         {
             auto copy = *this;
-            copy.iBeingFiltered = (iEffect && &aTextEffect == &*iEffect ? &*copy.iEffect : &*copy.iEffect2);
+            if (iEffect && &aTextEffect == &*iEffect)
+                copy.iBeingFiltered = filtered_effect::Effect1;
+            else if (iEffect2 && &aTextEffect == &*iEffect2)
+                copy.iBeingFiltered = filtered_effect::Effect2;
+            else
+                throw no_effect();
             return copy;
         }
         font apply(font const& aFont) const
@@ -1017,7 +1037,7 @@ namespace neogfx
         optional_text_effect iEffect2;
         optional_text_animation iAnimation;
         bool iOnlyCalculateEffect;
-        text_effect const* iBeingFiltered;
+        filtered_effect iBeingFiltered;
     };
 
     typedef neolib::optional<text_format> optional_text_format;
