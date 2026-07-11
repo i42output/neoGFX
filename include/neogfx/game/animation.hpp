@@ -101,9 +101,10 @@ namespace neogfx::game
         vec3f rotateStart;
         vec3f rotateEnd;
         std::optional<std::function<mat44f(float)>> transformationMatrixGenerator;
-        std::function<void(animation_tween&)> transformationMatrixGeneratorFactory =
-            [](animation_tween& self)
+        std::function<void(void*)> transformationMatrixGeneratorFactory =
+            [](void* selfPtr)
             {
+                auto& self = *static_cast<animation_tween*>(selfPtr);
                 if (self.transformationMatrixGenerator)
                     return;
                 self.transformationMatrixGenerator = neolib::affine_transformation_lerp_generator(
