@@ -91,112 +91,24 @@ namespace neogfx::game
 
     typedef std::vector<animation_frame> animation_frames;
 
-    struct tween
-    {
-        i32 i; // todo
-
-        struct meta : i_component_data::meta
-        {
-            static const neolib::uuid& id()
-            {
-                static const neolib::uuid sId = { 0x65918d0e, 0x87a8, 0x42cd, 0x8203, { 0x19, 0xe5, 0xab, 0xef, 0x80, 0xe } };
-                return sId;
-            }
-            static const i_string& name()
-            {
-                static const string sName = "Tween";
-                return sName;
-            }
-            static std::uint32_t field_count()
-            {
-                return 1;
-            }
-            static component_data_field_type field_type(std::uint32_t aFieldIndex)
-            {
-                switch (aFieldIndex)
-                {
-                case 0:
-                    return component_data_field_type::Int32;
-                default:
-                    throw invalid_field_index();
-                }
-            }
-            static neolib::uuid field_type_id(std::uint32_t aFieldIndex)
-            {
-                switch (aFieldIndex)
-                {
-                case 0:
-                    return neolib::uuid{};
-                default:
-                    throw invalid_field_index();
-                }
-            }
-            static const i_string& field_name(std::uint32_t aFieldIndex)
-            {
-                static const string sFieldNames[] =
-                {
-                    "Todo"
-                };
-                return sFieldNames[aFieldIndex];
-            }
-        };
-    };
-
-    struct tween_matrix
-    {
-        i32 i; // todo
-
-        struct meta : i_component_data::meta
-        {
-            static const neolib::uuid& id()
-            {
-                static const neolib::uuid sId = { 0x11161f9a, 0x4708, 0x4ed3, 0xadea, { 0x0, 0x5c, 0xef, 0x18, 0xf6, 0xda } };
-                return sId;
-            }
-            static const i_string& name()
-            {
-                static const string sName = "Tween Matrix";
-                return sName;
-            }
-            static std::uint32_t field_count()
-            {
-                return 1;
-            }
-            static component_data_field_type field_type(std::uint32_t aFieldIndex)
-            {
-                switch (aFieldIndex)
-                {
-                case 0:
-                    return component_data_field_type::Int32;
-                default:
-                    throw invalid_field_index();
-                }
-            }
-            static neolib::uuid field_type_id(std::uint32_t aFieldIndex)
-            {
-                switch (aFieldIndex)
-                {
-                case 0:
-                    return tween::meta::id();
-                default:
-                    throw invalid_field_index();
-                }
-            }
-            static const i_string& field_name(std::uint32_t aFieldIndex)
-            {
-                static const string sFieldNames[] =
-                {
-                    "Todo"
-                };
-                return sFieldNames[aFieldIndex];
-            }
-        };
-    };
-
     struct animation_tween
     {
         scalar duration;
-        tween_matrix tweenMatrix;
+        vec3f translateStart;
+        vec3f translateEnd;
+        vec3f scaleStart;
+        vec3f scaleEnd;
+        vec3f rotateStart;
+        vec3f rotateEnd;
+        std::optional<std::function<mat44f(float)>> transformationMatrixGenerator;
+        std::function<void()> transformationMatrixGeneratorFactory = [&]()
+            {
+                if (transformationMatrixGenerator)
+                    return;
+
+                transformationMatrixGenerator = neolib::affine_transformation_lerp_generator(
+                    vec3f_range{ translateStart, translateEnd }, vec3f_range{ scaleStart, scaleEnd }, vec3f_range{ rotateStart, rotateEnd });
+            };
 
         struct meta : i_component_data::meta
         {
@@ -212,7 +124,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 2;
+                return 9;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -221,7 +133,21 @@ namespace neogfx::game
                 case 0:
                     return component_data_field_type::Scalar;
                 case 1:
-                    return component_data_field_type::ComponentData;
+                    return component_data_field_type::Vec3f;
+                case 2:
+                    return component_data_field_type::Vec3f;
+                case 3:
+                    return component_data_field_type::Vec3f;
+                case 4:
+                    return component_data_field_type::Vec3f;
+                case 5:
+                    return component_data_field_type::Vec3f;
+                case 6:
+                    return component_data_field_type::Vec3f;
+                case 7:
+                    return component_data_field_type::Mat44f | component_data_field_type::Generator1 | component_data_field_type::Optional | component_data_field_type::Cache;
+                case 8:
+                    return component_data_field_type::GeneratorFactory;
                 default:
                     throw invalid_field_index();
                 }
@@ -233,7 +159,21 @@ namespace neogfx::game
                 case 0:
                     return neolib::uuid{};
                 case 1:
-                    return tween_matrix::meta::id();
+                    return neolib::uuid{};
+                case 2:
+                    return neolib::uuid{};
+                case 3:
+                    return neolib::uuid{};
+                case 4:
+                    return neolib::uuid{};
+                case 5:
+                    return neolib::uuid{};
+                case 6:
+                    return neolib::uuid{};
+                case 7:
+                    return neolib::uuid{};
+                case 8:
+                    return neolib::uuid{};
                 default:
                     throw invalid_field_index();
                 }
@@ -243,7 +183,14 @@ namespace neogfx::game
                 static const string sFieldNames[] =
                 {
                     "Duration",
-                    "Tween Matrix"
+                    "Translate Start",
+                    "Translate End",
+                    "Scale Start",
+                    "Scale End",
+                    "Rotate Start",
+                    "Rotate End",
+                    "Transformation Matrix",
+                    "Transformation Matrix Factory"
                 };
                 return sFieldNames[aFieldIndex];
             }
@@ -253,6 +200,7 @@ namespace neogfx::game
     struct animation
     {
         std::optional<animation_frames> frames;
+        std::optional<animation_tween> tween;
 
         struct meta : i_component_data::meta
         {
@@ -268,7 +216,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 1;
+                return 2;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -276,6 +224,8 @@ namespace neogfx::game
                 {
                 case 0:
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
+                case 1:
+                    return component_data_field_type::ComponentData | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }
@@ -286,6 +236,8 @@ namespace neogfx::game
                 {
                 case 0:
                     return animation_frame::meta::id();
+                case 1:
+                    return animation_tween::meta::id();
                 default:
                     throw invalid_field_index();
                 }
@@ -294,10 +246,38 @@ namespace neogfx::game
             {
                 static const string sFieldNames[] =
                 {
-                    "Animation"
+                    "Animation Frames",
+                    "Animation Tween"
                 };
                 return sFieldNames[aFieldIndex];
             }
         };
     };
+
+    inline void translate(animation& aAnimation, vec3_range const& aRange)
+    {
+        if (!aAnimation.tween)
+            aAnimation.tween.emplace();
+        aAnimation.tween->translateStart = aRange.start.as<float>();
+        aAnimation.tween->translateEnd = aRange.end.as<float>();
+        aAnimation.tween->transformationMatrixGenerator = std::nullopt;
+    }
+
+    inline void scale(animation& aAnimation, vec3_range const& aRange)
+    {
+        if (!aAnimation.tween)
+            aAnimation.tween.emplace();
+        aAnimation.tween->scaleStart = aRange.start.as<float>();
+        aAnimation.tween->scaleEnd = aRange.end.as<float>();
+        aAnimation.tween->transformationMatrixGenerator = std::nullopt;
+    }
+
+    inline void rotate(animation& aAnimation, vec3_range const& aRange)
+    {
+        if (!aAnimation.tween)
+            aAnimation.tween.emplace();
+        aAnimation.tween->rotateStart = aRange.start.as<float>();
+        aAnimation.tween->rotateEnd = aRange.end.as<float>();
+        aAnimation.tween->transformationMatrixGenerator = std::nullopt;
+    }
 }
