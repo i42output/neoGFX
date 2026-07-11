@@ -96,18 +96,20 @@ namespace neogfx::game
         scalar duration;
         vec3f translateStart;
         vec3f translateEnd;
-        vec3f scaleStart;
-        vec3f scaleEnd;
+        vec3f scaleStart = vec3f{ 1.0f, 1.0f, 1.0f };
+        vec3f scaleEnd = vec3f{ 1.0f, 1.0f, 1.0f };
         vec3f rotateStart;
         vec3f rotateEnd;
         std::optional<std::function<mat44f(float)>> transformationMatrixGenerator;
-        std::function<void()> transformationMatrixGeneratorFactory = [&]()
+        std::function<void(animation_tween&)> transformationMatrixGeneratorFactory =
+            [](animation_tween& self)
             {
-                if (transformationMatrixGenerator)
+                if (self.transformationMatrixGenerator)
                     return;
-
-                transformationMatrixGenerator = neolib::affine_transformation_lerp_generator(
-                    vec3f_range{ translateStart, translateEnd }, vec3f_range{ scaleStart, scaleEnd }, vec3f_range{ rotateStart, rotateEnd });
+                self.transformationMatrixGenerator = neolib::affine_transformation_lerp_generator(
+                    vec3f_range{ self.translateStart, self.translateEnd },
+                    vec3f_range{ self.scaleStart, self.scaleEnd },
+                    vec3f_range{ self.rotateStart, self.rotateEnd });
             };
 
         struct meta : i_component_data::meta
