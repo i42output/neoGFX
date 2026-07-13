@@ -919,6 +919,36 @@ namespace neogfx
         return kernel;
     }
 
+    template <typename ValueType = double, std::uint32_t W = 5u>
+    inline std::array<std::array<ValueType, W>, W> static_gaussian_filter_2d(ValueType aSigma = 1.0)
+    {
+        static_assert(W % 2u == 1u);
+
+        auto const kernel1d = static_gaussian_filter<ValueType, W>(aSigma);
+
+        std::array<std::array<ValueType, W>, W> kernel = {};
+        for (std::uint32_t y = 0u; y < W; ++y)
+            for (std::uint32_t x = 0u; x < W; ++x)
+                kernel[y][x] = kernel1d[y] * kernel1d[x];
+
+        return kernel;
+    }
+
+    template <typename ValueType = double>
+    inline boost::multi_array<ValueType, 2> dynamic_gaussian_filter_2d(std::uint32_t aKernelSize = 5u, ValueType aSigma = 1.0)
+    {
+        aKernelSize |= 1u;
+
+        auto const kernel1d = dynamic_gaussian_filter<ValueType>(aKernelSize, aSigma);
+
+        boost::multi_array<ValueType, 2> kernel{ boost::extents[aKernelSize][aKernelSize] };
+        for (std::uint32_t y = 0u; y < aKernelSize; ++y)
+            for (std::uint32_t x = 0u; x < aKernelSize; ++x)
+                kernel[y][x] = kernel1d[y] * kernel1d[x];
+
+        return kernel;
+    }
+
     class scoped_tab_stops
     {
     public:

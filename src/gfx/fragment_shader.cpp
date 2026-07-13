@@ -71,7 +71,7 @@ namespace neogfx
         uGradientColorCount = static_cast<int>(colorsSampler.data().extents().cx);
         uGradientColorRow = static_cast<int>(aGradient.colors().sampler_row());
         uGradientFilterSize = static_cast<int>(filterSampler.data().extents().cx);
-            colorsSampler.data().bind(static_cast<std::uint32_t>(reserved_texture_unit::ColorSampler));
+        colorsSampler.data().bind(static_cast<std::uint32_t>(reserved_texture_unit::ColorSampler));
         filterSampler.data().bind(static_cast<std::uint32_t>(reserved_texture_unit::FilterSampler));
         uGradientColors = sampler2DRect{ static_cast<std::uint32_t>(reserved_texture_unit::ColorSampler) };
         uGradientFilter = sampler2DRect{ static_cast<std::uint32_t>(reserved_texture_unit::FilterSampler) };
