@@ -21,7 +21,7 @@ float ellipse_radius(vec2 ab, vec2 center, vec2 pt)
     return sqrt(x * x + y * y);
 }
                 
-vec4 color_at(vec2 viewPos, vec4 boundingBox)
+float gradient_pos_at(vec2 viewPos, vec4 boundingBox)
 {
     vec2 s = boundingBox.zw - boundingBox.xy;
     vec2 pos = viewPos - boundingBox.xy;
@@ -164,27 +164,32 @@ vec4 color_at(vec2 viewPos, vec4 boundingBox)
         else
             gradientPos = 1.0;
     }
-    return gradient_color(gradientPos);
+    return gradientPos;
+}
+                
+vec4 color_at(vec2 viewPos, vec4 boundingBox)
+{
+    return gradient_color(gradient_pos_at(viewPos, boundingBox));
 }
                 
 void standard_gradient_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
 {
     if (uGradientEnabled)
     {
-        int d = uGradientFilterSize / 2;
-        if (texelFetch(uGradientFilter, ivec2(d, d)).r == 1.0)
+        float g = gradient_pos_at(Coord.xy, function0);
+        if (uGradientFilterSize <= 1)
         {
-            color = color_at(Coord.xy, function0) * vec4(1.0, 1.0, 1.0, color.a);  
+            color = gradient_color(g) * vec4(1.0, 1.0, 1.0, color.a);  
         }
         else
         {
+            float dg = length(vec2(dFdx(g), dFdy(g)));
+            dg = max(dg, 1.0 / 65536.0);
+            int d = uGradientFilterSize / 2;
             vec4 sum = vec4(0.0, 0.0, 0.0, 0.0);
-            for (int fy = -d; fy <= d; ++fy)
+            for (int i = -d; i <= d; ++i)
             {
-                for (int fx = -d; fx <= d; ++fx)
-                {
-                    sum += (color_at(Coord.xy + vec2(fx, fy), function0) * texelFetch(uGradientFilter, ivec2(fx + d, fy + d)).r);
-                }
+                sum += (gradient_color(g + float(i) * dg) * texelFetch(uGradientFilter, ivec2(i + d, 0)).r);
             }
             color = sum * vec4(1.0, 1.0, 1.0, color.a); 
         }

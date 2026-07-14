@@ -1408,7 +1408,7 @@ int main(int argc, char* argv[])
 
         window.pageDrawing.painting([&, t0](ng::i_graphics_context& aGc)
         {
-            ng::scalar t = std::chrono::duration_cast<std::chrono::microseconds>(neolib::chrono::fast_clock::now() - t0).count();
+            auto const t = static_cast<ng::scalar>(std::chrono::duration_cast<std::chrono::microseconds>(neolib::chrono::fast_clock::now() - t0).count());
 
             bool const justAnimation = ((ng::service<ng::i_keyboard>().locks() & ng::keyboard_locks::InsertLock) == ng::keyboard_locks::InsertLock);
 

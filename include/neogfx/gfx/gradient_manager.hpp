@@ -79,7 +79,7 @@ namespace neogfx
         friend class gradient_manager;
     public:
         gradient_filter() :
-            iSampler{ std::make_shared<shader_array<float>>(size_u32{ GRADIENT_FILTER_SIZE, GRADIENT_FILTER_SIZE }) }
+            iSampler{ std::make_shared<shader_array<float>>(size_u32{ GRADIENT_FILTER_SIZE, 1u }) }
         {
         }
     public:
