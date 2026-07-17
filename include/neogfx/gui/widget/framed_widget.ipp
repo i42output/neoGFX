@@ -55,12 +55,19 @@ namespace neogfx
             break;
         case frame_style::SolidFrame:
         case frame_style::WindowFrame:
-            if (!has_frame_radius())
-                aGc.draw_rect(frameRect, pen{ frame_color(), effective_frame_width(), false });
-            else
-                aGc.draw_rounded_rect(frameRect, frame_radius(), pen{ frame_color(), effective_frame_width() },
-                    base_type::as_widget().has_background_color() || !base_type::as_widget().background_is_transparent() ?
-                        brush{ base_type::as_widget().background_color().with_combined_alpha(base_type::as_widget().has_background_opacity() ? base_type::as_widget().background_opacity() : 1.0) } : brush{});
+            {
+                bool const hasBackgroundColor = base_type::as_widget().has_background_color();
+                bool const backgroundIsTransparent = base_type::as_widget().background_is_transparent();
+                auto const fill = (hasBackgroundColor || !backgroundIsTransparent ?
+                    brush{ base_type::as_widget().background_color().with_combined_alpha(
+                        base_type::as_widget().has_background_opacity() ?
+                            base_type::as_widget().background_opacity() : 1.0) } :
+                    brush{});
+                if (!has_frame_radius())
+                    aGc.draw_rect(frameRect, pen{ frame_color(), effective_frame_width(), false }, fill);
+                else
+                    aGc.draw_rounded_rect(frameRect, frame_radius(), pen{ frame_color(), effective_frame_width() }, fill);
+            }
             break;
         case frame_style::ContainerFrame:
             {

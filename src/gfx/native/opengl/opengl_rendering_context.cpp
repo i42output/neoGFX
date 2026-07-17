@@ -771,6 +771,13 @@ namespace neogfx
 
         if (fast_state_invalid())
         {
+            if (rendering_engine().is_shader_program_active() &&
+                rendering_engine().active_shader_program().type() == shader_program_type::Standard)
+            {
+                rendering_engine().active_shader_program().as<i_standard_shader_program>().
+                    standard_vertex_shader().set_opacity(iFastState.opacity);
+            }
+
             apply_scissor();
             apply_stencil();
 
@@ -1493,7 +1500,7 @@ namespace neogfx
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
                             !logical_operation_active() && !snap_to_pixel() ?
-                                drawOp.pen.anti_aliased() ? 
+                                drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
                             0.0,
@@ -1931,9 +1938,12 @@ namespace neogfx
 
     void opengl_rendering_context::draw_shapes(const render_batch& aDrawShapeOps)
     {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
+
         for (auto const& op : aDrawShapeOps)
         {
             update_state(op);
+
             auto const& shapeOp = static_variant_cast<const graphics_operation::draw_shape&>(*op);
             fill_shape(shapeOp.mesh, shapeOp.position, shapeOp.fill);
             draw_shape(shapeOp.mesh, shapeOp.position, shapeOp.pen);
@@ -1944,8 +1954,6 @@ namespace neogfx
     {
         if (!aPen.width())
             return;
-
-        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
         if (std::holds_alternative<gradient>(aPen.color()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()));
@@ -1979,8 +1987,6 @@ namespace neogfx
     {
         if (std::holds_alternative<std::monostate>(aFill))
             return;
-
-        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
