@@ -58,7 +58,7 @@ namespace neogfx
             {
                 bool const hasBackgroundColor = base_type::as_widget().has_background_color();
                 bool const backgroundIsTransparent = base_type::as_widget().background_is_transparent();
-                auto const fill = (hasBackgroundColor || !backgroundIsTransparent ?
+                auto const fill = (iStyle != frame_style::WindowFrame && (hasBackgroundColor || !backgroundIsTransparent) ?
                     brush{ base_type::as_widget().background_color().with_combined_alpha(
                         base_type::as_widget().has_background_opacity() ?
                             base_type::as_widget().background_opacity() : 1.0) } :
