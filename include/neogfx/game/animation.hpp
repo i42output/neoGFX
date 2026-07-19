@@ -89,26 +89,83 @@ namespace neogfx::game
         };
     };
 
-    typedef std::vector<animation_frame> animation_frames;
+    using animation_frames = std::vector<animation_frame>;
+
+    struct animation_easing
+    {
+        neolib::small_vector<easing, 1u> easing;
+        neolib::small_vector<scalar, 1u> weight;
+
+        struct meta : i_component_data::meta
+        {
+            static const neolib::uuid& id()
+            {
+                static const neolib::uuid sId = { 0x236f5e5f, 0xc5b3, 0x4dab, 0x9db5, { 0xc1, 0xe9, 0x7f, 0x9f, 0xf5, 0x17 } };
+                return sId;
+            }
+            static const i_string& name()
+            {
+                static const string sName = "Animation Easing";
+                return sName;
+            }
+            static std::uint32_t field_count()
+            {
+                return 2;
+            }
+            static component_data_field_type field_type(std::uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return component_data_field_type::Enum | component_data_field_type::Array;
+                case 1:
+                    return component_data_field_type::Scalar | component_data_field_type::Array;
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static neolib::uuid field_type_id(std::uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return neolib::uuid{};
+                case 1:
+                    return neolib::uuid{};
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static const i_string& field_name(std::uint32_t aFieldIndex)
+            {
+                static const string sFieldNames[] =
+                {
+                    "Easing",
+                    "Weight"
+                };
+                return sFieldNames[aFieldIndex];
+            }
+        };
+    };
 
     struct animation_tween
     {
         scalar duration;
-        vec3f translateStart;
-        vec3f translateEnd;
-        vec3f scaleStart{ 1.0f, 1.0f, 1.0f };
-        vec3f scaleEnd{ 1.0f, 1.0f, 1.0f };
-        vec3f rotateStart;
-        vec3f rotateEnd;
-        std::optional<std::function<mat44f(float)>> transformationMatrixGenerator;
-        generator_factory<animation_tween> transformationMatrixGeneratorFactory{
+        vec3f_range translation{ { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
+        vec3f_range scaling{ { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f } };
+        vec3f_range rotation{ { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
+        std::optional<std::array<animation_easing, 3u>> translationEasings;
+        std::optional<std::array<animation_easing, 3u>> scalingEasings;
+        std::optional<std::array<animation_easing, 3u>> rotationEasings;
+        std::optional<std::function<mat44f(vec3f const&, vec3f const&, vec3f const&)>> transformationMatrixFunction;
+        function_factory<animation_tween> transformationMatrixFunctionFactory{
             [](animation_tween& self)
             {
-                if (!self.transformationMatrixGenerator)
-                    self.transformationMatrixGenerator = neolib::affine_transformation_lerp_generator(
-                        vec3f_range{ self.translateStart, self.translateEnd },
-                        vec3f_range{ self.scaleStart, self.scaleEnd },
-                        vec3f_range{ self.rotateStart, self.rotateEnd });
+                if (!self.transformationMatrixFunction)
+                    self.transformationMatrixFunction = neolib::affine_transformation_lerp_generator(
+                        self.translation,
+                        self.scaling,
+                        self.rotation);
             } };
 
         struct meta : i_component_data::meta
@@ -134,21 +191,21 @@ namespace neogfx::game
                 case 0:
                     return component_data_field_type::Scalar;
                 case 1:
-                    return component_data_field_type::Vec3f;
+                    return component_data_field_type::Vec3f | component_data_field_type::Range;
                 case 2:
-                    return component_data_field_type::Vec3f;
+                    return component_data_field_type::Vec3f | component_data_field_type::Range;
                 case 3:
-                    return component_data_field_type::Vec3f;
+                    return component_data_field_type::Vec3f | component_data_field_type::Range;
                 case 4:
-                    return component_data_field_type::Vec3f;
+                    return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 5:
-                    return component_data_field_type::Vec3f;
+                    return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 6:
-                    return component_data_field_type::Vec3f;
+                    return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 7:
-                    return component_data_field_type::Mat44f | component_data_field_type::Generator1 | component_data_field_type::Optional | component_data_field_type::Cache;
+                    return component_data_field_type::Mat44f | component_data_field_type::Function3Vec3f | component_data_field_type::Optional | component_data_field_type::Cache;
                 case 8:
-                    return component_data_field_type::GeneratorFactory;
+                    return component_data_field_type::FunctionFactory;
                 default:
                     throw invalid_field_index();
                 }
@@ -166,11 +223,11 @@ namespace neogfx::game
                 case 3:
                     return neolib::uuid{};
                 case 4:
-                    return neolib::uuid{};
+                    return animation_easing::meta::id();
                 case 5:
-                    return neolib::uuid{};
+                    return animation_easing::meta::id();
                 case 6:
-                    return neolib::uuid{};
+                    return animation_easing::meta::id();
                 case 7:
                     return neolib::uuid{};
                 case 8:
@@ -184,12 +241,12 @@ namespace neogfx::game
                 static const string sFieldNames[] =
                 {
                     "Duration",
-                    "Translate Start",
-                    "Translate End",
-                    "Scale Start",
-                    "Scale End",
-                    "Rotate Start",
-                    "Rotate End",
+                    "Translation",
+                    "Scaling",
+                    "Rotation",
+                    "Translation Easing",
+                    "Scaling Easing",
+                    "Rotation Easing",
                     "Transformation Matrix",
                     "Transformation Matrix Factory"
                 };
@@ -259,26 +316,23 @@ namespace neogfx::game
     {
         if (!aAnimation.tween)
             aAnimation.tween.emplace();
-        aAnimation.tween->translateStart = aRange.start.as<float>();
-        aAnimation.tween->translateEnd = aRange.end.as<float>();
-        aAnimation.tween->transformationMatrixGenerator = std::nullopt;
+        aAnimation.tween->translation = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
+        aAnimation.tween->transformationMatrixFunction = std::nullopt;
     }
 
     inline void scale(animation& aAnimation, vec3_range const& aRange)
     {
         if (!aAnimation.tween)
             aAnimation.tween.emplace();
-        aAnimation.tween->scaleStart = aRange.start.as<float>();
-        aAnimation.tween->scaleEnd = aRange.end.as<float>();
-        aAnimation.tween->transformationMatrixGenerator = std::nullopt;
+        aAnimation.tween->scaling = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
+        aAnimation.tween->transformationMatrixFunction = std::nullopt;
     }
 
     inline void rotate(animation& aAnimation, vec3_range const& aRange)
     {
         if (!aAnimation.tween)
             aAnimation.tween.emplace();
-        aAnimation.tween->rotateStart = aRange.start.as<float>();
-        aAnimation.tween->rotateEnd = aRange.end.as<float>();
-        aAnimation.tween->transformationMatrixGenerator = std::nullopt;
+        aAnimation.tween->rotation = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
+        aAnimation.tween->transformationMatrixFunction = std::nullopt;
     }
 }
