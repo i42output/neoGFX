@@ -21,6 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 
+#include <numbers>
+
 #include <neolib/core/uuid.hpp>
 #include <neolib/core/string.hpp>
 
@@ -334,5 +336,10 @@ namespace neogfx::game
             aAnimation.tween.emplace();
         aAnimation.tween->rotation = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
         aAnimation.tween->transformationMatrixFunction = std::nullopt;
+    }
+
+    inline void rotate_deg(animation& aAnimation, vec3_range const& aRange)
+    {
+        rotate(aAnimation, { aRange.start * std::numbers::pi / 180.0, aRange.end * std::numbers::pi / 180.0 });
     }
 }

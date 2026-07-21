@@ -1233,7 +1233,7 @@ namespace neogfx
         scoped_scissor ss2{ aSource, aSourceRect };
         scoped_blending_mode sbm2{ aSource, blending_mode::Filter };
 
-        auto const passes = static_cast<std::int32_t>(aRadius);
+        auto const passes = static_cast<std::int32_t>(aRadius) * 2;
 
         for (std::int32_t pass = 0; pass < passes; ++pass)
         {
