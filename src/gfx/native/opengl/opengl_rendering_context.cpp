@@ -1003,6 +1003,11 @@ namespace neogfx
                 glCheck(glBlendEquation(GL_FUNC_ADD));
                 glCheck(glBlendFunc(GL_ONE, GL_ZERO));
                 break;
+            case neogfx::blending_mode::Lighten:
+                glCheck(glEnable(GL_BLEND));
+                glCheck(glBlendEquationSeparate(GL_MAX, GL_FUNC_ADD));
+                glCheck(glBlendFuncSeparate(GL_ONE, GL_ONE, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+                break;
             case neogfx::blending_mode::Filter:
                 glCheck(glEnable(GL_BLEND));
                 glCheck(glBlendEquation(GL_FUNC_ADD));
@@ -2396,6 +2401,7 @@ namespace neogfx
                     {
                         std::optional<scoped_filter<blur_filter>> filter;
                         scalar opacity = 1.0;
+                        auto blend = neogfx::blending_mode::FilterFinish;
                         for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                         {
                             if (drawOp.appearance->being_filtered())
@@ -2426,8 +2432,10 @@ namespace neogfx
 
                             if (!filter)
                             {
+                                if ((textEffect->flags() & text_effect_flags::Bright) == text_effect_flags::Bright)
+                                    blend = blending_mode::Lighten;
                                 filter.emplace(*this, blur_filter{ *filterRegion, textEffect->width(), blurring_algorithm::Gaussian,
-                                    textEffect->aux1(), textEffect->aux2() });
+                                    textEffect->aux1(), textEffect->aux2(), blend });
                                 opacity = textEffect->color().alpha() / 255.0;
                             }
 
@@ -2440,6 +2448,9 @@ namespace neogfx
                         if (filter)
                         {
                             scoped_opacity so{ *this, opacity * this->opacity() };
+                            std::optional<scoped_blending_mode> sbm;
+                            if (blend != neogfx::blending_mode::Unspecified)
+                                sbm.emplace(*this, blend);
                             filter = std::nullopt;
                         }
                     }

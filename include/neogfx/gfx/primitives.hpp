@@ -52,10 +52,12 @@ namespace neogfx
 
     enum class blending_mode : std::uint32_t
     {
+        Unspecified,
         None,
         Default,
         Sprite,
         Blit,
+        Lighten,
         Filter,
         FilterFinish
     };
@@ -237,9 +239,9 @@ namespace neogfx
 
     enum class text_effect_flags : std::uint64_t
     {
-        Default = 0x0000000000000000,
+        Default     = 0x0000000000000000,
         IgnoreEmoji = 0x0000000000000001,
-        Bright = 0x0000000000010000
+        Bright      = 0x0000000000010000
     };
 
     inline constexpr text_effect_flags operator|(text_effect_flags aLhs, text_effect_flags aRhs)
@@ -291,10 +293,10 @@ namespace neogfx
     class text_effect
     {
     public:
-        typedef text_effect abstract_type; // todo
+        using abstract_type = text_effect; // todo
     public:
-        typedef double auxiliary_parameter;
-        typedef optional<auxiliary_parameter> optional_auxiliary_parameter;
+        using auxiliary_parameter = double;
+        using optional_auxiliary_parameter = optional<auxiliary_parameter>;
     public:
         text_effect() :
             iType{ text_effect_type::None }, iFlags{ text_effect_flags::Default }, iColor{}, iWidth{}, iOffset{}, iAux1{}, iAux2{}

@@ -846,6 +846,7 @@ namespace neogfx
         blurring_algorithm algorithm = blurring_algorithm::Gaussian;
         scalar parameter1 = 5.0;
         scalar parameter2 = 1.0;
+        neogfx::blending_mode blend = neogfx::blending_mode::FilterFinish;
     };
 
     template <typename Filter>

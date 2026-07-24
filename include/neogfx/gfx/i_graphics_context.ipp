@@ -76,6 +76,6 @@ namespace neogfx
         auto& finalBuffer = static_cast<std::int32_t>(iFilter.radius) % 2 == 0   ? front_buffer() : back_buffer();
         
         scoped_render_target srt{ iRc };
-        iRc.blit(drawRect, finalBuffer.render_target().target_texture(), iBufferRect, blending_mode::FilterFinish);
+        iRc.blit(drawRect, finalBuffer.render_target().target_texture(), iBufferRect, iFilter.blend);
     }
 }
