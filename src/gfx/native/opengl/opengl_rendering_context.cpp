@@ -1006,7 +1006,7 @@ namespace neogfx
             case neogfx::blending_mode::Lighten:
                 glCheck(glEnable(GL_BLEND));
                 glCheck(glBlendEquationSeparate(GL_MAX, GL_FUNC_ADD));
-                glCheck(glBlendFuncSeparate(GL_ONE, GL_ONE, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+                glCheck(glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
                 break;
             case neogfx::blending_mode::Filter:
                 glCheck(glEnable(GL_BLEND));
@@ -2448,9 +2448,6 @@ namespace neogfx
                         if (filter)
                         {
                             scoped_opacity so{ *this, opacity * this->opacity() };
-                            std::optional<scoped_blending_mode> sbm;
-                            if (blend != neogfx::blending_mode::Unspecified)
-                                sbm.emplace(*this, blend);
                             filter = std::nullopt;
                         }
                     }
