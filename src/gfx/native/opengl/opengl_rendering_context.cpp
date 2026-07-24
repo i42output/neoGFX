@@ -438,6 +438,7 @@ namespace neogfx
         case neogfx::blending_mode::None:
             shaderEffect = shader_effect::Blit;
             break;
+        case neogfx::blending_mode::Lighten:
         case neogfx::blending_mode::FilterFinish:
             shaderEffect = shader_effect::MultiplyAlpha;
             break;
