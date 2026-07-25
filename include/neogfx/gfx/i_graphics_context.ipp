@@ -26,13 +26,14 @@ namespace neogfx
     scoped_filter<Filter>::scoped_filter(i_rendering_context& aRc, Filter const& aFilter, bool aSubtractRadius) :
         iRc{ aRc },
         iFilter{ aFilter },
-        iBufferRect{ point{}, aFilter.region.extents() + size{ aFilter.radius * 2.0 } },
-        iBuffers{ std::move(create_ping_pong_buffers(aRc, iBufferRect.extents(), texture_sampling::Multisample, color{}, aFilter.radius + 1.0)) },
+        iOutset{ std::max(aFilter.radius, aFilter.parameter1 / 2.0) },
+        iBufferRect{ point{}, aFilter.region.extents() + size{ iOutset * 2.0 } },
+        iBuffers{ std::move(create_ping_pong_buffers(aRc, iBufferRect.extents(), texture_sampling::Multisample, color{}, iOutset + 1.0)) },
         iRenderTarget{ front_buffer() },
         iSubtractRadius{ aSubtractRadius }
     {
         front_buffer().begin_redirect(aRc, aRc.origin());
-        front_buffer().set_origin(aRc.origin() - aFilter.region.top_left() + point{ aFilter.radius, aFilter.radius });
+        front_buffer().set_origin(aRc.origin() - aFilter.region.top_left() + point{ iOutset, iOutset });
     }
 
     template <typename Filter>
@@ -71,7 +72,7 @@ namespace neogfx
         if constexpr (std::is_same_v<Filter, blur_filter>)
             back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, iFilter.radius, iFilter.algorithm, iFilter.parameter1, iFilter.parameter2);
         
-        rect const drawRect{ iFilter.region.top_left() - (iSubtractRadius ? point{ iFilter.radius, iFilter.radius } : point{}), iBufferRect.extents() };
+        rect const drawRect{ iFilter.region.top_left() - (iSubtractRadius ? point{ iOutset, iOutset } : point{}), iBufferRect.extents() };
         
         auto& finalBuffer = static_cast<std::int32_t>(iFilter.radius) % 2 == 0   ? front_buffer() : back_buffer();
         

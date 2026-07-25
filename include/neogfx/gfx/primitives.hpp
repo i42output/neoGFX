@@ -225,6 +225,20 @@ namespace neogfx
         OutlineShadow
     };
 
+    inline bool text_effect_type_uses_filter(text_effect_type aTextEffectType)
+    {
+        switch (aTextEffectType)
+        {
+        case text_effect_type::Glow:
+        case text_effect_type::Shadow:
+        case text_effect_type::OutlineGlow:
+        case text_effect_type::OutlineShadow:
+            return true;
+        default:
+            return false;
+        }
+    }
+
     inline bool filtered_content_ink_is_effect_color(text_effect_type aTextEffectType)
     {
         switch (aTextEffectType)
@@ -383,6 +397,13 @@ namespace neogfx
             case text_effect_type::Shadow:
                 return 4.0;
             }
+        }
+        dimension outset() const
+        {
+            auto result = width();
+            if (text_effect_type_uses_filter(type()))
+                result = std::max(result, aux1() / 2.0);
+            return result;
         }
         void set_width(optional_dimension const& aWidth)
         {

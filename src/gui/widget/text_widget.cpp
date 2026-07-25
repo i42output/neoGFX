@@ -157,8 +157,14 @@ namespace neogfx
         if (appearance.ink() == neolib::none)
             appearance.set_ink(text_color());
         textPosition += size{ font().info().outline().radius };
+
+        scalar textEffectOutset = 0.0;
         if (appearance.effect())
-            textPosition += size{ appearance.effect()->width() };
+            textEffectOutset = appearance.effect()->outset();
+        if (appearance.effect2())
+            textEffectOutset = std::max(textEffectOutset, appearance.effect2()->outset());
+
+        textPosition += size{ textEffectOutset };
 
         if (iCacheTexture)
         {
@@ -380,8 +386,12 @@ namespace neogfx
         if (iTextExtent->cy == 0.0)
             iTextExtent->cy = font().height();
         *iTextExtent += size{ font().info().outline().radius * 2.0 };
+        scalar textEffectOutset = 0.0;
         if (text_format().effect())
-            *iTextExtent += size{ text_format().effect()->width() * 2.0 };
+            textEffectOutset = std::max(textEffectOutset, text_format().effect()->outset());
+        if (text_format().effect2())
+            textEffectOutset = std::max(textEffectOutset, text_format().effect2()->outset());
+        *iTextExtent += size{ textEffectOutset * 2.0 };
         iTextExtent = iTextExtent->ceil();
         return *iTextExtent;
     }

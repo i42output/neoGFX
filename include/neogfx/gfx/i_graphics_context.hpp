@@ -862,6 +862,7 @@ namespace neogfx
     private:
         i_rendering_context& iRc;
         Filter iFilter;
+        scalar iOutset;
         rect iBufferRect;
         ping_pong_buffers iBuffers;
         std::optional<scoped_render_target> iRenderTarget;
