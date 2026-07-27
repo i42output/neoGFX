@@ -44,6 +44,7 @@ namespace neogfx
         std::optional<face_culling> faceCulling;
         std::optional<blending_mode> blendingMode;
         std::optional<smoothing_mode> smoothingMode;
+        std::optional<double> gain;
 
         for (auto const& queueEntry : aInput)
         {
@@ -75,6 +76,10 @@ namespace neogfx
                 break;
             case graphics_operation::SetSmoothingMode:
                 smoothingMode = static_variant_cast<const graphics_operation::set_smoothing_mode&>(queueEntry).smoothingMode;
+                keepOp = false;
+                break;
+            case graphics_operation::SetGain:
+                gain = static_variant_cast<const graphics_operation::set_gain&>(queueEntry).gain;
                 keepOp = false;
                 break;
             case graphics_operation::ScissorOn:
@@ -139,7 +144,8 @@ namespace neogfx
                 (frontFace && slowState->frontFace != frontFace) ||
                 (faceCulling && slowState->faceCulling != faceCulling) ||
                 (blendingMode && slowState->blendingMode != blendingMode) ||
-                (smoothingMode && slowState->smoothingMode != smoothingMode))
+                (smoothingMode && slowState->smoothingMode != smoothingMode) ||
+                (gain && slowState->gain != gain))
             {
                 auto state = *slowState;
                 if (logicalCoordinateSystem)
@@ -154,12 +160,15 @@ namespace neogfx
                     state.blendingMode = *blendingMode;
                 if (smoothingMode)
                     state.smoothingMode = *smoothingMode;
+                if (gain)
+                    state.gain = *gain;
                 logicalCoordinateSystem.reset();
                 logicalCoordinates.reset();
                 frontFace.reset();
                 faceCulling.reset();
                 blendingMode.reset();
                 smoothingMode.reset();
+                gain.reset();
                 slowState = aContext.intern_state(state);
             }
             

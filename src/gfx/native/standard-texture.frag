@@ -41,60 +41,49 @@ void standard_texture_shader(inout vec4 color, inout vec4 function0, inout vec4 
 {
     if (uTextureEnabled && !uTexturePassThrough)
     {
+        vec4 texel = texel_at(TexCoord);
         switch(uTextureEffect)
         {
         case SHADER_EFFECT_None:
-            {
-                vec4 texel = texel_at(TexCoord);
-                color = texel.rgba * color;
-            }
+            color = texel.rgba * color;
             break;
         case SHADER_EFFECT_Colorize: // ColorizeAverage
             {
-                vec4 texel = texel_at(TexCoord);
                 float avg = (texel.r + texel.g + texel.b) / 3.0;
                 color = vec4(avg, avg, avg, texel.a) * color;
             }
             break;
         case SHADER_EFFECT_ColorizeMaximum:
             {
-                vec4 texel = texel_at(TexCoord);
                 float maxChannel = max(texel.r, max(texel.g, texel.b));
                 color = vec4(maxChannel, maxChannel, maxChannel, texel.a) * color;
             }
             break;
         case SHADER_EFFECT_ColorizeSpot:
-            {
-                vec4 texel = texel_at(TexCoord);
-                color = vec4(1.0, 1.0, 1.0, texel.a) * color;
-            }
+            color = vec4(1.0, 1.0, 1.0, texel.a) * color;
             break;
         case SHADER_EFFECT_ColorizeAlpha:
             {
-                vec4 texel = texel_at(TexCoord);
                 float avg = (texel.r + texel.g + texel.b) / 3.0;
                 color = vec4(1.0, 1.0, 1.0, texel.a * avg) * color;
             }
             break;
         case SHADER_EFFECT_Monochrome:
             {
-                vec4 texel = texel_at(TexCoord);
                 float gray = dot(color.rgb * texel.rgb, vec3(0.299, 0.587, 0.114));
                 color = vec4(gray, gray, gray, texel.a) * color;
             }
             break;
         case SHADER_EFFECT_MultiplyAlpha:
-            {   
-                vec4 texel = texel_at(TexCoord);
-                color = texel.rgba * color;
-                color = vec4(color.rgb * color.a, color.a);
+            {
+                color = vec4(texel.rgb * color.rgb * color.a, texel.a * color.a) * uEffectGain;
+                float m = max(max(color.r, max(color.g, color.b)), color.a);
+                if (m > 1.0)
+                    color /= m;
             }
             break;
         case SHADER_EFFECT_Blit:
-            {
-                vec4 texel = texel_at(TexCoord);
-                color = texel.rgba;
-            }
+            color = texel.rgba;
             break;
         case SHADER_EFFECT_Filter:
             break;

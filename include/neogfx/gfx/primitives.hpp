@@ -91,8 +91,9 @@ namespace neogfx
 
     enum class shader_filter : std::uint32_t
     {
-        None = 0,
-        GaussianBlur = 1
+        None            = 0,
+        GaussianBlur    = 1,
+        GaussianBlur2D  = 2,
     };
 
     enum class shader_shape : std::uint32_t
@@ -115,7 +116,8 @@ namespace neogfx
     enum class blurring_algorithm : std::uint32_t
     {
         None,
-        Gaussian
+        Gaussian,
+        Gaussian2D
     };
 
     typedef neolib::variant<color, gradient, texture, neolib::pair<texture, rect>, sub_texture, neolib::pair<sub_texture, rect>> brush;

@@ -121,6 +121,10 @@ namespace neogfx
         void set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) final;
         bool snap_to_pixel() const final;
         void set_snap_to_pixel(bool aSnap) final;
+        // gain
+    public:
+        double gain() const final;
+        void set_gain(double aGain) final;
         // blending
     public:
         double opacity() const final;
@@ -147,7 +151,7 @@ namespace neogfx
         void enable_stencil_update(std::int32_t aRef = 1) final;
         void disable_stencil_update() final;
         void blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::Blit) final;
-        void blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) final;
+        i_graphics_context& blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::None) final;
         // gradient
     public:
         void clear_gradient() final;
@@ -313,6 +317,7 @@ namespace neogfx
         double iOpacity;
         neogfx::blending_mode iBlendingMode;
         neogfx::smoothing_mode iSmoothingMode;
+        double iGain;
         bool iSubpixelRendering;
         std::optional<stipple> iLineStipple;
         std::optional<neogfx::tab_stops> iTabStops;

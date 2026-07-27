@@ -272,7 +272,7 @@ namespace neogfx
         auto const h = barRect.cy / 1.5;
         auto const frameRect = rect{ point{ barRect.x - w + (barRect.cx + w * 2.0) * frame, barRect.y - h * 0.25 }, size{ w, h } };
         scoped_scissor ss{ aGc, doneRect }; // todo: replace with a stencil
-        scoped_filter<blur_filter> filter{ aGc, blur_filter{ frameRect.inflated(size{ w, h }), 2.0, blurring_algorithm::Gaussian, std::min(h * 2.0, 15.0), 4.0} };
+        scoped_filter<blur_filter> filter{ aGc, blur_filter{ frameRect.inflated(size{ w, h }), 2.0, 1.0, blurring_algorithm::Gaussian, std::min(h * 2.0, 15.0), 4.0} };
         filter.front_buffer().fill_ellipse(frameRect.center(), w * 0.5, h * 0.5, color::LightGreen.with_alpha(0.2));
     }
 

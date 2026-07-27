@@ -94,6 +94,7 @@ namespace neogfx
         set_uniform("texMS"_s, sampler2DMS{ static_cast<std::uint32_t>(reserved_texture_unit::TexMS) });
         uTextureEffect = shader_effect::None;
         uTexturePassThrough = false;
+        uEffectGain = 1.0f;
     }
 
     bool standard_texture_shader::supports(vertex_buffer_type aBufferType) const
@@ -120,6 +121,7 @@ namespace neogfx
         uTextureDataFormat = texture_data_format::RGBA;
         uTextureMultisample = texture_sampling::Normal;
         uTextureExtents = vec2f{};
+        uEffectGain = 1.0f;
     }
 
     void standard_texture_shader::set_texture(const i_texture& aTexture)
@@ -134,6 +136,11 @@ namespace neogfx
     void standard_texture_shader::set_effect(shader_effect aEffect)
     {
         uTextureEffect = aEffect;
+    }
+
+    void standard_texture_shader::set_effect_gain(scalar aGain)
+    {
+        uEffectGain = static_cast<float>(aGain);
     }
 
     void standard_texture_shader::set_pass_through(bool aPassThrough)
@@ -172,19 +179,33 @@ namespace neogfx
         uFilterEnabled = true;
         uFilterType = aFilter;
         uFilterPass = aPass;
-        if (aFilter == shader_filter::GaussianBlur)
+        if (aFilter == shader_filter::GaussianBlur || aFilter == shader_filter::GaussianBlur2D)
             aArgument1 = (static_cast<std::uint32_t>(aArgument1) | 1u);
         auto const arguments = vec4{ aArgument1, aArgument2, aArgument3, aArgument4 };
         uFilterArguments = arguments.as<float>();
         auto kernel = iFilterKernels.find(std::make_pair(aFilter, arguments));
         if (kernel == iFilterKernels.end())
         {
-            if (aFilter == shader_filter::GaussianBlur)
+            switch (aFilter)
             {
-                kernel = iFilterKernels.emplace(std::make_pair(aFilter, arguments), std::optional<shader_array<float>>{}).first;
-                auto const kernelValues = dynamic_gaussian_filter<float>(static_cast<std::uint32_t>(aArgument1), static_cast<float>(aArgument2));
-                kernel->second.emplace(size_u32{ static_cast<std::uint32_t>(aArgument1), 1u });
-                kernel->second->data().set_pixels(rect{ point{}, size_u32{ static_cast<std::uint32_t>(aArgument1), 1u } }, &kernelValues[0]);
+            case shader_filter::GaussianBlur:
+                {
+                    kernel = iFilterKernels.emplace(std::make_pair(aFilter, arguments), std::optional<shader_array<float>>{}).first;
+                    auto const kernelValues = dynamic_gaussian_filter<float>(static_cast<std::uint32_t>(aArgument1), static_cast<float>(aArgument2));
+                    auto const kernelSize = size_u32{ static_cast<std::uint32_t>(aArgument1), 1u };
+                    kernel->second.emplace(kernelSize);
+                    kernel->second->data().set_pixels(rect{ point{}, kernelSize }, &kernelValues[0]);
+                }
+                break;
+            case shader_filter::GaussianBlur2D:
+                {
+                    kernel = iFilterKernels.emplace(std::make_pair(aFilter, arguments), std::optional<shader_array<float>>{}).first;
+                    auto const kernelValues = dynamic_gaussian_filter_2d<float>(static_cast<std::uint32_t>(aArgument1), static_cast<float>(aArgument2));
+                    auto const kernelSize = size_u32{ static_cast<std::uint32_t>(aArgument1), static_cast<std::uint32_t>(aArgument1) };
+                    kernel->second.emplace(kernelSize);
+                    kernel->second->data().set_pixels(rect{ point{}, kernelSize }, &kernelValues[0][0]);
+                }
+                break;
             }
         }
         auto& kernelData = kernel->second->data();

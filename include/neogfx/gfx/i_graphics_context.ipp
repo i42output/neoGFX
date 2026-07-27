@@ -26,7 +26,7 @@ namespace neogfx
     scoped_filter<Filter>::scoped_filter(i_rendering_context& aRc, Filter const& aFilter, bool aSubtractRadius) :
         iRc{ aRc },
         iFilter{ aFilter },
-        iOutset{ std::max(aFilter.radius, aFilter.parameter1 / 2.0) },
+        iOutset{ std::max(aFilter.radius, aFilter.taps / 2.0) },
         iBufferRect{ point{}, aFilter.region.extents() + size{ iOutset * 2.0 } },
         iBuffers{ std::move(create_ping_pong_buffers(aRc, iBufferRect.extents(), texture_sampling::Multisample, color{}, iOutset + 1.0)) },
         iRenderTarget{ front_buffer() },
@@ -66,17 +66,36 @@ namespace neogfx
         
         {
             scoped_render_target srt{ back_buffer() };
+            scoped_blending_mode sbm{ back_buffer(), blending_mode::None };
             back_buffer().blit(iBufferRect, front_buffer(), iBufferRect);
         }
 
-        if constexpr (std::is_same_v<Filter, blur_filter>)
-            back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, iFilter.radius, iFilter.algorithm, iFilter.parameter1, iFilter.parameter2);
-        
         rect const drawRect{ iFilter.region.top_left() - (iSubtractRadius ? point{ iOutset, iOutset } : point{}), iBufferRect.extents() };
-        
-        auto& finalBuffer = static_cast<std::int32_t>(iFilter.radius) % 2 == 0   ? front_buffer() : back_buffer();
-        
+
         scoped_render_target srt{ iRc };
-        iRc.blit(drawRect, finalBuffer.render_target().target_texture(), iBufferRect, iFilter.blend);
+        scoped_gain sg{ iRc, iFilter.gain };
+
+        auto const passes = static_cast<int>(iFilter.radius);
+
+        if (passes == 0)    
+        {
+            iRc.blit(drawRect, back_buffer().render_target().target_texture(), iBufferRect, iFilter.finalBlend);
+            return;
+        }
+
+        i_graphics_context* accumulator = &back_buffer();
+
+        for (int pass = 0; pass < passes; ++pass)
+        {
+            if constexpr (std::is_same_v<Filter, blur_filter>)
+            {
+                accumulator = &(accumulator == &back_buffer() ? front_buffer() : back_buffer()).blur(
+                    iBufferRect, *accumulator, iBufferRect,
+                    iFilter.algorithm, iFilter.taps, iFilter.sigma,
+                    pass == 0 ? blending_mode::None : iFilter.accumulatorBlend);
+            }
+        }
+
+        iRc.blit(drawRect, accumulator->render_target().target_texture(), iBufferRect, iFilter.finalBlend);
     }
 }

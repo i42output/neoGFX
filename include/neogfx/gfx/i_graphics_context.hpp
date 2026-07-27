@@ -219,6 +219,10 @@ namespace neogfx
         virtual void set_opacity(double aOpacity) = 0;
         virtual neogfx::blending_mode blending_mode() const = 0;
         virtual void set_blending_mode(neogfx::blending_mode aBlendingMode) = 0;
+        // gain
+    public:
+        virtual double gain() const = 0;
+        virtual void set_gain(double aGain) = 0;
         // drawing mode
     public:
         virtual void push_logical_operation(logical_operation aLogicalOperation) = 0;
@@ -239,7 +243,7 @@ namespace neogfx
         virtual void enable_stencil_update(std::int32_t aRef = 1) = 0;
         virtual void disable_stencil_update() = 0;
         virtual void blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::Blit) = 0;
-        virtual void blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) = 0;
+        virtual i_graphics_context& blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::None) = 0;
         // gradient
     public:
         virtual void clear_gradient() = 0;
@@ -718,6 +722,23 @@ namespace neogfx
         double iPreviousOpacity;
     };
 
+    class scoped_gain
+    {
+    public:
+        scoped_gain(i_rendering_context& aRc, double aGain) :
+            iRc{ aRc }, iPreviousGain{ aRc.gain() }
+        {
+            iRc.set_gain(iRc.gain() * aGain);
+        }
+        ~scoped_gain()
+        {
+            iRc.set_gain(iPreviousGain);
+        }
+    private:
+        i_rendering_context& iRc;
+        double iPreviousGain;
+    };
+
     class scoped_blending_mode
     {
     public:
@@ -843,10 +864,58 @@ namespace neogfx
     {
         rect region;
         dimension radius;
+        scalar gain = 1.0;
         blurring_algorithm algorithm = blurring_algorithm::Gaussian;
-        scalar parameter1 = 5.0;
-        scalar parameter2 = 1.0;
-        neogfx::blending_mode blend = neogfx::blending_mode::FilterFinish;
+        scalar taps = 5.0;
+        scalar sigma = 1.0;
+        blending_mode accumulatorBlend = blending_mode::Filter;
+        blending_mode finalBlend = blending_mode::FilterFinish;
+
+        static std::uint32_t taps_for(scalar aSigma)
+        {
+            auto t = static_cast<std::uint32_t>(std::ceil(6.0 * aSigma)) + 1u;
+            return t | 1u;
+        }
+
+        static scalar glow_gain(dimension aRadius)
+        {
+            scalar const c = 0.5;
+            return std::max<scalar>(1.0, c * aRadius);
+        }
+
+        static blur_filter smoothing(rect const& aRegion, dimension aRadius,
+            blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian,
+            blending_mode aAccumulatorBlend = blending_mode::Filter,
+            blending_mode aFinalBlend = blending_mode::FilterFinish)
+        {
+            scalar const sigma = aRadius / 3.0;
+            return blur_filter{
+                .region = aRegion,
+                .radius = aRadius,
+                .gain = 1.0,
+                .algorithm = aAlgorithm,
+                .taps = static_cast<scalar>(taps_for(sigma)),
+                .sigma = sigma,
+                .accumulatorBlend = aAccumulatorBlend,
+                .finalBlend = aFinalBlend };
+        }
+
+        static blur_filter glow(rect const& aRegion, dimension aRadius,
+            scalar aIntensity = 1.0,
+            blending_mode aAccumulatorBlend = blending_mode::Filter,
+            blending_mode aFinalBlend = blending_mode::FilterFinish)
+        {
+            scalar const sigma = aRadius / 3.0;
+            return blur_filter{
+                .region = aRegion,
+                .radius = aRadius,
+                .gain = glow_gain(aRadius) * aIntensity,
+                .algorithm = blurring_algorithm::Gaussian,
+                .taps = static_cast<scalar>(taps_for(sigma)),
+                .sigma = sigma,
+                .accumulatorBlend = aAccumulatorBlend,
+                .finalBlend = aFinalBlend };
+        }
     };
 
     template <typename Filter>

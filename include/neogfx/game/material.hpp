@@ -42,6 +42,7 @@ namespace neogfx::game
         std::optional<shared<texture>> sharedTexture;
         std::optional<texture> texture;
         std::optional<shader_effect> shaderEffect;
+        std::optional<scalar> shaderEffectGain;
         bool subpixel;
 
         auto operator<=>(material const&) const = default;
@@ -60,7 +61,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 6;
+                return 7;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -76,6 +77,8 @@ namespace neogfx::game
                 case 4:
                     return component_data_field_type::Enum | component_data_field_type::Uint32 | component_data_field_type::Optional;
                 case 5:
+                    return component_data_field_type::Scalar | component_data_field_type::Optional;
+                case 6:
                     return component_data_field_type::Bool;
                 default:
                     throw invalid_field_index();
@@ -92,6 +95,10 @@ namespace neogfx::game
                 case 2:
                 case 3:
                     return texture::meta::id();
+                case 4:
+                case 5:
+                case 6:
+                    return neolib::uuid{};
                 default:
                     throw invalid_field_index();
                 }
@@ -105,6 +112,7 @@ namespace neogfx::game
                     "Shared Texture",
                     "Texture",
                     "Shader Effect",
+                    "Shader Effect Gain",
                     "Subpixel"
                 };
                 return sFieldNames[aFieldIndex];
@@ -118,6 +126,7 @@ namespace neogfx::game
             batchable(lhs.sharedTexture, rhs.sharedTexture) &&
             batchable(lhs.texture, rhs.texture) &&
             lhs.shaderEffect == rhs.shaderEffect &&
+            lhs.shaderEffectGain == rhs.shaderEffectGain &&
             lhs.subpixel == rhs.subpixel;
     }
 }

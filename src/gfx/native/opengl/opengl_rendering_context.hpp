@@ -299,6 +299,8 @@ namespace neogfx
         void set_blending_mode(neogfx::blending_mode aBlendingMode);
         neogfx::smoothing_mode smoothing_mode() const;
         void set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode);
+        double gain() const;
+        void set_gain(double aGain);
         bool logical_operation_active() const;
         void push_logical_operation(logical_operation aLogicalOperation);
         void pop_logical_operation();

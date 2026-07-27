@@ -144,6 +144,7 @@ namespace neogfx
         void clear_texture() final;
         void set_texture(const i_texture& aTexture) final;
         void set_effect(shader_effect aEffect) final;
+        void set_effect_gain(scalar aGain) final;
         void set_pass_through(bool aPassThrough) final;
     private:
         cache_uniform(uTextureEnabled)
@@ -152,6 +153,7 @@ namespace neogfx
         cache_uniform(uTextureExtents)
         cache_uniform(uTextureEffect)
         cache_uniform(uTexturePassThrough)
+        cache_uniform(uEffectGain)
         texture iDummyTexture;
         texture iDummyTextureMS;
     };

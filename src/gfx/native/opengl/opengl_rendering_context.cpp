@@ -251,6 +251,7 @@ namespace neogfx
         set_multisample(true);
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
+        set_gain(1.0);
 
         iSink += render_target().target_deactivating([&]() 
             { 
@@ -288,6 +289,7 @@ namespace neogfx
         set_multisample(true);
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
+        set_gain(1.0);
 
         iSink += render_target().target_deactivating([&]()
             {
@@ -326,6 +328,7 @@ namespace neogfx
         set_multisample(aOther.multisample());
         set_blending_mode(aOther.blending_mode());
         set_smoothing_mode(aOther.smoothing_mode());
+        set_gain(aOther.gain());
 
         iSink += render_target().target_deactivating([&]()
             {
@@ -760,6 +763,7 @@ namespace neogfx
             if (aQbi.slowState->faceCulling) iSlowState.faceCulling = aQbi.slowState->faceCulling;
             if (aQbi.slowState->blendingMode) iSlowState.blendingMode = aQbi.slowState->blendingMode;
             if (aQbi.slowState->smoothingMode) iSlowState.smoothingMode = aQbi.slowState->smoothingMode;
+            if (aQbi.slowState->gain) iSlowState.gain = aQbi.slowState->gain;
             invalidate_slow_state();
         }
 
@@ -1044,6 +1048,17 @@ namespace neogfx
                 glCheck(glDisable(GL_POLYGON_SMOOTH));
             }
         }
+    }
+
+    double opengl_rendering_context::gain() const
+    {
+        return *iSlowState.gain;
+    }
+
+    void opengl_rendering_context::set_gain(double aGain)
+    {
+        if (iSlowState.gain != aGain || slow_state_invalid())
+            iSlowState.gain = aGain;
     }
 
     bool opengl_rendering_context::logical_operation_active() const
@@ -2402,7 +2417,7 @@ namespace neogfx
                     {
                         std::optional<scoped_filter<blur_filter>> filter;
                         scalar opacity = 1.0;
-                        auto blend = neogfx::blending_mode::FilterFinish;
+                        auto blend = neogfx::blending_mode::Filter;
                         for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                         {
                             if (drawOp.appearance->being_filtered())
@@ -2435,8 +2450,10 @@ namespace neogfx
                             {
                                 if ((textEffect->flags() & text_effect_flags::Bright) == text_effect_flags::Bright)
                                     blend = blending_mode::Lighten;
-                                filter.emplace(*this, blur_filter{ *filterRegion, textEffect->width(), blurring_algorithm::Gaussian,
-                                    textEffect->aux1(), textEffect->aux2(), blend });
+                                filter.emplace(*this, blur_filter{ 
+                                    *filterRegion, 1.0, blur_filter::glow_gain(textEffect->width()),
+                                    blurring_algorithm::Gaussian,
+                                    textEffect->aux1(), textEffect->aux2(), blending_mode::Filter, blend });
                                 opacity = textEffect->color().alpha() / 255.0;
                             }
 
@@ -2969,6 +2986,8 @@ namespace neogfx
                 rendering_engine().default_shader_program().texture_shader().set_texture(texture);
                 rendering_engine().default_shader_program().texture_shader().set_effect(batchMaterial.shaderEffect != std::nullopt ?
                     *batchMaterial.shaderEffect : shader_effect::None);
+                rendering_engine().default_shader_program().texture_shader().set_effect_gain(batchMaterial.shaderEffectGain != std::nullopt ?
+                    *batchMaterial.shaderEffectGain : 1.0);
                 if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
                     enable_sample_shading(1.0);
 
@@ -3014,7 +3033,8 @@ namespace neogfx
                 {},
                 {},
                 to_ecs_component(aTexture),
-                aShaderEffect
+                aShaderEffect,
+                gain()
             },
             mat44::identity());
     }

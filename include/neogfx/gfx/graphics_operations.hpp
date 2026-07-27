@@ -115,6 +115,11 @@ namespace neogfx
             smoothing_mode smoothingMode;
         };
 
+        struct set_gain
+        {
+            double gain;
+        };
+
         struct push_logical_operation
         {
             logical_operation logicalOperation;
@@ -354,6 +359,7 @@ namespace neogfx
             set_opacity,
             set_blending_mode,
             set_smoothing_mode,
+            set_gain,
             push_logical_operation,
             pop_logical_operation,
             line_stipple_on,
@@ -409,40 +415,41 @@ namespace neogfx
             SetOpacity                  = 14,
             SetBlendingMode             = 15,
             SetSmoothingMode            = 16,
-            PushLogicalOperation        = 17,
-            PopLogicalOperation         = 18,
-            LineStippleOn               = 19,
-            LineStippleOff              = 20,
-            SubpixelRenderingOn         = 21,
-            SubpixelRenderingOff        = 22,
-            Clear                       = 23,
-            ClearDepthBuffer            = 24,
-            ClearStencilBuffer          = 25,
-            EnableStencilTest           = 26,
-            DisableStencilTest          = 27,
-            EnableStencilUpdate         = 28,
-            DisableStencilUpdate        = 29,
-            ClearGradient               = 30,
-            SetGradient                 = 31,
-            SetPixel                    = 32,
-            Blit                        = 33,
-            DrawPixel                   = 34,
-            DrawLine                    = 35,
-            DrawTriangle                = 36,
-            DrawRect                    = 37,
-            DrawRoundedRect             = 38,
-            DrawEllipseRect             = 39,
-            DrawCheckerboard            = 40,
-            DrawCircle                  = 41,
-            DrawEllipse                 = 42,
-            DrawPie                     = 43,
-            DrawArc                     = 44,
-            DrawCubicBezier             = 45,
-            DrawPath                    = 46,
-            DrawShape                   = 47,
-            DrawEntities                = 48,
-            DrawGlyph                   = 49,
-            DrawMesh                    = 50
+            SetGain                     = 17,
+            PushLogicalOperation        = 18,
+            PopLogicalOperation         = 19,
+            LineStippleOn               = 20,
+            LineStippleOff              = 21,
+            SubpixelRenderingOn         = 22,
+            SubpixelRenderingOff        = 23,
+            Clear                       = 24,
+            ClearDepthBuffer            = 25,
+            ClearStencilBuffer          = 26,
+            EnableStencilTest           = 27,
+            DisableStencilTest          = 28,
+            EnableStencilUpdate         = 29,
+            DisableStencilUpdate        = 30,
+            ClearGradient               = 31,
+            SetGradient                 = 32,
+            SetPixel                    = 33,
+            Blit                        = 34,
+            DrawPixel                   = 35,
+            DrawLine                    = 36,
+            DrawTriangle                = 37,
+            DrawRect                    = 38,
+            DrawRoundedRect             = 39,
+            DrawEllipseRect             = 40,
+            DrawCheckerboard            = 41,
+            DrawCircle                  = 42,
+            DrawEllipse                 = 43,
+            DrawPie                     = 44,
+            DrawArc                     = 45,
+            DrawCubicBezier             = 46,
+            DrawPath                    = 47,
+            DrawShape                   = 48,
+            DrawEntities                = 49,
+            DrawGlyph                   = 50,
+            DrawMesh                    = 51
         };
 
         std::string to_string(operation_type aOpType);

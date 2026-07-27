@@ -122,6 +122,7 @@ namespace neogfx
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
+        iGain{ 1.0 },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() }
     {
     }
@@ -139,6 +140,7 @@ namespace neogfx
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
+        iGain{ 1.0 },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() }
     {
     }
@@ -157,6 +159,7 @@ namespace neogfx
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
+        iGain{ 1.0 },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() }
     {
         set_logical_coordinate_system(aWidget.logical_coordinate_system());
@@ -176,6 +179,7 @@ namespace neogfx
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
+        iGain{ 1.0 },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() }
     {
     }
@@ -196,6 +200,7 @@ namespace neogfx
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
+        iGain{ 1.0 },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() }
     {
     }
@@ -1098,6 +1103,20 @@ namespace neogfx
         }
     }
 
+    double graphics_context::gain() const
+    {
+        return iGain;
+    }
+
+    void graphics_context::set_gain(double aGain)
+    {
+        if (iGain != aGain)
+        {
+            iGain = aGain;
+            rendering_context().enqueue(graphics_operation::set_gain{ aGain });
+        }
+    }
+
     void graphics_context::push_logical_operation(logical_operation aLogicalOperation)
     {
         rendering_context().enqueue(graphics_operation::push_logical_operation{ aLogicalOperation });
@@ -1199,7 +1218,6 @@ namespace neogfx
     {
         scoped_render_target srt{ aDestination };
         scoped_scissor ss1{ aDestination, aDestinationRect };
-        scoped_blending_mode sbm1{ aDestination, blending_mode::Filter };
 
         auto mesh = aDestination.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ? 
             to_ecs_component(aDestinationRect) : to_ecs_component(game_rect{ aDestinationRect });
@@ -1221,27 +1239,30 @@ namespace neogfx
             to_ecs_component(aAlgorithm, aPass, aParameter1, aParameter2));
     }
 
-    void graphics_context::blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
+    i_graphics_context& graphics_context::blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2, neogfx::blending_mode aBlendingMode)
     {   
         aSource.flush();
 
+        bool const separable = (aAlgorithm == blurring_algorithm::Gaussian);
+
         scoped_render_target srt1{ *this };
         scoped_scissor ss1{ *this, aDestinationRect };
-        scoped_blending_mode sbm1{ *this, blending_mode::Filter };
+        scoped_blending_mode sbm1{ *this, separable ? neogfx::blending_mode::None : aBlendingMode };
 
-        scoped_render_target srt2{ aSource };
-        scoped_scissor ss2{ aSource, aSourceRect };
-        scoped_blending_mode sbm2{ aSource, blending_mode::Filter };
+        neogfx::blur(0, *this, aDestinationRect, aSource, aSourceRect, aAlgorithm, aParameter1, aParameter2);
+        i_graphics_context* lastWritten = this;
 
-        auto const passes = static_cast<std::int32_t>(aRadius) * 2;
-
-        for (std::int32_t pass = 0; pass < passes; ++pass)
+        if (separable)
         {
-            if (pass % 2 == 0)
-                neogfx::blur(0, *this, aDestinationRect, aSource, aSourceRect, aAlgorithm, aParameter1, aParameter2);
-            else
-                neogfx::blur(1, aSource, aSourceRect, *this, aDestinationRect, aAlgorithm, aParameter1, aParameter2);
+            scoped_render_target srt2{ aSource };
+            scoped_scissor ss2{ aSource, aSourceRect };
+            scoped_blending_mode sbm2{ aSource, aBlendingMode };
+
+            neogfx::blur(1, aSource, aSourceRect, *this, aDestinationRect, aAlgorithm, aParameter1, aParameter2);
+            lastWritten = &aSource;
         }
+
+        return *lastWritten;
     }
 
     glyph_text graphics_context::to_glyph_text(string const& aText) const

@@ -212,6 +212,8 @@ namespace neogfx
             return {};
         case blurring_algorithm::Gaussian:
             return game::filter{ shader_filter::GaussianBlur, aPass, static_cast<float>(aParameter1), static_cast<float>(aParameter2), {}, {}, {} };
+        case blurring_algorithm::Gaussian2D:
+            return game::filter{ shader_filter::GaussianBlur2D, aPass, static_cast<float>(aParameter1), static_cast<float>(aParameter2), {}, {}, {} };
         default:
             return {};
         }
