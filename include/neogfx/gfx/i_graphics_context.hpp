@@ -883,33 +883,40 @@ namespace neogfx
             return std::max<scalar>(1.0, c * aRadius);
         }
 
-        static blur_filter smoothing(rect const& aRegion, dimension aRadius,
+        // Presets. NB: blur_filter::radius is the PASS COUNT consumed by
+        // scoped_filter::execute (each pass = one full convolution, passes > 1
+        // accumulate via accumulatorBlend); apparent blur extent is governed by
+        // sigma/taps, and grows as sqrt(passes) when multi-passing.
+
+        static blur_filter smoothing(rect const& aRegion, dimension aExtent,
             blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian,
             blending_mode aAccumulatorBlend = blending_mode::Filter,
             blending_mode aFinalBlend = blending_mode::FilterFinish)
         {
-            scalar const sigma = aRadius / 3.0;
+            scalar const sigma = aExtent / 3.0;
             return blur_filter{
                 .region = aRegion,
-                .radius = aRadius,
+                .radius = 1.0,                          // single pass: energy-preserving filtering
                 .gain = 1.0,
                 .algorithm = aAlgorithm,
                 .taps = static_cast<scalar>(taps_for(sigma)),
                 .sigma = sigma,
-                .accumulatorBlend = aAccumulatorBlend,
+                .accumulatorBlend = aAccumulatorBlend,  // unused at 1 pass
                 .finalBlend = aFinalBlend };
         }
 
-        static blur_filter glow(rect const& aRegion, dimension aRadius,
-            scalar aIntensity = 1.0,
+        static blur_filter glow(rect const& aRegion, dimension aExtent,
+            scalar aIntensity = 1.0, std::uint32_t aPasses = 1u,
             blending_mode aAccumulatorBlend = blending_mode::Filter,
             blending_mode aFinalBlend = blending_mode::FilterFinish)
         {
-            scalar const sigma = aRadius / 3.0;
+            // Per-pass sigma derived so the OUTERMOST layer's extent equals
+            // aExtent after aPasses accumulations (sigma_total = sigma_pass * sqrt(N)).
+            scalar const sigma = aExtent / 3.0 / std::sqrt(static_cast<scalar>(std::max(aPasses, 1u)));
             return blur_filter{
                 .region = aRegion,
-                .radius = aRadius,
-                .gain = glow_gain(aRadius) * aIntensity,
+                .radius = static_cast<dimension>(std::max(aPasses, 1u)),
+                .gain = glow_gain(aExtent) * aIntensity, // gain law keys off apparent extent, not per-pass sigma
                 .algorithm = blurring_algorithm::Gaussian,
                 .taps = static_cast<scalar>(taps_for(sigma)),
                 .sigma = sigma,

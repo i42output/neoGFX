@@ -2417,7 +2417,7 @@ namespace neogfx
                     {
                         std::optional<scoped_filter<blur_filter>> filter;
                         scalar opacity = 1.0;
-                        auto blend = neogfx::blending_mode::Filter;
+                        auto blend = neogfx::blending_mode::FilterFinish;
                         for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                         {
                             if (drawOp.appearance->being_filtered())
