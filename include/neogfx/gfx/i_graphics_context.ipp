@@ -26,9 +26,7 @@ namespace neogfx
     scoped_filter<Filter>::scoped_filter(i_rendering_context& aRc, Filter const& aFilter, bool aSubtractRadius) :
         iRc{ aRc },
         iFilter{ aFilter },
-        iOutset{ aFilter.accumulatorBlend == blending_mode::Filter ? 
-            std::max(aFilter.radius, aFilter.taps / 2.0) : 
-            std::max(aFilter.radius, aFilter.taps / 2.0 * std::sqrt(std::max(aFilter.radius, 1.0))) },
+        iOutset{ std::max(aFilter.radius, aFilter.taps / 2.0) },
         iBufferRect{ point{}, aFilter.region.extents() + size{ iOutset * 2.0 } },
         iBuffers{ std::move(create_ping_pong_buffers(aRc, iBufferRect.extents(), texture_sampling::Multisample, color{}, iOutset + 1.0)) },
         iRenderTarget{ front_buffer() },
