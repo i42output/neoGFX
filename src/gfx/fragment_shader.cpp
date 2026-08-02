@@ -94,7 +94,7 @@ namespace neogfx
         set_uniform("texMS"_s, sampler2DMS{ static_cast<std::uint32_t>(reserved_texture_unit::TexMS) });
         uTextureEffect = shader_effect::None;
         uTexturePassThrough = false;
-        uEffectGain = 1.0f;
+        uEffectGain = gain{}.as<float>();
     }
 
     bool standard_texture_shader::supports(vertex_buffer_type aBufferType) const
@@ -121,7 +121,7 @@ namespace neogfx
         uTextureDataFormat = texture_data_format::RGBA;
         uTextureMultisample = texture_sampling::Normal;
         uTextureExtents = vec2f{};
-        uEffectGain = 1.0f;
+        uEffectGain = gain{}.as<float>();
     }
 
     void standard_texture_shader::set_texture(i_texture const& aTexture)

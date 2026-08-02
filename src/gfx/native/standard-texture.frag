@@ -80,6 +80,7 @@ void standard_texture_shader(inout vec4 color, inout vec4 function0, inout vec4 
                 float m = max(color.r, max(color.g, color.b));
                 if (m > 1.0)
                     color = vec4((color / m).rgb, color.a);
+                color.a = min(color.a, 1.0);
             }
             break;
         case SHADER_EFFECT_Blit:
