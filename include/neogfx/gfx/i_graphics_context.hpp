@@ -221,8 +221,8 @@ namespace neogfx
         virtual void set_blending_mode(neogfx::blending_mode aBlendingMode) = 0;
         // gain
     public:
-        virtual double gain() const = 0;
-        virtual void set_gain(double aGain) = 0;
+        virtual vec4 gain() const = 0;
+        virtual void set_gain(vec4 const& aGain) = 0;
         // drawing mode
     public:
         virtual void push_logical_operation(logical_operation aLogicalOperation) = 0;
@@ -728,7 +728,12 @@ namespace neogfx
         scoped_gain(i_rendering_context& aRc, double aGain) :
             iRc{ aRc }, iPreviousGain{ aRc.gain() }
         {
-            iRc.set_gain(iRc.gain() * aGain);
+            iRc.set_gain(iRc.gain().hadamard_product(vec4{ aGain, aGain, aGain, aGain }));
+        }
+        scoped_gain(i_rendering_context& aRc, vec4 const& aGain) :
+            iRc{ aRc }, iPreviousGain{ aRc.gain() }
+        {
+            iRc.set_gain(iRc.gain().hadamard_product(aGain));
         }
         ~scoped_gain()
         {
@@ -736,7 +741,7 @@ namespace neogfx
         }
     private:
         i_rendering_context& iRc;
-        double iPreviousGain;
+        vec4 iPreviousGain;
     };
 
     class scoped_blending_mode
@@ -860,11 +865,20 @@ namespace neogfx
         i_rendering_context& iRcBase;
     };
 
+    struct gain : vec4
+    {
+        using vec4::vec4;
+
+        gain() : vec4{ 1.0, 1.0, 1.0, 1.0 } {}
+        gain(scalar s) : vec4{ s, s, s, s } {}
+        gain(vec4 const& v) : vec4{ v } {}
+    };
+
     struct blur_filter
     {
         rect region;
         dimension radius;
-        scalar gain = 1.0;
+        gain gain = {};
         blurring_algorithm algorithm = blurring_algorithm::Gaussian;
         scalar taps = 5.0;
         scalar sigma = 1.0;
@@ -897,7 +911,7 @@ namespace neogfx
             return blur_filter{
                 .region = aRegion,
                 .radius = 1.0,                          // single pass: energy-preserving filtering
-                .gain = 1.0,
+                .gain = {},
                 .algorithm = aAlgorithm,
                 .taps = static_cast<scalar>(taps_for(sigma)),
                 .sigma = sigma,

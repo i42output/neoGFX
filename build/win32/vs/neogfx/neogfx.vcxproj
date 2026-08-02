@@ -1,0 +1,801 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Tools_Debug|x64">
+      <Configuration>Tools_Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Tools|x64">
+      <Configuration>Tools</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup>
+    <UseNativeEnvironment>true</UseNativeEnvironment>
+  </PropertyGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>neogfx</RootNamespace>
+    <ProjectName>neogfx</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Tools|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>$(ProjectName)d</TargetName>
+    <OutDir>$(ProjectDir)\..\..\..\..\lib\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)\..\..\..\..\lib\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">
+    <OutDir>$(ProjectDir)\..\..\..\..\lib\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">
+    <OutDir>$(ProjectDir)\..\..\..\..\lib\</OutDir>
+    <TargetName>$(ProjectName)d</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;DEBUG_HID;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\..\include;/usr/local/include;..\..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirVulkan)\Include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <MinimalRebuild>false</MinimalRebuild>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\..\include;/usr/local/include;..\..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirVulkan)\Include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\..\include;/usr/local/include;..\..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirVulkan)\Include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>Disabled</Optimization>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\..\include;/usr/local/include;..\..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirVulkan)\Include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\include\neogfx\app\action.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\app.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\clipboard.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\drag_drop.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\event_processing_context.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i18n.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i_accessibility.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i_action.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i_app.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i_basic_services.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i_clipboard.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i_drag_drop.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i_event_processing_context.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i_help.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i_mnemonic.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i_palette.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i_resource.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i_resource_manager.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i_shared_menu_bar.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\i_style.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\modal_task.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\module_resource.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\palette.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\resource.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\resource_manager.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\settings.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\app\style.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\audio.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_bitstream.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_bitstream.ipp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_clip.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_device.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_instrument.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_instrument_atlas.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_oscillator.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_primitives.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_sample.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_waveform.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_bitstream.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_clip.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_device.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_instrument.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_instrument_atlas.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_oscillator.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_sample.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_track.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_waveform.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\alignment.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\i_style_sheet.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\i_object.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\style.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\transition_animator.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\async_task.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\async_thread.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\style_sheet.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\device_metrics.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\event.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\geometrical.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\html.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\i_transition_animator.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\i_event.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\i_plugin_properties.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\i_plugin_property.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\i_properties.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\i_property.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\object_type.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\units.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\numerical.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\object.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\primitives.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\property.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\core\easing.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\aabb_quadtree.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\animation.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\animation_filter.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\animator.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\box_collider.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\clock.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\collision_detector.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\color.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\component.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\ecs.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\ecs_helpers.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\ecs_ids.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\entity.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\entity_archetype.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\entity_info.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\entity_life_span.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\filter.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\font.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\game_world.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\image.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\i_ecs.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\material.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\gradient.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\i_component.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\i_component_data.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\i_entity_archetype.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\mesh.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\i_system.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\mesh_filter.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\mesh_renderer.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\mesh_render_cache.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\outline.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\patch.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\physics.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\renderable_entity_archetype.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\simple_physics.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\rigid_body.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\aabb_octree.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\rectangle.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\sprite.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\canvas.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\standard_archetypes.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\system.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\text_mesh.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\chrono.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\texture.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\time.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\transformation.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\color.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\color_bits.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\fragment_shader.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\gradient.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\gradient_manager.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\graphics_context.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_graphics_context.ipp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\graphics_operations.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\hsl_color.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\hsv_color.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\image.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_fragment_shader.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_gradient.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_gradient_manager.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_graphics_context.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_ping_pong_buffer.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_rendering_context.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_image.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_rendering_engine.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_render_target.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_scene_graph.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_shader.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_shader_array.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_shader_program.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_ssbo.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_standard_shader_program.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_sub_texture.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_texture.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_texture_atlas.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_texture_manager.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_vertex_buffer.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_vertex_provider.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_vertex_shader.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\line.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\path.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\pen.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\primitives.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\rect_pack.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\render_target.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\shader.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\shader_array.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\shader_program.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\shapes.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\standard_shader_program.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\stipple.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\sub_texture.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\texture.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\texture_atlas.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\texture_manager.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\emoji_atlas.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\font.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\font_manager.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\glyph.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\glyph_text.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\i_emoticon_translator.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\i_emoji_atlas.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\i_font_manager.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\i_glyph.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\text_category_map.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\utility.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\vertex_buffer.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\vertex_shader.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\layout\anchor.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\layout\anchorable.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\layout\i_anchor.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\layout\i_anchorable.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\layout\i_async_layout.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\layout\i_geometry.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\layout\async_layout.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\controller.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\i_controller.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\i_model.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\i_view.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\i_view_container.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\model.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\view.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\view_container.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\view_container.ipp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\cursor.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\default_skin.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\framed_widget.ipp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\framed_widget.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_basic_item_model.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_button.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_cursor.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_document.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_native_widget.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_progress_bar.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_text_document.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_tool.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\skin.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\skin_manager.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\slider.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\timer.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\window\i_native_window.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\window\i_window.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\window\window_events.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\window\window_bits.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\display.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\game_controller.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\game_controllers.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\hid_device.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\hid_devices.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\i_display.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\i_game_controller.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\i_game_controllers.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\i_hid_device.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\i_hid_devices.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\i_keyboard.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\i_native_surface.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\i_nest.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\i_surface.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\i_surface_manager.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\i_surface_window.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\i_window_manager.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\keyboard.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\i_mouse.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\mouse.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\nest.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\surface_manager.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\surface_window.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\video_mode.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\hid\window_manager.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\neogfx.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\support\file\gfx\gltf.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\support\file\gfx\svg.hpp" />
+    <ClInclude Include="..\..\..\..\src\app\native\3rdparty\tinyfiledialogs.h" />
+    <ClInclude Include="..\..\..\..\src\app\native\windows_accessibility.hpp" />
+    <ClInclude Include="..\..\..\..\src\app\native\i_native_clipboard.hpp" />
+    <ClInclude Include="..\..\..\..\src\app\native\windows_basic_services.hpp" />
+    <ClInclude Include="..\..\..\..\src\app\native\windows_com.hpp" />
+    <ClInclude Include="..\..\..\..\src\app\native\windows_drag_drop.hpp" />
+    <ClInclude Include="..\..\..\..\src\audio\3rdparty\miniaudio\miniaudio.h" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\i_native_texture.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\native_texture.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_buffer.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_buffer.ipp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_error.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_vertex.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_renderer.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_rendering_context.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_shader_program.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_shader_program.ipp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_surface.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_texture.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_texture_manager.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_triangle_renderer.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_vertex.ipp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_error.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_texture.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\windows_renderer.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\text\native\i_native_font.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\text\native\i_native_font_face.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\text\native\native_font.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\text\native\native_font_face.hpp" />
+    <ClInclude Include="..\..\..\..\src\gui\window\native\native_surface.hpp" />
+    <ClInclude Include="..\..\..\..\src\gui\window\native\native_window.hpp" />
+    <ClInclude Include="..\..\..\..\src\gui\window\native\virtual_surface.hpp" />
+    <ClInclude Include="..\..\..\..\src\gui\window\native\virtual_window.hpp" />
+    <ClInclude Include="..\..\..\..\src\gui\window\native\windows_window.hpp" />
+    <ClInclude Include="..\..\..\..\src\hid\native\windows_directinput_controller.hpp" />
+    <ClInclude Include="..\..\..\..\src\hid\native\windows_display.hpp" />
+    <ClInclude Include="..\..\..\..\src\hid\native\windows_game_controllers.hpp" />
+    <ClInclude Include="..\..\..\..\src\hid\native\windows_hid_devices.hpp" />
+    <ClInclude Include="..\..\..\..\src\hid\native\windows_keyboard.hpp" />
+    <ClInclude Include="..\..\..\..\src\hid\native\windows_mouse.hpp" />
+    <ClInclude Include="..\..\..\..\src\hid\native\windows_window_manager.hpp" />
+    <ClInclude Include="..\..\..\..\src\hid\native\windows_xinput_controller.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\shader.glsl-gles.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\shader.glsl.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-filter.frag.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-glyph.frag.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-gradient.frag.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-shape.frag.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-stipple.frag.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-texture.frag.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-texture.vert.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard.frag.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard.vert.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\app\action.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\app.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\clipboard.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\drag_drop.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\event_processing_context.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\file_dialog.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\i18n.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\module_resource.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\native\3rdparty\tinyfiledialogs.c" />
+    <ClCompile Include="..\..\..\..\src\app\native\windows_accessibility.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\native\windows_basic_services.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\native\windows_drag_drop.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\native\windows_services.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\palette.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\resource.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\settings.cpp" />
+    <ClCompile Include="..\..\..\..\src\app\style.cpp" />
+    <ClCompile Include="..\..\..\..\src\audio\3rdparty\smb\smbPitchShift.cpp" />
+    <ClCompile Include="..\..\..\..\src\audio\audio.cpp" />
+    <ClCompile Include="..\..\..\..\src\audio\audio_bitstream.cpp" />
+    <ClCompile Include="..\..\..\..\src\audio\audio_clip.cpp" />
+    <ClCompile Include="..\..\..\..\src\audio\audio_device.cpp" />
+    <ClCompile Include="..\..\..\..\src\audio\audio_instrument.cpp" />
+    <ClCompile Include="..\..\..\..\src\audio\audio_instrument_atlas.cpp" />
+    <ClCompile Include="..\..\..\..\src\audio\audio_oscillator.cpp" />
+    <ClCompile Include="..\..\..\..\src\audio\audio_sample.cpp" />
+    <ClCompile Include="..\..\..\..\src\audio\audio_waveform.cpp" />
+    <ClCompile Include="..\..\..\..\src\core\async_task.cpp" />
+    <ClCompile Include="..\..\..\..\src\core\async_thread.cpp" />
+    <ClCompile Include="..\..\..\..\src\core\units.cpp" />
+    <ClCompile Include="..\..\..\..\src\game\animator.cpp" />
+    <ClCompile Include="..\..\..\..\src\game\collision_detector.cpp" />
+    <ClCompile Include="..\..\..\..\src\game\ecs.cpp" />
+    <ClCompile Include="..\..\..\..\src\game\game_world.cpp" />
+    <ClCompile Include="..\..\..\..\src\game\renderable_entity_archetype.cpp" />
+    <ClCompile Include="..\..\..\..\src\game\simple_physics.cpp" />
+    <ClCompile Include="..\..\..\..\src\game\rectangle.cpp" />
+    <ClCompile Include="..\..\..\..\src\game\canvas.cpp" />
+    <ClCompile Include="..\..\..\..\src\game\text_mesh.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\color.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\fragment_shader.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\gradient.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\graphics_context.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\graphics_operations.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\hsl_color.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\hsv_color.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\image.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\native_texture.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_buffer.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_error.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_vertex.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_renderer.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_rendering_context.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_shader_program.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_surface.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_texture.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_texture_manager.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_triangle_renderer.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_error.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_texture.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\windows_renderer.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\rect_pack.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\render_target.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\standard_shader_program.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\sub_texture.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\texture.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\texture_atlas.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\texture_manager.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\text\emoji_atlas.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\text\font.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\text\font_manager.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\text\glyph.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\text\glyph_text.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\text\native\native_font.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\text\native\native_font_face.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\utility.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\vertex_shader.cpp" />
+    <ClCompile Include="..\..\..\..\src\gui\widget\native_widget.cpp" />
+    <ClCompile Include="..\..\..\..\src\gui\widget\timer.cpp" />
+    <ClCompile Include="..\..\..\..\src\gui\window\native\native_surface.cpp" />
+    <ClCompile Include="..\..\..\..\src\gui\window\native\native_window.cpp" />
+    <ClCompile Include="..\..\..\..\src\gui\window\native\virtual_surface.cpp" />
+    <ClCompile Include="..\..\..\..\src\gui\window\native\virtual_window.cpp" />
+    <ClCompile Include="..\..\..\..\src\gui\window\native\windows_window.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\display.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\game_controller.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\game_controllers.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\hid_devices.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\keyboard.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\mouse.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\native\windows_directinput_controller.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\native\windows_display.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\native\windows_game_controllers.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\native\windows_hid_devices.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\native\windows_keyboard.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\native\windows_mouse.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\native\windows_window_manager.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\native\windows_xinput_controller.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\nest.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\surface_manager.cpp" />
+    <ClCompile Include="..\..\..\..\src\hid\surface_window.cpp" />
+    <ClCompile Include="..\..\..\..\src\neogfx.cpp" />
+    <ClCompile Include="x64\Debug\GeneratedFiles\icons.res.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="x64\Debug\GeneratedFiles\resources.res.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="x64\Release\GeneratedFiles\icons.res.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="x64\Release\GeneratedFiles\resources.res.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\include\neogfx\gfx\color.inl" />
+    <None Include="..\..\..\..\include\neogfx\gfx\path.inl" />
+    <None Include="..\..\..\..\include\neogfx\gfx\shader_program.inl" />
+    <None Include="..\..\..\..\include\neogfx\gfx\text\glyph_text.ipp" />
+    <None Include="..\..\..\..\include\neogfx\gui\widget\slider.ipp" />
+    <CustomBuild Include="..\..\..\..\src\resources.nrc">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\shader.glsl">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl Shader</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl Shader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl Shader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl Shader</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\shader.glsl-gles">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl::gles Shader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl::gles Shader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl::gles Shader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl::gles Shader</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-texture.vert">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureVertexShader</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard.vert">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardVertexShader</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-filter.frag">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFilterFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFilterFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFilterFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFilterFragmentShader</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-glyph.frag">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGlyphFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGlyphFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGlyphFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGlyphFragmentShader</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-gradient.frag">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGradientFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGradientFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGradientFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGradientFragmentShader</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-shape.frag">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardShapeFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardShapeFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardShapeFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardShapeFragmentShader</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-stipple.frag">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardStippleFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardStippleFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardStippleFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardStippleFragmentShader</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-texture.frag">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureFragmentShader</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard.frag">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFragmentShader</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\icons.nrc">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
+    </CustomBuild>
+    <None Include="..\..\..\..\src\resources\emoticon.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\..\src\resources\gamecontrollerdb.txt" />
+    <Text Include="..\..\..\..\src\resources\language-subtag-registry.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

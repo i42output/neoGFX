@@ -257,7 +257,9 @@ namespace neogfx
     {
         Default     = 0x0000000000000000,
         IgnoreEmoji = 0x0000000000000001,
-        Bright      = 0x0000000000010000
+        Bright      = 0x0000000000010000,
+        Blur        = 0x0000000000020000,
+        Glow        = 0x0000000000040000
     };
 
     inline constexpr text_effect_flags operator|(text_effect_flags aLhs, text_effect_flags aRhs)
@@ -268,6 +270,11 @@ namespace neogfx
     inline constexpr text_effect_flags operator&(text_effect_flags aLhs, text_effect_flags aRhs)
     {
         return static_cast<text_effect_flags>(static_cast<std::uint64_t>(aLhs) & static_cast<std::uint64_t>(aRhs));
+    }
+
+    inline constexpr text_effect_flags operator^(text_effect_flags aLhs, text_effect_flags aRhs)
+    {
+        return static_cast<text_effect_flags>(static_cast<std::uint64_t>(aLhs) ^ static_cast<std::uint64_t>(aRhs));
     }
 
     inline constexpr text_effect_flags operator~(text_effect_flags aLhs)

@@ -42,7 +42,7 @@ namespace neogfx::game
         std::optional<shared<texture>> sharedTexture;
         std::optional<texture> texture;
         std::optional<shader_effect> shaderEffect;
-        std::optional<scalar> shaderEffectGain;
+        std::optional<vec4> shaderEffectGain;
         bool subpixel;
 
         auto operator<=>(material const&) const = default;
@@ -77,7 +77,7 @@ namespace neogfx::game
                 case 4:
                     return component_data_field_type::Enum | component_data_field_type::Uint32 | component_data_field_type::Optional;
                 case 5:
-                    return component_data_field_type::Scalar | component_data_field_type::Optional;
+                    return component_data_field_type::Vec4 | component_data_field_type::Optional;
                 case 6:
                     return component_data_field_type::Bool;
                 default:

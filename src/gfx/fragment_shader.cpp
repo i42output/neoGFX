@@ -35,7 +35,7 @@ namespace neogfx
         disable();
     }
 
-    void standard_gradient_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
+    void standard_gradient_shader::generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const
     {
         standard_fragment_shader<i_gradient_shader>::generate_code(aProgram, aLanguage, aOutput);
         if (aLanguage == shader_language::Glsl)
@@ -49,7 +49,7 @@ namespace neogfx
         uGradientEnabled = false;
     }
 
-    void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const gradient& aGradient)
+    void standard_gradient_shader::set_gradient(i_rendering_context& aContext, gradient const& aGradient)
     {
         enable();
         uGradientGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
@@ -78,7 +78,7 @@ namespace neogfx
         uGradientEnabled = true;
     }
 
-    void standard_gradient_shader::set_gradient(i_rendering_context& aContext, const game::gradient& aGradient)
+    void standard_gradient_shader::set_gradient(i_rendering_context& aContext,  game::gradient const& aGradient)
     {
         gradient g = service<i_gradient_manager>().find_gradient(aGradient.id.cookie());
         set_gradient(aContext, g);
@@ -102,7 +102,7 @@ namespace neogfx
         return enabled() && (aBufferType & vertex_buffer_type::UV) != vertex_buffer_type::Invalid;
     }
 
-    void standard_texture_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
+    void standard_texture_shader::generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const
     {
         standard_fragment_shader<i_texture_shader>::generate_code(aProgram, aLanguage, aOutput);
         if (aLanguage == shader_language::Glsl)
@@ -124,7 +124,7 @@ namespace neogfx
         uEffectGain = 1.0f;
     }
 
-    void standard_texture_shader::set_texture(const i_texture& aTexture)
+    void standard_texture_shader::set_texture(i_texture const& aTexture)
     {
         enable();
         uTextureEnabled = true;
@@ -138,9 +138,9 @@ namespace neogfx
         uTextureEffect = aEffect;
     }
 
-    void standard_texture_shader::set_effect_gain(scalar aGain)
+    void standard_texture_shader::set_effect_gain(vec4 const& aGain)
     {
-        uEffectGain = static_cast<float>(aGain);
+        uEffectGain = aGain.as<float>();
     }
 
     void standard_texture_shader::set_pass_through(bool aPassThrough)
@@ -159,7 +159,7 @@ namespace neogfx
         return enabled() && (aBufferType & vertex_buffer_type::UV) != vertex_buffer_type::Invalid;
     }
 
-    void standard_filter_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
+    void standard_filter_shader::generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const
     {
         standard_fragment_shader<i_filter_shader>::generate_code(aProgram, aLanguage, aOutput);
         if (aLanguage == shader_language::Glsl)
@@ -223,7 +223,7 @@ namespace neogfx
         disable();
     }
 
-    void standard_glyph_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
+    void standard_glyph_shader::generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const
     {
         standard_fragment_shader<i_glyph_shader>::generate_code(aProgram, aLanguage, aOutput);
         if (aLanguage == shader_language::Glsl)
@@ -237,7 +237,7 @@ namespace neogfx
         uGlyphEnabled = false;
     }
 
-    void standard_glyph_shader::set_first_glyph(const i_rendering_context& aContext, const glyph_text& aText, const glyph_char& aGlyphChar)
+    void standard_glyph_shader::set_first_glyph(i_rendering_context const& aContext, glyph_text const& aText, glyph_char const& aGlyphChar)
     {
         enable();
         bool subpixelRender = subpixel(aGlyphChar) && aText.glyph(aGlyphChar).subpixel();
@@ -255,7 +255,7 @@ namespace neogfx
         disable();
     }
 
-    void standard_stipple_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
+    void standard_stipple_shader::generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const
     {
         standard_fragment_shader<i_stipple_shader>::generate_code(aProgram, aLanguage, aOutput);
         if (aLanguage == shader_language::Glsl)
@@ -292,12 +292,12 @@ namespace neogfx
         uStippleEnabled = true;
     }
 
-    void standard_stipple_shader::start(const i_rendering_context& aContext, const vec3& aFrom)
+    void standard_stipple_shader::start(i_rendering_context const& aContext, vec3 const& aFrom)
     {
         next(aContext, aFrom, 0.0);
     }
     
-    void standard_stipple_shader::next(const i_rendering_context& aContext, const vec3& aFrom, scalar aPositionOffset)
+    void standard_stipple_shader::next(i_rendering_context const& aContext, vec3 const& aFrom, scalar aPositionOffset)
     {
         uStipplePosition = static_cast<float>(iPosition + aPositionOffset);
         uStippleVertex = aFrom.as<float>();
@@ -314,7 +314,7 @@ namespace neogfx
         disable();
     }
 
-    void standard_shape_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
+    void standard_shape_shader::generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const
     {
         standard_fragment_shader<i_shape_shader>::generate_code(aProgram, aLanguage, aOutput);
         if (aLanguage == shader_language::Glsl)

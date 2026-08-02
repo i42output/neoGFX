@@ -90,7 +90,7 @@ namespace neogfx
                 vertex_buffer_type::Function5 |
                 vertex_buffer_type::Function6 )) != vertex_buffer_type::Invalid;
         }
-        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
+        void generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
             fragment_shader<Base>::generate_code(aProgram, aLanguage, aOutput);
             if (aProgram.is_first_in_stage(*this))
@@ -108,11 +108,11 @@ namespace neogfx
     public:
         standard_gradient_shader(std::string const& aName = "standard_gradient_shader");
     public:
-        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
+        void generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
         void clear_gradient() final;
-        void set_gradient(i_rendering_context& aContext, const gradient& aGradient) final;
-        void set_gradient(i_rendering_context& aContext, const game::gradient& aGradient) final;
+        void set_gradient(i_rendering_context& aContext, gradient const& aGradient) final;
+        void set_gradient(i_rendering_context& aContext, game::gradient const& aGradient) final;
     private:
         cache_uniform(uGradientGuiCoordinates)
         cache_uniform(uGradientDirection)
@@ -139,12 +139,12 @@ namespace neogfx
     public:
         bool supports(vertex_buffer_type aBufferType) const override;
     public:
-        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
+        void generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
         void clear_texture() final;
-        void set_texture(const i_texture& aTexture) final;
+        void set_texture(i_texture const& aTexture) final;
         void set_effect(shader_effect aEffect) final;
-        void set_effect_gain(scalar aGain) final;
+        void set_effect_gain(vec4 const& aGain) final;
         void set_pass_through(bool aPassThrough) final;
     private:
         cache_uniform(uTextureEnabled)
@@ -165,7 +165,7 @@ namespace neogfx
     public:
         bool supports(vertex_buffer_type aBufferType) const override;
     public:
-        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
+        void generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
         void clear_filter() final;
         void set_filter(shader_filter aFilter, std::int32_t aPass = 0, scalar aArgument1 = 0.0, scalar aArgument2 = 0.0, scalar aArgument3 = 0.0, scalar aArgument4 = 0.0) final;
@@ -186,10 +186,10 @@ namespace neogfx
     public:
         standard_glyph_shader(std::string const& aName = "standard_glyph_shader");
     public:
-        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
+        void generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
         void clear_glyph() final;
-        void set_first_glyph(const i_rendering_context& aContext, const glyph_text& aText, const glyph_char& aGlyphChar) final;
+        void set_first_glyph(i_rendering_context const& aContext, glyph_text const& aText, glyph_char const& aGlyphChar) final;
     private:
         cache_uniform(uGlyphRenderOutput)
         cache_uniform(uGlyphSubpixel)
@@ -202,13 +202,13 @@ namespace neogfx
     public:
         standard_stipple_shader(std::string const& aName = "standard_stipple_shader");
     public:
-        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
+        void generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
         bool stipple_active() const final;
         void clear_stipple() final;
         void set_stipple(stipple const& aStipple) final;
-        void start(const i_rendering_context& aContext, const vec3& aFrom) final;
-        void next(const i_rendering_context& aContext, const vec3& aFrom, scalar aPositionOffset) final;
+        void start(i_rendering_context const& aContext, const vec3& aFrom) final;
+        void next(i_rendering_context const& aContext, const vec3& aFrom, scalar aPositionOffset) final;
     private:
         scalar iPosition;
     private:
@@ -225,7 +225,7 @@ namespace neogfx
     public:
         standard_shape_shader(i_shader_program& aShaderProgram, std::string const& aName = "standard_shape_shader");
     public:
-        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
+        void generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
         bool shape_active() const final;
         void clear_shape() final;

@@ -44,7 +44,7 @@ namespace neogfx
         std::optional<face_culling> faceCulling;
         std::optional<blending_mode> blendingMode;
         std::optional<smoothing_mode> smoothingMode;
-        std::optional<double> gain;
+        std::optional<vec4> gain;
 
         for (auto const& queueEntry : aInput)
         {

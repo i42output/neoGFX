@@ -372,3 +372,9 @@ Debug
 /build/win32/vs/.vs/neogfx/CopilotIndices/18.0.981.45449/*.db
 /build/plugin/web_view/win32/vs/x64/Foo
 /build/plugin/web_view/win32/vs/x64/ReleaseInDebug
+.vs
+Cl.items.tlog
+neogfx_widget.tlog
+/build/win32/vs/neogfx_widget/neogfx_widget.lib.recipe
+/build/win32/vs/neogfx_widget/neogfx_widgetd.lib.recipe
+/build/win32/vs/neogfx_widget/x64/Tools/neogfx_widget.vcxproj.FileListAbsolute.txt

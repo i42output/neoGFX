@@ -117,7 +117,7 @@ namespace neogfx
 
         struct set_gain
         {
-            double gain;
+            vec4 gain;
         };
 
         struct push_logical_operation

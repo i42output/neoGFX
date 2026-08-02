@@ -61,7 +61,7 @@ namespace neogfx
         std::optional<face_culling> faceCulling;
         std::optional<blending_mode> blendingMode;
         std::optional<smoothing_mode> smoothingMode;
-        std::optional<double> gain;
+        std::optional<vec4> gain;
 
         bool operator==(rendering_context_slow_state const&) const = default;
         auto operator<=>(rendering_context_slow_state const&) const = default;
@@ -122,8 +122,8 @@ namespace neogfx
         virtual void set_origin(point const& aOrigin) = 0;
         virtual vec2 offset() const = 0;
         virtual void set_offset(optional_vec2 const& aOffset) = 0;
-        virtual double gain() const = 0;
-        virtual void set_gain(double aGain) = 0;
+        virtual vec4 gain() const = 0;
+        virtual void set_gain(vec4 const& aGain) = 0;
         virtual void blit(rect const& aDestinationRect, i_texture const& aTexture, rect const& aSourceRect, blending_mode aBlendingMode = blending_mode::Blit) = 0;
         virtual bool gradient_set() const = 0;
         virtual void apply_gradient(i_gradient_shader& aShader) = 0;

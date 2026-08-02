@@ -123,8 +123,8 @@ namespace neogfx
         void set_snap_to_pixel(bool aSnap) final;
         // gain
     public:
-        double gain() const final;
-        void set_gain(double aGain) final;
+        vec4 gain() const final;
+        void set_gain(vec4 const& aGain) final;
         // blending
     public:
         double opacity() const final;
@@ -317,7 +317,7 @@ namespace neogfx
         double iOpacity;
         neogfx::blending_mode iBlendingMode;
         neogfx::smoothing_mode iSmoothingMode;
-        double iGain;
+        vec4 iGain;
         bool iSubpixelRendering;
         std::optional<stipple> iLineStipple;
         std::optional<neogfx::tab_stops> iTabStops;

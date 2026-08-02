@@ -122,7 +122,7 @@ namespace neogfx
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
-        iGain{ 1.0 },
+        iGain{ 1.0, 1.0, 1.0, 1.0 },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() }
     {
     }
@@ -140,7 +140,7 @@ namespace neogfx
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
-        iGain{ 1.0 },
+        iGain{ 1.0, 1.0, 1.0, 1.0 },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() }
     {
     }
@@ -159,7 +159,7 @@ namespace neogfx
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
-        iGain{ 1.0 },
+        iGain{ 1.0, 1.0, 1.0, 1.0 },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() }
     {
         set_logical_coordinate_system(aWidget.logical_coordinate_system());
@@ -179,7 +179,7 @@ namespace neogfx
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
-        iGain{ 1.0 },
+        iGain{ 1.0, 1.0, 1.0, 1.0 },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() }
     {
     }
@@ -200,7 +200,7 @@ namespace neogfx
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
-        iGain{ 1.0 },
+        iGain{ 1.0, 1.0, 1.0, 1.0 },
         iSubpixelRendering{ service<i_rendering_engine>().is_subpixel_rendering_on() }
     {
     }
@@ -1103,12 +1103,12 @@ namespace neogfx
         }
     }
 
-    double graphics_context::gain() const
+    vec4 graphics_context::gain() const
     {
         return iGain;
     }
 
-    void graphics_context::set_gain(double aGain)
+    void graphics_context::set_gain(vec4 const& aGain)
     {
         if (iGain != aGain)
         {

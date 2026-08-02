@@ -77,9 +77,9 @@ void standard_texture_shader(inout vec4 color, inout vec4 function0, inout vec4 
         case SHADER_EFFECT_MultiplyAlpha:
             {
                 color = vec4(texel.rgb * color.rgb * color.a, texel.a * color.a) * uEffectGain;
-                float m = max(max(color.r, max(color.g, color.b)), color.a);
+                float m = max(color.r, max(color.g, color.b));
                 if (m > 1.0)
-                    color /= m;
+                    color = vec4((color / m).rgb, color.a);
             }
             break;
         case SHADER_EFFECT_Blit:

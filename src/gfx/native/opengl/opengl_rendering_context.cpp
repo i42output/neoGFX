@@ -251,7 +251,7 @@ namespace neogfx
         set_multisample(true);
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
-        set_gain(1.0);
+        set_gain(vec4{ 1.0, 1.0, 1.0, 1.0 });
 
         iSink += render_target().target_deactivating([&]() 
             { 
@@ -289,7 +289,7 @@ namespace neogfx
         set_multisample(true);
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
-        set_gain(1.0);
+        set_gain(vec4{ 1.0, 1.0, 1.0, 1.0 });
 
         iSink += render_target().target_deactivating([&]()
             {
@@ -1050,12 +1050,12 @@ namespace neogfx
         }
     }
 
-    double opengl_rendering_context::gain() const
+    vec4 opengl_rendering_context::gain() const
     {
         return *iSlowState.gain;
     }
 
-    void opengl_rendering_context::set_gain(double aGain)
+    void opengl_rendering_context::set_gain(vec4 const& aGain)
     {
         if (iSlowState.gain != aGain || slow_state_invalid())
             iSlowState.gain = aGain;
@@ -2417,7 +2417,6 @@ namespace neogfx
                     {
                         std::optional<scoped_filter<blur_filter>> filter;
                         scalar opacity = 1.0;
-                        auto blend = neogfx::blending_mode::FilterFinish;
                         for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                         {
                             if (drawOp.appearance->being_filtered())
@@ -2448,10 +2447,19 @@ namespace neogfx
 
                             if (!filter)
                             {
-                                if ((textEffect->flags() & text_effect_flags::Bright) == text_effect_flags::Bright)
-                                    blend = blending_mode::Lighten;
-                                filter.emplace(*this, blur_filter{ 
-                                    *filterRegion, 1.0, blur_filter::glow_gain(textEffect->width()),
+                                auto const bright = ((textEffect->flags() & text_effect_flags::Bright) == text_effect_flags::Bright);
+                                auto const blur = (
+                                    (textEffect->flags() & text_effect_flags::Blur) == text_effect_flags::Blur ||
+                                    (textEffect->flags() & text_effect_flags::Glow) != text_effect_flags::Glow ?
+                                    textEffect->width() : 1.0);
+                                auto const glow = ((textEffect->flags() & text_effect_flags::Glow) == text_effect_flags::Glow ?
+                                    ( bright ? 
+                                        neogfx::gain{ blur_filter::glow_gain(textEffect->width()) } : 
+                                        vec4{ 1.0, 1.0, 1.0, blur_filter::glow_gain(textEffect->width()) }) : 
+                                    neogfx::gain{});
+                                auto const blend = (bright ? blending_mode::Lighten : blending_mode::FilterFinish);
+                                filter.emplace(*this, blur_filter{
+                                    *filterRegion, blur, glow,
                                     blurring_algorithm::Gaussian,
                                     textEffect->aux1(), textEffect->aux2(), blending_mode::Filter, blend });
                                 opacity = textEffect->color().alpha() / 255.0;
@@ -2987,7 +2995,7 @@ namespace neogfx
                 rendering_engine().default_shader_program().texture_shader().set_effect(batchMaterial.shaderEffect != std::nullopt ?
                     *batchMaterial.shaderEffect : shader_effect::None);
                 rendering_engine().default_shader_program().texture_shader().set_effect_gain(batchMaterial.shaderEffectGain != std::nullopt ?
-                    *batchMaterial.shaderEffectGain : 1.0);
+                    *batchMaterial.shaderEffectGain : vec4{ 1.0, 1.0, 1.0, 1.0 });
                 if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
                     enable_sample_shading(1.0);
 

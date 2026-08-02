@@ -48,8 +48,8 @@ namespace neogfx
         typedef i_gradient_shader abstract_type;
     public:
         virtual void clear_gradient() = 0;
-        virtual void set_gradient(i_rendering_context& aContext, const gradient& aGradient) = 0;
-        virtual void set_gradient(i_rendering_context& aContext, const game::gradient& aGradient) = 0;
+        virtual void set_gradient(i_rendering_context& aContext, gradient const& aGradient) = 0;
+        virtual void set_gradient(i_rendering_context& aContext, game::gradient const& aGradient) = 0;
     };
 
     class i_texture_shader : public i_fragment_shader
@@ -58,9 +58,9 @@ namespace neogfx
         typedef i_texture_shader abstract_type;
     public:
         virtual void clear_texture() = 0;
-        virtual void set_texture(const i_texture& aTexture) = 0;
+        virtual void set_texture(i_texture const& aTexture) = 0;
         virtual void set_effect(shader_effect aEffect) = 0;
-        virtual void set_effect_gain(scalar aGain) = 0;
+        virtual void set_effect_gain(vec4 const& aGain) = 0;
         virtual void set_pass_through(bool aPassThrough) = 0;
     };
 
@@ -79,7 +79,7 @@ namespace neogfx
         typedef i_glyph_shader abstract_type;
     public:
         virtual void clear_glyph() = 0;
-        virtual void set_first_glyph(const i_rendering_context& aContext, const glyph_text& aText, const glyph_char& aGlyphChar) = 0;
+        virtual void set_first_glyph(i_rendering_context const& aContext, glyph_text const& aText, glyph_char const& aGlyphChar) = 0;
     };
 
     class i_stipple_shader : public i_fragment_shader
@@ -90,8 +90,8 @@ namespace neogfx
         virtual bool stipple_active() const = 0;
         virtual void clear_stipple() = 0;
         virtual void set_stipple(stipple const& aStipple) = 0;
-        virtual void start(const i_rendering_context& aContext, const vec3& aFrom) = 0;
-        virtual void next(const i_rendering_context& aContext, const vec3& aFrom, scalar aPositionOffset) = 0;
+        virtual void start(i_rendering_context const& aContext, vec3 const& aFrom) = 0;
+        virtual void next(i_rendering_context const& aContext, vec3 const& aFrom, scalar aPositionOffset) = 0;
     };
 
     class i_shape_shader : public i_fragment_shader
