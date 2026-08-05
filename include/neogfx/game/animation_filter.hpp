@@ -126,6 +126,12 @@ namespace neogfx::game
         return to_animation_frames(aAnimationFilter)[aAnimationFilter.currentFrame].filter;
     }
 
+    inline bool is_tweening_animation(animation_filter const& aAnimationFilter)
+    {
+        return (aAnimationFilter.animation && aAnimationFilter.animation->tweens) ||
+            (aAnimationFilter.sharedAnimation.ptr && aAnimationFilter.sharedAnimation.ptr->tweens);
+    }
+
     inline mat44f const& to_transformation_matrix(animation_filter const& aAnimationFilter)
     {
         return aAnimationFilter.transformation ? *aAnimationFilter.transformation : mat44f::identity();

@@ -34,8 +34,8 @@ namespace neogfx::game
 {
     struct mesh_renderer
     {
-        material material;
-        patches patches;
+        game::material material;
+        game::patches patches;
         bool render = true;
         i32 layer = 0;
         std::optional<game::filter> filter;
