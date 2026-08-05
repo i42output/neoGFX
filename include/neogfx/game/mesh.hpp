@@ -35,9 +35,9 @@ namespace neogfx::game
 
     struct mesh
     {
-        vertices vertices;
+        game::vertices vertices;
         vertices_2d uv;
-        faces faces;
+        game::faces faces;
 
         struct meta : i_component_data::meta
         {
@@ -60,9 +60,9 @@ namespace neogfx::game
                 switch (aFieldIndex)
                 {
                 case 0:
-                    return component_data_field_type::Vec3 | component_data_field_type::Array;
+                    return component_data_field_type::Vec3f | component_data_field_type::Array;
                 case 1:
-                    return component_data_field_type::Vec2 | component_data_field_type::Array;
+                    return component_data_field_type::Vec2f | component_data_field_type::Array;
                 case 2:
                     return component_data_field_type::Face | component_data_field_type::Array;
                 default:

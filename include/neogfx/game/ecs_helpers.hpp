@@ -353,7 +353,7 @@ namespace neogfx
     }
 
     template <typename Geometry>
-    inline void add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const Geometry& aGeometry, const neogfx::i_texture& aTexture, const mat33f& aTextureTransform = mat33f::identity())
+    inline game::patch& add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const Geometry& aGeometry, const neogfx::i_texture& aTexture, const mat33f& aTextureTransform = mat33f::identity())
     {
         thread_local game::mesh patchMesh;
         to_ecs_component(patchMesh, aGeometry, mesh_type::Triangles, std::nullopt, static_cast<std::uint32_t>(aMesh.vertices.size()));
@@ -362,8 +362,9 @@ namespace neogfx
             for (auto& uv : patchMesh.uv)
                 uv = (aTextureTransform * vec3f{ uv.x, uv.y, 1.0f }).xy;
         aMesh.uv.insert(aMesh.uv.end(), patchMesh.uv.begin(), patchMesh.uv.end());
-        auto& patch = aMeshRenderer.patches.emplace_back();
+        auto& patch = *aMeshRenderer.patches.emplace_back(std::make_shared<game::patch>());
         patch.faces.insert(patch.faces.end(), patchMesh.faces.begin(), patchMesh.faces.end());
         patch.material.texture = to_ecs_component(aTexture);
+        return patch;
     }
 }

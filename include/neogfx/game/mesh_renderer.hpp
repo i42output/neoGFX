@@ -64,7 +64,7 @@ namespace neogfx::game
                 case 0:
                     return component_data_field_type::ComponentData;
                 case 1:
-                    return component_data_field_type::ComponentData | component_data_field_type::Array;
+                    return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::SharedPointer;
                 case 2:
                     return component_data_field_type::Bool;
                 case 3:
@@ -113,8 +113,10 @@ namespace neogfx::game
             static constexpr bool has_updater = true;
             static void update(mesh_renderer& aData, i_ecs&, entity_id)
             {
-                std::sort(aData.patches.begin(), aData.patches.end(), [](const patch& lhs, const patch& rhs)
+                std::sort(aData.patches.begin(), aData.patches.end(), [](const patch_ptr& lhsPtr, const patch_ptr& rhsPtr)
                 {
+                    auto& lhs = *lhsPtr;
+                    auto& rhs = *rhsPtr;
                     auto lhsTexture = lhs.material.texture != std::nullopt ? 
                         lhs.material.texture->id : lhs.material.sharedTexture != std::nullopt ? 
                             lhs.material.sharedTexture->ptr->id : neolib::cookie_ref_ptr{};

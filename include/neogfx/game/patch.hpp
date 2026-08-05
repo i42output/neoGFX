@@ -32,8 +32,9 @@ namespace neogfx::game
 {
     struct patch
     {
-        material material;
-        faces faces;
+        game::material material;
+        game::faces faces;
+        std::optional<vec3f> origin;
         std::optional<i32> layer;
 
         struct meta : i_component_data::meta
@@ -50,7 +51,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 3;
+                return 4;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -61,6 +62,8 @@ namespace neogfx::game
                 case 1:
                     return component_data_field_type::Face | component_data_field_type::Array;
                 case 2:
+                    return component_data_field_type::Vec3f | component_data_field_type::Optional;
+                case 3:
                     return component_data_field_type::Int32 | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
@@ -76,6 +79,8 @@ namespace neogfx::game
                     return neolib::uuid{};
                 case 2:
                     return neolib::uuid{};
+                case 3:
+                    return neolib::uuid{};
                 default:
                     throw invalid_field_index();
                 }
@@ -86,6 +91,7 @@ namespace neogfx::game
                 {
                     "Material",
                     "Faces",
+                    "Origin",
                     "Layer"
                 };
                 return sFieldNames[aFieldIndex];
@@ -93,5 +99,6 @@ namespace neogfx::game
         };
     };
 
-    typedef std::vector<patch> patches;
+    using patch_ptr = std::shared_ptr<patch>;
+    using patches = std::vector<patch_ptr>;
 }

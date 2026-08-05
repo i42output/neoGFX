@@ -195,7 +195,7 @@ namespace neogfx::game
                 case 0:
                     return component_data_field_type::Scalar;
                 case 1:
-                    return component_data_field_type::ComponentData | component_data_field_type::Array;
+                    return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::SharedPointer;
                 case 2:
                     return component_data_field_type::Vec3f | component_data_field_type::Range;
                 case 3:

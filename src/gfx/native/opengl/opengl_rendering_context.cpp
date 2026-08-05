@@ -2093,8 +2093,8 @@ namespace neogfx
                 auto const& meshRenderer = meshRenderers.entity_record_no_lock(entity);
                 tMaxLayer = std::max(tMaxLayer, meshRenderer.layer);
                 for (auto const& patch : meshRenderer.patches)
-                    if (patch.layer.has_value())
-                        tMaxLayer = std::max(tMaxLayer, patch.layer.value());
+                    if (patch->layer.has_value())
+                        tMaxLayer = std::max(tMaxLayer, patch->layer.value());
                 if (tMeshDrawables.size() <= tMaxLayer)
                     tMeshDrawables.resize(tMaxLayer + 1);
                 auto const& meshFilter = meshFilters.has_entity_record_no_lock(entity) ?
@@ -2107,9 +2107,9 @@ namespace neogfx
                     optional_mat44f{},
                     entity);
                 for (auto const& patch : meshRenderer.patches)
-                    if (patch.layer.has_value() && patch.layer.value() != meshRenderer.layer && 
-                        (tMeshDrawables[patch.layer.value()].empty() || tMeshDrawables[patch.layer.value()].back().entity != entity))
-                        tMeshDrawables[patch.layer.value()].emplace_back(
+                    if (patch->layer.has_value() && patch->layer.value() != meshRenderer.layer && 
+                        (tMeshDrawables[patch->layer.value()].empty() || tMeshDrawables[patch->layer.value()].back().entity != entity))
+                        tMeshDrawables[patch->layer.value()].emplace_back(
                             origin(),
                             meshFilter,
                             meshRenderer,
@@ -2126,9 +2126,9 @@ namespace neogfx
                     auto const& transformation = rigidBodyTransformation * meshFilterTransformation * animationMeshFilterTransformation;
                     tMeshDrawables[meshRenderer.layer].back().transformation = transformation;
                     for (auto const& patch : meshRenderer.patches)
-                        if (patch.layer.has_value() && patch.layer.value() != meshRenderer.layer && 
-                            !tMeshDrawables[patch.layer.value()].back().transformation.has_value())
-                            tMeshDrawables[patch.layer.value()].back().transformation = transformation;
+                        if (patch->layer.has_value() && patch->layer.value() != meshRenderer.layer &&
+                            !tMeshDrawables[patch->layer.value()].back().transformation.has_value())
+                            tMeshDrawables[patch->layer.value()].back().transformation = transformation;
                 }
                 if (info.debug)
                     tMeshDrawables[meshRenderer.layer].back().debug = true;
@@ -2762,9 +2762,9 @@ namespace neogfx
                 cachedVertexCount += faces.size() * 3;
             for (auto const& meshPatch : meshRenderer.patches)
             {
-                vertexCount += meshPatch.faces.size() * 3;
+                vertexCount += meshPatch->faces.size() * 3;
                 if (cached)
-                    cachedVertexCount += meshPatch.faces.size() * 3;
+                    cachedVertexCount += meshPatch->faces.size() * 3;
             }
         }
 
@@ -2882,8 +2882,8 @@ namespace neogfx
             for (std::size_t patchIndex = 0; patchIndex < patchCount; ++patchIndex)
             {
                 auto& patch = meshRenderer.patches[patchIndex];
-                add_item(meshRenderCache.patchVertexArrayIndices[patchIndex], patch.layer.value_or(meshRenderer.layer), mesh, patch.material, patch.faces);
-                if (patch.layer.has_value() && patch.layer.value() > aLayer)
+                add_item(meshRenderCache.patchVertexArrayIndices[patchIndex], patch->layer.value_or(meshRenderer.layer), mesh, patch->material, patch->faces);
+                if (patch->layer.has_value() && patch->layer.value() > aLayer)
                     outstandingPatches = true;
             }
             if (cache && !outstandingPatches)
