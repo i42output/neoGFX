@@ -132,10 +132,10 @@ namespace neogames
             // Card value textures...
             auto const cardValueUpperLeft = ng::rect{ aabb.top_left(), ng::size{ valueDimension } };
             auto const cardValueBottomRight = ng::rect{ aabb.bottom_right() + ng::delta{ -valueDimension }, ng::size{ valueDimension } };
-            ng::add_patch(mesh, meshRenderer, cardValueUpperLeft, aCardTextures.value_texture(aCard));
-            meshRenderer.patches.back().material.color = ng::to_ecs_component(aCard == basic_card<GameTraits>::color::Black ? ng::color::Black : ng::color{ 213, 0, 0 });
-            ng::add_patch(mesh, meshRenderer, cardValueBottomRight, aCardTextures.value_texture(aCard), uvRotate180);
-            meshRenderer.patches.back().material.color = ng::to_ecs_component(aCard == basic_card<GameTraits>::color::Black ? ng::color::Black : ng::color{ 213, 0, 0 });
+            auto& upperLeftPatch = ng::add_patch(mesh, meshRenderer, cardValueUpperLeft, aCardTextures.value_texture(aCard));
+            upperLeftPatch.material.color = ng::to_ecs_component(aCard == basic_card<GameTraits>::color::Black ? ng::color::Black : ng::color{ 213, 0, 0 });
+            auto& bottomRightPatch = ng::add_patch(mesh, meshRenderer, cardValueBottomRight, aCardTextures.value_texture(aCard), uvRotate180);
+            bottomRightPatch.material.color = ng::to_ecs_component(aCard == basic_card<GameTraits>::color::Black ? ng::color::Black : ng::color{ 213, 0, 0 });
 
             // Card suit textures under card value textures...
             auto const cardSuitUpperLeft = cardValueUpperLeft.translated(ng::point{ 0.0, valueDimension }).deflated(ng::size{ 0.055 }).translated(ng::point{ 0.0, -0.055 });
