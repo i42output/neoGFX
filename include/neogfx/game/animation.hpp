@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 
 #include <numbers>
+#include <ranges>
 
 #include <neolib/core/uuid.hpp>
 #include <neolib/core/string.hpp>
@@ -96,8 +97,8 @@ namespace neogfx::game
 
     struct animation_easing
     {
-        neolib::small_vector<easing, 1u> easing;
-        neolib::small_vector<scalar, 1u> weight;
+        neolib::small_vector<easing, 1u> easings;
+        neolib::small_vector<scalar, 1u> weights;
 
         struct meta : i_component_data::meta
         {
@@ -143,8 +144,8 @@ namespace neogfx::game
             {
                 static const string sFieldNames[] =
                 {
-                    "Easing",
-                    "Weight"
+                    "Easings",
+                    "Weights"
                 };
                 return sFieldNames[aFieldIndex];
             }
@@ -161,9 +162,9 @@ namespace neogfx::game
         std::optional<std::array<animation_easing, 3u>> translationEasings;
         std::optional<std::array<animation_easing, 3u>> scalingEasings;
         std::optional<std::array<animation_easing, 3u>> rotationEasings;
-        std::optional<std::function<mat44f(vec3f const&, vec3f const&, vec3f const&)>> transformationMatrixFunction;
+        mutable std::optional<std::function<mat44f(vec3f const&, vec3f const&, vec3f const&)>> transformationMatrixFunction;
         function_factory<animation_tween> transformationMatrixFunctionFactory{
-            [](animation_tween& self)
+            [](animation_tween const& self)
             {
                 if (!self.transformationMatrixFunction)
                     self.transformationMatrixFunction = neolib::affine_transformation_lerp_generator(
@@ -171,6 +172,56 @@ namespace neogfx::game
                         self.scaling,
                         self.rotation);
             } };
+
+        mat44f operator()(scalar timestep) const
+        {
+            static std::array<animation_easing, 3u> sDefaultEasings{ 
+                animation_easing{ { easing::Linear }, { 1.0 } }, 
+                animation_easing{ { easing::Linear }, { 1.0 } }, 
+                animation_easing{ { easing::Linear }, { 1.0 } } };
+
+            thread_local std::vector<ease_segment<double>> tSegments;
+
+            auto const t = duration > 0.0 ? std::fmod(timestep, duration) / duration : 0.0;
+            vec3f et;
+            vec3f es;
+            vec3f er;
+
+            for (auto axis : { 0u, 1u, 2u })
+            {
+                tSegments.clear();
+                auto const& segment = (translationEasings ? *translationEasings : sDefaultEasings)[axis];
+                for (auto [e, w] : std::views::zip(segment.easings, segment.weights))
+                    tSegments.emplace_back(e, w);
+                et[axis] = static_cast<float>(partitioned_ease({ tSegments.begin(), tSegments.end() }, t));
+            }
+               
+            for (auto axis : { 0u, 1u, 2u })
+            {
+                tSegments.clear();
+                auto const& segment = (scalingEasings ? *scalingEasings : sDefaultEasings)[axis];
+                for (auto [e, w] : std::views::zip(segment.easings, segment.weights))
+                    tSegments.emplace_back(e, w);
+                es[axis] = static_cast<float>(partitioned_ease({ tSegments.begin(), tSegments.end() }, t));
+            }
+
+            for (auto axis : { 0u, 1u, 2u })
+            {
+                tSegments.clear();
+                auto const& segment = (rotationEasings ? *rotationEasings : sDefaultEasings)[axis];
+                for (auto [e, w] : std::views::zip(segment.easings, segment.weights))
+                    tSegments.emplace_back(e, w);
+                er[axis] = static_cast<float>(partitioned_ease({ tSegments.begin(), tSegments.end() }, t));
+            }
+
+            if (!transformationMatrixFunction)
+                transformationMatrixFunctionFactory.make(*this);
+
+            return transformationMatrixFunction.value()(
+                translation.start + (translation.end - translation.start).hadamard_product(et),
+                scaling.start + (scaling.end - scaling.start).hadamard_product(es),
+                rotation.start + (rotation.end - rotation.start).hadamard_product(er));
+        }
 
         struct meta : i_component_data::meta
         {
@@ -270,6 +321,7 @@ namespace neogfx::game
     {
         std::optional<animation_frames> frames;
         std::optional<animation_tweens> tweens;
+        bool active = true;
 
         struct meta : i_component_data::meta
         {
@@ -285,7 +337,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 2;
+                return 3;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -295,6 +347,8 @@ namespace neogfx::game
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 1:
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
+                case 2:
+                    return component_data_field_type::Bool;
                 default:
                     throw invalid_field_index();
                 }
@@ -307,6 +361,8 @@ namespace neogfx::game
                     return animation_frame::meta::id();
                 case 1:
                     return animation_tween::meta::id();
+                case 2:
+                    return neolib::uuid{};
                 default:
                     throw invalid_field_index();
                 }
@@ -316,7 +372,8 @@ namespace neogfx::game
                 static const string sFieldNames[] =
                 {
                     "Animation Frames",
-                    "Animation Tweens"
+                    "Animation Tweens",
+                    "Active"
                 };
                 return sFieldNames[aFieldIndex];
             }
