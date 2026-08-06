@@ -175,7 +175,7 @@ namespace neogfx::game
 
         mat44f operator()(scalar timestep) const
         {
-            static std::array<animation_easing, 3u> sDefaultEasings{ 
+            static std::array<animation_easing, 3u> const sDefaultEasings{
                 animation_easing{ { easing::Linear }, { 1.0 } }, 
                 animation_easing{ { easing::Linear }, { 1.0 } }, 
                 animation_easing{ { easing::Linear }, { 1.0 } } };
