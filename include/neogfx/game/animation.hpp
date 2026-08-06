@@ -175,54 +175,43 @@ namespace neogfx::game
 
         mat44f operator()(scalar timestep) const
         {
-            static std::array<animation_easing, 3u> const sDefaultEasings{
-                animation_easing{ { easing::Linear }, { 1.0 } }, 
-                animation_easing{ { easing::Linear }, { 1.0 } }, 
+            using easings_t = std::array<animation_easing, 3u>;
+
+            static easings_t const sDefaultEasings{
+                animation_easing{ { easing::Linear }, { 1.0 } },
+                animation_easing{ { easing::Linear }, { 1.0 } },
                 animation_easing{ { easing::Linear }, { 1.0 } } };
 
-            thread_local std::vector<ease_segment<double>> tSegments;
-
             auto const t = duration > 0.0 ? std::fmod(timestep, duration) / duration : 0.0;
-            vec3f et;
-            vec3f es;
-            vec3f er;
 
-            for (auto axis : { 0u, 1u, 2u })
-            {
-                tSegments.clear();
-                auto const& segment = (translationEasings ? *translationEasings : sDefaultEasings)[axis];
-                for (auto [e, w] : std::views::zip(segment.easings, segment.weights))
-                    tSegments.emplace_back(e, w);
-                et[axis] = static_cast<float>(partitioned_ease({ tSegments.begin(), tSegments.end() }, t));
-            }
-               
-            for (auto axis : { 0u, 1u, 2u })
-            {
-                tSegments.clear();
-                auto const& segment = (scalingEasings ? *scalingEasings : sDefaultEasings)[axis];
-                for (auto [e, w] : std::views::zip(segment.easings, segment.weights))
-                    tSegments.emplace_back(e, w);
-                es[axis] = static_cast<float>(partitioned_ease({ tSegments.begin(), tSegments.end() }, t));
-            }
+            auto const interpolate = [t](std::optional<easings_t> const& aEasings, vec3f_range const& aRange) -> vec3f
+                {
+                    auto const& easings = aEasings ? *aEasings : sDefaultEasings;
 
-            for (auto axis : { 0u, 1u, 2u })
-            {
-                tSegments.clear();
-                auto const& segment = (rotationEasings ? *rotationEasings : sDefaultEasings)[axis];
-                for (auto [e, w] : std::views::zip(segment.easings, segment.weights))
-                    tSegments.emplace_back(e, w);
-                er[axis] = static_cast<float>(partitioned_ease({ tSegments.begin(), tSegments.end() }, t));
-            }
+                    vec3f factor;
+
+                    for (auto axis : { 0u, 1u, 2u })
+                    {
+                        thread_local std::vector<ease_segment<double>> tSegments;
+                        tSegments.clear();
+
+                        for (auto [e, w] : std::views::zip(easings[axis].easings, easings[axis].weights))
+                            tSegments.emplace_back(e, w);
+
+                        factor[axis] = static_cast<float>(partitioned_ease({ tSegments.begin(), tSegments.end() }, t));
+                    }
+
+                    return aRange.start + (aRange.end - aRange.start).hadamard_product(factor);
+                };
 
             if (!transformationMatrixFunction)
                 transformationMatrixFunctionFactory.make(*this);
 
             return transformationMatrixFunction.value()(
-                translation.start + (translation.end - translation.start).hadamard_product(et),
-                scaling.start + (scaling.end - scaling.start).hadamard_product(es),
-                rotation.start + (rotation.end - rotation.start).hadamard_product(er));
+                interpolate(translationEasings, translation),
+                interpolate(scalingEasings, scaling),
+                interpolate(rotationEasings, rotation));
         }
-
         struct meta : i_component_data::meta
         {
             static const neolib::uuid& id()
