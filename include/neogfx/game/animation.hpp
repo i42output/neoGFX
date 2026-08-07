@@ -334,9 +334,9 @@ namespace neogfx::game
             active = false;
         }
 
-        mat44f operator()(i_ecs const& aEcs) const
+        mat44f operator()(i_ecs const& aEcs, patch_ptr const& aPatch) const
         {
-            if (!active || !tweens)
+            if (!active || !tweens || !startTime)
                 return mat44f::identity();
 
             auto result = mat44f::identity();
@@ -344,7 +344,8 @@ namespace neogfx::game
             auto const elapsed = from_step_time(aEcs.system<game::time>().world_time() - *startTime);
 
             for (auto const& tween : *tweens)
-                result *= tween(elapsed);
+                if (std::find(tween.patches.begin(), tween.patches.end(), aPatch) != tween.patches.end())
+                    result *= tween(elapsed);
 
             return result;
         }
@@ -376,7 +377,7 @@ namespace neogfx::game
                 case 2:
                     return component_data_field_type::Bool;
                 case 3:
-                    return component_data_field_type::Int32 | component_data_field_type::Internal;
+                    return component_data_field_type::Int64 | component_data_field_type::Internal | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }

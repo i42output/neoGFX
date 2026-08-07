@@ -68,7 +68,7 @@ namespace neogfx::game
                 case 4:
                     return component_data_field_type::Bool;
                 case 5:
-                    return component_data_field_type::Int64 | component_data_field_type::Internal;
+                    return component_data_field_type::Int64 | component_data_field_type::Internal | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }
