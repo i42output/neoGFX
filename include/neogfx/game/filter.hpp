@@ -60,7 +60,7 @@ namespace neogfx::game
                 switch (aFieldIndex)
                 {
                 case 0:
-                    return component_data_field_type::Enum;
+                    return component_data_field_type::Enum | component_data_field_type::Uint32;
                 case 1:
                     return component_data_field_type::Int32;
                 case 2:

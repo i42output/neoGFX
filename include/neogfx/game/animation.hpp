@@ -121,7 +121,7 @@ namespace neogfx::game
                 switch (aFieldIndex)
                 {
                 case 0:
-                    return component_data_field_type::Enum | component_data_field_type::Array;
+                    return component_data_field_type::Enum | component_data_field_type::Uint32 | component_data_field_type::Array;
                 case 1:
                     return component_data_field_type::Scalar | component_data_field_type::Array;
                 default:
@@ -194,32 +194,26 @@ namespace neogfx::game
             auto const t0 = duration > 0.0 ? std::fmod(timestep, duration) / duration : 0.0;
             auto const t = (cycle == tween_cycle::PingPong) ? (t0 < 0.5 ? t0 * 2.0 : (1.0 - t0) * 2.0) : t0;
 
-            auto const interpolate = [&](std::optional<easings_t> const& aEasings, vec3f_range const& aRange) -> vec3f
+            auto const ease = [t](std::optional<easings_t> const& aEasings) -> vec3f
                 {
                     auto const& easings = aEasings ? *aEasings : sDefaultEasings;
-
                     vec3f factor;
-
                     for (auto axis : { 0u, 1u, 2u })
                     {
                         tSegments.clear();
-
                         for (auto [e, w] : std::views::zip(easings[axis].easings, easings[axis].weights))
                             tSegments.emplace_back(e, w);
 
                         factor[axis] = static_cast<float>(partitioned_ease({ tSegments.begin(), tSegments.end() }, t));
                     }
-
-                    return aRange.start + (aRange.end - aRange.start).hadamard_product(factor);
+                    return factor;
                 };
 
             if (!transformationMatrixFunction)
                 transformationMatrixFunctionFactory.make(*this);
 
-            return transformationMatrixFunction.value()(
-                interpolate(translationEasings, translation),
-                interpolate(scalingEasings, scaling),
-                interpolate(rotationEasings, rotation));
+            return transformationMatrixFunction.value()(ease(translationEasings), ease(scalingEasings), ease(rotationEasings));
+
         }
         struct meta : i_component_data::meta
         {
@@ -258,7 +252,7 @@ namespace neogfx::game
                 case 7:
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 8:
-                    return component_data_field_type::Enum;
+                    return component_data_field_type::Enum | component_data_field_type::Uint32;
                 case 9:
                     return component_data_field_type::Mat44f | component_data_field_type::Function3Vec3f | component_data_field_type::Optional | component_data_field_type::Cache;
                 case 10:
