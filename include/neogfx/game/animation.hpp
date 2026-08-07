@@ -28,7 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/core/string.hpp>
 
 #include <neogfx/gfx/color.hpp>
-#include <neogfx/game/ecs.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_component.hpp>
 #include <neogfx/game/mesh_filter.hpp>
@@ -323,10 +322,10 @@ namespace neogfx::game
         bool active = false;
         std::optional<i64> startTime; // ECS internal
 
-        void start(i_ecs const& aEcs)
+        void start(i64 aWorldTime)
         {
             active = true;
-            startTime = aEcs.system<game::time>().world_time();
+            startTime = aWorldTime;
         }
 
         void stop()
@@ -334,17 +333,17 @@ namespace neogfx::game
             active = false;
         }
 
-        mat44f operator()(i_ecs const& aEcs, patch_ptr const& aPatch) const
+        mat44f operator()(i64 aStepTime, patch_ptr const& aPatch) const
         {
             if (!active || !tweens || !startTime)
                 return mat44f::identity();
 
             auto result = mat44f::identity();
 
-            auto const elapsed = from_step_time(aEcs.system<game::time>().world_time() - *startTime);
+            auto const elapsed = from_step_time(aStepTime - *startTime);
 
             for (auto const& tween : *tweens)
-                if (std::find(tween.patches.begin(), tween.patches.end(), aPatch) != tween.patches.end())
+                if (std::ranges::contains(tween.patches, aPatch))
                     result *= tween(elapsed);
 
             return result;
