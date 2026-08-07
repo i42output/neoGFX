@@ -28,11 +28,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/core/string.hpp>
 
 #include <neogfx/gfx/color.hpp>
+#include <neogfx/game/ecs.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_component.hpp>
 #include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/material.hpp>
 #include <neogfx/game/patch.hpp>
+#include <neogfx/game/time.hpp>
 
 namespace neogfx::game
 {
@@ -318,8 +320,35 @@ namespace neogfx::game
     {
         std::optional<animation_frames> frames;
         std::optional<animation_tweens> tweens;
-        bool active = true;
+        bool active = false;
+        std::optional<i64> startTime; // ECS internal
 
+        void start(i_ecs const& aEcs)
+        {
+            active = true;
+            startTime = aEcs.system<game::time>().world_time();
+        }
+
+        void stop()
+        {
+            active = false;
+        }
+
+        mat44f operator()(i_ecs const& aEcs) const
+        {
+            if (!active || !tweens)
+                return mat44f::identity();
+
+            auto result = mat44f::identity();
+
+            auto const elapsed = from_step_time(aEcs.system<game::time>().world_time() - *startTime);
+
+            for (auto const& tween : *tweens)
+                result *= tween(elapsed);
+
+            return result;
+        }
+            
         struct meta : i_component_data::meta
         {
             static const neolib::uuid& id()
@@ -334,7 +363,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 3;
+                return 4;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -346,6 +375,8 @@ namespace neogfx::game
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 2:
                     return component_data_field_type::Bool;
+                case 3:
+                    return component_data_field_type::Int32 | component_data_field_type::Internal;
                 default:
                     throw invalid_field_index();
                 }
@@ -360,6 +391,8 @@ namespace neogfx::game
                     return animation_tween::meta::id();
                 case 2:
                     return neolib::uuid{};
+                case 3:
+                    return neolib::uuid{};
                 default:
                     throw invalid_field_index();
                 }
@@ -370,7 +403,8 @@ namespace neogfx::game
                 {
                     "Animation Frames",
                     "Animation Tweens",
-                    "Active"
+                    "Active",
+                    "Start Time"
                 };
                 return sFieldNames[aFieldIndex];
             }
