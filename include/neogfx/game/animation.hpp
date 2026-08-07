@@ -152,6 +152,12 @@ namespace neogfx::game
         };
     };
 
+    enum class tween_cycle : std::uint32_t
+    {
+        Loop,
+        PingPong
+    };
+
     struct animation_tween
     {
         scalar duration;
@@ -162,6 +168,7 @@ namespace neogfx::game
         std::optional<std::array<animation_easing, 3u>> translationEasings;
         std::optional<std::array<animation_easing, 3u>> scalingEasings;
         std::optional<std::array<animation_easing, 3u>> rotationEasings;
+        tween_cycle cycle = tween_cycle::Loop;
         mutable std::optional<std::function<mat44f(vec3f const&, vec3f const&, vec3f const&)>> transformationMatrixFunction;
         function_factory<animation_tween> transformationMatrixFunctionFactory{
             [](animation_tween const& self)
@@ -182,9 +189,12 @@ namespace neogfx::game
                 animation_easing{ { easing::Linear }, { 1.0 } },
                 animation_easing{ { easing::Linear }, { 1.0 } } };
 
-            auto const t = duration > 0.0 ? std::fmod(timestep, duration) / duration : 0.0;
+            thread_local std::vector<ease_segment<double>> tSegments;
 
-            auto const interpolate = [t](std::optional<easings_t> const& aEasings, vec3f_range const& aRange) -> vec3f
+            auto const t0 = duration > 0.0 ? std::fmod(timestep, duration) / duration : 0.0;
+            auto const t = (cycle == tween_cycle::PingPong) ? (t0 < 0.5 ? t0 * 2.0 : (1.0 - t0) * 2.0) : t0;
+
+            auto const interpolate = [&](std::optional<easings_t> const& aEasings, vec3f_range const& aRange) -> vec3f
                 {
                     auto const& easings = aEasings ? *aEasings : sDefaultEasings;
 
@@ -192,7 +202,6 @@ namespace neogfx::game
 
                     for (auto axis : { 0u, 1u, 2u })
                     {
-                        thread_local std::vector<ease_segment<double>> tSegments;
                         tSegments.clear();
 
                         for (auto [e, w] : std::views::zip(easings[axis].easings, easings[axis].weights))
@@ -226,7 +235,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 10;
+                return 11;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -249,8 +258,10 @@ namespace neogfx::game
                 case 7:
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 8:
-                    return component_data_field_type::Mat44f | component_data_field_type::Function3Vec3f | component_data_field_type::Optional | component_data_field_type::Cache;
+                    return component_data_field_type::Enum;
                 case 9:
+                    return component_data_field_type::Mat44f | component_data_field_type::Function3Vec3f | component_data_field_type::Optional | component_data_field_type::Cache;
+                case 10:
                     return component_data_field_type::FunctionFactory;
                 default:
                     throw invalid_field_index();
@@ -280,6 +291,8 @@ namespace neogfx::game
                     return neolib::uuid{};
                 case 9:
                     return neolib::uuid{};
+                case 10:
+                    return neolib::uuid{};
                 default:
                     throw invalid_field_index();
                 }
@@ -296,6 +309,7 @@ namespace neogfx::game
                     "Translation Easing",
                     "Scaling Easing",
                     "Rotation Easing",
+                    "Cycle",
                     "Transformation Matrix",
                     "Transformation Matrix Factory"
                 };
