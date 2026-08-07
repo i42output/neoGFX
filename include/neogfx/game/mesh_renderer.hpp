@@ -119,10 +119,10 @@ namespace neogfx::game
                     auto& rhs = *rhsPtr;
                     auto lhsTexture = lhs.material.texture != std::nullopt ? 
                         lhs.material.texture->id : lhs.material.sharedTexture != std::nullopt ? 
-                            lhs.material.sharedTexture->ptr->id : neolib::cookie_ref_ptr{};
+                            lhs.material.sharedTexture.value()->id : neolib::cookie_ref_ptr{};
                     auto rhsTexture = rhs.material.texture != std::nullopt ?
                         rhs.material.texture->id : rhs.material.sharedTexture != std::nullopt ?
-                        rhs.material.sharedTexture->ptr->id : neolib::cookie_ref_ptr{};
+                        rhs.material.sharedTexture.value()->id : neolib::cookie_ref_ptr{};
                     return lhsTexture < rhsTexture;
                 });
             }

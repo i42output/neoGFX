@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/core/uuid.hpp>
 #include <neolib/core/string.hpp>
 
+#include <neogfx/game/i_ecs.hpp>
+#include <neogfx/game/time.hpp>
 #include <neogfx/game/animation.hpp>
 
 namespace neogfx::game
@@ -105,18 +107,31 @@ namespace neogfx::game
         };
     };
 
+    inline void start_animation(animation_filter& aAnimationFilter, i64 aStepTime)
+    {
+        if (aAnimationFilter.animation)
+            aAnimationFilter.animation->start(aStepTime);
+        else if (aAnimationFilter.sharedAnimation)
+            aAnimationFilter.sharedAnimation->start(aStepTime);
+    }
+
+    inline void start_animation(i_ecs& aEcs, animation_filter& aAnimationFilter)
+    {
+        start_animation(aAnimationFilter, aEcs.system<game::time>().world_time());
+    }
+
     inline bool has_animation_frames(animation_filter const& aAnimationFilter)
     {
         return (aAnimationFilter.animation && aAnimationFilter.animation->frames) ||
-            (aAnimationFilter.sharedAnimation.ptr && aAnimationFilter.sharedAnimation.ptr->frames);
+            (aAnimationFilter.sharedAnimation && aAnimationFilter.sharedAnimation->frames);
     }
 
     inline animation_frames const& to_animation_frames(animation_filter const& aAnimationFilter)
     {
         if (aAnimationFilter.animation && aAnimationFilter.animation->frames)
             return aAnimationFilter.animation->frames.value();
-        else if (aAnimationFilter.sharedAnimation.ptr && aAnimationFilter.sharedAnimation.ptr->frames)
-            return aAnimationFilter.sharedAnimation.ptr->frames.value();
+        else if (aAnimationFilter.sharedAnimation && aAnimationFilter.sharedAnimation->frames)
+            return aAnimationFilter.sharedAnimation->frames.value();
         else
             throw std::logic_error("neogfx::game::to_animation_frames: no animation frames!");
     }
@@ -129,11 +144,24 @@ namespace neogfx::game
     inline bool is_tweening_animation(animation_filter const& aAnimationFilter)
     {
         return (aAnimationFilter.animation && aAnimationFilter.animation->tweens) ||
-            (aAnimationFilter.sharedAnimation.ptr && aAnimationFilter.sharedAnimation.ptr->tweens);
+            (aAnimationFilter.sharedAnimation && aAnimationFilter.sharedAnimation->tweens);
     }
 
     inline mat44f const& to_transformation_matrix(animation_filter const& aAnimationFilter)
     {
         return aAnimationFilter.transformation ? *aAnimationFilter.transformation : mat44f::identity();
+    }
+
+    inline mat44f to_transformation_matrix(animation_filter& aAnimationFilter, i64 aStepTime, patch_ptr const& aPatch)
+    {
+        if (aAnimationFilter.animation)
+            return (*aAnimationFilter.animation)(aStepTime, aPatch);
+        else if (aAnimationFilter.sharedAnimation)
+            return (*aAnimationFilter.sharedAnimation)(aStepTime, aPatch);
+    }
+
+    inline mat44f to_transformation_matrix(i_ecs const& aEcs, animation_filter& aAnimationFilter, patch_ptr const& aPatch)
+    {
+        return to_transformation_matrix(aAnimationFilter, aEcs.system<game::time>().world_time(), aPatch);
     }
 }

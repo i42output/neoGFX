@@ -33,6 +33,7 @@
 #include <neogfx/game/filter.hpp>
 #include <neogfx/game/animation_filter.hpp>
 #include <neogfx/game/rigid_body.hpp>
+#include <neogfx/game/time.hpp>
 
 namespace neogfx
 {
@@ -322,14 +323,14 @@ namespace neogfx
     inline game::animation regular_sprite_sheet_to_animation(const game::material& aSpriteSheet, const vec2u32& aCells, const vec2u32& aCellIndexTopLeft, const vec2u32& aCellIndexBottomRight, scalar aDefaultFrameDuration = 0.0)
     {
         return regular_sprite_sheet_to_animation(
-            aSpriteSheet.sharedTexture ? aSpriteSheet.sharedTexture->ptr->extents.as<u32>() : aSpriteSheet.texture->extents.as<u32>(),
+            aSpriteSheet.sharedTexture ? aSpriteSheet.sharedTexture.value()->extents.as<u32>() : aSpriteSheet.texture->extents.as<u32>(),
             aCells, aCellIndexTopLeft, aCellIndexBottomRight, aDefaultFrameDuration);
     }
 
     inline game::animation regular_sprite_sheet_to_animation(const game::material& aSpriteSheet, const vec2u32& aCells, scalar aDefaultFrameDuration = 0.0)
     {
         return regular_sprite_sheet_to_animation(
-            aSpriteSheet.sharedTexture ? aSpriteSheet.sharedTexture->ptr->extents.as<u32>() : aSpriteSheet.texture->extents.as<u32>(),
+            aSpriteSheet.sharedTexture ? aSpriteSheet.sharedTexture.value()->extents.as<u32>() : aSpriteSheet.texture->extents.as<u32>(),
             aCells, aDefaultFrameDuration);
     }
 

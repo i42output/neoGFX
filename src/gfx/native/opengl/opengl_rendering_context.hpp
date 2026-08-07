@@ -199,11 +199,11 @@ namespace neogfx
                 if (material.texture != std::nullopt)
                     return *material.texture;
                 else if (material.sharedTexture != std::nullopt)
-                    return *material.sharedTexture->ptr;
+                    return **material.sharedTexture;
                 else if (meshRenderer.material.texture != std::nullopt)
                     return *meshRenderer.material.texture;
                 else if (meshRenderer.material.sharedTexture != std::nullopt)
-                    return *meshRenderer.material.sharedTexture->ptr;
+                    return **meshRenderer.material.sharedTexture;
                 else
                     throw no_texture();
             }

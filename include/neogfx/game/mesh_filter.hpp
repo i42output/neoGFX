@@ -34,7 +34,7 @@ namespace neogfx::game
 {
     struct mesh_filter
     {
-        shared<game::mesh> sharedMesh;
+        shared<game::mesh const> sharedMesh;
         std::optional<game::mesh> mesh;
         std::optional<mat44f> transformation;
 

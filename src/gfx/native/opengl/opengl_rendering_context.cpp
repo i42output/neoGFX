@@ -2501,7 +2501,7 @@ namespace neogfx
                         (drawOp.appearance->ignore_emoji() ? neolib::none : drawOp.appearance->ink()) :
                         (drawOp.appearance->being_filtered()->ignore_emoji() ? neolib::none : drawOp.appearance->being_filtered()->color());
                     tMeshOrigins.push_back(drawOp.origin);
-                    tMeshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
+                    tMeshFilters.push_back(game::mesh_filter{ game::shared<game::mesh const>{}, mesh });
                     tMeshRenderers.push_back(game::mesh_renderer
                         {
                             game::material
@@ -2715,7 +2715,7 @@ namespace neogfx
 
     void opengl_rendering_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation, const std::optional<game::filter>& aFilter)
     {
-        draw_mesh(game::mesh_filter{ { &aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {}, true, 0, aFilter }, aTransformation);
+        draw_mesh(game::mesh_filter{ { aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {}, true, 0, aFilter }, aTransformation);
     }
     
     void opengl_rendering_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation)
@@ -2754,7 +2754,7 @@ namespace neogfx
             auto& meshFilter = *meshDrawable.filter;
             bool const cached = cache && meshDrawable.entity != null_entity &&
                 game::is_render_cache_valid_no_lock(*cache, meshDrawable.entity);
-            auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
+            auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh);
             auto const& faces = mesh.faces;
 
             vertexCount += faces.size() * 3;
@@ -2789,7 +2789,7 @@ namespace neogfx
             thread_local game::mesh_render_cache ignore;
             ignore = {};
             auto const& meshRenderCache = (cache && meshDrawable.entity != null_entity ? cache->entity_record_no_lock(meshDrawable.entity, true) : ignore);
-            auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
+            auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh);
             auto const& origin = meshDrawable.origin.to_vec3().as<float>();
             auto const& transformation = meshDrawable.transformation;
             auto const& faces = mesh.faces;

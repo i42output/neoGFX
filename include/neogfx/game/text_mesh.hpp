@@ -140,7 +140,7 @@ namespace neogfx::game
                     aEcs.component<mesh_renderer>().populate(aEntity, mesh_renderer{});
                 mf.mesh = mesh{};
                 mr.patches = patches{};
-                auto multilineGlyphText = aGc.to_multiline_glyph_text(aData.text, service<i_font_manager>().font_from_id(aData.font.ptr->id.cookie()), aData.extents.x, aData.alignment);
+                auto multilineGlyphText = aGc.to_multiline_glyph_text(aData.text, service<i_font_manager>().font_from_id(aData.font->id.cookie()), aData.extents.x, aData.alignment);
                 for (auto const& line : multilineGlyphText.lines)
                 {
                     auto mesh_line = [&](const vec3f& aOffset, const material& aMaterial) 
