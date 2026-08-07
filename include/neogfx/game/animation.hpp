@@ -23,17 +23,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <numbers>
 #include <ranges>
+#include <algorithm>
 
 #include <neolib/core/uuid.hpp>
 #include <neolib/core/string.hpp>
-
+#include <neolib/ecs/chrono.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_component.hpp>
 #include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/material.hpp>
 #include <neogfx/game/patch.hpp>
-#include <neogfx/game/time.hpp>
 
 namespace neogfx::game
 {
@@ -322,10 +322,10 @@ namespace neogfx::game
         bool active = false;
         std::optional<i64> startTime; // ECS internal
 
-        void start(i64 aWorldTime)
+        void start(i64 aStepTime)
         {
             active = true;
-            startTime = aWorldTime;
+            startTime = aStepTime;
         }
 
         void stop()
