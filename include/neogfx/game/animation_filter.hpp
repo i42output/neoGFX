@@ -158,6 +158,7 @@ namespace neogfx::game
             return (*aAnimationFilter.animation)(aStepTime, aPatch);
         else if (aAnimationFilter.sharedAnimation)
             return (*aAnimationFilter.sharedAnimation)(aStepTime, aPatch);
+        return mat44f::identity();
     }
 
     inline mat44f to_transformation_matrix(i_ecs const& aEcs, animation_filter& aAnimationFilter, patch_ptr const& aPatch)
