@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/core/uuid.hpp>
 #include <neolib/core/string.hpp>
 #include <neolib/ecs/chrono.hpp>
+
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_component.hpp>
