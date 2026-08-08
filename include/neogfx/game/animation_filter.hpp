@@ -66,16 +66,36 @@ namespace neogfx::game
         // @todo add to meta
         frame_animation_state frameState;
         // @todo add to meta
-        std::vector<animation_tween_ptr> tweens;
-        // @todo add to meta
         std::unordered_map<animation_tween_ptr, tween_animation_state> tweenStates;
+
+        animation_tweens const& asset_tweens() const
+        {
+            static animation_tweens const sNoTweens;
+            if (animation && animation->tweens)
+                return *animation->tweens;
+            else if (sharedAnimation && sharedAnimation->tweens)
+                return *sharedAnimation->tweens;
+            return sNoTweens;
+        }
+
+        auto active_tweens() const
+        {
+            return asset_tweens() | std::views::filter([this](animation_tween_ptr const& aTween)
+                { return tweenStates.contains(aTween); });
+        }
+
+        auto active_tweens(patch_ptr const& aPatch) const
+        {
+            return active_tweens() | std::views::filter([aPatch](animation_tween_ptr const& aTween)
+                { return std::ranges::contains(aTween->patches, aPatch); });
+        }
 
         void start(i64 aStepTime, bool aStartTweens = false)
         {
             frameState.active = true;
 
             if (aStartTweens)
-                for (auto& tween : tweens)
+                for (auto& tween : active_tweens())
                     tweenStates[tween].start(aStepTime);
         }
 
@@ -84,29 +104,27 @@ namespace neogfx::game
             frameState.active = false;
 
             if (aStopTweens)
-                for (auto& tween : tweens)
+                for (auto& tween : active_tweens())
                     tweenStates[tween].stop();
         }
 
         void start(i64 aStepTime, patch_ptr const& aPatch)
         {
-            for (auto& tween : tweens)
-                if (std::ranges::contains(tween->patches, aPatch))
-                    tweenStates[tween].start(aStepTime);
+            for (auto& tween : active_tweens(aPatch))
+                tweenStates[tween].start(aStepTime);
         }
 
         void stop(patch_ptr const& aPatch)
         {
-            for (auto& tween : tweens)
-                if (std::ranges::contains(tween->patches, aPatch))
-                    tweenStates[tween].stop();
+            for (auto& tween : active_tweens(aPatch))
+                tweenStates[tween].stop();
         }
 
         mat44f operator()(i64 aStepTime, patch_ptr const& aPatch) const
         {
             auto result = mat44f::identity();
 
-            for (auto& tween : tweens)
+            for (auto& tween : active_tweens(aPatch))
             {
                 auto& tweenState = tweenStates.at(tween);
                 if (tweenState.active && tweenState.startTime && std::ranges::contains(tween->patches, aPatch))
@@ -275,7 +293,6 @@ namespace neogfx::game
     inline animation_tween_ptr add_tween(animation_filter& aAnimationFilter, scalar aDuration, patches const& aPatches)
     {
         auto tween = add_tween(to_animation(aAnimationFilter), aDuration, aPatches);
-        aAnimationFilter.tweens.push_back(tween);
         (void)aAnimationFilter.tweenStates[tween];
         return tween;
     }
