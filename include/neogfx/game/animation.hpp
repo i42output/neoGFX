@@ -289,7 +289,8 @@ namespace neogfx::game
                 case 9:
                     return neolib::uuid{};
                 case 10:
-                    return neolib::uuid{};                default:
+                    return neolib::uuid{};
+                default:
                     throw invalid_field_index();
                 }
             }
@@ -345,7 +346,7 @@ namespace neogfx::game
                 case 0:
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 1:
-                    return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
+                    return component_data_field_type::ComponentData | component_data_field_type::SharedPointer | component_data_field_type::Array | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }

@@ -90,22 +90,26 @@ namespace neogfx::game
                 { return std::ranges::contains(aTween->patches, aPatch); });
         }
 
-        void start(i64 aStepTime, bool aStartTweens = false)
+        void start_frames()
         {
             frameState.active = true;
-
-            if (aStartTweens)
-                for (auto& tween : active_tweens())
-                    tweenStates[tween].start(aStepTime);
         }
 
-        void stop(bool aStopTweens = false)
+        void stop_frames()
         {
             frameState.active = false;
+        }
 
-            if (aStopTweens)
-                for (auto& tween : active_tweens())
-                    tweenStates[tween].stop();
+        void start(i64 aStepTime)
+        {
+            for (auto& tween : active_tweens())
+                tweenStates[tween].start(aStepTime);
+        }
+
+        void stop()
+        {
+            for (auto& tween : active_tweens())
+                tweenStates[tween].stop();
         }
 
         void start(i64 aStepTime, patch_ptr const& aPatch)
@@ -127,7 +131,7 @@ namespace neogfx::game
             for (auto& tween : active_tweens(aPatch))
             {
                 auto& tweenState = tweenStates.at(tween);
-                if (tweenState.active && tweenState.startTime && std::ranges::contains(tween->patches, aPatch))
+                if (tweenState.active && tweenState.startTime)
                     result *= (*tween)(from_step_time(aStepTime - *tweenState.startTime));
             }
 
