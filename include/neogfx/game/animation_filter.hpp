@@ -66,6 +66,8 @@ namespace neogfx::game
         // @todo add to meta
         frame_animation_state frameState;
         // @todo add to meta
+        std::vector<animation_tween_ptr> tweens;
+        // @todo add to meta
         std::unordered_map<animation_tween_ptr, tween_animation_state> tweenStates;
 
         void start(i64 aStepTime, bool aStartTweens = false)
@@ -73,8 +75,8 @@ namespace neogfx::game
             frameState.active = true;
 
             if (aStartTweens)
-                for (auto& tweenState : tweenStates)
-                    tweenState.second.start(aStepTime);
+                for (auto& tween : tweens)
+                    tweenStates[tween].start(aStepTime);
         }
 
         void stop(bool aStopTweens = false)
@@ -82,31 +84,34 @@ namespace neogfx::game
             frameState.active = false;
 
             if (aStopTweens)
-                for (auto& tweenState : tweenStates)
-                    tweenState.second.stop();
+                for (auto& tween : tweens)
+                    tweenStates[tween].stop();
         }
 
         void start(i64 aStepTime, patch_ptr const& aPatch)
         {
-            for (auto& tweenState : tweenStates)
-                if (std::ranges::contains(tweenState.first->patches, aPatch))
-                    tweenState.second.start(aStepTime);
+            for (auto& tween : tweens)
+                if (std::ranges::contains(tween->patches, aPatch))
+                    tweenStates[tween].start(aStepTime);
         }
 
         void stop(patch_ptr const& aPatch)
         {
-            for (auto& tweenState : tweenStates)
-                if (std::ranges::contains(tweenState.first->patches, aPatch))
-                    tweenState.second.stop();
+            for (auto& tween : tweens)
+                if (std::ranges::contains(tween->patches, aPatch))
+                    tweenStates[tween].stop();
         }
 
         mat44f operator()(i64 aStepTime, patch_ptr const& aPatch) const
         {
             auto result = mat44f::identity();
 
-            for (auto& tweenState : tweenStates)
-                if (tweenState.second.active && tweenState.second.startTime && std::ranges::contains(tweenState.first->patches, aPatch))
-                    result *= (*tweenState.first)(from_step_time(aStepTime - *tweenState.second.startTime));
+            for (auto& tween : tweens)
+            {
+                auto& tweenState = tweenStates.at(tween);
+                if (tweenState.active && tweenState.startTime && std::ranges::contains(tween->patches, aPatch))
+                    result *= (*tween)(from_step_time(aStepTime - *tweenState.startTime));
+            }
 
             return result;
         }
@@ -265,5 +270,58 @@ namespace neogfx::game
     inline mat44f to_transformation_matrix(i_ecs const& aEcs, animation_filter& aAnimationFilter, patch_ptr const& aPatch = mesh_filter_patch)
     {
         return to_transformation_matrix(aAnimationFilter, aEcs.system<game::time>().world_time(), aPatch);
+    }
+
+    inline animation_tween_ptr add_tween(animation_filter& aAnimationFilter, scalar aDuration, patches const& aPatches)
+    {
+        auto tween = add_tween(to_animation(aAnimationFilter), aDuration, aPatches);
+        aAnimationFilter.tweens.push_back(tween);
+        (void)aAnimationFilter.tweenStates[tween];
+        return tween;
+    }
+
+    inline animation_tween_ptr add_tween(animation_filter& aAnimationFilter, scalar aDuration)
+    {
+        return add_tween(aAnimationFilter, aDuration, { mesh_filter_patch });
+    }
+
+    inline animation_tween_ptr translate(animation_filter& aAnimationFilter, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
+    {
+        return translate(add_tween(aAnimationFilter, aDuration, aPatches), aRange);
+    }
+
+    inline animation_tween_ptr translate(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange)
+    {
+        return translate(aAnimationFilter, aDuration, { mesh_filter_patch }, aRange);
+    }
+
+    inline animation_tween_ptr scale(animation_filter& aAnimationFilter, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
+    {
+        return scale(add_tween(aAnimationFilter, aDuration, aPatches), aRange);
+    }
+
+    inline animation_tween_ptr scale(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange)
+    {
+        return scale(aAnimationFilter, aDuration, { mesh_filter_patch }, aRange);
+    }
+
+    inline animation_tween_ptr rotate(animation_filter& aAnimationFilter, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
+    {
+        return rotate(add_tween(aAnimationFilter, aDuration, aPatches), aRange);
+    }
+
+    inline animation_tween_ptr rotate(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange)
+    {
+        return rotate(aAnimationFilter, aDuration, { mesh_filter_patch }, aRange);
+    }
+
+    inline animation_tween_ptr rotate_deg(animation_filter& aAnimationFilter, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
+    {
+        return rotate(aAnimationFilter, aDuration, aPatches, { aRange.start * std::numbers::pi / 180.0, aRange.end * std::numbers::pi / 180.0 });
+    }
+
+    inline animation_tween_ptr rotate_deg(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange)
+    {
+        return rotate_deg(aAnimationFilter, aDuration, { mesh_filter_patch }, aRange);
     }
 }
