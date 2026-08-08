@@ -98,17 +98,20 @@ namespace neogfx::game
             if (info.destroyed)
                 continue;
             auto& filter = filters.entity_record(entity);
-            if (!filter.currentFrameStartTime)
-                filter.currentFrameStartTime = info.creationTime;
+            if (!has_animation(filter))
+                continue;
+            auto& animation = to_animation(filter);
+            if (!animation.currentFrameStartTime)
+                animation.currentFrameStartTime = info.creationTime;
             if (has_animation_frames(filter))
             {
                 auto const& frames = to_animation_frames(filter);
-                auto const currentFrame = filter.currentFrame % frames.size();
-                while (*filter.currentFrameStartTime + to_step_time(frames[currentFrame].duration, worldClock.timestep) < now)
+                auto const currentFrame = animation.currentFrame % frames.size();
+                while (*animation.currentFrameStartTime + to_step_time(frames[currentFrame].duration, worldClock.timestep) < now)
                 {
-                    *filter.currentFrameStartTime += to_step_time(frames[currentFrame].duration, worldClock.timestep);
-                    filter.currentFrame = static_cast<u32>((currentFrame + 1u) % frames.size());
-                    if (filter.currentFrame == 0 && filter.autoDestroy)
+                    *animation.currentFrameStartTime += to_step_time(frames[currentFrame].duration, worldClock.timestep);
+                    animation.currentFrame = static_cast<u32>((currentFrame + 1u) % frames.size());
+                    if (animation.currentFrame == 0 && animation.autoDestroy)
                     {
                         ecs().async_destroy_entity(entity);
                         break;

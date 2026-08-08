@@ -35,9 +35,6 @@ namespace neogfx::game
         shared<animation> sharedAnimation;
         std::optional<animation> animation;
         std::optional<mat44f> transformation;
-        u32 currentFrame;
-        bool autoDestroy;
-        std::optional<i64> currentFrameStartTime; // ECS internal
 
         struct meta : i_component_data::meta
         {
@@ -53,7 +50,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 6;
+                return 3;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -65,12 +62,6 @@ namespace neogfx::game
                     return component_data_field_type::ComponentData | component_data_field_type::Optional;
                 case 2:
                     return component_data_field_type::Mat44f | component_data_field_type::Optional;
-                case 3:
-                    return component_data_field_type::Uint32;
-                case 4:
-                    return component_data_field_type::Bool;
-                case 5:
-                    return component_data_field_type::Int64 | component_data_field_type::Internal | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }
@@ -83,9 +74,6 @@ namespace neogfx::game
                 case 1:
                     return animation::meta::id();
                 case 2:
-                case 3:
-                case 4:
-                case 5:
                     return neolib::uuid{};
                 default:
                     throw invalid_field_index();
@@ -97,83 +85,94 @@ namespace neogfx::game
                 {
                     "Shared Animation",
                     "Animation",
-                    "Transformation",
-                    "Current Frame",
-                    "Auto Destroy",
-                    "Current Frame Start Time"
+                    "Transformation"
                 };
                 return sFieldNames[aFieldIndex];
             }
         };
     };
 
-    inline void start_animation(animation_filter& aAnimationFilter, i64 aStepTime)
+    inline bool has_animation(animation_filter const& aAnimationFilter)
+    {
+        return aAnimationFilter.animation || aAnimationFilter.sharedAnimation;
+    }
+
+    inline animation& to_animation(animation_filter& aAnimationFilter)
     {
         if (aAnimationFilter.animation)
-            aAnimationFilter.animation->start(aStepTime);
+            return *aAnimationFilter.animation;
         else if (aAnimationFilter.sharedAnimation)
-            aAnimationFilter.sharedAnimation->start(aStepTime);
+            return *aAnimationFilter.sharedAnimation;
+        throw std::logic_error("neogfx::game::to_animation: no animation!");
+    }
+
+    inline animation const& to_animation(animation_filter const& aAnimationFilter)
+    {
+        if (aAnimationFilter.animation)
+            return *aAnimationFilter.animation;
+        else if (aAnimationFilter.sharedAnimation)
+            return *aAnimationFilter.sharedAnimation;
+        throw std::logic_error("neogfx::game::to_animation: no animation!");
+    }
+
+    inline void start_animation(animation_filter& aAnimationFilter, i64 aStepTime)
+    {
+        if (has_animation(aAnimationFilter))
+            to_animation(aAnimationFilter).start(aStepTime);
     }
 
     inline void start_animation(i_ecs& aEcs, animation_filter& aAnimationFilter)
     {
-        start_animation(aAnimationFilter, aEcs.system<game::time>().world_time());
+        if (has_animation(aAnimationFilter))
+            start_animation(aAnimationFilter, aEcs.system<game::time>().world_time());
     }
 
     inline void start_animation(animation_filter& aAnimationFilter, i64 aStepTime, patch_ptr const& aPatch)
     {
-        if (aAnimationFilter.animation)
-            aAnimationFilter.animation->start(aStepTime, aPatch);
-        else if (aAnimationFilter.sharedAnimation)
-            aAnimationFilter.sharedAnimation->start(aStepTime, aPatch);
+        if (has_animation(aAnimationFilter))
+            to_animation(aAnimationFilter).start(aStepTime, aPatch);
     }
 
     inline void start_animation(i_ecs& aEcs, animation_filter& aAnimationFilter, patch_ptr const& aPatch)
     {
-        start_animation(aAnimationFilter, aEcs.system<game::time>().world_time(), aPatch);
+        if (has_animation(aAnimationFilter))
+            start_animation(aAnimationFilter, aEcs.system<game::time>().world_time(), aPatch);
     }
 
-    inline void stop_animation(i_ecs& aEcs, animation_filter& aAnimationFilter)
+    inline void stop_animation(animation_filter& aAnimationFilter)
     {
-        if (aAnimationFilter.animation)
-            aAnimationFilter.animation->stop();
-        else if (aAnimationFilter.sharedAnimation)
-            aAnimationFilter.sharedAnimation->stop();
+        if (has_animation(aAnimationFilter))
+            to_animation(aAnimationFilter).stop();
     }
 
-    inline void stop_animation(i_ecs& aEcs, animation_filter& aAnimationFilter, patch_ptr const& aPatch)
+    inline void stop_animation(animation_filter& aAnimationFilter, patch_ptr const& aPatch)
     {
-        if (aAnimationFilter.animation)
-            aAnimationFilter.animation->stop(aPatch);
-        else if (aAnimationFilter.sharedAnimation)
-            aAnimationFilter.sharedAnimation->stop(aPatch);
+        if (has_animation(aAnimationFilter))
+            to_animation(aAnimationFilter).stop(aPatch);
     }
 
     inline bool has_animation_frames(animation_filter const& aAnimationFilter)
     {
-        return (aAnimationFilter.animation && aAnimationFilter.animation->frames) ||
-            (aAnimationFilter.sharedAnimation && aAnimationFilter.sharedAnimation->frames);
+        return has_animation(aAnimationFilter) && to_animation(aAnimationFilter).frames;
     }
 
     inline animation_frames const& to_animation_frames(animation_filter const& aAnimationFilter)
     {
-        if (aAnimationFilter.animation && aAnimationFilter.animation->frames)
-            return aAnimationFilter.animation->frames.value();
-        else if (aAnimationFilter.sharedAnimation && aAnimationFilter.sharedAnimation->frames)
-            return aAnimationFilter.sharedAnimation->frames.value();
-        else
-            throw std::logic_error("neogfx::game::to_animation_frames: no animation frames!");
+        if (has_animation_frames(aAnimationFilter))
+            return *to_animation(aAnimationFilter).frames;
+        throw std::logic_error("neogfx::game::to_animation_frames: no animation frames!");
     }
 
     inline mesh_filter const& current_animation_frame(animation_filter const& aAnimationFilter)
     {
-        return to_animation_frames(aAnimationFilter)[aAnimationFilter.currentFrame].filter;
+        if (has_animation_frames(aAnimationFilter))
+            return to_animation_frames(aAnimationFilter)[to_animation(aAnimationFilter).currentFrame].filter;
+        throw std::logic_error("neogfx::game::to_animation_frames: no animation frames!");
     }
 
     inline bool is_tweening_animation(animation_filter const& aAnimationFilter)
     {
-        return (aAnimationFilter.animation && aAnimationFilter.animation->tweens) ||
-            (aAnimationFilter.sharedAnimation && aAnimationFilter.sharedAnimation->tweens);
+        return has_animation(aAnimationFilter) && to_animation(aAnimationFilter).tweens;
     }
 
     inline mat44f const& to_transformation_matrix(animation_filter const& aAnimationFilter)
@@ -183,10 +182,8 @@ namespace neogfx::game
 
     inline mat44f to_transformation_matrix(animation_filter& aAnimationFilter, i64 aStepTime, patch_ptr const& aPatch = mesh_filter_patch)
     {
-        if (aAnimationFilter.animation)
-            return (*aAnimationFilter.animation)(aStepTime, aPatch);
-        else if (aAnimationFilter.sharedAnimation)
-            return (*aAnimationFilter.sharedAnimation)(aStepTime, aPatch);
+        if (has_animation(aAnimationFilter))
+            return to_animation(aAnimationFilter)(aStepTime, aPatch);
         return mat44f::identity();
     }
 

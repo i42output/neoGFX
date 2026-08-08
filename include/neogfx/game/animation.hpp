@@ -345,12 +345,13 @@ namespace neogfx::game
         std::optional<animation_frames> frames;
         std::optional<animation_tweens> tweens;
         bool active = false;
-        std::optional<i64> startTime; // ECS internal
+        u32 currentFrame = 0u;
+        bool autoDestroy = false;
+        std::optional<i64> currentFrameStartTime; // ECS internal
 
         void start(i64 aStepTime, bool aStartChildren = false)
         {
             active = true;
-            startTime = aStepTime;
 
             if (aStartChildren && tweens)
                 for (auto& tween : *tweens)
@@ -384,7 +385,7 @@ namespace neogfx::game
 
         mat44f operator()(i64 aStepTime, patch_ptr const& aPatch) const
         {
-            if (!active || !tweens || !startTime)
+            if (!active || !tweens)
                 return mat44f::identity();
 
             auto result = mat44f::identity();
@@ -410,7 +411,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 4;
+                return 6;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -423,6 +424,10 @@ namespace neogfx::game
                 case 2:
                     return component_data_field_type::Bool;
                 case 3:
+                    return component_data_field_type::Uint32;
+                case 4:
+                    return component_data_field_type::Bool;
+                case 5:
                     return component_data_field_type::Int64 | component_data_field_type::Internal | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
@@ -437,8 +442,9 @@ namespace neogfx::game
                 case 1:
                     return animation_tween::meta::id();
                 case 2:
-                    return neolib::uuid{};
                 case 3:
+                case 4:
+                case 5:
                     return neolib::uuid{};
                 default:
                     throw invalid_field_index();
@@ -451,7 +457,9 @@ namespace neogfx::game
                     "Animation Frames",
                     "Animation Tweens",
                     "Active",
-                    "Start Time"
+                    "Current Frame",
+                    "Auto Destroy",
+                    "Current Frame Start Time" 
                 };
                 return sFieldNames[aFieldIndex];
             }
