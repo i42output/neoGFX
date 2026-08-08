@@ -171,8 +171,6 @@ namespace neogfx::game
         std::optional<std::array<animation_easing, 3u>> scalingEasings;
         std::optional<std::array<animation_easing, 3u>> rotationEasings;
         tween_cycle cycle = tween_cycle::Loop;
-        bool active = false;
-        std::optional<i64> startTime; // ECS internal
 
         mutable std::optional<std::function<mat44f(vec3f const&, vec3f const&, vec3f const&)>> transformationMatrixFunction;
         function_factory<animation_tween> transformationMatrixFunctionFactory{
@@ -220,17 +218,6 @@ namespace neogfx::game
             return transformationMatrixFunction.value()(ease(translationEasings), ease(scalingEasings), ease(rotationEasings));
         }
 
-        void start(i64 aStepTime)
-        {
-            active = true;
-            startTime = aStepTime;
-        }
-
-        void stop()
-        {
-            active = false;
-        }
-
         struct meta : i_component_data::meta
         {
             static const neolib::uuid& id()
@@ -245,7 +232,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 13;
+                return 9;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -269,14 +256,6 @@ namespace neogfx::game
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 8:
                     return component_data_field_type::Enum | component_data_field_type::Uint32;
-                case 9:
-                    return component_data_field_type::Bool;
-                case 10:
-                    return component_data_field_type::Int64 | component_data_field_type::Internal | component_data_field_type::Optional;
-                case 11:
-                    return component_data_field_type::Mat44f | component_data_field_type::Function3Vec3f | component_data_field_type::Optional | component_data_field_type::Cache;
-                case 12:
-                    return component_data_field_type::FunctionFactory;
                 default:
                     throw invalid_field_index();
                 }
@@ -303,14 +282,6 @@ namespace neogfx::game
                     return animation_easing::meta::id();
                 case 8:
                     return neolib::uuid{};
-                case 9:
-                    return neolib::uuid{};
-                case 10:
-                    return neolib::uuid{};
-                case 11:
-                    return neolib::uuid{};
-                case 12:
-                    return neolib::uuid{};
                 default:
                     throw invalid_field_index();
                 }
@@ -327,76 +298,21 @@ namespace neogfx::game
                     "Translation Easing",
                     "Scaling Easing",
                     "Rotation Easing",
-                    "Cycle",
-                    "Active",
-                    "Start Time",
-                    "Transformation Matrix",
-                    "Transformation Matrix Factory"
+                    "Cycle"
                 };
                 return sFieldNames[aFieldIndex];
             }
         };
     };
 
-    using animation_tweens = std::vector<animation_tween>;
+    using animation_tween_ptr = std::shared_ptr<animation_tween>;
+    using animation_tweens = std::vector<animation_tween_ptr>;
 
     struct animation
     {
         std::optional<animation_frames> frames;
         std::optional<animation_tweens> tweens;
-        bool active = false;
-        u32 currentFrame = 0u;
-        bool autoDestroy = false;
-        std::optional<i64> currentFrameStartTime; // ECS internal
 
-        void start(i64 aStepTime, bool aStartChildren = false)
-        {
-            active = true;
-
-            if (aStartChildren && tweens)
-                for (auto& tween : *tweens)
-                    tween.start(aStepTime);
-        }
-
-        void stop(bool aStopChildren = false)
-        {
-            active = false;
-
-            if (aStopChildren && tweens)
-                for (auto& tween : *tweens)
-                    tween.stop();
-        }
-
-        void start(i64 aStepTime, patch_ptr const& aPatch)
-        {
-            if (tweens)
-                for (auto& tween : *tweens)
-                    if (std::ranges::contains(tween.patches, aPatch))
-                        tween.start(aStepTime);
-        }
-
-        void stop(patch_ptr const& aPatch)
-        {
-            if (tweens)
-                for (auto& tween : *tweens)
-                    if (std::ranges::contains(tween.patches, aPatch))
-                        tween.stop();
-        }
-
-        mat44f operator()(i64 aStepTime, patch_ptr const& aPatch) const
-        {
-            if (!active || !tweens)
-                return mat44f::identity();
-
-            auto result = mat44f::identity();
-
-            for (auto const& tween : *tweens)
-                if (tween.active && tween.startTime && std::ranges::contains(tween.patches, aPatch))
-                    result *= tween(from_step_time(aStepTime - *tween.startTime));
-
-            return result;
-        }
-            
         struct meta : i_component_data::meta
         {
             static const neolib::uuid& id()
@@ -411,7 +327,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 6;
+                return 2;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -421,14 +337,6 @@ namespace neogfx::game
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 1:
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
-                case 2:
-                    return component_data_field_type::Bool;
-                case 3:
-                    return component_data_field_type::Uint32;
-                case 4:
-                    return component_data_field_type::Bool;
-                case 5:
-                    return component_data_field_type::Int64 | component_data_field_type::Internal | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }
@@ -441,11 +349,6 @@ namespace neogfx::game
                     return animation_frame::meta::id();
                 case 1:
                     return animation_tween::meta::id();
-                case 2:
-                case 3:
-                case 4:
-                case 5:
-                    return neolib::uuid{};
                 default:
                     throw invalid_field_index();
                 }
@@ -455,90 +358,89 @@ namespace neogfx::game
                 static const string sFieldNames[] =
                 {
                     "Animation Frames",
-                    "Animation Tweens",
-                    "Active",
-                    "Current Frame",
-                    "Auto Destroy",
-                    "Current Frame Start Time" 
+                    "Animation Tweens"
                 };
                 return sFieldNames[aFieldIndex];
             }
         };
     };
 
-    inline void translate(animation_tween& aTween, vec3_range const& aRange)
+    inline animation_tween_ptr translate(animation_tween_ptr aTween, vec3_range const& aRange)
     {
-        aTween.translation = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
-        aTween.transformationMatrixFunction = std::nullopt;
+        aTween->translation = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
+        aTween->transformationMatrixFunction = std::nullopt;
+        return aTween;
     }
 
-    inline void scale(animation_tween& aTween, vec3_range const& aRange)
+    inline animation_tween_ptr scale(animation_tween_ptr aTween, vec3_range const& aRange)
     {
-        aTween.scaling = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
-        aTween.transformationMatrixFunction = std::nullopt;
+        aTween->scaling = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
+        aTween->transformationMatrixFunction = std::nullopt;
+        return aTween;
     }
 
-    inline void rotate(animation_tween& aTween, vec3_range const& aRange)
+    inline animation_tween_ptr rotate(animation_tween_ptr aTween, vec3_range const& aRange)
     {
-        aTween.rotation = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
-        aTween.transformationMatrixFunction = std::nullopt;
+        aTween->rotation = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
+        aTween->transformationMatrixFunction = std::nullopt;
+        return aTween;
     }
 
-    inline void rotate_deg(animation_tween& aTween, vec3_range const& aRange)
+    inline animation_tween_ptr rotate_deg(animation_tween_ptr aTween, vec3_range const& aRange)
     {
-        rotate(aTween, { aRange.start * std::numbers::pi / 180.0, aRange.end * std::numbers::pi / 180.0 });
+        return rotate(aTween, { aRange.start * std::numbers::pi / 180.0, aRange.end * std::numbers::pi / 180.0 });
     }
 
-    inline animation_tween& add_tween(animation& aAnimation, scalar aDuration, patches const& aPatches)
+    inline animation_tween_ptr add_tween(animation& aAnimation, scalar aDuration, patches const& aPatches)
     {
         if (!aAnimation.tweens)
             aAnimation.tweens.emplace();
-        aAnimation.tweens->emplace_back(aDuration, aPatches);
+        aAnimation.tweens->push_back(std::make_shared<animation_tween>(aDuration, aPatches));
         return aAnimation.tweens->back();
     }
 
-    inline animation_tween& add_tween(animation& aAnimation, scalar aDuration)
+    inline animation_tween_ptr add_tween(animation& aAnimation, scalar aDuration)
     {
         return add_tween(aAnimation, aDuration, { mesh_filter_patch });
     }
 
-    inline void translate(animation& aAnimation, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
+    inline animation_tween_ptr translate(animation& aAnimation, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
     {
-        translate(add_tween(aAnimation, aDuration, aPatches), aRange);
+        return translate(add_tween(aAnimation, aDuration, aPatches), aRange);
     }
 
-    inline void translate(animation& aAnimation, scalar aDuration, vec3_range const& aRange)
+    inline animation_tween_ptr translate(animation& aAnimation, scalar aDuration, vec3_range const& aRange)
     {
-        translate(aAnimation, aDuration, { mesh_filter_patch }, aRange);
+        return translate(aAnimation, aDuration, { mesh_filter_patch }, aRange);
     }
 
-    inline void scale(animation& aAnimation, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
+    inline animation_tween_ptr scale(animation& aAnimation, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
     {
-        scale(add_tween(aAnimation, aDuration, aPatches), aRange);
+        return scale(add_tween(aAnimation, aDuration, aPatches), aRange);
     }
 
-    inline void scale(animation& aAnimation, scalar aDuration, vec3_range const& aRange)
+    inline animation_tween_ptr scale(animation& aAnimation, scalar aDuration, vec3_range const& aRange)
     {
-        scale(aAnimation, aDuration, { mesh_filter_patch }, aRange);
+        return scale(aAnimation, aDuration, { mesh_filter_patch }, aRange);
     }
 
-    inline void rotate(animation& aAnimation, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
+    inline animation_tween_ptr rotate(animation& aAnimation, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
     {
-        rotate(add_tween(aAnimation, aDuration, aPatches), aRange);
+        return rotate(add_tween(aAnimation, aDuration, aPatches), aRange);
     }
 
-    inline void rotate(animation& aAnimation, scalar aDuration, vec3_range const& aRange)
+    inline animation_tween_ptr rotate(animation& aAnimation, scalar aDuration, vec3_range const& aRange)
     {
-        rotate(aAnimation, aDuration, { mesh_filter_patch }, aRange);
+        return rotate(aAnimation, aDuration, { mesh_filter_patch }, aRange);
     }
 
-    inline void rotate_deg(animation& aAnimation, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
+    inline animation_tween_ptr rotate_deg(animation& aAnimation, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
     {
-        rotate(aAnimation, aDuration, aPatches, { aRange.start * std::numbers::pi / 180.0, aRange.end * std::numbers::pi / 180.0 });
+        return rotate(aAnimation, aDuration, aPatches, { aRange.start * std::numbers::pi / 180.0, aRange.end * std::numbers::pi / 180.0 });
     }
 
-    inline void rotate_deg(animation& aAnimation, scalar aDuration, vec3_range const& aRange)
+    inline animation_tween_ptr rotate_deg(animation& aAnimation, scalar aDuration, vec3_range const& aRange)
     {
-        rotate_deg(aAnimation, aDuration, { mesh_filter_patch }, aRange);
+        return rotate_deg(aAnimation, aDuration, { mesh_filter_patch }, aRange);
     }
 }

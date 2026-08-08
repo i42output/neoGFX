@@ -30,11 +30,86 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::game
 {
+    // @todo make componenent data (add meta)
+    struct frame_animation_state
+    {
+        bool active = false;
+        u32 currentFrame = 0u;
+        bool autoDestroy = false;
+        std::optional<i64> currentFrameStartTime;
+    };
+
+    // @todo make componenent data (add meta)
+    struct tween_animation_state
+    {
+        bool active = false;
+        std::optional<i64> startTime;
+
+        void start(i64 aStepTime)
+        {
+            active = true;
+            startTime = aStepTime;
+        }
+
+        void stop()
+        {
+            active = false;
+        }
+    };
+
     struct animation_filter
     {
         shared<animation> sharedAnimation;
         std::optional<animation> animation;
         std::optional<mat44f> transformation;
+
+        // @todo add to meta
+        frame_animation_state frameState;
+        // @todo add to meta
+        std::unordered_map<animation_tween_ptr, tween_animation_state> tweenStates;
+
+        void start(i64 aStepTime, bool aStartTweens = false)
+        {
+            frameState.active = true;
+
+            if (aStartTweens)
+                for (auto& tweenState : tweenStates)
+                    tweenState.second.start(aStepTime);
+        }
+
+        void stop(bool aStopTweens = false)
+        {
+            frameState.active = false;
+
+            if (aStopTweens)
+                for (auto& tweenState : tweenStates)
+                    tweenState.second.stop();
+        }
+
+        void start(i64 aStepTime, patch_ptr const& aPatch)
+        {
+            for (auto& tweenState : tweenStates)
+                if (std::ranges::contains(tweenState.first->patches, aPatch))
+                    tweenState.second.start(aStepTime);
+        }
+
+        void stop(patch_ptr const& aPatch)
+        {
+            for (auto& tweenState : tweenStates)
+                if (std::ranges::contains(tweenState.first->patches, aPatch))
+                    tweenState.second.stop();
+        }
+
+        mat44f operator()(i64 aStepTime, patch_ptr const& aPatch) const
+        {
+            auto result = mat44f::identity();
+
+            for (auto& tweenState : tweenStates)
+                if (tweenState.second.active && tweenState.second.startTime && std::ranges::contains(tweenState.first->patches, aPatch))
+                    result *= (*tweenState.first)(from_step_time(aStepTime - *tweenState.second.startTime));
+
+            return result;
+        }
 
         struct meta : i_component_data::meta
         {
@@ -118,7 +193,7 @@ namespace neogfx::game
     inline void start_animation(animation_filter& aAnimationFilter, i64 aStepTime)
     {
         if (has_animation(aAnimationFilter))
-            to_animation(aAnimationFilter).start(aStepTime);
+            aAnimationFilter.start(aStepTime);
     }
 
     inline void start_animation(i_ecs& aEcs, animation_filter& aAnimationFilter)
@@ -130,7 +205,7 @@ namespace neogfx::game
     inline void start_animation(animation_filter& aAnimationFilter, i64 aStepTime, patch_ptr const& aPatch)
     {
         if (has_animation(aAnimationFilter))
-            to_animation(aAnimationFilter).start(aStepTime, aPatch);
+            aAnimationFilter.start(aStepTime, aPatch);
     }
 
     inline void start_animation(i_ecs& aEcs, animation_filter& aAnimationFilter, patch_ptr const& aPatch)
@@ -142,13 +217,13 @@ namespace neogfx::game
     inline void stop_animation(animation_filter& aAnimationFilter)
     {
         if (has_animation(aAnimationFilter))
-            to_animation(aAnimationFilter).stop();
+            aAnimationFilter.stop();
     }
 
     inline void stop_animation(animation_filter& aAnimationFilter, patch_ptr const& aPatch)
     {
         if (has_animation(aAnimationFilter))
-            to_animation(aAnimationFilter).stop(aPatch);
+            aAnimationFilter.stop(aPatch);
     }
 
     inline bool has_animation_frames(animation_filter const& aAnimationFilter)
@@ -166,7 +241,7 @@ namespace neogfx::game
     inline mesh_filter const& current_animation_frame(animation_filter const& aAnimationFilter)
     {
         if (has_animation_frames(aAnimationFilter))
-            return to_animation_frames(aAnimationFilter)[to_animation(aAnimationFilter).currentFrame].filter;
+            return to_animation_frames(aAnimationFilter)[aAnimationFilter.frameState.currentFrame].filter;
         throw std::logic_error("neogfx::game::to_animation_frames: no animation frames!");
     }
 
@@ -183,7 +258,7 @@ namespace neogfx::game
     inline mat44f to_transformation_matrix(animation_filter& aAnimationFilter, i64 aStepTime, patch_ptr const& aPatch = mesh_filter_patch)
     {
         if (has_animation(aAnimationFilter))
-            return to_animation(aAnimationFilter)(aStepTime, aPatch);
+            return aAnimationFilter(aStepTime, aPatch);
         return mat44f::identity();
     }
 
