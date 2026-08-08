@@ -368,16 +368,18 @@ namespace neogfx::game
 
         void start(i64 aStepTime, patch_ptr const& aPatch)
         {
-            for (auto& tween : *tweens)
-                if (std::ranges::contains(tween.patches, aPatch))
-                    tween.start(aStepTime);
+            if (tweens)
+                for (auto& tween : *tweens)
+                    if (std::ranges::contains(tween.patches, aPatch))
+                        tween.start(aStepTime);
         }
 
         void stop(patch_ptr const& aPatch)
         {
-            for (auto& tween : *tweens)
-                if (std::ranges::contains(tween.patches, aPatch))
-                    tween.stop();
+            if (tweens)
+                for (auto& tween : *tweens)
+                    if (std::ranges::contains(tween.patches, aPatch))
+                        tween.stop();
         }
 
         mat44f operator()(i64 aStepTime, patch_ptr const& aPatch) const
@@ -387,11 +389,9 @@ namespace neogfx::game
 
             auto result = mat44f::identity();
 
-            auto const elapsed = from_step_time(aStepTime - *startTime);
-
             for (auto const& tween : *tweens)
-                if (std::ranges::contains(tween.patches, aPatch))
-                    result *= tween(elapsed);
+                if (tween.active && tween.startTime && std::ranges::contains(tween.patches, aPatch))
+                    result *= tween(from_step_time(aStepTime - *tween.startTime));
 
             return result;
         }
