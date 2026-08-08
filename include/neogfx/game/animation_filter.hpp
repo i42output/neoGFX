@@ -229,14 +229,18 @@ namespace neogfx::game
         throw std::logic_error("neogfx::game::to_animation: no animation!");
     }
 
-    inline void start_animation(i_ecs& aEcs, animation_filter& aAnimationFilter)
+    inline void start_animation(animation_filter& aAnimationFilter, i64 aStepTime)
     {
         if (has_animation(aAnimationFilter))
         {
-            auto const stepTime = aEcs.system<game::time>().world_time();
-            aAnimationFilter.start_frames(stepTime);
-            aAnimationFilter.start_tweens(stepTime);
+            aAnimationFilter.start_frames(aStepTime);
+            aAnimationFilter.start_tweens(aStepTime);
         }
+    }
+
+    inline void start_animation(i_ecs& aEcs, animation_filter& aAnimationFilter)
+    {
+        start_animation(aAnimationFilter, aEcs.system<game::time>().world_time());
     }
 
     inline void start_frame_animation(animation_filter& aAnimationFilter, i64 aStepTime)
@@ -282,6 +286,12 @@ namespace neogfx::game
     {
         if (has_animation(aAnimationFilter))
             aAnimationFilter.stop_frames();
+    }
+
+    inline void stop_tween_animation(animation_filter& aAnimationFilter)
+    {
+        if (has_animation(aAnimationFilter))
+            aAnimationFilter.stop_tweens();
     }
 
     inline void stop_tween_animation(animation_filter& aAnimationFilter, patch_ptr const& aPatch)

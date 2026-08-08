@@ -107,18 +107,24 @@ namespace neogfx::game
             if (has_animation_frames(filter))
             {
                 auto const& frames = to_animation_frames(filter);
-                auto const currentFrame = filter.frameState.currentFrame % frames.size();
+                auto const previousFrame = static_cast<u32>(filter.frameState.currentFrame % frames.size());
+                auto currentFrame = previousFrame;
                 while (now > *filter.frameState.currentFrameStartTime + to_step_time(frames[currentFrame].duration, worldClock.timestep))
                 {
-                    *filter.frameState.currentFrameStartTime += to_step_time(frames[currentFrame].duration, worldClock.timestep);
-                    filter.frameState.currentFrame = static_cast<u32>((currentFrame + 1u) % frames.size());
-                    if (filter.frameState.currentFrame == 0 && filter.frameState.autoDestroy)
+                    auto const frameDuration = to_step_time(frames[currentFrame].duration, worldClock.timestep);
+                    if (frameDuration == 0)
+                        throw std::runtime_error("neogfx::game::animator: frame duration of zero!");
+                    *filter.frameState.currentFrameStartTime += frameDuration;
+                    currentFrame = static_cast<u32>((currentFrame + 1u) % frames.size());
+                    filter.frameState.currentFrame = currentFrame;
+                    if (currentFrame == 0 && filter.frameState.autoDestroy)
                     {
                         ecs().async_destroy_entity(entity);
                         break;
                     }
-                    set_render_cache_dirty_no_lock(cache, entity);
                 }
+                if (currentFrame != previousFrame)
+                    set_render_cache_dirty_no_lock(cache, entity);
             }
         }
     }
