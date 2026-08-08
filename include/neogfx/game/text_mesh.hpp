@@ -152,7 +152,7 @@ namespace neogfx::game
                             if (!is_whitespace(glyphChar))
                             {
                                 auto const& glyphTexture = multilineGlyphText.glyphText.glyph(glyphChar);
-                                auto& patch = add_patch(*mf.mesh, mr, pos + vec3f{ glyphChar.cell[0] } + quadf{ glyphChar.shape[0], glyphChar.shape[1], glyphChar.shape[2], glyphChar.shape[3] }, glyphTexture.texture());
+                                auto& patch = *add_patch(*mf.mesh, mr, pos + vec3f{ glyphChar.cell[0] } + quadf{ glyphChar.shape[0], glyphChar.shape[1], glyphChar.shape[2], glyphChar.shape[3] }, glyphTexture.texture());
                                 patch.material = material{ aMaterial.color, aMaterial.gradient, aMaterial.sharedTexture, patch.material.texture, aMaterial.shaderEffect };
                             }
                         }

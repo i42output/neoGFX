@@ -261,6 +261,12 @@ namespace neogfx::game
             aAnimationFilter.start_tweens(aStepTime);
     }
 
+    inline void start_tween_animation(i_ecs& aEcs, animation_filter& aAnimationFilter)
+    {
+        if (has_animation(aAnimationFilter))
+            aAnimationFilter.start_tweens(aEcs.system<game::time>().world_time());
+    }
+
     inline void start_tween_animation(animation_filter& aAnimationFilter, i64 aStepTime, patch_ptr const& aPatch)
     {
         if (has_animation(aAnimationFilter))
