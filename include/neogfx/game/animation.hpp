@@ -375,28 +375,28 @@ namespace neogfx::game
         };
     };
 
-    inline animation_tween_ptr translate(animation_tween_ptr aTween, vec3_range const& aRange)
+    inline animation_tween& translate(animation_tween& aTween, vec3_range const& aRange)
     {
-        aTween->translation = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
-        aTween->transformationMatrixFunction = std::nullopt;
+        aTween.translation = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
+        aTween.transformationMatrixFunction = std::nullopt;
         return aTween;
     }
 
-    inline animation_tween_ptr scale(animation_tween_ptr aTween, vec3_range const& aRange)
+    inline animation_tween& scale(animation_tween& aTween, vec3_range const& aRange)
     {
-        aTween->scaling = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
-        aTween->transformationMatrixFunction = std::nullopt;
+        aTween.scaling = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
+        aTween.transformationMatrixFunction = std::nullopt;
         return aTween;
     }
 
-    inline animation_tween_ptr rotate(animation_tween_ptr aTween, vec3_range const& aRange)
+    inline animation_tween& rotate(animation_tween& aTween, vec3_range const& aRange)
     {
-        aTween->rotation = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
-        aTween->transformationMatrixFunction = std::nullopt;
+        aTween.rotation = vec3f_range{ aRange.start.as<float>(), aRange.end.as<float>() };
+        aTween.transformationMatrixFunction = std::nullopt;
         return aTween;
     }
 
-    inline animation_tween_ptr rotate_deg(animation_tween_ptr aTween, vec3_range const& aRange)
+    inline animation_tween& rotate_deg(animation_tween& aTween, vec3_range const& aRange)
     {
         return rotate(aTween, { aRange.start * std::numbers::pi / 180.0, aRange.end * std::numbers::pi / 180.0 });
     }
