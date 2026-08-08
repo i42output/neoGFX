@@ -100,6 +100,8 @@ namespace neogfx::game
             auto& filter = filters.entity_record(entity);
             if (!has_animation(filter))
                 continue;
+            if (!filter.frameState.active)
+                continue;
             if (!filter.frameState.currentFrameStartTime)
                 filter.frameState.currentFrameStartTime = info.creationTime;
             if (has_animation_frames(filter))

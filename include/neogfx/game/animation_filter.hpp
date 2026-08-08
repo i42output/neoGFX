@@ -37,6 +37,17 @@ namespace neogfx::game
         u32 currentFrame = 0u;
         bool autoDestroy = false;
         std::optional<i64> currentFrameStartTime;
+
+        void start()
+        {
+            active = true;
+            currentFrame = 0u;
+        }
+
+        void stop()
+        {
+            active = false;
+        }
     };
 
     // @todo make componenent data (add meta)
@@ -92,33 +103,33 @@ namespace neogfx::game
 
         void start_frames()
         {
-            frameState.active = true;
+            frameState.start();
         }
 
         void stop_frames()
         {
-            frameState.active = false;
+            frameState.stop();
         }
 
-        void start(i64 aStepTime)
+        void start_tweens(i64 aStepTime)
         {
             for (auto& tween : active_tweens())
                 tweenStates[tween].start(aStepTime);
         }
 
-        void stop()
-        {
-            for (auto& tween : active_tweens())
-                tweenStates[tween].stop();
-        }
-
-        void start(i64 aStepTime, patch_ptr const& aPatch)
+        void start_tweens(i64 aStepTime, patch_ptr const& aPatch)
         {
             for (auto& tween : active_tweens(aPatch))
                 tweenStates[tween].start(aStepTime);
         }
 
-        void stop(patch_ptr const& aPatch)
+        void stop_tweens()
+        {
+            for (auto& tween : active_tweens())
+                tweenStates[tween].stop();
+        }
+
+        void stop_tweens(patch_ptr const& aPatch)
         {
             for (auto& tween : active_tweens(aPatch))
                 tweenStates[tween].stop();
@@ -217,40 +228,58 @@ namespace neogfx::game
         throw std::logic_error("neogfx::game::to_animation: no animation!");
     }
 
-    inline void start_animation(animation_filter& aAnimationFilter, i64 aStepTime)
-    {
-        if (has_animation(aAnimationFilter))
-            aAnimationFilter.start(aStepTime);
-    }
-
     inline void start_animation(i_ecs& aEcs, animation_filter& aAnimationFilter)
     {
         if (has_animation(aAnimationFilter))
-            start_animation(aAnimationFilter, aEcs.system<game::time>().world_time());
+        {
+            aAnimationFilter.start_frames();
+            aAnimationFilter.start_tweens(aEcs.system<game::time>().world_time());
+        }
     }
 
-    inline void start_animation(animation_filter& aAnimationFilter, i64 aStepTime, patch_ptr const& aPatch)
+    inline void start_frame_animation(animation_filter& aAnimationFilter)
     {
         if (has_animation(aAnimationFilter))
-            aAnimationFilter.start(aStepTime, aPatch);
+            aAnimationFilter.start_frames();
     }
 
-    inline void start_animation(i_ecs& aEcs, animation_filter& aAnimationFilter, patch_ptr const& aPatch)
+    inline void start_tween_animation(animation_filter& aAnimationFilter, i64 aStepTime)
     {
         if (has_animation(aAnimationFilter))
-            start_animation(aAnimationFilter, aEcs.system<game::time>().world_time(), aPatch);
+            aAnimationFilter.start_tweens(aStepTime);
+    }
+
+    inline void start_tween_animation(animation_filter& aAnimationFilter, i64 aStepTime, patch_ptr const& aPatch)
+    {
+        if (has_animation(aAnimationFilter))
+            aAnimationFilter.start_tweens(aStepTime, aPatch);
+    }
+
+    inline void start_tween_animation(i_ecs& aEcs, animation_filter& aAnimationFilter, patch_ptr const& aPatch)
+    {
+        if (has_animation(aAnimationFilter))
+            start_tween_animation(aAnimationFilter, aEcs.system<game::time>().world_time(), aPatch);
     }
 
     inline void stop_animation(animation_filter& aAnimationFilter)
     {
         if (has_animation(aAnimationFilter))
-            aAnimationFilter.stop();
+        {
+            aAnimationFilter.stop_frames();
+            aAnimationFilter.stop_tweens();
+        }
     }
 
-    inline void stop_animation(animation_filter& aAnimationFilter, patch_ptr const& aPatch)
+    inline void stop_frame_animation(animation_filter& aAnimationFilter)
     {
         if (has_animation(aAnimationFilter))
-            aAnimationFilter.stop(aPatch);
+            aAnimationFilter.stop_frames();
+    }
+
+    inline void stop_tween_animation(animation_filter& aAnimationFilter, patch_ptr const& aPatch)
+    {
+        if (has_animation(aAnimationFilter))
+            aAnimationFilter.stop_tweens(aPatch);
     }
 
     inline bool has_animation_frames(animation_filter const& aAnimationFilter)
