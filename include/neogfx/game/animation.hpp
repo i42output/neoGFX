@@ -171,6 +171,9 @@ namespace neogfx::game
         std::optional<std::array<animation_easing, 3u>> scalingEasings;
         std::optional<std::array<animation_easing, 3u>> rotationEasings;
         tween_cycle cycle = tween_cycle::Loop;
+        bool active = false;
+        std::optional<i64> startTime; // ECS internal
+
         mutable std::optional<std::function<mat44f(vec3f const&, vec3f const&, vec3f const&)>> transformationMatrixFunction;
         function_factory<animation_tween> transformationMatrixFunctionFactory{
             [](animation_tween const& self)
@@ -215,8 +218,19 @@ namespace neogfx::game
                 transformationMatrixFunctionFactory.make(*this);
 
             return transformationMatrixFunction.value()(ease(translationEasings), ease(scalingEasings), ease(rotationEasings));
-
         }
+
+        void start(i64 aStepTime)
+        {
+            active = true;
+            startTime = aStepTime;
+        }
+
+        void stop()
+        {
+            active = false;
+        }
+
         struct meta : i_component_data::meta
         {
             static const neolib::uuid& id()
@@ -231,7 +245,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 11;
+                return 13;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -256,8 +270,12 @@ namespace neogfx::game
                 case 8:
                     return component_data_field_type::Enum | component_data_field_type::Uint32;
                 case 9:
-                    return component_data_field_type::Mat44f | component_data_field_type::Function3Vec3f | component_data_field_type::Optional | component_data_field_type::Cache;
+                    return component_data_field_type::Bool;
                 case 10:
+                    return component_data_field_type::Int64 | component_data_field_type::Internal | component_data_field_type::Optional;
+                case 11:
+                    return component_data_field_type::Mat44f | component_data_field_type::Function3Vec3f | component_data_field_type::Optional | component_data_field_type::Cache;
+                case 12:
                     return component_data_field_type::FunctionFactory;
                 default:
                     throw invalid_field_index();
@@ -289,6 +307,10 @@ namespace neogfx::game
                     return neolib::uuid{};
                 case 10:
                     return neolib::uuid{};
+                case 11:
+                    return neolib::uuid{};
+                case 12:
+                    return neolib::uuid{};
                 default:
                     throw invalid_field_index();
                 }
@@ -306,6 +328,8 @@ namespace neogfx::game
                     "Scaling Easing",
                     "Rotation Easing",
                     "Cycle",
+                    "Active",
+                    "Start Time",
                     "Transformation Matrix",
                     "Transformation Matrix Factory"
                 };
@@ -323,15 +347,37 @@ namespace neogfx::game
         bool active = false;
         std::optional<i64> startTime; // ECS internal
 
-        void start(i64 aStepTime)
+        void start(i64 aStepTime, bool aStartChildren = false)
         {
             active = true;
             startTime = aStepTime;
+
+            if (aStartChildren && tweens)
+                for (auto& tween : *tweens)
+                    tween.start(aStepTime);
         }
 
-        void stop()
+        void stop(bool aStopChildren = false)
         {
             active = false;
+
+            if (aStopChildren && tweens)
+                for (auto& tween : *tweens)
+                    tween.stop();
+        }
+
+        void start(i64 aStepTime, patch_ptr const& aPatch)
+        {
+            for (auto& tween : *tweens)
+                if (std::ranges::contains(tween.patches, aPatch))
+                    tween.start(aStepTime);
+        }
+
+        void stop(patch_ptr const& aPatch)
+        {
+            for (auto& tween : *tweens)
+                if (std::ranges::contains(tween.patches, aPatch))
+                    tween.stop();
         }
 
         mat44f operator()(i64 aStepTime, patch_ptr const& aPatch) const

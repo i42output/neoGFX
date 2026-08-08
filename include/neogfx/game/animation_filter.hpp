@@ -120,6 +120,35 @@ namespace neogfx::game
         start_animation(aAnimationFilter, aEcs.system<game::time>().world_time());
     }
 
+    inline void start_animation(animation_filter& aAnimationFilter, i64 aStepTime, patch_ptr const& aPatch)
+    {
+        if (aAnimationFilter.animation)
+            aAnimationFilter.animation->start(aStepTime, aPatch);
+        else if (aAnimationFilter.sharedAnimation)
+            aAnimationFilter.sharedAnimation->start(aStepTime, aPatch);
+    }
+
+    inline void start_animation(i_ecs& aEcs, animation_filter& aAnimationFilter, patch_ptr const& aPatch)
+    {
+        start_animation(aAnimationFilter, aEcs.system<game::time>().world_time(), aPatch);
+    }
+
+    inline void stop_animation(i_ecs& aEcs, animation_filter& aAnimationFilter)
+    {
+        if (aAnimationFilter.animation)
+            aAnimationFilter.animation->stop();
+        else if (aAnimationFilter.sharedAnimation)
+            aAnimationFilter.sharedAnimation->stop();
+    }
+
+    inline void stop_animation(i_ecs& aEcs, animation_filter& aAnimationFilter, patch_ptr const& aPatch)
+    {
+        if (aAnimationFilter.animation)
+            aAnimationFilter.animation->stop(aPatch);
+        else if (aAnimationFilter.sharedAnimation)
+            aAnimationFilter.sharedAnimation->stop(aPatch);
+    }
+
     inline bool has_animation_frames(animation_filter const& aAnimationFilter)
     {
         return (aAnimationFilter.animation && aAnimationFilter.animation->frames) ||
