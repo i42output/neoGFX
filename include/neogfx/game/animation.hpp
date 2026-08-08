@@ -445,7 +445,7 @@ namespace neogfx::game
 
     inline animation_tween& add_tween(animation& aAnimation, scalar aDuration)
     {
-        return add_tween(aAnimation, aDuration, { patch_ptr{} });
+        return add_tween(aAnimation, aDuration, { mesh_filter_patch });
     }
 
     inline void translate(animation& aAnimation, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
@@ -455,7 +455,7 @@ namespace neogfx::game
 
     inline void translate(animation& aAnimation, scalar aDuration, vec3_range const& aRange)
     {
-        translate(aAnimation, aDuration, { patch_ptr{} }, aRange);
+        translate(aAnimation, aDuration, { mesh_filter_patch }, aRange);
     }
 
     inline void scale(animation& aAnimation, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
@@ -465,7 +465,7 @@ namespace neogfx::game
 
     inline void scale(animation& aAnimation, scalar aDuration, vec3_range const& aRange)
     {
-        scale(aAnimation, aDuration, { patch_ptr{} }, aRange);
+        scale(aAnimation, aDuration, { mesh_filter_patch }, aRange);
     }
 
     inline void rotate(animation& aAnimation, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
@@ -475,7 +475,7 @@ namespace neogfx::game
 
     inline void rotate(animation& aAnimation, scalar aDuration, vec3_range const& aRange)
     {
-        rotate(aAnimation, aDuration, { patch_ptr{} }, aRange);
+        rotate(aAnimation, aDuration, { mesh_filter_patch }, aRange);
     }
 
     inline void rotate_deg(animation& aAnimation, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
@@ -485,6 +485,6 @@ namespace neogfx::game
 
     inline void rotate_deg(animation& aAnimation, scalar aDuration, vec3_range const& aRange)
     {
-        rotate_deg(aAnimation, aDuration, { patch_ptr{} }, aRange);
+        rotate_deg(aAnimation, aDuration, { mesh_filter_patch }, aRange);
     }
 }

@@ -101,4 +101,6 @@ namespace neogfx::game
 
     using patch_ptr = std::shared_ptr<patch>;
     using patches = std::vector<patch_ptr>;
+
+    inline patch_ptr const mesh_filter_patch{};
 }
