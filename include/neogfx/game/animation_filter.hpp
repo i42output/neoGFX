@@ -152,7 +152,7 @@ namespace neogfx::game
         return aAnimationFilter.transformation ? *aAnimationFilter.transformation : mat44f::identity();
     }
 
-    inline mat44f to_transformation_matrix(animation_filter& aAnimationFilter, i64 aStepTime, patch_ptr const& aPatch)
+    inline mat44f to_transformation_matrix(animation_filter& aAnimationFilter, i64 aStepTime, patch_ptr const& aPatch = patch_ptr{})
     {
         if (aAnimationFilter.animation)
             return (*aAnimationFilter.animation)(aStepTime, aPatch);
@@ -161,7 +161,7 @@ namespace neogfx::game
         return mat44f::identity();
     }
 
-    inline mat44f to_transformation_matrix(i_ecs const& aEcs, animation_filter& aAnimationFilter, patch_ptr const& aPatch)
+    inline mat44f to_transformation_matrix(i_ecs const& aEcs, animation_filter& aAnimationFilter, patch_ptr const& aPatch = patch_ptr{})
     {
         return to_transformation_matrix(aAnimationFilter, aEcs.system<game::time>().world_time(), aPatch);
     }
