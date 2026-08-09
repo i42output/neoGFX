@@ -35,7 +35,7 @@ namespace neogfx::game
 {
     animator::animator(game::i_ecs& aEcs) :
         system<animation_filter>{ aEcs },
-        iDefaultClock{ std::make_shared<animation_clock>(ecs().system<game::time>().world_time()) }
+        iDefaultTimer{ std::make_shared<animation_timer>(ecs().system<game::time>().world_time()) }
     {
         Animate.set_trigger_type(neolib::trigger_type::SynchronousDontQueue);
     }
@@ -65,12 +65,12 @@ namespace neogfx::game
 
         update_animations();
 
-        for (auto c = iClocks.begin(); c != iClocks.end();)
+        for (auto timer = iTimers.begin(); timer != iTimers.end();)
         {
-            if (c->expired())
-                c = iClocks.erase(c);
+            if (timer->expired())
+                timer = iTimers.erase(timer);
             else
-                ++c;
+                ++timer;
         }
 
         return true;
@@ -135,27 +135,27 @@ namespace neogfx::game
                     set_render_cache_dirty_no_lock(cache, entity);
             }
             for (auto& tweenState : filter.tweenStates)
-                if (tweenState.second.clock == nullptr)
-                    tweenState.second.clock = default_clock();
+                if (tweenState.second.timer == nullptr)
+                    tweenState.second.timer = default_timer();
             if (has_active_tweens(filter))
                 set_render_cache_dirty_no_lock(cache, entity);
         }
     }
 
-    animation_clock_ptr animator::default_clock()
+    animation_timer_ptr animator::default_timer()
     {
-        return iDefaultClock;
+        return iDefaultTimer;
     }
 
-    animation_clock_ptr animator::create_clock()
+    animation_timer_ptr animator::create_timer()
     {
-        return create_clock(ecs().system<game::time>().world_time());
+        return create_timer(ecs().system<game::time>().world_time());
     }
 
-    animation_clock_ptr animator::create_clock(i64 epoch)
+    animation_timer_ptr animator::create_timer(i64 epoch)
     {
-        auto newClock = std::make_shared<animation_clock>(epoch);
-        iClocks.push_back(newClock);
-        return newClock;
+        auto newTimer = std::make_shared<animation_timer>(epoch);
+        iTimers.push_back(newTimer);
+        return newTimer;
     }
 }

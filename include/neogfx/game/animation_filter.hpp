@@ -32,22 +32,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx::game
 {
     // @todo add meta
-    struct animation_clock
+    struct animation_timer
     {
         i64 epoch = 0;
         i64 lastElapsed = 0;
+        std::optional<i64> duration;    // one-shot when set; nullopt runs indefinitely
         bool paused = false;
+
+        bool complete() const
+        {
+            return duration && lastElapsed >= *duration;
+        }
+
+        bool running() const
+        {
+            return !paused && !complete();
+        }
 
         i64 elapsed(i64 aStepTime)
         {
             if (!paused)
+            {
                 lastElapsed = aStepTime - epoch;
+                if (duration && lastElapsed > *duration)
+                    lastElapsed = *duration;
+            }
             return lastElapsed;
         }
 
         void pause(i64 aStepTime)
         {
-            lastElapsed = aStepTime - epoch;
+            lastElapsed = elapsed(aStepTime);
             paused = true;
         }
 
@@ -56,10 +71,19 @@ namespace neogfx::game
             epoch = aStepTime - lastElapsed;
             paused = false;
         }
+
+        void reset(i64 aStepTime)
+        {
+            epoch = aStepTime;
+            lastElapsed = 0;
+            paused = false;
+        }
     };
 
-    using animation_clock_ptr = std::shared_ptr<animation_clock>;
-    using animation_clock_weak_ptr = std::weak_ptr<animation_clock>;
+    using animation_timer_ptr = std::shared_ptr<animation_timer>;
+
+    using animation_timer_ptr = std::shared_ptr<animation_timer>;
+    using animation_timer_weak_ptr = std::weak_ptr<animation_timer>;
 
     // @todo make componenent data (add meta)
     struct frame_animation_state
@@ -86,7 +110,7 @@ namespace neogfx::game
     struct tween_animation_state
     {
         bool active = false;
-        animation_clock_ptr clock;
+        animation_timer_ptr timer;
 
         void start()
         {
@@ -135,7 +159,7 @@ namespace neogfx::game
         bool any_active_tweens() const
         {
             return std::ranges::any_of(tweenStates, [](auto const& aTweenState)
-                { return aTweenState.second.active && aTweenState.second.clock && !aTweenState.second.clock->paused; });
+                { return aTweenState.second.active && aTweenState.second.timer && aTweenState.second.timer->running(); });
         }
 
         void start_frames(i64 aStepTime)
@@ -180,7 +204,7 @@ namespace neogfx::game
             {
                 auto& tweenState = tweenStates.at(tween);
                 if (tweenState.active)
-                    result *= (*tween)(tweenState.clock ? from_step_time(tweenState.clock->elapsed(aStepTime)) : 0.0);
+                    result *= (*tween)(tweenState.timer ? from_step_time(tweenState.timer->elapsed(aStepTime)) : 0.0);
             }
 
             return result;

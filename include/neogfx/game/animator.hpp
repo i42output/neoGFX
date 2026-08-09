@@ -48,9 +48,9 @@ namespace neogfx::game
         void set_external_animation(bool aExternalAnimation);
         void update_animations();
     public:
-        animation_clock_ptr default_clock();
-        animation_clock_ptr create_clock();
-        animation_clock_ptr create_clock(i64 epoch);
+        animation_timer_ptr default_timer();
+        animation_timer_ptr create_timer();
+        animation_timer_ptr create_timer(i64 epoch);
     public:
         struct meta
         {
@@ -67,7 +67,7 @@ namespace neogfx::game
         };
     private:
         std::atomic<bool> iExternalAnimation = false;
-        animation_clock_ptr iDefaultClock;
-        std::vector<animation_clock_weak_ptr> iClocks;
+        animation_timer_ptr iDefaultTimer;
+        std::vector<animation_timer_weak_ptr> iTimers;
     };
 }   
