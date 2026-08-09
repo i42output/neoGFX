@@ -34,7 +34,8 @@
 namespace neogfx::game
 {
     animator::animator(game::i_ecs& aEcs) :
-        system<animation_filter>{ aEcs }
+        system<animation_filter>{ aEcs },
+        iDefaultClock{ std::make_shared<animation_clock>(ecs().system<game::time>().world_time()) }
     {
         Animate.set_trigger_type(neolib::trigger_type::SynchronousDontQueue);
     }
@@ -63,6 +64,14 @@ namespace neogfx::game
             return false;
 
         update_animations();
+
+        for (auto c = iClocks.begin(); c != iClocks.end();)
+        {
+            if (c->expired())
+                c = iClocks.erase(c);
+            else
+                ++c;
+        }
 
         return true;
     }
@@ -125,8 +134,28 @@ namespace neogfx::game
                 if (currentFrame != previousFrame)
                     set_render_cache_dirty_no_lock(cache, entity);
             }
+            for (auto& tween : filter.asset_tweens())
+                if (tween->clock == nullptr)
+                    tween->clock = default_clock();
             if (has_active_tweens(filter))
                 set_render_cache_dirty_no_lock(cache, entity);
         }
+    }
+
+    animation_clock_ptr animator::default_clock()
+    {
+        return iDefaultClock;
+    }
+
+    animation_clock_ptr animator::create_clock()
+    {
+        return create_clock(ecs().system<game::time>().world_time());
+    }
+
+    animation_clock_ptr animator::create_clock(i64 epoch)
+    {
+        auto newClock = std::make_shared<animation_clock>(epoch);
+        iClocks.push_back(newClock);
+        return newClock;
     }
 }

@@ -56,12 +56,10 @@ namespace neogfx::game
     struct tween_animation_state
     {
         bool active = false;
-        std::optional<i64> startTime;
 
-        void start(i64 aStepTime)
+        void start()
         {
             active = true;
-            startTime = aStepTime;
         }
 
         void stop()
@@ -106,7 +104,7 @@ namespace neogfx::game
         bool any_active_tweens() const
         {
             return std::ranges::any_of(tweenStates, [](auto const& aTweenState)
-                { return aTweenState.second.active && aTweenState.second.startTime.has_value(); });
+                { return aTweenState.second.active && aTweenState.first->clock && !aTweenState.first->clock->paused; });
         }
 
         void start_frames(i64 aStepTime)
@@ -119,16 +117,16 @@ namespace neogfx::game
             frameState.stop();
         }
 
-        void start_tweens(i64 aStepTime)
+        void start_tweens()
         {
             for (auto& tween : active_tweens())
-                tweenStates[tween].start(aStepTime);
+                tweenStates[tween].start();
         }
 
-        void start_tweens(i64 aStepTime, patch_ptr const& aPatch)
+        void start_tweens(patch_ptr const& aPatch)
         {
             for (auto& tween : active_tweens(aPatch))
-                tweenStates[tween].start(aStepTime);
+                tweenStates[tween].start();
         }
 
         void stop_tweens()
@@ -150,8 +148,8 @@ namespace neogfx::game
             for (auto& tween : active_tweens(aPatch))
             {
                 auto& tweenState = tweenStates.at(tween);
-                if (tweenState.active && tweenState.startTime)
-                    result *= (*tween)(from_step_time(aStepTime - *tweenState.startTime));
+                if (tweenState.active)
+                    result *= (*tween)(tween->clock ? from_step_time(tween->clock->elapsed(aStepTime)) : 0.0);
             }
 
             return result;
@@ -241,7 +239,7 @@ namespace neogfx::game
         if (has_animation(aAnimationFilter))
         {
             aAnimationFilter.start_frames(aStepTime);
-            aAnimationFilter.start_tweens(aStepTime);
+            aAnimationFilter.start_tweens();
         }
     }
 
@@ -262,28 +260,16 @@ namespace neogfx::game
             aAnimationFilter.start_frames(aEcs.system<game::time>().world_time());
     }
 
-    inline void start_tween_animation(animation_filter& aAnimationFilter, i64 aStepTime)
+    inline void start_tween_animation(animation_filter& aAnimationFilter)
     {
         if (has_animation(aAnimationFilter))
-            aAnimationFilter.start_tweens(aStepTime);
+            aAnimationFilter.start_tweens();
     }
 
-    inline void start_tween_animation(i_ecs& aEcs, animation_filter& aAnimationFilter)
+    inline void start_tween_animation(animation_filter& aAnimationFilter, patch_ptr const& aPatch)
     {
         if (has_animation(aAnimationFilter))
-            aAnimationFilter.start_tweens(aEcs.system<game::time>().world_time());
-    }
-
-    inline void start_tween_animation(animation_filter& aAnimationFilter, i64 aStepTime, patch_ptr const& aPatch)
-    {
-        if (has_animation(aAnimationFilter))
-            aAnimationFilter.start_tweens(aStepTime, aPatch);
-    }
-
-    inline void start_tween_animation(i_ecs& aEcs, animation_filter& aAnimationFilter, patch_ptr const& aPatch)
-    {
-        if (has_animation(aAnimationFilter))
-            start_tween_animation(aAnimationFilter, aEcs.system<game::time>().world_time(), aPatch);
+            aAnimationFilter.start_tweens(aPatch);
     }
 
     inline void stop_animation(animation_filter& aAnimationFilter)
