@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/game/i_ecs.hpp>
 #include <neogfx/game/time.hpp>
+#include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/animation.hpp>
 
 namespace neogfx::game
@@ -359,43 +360,71 @@ namespace neogfx::game
         return add_tween(aAnimationFilter, aDuration, { mesh_filter_patch });
     }
 
-    inline animation_tween& translate(animation_filter& aAnimationFilter, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
+    inline animation_tween& translate(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange, patches const& aPatches)
     {
         return translate(add_tween(aAnimationFilter, aDuration, aPatches), aRange);
     }
 
     inline animation_tween& translate(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange)
     {
-        return translate(aAnimationFilter, aDuration, { mesh_filter_patch }, aRange);
+        return translate(aAnimationFilter, aDuration, aRange, { mesh_filter_patch });
     }
 
-    inline animation_tween& scale(animation_filter& aAnimationFilter, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
+    inline animation_tween& scale(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange, patches const& aPatches)
     {
         return scale(add_tween(aAnimationFilter, aDuration, aPatches), aRange);
     }
 
     inline animation_tween& scale(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange)
     {
-        return scale(aAnimationFilter, aDuration, { mesh_filter_patch }, aRange);
+        return scale(aAnimationFilter, aDuration, aRange, { mesh_filter_patch });
     }
 
-    inline animation_tween& rotate(animation_filter& aAnimationFilter, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
+    inline animation_tween& rotate(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange, patches const& aPatches)
     {
         return rotate(add_tween(aAnimationFilter, aDuration, aPatches), aRange);
     }
 
     inline animation_tween& rotate(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange)
     {
-        return rotate(aAnimationFilter, aDuration, { mesh_filter_patch }, aRange);
+        return rotate(aAnimationFilter, aDuration, aRange, { mesh_filter_patch });
     }
 
-    inline animation_tween& rotate_deg(animation_filter& aAnimationFilter, scalar aDuration, patches const& aPatches, vec3_range const& aRange)
+    inline animation_tween& rotate_deg(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange, patches const& aPatches)
     {
-        return rotate(aAnimationFilter, aDuration, aPatches, { aRange.start * std::numbers::pi / 180.0, aRange.end * std::numbers::pi / 180.0 });
+        return rotate(aAnimationFilter, aDuration, { aRange.start * std::numbers::pi / 180.0, aRange.end * std::numbers::pi / 180.0 }, aPatches);
     }
 
     inline animation_tween& rotate_deg(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange)
     {
-        return rotate_deg(aAnimationFilter, aDuration, { mesh_filter_patch }, aRange);
+        return rotate_deg(aAnimationFilter, aDuration, aRange, { mesh_filter_patch });
+    }
+
+    inline animation_tween& translate(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange, mesh_renderer const& aMeshRenderer)
+    {
+        auto& tween = translate(aAnimationFilter, aDuration, aRange, { mesh_filter_patch });
+        tween.patches.insert(tween.patches.begin(), aMeshRenderer.patches.begin(), aMeshRenderer.patches.end());
+        return tween;
+    }
+
+    inline animation_tween& scale(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange, mesh_renderer const& aMeshRenderer)
+    {
+        auto& tween = scale(aAnimationFilter, aDuration, aRange, { mesh_filter_patch });
+        tween.patches.insert(tween.patches.begin(), aMeshRenderer.patches.begin(), aMeshRenderer.patches.end());
+        return tween;
+    }
+
+    inline animation_tween& rotate(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange, mesh_renderer const& aMeshRenderer)
+    {
+        auto& tween = rotate(aAnimationFilter, aDuration, aRange, { mesh_filter_patch });
+        tween.patches.insert(tween.patches.begin(), aMeshRenderer.patches.begin(), aMeshRenderer.patches.end());
+        return tween;
+    }
+
+    inline animation_tween& rotate_deg(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange, mesh_renderer const& aMeshRenderer)
+    {
+        auto& tween = rotate_deg(aAnimationFilter, aDuration, aRange, { mesh_filter_patch });
+        tween.patches.insert(tween.patches.begin(), aMeshRenderer.patches.begin(), aMeshRenderer.patches.end());
+        return tween;
     }
 }

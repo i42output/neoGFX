@@ -2059,6 +2059,8 @@ namespace neogfx
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
+        neolib::scoped_pointer ecs{ iEcs, &aEcs };
+
         thread_local std::vector<std::vector<mesh_drawable>> tMeshDrawables;
         thread_local game::scene_layer tMaxLayer = 0;
         thread_local optional_ecs_render_lock tLock;
@@ -2097,24 +2099,24 @@ namespace neogfx
                         tMaxLayer = std::max(tMaxLayer, patch->layer.value());
                 if (tMeshDrawables.size() <= tMaxLayer)
                     tMeshDrawables.resize(tMaxLayer + 1);
+                auto animationFilter = animatedMeshFilters.has_entity_record_no_lock(entity) ?
+                    &animatedMeshFilters.entity_record_no_lock(entity) : nullptr;
                 auto const& meshFilter = meshFilters.has_entity_record_no_lock(entity) ?
                     meshFilters.entity_record_no_lock(entity) :
                     game::current_animation_frame(animatedMeshFilters.entity_record_no_lock(entity));
-                tMeshDrawables[meshRenderer.layer].emplace_back(
-                    origin(),
-                    meshFilter,
-                    meshRenderer,
-                    optional_mat44f{},
-                    entity);
+                if (animationFilter)
+                    tMeshDrawables[meshRenderer.layer].emplace_back(origin(), meshFilter, *animationFilter, meshRenderer, optional_mat44f{}, entity);
+                else
+                    tMeshDrawables[meshRenderer.layer].emplace_back(origin(), meshFilter, meshRenderer, optional_mat44f{}, entity);
                 for (auto const& patch : meshRenderer.patches)
-                    if (patch->layer.has_value() && patch->layer.value() != meshRenderer.layer && 
+                    if (patch->layer.has_value() && patch->layer.value() != meshRenderer.layer &&
                         (tMeshDrawables[patch->layer.value()].empty() || tMeshDrawables[patch->layer.value()].back().entity != entity))
-                        tMeshDrawables[patch->layer.value()].emplace_back(
-                            origin(),
-                            meshFilter,
-                            meshRenderer,
-                            optional_mat44f{},
-                            entity);
+                    {
+                        if (animationFilter)
+                            tMeshDrawables[patch->layer.value()].emplace_back(origin(), meshFilter, *animationFilter, meshRenderer, optional_mat44f{}, entity);
+                        else
+                            tMeshDrawables[patch->layer.value()].emplace_back(origin(), meshFilter, meshRenderer, optional_mat44f{}, entity);
+                    }
                 if (!game::is_render_cache_clean_no_lock(cache, entity))
                 {
                     auto const& rigidBodyTransformation = (rigidBodies.has_entity_record_no_lock(entity) ?
@@ -2743,6 +2745,8 @@ namespace neogfx
 
         auto cache = aVertexProvider.cacheable() ? &aVertexProvider.cache() : nullptr;
 
+        auto const now = (iEcs ? iEcs->system<game::time>().world_time() : 0u);
+
         std::size_t vertexCount = 0;
         std::size_t cachedVertexCount = 0;
         for (auto md = aFirst; md != aLast; ++md)
@@ -2751,7 +2755,7 @@ namespace neogfx
             auto& meshRenderer = *meshDrawable.renderer;
             if (!meshRenderer.render)
                 continue;
-            auto& meshFilter = *meshDrawable.filter;
+            auto& meshFilter = *meshDrawable.meshFilter;
             bool const cached = cache && meshDrawable.entity != null_entity &&
                 game::is_render_cache_valid_no_lock(*cache, meshDrawable.entity);
             auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh);
@@ -2785,7 +2789,7 @@ namespace neogfx
             if (!meshRenderer.render)
                 continue;
 
-            auto& meshFilter = *meshDrawable.filter;
+            auto& meshFilter = *meshDrawable.meshFilter;
             thread_local game::mesh_render_cache ignore;
             ignore = {};
             auto const& meshRenderCache = (cache && meshDrawable.entity != null_entity ? cache->entity_record_no_lock(meshDrawable.entity, true) : ignore);
@@ -2796,15 +2800,32 @@ namespace neogfx
             auto const& material = meshRenderer.material;
             vec4f const defaultColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 
-            auto add_item = [&](vec2u32& cacheIndices, game::scene_layer aItemLayer, auto const& mesh, auto const& material, auto const& faces)
+            auto add_item = [&](vec2u32& cacheIndices, game::scene_layer aItemLayer, auto const& mesh, auto const& patch)
             {
                 if (aItemLayer != aLayer)
                     return false;
 
-                auto const function = material.gradient != std::nullopt && material.gradient->boundingBox ?
+                auto const& itemFaces = (patch == game::mesh_filter_patch ? faces : patch->faces);
+                if (itemFaces.empty())
+                    return false;
+
+                auto const& itemMaterial = (patch == game::mesh_filter_patch ? material : patch->material);
+
+                optional_mat44f itemTransformation;
+                if (meshDrawable.animationFilter)
+                    itemTransformation = (*meshDrawable.animationFilter)(now, patch);
+                if (transformation)
+                {
+                    if (itemTransformation)
+                        itemTransformation = *transformation * *itemTransformation;
+                    else
+                        itemTransformation = transformation;
+                }
+
+                auto const function = itemMaterial.gradient != std::nullopt && itemMaterial.gradient->boundingBox ?
                     vec4f{
-                        material.gradient->boundingBox->min.x, material.gradient->boundingBox->min.y,
-                        material.gradient->boundingBox->max.x, material.gradient->boundingBox->max.y } :
+                        itemMaterial.gradient->boundingBox->min.x, itemMaterial.gradient->boundingBox->min.y,
+                        itemMaterial.gradient->boundingBox->max.x, itemMaterial.gradient->boundingBox->max.y } :
                     meshRenderer.filter != std::nullopt && meshRenderer.filter->boundingBox ?
                         vec4f{
                             meshRenderer.filter->boundingBox->min.x, meshRenderer.filter->boundingBox->min.y,
@@ -2813,9 +2834,9 @@ namespace neogfx
 
                 if (meshRenderCache.state != game::cache_state::Clean)
                 {
-                    if (patch_drawable::has_texture(meshRenderer, material))
+                    if (patch_drawable::has_texture(meshRenderer, itemMaterial))
                     {
-                        auto const& materialTexture = patch_drawable::texture(meshRenderer, material);
+                        auto const& materialTexture = patch_drawable::texture(meshRenderer, itemMaterial);
                         auto nextTextureId = materialTexture.id.cookie();
                         if (uvCalculator == nullptr || textureId == std::nullopt || *textureId != nextTextureId || materialSubtexture != materialTexture.subTexture)
                         {
@@ -2828,7 +2849,7 @@ namespace neogfx
                     else
                         uvCalculator = nullptr;
                     
-                    auto const vertexCount = faces.size() * 3;
+                    auto const vertexCount = itemFaces.size() * 3;
                     auto const currentCachedVertexCount = cacheIndices[1] - cacheIndices[0];
                     auto vertexStartIndex = cacheIndices[0];
                     if (vertexCount != currentCachedVertexCount || meshRenderCache.state == game::cache_state::Invalid)
@@ -2840,12 +2861,12 @@ namespace neogfx
 
                     auto nextIndex = vertexStartIndex;
 
-                    for (auto const& face : faces)
+                    for (auto const& face : itemFaces)
                     {
                         for (auto faceVertexIndex : face)
                         {
-                            auto const& xyz = (transformation? *transformation * mesh.vertices[faceVertexIndex] : mesh.vertices[faceVertexIndex]) + origin;
-                            auto const& rgba = (material.color != std::nullopt ? material.color->rgba : defaultColor);
+                            auto const& xyz = (itemTransformation ? *itemTransformation * mesh.vertices[faceVertexIndex] : mesh.vertices[faceVertexIndex]) + origin;
+                            auto const& rgba = (itemMaterial.color != std::nullopt ? itemMaterial.color->rgba : defaultColor);
                             auto const& uv = (uvCalculator ? (*uvCalculator)(mesh.uv[faceVertexIndex]) : vec2f{});
                             auto const& xyzw = function;
                             if (nextIndex == vertices.size())
@@ -2868,21 +2889,19 @@ namespace neogfx
                     cacheIndices[1] = static_cast<std::uint32_t>(nextIndex);
                 }
 
-                patchDrawable.items.emplace_back(meshDrawable, cacheIndices[0], cacheIndices[1], material, faces);
+                patchDrawable.items.emplace_back(meshDrawable, cacheIndices[0], cacheIndices[1], itemMaterial, itemFaces);
 
                 return true;
             };
 
-            bool addedPrimaryMesh = false;
-            if (!faces.empty())
-                addedPrimaryMesh = add_item(meshRenderCache.meshVertexArrayIndices, meshRenderer.layer, mesh, material, faces);
+            add_item(meshRenderCache.meshVertexArrayIndices, meshRenderer.layer, mesh, game::mesh_filter_patch);
             auto const patchCount = meshRenderer.patches.size();
             meshRenderCache.patchVertexArrayIndices.resize(patchCount);
             bool outstandingPatches = false;
             for (std::size_t patchIndex = 0; patchIndex < patchCount; ++patchIndex)
             {
-                auto& patch = meshRenderer.patches[patchIndex];
-                add_item(meshRenderCache.patchVertexArrayIndices[patchIndex], patch->layer.value_or(meshRenderer.layer), mesh, patch->material, patch->faces);
+                auto patch = meshRenderer.patches[patchIndex];
+                add_item(meshRenderCache.patchVertexArrayIndices[patchIndex], patch->layer.value_or(meshRenderer.layer), mesh, patch);
                 if (patch->layer.has_value() && patch->layer.value() > aLayer)
                     outstandingPatches = true;
             }

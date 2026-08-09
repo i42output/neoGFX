@@ -158,20 +158,37 @@ namespace neogfx
         struct mesh_drawable
         {
             point origin;
-            game::mesh_filter const* filter;
+            game::mesh_filter const* meshFilter;
+            game::animation_filter const* animationFilter;
             game::mesh_renderer const* renderer;
             optional_mat44f transformation;
             game::entity_id entity;
             bool debug = false;
             mesh_drawable(
                 point const& origin,
-                game::mesh_filter const& filter,
+                game::mesh_filter const& meshFilter,
                 game::mesh_renderer const& renderer,
                 optional_mat44f const& transformation = {},
                 game::entity_id entity = game::null_entity
             ) :
                 origin{ origin },
-                filter{ &filter },
+                meshFilter{ &meshFilter },
+                animationFilter{ nullptr },
+                renderer{ &renderer },
+                transformation{ transformation },
+                entity{ entity }
+            {}
+            mesh_drawable(
+                point const& origin,
+                game::mesh_filter const& meshFilter,
+                game::animation_filter const& animationFilter,
+                game::mesh_renderer const& renderer,
+                optional_mat44f const& transformation = {},
+                game::entity_id entity = game::null_entity
+            ) :
+                origin{ origin },
+                meshFilter{ &meshFilter },
+                animationFilter{ &animationFilter },
                 renderer{ &renderer },
                 transformation{ transformation },
                 entity{ entity }
@@ -415,6 +432,7 @@ namespace neogfx
         bool iSnapToPixel;
         bool iSnapToPixelUsesOffset;
         std::optional<gradient> iGradient;
+        game::i_ecs* iEcs = nullptr;
         use_shader_program iUseDefaultShaderProgram; // must be last
     };
 }
