@@ -31,6 +31,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::game
 {
+    // @todo add meta
+    struct animation_clock
+    {
+        i64 epoch = 0;
+        i64 lastElapsed = 0;
+        bool paused = false;
+
+        i64 elapsed(i64 aStepTime)
+        {
+            if (!paused)
+                lastElapsed = aStepTime - epoch;
+            return lastElapsed;
+        }
+
+        void pause(i64 aStepTime)
+        {
+            lastElapsed = aStepTime - epoch;
+            paused = true;
+        }
+
+        void resume(i64 aStepTime)
+        {
+            epoch = aStepTime - lastElapsed;
+            paused = false;
+        }
+    };
+
+    using animation_clock_ptr = std::shared_ptr<animation_clock>;
+    using animation_clock_weak_ptr = std::weak_ptr<animation_clock>;
+
     // @todo make componenent data (add meta)
     struct frame_animation_state
     {
@@ -56,6 +86,7 @@ namespace neogfx::game
     struct tween_animation_state
     {
         bool active = false;
+        animation_clock_ptr clock;
 
         void start()
         {
@@ -104,7 +135,7 @@ namespace neogfx::game
         bool any_active_tweens() const
         {
             return std::ranges::any_of(tweenStates, [](auto const& aTweenState)
-                { return aTweenState.second.active && aTweenState.first->clock && !aTweenState.first->clock->paused; });
+                { return aTweenState.second.active && aTweenState.second.clock && !aTweenState.second.clock->paused; });
         }
 
         void start_frames(i64 aStepTime)
@@ -149,7 +180,7 @@ namespace neogfx::game
             {
                 auto& tweenState = tweenStates.at(tween);
                 if (tweenState.active)
-                    result *= (*tween)(tween->clock ? from_step_time(tween->clock->elapsed(aStepTime)) : 0.0);
+                    result *= (*tween)(tweenState.clock ? from_step_time(tweenState.clock->elapsed(aStepTime)) : 0.0);
             }
 
             return result;

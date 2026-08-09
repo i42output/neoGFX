@@ -134,9 +134,9 @@ namespace neogfx::game
                 if (currentFrame != previousFrame)
                     set_render_cache_dirty_no_lock(cache, entity);
             }
-            for (auto& tween : filter.asset_tweens())
-                if (tween->clock == nullptr)
-                    tween->clock = default_clock();
+            for (auto& tweenState : filter.tweenStates)
+                if (tweenState.second.clock == nullptr)
+                    tweenState.second.clock = default_clock();
             if (has_active_tweens(filter))
                 set_render_cache_dirty_no_lock(cache, entity);
         }

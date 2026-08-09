@@ -38,36 +38,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::game
 {
-    // @todo add meta
-    struct animation_clock
-    {
-        i64 epoch = 0;
-        i64 lastElapsed = 0;
-        bool paused = false;
-
-        i64 elapsed(i64 aStepTime)
-        {
-            if (!paused)
-                lastElapsed = aStepTime - epoch;
-            return lastElapsed;
-        }
-
-        void pause(i64 aStepTime)
-        {
-            lastElapsed = aStepTime - epoch;
-            paused = true;
-        }
-
-        void resume(i64 aStepTime)
-        {
-            epoch = aStepTime - lastElapsed;
-            paused = false;
-        }
-    };
-
-    using animation_clock_ptr = std::shared_ptr<animation_clock>;
-    using animation_clock_weak_ptr = std::weak_ptr<animation_clock>;
-
     struct animation_frame
     {
         scalar duration;
@@ -194,7 +164,6 @@ namespace neogfx::game
     {
         scalar duration;
         game::patches patches;
-        animation_clock_ptr clock;
         vec3f_range translation{ { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
         vec3f_range scaling{ { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f } };
         vec3f_range rotation{ { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
@@ -263,7 +232,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 12;
+                return 11;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -274,24 +243,22 @@ namespace neogfx::game
                 case 1:
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::SharedPointer;
                 case 2:
-                    return component_data_field_type::ComponentData | component_data_field_type::SharedPointer;
+                    return component_data_field_type::Vec3f | component_data_field_type::Range;
                 case 3:
                     return component_data_field_type::Vec3f | component_data_field_type::Range;
                 case 4:
                     return component_data_field_type::Vec3f | component_data_field_type::Range;
                 case 5:
-                    return component_data_field_type::Vec3f | component_data_field_type::Range;
+                    return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 6:
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 7:
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 8:
-                    return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
-                case 9:
                     return component_data_field_type::Enum | component_data_field_type::Uint32;
-                case 10:
+                case 9:
                     return component_data_field_type::Mat44f | component_data_field_type::Function3Vec3f | component_data_field_type::Optional | component_data_field_type::Cache;
-                case 11:
+                case 10:
                     return component_data_field_type::FunctionFactory;
                 default:
                     throw invalid_field_index();
@@ -322,8 +289,6 @@ namespace neogfx::game
                 case 9:
                     return neolib::uuid{};
                 case 10:
-                    return neolib::uuid{};
-                case 11:
                     return neolib::uuid{};
                 default:
                     throw invalid_field_index();
