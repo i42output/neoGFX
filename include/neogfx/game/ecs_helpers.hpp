@@ -368,4 +368,38 @@ namespace neogfx
         patch->material.texture = to_ecs_component(aTexture);
         return patch;
     }
+
+    struct patch_info
+    {
+        rect geometry;
+        neogfx::texture texture;
+        std::optional<i32> layer;
+        std::optional<vec3f> origin;
+        mat33f textureTransform = mat33f::identity();
+        vec3f offset = {};
+        bool ignore = false;
+    };
+
+    inline game::patch_ptr add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, patch_info const& aInfo)
+    {
+        auto const vertexStart = aMesh.vertices.size();
+        auto patch = add_patch(aMesh, aMeshRenderer, aInfo.geometry, aInfo.texture, aInfo.textureTransform);
+        patch->layer = aInfo.layer;
+        patch->origin = aInfo.origin;
+        for (auto v = std::next(aMesh.vertices.begin(), vertexStart); v != aMesh.vertices.end(); ++v)
+            *v += aInfo.offset;
+        return patch;
+    }
+
+    inline patch_info const no_patch{ .ignore = true };
+
+    inline game::patches add_patches(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, std::initializer_list<patch_info> aInfos)
+    {
+        game::patches result;
+        result.reserve(aInfos.size());
+        for (auto const& info : aInfos)
+            if (!info.ignore)
+                result.push_back(add_patch(aMesh, aMeshRenderer, info));
+        return result;
+    }
 }

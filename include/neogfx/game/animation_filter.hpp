@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/i_ecs.hpp>
 #include <neogfx/game/time.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
+#include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/animation.hpp>
 
 namespace neogfx::game
@@ -479,5 +480,49 @@ namespace neogfx::game
     inline animation_tween& rotate_deg(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange, mesh_renderer const& aMeshRenderer)
     {
         return rotate_deg(aAnimationFilter, aDuration, aRange, all_patches(aMeshRenderer));
+    }
+
+    enum class tween_type : std::uint32_t { Translate, Scale, Rotate, RotateDeg };
+
+    struct tween_info
+    {
+        tween_type type;
+        scalar duration;
+        vec3_range range;
+        game::patches patches;
+        tween_cycle cycle = tween_cycle::Loop;
+        std::optional<vec3f> pivot;
+    };
+
+    inline animation_tween& add_tween(animation_filter& aAnimationFilter, tween_info const& aInfo)
+    {
+        auto& tween = [&]() -> animation_tween&
+            {
+                switch (aInfo.type)
+                {
+                case tween_type::Translate:
+                    return translate(aAnimationFilter, aInfo.duration, aInfo.range, aInfo.patches);
+                case tween_type::Scale:
+                    return scale(aAnimationFilter, aInfo.duration, aInfo.range, aInfo.patches);
+                case tween_type::Rotate:
+                    return rotate(aAnimationFilter, aInfo.duration, aInfo.range, aInfo.patches);
+                case tween_type::RotateDeg:
+                    return rotate_deg(aAnimationFilter, aInfo.duration, aInfo.range, aInfo.patches);
+                default:
+                    throw std::logic_error("neogfx::game::add_tween: unknown tween type");
+                }
+            }();
+        tween.cycle = aInfo.cycle;
+        tween.pivot = aInfo.pivot;
+        return tween;
+    }
+
+    template <std::size_t N>
+    inline std::array<animation_tween*, N> add_tweens(animation_filter& aAnimationFilter, std::array<tween_info, N> const& aInfos)
+    {
+        std::array<animation_tween*, N> result;
+        for (std::size_t i = 0; i < N; ++i)
+            result[i] = &add_tween(aAnimationFilter, aInfos[i]);
+        return result;
     }
 }
