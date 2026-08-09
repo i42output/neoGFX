@@ -164,6 +164,7 @@ namespace neogfx::game
     {
         scalar duration;
         game::patches patches;
+        std::optional<vec3f> pivot;
         vec3f_range translation{ { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
         vec3f_range scaling{ { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f } };
         vec3f_range rotation{ { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
@@ -215,7 +216,18 @@ namespace neogfx::game
             if (!transformationMatrixFunction)
                 transformationMatrixFunctionFactory.make(*this);
 
-            return transformationMatrixFunction.value()(ease(translationEasings), ease(scalingEasings), ease(rotationEasings));
+            auto result = transformationMatrixFunction.value()(ease(translationEasings), ease(scalingEasings), ease(rotationEasings));
+
+            if (pivot)
+            {
+                auto preTranslate = mat44f::identity();
+                apply_translation(preTranslate, *pivot);
+                auto postTranslate = mat44f::identity();
+                apply_translation(postTranslate, -*pivot);
+                result = preTranslate * result * postTranslate;
+            }
+
+            return result;
         }
 
         struct meta : i_component_data::meta
@@ -232,7 +244,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 11;
+                return 12;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -243,22 +255,24 @@ namespace neogfx::game
                 case 1:
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::SharedPointer;
                 case 2:
-                    return component_data_field_type::Vec3f | component_data_field_type::Range;
+                    return component_data_field_type::Vec3f | component_data_field_type::Optional;
                 case 3:
                     return component_data_field_type::Vec3f | component_data_field_type::Range;
                 case 4:
                     return component_data_field_type::Vec3f | component_data_field_type::Range;
                 case 5:
-                    return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
+                    return component_data_field_type::Vec3f | component_data_field_type::Range;
                 case 6:
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 7:
                     return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 8:
-                    return component_data_field_type::Enum | component_data_field_type::Uint32;
+                    return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 case 9:
-                    return component_data_field_type::Mat44f | component_data_field_type::Function3Vec3f | component_data_field_type::Optional | component_data_field_type::Cache;
+                    return component_data_field_type::Enum | component_data_field_type::Uint32;
                 case 10:
+                    return component_data_field_type::Mat44f | component_data_field_type::Function3Vec3f | component_data_field_type::Optional | component_data_field_type::Cache;
+                case 11:
                     return component_data_field_type::FunctionFactory;
                 default:
                     throw invalid_field_index();
@@ -279,16 +293,18 @@ namespace neogfx::game
                 case 4:
                     return neolib::uuid{};
                 case 5:
-                    return animation_easing::meta::id();
+                    return neolib::uuid{};
                 case 6:
                     return animation_easing::meta::id();
                 case 7:
                     return animation_easing::meta::id();
                 case 8:
-                    return neolib::uuid{};
+                    return animation_easing::meta::id();
                 case 9:
                     return neolib::uuid{};
                 case 10:
+                    return neolib::uuid{};
+                case 11:
                     return neolib::uuid{};
                 default:
                     throw invalid_field_index();
@@ -300,7 +316,7 @@ namespace neogfx::game
                 {
                     "Duration",
                     "Patches",
-                    "Clock",
+                    "Pivot",
                     "Translation",
                     "Scaling",
                     "Rotation",
