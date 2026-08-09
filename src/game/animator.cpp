@@ -79,7 +79,7 @@ namespace neogfx::game
 
     void animator::update_animations()
     {
-        thread_local auto const& time = ecs().system<game::time>();
+        auto const& time = ecs().system<game::time>();
         auto now = time.world_time();
 
         scoped_component_data_lock<animation_filter> lock{ ecs() };
@@ -100,12 +100,11 @@ namespace neogfx::game
             auto& filter = filters.entity_record(entity);
             if (!has_animation(filter))
                 continue;
-            if (!filter.frameState.active)
-                continue;
-            if (!filter.frameState.currentFrameStartTime)
-                filter.frameState.currentFrameStartTime = info.creationTime;
-            if (has_animation_frames(filter))
+            if (filter.frameState.active && has_animation_frames(filter))
             {
+                if (!filter.frameState.currentFrameStartTime)
+                    filter.frameState.currentFrameStartTime = info.creationTime;
+
                 auto const& frames = to_animation_frames(filter);
                 auto const previousFrame = static_cast<u32>(filter.frameState.currentFrame % frames.size());
                 auto currentFrame = previousFrame;
@@ -126,6 +125,8 @@ namespace neogfx::game
                 if (currentFrame != previousFrame)
                     set_render_cache_dirty_no_lock(cache, entity);
             }
+            if (has_active_tweens(filter))
+                set_render_cache_dirty_no_lock(cache, entity);
         }
     }
 }

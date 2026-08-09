@@ -2060,6 +2060,10 @@ namespace neogfx
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         neolib::scoped_pointer ecs{ iEcs, &aEcs };
+        thread_local game::step_time tStepTime = 0;
+        if (aLayer == 0)
+            tStepTime = aEcs.system<game::time>().world_time();
+        neolib::scoped_object stepTime{ iStepTime, tStepTime };
 
         thread_local std::vector<std::vector<mesh_drawable>> tMeshDrawables;
         thread_local game::scene_layer tMaxLayer = 0;
@@ -2745,8 +2749,6 @@ namespace neogfx
 
         auto cache = aVertexProvider.cacheable() ? &aVertexProvider.cache() : nullptr;
 
-        auto const now = (iEcs ? iEcs->system<game::time>().world_time() : 0u);
-
         std::size_t vertexCount = 0;
         std::size_t cachedVertexCount = 0;
         for (auto md = aFirst; md != aLast; ++md)
@@ -2813,7 +2815,7 @@ namespace neogfx
 
                 optional_mat44f itemTransformation;
                 if (meshDrawable.animationFilter)
-                    itemTransformation = (*meshDrawable.animationFilter)(now, patch);
+                    itemTransformation = (*meshDrawable.animationFilter)(iStepTime, patch);
                 if (transformation)
                 {
                     if (itemTransformation)
@@ -2900,13 +2902,14 @@ namespace neogfx
             bool outstandingPatches = false;
             for (std::size_t patchIndex = 0; patchIndex < patchCount; ++patchIndex)
             {
-                auto patch = meshRenderer.patches[patchIndex];
+                auto& patch = meshRenderer.patches[patchIndex];
                 add_item(meshRenderCache.patchVertexArrayIndices[patchIndex], patch->layer.value_or(meshRenderer.layer), mesh, patch);
                 if (patch->layer.has_value() && patch->layer.value() > aLayer)
                     outstandingPatches = true;
             }
-            if (cache && !outstandingPatches)
-                meshRenderCache.state = game::cache_state::Clean;
+            if (cache && !outstandingPatches &&
+                (meshDrawable.animationFilter == nullptr || !meshDrawable.animationFilter->any_active_tweens()))
+                meshRenderCache.state = game::cache_state::Clean;        
         }
 
         draw_patch(patchDrawable, aTransformation);

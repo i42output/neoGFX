@@ -103,6 +103,12 @@ namespace neogfx::game
                 { return std::ranges::contains(aTween->patches, aPatch); });
         }
 
+        bool any_active_tweens() const
+        {
+            return std::ranges::any_of(tweenStates, [](auto const& aTweenState)
+                { return aTweenState.second.active && aTweenState.second.startTime.has_value(); });
+        }
+
         void start_frames(i64 aStepTime)
         {
             frameState.start(aStepTime);
@@ -331,6 +337,11 @@ namespace neogfx::game
         return has_animation(aAnimationFilter) && to_animation(aAnimationFilter).tweens;
     }
 
+    inline bool has_active_tweens(animation_filter const& aAnimationFilter)
+    {
+        return aAnimationFilter.any_active_tweens();
+    }
+
     inline mat44f const& to_transformation_matrix(animation_filter const& aAnimationFilter)
     {
         return aAnimationFilter.transformation ? *aAnimationFilter.transformation : mat44f::identity();
@@ -400,31 +411,32 @@ namespace neogfx::game
         return rotate_deg(aAnimationFilter, aDuration, aRange, { mesh_filter_patch });
     }
 
+    inline patches all_patches(mesh_renderer const& aMeshRenderer)
+    {
+        patches allPatches;
+        allPatches.reserve(aMeshRenderer.patches.size() + 1u);
+        allPatches.push_back(mesh_filter_patch);
+        allPatches.insert(allPatches.end(), aMeshRenderer.patches.begin(), aMeshRenderer.patches.end());
+        return allPatches;
+    }
+
     inline animation_tween& translate(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange, mesh_renderer const& aMeshRenderer)
     {
-        auto& tween = translate(aAnimationFilter, aDuration, aRange, { mesh_filter_patch });
-        tween.patches.insert(tween.patches.begin(), aMeshRenderer.patches.begin(), aMeshRenderer.patches.end());
-        return tween;
+        return translate(aAnimationFilter, aDuration, aRange, all_patches(aMeshRenderer));
     }
 
     inline animation_tween& scale(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange, mesh_renderer const& aMeshRenderer)
     {
-        auto& tween = scale(aAnimationFilter, aDuration, aRange, { mesh_filter_patch });
-        tween.patches.insert(tween.patches.begin(), aMeshRenderer.patches.begin(), aMeshRenderer.patches.end());
-        return tween;
+        return scale(aAnimationFilter, aDuration, aRange, all_patches(aMeshRenderer));
     }
 
     inline animation_tween& rotate(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange, mesh_renderer const& aMeshRenderer)
     {
-        auto& tween = rotate(aAnimationFilter, aDuration, aRange, { mesh_filter_patch });
-        tween.patches.insert(tween.patches.begin(), aMeshRenderer.patches.begin(), aMeshRenderer.patches.end());
-        return tween;
+        return rotate(aAnimationFilter, aDuration, aRange, all_patches(aMeshRenderer));
     }
 
     inline animation_tween& rotate_deg(animation_filter& aAnimationFilter, scalar aDuration, vec3_range const& aRange, mesh_renderer const& aMeshRenderer)
     {
-        auto& tween = rotate_deg(aAnimationFilter, aDuration, aRange, { mesh_filter_patch });
-        tween.patches.insert(tween.patches.begin(), aMeshRenderer.patches.begin(), aMeshRenderer.patches.end());
-        return tween;
+        return rotate_deg(aAnimationFilter, aDuration, aRange, all_patches(aMeshRenderer));
     }
 }

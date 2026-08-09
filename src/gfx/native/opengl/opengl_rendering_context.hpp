@@ -433,6 +433,7 @@ namespace neogfx
         bool iSnapToPixelUsesOffset;
         std::optional<gradient> iGradient;
         game::i_ecs* iEcs = nullptr;
+        i64 iStepTime = 0;
         use_shader_program iUseDefaultShaderProgram; // must be last
     };
 }
