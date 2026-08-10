@@ -22,7 +22,6 @@
 
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
-#include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>
 #include <neogfx/game/component.hpp>
 #include <neogfx/game/entity.hpp>
@@ -166,7 +165,7 @@ namespace neogfx::game
                             }
                             else if (!aEffect)
                             {
-                                auto const& emojiAtlas = service<i_rendering_engine>().font_manager().emoji_atlas();
+                                auto const& emojiAtlas = service<i_font_manager>().emoji_atlas();
                                 auto const& emojiTexture = emojiAtlas.emoji_texture(glyphChar.value).as_sub_texture();
                                 auto& patch = *add_patch(*mf.mesh, mr, pos + vec3f{ glyphChar.cell[0] } + quadf{ glyphChar.shape[0], glyphChar.shape[1], glyphChar.shape[2], glyphChar.shape[3] }, emojiTexture);
                                 patch.material = material{ 
