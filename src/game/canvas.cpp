@@ -254,6 +254,7 @@ namespace neogfx::game
                     {
                         if (!layer_visible(layer))
                             continue;
+                        aGc.clear_depth_buffer();
                         RenderingEntities(aGc, layer);
                         aGc.draw_entities(ecs(), layer);
                         EntitiesRendered(aGc, layer);

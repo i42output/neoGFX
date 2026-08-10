@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/material.hpp>
 #include <neogfx/game/filter.hpp>
 #include <neogfx/game/patch.hpp>
-
+    
 namespace neogfx::game
 {
     struct mesh_renderer
@@ -38,6 +38,7 @@ namespace neogfx::game
         game::patches patches;
         bool render = true;
         i32 layer = 0;
+        bool depthTest = true;
         std::optional<game::filter> filter;
         bool barrier = false;
 
@@ -55,7 +56,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 6;
+                return 7;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -70,8 +71,10 @@ namespace neogfx::game
                 case 3:
                     return component_data_field_type::Int32;
                 case 4:
-                    return component_data_field_type::ComponentData | component_data_field_type::Optional;
+                    return component_data_field_type::Bool;
                 case 5:
+                    return component_data_field_type::ComponentData | component_data_field_type::Optional;
+                case 6:
                     return component_data_field_type::Bool;
                 default:
                     throw invalid_field_index();
@@ -90,8 +93,10 @@ namespace neogfx::game
                 case 3:
                     return neolib::uuid{};
                 case 4:
-                    return filter::meta::id();
+                    return neolib::uuid{};
                 case 5:
+                    return filter::meta::id();
+                case 6:
                     return neolib::uuid{};
                 default:
                     throw invalid_field_index();
@@ -105,6 +110,7 @@ namespace neogfx::game
                     "Patches",
                     "Render",
                     "Layer",
+                    "Depth Test",
                     "Filter",
                     "Barrier"
                 };

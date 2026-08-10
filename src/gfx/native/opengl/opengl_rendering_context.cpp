@@ -2097,6 +2097,7 @@ namespace neogfx
                 if (info.destroyed)
                     continue;
                 auto const& meshRenderer = meshRenderers.entity_record_no_lock(entity);
+                // @todo use mesh_renderer::depthTest
                 tMaxLayer = std::max(tMaxLayer, meshRenderer.layer);
                 for (auto const& patch : meshRenderer.patches)
                     if (patch->layer.has_value())
@@ -2600,6 +2601,7 @@ namespace neogfx
                                         {},
                                         true,
                                         0,
+                                        true,
                                         {}, subpixelRender });
                             }
                             continue;
@@ -2633,6 +2635,7 @@ namespace neogfx
                                 {},
                                 true,
                                 0,
+                                true,
                                 {}, subpixelRender });
                     }
                 }
@@ -2721,7 +2724,7 @@ namespace neogfx
 
     void opengl_rendering_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation, const std::optional<game::filter>& aFilter)
     {
-        draw_mesh(game::mesh_filter{ { aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {}, true, 0, aFilter }, aTransformation);
+        draw_mesh(game::mesh_filter{ { aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {}, true, 0, true, aFilter }, aTransformation);
     }
     
     void opengl_rendering_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation)
@@ -2741,6 +2744,8 @@ namespace neogfx
 
     void opengl_rendering_context::draw_meshes(optional_ecs_render_lock& aLock, i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)
     {
+        auto const defaultDecalOffset = 1e-5f;
+
         auto const logicalCoordinates = logical_coordinates();
 
         thread_local patch_drawable patchDrawable = {};
@@ -2867,7 +2872,12 @@ namespace neogfx
                     {
                         for (auto faceVertexIndex : face)
                         {
-                            auto const& xyz = (itemTransformation ? *itemTransformation * mesh.vertices[faceVertexIndex] : mesh.vertices[faceVertexIndex]) + origin;
+                            auto v = mesh.vertices[faceVertexIndex];
+                            // @todo make decal offset behaviour configurable
+                            if (patch != game::mesh_filter_patch && aItemLayer == meshRenderer.layer && v.z == 0.0)
+                                v.z = defaultDecalOffset;
+
+                            auto const& xyz = (itemTransformation ? *itemTransformation * v : v) + origin;
                             auto const& rgba = (itemMaterial.color != std::nullopt ? itemMaterial.color->rgba : defaultColor);
                             auto const& uv = (uvCalculator ? (*uvCalculator)(mesh.uv[faceVertexIndex]) : vec2f{});
                             auto const& xyzw = function;
@@ -2929,6 +2939,8 @@ namespace neogfx
 
         i_texture const* previousTexture = nullptr;
 
+        bool const depthTestEnabled = glIsEnabled(GL_DEPTH_TEST); // @todo move to API
+
         for (auto item = aPatch.items.begin(); item != aPatch.items.end();)
         {
             auto& vertexBuffer = static_cast<opengl_vertex_buffer<>&>(service<i_rendering_engine>().vertex_buffer(*aPatch.provider));
@@ -2968,10 +2980,19 @@ namespace neogfx
             while (next != aPatch.items.end() &&
                 std::prev(next)->vertexArrayIndexEnd == next->vertexArrayIndexStart &&
                 game::batchable(*item->material, *next->material) && 
-                sampling == calc_sampling(*next))
+                sampling == calc_sampling(*next) &&
+                item->meshDrawable->renderer->depthTest == next->meshDrawable->renderer->depthTest)
             {   
                 faceCount += next->faces->size();
                 ++next;
+            }
+
+            if (depthTestEnabled)
+            {
+                if (!item->meshDrawable->renderer->depthTest)
+                    glCheck(glDisable(GL_DEPTH_TEST))
+                else
+                    glCheck(glEnable(GL_DEPTH_TEST))
             }
 
             if (item->material->gradient)
@@ -3045,6 +3066,9 @@ namespace neogfx
 
         if (previousTexture != nullptr)
             previousTexture->unbind();
+
+        if (depthTestEnabled)
+            glCheck(glEnable(GL_DEPTH_TEST))
     }
 
     void opengl_rendering_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect)
