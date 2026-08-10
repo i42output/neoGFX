@@ -1150,8 +1150,14 @@ namespace neogfx
 
     void opengl_rendering_context::clear_depth_buffer()
     {
+        GLboolean depthMask;
+        glCheck(glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask));
+        if (!depthMask)
+            glCheck(glDepthMask(GL_TRUE));
         glCheck(glClearDepth(1.0));
         glCheck(glClear(GL_DEPTH_BUFFER_BIT));
+        if (!depthMask)
+            glCheck(glDepthMask(GL_FALSE));
     }
 
     void opengl_rendering_context::clear_stencil_buffer()
