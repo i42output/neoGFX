@@ -47,6 +47,7 @@ namespace neogfx::game
         text_effect_type textEffect;
         game::material textEffectMaterial;
         float textEffectWidth;
+        bool renderToPatch = false;
 
         struct meta : i_component_data::meta
         {
@@ -62,7 +63,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 10;
+                return 11;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -88,6 +89,8 @@ namespace neogfx::game
                     return component_data_field_type::ComponentData;
                 case 9:
                     return component_data_field_type::Float32;
+                case 10:
+                    return component_data_field_type::Bool;
                 default:
                     throw invalid_field_index();
                 }
@@ -103,6 +106,7 @@ namespace neogfx::game
                 case 4:
                 case 7:
                 case 9:
+                case 10:
                     return neolib::uuid{};
                 case 5:
                     return font::meta::id();
@@ -126,7 +130,8 @@ namespace neogfx::game
                     "Material",
                     "Text Effect",
                     "Text Effect Material",
-                    "Text Effect Width"
+                    "Text Effect Width",
+                    "Render To Patch"
                 };
                 return sFieldNames[aFieldIndex];
             }

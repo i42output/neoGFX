@@ -71,7 +71,7 @@ namespace neogfx::game
         mr.patches = patches{};
         neogfx::font font = service<i_font_manager>().font_from_id(aData.font->id.cookie());
         auto multilineGlyphText = aGc.to_multiline_glyph_text(aData.text, font, aData.extents.x, aData.alignment);
-        if (aData.textEffect == text_effect_type::None)
+        if (aData.textEffect == text_effect_type::None && !aData.renderToPatch)
         {
             for (auto const& line : multilineGlyphText.lines)
             {
@@ -109,7 +109,7 @@ namespace neogfx::game
                 }
             }
         }
-        else // aData.textEffect != text_effect_type::None
+        else // aData.textEffect != text_effect_type::None || aData.renderToPatch 
         {
             size extents{ multilineGlyphText.bbox[2] - multilineGlyphText.bbox[0] };
 
@@ -135,7 +135,7 @@ namespace neogfx::game
             text_format const textFormat{
                 ink,
                 text_effect{
-                        aData.textEffect,
+                    aData.textEffect,
                     effectInk,
                     aData.textEffectWidth } };
 
