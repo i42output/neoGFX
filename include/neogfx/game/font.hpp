@@ -87,9 +87,12 @@ namespace neogfx::game
             static constexpr bool has_updater = true;
             static void update(font& aData, i_ecs&, entity_id)
             {
-                neogfx::font_info fontInfo{ aData.familyName, aData.styleName, aData.pointSize };
-                fontInfo.set_underline(aData.underline);
-                aData.id = neolib::small_cookie_ref_ptr{ service<i_font_manager>(), neogfx::font{ fontInfo }.id() };
+                if (aData.id == neolib::small_cookie_ref_ptr{})
+                {
+                    neogfx::font_info fontInfo{ aData.familyName, aData.styleName, aData.pointSize };
+                    fontInfo.set_underline(aData.underline);
+                    aData.id = neolib::small_cookie_ref_ptr{ service<i_font_manager>(), neogfx::font{ fontInfo }.id() };
+                }
             }
         };
     };

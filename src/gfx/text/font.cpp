@@ -464,12 +464,12 @@ namespace neogfx
     }
 
     font::font(i_native_font_face& aNativeFontFace) :
-        iInstance{ std::make_shared<instance>(font_info{ aNativeFontFace.family_name(), aNativeFontFace.style_name(), aNativeFontFace.size() }, aNativeFontFace) }
+        iInstance{ std::make_shared<instance>(font_info{ aNativeFontFace.family_name(), aNativeFontFace.style_name(), aNativeFontFace.size() }.with_outline(aNativeFontFace.outline()), aNativeFontFace)}
     {
     }
 
     font::font(i_native_font_face& aNativeFontFace, font_style aStyle) :
-        iInstance{ std::make_shared<instance>(font_info{ aNativeFontFace.family_name(), aStyle, aNativeFontFace.style_name(), aNativeFontFace.size() }, aNativeFontFace) }
+        iInstance{ std::make_shared<instance>(font_info{ aNativeFontFace.family_name(), aStyle, aNativeFontFace.style_name(), aNativeFontFace.size() }.with_outline(aNativeFontFace.outline()), aNativeFontFace) }
     {
     }
 

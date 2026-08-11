@@ -821,6 +821,32 @@ namespace neogfx
             return result;
     }
 
+    namespace
+    {
+        bool has_font_extension(std::filesystem::path const& aPath)
+        {
+            // FreeType-loadable face containers only; metrics-only sidecars
+            // (.afm/.pfm/.inf) and .ini/.dat/.txt are deliberately absent.
+            static constexpr std::string_view sFontExtensions[] =
+            {
+                ".ttf", ".ttc", ".otf", ".otc",  // SFNT (+ collections)
+                ".fon", ".fnt",                  // Windows bitmap
+                ".pfa", ".pfb",                  // Type 1
+                ".cff", ".pfr", ".bdf", ".pcf",  // misc FreeType drivers
+                ".dfont",                        // Mac datafork suitcase
+                ".woff", ".woff2"                // FT 2.9+ / 2.10.2+ (needs brotli)
+            };
+
+            auto ext = aPath.extension().string();
+            if (ext.empty())
+                return false;
+            std::transform(ext.begin(), ext.end(), ext.begin(),
+                [](char c) { return static_cast<char>(std::tolower(static_cast<unsigned char>(c))); });
+
+            return std::find(std::begin(sFontExtensions), std::end(sFontExtensions), ext) != std::end(sFontExtensions);
+        }
+    }
+
     font_manager::font_manager() :
         iGlyphTextFactory{ std::make_unique<neogfx::glyph_text_factory>() },
         iGlyphAtlas{ size{1024.0, 1024.0} },
@@ -837,7 +863,7 @@ namespace neogfx
             if (std::filesystem::exists(fontsDirectory))
                 for (std::filesystem::directory_iterator file(fontsDirectory); file != std::filesystem::directory_iterator(); ++file)
                 {
-                    if (!std::filesystem::is_regular_file(file->status()))
+                    if (!std::filesystem::is_regular_file(file->status()) || !has_font_extension(file->path()))
                         continue;
                     try
                     {
@@ -857,7 +883,8 @@ namespace neogfx
                 }
         };
         enumerate(detail::platform_specific::get_system_font_directory());
-        for (auto const& path : detail::platform_specific::get_local_font_directories())
+        auto const localFontDirectories = detail::platform_specific::get_local_font_directories();
+        for (auto const& path : localFontDirectories)
             enumerate(path);
         for (auto& family : iFontFamilies)
         {

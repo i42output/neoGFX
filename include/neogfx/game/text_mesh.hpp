@@ -21,7 +21,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/gfx/primitives.hpp>
-#include <neogfx/gfx/i_graphics_context.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>
 #include <neogfx/game/component.hpp>
 #include <neogfx/game/entity.hpp>
@@ -43,9 +43,9 @@ namespace neogfx::game
         vec4f padding;
         neogfx::alignment alignment;
         shared<font> font;
-        material ink;
+        game::material material;
         text_effect_type textEffect;
-        material textEffectMaterial;
+        game::material textEffectMaterial;
         float textEffectWidth;
 
         struct meta : i_component_data::meta
@@ -123,7 +123,7 @@ namespace neogfx::game
                     "Padding",
                     "Alignment",
                     "Font",
-                    "Ink",
+                    "Material",
                     "Text Effect",
                     "Text Effect Material",
                     "Text Effect Width"
@@ -131,67 +131,7 @@ namespace neogfx::game
                 return sFieldNames[aFieldIndex];
             }
             static constexpr bool has_updater = true;
-            static void update(const text_mesh& aData, i_ecs& aEcs, i_graphics_context const& aGc, entity_id aEntity)
-            {
-                auto& mf = aEcs.component<mesh_filter>().has_entity_record(aEntity) ?
-                    aEcs.component<mesh_filter>().entity_record(aEntity) :
-                    aEcs.component<mesh_filter>().populate(aEntity, mesh_filter{});
-                auto& mr = aEcs.component<mesh_renderer>().has_entity_record(aEntity) ?
-                    aEcs.component<mesh_renderer>().entity_record(aEntity) :
-                    aEcs.component<mesh_renderer>().populate(aEntity, mesh_renderer{});
-                mf.mesh = mesh{};
-                mr.patches = patches{};
-                auto multilineGlyphText = aGc.to_multiline_glyph_text(aData.text, service<i_font_manager>().font_from_id(aData.font->id.cookie()), aData.extents.x, aData.alignment);
-                for (auto const& line : multilineGlyphText.lines)
-                {
-                    auto mesh_line = [&](const vec3f& aOffset, const material& aMaterial, bool aEffect) 
-                    {
-                        auto const glyphs = std::ranges::subrange(std::next(multilineGlyphText.glyphText.cbegin(), line.begin), std::next(multilineGlyphText.glyphText.cbegin(), line.end));
-                        auto const pos = aOffset + line.bbox[0] - vec3f{ glyphs.begin()->cell[0] };
-                        for (auto const& glyphChar : glyphs)
-                        {
-                            if (is_whitespace(glyphChar))
-                                continue;
-                            else if (!is_emoji(glyphChar))
-                            {
-                                auto const& glyphTexture = multilineGlyphText.glyphText.glyph(glyphChar);
-                                auto& patch = *add_patch(*mf.mesh, mr, pos + vec3f{ glyphChar.cell[0] } + quadf{ glyphChar.shape[0], glyphChar.shape[1], glyphChar.shape[2], glyphChar.shape[3] }, glyphTexture.texture());
-                                patch.material = material{
-                                    aMaterial.color,
-                                    aMaterial.gradient,
-                                    aMaterial.sharedTexture,
-                                    patch.material.texture,
-                                    aMaterial.shaderEffect };
-                            }
-                            else if (!aEffect)
-                            {
-                                auto const& emojiAtlas = service<i_font_manager>().emoji_atlas();
-                                auto const& emojiTexture = emojiAtlas.emoji_texture(glyphChar.value).as_sub_texture();
-                                auto& patch = *add_patch(*mf.mesh, mr, pos + vec3f{ glyphChar.cell[0] } + quadf{ glyphChar.shape[0], glyphChar.shape[1], glyphChar.shape[2], glyphChar.shape[3] }, emojiTexture);
-                                patch.material = material{ 
-                                    {},
-                                    {},
-                                    aMaterial.sharedTexture, 
-                                    patch.material.texture, 
-                                    {} };
-                            }
-                        }
-                    };
-                    switch(aData.textEffect)
-                    {
-                    case text_effect_type::Outline:
-                        // @todo - use FT outlines
-                        for (float oy = -aData.textEffectWidth; oy <= aData.textEffectWidth; ++oy)
-                            for (float ox = -aData.textEffectWidth; ox <= aData.textEffectWidth; ++ox)
-                                mesh_line(vec2f{ ox, oy }, aData.textEffectMaterial, true);
-                        break;
-                    default:
-                        // @todo
-                        break;
-                    }
-                    mesh_line(vec2f{}, aData.ink, false);
-                }
-            }
+            static void update(const text_mesh& aData, i_ecs& aEcs, i_graphics_context const& aGc, entity_id aEntity);
         };
     };
 

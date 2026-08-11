@@ -30,7 +30,8 @@ namespace neogfx::game
             entity{ aEcs, archetype().id() }
         {
             neogfx::game::scoped_component_data_lock<game::text_mesh> lock{ aEcs };
-            auto const& font = aEcs.shared_component<game::font>().populate(to_string(neolib::generate_uuid()).to_std_string(), game::font{{service<i_font_manager>(), aFont.id()}, aFont.family_name(), aFont.style_name(), aFont.size(), aFont.underline()});
+            auto const& font = aEcs.shared_component<game::font>().populate(to_string(neolib::generate_uuid()).to_std_string(), 
+                game::font{{service<i_font_manager>(), aFont.id()}, aFont.family_name(), aFont.style_name(), aFont.size(), aFont.underline()});
             auto& textMesh = aEcs.component<game::text_mesh>().populate(id(), game::text_mesh
                 {
                     aText,
@@ -57,4 +58,109 @@ namespace neogfx::game
         {
         }
     }
+
+    void text_mesh::meta::update(const text_mesh& aData, i_ecs& aEcs, i_graphics_context const& aGc, entity_id aEntity)
+    {
+        auto& mf = aEcs.component<mesh_filter>().has_entity_record(aEntity) ?
+            aEcs.component<mesh_filter>().entity_record(aEntity) :
+            aEcs.component<mesh_filter>().populate(aEntity, mesh_filter{});
+        auto& mr = aEcs.component<mesh_renderer>().has_entity_record(aEntity) ?
+            aEcs.component<mesh_renderer>().entity_record(aEntity) :
+            aEcs.component<mesh_renderer>().populate(aEntity, mesh_renderer{});
+        mf.mesh = mesh{};
+        mr.patches = patches{};
+        neogfx::font font = service<i_font_manager>().font_from_id(aData.font->id.cookie());
+        auto multilineGlyphText = aGc.to_multiline_glyph_text(aData.text, font, aData.extents.x, aData.alignment);
+        if (aData.textEffect == text_effect_type::None)
+        {
+            for (auto const& line : multilineGlyphText.lines)
+            {
+                auto const glyphs = std::ranges::subrange(std::next(multilineGlyphText.glyphText.cbegin(), line.begin), std::next(multilineGlyphText.glyphText.cbegin(), line.end));
+                auto const pos = line.bbox[0] - vec3f{ glyphs.begin()->cell[0] };
+                for (auto const& glyphChar : glyphs)
+                {
+                    if (is_whitespace(glyphChar))
+                        continue;
+                    else if (!is_emoji(glyphChar))
+                    {
+                        auto const& glyphTexture = multilineGlyphText.glyphText.glyph(glyphChar);
+                        auto& patch = *add_patch(*mf.mesh, mr, pos + vec3f{ glyphChar.cell[0] } + quadf{ glyphChar.shape[0], glyphChar.shape[1], glyphChar.shape[2], glyphChar.shape[3] }, glyphTexture.texture());
+                        patch.material = game::material{
+                            aData.material.color,
+                            aData.material.gradient,
+                            aData.material.sharedTexture,
+                            patch.material.texture,
+                            aData.material.shaderEffect };
+                    }
+                    else
+                    {
+                        auto const& emojiAtlas = service<i_font_manager>().emoji_atlas();
+                        auto const& emojiTexture = emojiAtlas.emoji_texture(glyphChar.value).as_sub_texture();
+                        auto& patch = *add_patch(*mf.mesh, mr, pos + vec3f{ glyphChar.cell[0] } + quadf{ glyphChar.shape[0], glyphChar.shape[1], glyphChar.shape[2], glyphChar.shape[3] }, emojiTexture);
+                        patch.material = game::material{
+                            {},
+                            {},
+                            aData.material.sharedTexture,
+                            patch.material.texture,
+                            {} };
+                    }
+                }
+            }
+        }
+        else // aData.textEffect != text_effect_type::None
+        {
+            size extents{ multilineGlyphText.bbox[2] - multilineGlyphText.bbox[0] };
+            if (extents.cy == 0.0)
+                extents.cy = font.height();
+            extents += size{ font.info().outline().radius * 2.0 };
+
+            auto ink = aData.material.color ?
+                text_color{ neogfx::color{ aData.material.color->rgba } } :
+                aData.material.gradient ?
+                    text_color{ neogfx::gradient{ service<i_gradient_manager>().find_gradient(aData.material.gradient->id.cookie()) } } :
+                    text_color{ neogfx::color::White };
+            if (aData.material.gradient && aData.material.gradient->boundingBox)
+                apply_bounding_box(ink, *aData.material.gradient->boundingBox);
+
+            auto effectInk = aData.textEffectMaterial.color ?
+                text_color{ neogfx::color{ aData.textEffectMaterial.color->rgba } } :
+                aData.textEffectMaterial.gradient ?
+                    text_color{ neogfx::gradient{ service<i_gradient_manager>().find_gradient(aData.textEffectMaterial.gradient->id.cookie()) } } :
+                    text_color{ neogfx::color::White };
+            if (aData.textEffectMaterial.gradient && aData.textEffectMaterial.gradient->boundingBox)
+                apply_bounding_box(effectInk, *aData.textEffectMaterial.gradient->boundingBox);
+
+            text_format const textFormat{
+                ink,
+                text_effect{
+                    aData.textEffect,
+                    effectInk,
+                    aData.textEffectWidth } };
+
+            scalar textEffectOutset = 0.0;
+
+            if (textFormat.effect())
+                textEffectOutset = std::max(textEffectOutset, textFormat.effect()->outset());
+            if (textFormat.effect2())
+                textEffectOutset = std::max(textEffectOutset, textFormat.effect2()->outset());
+
+            extents += size{ textEffectOutset * 2.0 };
+            extents = extents.ceil();
+
+            neogfx::texture tex{ extents, 1.0, texture_sampling::Multisample };
+            {
+                graphics_context gcTex{ tex };
+                gcTex.draw_multiline_glyph_text(vec3{}, multilineGlyphText, textFormat);
+            }
+
+            auto& patch = *add_patch(*mf.mesh, mr, game_rect{ point{}, extents }, tex);
+            patch.material = game::material{
+                {},
+                {},
+                aData.material.sharedTexture,
+                patch.material.texture,
+                {} };
+        }
+    }
+
 }
