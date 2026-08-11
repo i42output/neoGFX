@@ -76,6 +76,8 @@ namespace neogfx::game
             for (auto const& line : multilineGlyphText.lines)
             {
                 auto const glyphs = std::ranges::subrange(std::next(multilineGlyphText.glyphText.cbegin(), line.begin), std::next(multilineGlyphText.glyphText.cbegin(), line.end));
+                if (glyphs.empty())
+                    continue;
                 auto const pos = line.bbox[0] - vec3f{ glyphs.begin()->cell[0] };
                 for (auto const& glyphChar : glyphs)
                 {
@@ -110,9 +112,6 @@ namespace neogfx::game
         else // aData.textEffect != text_effect_type::None
         {
             size extents{ multilineGlyphText.bbox[2] - multilineGlyphText.bbox[0] };
-            if (extents.cy == 0.0)
-                extents.cy = font.height();
-            extents += size{ font.info().outline().radius * 2.0 };
 
             auto ink = aData.material.color ?
                 text_color{ neogfx::color{ aData.material.color->rgba } } :
@@ -133,7 +132,7 @@ namespace neogfx::game
             text_format const textFormat{
                 ink,
                 text_effect{
-                    aData.textEffect,
+                        aData.textEffect,
                     effectInk,
                     aData.textEffectWidth } };
 
