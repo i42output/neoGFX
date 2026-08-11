@@ -113,6 +113,9 @@ namespace neogfx::game
         {
             size extents{ multilineGlyphText.bbox[2] - multilineGlyphText.bbox[0] };
 
+            if (extents.cx == 0.0 || extents.cy == 0.0)
+                return;
+
             auto ink = aData.material.color ?
                 text_color{ neogfx::color{ aData.material.color->rgba } } :
                 aData.material.gradient ?
