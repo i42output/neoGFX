@@ -67,11 +67,16 @@ namespace neogfx::game
         auto& mr = aEcs.component<mesh_renderer>().has_entity_record(aEntity) ?
             aEcs.component<mesh_renderer>().entity_record(aEntity) :
             aEcs.component<mesh_renderer>().populate(aEntity, mesh_renderer{});
+        
         mf.mesh = mesh{};
         mr.patches = patches{};
+        
         neogfx::font font = service<i_font_manager>().font_from_id(aData.font->id.cookie());
         auto multilineGlyphText = aGc.to_multiline_glyph_text(aData.text, font, aData.extents.x, aData.alignment);
-        if (aData.textEffect == text_effect_type::None && !aData.renderToPatch)
+
+        bool const renderToPatch = (aData.textEffect != text_effect_type::None || aData.renderToPatch);
+
+        if (!renderToPatch)
         {
             for (auto const& line : multilineGlyphText.lines)
             {
@@ -109,7 +114,7 @@ namespace neogfx::game
                 }
             }
         }
-        else // aData.textEffect != text_effect_type::None || aData.renderToPatch 
+        else // renderToPatch 
         {
             size extents{ multilineGlyphText.bbox[2] - multilineGlyphText.bbox[0] };
 
@@ -163,6 +168,13 @@ namespace neogfx::game
                 patch.material.texture,
                 {} };
         }
+
+        auto const& boundingBox = renderToPatch ?
+            game::bounding_rect(*mf.mesh).as<float>() :
+            rect{ point{}, size{ multilineGlyphText.bbox[2] - multilineGlyphText.bbox[0] } }.as<float>();
+        auto const& boundingBoxCentre = boundingBox.as<float>().center().to_vec3();
+        for (auto& v : mf.mesh->vertices)
+            v -= boundingBoxCentre;
     }
 
 }
