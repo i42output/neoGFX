@@ -172,7 +172,7 @@ namespace neogfx::game
         auto const& boundingBox = renderToPatch ?
             game::bounding_rect(*mf.mesh).as<float>() :
             rect{ point{}, size{ multilineGlyphText.bbox[2] - multilineGlyphText.bbox[0] } }.as<float>();
-        auto const& boundingBoxCentre = boundingBox.as<float>().center().to_vec3();
+        auto const& boundingBoxCentre = boundingBox.center().to_vec3();
         for (auto& v : mf.mesh->vertices)
             v -= boundingBoxCentre;
     }
