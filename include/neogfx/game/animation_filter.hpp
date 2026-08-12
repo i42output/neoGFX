@@ -24,11 +24,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/core/uuid.hpp>
 #include <neolib/core/string.hpp>
 
-#include <neogfx/game/i_ecs.hpp>
+#include <neogfx/game/ecs.hpp>
 #include <neogfx/game/time.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/animation.hpp>
+#include <neogfx/game/entity_life_span.hpp>
 
 namespace neogfx::game
 {
@@ -524,5 +525,33 @@ namespace neogfx::game
         for (std::size_t i = 0; i < N; ++i)
             result[i] = &add_tween(aAnimationFilter, aInfos[i]);
         return result;
+    }
+
+    template<std::size_t N>
+    inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, std::array<tween_info, N>&& aTweens, const std::optional<double>& aDuration = {}, i32 aLayer = 0)
+    {
+        scoped_component_data_lock<mesh_renderer, mesh_filter, animation_filter, entity_info> lock{ aEcs };
+
+        if (aDuration)
+            aEcs.populate(aId, entity_life_span{ to_step_time(aEcs, *aDuration) });
+
+        auto& mr = aEcs.component<mesh_renderer>().entity_record(aId);
+        mr.layer = aLayer;
+
+        auto& mf = aEcs.component<mesh_filter>().entity_record(aId);
+        mf.transformation.emplace(mat44f::identity());
+        neolib::apply_translation(*mf.transformation, aOrigin);
+
+        aEcs.component<animation_filter>().populate(aId, {});
+        auto& af = aEcs.component<animation_filter>().entity_record(aId);
+        af.animation.emplace();
+
+        for (auto& tween : aTweens)
+            if (tween.patches.empty())
+                tween.patches = all_patches(mr);
+
+        add_tweens(af, aTweens);
+
+        return af;
     }
 }
