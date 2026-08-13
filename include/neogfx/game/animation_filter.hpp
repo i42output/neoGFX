@@ -21,10 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 
+#include <span>
+
 #include <neolib/core/uuid.hpp>
 #include <neolib/core/string.hpp>
 
-#include <neogfx/game/ecs.hpp>
+#include <neogfx/game/i_ecs.hpp>
 #include <neogfx/game/time.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/mesh_filter.hpp>
@@ -527,8 +529,7 @@ namespace neogfx::game
         return result;
     }
 
-    template<std::size_t N>
-    inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, std::array<tween_info, N>&& aTweens, const std::optional<double>& aDuration = {}, i32 aLayer = 0)
+    inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, std::span<tween_info> aTweens, std::optional<double> const& aDuration = {}, i32 aLayer = 0)
     {
         scoped_component_data_lock<mesh_renderer, mesh_filter, animation_filter, entity_info> lock{ aEcs };
 
@@ -546,12 +547,24 @@ namespace neogfx::game
         auto& af = aEcs.component<animation_filter>().entity_record(aId);
         af.animation.emplace();
 
+        std::optional<decltype(all_patches(mr))> defaultPatches;
         for (auto& tween : aTweens)
+        {
             if (tween.patches.empty())
-                tween.patches = all_patches(mr);
-
-        add_tweens(af, aTweens);
+            {
+                if (!defaultPatches)
+                    defaultPatches.emplace(all_patches(mr));
+                tween.patches = *defaultPatches;
+            }
+            add_tween(af, tween);
+        }
 
         return af;
+    }
+
+    template <typename Tweens> requires (!std::is_lvalue_reference_v<Tweens>)
+    inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, Tweens&& aTweens, std::optional<double> const& aDuration = {}, i32 aLayer = 0)
+    {
+        return create_animation(aEcs, aId, aOrigin, std::span<tween_info>{ aTweens }, aDuration, aLayer);
     }
 }
