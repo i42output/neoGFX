@@ -109,23 +109,23 @@ namespace neogfx::game
             auto& filter = filters.entity_record(entity);
             if (!has_animation(filter))
                 continue;
-            if (filter.frameState.active && has_animation_frames(filter))
+            if (filter.frameAnimationState.active && has_animation_frames(filter))
             {
-                if (!filter.frameState.currentFrameStartTime)
-                    filter.frameState.currentFrameStartTime = info.creationTime;
+                if (!filter.frameAnimationState.currentFrameStartTime)
+                    filter.frameAnimationState.currentFrameStartTime = info.creationTime;
 
                 auto const& frames = to_animation_frames(filter);
-                auto const previousFrame = static_cast<u32>(filter.frameState.currentFrame % frames.size());
+                auto const previousFrame = static_cast<u32>(filter.frameAnimationState.currentFrame % frames.size());
                 auto currentFrame = previousFrame;
-                while (now > *filter.frameState.currentFrameStartTime + to_step_time(frames[currentFrame].duration, worldClock.timestep))
+                while (now > *filter.frameAnimationState.currentFrameStartTime + to_step_time(frames[currentFrame].duration, worldClock.timestep))
                 {
                     auto const frameDuration = to_step_time(frames[currentFrame].duration, worldClock.timestep);
                     if (frameDuration == 0)
                         throw std::runtime_error("neogfx::game::animator: frame duration of zero!");
-                    *filter.frameState.currentFrameStartTime += frameDuration;
+                    *filter.frameAnimationState.currentFrameStartTime += frameDuration;
                     currentFrame = static_cast<u32>((currentFrame + 1u) % frames.size());
-                    filter.frameState.currentFrame = currentFrame;
-                    if (currentFrame == 0 && filter.frameState.autoDestroy)
+                    filter.frameAnimationState.currentFrame = currentFrame;
+                    if (currentFrame == 0 && filter.frameAnimationState.autoDestroy)
                     {
                         ecs().async_destroy_entity(entity);
                         break;

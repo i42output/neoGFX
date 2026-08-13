@@ -134,7 +134,7 @@ namespace neogfx::game
         std::optional<mat44f> transformation;
 
         // @todo add to meta
-        frame_animation_state frameState;
+        frame_animation_state frameAnimationState;
         // @todo add to meta
         std::unordered_map<animation_tween_ptr, tween_animation_state> tweenStates;
 
@@ -168,12 +168,12 @@ namespace neogfx::game
 
         void start_frames(i64 aStepTime)
         {
-            frameState.start(aStepTime);
+            frameAnimationState.start(aStepTime);
         }
 
         void stop_frames()
         {
-            frameState.stop();
+            frameAnimationState.stop();
         }
 
         void start_tweens()
@@ -373,7 +373,7 @@ namespace neogfx::game
     inline mesh_filter const& current_animation_frame(animation_filter const& aAnimationFilter)
     {
         if (has_animation_frames(aAnimationFilter))
-            return to_animation_frames(aAnimationFilter)[aAnimationFilter.frameState.currentFrame].filter;
+            return to_animation_frames(aAnimationFilter)[aAnimationFilter.frameAnimationState.currentFrame].filter;
         throw std::logic_error("neogfx::game::to_animation_frames: no animation frames!");
     }
 
@@ -531,7 +531,7 @@ namespace neogfx::game
 
     inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, std::span<tween_info> aTweens, std::optional<double> const& aDuration = {}, i32 aLayer = 0)
     {
-        scoped_component_data_lock<mesh_renderer, mesh_filter, animation_filter, entity_info> lock{ aEcs };
+        scoped_component_data_lock<mesh_renderer, mesh_filter, animation_filter, entity_life_span> lock{ aEcs };
 
         if (aDuration)
             aEcs.populate(aId, entity_life_span{ to_step_time(aEcs, *aDuration) });
