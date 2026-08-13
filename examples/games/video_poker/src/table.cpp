@@ -24,7 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
 #include <neogfx/game/clock.hpp>
-#include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/text_mesh.hpp>
 #include <neogfx/game/simple_physics.hpp>
@@ -63,19 +62,24 @@ namespace video_poker
                 aCanvas.ecs(),
                 ng::graphics_context{ aCanvas },
                 aOutcome,
-                ng::font{ "Audiowide", "Regular", 48.0 }.with_outline({ 1.0_dp }),
+                ng::font{ "Audiowide", "Regular", 48.0 }.with_outline({ 3.0_dp }),
                 ng::text_format{aColor, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black } },
                 ng::alignment::Center}
         {
-            ng::game::scoped_component_data_lock<ng::game::mesh_renderer, ng::game::entity_info, ng::game::rigid_body> lock{ aCanvas.ecs() };
-            aCanvas.ecs().component<ng::game::mesh_renderer>().entity_record(id()).layer = 1;
-            aCanvas.ecs().populate(id(), ng::game::entity_life_span{ ng::game::to_step_time(aCanvas.ecs(), 3.0) });
-            auto const& boundingBox = ng::game::bounding_rect(*aCanvas.ecs().component<ng::game::mesh_filter>().entity_record(id()).mesh);
-            aCanvas.ecs().populate(id(), ng::game::rigid_body{ 
-                ng::vec3{ (aCanvas.extents().cx - boundingBox.cx) / 2.0, (aCanvas.extents().cy - boundingBox.cy) / 2.0, 0.9 }, 
-                1.0,
-                ng::vec3{ 0.0, aCanvas.dpi_scale(-300.0), 0.0 }
-                });
+            ng::game::scoped_component_data_lock<ng::game::animation_filter> lock{ aCanvas.ecs() };
+
+            auto& af = ng::game::create_animation(
+                aCanvas.ecs(), id(),
+                aCanvas.client_rect().center().to_vec3().as<float>(),
+                std::to_array<ng::game::tween_info>({
+                    {
+                        ng::game::tween_type::Translate, 1.0,
+                        { ng::vec3{ 0.0, -20.0_dip, 0.0 }, ng::vec3{ 0.0, 20.0_dip, 0.0 } },
+                        {}, ng::game::tween_cycle::PingPong
+                    } }),
+                2.0, 2);
+
+            ng::game::start_tween_animation(af);
         }
     };
     
@@ -113,7 +117,7 @@ namespace video_poker
         iBetMax{ iGambleLayout, "MAX\nBET" },
         iSpacerGamble{ iGambleLayout },
         iDeal{ iGambleLayout, "DEAL" },
-        iInfoBarLayout{ iMainLayout },
+        iInfoBarLayout{ iMainLayout },  
         iLabelCredits{ iInfoBarLayout, "Credits: " },
         iLabelCreditsValue{ iInfoBarLayout, "" },
         iSpacer5{ iInfoBarLayout },
@@ -122,7 +126,7 @@ namespace video_poker
     {
         set_logical_coordinate_system(ng::logical_coordinate_system::AutomaticGui);
 
-        set_layers(2);
+        set_layers(3);
 
         iMainLayout.set_spacing(ng::size{ 2.0_dip });
         iSpacesLayout.set_spacing(ng::size{ 8.0_dip });

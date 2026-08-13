@@ -179,7 +179,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         }
         auto filter = explosionAnimation.filter;
         filter.transformation = ng::mat44f::identity();
-        filter.autoDestroy = true;
+        filter.frameState.autoDestroy = true;
         ng::apply_scaling(*filter.transformation, ng::aabb_extents(target).max(ng::vec2f{ 16.0f, 16.0f }));
         ecs.async_create_entity(
             color ? archetypes::missileExplosion : archetypes::explosion,
