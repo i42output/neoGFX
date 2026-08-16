@@ -41,9 +41,11 @@ namespace neogfx::game
                     aAlignment,
                     { font },
                     { to_ecs_component(aTextFormat.ink()) },
+                    aTextFormat.ignore_emoji(),
                     aTextFormat.effect() ? aTextFormat.effect()->type() : text_effect_type::None,
                     { aTextFormat.effect() ? to_ecs_component(aTextFormat.effect()->color()) : game::material{} },
-                    aTextFormat.effect() ? static_cast<float>(aTextFormat.effect()->width()) : 0.0f
+                    aTextFormat.effect() ? static_cast<float>(aTextFormat.effect()->width()) : 0.0f,
+                    aTextFormat.effect() ? aTextFormat.effect()->ignore_emoji() : true
                 });
             game::text_mesh::meta::update(textMesh, aEcs, aGc, id());
         }
@@ -137,19 +139,29 @@ namespace neogfx::game
             if (aData.textEffectMaterial.gradient && aData.textEffectMaterial.gradient->boundingBox)
                 apply_bounding_box(effectInk, *aData.textEffectMaterial.gradient->boundingBox);
 
-            text_format const textFormat{
+            auto const textFormat = text_format{
                 ink,
                 text_effect{
                     aData.textEffect,
                     effectInk,
-                    aData.textEffectWidth } };
+                    aData.textEffectWidth }.with_emoji_ignored(aData.textEffectIgnoreEmoji) }.with_emoji_ignored(aData.ignoreEmoji);
 
             scalar textEffectOutset = 0.0;
 
             if (textFormat.effect())
-                textEffectOutset = std::max(textEffectOutset, textFormat.effect()->outset());
+            {
+                if (textFormat.effect()->type() == text_effect_type::Outline)
+                    textEffectOutset = std::max(textEffectOutset, font.info().outline().radius);
+                else
+                    textEffectOutset = std::max(textEffectOutset, textFormat.effect()->outset());
+            }
             if (textFormat.effect2())
-                textEffectOutset = std::max(textEffectOutset, textFormat.effect2()->outset());
+            {
+                if (textFormat.effect2()->type() == text_effect_type::Outline)
+                    textEffectOutset = std::max(textEffectOutset, font.info().outline().radius);
+                else
+                    textEffectOutset = std::max(textEffectOutset, textFormat.effect2()->outset());
+            }
 
             extents += size{ textEffectOutset * 2.0 };
             extents = extents.ceil();
@@ -157,7 +169,7 @@ namespace neogfx::game
             neogfx::texture tex{ extents, 1.0, texture_sampling::Multisample };
             {
                 graphics_context gcTex{ tex };
-                gcTex.draw_multiline_glyph_text(vec3{}, multilineGlyphText, textFormat);
+                gcTex.draw_multiline_glyph_text(vec3{ textEffectOutset , textEffectOutset, 0.0 }, multilineGlyphText, textFormat);
             }
 
             auto& patch = *add_patch(*mf.mesh, mr, game_rect{ point{}, extents }, tex);

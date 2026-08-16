@@ -398,12 +398,13 @@ namespace neogfx
             switch (type())
             {
             case text_effect_type::None:
+            case text_effect_type::Outline:
             default:
                 return 0.0;
-            case text_effect_type::Outline:
-                return 1.0;
             case text_effect_type::Glow:
             case text_effect_type::Shadow:
+            case text_effect_type::OutlineGlow:
+            case text_effect_type::OutlineShadow:
                 return 4.0;
             }
         }
@@ -500,6 +501,12 @@ namespace neogfx
                 set_flags(flags() | text_effect_flags::IgnoreEmoji);
             else
                 set_flags(flags() & ~text_effect_flags::IgnoreEmoji);
+        }
+        text_effect with_emoji_ignored(bool aIgnored) const
+        {
+            auto result = *this;
+            result.set_ignore_emoji(aIgnored);
+            return result;
         }
         text_effect with_alpha(color::component aAlpha) const
         {

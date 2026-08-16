@@ -393,7 +393,7 @@ namespace neogfx
 
     inline patch_info const no_patch{ .ignore = true };
 
-    inline game::patches add_patches(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, std::initializer_list<patch_info> aInfos)
+    inline game::patches add_patches(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, std::initializer_list<patch_info> const& aInfos)
     {
         game::patches result;
         result.reserve(aInfos.size());

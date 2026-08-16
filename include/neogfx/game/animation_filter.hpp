@@ -520,13 +520,10 @@ namespace neogfx::game
         return tween;
     }
 
-    template <std::size_t N>
-    inline std::array<animation_tween*, N> add_tweens(animation_filter& aAnimationFilter, std::array<tween_info, N> const& aInfos)
+    inline void add_tweens(animation_filter& aAnimationFilter, std::initializer_list<tween_info> const& aInfos)
     {
-        std::array<animation_tween*, N> result;
-        for (std::size_t i = 0; i < N; ++i)
-            result[i] = &add_tween(aAnimationFilter, aInfos[i]);
-        return result;
+        for (auto i = aInfos.begin(); i != aInfos.end(); ++i)
+            add_tween(aAnimationFilter, *i);
     }
 
     inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, std::span<tween_info> aTweens, std::optional<double> const& aDuration = {}, i32 aLayer = 0)

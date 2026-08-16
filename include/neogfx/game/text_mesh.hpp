@@ -44,9 +44,11 @@ namespace neogfx::game
         neogfx::alignment alignment;
         shared<font> font;
         game::material material;
+        bool ignoreEmoji = true;
         text_effect_type textEffect;
         game::material textEffectMaterial;
         float textEffectWidth;
+        bool textEffectIgnoreEmoji = true;
         bool renderToPatch = false;
 
         struct meta : i_component_data::meta
@@ -63,7 +65,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 11;
+                return 12;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -84,12 +86,16 @@ namespace neogfx::game
                 case 6:
                     return component_data_field_type::ComponentData;
                 case 7:
-                    return component_data_field_type::Enum | component_data_field_type::Uint32;
+                    return component_data_field_type::Bool;
                 case 8:
-                    return component_data_field_type::ComponentData;
+                    return component_data_field_type::Enum | component_data_field_type::Uint32;
                 case 9:
-                    return component_data_field_type::Float32;
+                    return component_data_field_type::ComponentData;
                 case 10:
+                    return component_data_field_type::Float32;
+                case 11:
+                    return component_data_field_type::Bool;
+                case 12:
                     return component_data_field_type::Bool;
                 default:
                     throw invalid_field_index();
@@ -105,13 +111,15 @@ namespace neogfx::game
                 case 3:
                 case 4:
                 case 7:
-                case 9:
+                case 8:
                 case 10:
+                case 11:
+                case 12:
                     return neolib::uuid{};
                 case 5:
                     return font::meta::id();
                 case 6:
-                case 8:
+                case 9:
                     return material::meta::id();
                 default:
                     throw invalid_field_index();
@@ -128,9 +136,11 @@ namespace neogfx::game
                     "Alignment",
                     "Font",
                     "Material",
+                    "Ignore Emoji",
                     "Text Effect",
                     "Text Effect Material",
                     "Text Effect Width",
+                    "Text Effect Ignore Emoji",
                     "Render To Patch"
                 };
                 return sFieldNames[aFieldIndex];
