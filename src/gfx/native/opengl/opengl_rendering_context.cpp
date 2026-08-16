@@ -2311,7 +2311,7 @@ namespace neogfx
                 return result;
             };
 
-        auto shape_quad = [&](font const& glyphFont, glyph_char const& glyphChar, bool outline = false)
+        auto shape_quad = [&](font const& glyphFont, glyph_char const& glyphChar, bool outline = false) -> quadf_2d const&
             {
                 static optional_mat44f const italicTransformGui = mat44f{
                         { 1.0f, 0.0f, 0.0f, 0.0f },
@@ -2330,8 +2330,12 @@ namespace neogfx
 
                 thread_local quadf_2d shapeQuad;
 
-                if (!outline && !italicTransform)
-                    return glyphChar.shape;
+                if (!outline)
+                {
+                    if (!italicTransform)
+                        return glyphChar.shape;
+                    shapeQuad = glyphChar.shape;
+                }
                 else if (glyphChar.outlineShape.has_value())
                     shapeQuad = *glyphChar.outlineShape;
                 else
