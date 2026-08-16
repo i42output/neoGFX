@@ -138,4 +138,22 @@ namespace neogfx
         else
             return mix(*aLhs, *aRhs, aMixValue);
     }
+
+    inline quadf_2d expand_quad(quadf_2d const& aQuad, vec2f const& aOutset) noexcept
+    {
+        auto expansion_sign = [](float aDelta)
+            {
+                // 0.0f for a degenerate axis: don't translate a zero-extent quad
+                return aDelta > 0.0f ? 1.0f : aDelta < 0.0f ? -1.0f : 0.0f;
+            };
+
+        auto const centre = (aQuad[0] + aQuad[1] + aQuad[2] + aQuad[3]) / 4.0f;
+        quadf_2d result = aQuad;
+        for (auto& v : result)
+        {
+            auto const d = v - centre;
+            v += vec2f{ expansion_sign(d.x) * aOutset.x, expansion_sign(d.y) * aOutset.y };
+        }
+        return result;
+    }
 }

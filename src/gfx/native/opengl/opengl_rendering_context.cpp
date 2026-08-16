@@ -2225,7 +2225,7 @@ namespace neogfx
             Adornments
         };
     }
-
+        
     void opengl_rendering_context::draw_glyphs(const draw_glyph* aBegin, const draw_glyph* aEnd)
     {
         // Ensure texture shader enabled as glyph shader depends on it...
@@ -2310,36 +2310,27 @@ namespace neogfx
                 logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
                 italicTransformGui : italicTransformGame;
 
-            auto const outset = vec2{ glyphFont.info().outline().radius, glyphFont.info().outline().radius }.as<float>();
+            thread_local quadf_2d shapeQuad;
 
-            auto const& shape = !outline ? 
-                glyphChar.shape : 
-                glyphChar.outlineShape.has_value() ? 
-                    *glyphChar.outlineShape : 
-                    logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ? 
-                        quadf_2d{
-                            glyphChar.shape[0] + vec2f{ -outset.x, -outset.y },
-                            glyphChar.shape[1] + vec2f{ outset.x, -outset.y },
-                            glyphChar.shape[2] + vec2f{ outset.x, outset.y },
-                            glyphChar.shape[3] + vec2f{ -outset.x, outset.y }
-                        } :
-                        quadf_2d{
-                            glyphChar.shape[0] + vec2f{ -outset.x, outset.y },
-                            glyphChar.shape[1] + vec2f{ outset.x, outset.y },
-                            glyphChar.shape[2] + vec2f{ outset.x, -outset.y },
-                            glyphChar.shape[3] + vec2f{ -outset.x, -outset.y }
-                        };
+            if (!outline)
+                shapeQuad = glyphChar.shape;
+            else if (glyphChar.outlineShape.has_value())
+                shapeQuad = *glyphChar.outlineShape;
+            else
+            {
+                auto const radius = static_cast<float>(glyphFont.info().outline().radius);
+                shapeQuad = expand_quad(glyphChar.shape, vec2f{ radius, radius });
+            }
 
             if (!italicTransform)
-                return shape;
+                return shapeQuad;
 
-            thread_local quadf_2d transformedQuad;
             vec2f centeringTranslation;
-            transformedQuad = center_quad(shape, centeringTranslation);
-            for (auto& v : transformedQuad)
+            shapeQuad = center_quad(shapeQuad, centeringTranslation);
+            for (auto& v : shapeQuad)
                 v = (*italicTransform * vec3f{ v } + -vec3f{ centeringTranslation }).xy;
 
-            return transformedQuad;
+            return shapeQuad;
         };
 
         std::size_t normalGlyphCount = 0;
@@ -2532,6 +2523,10 @@ namespace neogfx
                     {
                         if (!textEffect)
                             continue;
+                        
+                        if (textEffect->ignore_emoji())
+                            continue;
+
                         if (textEffect->type() != text_effect_type::Outline &&
                             !(drawOp.appearance->being_filtered() &&
                                 (textEffect->type() == text_effect_type::OutlineGlow ||
@@ -2566,10 +2561,8 @@ namespace neogfx
                                     {},
                                     to_ecs_component(emojiTexture),
                                     !drawOp.appearance->being_filtered() ?
-                                        textEffect->ignore_emoji() ?
-                                            shader_effect::None : shader_effect::ColorizeSpot :
-                                        drawOp.appearance->being_filtered()->ignore_emoji() ?
-                                            shader_effect::None : to_ecs_component(drawOp.appearance->being_filtered()->type())
+                                        shader_effect::ColorizeSpot :
+                                        to_ecs_component(drawOp.appearance->being_filtered()->type())
                                 }
                             });
                     }

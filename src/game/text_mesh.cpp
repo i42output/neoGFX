@@ -164,12 +164,13 @@ namespace neogfx::game
             }
 
             extents += size{ textEffectOutset * 2.0 };
+
             extents = extents.ceil();
 
             neogfx::texture tex{ extents, 1.0, texture_sampling::Multisample };
             {
                 graphics_context gcTex{ tex };
-                gcTex.draw_multiline_glyph_text(vec3{ textEffectOutset , textEffectOutset, 0.0 }, multilineGlyphText, textFormat);
+                gcTex.draw_multiline_glyph_text(vec3{ textEffectOutset , textEffectOutset, 0.0 }.ceil(), multilineGlyphText, textFormat);
             }
 
             auto& patch = *add_patch(*mf.mesh, mr, game_rect{ point{}, extents }, tex);
