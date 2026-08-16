@@ -2293,45 +2293,63 @@ namespace neogfx
             return boundingRect;
         };
 
-        auto shape_quad = [&](font const& glyphFont, glyph_char const& glyphChar, bool outline = false)
-        {
-            static optional_mat44f const italicTransformGui = mat44f{
-                    { 1.0f, 0.0f, 0.0f, 0.0f },
-                    { -0.25f, 1.0f, 0.0f, 0.0f },
-                    { 0.0f, 0.0f, 1.0f, 0.0f },
-                    { 0.0f, 0.0f, 0.0f, 1.0f } };
-            static optional_mat44f const italicTransformGame = mat44f{
-                    { 1.0f, 0.0f, 0.0f, 0.0f },
-                    { 0.25f, 1.0f, 0.0f, 0.0f },
-                    { 0.0f, 0.0f, 1.0f, 0.0f },
-                    { 0.0f, 0.0f, 0.0f, 1.0f } };
-            auto const& italicTransform = ((glyphFont.style() & font_style::EmulatedItalic) != font_style::EmulatedItalic) ?
-                optional_mat44f{} :
-                logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
-                italicTransformGui : italicTransformGame;
-
-            thread_local quadf_2d shapeQuad;
-
-            if (!outline)
-                shapeQuad = glyphChar.shape;
-            else if (glyphChar.outlineShape.has_value())
-                shapeQuad = *glyphChar.outlineShape;
-            else
+        auto expand_quad = [](quadf_2d const& aQuad, vec2f const& aOutset) noexcept
             {
-                auto const radius = static_cast<float>(glyphFont.info().outline().radius);
-                shapeQuad = expand_quad(glyphChar.shape, vec2f{ radius, radius });
-            }
+                auto expansion_sign = [](float aDelta)
+                    {
+                        // 0.0f for a degenerate axis: don't translate a zero-extent quad
+                        return aDelta > 0.0f ? 1.0f : aDelta < 0.0f ? -1.0f : 0.0f;
+                    };
 
-            if (!italicTransform)
+                auto const centre = (aQuad[0] + aQuad[1] + aQuad[2] + aQuad[3]) / 4.0f;
+                quadf_2d result = aQuad;
+                for (auto& v : result)
+                {
+                    auto const d = v - centre;
+                    v += vec2f{ expansion_sign(d.x) * aOutset.x, expansion_sign(d.y) * aOutset.y };
+                }
+                return result;
+            };
+
+        auto shape_quad = [&](font const& glyphFont, glyph_char const& glyphChar, bool outline = false)
+            {
+                static optional_mat44f const italicTransformGui = mat44f{
+                        { 1.0f, 0.0f, 0.0f, 0.0f },
+                        { -0.25f, 1.0f, 0.0f, 0.0f },
+                        { 0.0f, 0.0f, 1.0f, 0.0f },
+                        { 0.0f, 0.0f, 0.0f, 1.0f } };
+                static optional_mat44f const italicTransformGame = mat44f{
+                        { 1.0f, 0.0f, 0.0f, 0.0f },
+                        { 0.25f, 1.0f, 0.0f, 0.0f },
+                        { 0.0f, 0.0f, 1.0f, 0.0f },
+                        { 0.0f, 0.0f, 0.0f, 1.0f } };
+                auto const& italicTransform = ((glyphFont.style() & font_style::EmulatedItalic) != font_style::EmulatedItalic) ?
+                    optional_mat44f{} :
+                    logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
+                    italicTransformGui : italicTransformGame;
+
+                thread_local quadf_2d shapeQuad;
+
+                if (!outline && !italicTransform)
+                    return glyphChar.shape;
+                else if (glyphChar.outlineShape.has_value())
+                    shapeQuad = *glyphChar.outlineShape;
+                else
+                {
+                    auto const radius = static_cast<float>(glyphFont.info().outline().radius);
+                    shapeQuad = expand_quad(glyphChar.shape, vec2f{ radius, radius });
+                }
+
+                if (!italicTransform)
+                    return shapeQuad;
+
+                vec2f centeringTranslation;
+                shapeQuad = center_quad(shapeQuad, centeringTranslation);
+                for (auto& v : shapeQuad)
+                    v = (*italicTransform * vec3f{ v } + -vec3f{ centeringTranslation }).xy;
+
                 return shapeQuad;
-
-            vec2f centeringTranslation;
-            shapeQuad = center_quad(shapeQuad, centeringTranslation);
-            for (auto& v : shapeQuad)
-                v = (*italicTransform * vec3f{ v } + -vec3f{ centeringTranslation }).xy;
-
-            return shapeQuad;
-        };
+            };
 
         std::size_t normalGlyphCount = 0;
 
