@@ -172,6 +172,8 @@ namespace neogfx::game
             neogfx::texture tex{ extents, 1.0, texture_sampling::Multisample };
             {
                 graphics_context gcTex{ tex };
+                scoped_render_target srt{ gcTex };
+                gcTex.clear(neogfx::color{});
                 gcTex.draw_multiline_glyph_text(vec3{ textEffectOutset , textEffectOutset, 0.0 }, multilineGlyphText, textFormat);
             }
 

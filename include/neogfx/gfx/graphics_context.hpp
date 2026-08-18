@@ -152,6 +152,7 @@ namespace neogfx
         void disable_stencil_update() final;
         void blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::Blit) final;
         i_graphics_context& blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::None) final;
+        i_graphics_context& dilate(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, std::uint32_t aTaps, vec2 const& aDirection, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::None) final;
         // gradient
     public:
         void clear_gradient() final;

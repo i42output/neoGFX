@@ -106,7 +106,34 @@ namespace neogfx
 
     texture_atlas::pages::iterator texture_atlas::create_page(dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat)
     {
-        return iPages.insert(iPages.end(), page{ texture{ page_size(), aDpiScaleFactor, aSampling, aDataFormat }, fragments{ page_size() } });
+        optional_color clearColor;
+        switch (aSampling)
+        {
+        case texture_sampling::Normal:
+        case texture_sampling::NormalMipmap:
+        case texture_sampling::Nearest:
+        case texture_sampling::Scaled:
+        case texture_sampling::Data:
+            clearColor = color{};
+            break;
+        case texture_sampling::Multisample:
+        case texture_sampling::Multisample4x:
+        case texture_sampling::Multisample8x:
+        case texture_sampling::Multisample16x:
+        case texture_sampling::Multisample32x:
+            break;
+        }
+        auto newPage = iPages.insert(iPages.end(), page{ 
+            texture{ 
+                page_size(), 
+                aDpiScaleFactor, 
+                aSampling, 
+                aDataFormat,
+                texture_data_type::UnsignedByte,
+                color_space::sRGB,
+                clearColor },
+            fragments{ page_size() } });
+        return newPage;
     }
 
     std::pair<texture_atlas::pages::iterator, rect> texture_atlas::allocate_space(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat)

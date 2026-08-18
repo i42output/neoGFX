@@ -265,8 +265,19 @@ namespace neogfx
                 std::vector<std::uint8_t> data(imagePartExtents.cx * 4 * imagePartExtents.cy);
                 for (std::size_t y = 0; y < imagePartExtents.cy; ++y)
                     for (std::size_t x = 0; x < imagePartExtents.cx; ++x)
+                    {
+                        auto const srcPixelIndex = (y + imagePartOrigin.y) * imageExtents.cx * 4 + (x + imagePartOrigin.x) * 4;
+                        auto const alpha = imageData[srcPixelIndex + 3];
                         for (std::size_t c = 0; c < 4; ++c)
-                            data[(imagePartExtents.cy - 1 - y) * imagePartExtents.cx * 4 + x * 4 + c] = imageData[(y + imagePartOrigin.y) * imageExtents.cx * 4 + (x + imagePartOrigin.x) * 4 + c];
+                        {
+                            auto const component = imageData[srcPixelIndex + c];
+                            auto const dstComponentIndex = (imagePartExtents.cy - 1 - y) * imagePartExtents.cx * 4 + x * 4 + c;
+                            if (alpha != 0u)
+                                data[dstComponentIndex] = component;
+                            else
+                                data[dstComponentIndex] = 0u;
+                        }
+                    }
                 set_pixels(rect{ point{}, imagePartExtents }, &data[0]);
             }
             break;

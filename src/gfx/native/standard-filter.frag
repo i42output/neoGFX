@@ -38,6 +38,33 @@ void standard_filter_shader(inout vec4 color, inout vec4 function0, inout vec4 f
                 color = sum / weightSum;
             }
             break;
+        case 3: // filter: Dilate (separable morphological max)
+            {
+                int taps = int(uFilterArguments.x);
+                vec2 stepUv = vec2(uFilterArguments.y, uFilterArguments.z) / uTextureExtents;
+                // No bounds test: dilate_filter::outset() is the exact per-axis
+                // reach of the whole pass sequence, and scoped_filter clears the
+                // buffers to outset() + 1, so every texel a tap can reach is
+                // already cleared.
+                // combined_texel_at, not texel_at: texel_at resolves to
+                // texelFetch(.., gl_SampleID) and max() of a single arbitrary
+                // sample varies per invocation at a partially covered edge. A
+                // Gaussian tolerates that because it averages many taps; max
+                // does not.
+                vec4 best = combined_texel_at(TexCoord);
+                for (int f = 1; f <= taps; ++f)
+                {
+                    vec2 o = stepUv * float(f);
+                    vec4 s0 = combined_texel_at(TexCoord - o);
+                    vec4 s1 = combined_texel_at(TexCoord + o);
+                    if (s0.a > best.a)
+                        best = s0;
+                    if (s1.a > best.a)
+                        best = s1;
+                }
+                color = best;
+            }
+            break;
         }
     }
 }

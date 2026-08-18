@@ -140,6 +140,8 @@ namespace neogfx
                 return false;
             if (!batchable(aLeft.effect(), aRight.effect()))
                 return false;
+            if (!batchable(aLeft.effect2(), aRight.effect2()))
+                return false;
             return true;
         }
 

@@ -94,6 +94,7 @@ namespace neogfx
         None            = 0,
         GaussianBlur    = 1,
         GaussianBlur2D  = 2,
+        Dilate          = 3,
     };
 
     enum class shader_shape : std::uint32_t
@@ -245,6 +246,7 @@ namespace neogfx
     {
         switch (aTextEffectType)
         {
+        case text_effect_type::Outline:
         case text_effect_type::Glow:
         case text_effect_type::Shadow:
             return true;

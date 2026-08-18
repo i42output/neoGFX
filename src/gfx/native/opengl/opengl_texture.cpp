@@ -66,6 +66,10 @@ namespace neogfx
             switch (aSampling)
             {
             case texture_sampling::Multisample:
+            case texture_sampling::Multisample4x:
+            case texture_sampling::Multisample8x:
+            case texture_sampling::Multisample16x:
+            case texture_sampling::Multisample32x:
                 return GL_TEXTURE_2D_MULTISAMPLE;
             case texture_sampling::Data:
                 return GL_TEXTURE_RECTANGLE;
@@ -79,6 +83,10 @@ namespace neogfx
             switch (aSampling)
             {
             case texture_sampling::Multisample:
+            case texture_sampling::Multisample4x:
+            case texture_sampling::Multisample8x:
+            case texture_sampling::Multisample16x:
+            case texture_sampling::Multisample32x:
                 return GL_TEXTURE_BINDING_2D_MULTISAMPLE;
             case texture_sampling::Data:
                 return GL_TEXTURE_BINDING_RECTANGLE;
@@ -91,6 +99,19 @@ namespace neogfx
     namespace
     {
         constexpr std::int32_t MaxBleedGuardWidth_i32 = static_cast<std::int32_t>(MaxBleedGuardWidth);
+
+        inline std::int32_t align_up(std::int32_t aValue, std::int32_t aAlignment)
+        {
+            return (aValue + aAlignment - 1) / aAlignment * aAlignment;
+        }
+
+        inline std::int32_t next_power_of_two(std::int32_t aValue, std::int32_t aMinimum)
+        {
+            auto result = aMinimum;
+            while (result < aValue)
+                result *= 2;
+            return result;
+        }
     }
 
     template <typename T>
@@ -104,87 +125,117 @@ namespace neogfx
         iSampling{ aSampling },
         iDataFormat{ aDataFormat },
         iSize{ aExtents },
-        iStorageSize{ aSampling != texture_sampling::NormalMipmap ?
-            (aSampling != texture_sampling::Data ? decltype(iStorageSize){((iSize.cx + MaxBleedGuardWidth_i32 * 2 - 1) / 16 + 1) * 16, ((iSize.cy + MaxBleedGuardWidth_i32 * 2 - 1) / 16 + 1) * 16} : decltype(iStorageSize){iSize}) :
-            decltype(iStorageSize){size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + MaxBleedGuardWidth_i32 * 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + MaxBleedGuardWidth_i32 * 2))), 16.0)}} },
+        iStorageSize{ aSampling == texture_sampling::Data ?
+            iSize :
+            aSampling == texture_sampling::NormalMipmap ?
+                size_i32{
+                    next_power_of_two(static_cast<std::int32_t>(iSize.cx) + MaxBleedGuardWidth_i32 * 2, 16),
+                    next_power_of_two(static_cast<std::int32_t>(iSize.cy) + MaxBleedGuardWidth_i32 * 2, 16) }.as<u32>() :
+                size_i32{
+                    align_up(static_cast<std::int32_t>(iSize.cx) + MaxBleedGuardWidth_i32 * 2, 16),
+                    align_up(static_cast<std::int32_t>(iSize.cy) + MaxBleedGuardWidth_i32 * 2, 16) }.as<u32>() },
         iHandle{ 0 },
         iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
         iFrameBuffer{ 0 },
         iDepthStencilBuffer{ 0 }
     {
+        bool bound = false;
         try
         {
+            auto const target = to_gl_enum(sampling());
+            bool const multisample = (target == GL_TEXTURE_2D_MULTISAMPLE);
+
             glCheck(glGenTextures(1, &iHandle));
             bind();
-            glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
-            glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
-            switch(sampling())
+            bound = true;
+
+            if (!multisample)
             {
-            case texture_sampling::Normal:
-                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-                break;
-            case texture_sampling::NormalMipmap:
-                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-                break;
-            case texture_sampling::Nearest:
-            case texture_sampling::Scaled:
-                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-                break;
-            case texture_sampling::Data:
-                glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-                glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-                break;
+                glCheck(glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
+                glCheck(glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
+
+                switch (sampling())
+                {
+                case texture_sampling::Normal:
+                    glCheck(glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+                    glCheck(glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+                    break;
+                case texture_sampling::NormalMipmap:
+                    glCheck(glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+                    glCheck(glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+                    break;
+                case texture_sampling::Nearest:
+                case texture_sampling::Scaled:
+                case texture_sampling::Data:
+                    glCheck(glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+                    glCheck(glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+                    break;
+                case texture_sampling::Multisample:
+                    break;
+                default:
+                    throw std::logic_error("neogfx::opengl_texture: unhandled texture_sampling");
+                }
             }
+
             auto const [internalformat, format, type] = to_gl_enums(iDataFormat, kDataType);
-            if (sampling() != texture_sampling::Multisample)
+
+            if (!multisample)
             {
-                thread_local std::vector<value_type> data;
-                data.clear();
-                data.resize(iStorageSize.cx * 4 * iStorageSize.cy);
-                auto const bleedGuard = static_cast<std::size_t>(bleed_guard());
-                if (aColor.has_value())
-                {
-                    if constexpr (std::is_same_v<value_type, avec4u8>)
-                        for (std::size_t y = bleedGuard; y < bleedGuard + iSize.cy; ++y)
-                            for (std::size_t x = bleedGuard; x < bleedGuard + iSize.cx; ++x)
-                                data[y * iStorageSize.cx + x + 0] = 
-                                    value_type{
-                                        aColor->red(),
-                                        aColor->green(),
-                                        aColor->blue(),
-                                        aColor->alpha()
-                                    };
-                    else if constexpr (std::is_same_v<value_type, std::array<float, 4>>)
-                        for (std::size_t y = bleedGuard; y < bleedGuard + iSize.cy; ++y)
-                            for (std::size_t x = bleedGuard; x < bleedGuard + iSize.cx; ++x)
-                                data[y * iStorageSize.cx + x + 0] = 
-                                    value_type{
-                                        aColor->red<float>(),
-                                        aColor->green<float>(),
-                                        aColor->blue<float>(),
-                                        aColor->alpha<float>()
-                                    };
-                }
-                glCheck(glTexImage2D(to_gl_enum(sampling()), 0, internalformat, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, format, type, data.empty() ? nullptr : &data[0]));
-                if (sampling() == texture_sampling::NormalMipmap)
-                {
-                    glCheck(glGenerateMipmap(GL_TEXTURE_2D));
-                }
+                glCheck(glTexImage2D(target, 0, internalformat,
+                    static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy),
+                    0, format, type, nullptr));
             }
             else
             {
-                if (aColor.has_value())
-                    throw multisample_texture_initialization_unsupported();
-                glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples(), internalformat, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
+                glCheck(glTexImage2DMultisample(target, samples(), internalformat,
+                    static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
             }
+
             unbind();
+            bound = false;
+
+            if (aColor)
+            {
+                if (multisample)
+                    throw std::logic_error("neogfx::opengl_texture: clear colour unsupported for multisample sampling");
+
+                switch (format)
+                {
+                case GL_RED:
+                case GL_RG:
+                case GL_RGB:
+                case GL_BGR:
+                case GL_RGBA:
+                case GL_BGRA:
+                    break;
+                default:
+                    throw std::logic_error("neogfx::opengl_texture: clear colour unsupported for this data format");
+                }
+                std::uint8_t const clearColour[4] = { aColor->red(), aColor->green(), aColor->blue(), aColor->alpha() };
+                glCheck(glClearTexImage(iHandle, 0, GL_RGBA, GL_UNSIGNED_BYTE, clearColour));
+            }
+
+            if (sampling() == texture_sampling::NormalMipmap)
+            {
+                bind();
+                bound = true;
+                glCheck(glGenerateMipmap(target));
+                unbind();
+                bound = false;
+            }
         }
         catch (...)
         {
-            glCheck(glDeleteTextures(1, &iHandle));
+            if (bound)
+            {
+                try { unbind(); }
+                catch (...) {}
+            }
+            if (iHandle != 0)
+            {
+                glDeleteTextures(1, &iHandle);   // deliberately not glCheck'd: must not throw here
+                iHandle = 0;
+            }
             throw;
         }
     }
@@ -200,86 +251,135 @@ namespace neogfx
         iSampling{ aImage.sampling() },
         iDataFormat{ aDataFormat },
         iSize{ aImagePart.extents() },
-        iStorageSize{ aImage.sampling() != texture_sampling::NormalMipmap ? 
-            (aImage.sampling() != texture_sampling::Data ? decltype(iStorageSize){((iSize.cx + MaxBleedGuardWidth_i32 * 2 - 1) / 16 + 1) * 16, ((iSize.cy + MaxBleedGuardWidth_i32 * 2 - 1) / 16 + 1) * 16} : decltype(iStorageSize){iSize}) :
-            decltype(iStorageSize){size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + MaxBleedGuardWidth_i32 * 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + MaxBleedGuardWidth_i32 * 2))), 16.0)}} },
+        iStorageSize{ aImage.sampling() == texture_sampling::Data ?
+            iSize :
+            aImage.sampling() == texture_sampling::NormalMipmap ?
+                size_i32{
+                    next_power_of_two(static_cast<std::int32_t>(iSize.cx) + MaxBleedGuardWidth_i32 * 2, 16),
+                    next_power_of_two(static_cast<std::int32_t>(iSize.cy) + MaxBleedGuardWidth_i32 * 2, 16) }.as<u32>() :
+                size_i32{
+                    align_up(static_cast<std::int32_t>(iSize.cx) + MaxBleedGuardWidth_i32 * 2, 16),
+                    align_up(static_cast<std::int32_t>(iSize.cy) + MaxBleedGuardWidth_i32 * 2, 16) }.as<u32>() },
         iHandle{ 0 },
         iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame },
         iFrameBuffer{ 0 },
         iDepthStencilBuffer{ 0 }
     {
-        try
+        if constexpr (!std::is_same_v<value_type, avec4u8> && !std::is_same_v<value_type, std::array<float, 4>>)
+            throw unsupported_color_format();
+        else
         {
-            glCheck(glGenTextures(1, &iHandle));
-            bind();
-            switch(sampling())
-            {
-            case texture_sampling::Normal:
-                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-                break;
-            case texture_sampling::NormalMipmap:
-                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-                break;
-            case texture_sampling::Nearest:
-            case texture_sampling::Scaled:
-                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-                glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-                break;
-            case texture_sampling::Data:
-                glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-                glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-                break;
-            case texture_sampling::Multisample:
+            constexpr bool normalize = std::is_same_v<value_type, std::array<float, 4>>;
+
+            // validate before creating any GL object, so failure needs no cleanup
+            if (sampling() == texture_sampling::Multisample)
                 throw multisample_texture_initialization_unsupported();
-                break;
-            }
-            auto const [internalformat, format, type] = to_gl_enums(iDataFormat, kDataType);
-            switch (aImage.color_format())
+            if (aImage.color_format() != color_format::RGBA8)
+                throw unsupported_color_format();
+
+            size_u32 const imageExtents = aImage.extents();
+            point_u32 const partOrigin = aImagePart.position();
+            size_u32 const partExtents{ iSize };
+            auto const bleedGuard = static_cast<std::uint32_t>(bleed_guard());
+
+            if (partOrigin.x + partExtents.cx > imageExtents.cx || partOrigin.y + partExtents.cy > imageExtents.cy)
+                throw std::logic_error("neogfx::opengl_texture: image part out of range");
+            if (bleedGuard * 2 + partExtents.cx > iStorageSize.cx || bleedGuard * 2 + partExtents.cy > iStorageSize.cy)
+                throw std::logic_error("neogfx::opengl_texture: bleed guard exceeds storage size");
+
+            bool bound = false;
+            try
             {
-            case color_format::RGBA8:
+                auto const target = to_gl_enum(sampling());
+
+                glCheck(glGenTextures(1, &iHandle));
+                bind();
+                bound = true;
+
+                glCheck(glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
+                glCheck(glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
+
+                switch (sampling())
                 {
-                    size_u32 const imageExtents = aImage.extents();
-                    point_u32 const imagePartOrigin = aImagePart.position();
-                    size_u32 const imagePartExtents = aImagePart.extents();
-                    thread_local std::vector<value_type> data;
-                    data.clear();
-                    data.resize(iStorageSize.cx * 4 * iStorageSize.cy);
-                    auto const bleedGuard = static_cast<std::size_t>(bleed_guard());
-                    if constexpr (std::is_same_v<value_type, avec4u8>)
+                case texture_sampling::Normal:
+                    glCheck(glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+                    glCheck(glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+                    break;
+                case texture_sampling::NormalMipmap:
+                    glCheck(glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+                    glCheck(glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+                    break;
+                case texture_sampling::Nearest:
+                case texture_sampling::Scaled:
+                case texture_sampling::Data:
+                    glCheck(glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+                    glCheck(glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+                    break;
+                case texture_sampling::Multisample:
+                    throw multisample_texture_initialization_unsupported();
+                default:
+                    throw std::logic_error("neogfx::opengl_texture: unhandled texture_sampling");
+                }
+
+                auto const [internalformat, format, type] = to_gl_enums(iDataFormat, kDataType);
+
+                thread_local std::vector<value_type> data;
+                // one element per texel; value_type already holds all four components
+                data.assign(static_cast<std::size_t>(iStorageSize.cx) * iStorageSize.cy, value_type{});
+
+                auto const* const imageData = static_cast<std::uint8_t const*>(aImage.cpixels());
+                for (std::uint32_t y = 0; y < partExtents.cy; ++y)
+                {
+                    auto const* const srcRow = imageData +
+                        (static_cast<std::size_t>(partOrigin.y + y) * imageExtents.cx + partOrigin.x) * 4;
+                    // vertical flip, inset by the bleed guard on both axes
+                    auto* const dstRow = data.data() +
+                        static_cast<std::size_t>(bleedGuard + partExtents.cy - 1 - y) * iStorageSize.cx + bleedGuard;
+                    for (std::uint32_t x = 0; x < partExtents.cx; ++x)
                     {
-                        const std::uint8_t* imageData = static_cast<const std::uint8_t*>(aImage.cpixels());
-                        for (std::size_t y = bleedGuard; y < bleedGuard + iSize.cy; ++y)
-                            for (std::size_t x = bleedGuard; x < bleedGuard + iSize.cx; ++x)
-                                for (std::size_t c = 0; c < 4; ++c)
-                                    data[(iSize.cy + bleedGuard - y - 1) * iStorageSize.cx + x][c] = imageData[(y + imagePartOrigin.y - bleedGuard) * imageExtents.cx * 4 + (imagePartOrigin.x + x - bleedGuard) * 4 + c];
-                    }
-                    else if constexpr (std::is_same_v<value_type, std::array<float, 4>>)
-                    {
-                        const std::uint8_t* imageData = static_cast<const std::uint8_t*>(aImage.cpixels());
-                        for (std::size_t y = bleedGuard; y < bleedGuard + iSize.cy; ++y)
-                            for (std::size_t x = bleedGuard; x < bleedGuard + iSize.cx; ++x)
-                                for (std::size_t c = 0; c < 4; ++c)
-                                    data[(iSize.cy + bleedGuard - y - 1) * iStorageSize.cx + x][c] = imageData[(y + imagePartOrigin.y - bleedGuard) * imageExtents.cx * 4 + (imagePartOrigin.x + x - bleedGuard) * 4 + c] / 255.0f;
-                    }
-                    glCheck(glTexImage2D(GL_TEXTURE_2D, 0, internalformat, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, format, type, &data[0]));
-                    if (sampling() == texture_sampling::NormalMipmap)
-                    {
-                        glCheck(glGenerateMipmap(GL_TEXTURE_2D));
+                        auto const alpha = srcRow[x * 4 + 3];
+                        for (std::size_t c = 0; c < 4; ++c)
+                        {
+                            if (alpha != 0u)
+                            {
+                                auto const component = srcRow[x * 4 + c];
+                                if constexpr (normalize)
+                                    dstRow[x][c] = component / 255.0f;
+                                else
+                                    dstRow[x][c] = component;
+                            }
+                            else
+                                dstRow[x][c] = 0;
+                        }
                     }
                 }
-                break;
-            default:
-                throw unsupported_color_format();
-                break;
+
+                glCheck(glTexImage2D(target, 0, internalformat,
+                    static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy),
+                    0, format, type, data.data()));
+
+                if (sampling() == texture_sampling::NormalMipmap)
+                {
+                    glCheck(glGenerateMipmap(target));
+                }
+
+                unbind();
+                bound = false;
             }
-            unbind();
-        }
-        catch (...)
-        {
-            glCheck(glDeleteTextures(1, &iHandle));
-            throw;
+            catch (...)
+            {
+                if (bound)
+                {
+                    try { unbind(); }
+                    catch (...) {}
+                }
+                if (iHandle != 0)
+                {
+                    glDeleteTextures(1, &iHandle);   // deliberately not glCheck'd: must not throw here
+                    iHandle = 0;
+                }
+                throw;
+            }
         }
     }
 

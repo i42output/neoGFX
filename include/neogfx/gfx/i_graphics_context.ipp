@@ -26,7 +26,7 @@ namespace neogfx
     scoped_filter<Filter>::scoped_filter(i_rendering_context& aRc, Filter const& aFilter, bool aSubtractRadius) :
         iRc{ aRc },
         iFilter{ aFilter },
-        iOutset{ std::max(aFilter.radius, aFilter.taps / 2.0) },
+        iOutset{ aFilter.outset() },
         iBufferRect{ point{}, aFilter.region.extents() + size{ iOutset * 2.0 } },
         iBuffers{ std::move(create_ping_pong_buffers(aRc, iBufferRect.extents(), texture_sampling::Multisample, color{}, iOutset + 1.0)) },
         iRenderTarget{ front_buffer() },
@@ -93,6 +93,16 @@ namespace neogfx
                     iBufferRect, *accumulator, iBufferRect,
                     iFilter.algorithm, iFilter.taps, iFilter.sigma,
                     pass == 0 ? blending_mode::None : iFilter.accumulatorBlend);
+            }
+            else if constexpr (std::is_same_v<Filter, dilate_filter>)
+            {
+                // Unlike blur, each dilate pass is a single directional max, so
+                // the ping-pong alternates once per pass rather than per filter.
+                accumulator = &(accumulator == &back_buffer() ? front_buffer() : back_buffer()).dilate(
+                    iBufferRect, *accumulator, iBufferRect,
+                    iFilter.pass_taps(static_cast<std::uint32_t>(pass)),
+                    iFilter.pass_direction(static_cast<std::uint32_t>(pass)),
+                    blending_mode::None);
             }
         }
 

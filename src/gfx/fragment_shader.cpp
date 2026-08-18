@@ -183,6 +183,12 @@ namespace neogfx
             aArgument1 = (static_cast<std::uint32_t>(aArgument1) | 1u);
         auto const arguments = vec4{ aArgument1, aArgument2, aArgument3, aArgument4 };
         uFilterArguments = arguments.as<float>();
+        if (aFilter == shader_filter::Dilate)
+        {
+            // Morphological: no kernel texture, extent is carried in the arguments.
+            uFilterKernelSize = 0;
+            return;
+        }
         auto kernel = iFilterKernels.find(std::make_pair(aFilter, arguments));
         if (kernel == iFilterKernels.end())
         {

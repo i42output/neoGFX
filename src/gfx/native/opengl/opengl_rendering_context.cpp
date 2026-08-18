@@ -267,6 +267,8 @@ namespace neogfx
                 if (service<i_debug>().item() == this)
                     service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": target_activating" << std::endl;
 #endif
+                invalidate_fast_state();
+                invalidate_slow_state();
                 apply_state();
             });
 
@@ -305,6 +307,8 @@ namespace neogfx
                 if (service<i_debug>().item() == this)
                     service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": target_activating" << std::endl;
 #endif
+                invalidate_fast_state();
+                invalidate_slow_state();
                 apply_state();
             });
 
@@ -344,6 +348,8 @@ namespace neogfx
                 if (service<i_debug>().item() == this)
                     service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": target_activating" << std::endl;
 #endif
+                invalidate_fast_state();
+                invalidate_slow_state();
                 apply_state();
             });
 
@@ -2293,25 +2299,7 @@ namespace neogfx
             return boundingRect;
         };
 
-        auto expand_quad = [](quadf_2d const& aQuad, vec2f const& aOutset) noexcept
-            {
-                auto expansion_sign = [](float aDelta)
-                    {
-                        // 0.0f for a degenerate axis: don't translate a zero-extent quad
-                        return aDelta > 0.0f ? 1.0f : aDelta < 0.0f ? -1.0f : 0.0f;
-                    };
-
-                auto const centre = (aQuad[0] + aQuad[1] + aQuad[2] + aQuad[3]) / 4.0f;
-                quadf_2d result = aQuad;
-                for (auto& v : result)
-                {
-                    auto const d = v - centre;
-                    v += vec2f{ expansion_sign(d.x) * aOutset.x, expansion_sign(d.y) * aOutset.y };
-                }
-                return result;
-            };
-
-        auto shape_quad = [&](font const& glyphFont, glyph_char const& glyphChar, bool outline = false) -> quadf_2d const&
+        auto shape_quad = [&](font const& glyphFont, glyph_char const& glyphChar, bool outline = false) -> quadf_2d
             {
                 static optional_mat44f const italicTransformGui = mat44f{
                         { 1.0f, 0.0f, 0.0f, 0.0f },
@@ -2328,7 +2316,7 @@ namespace neogfx
                     logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
                     italicTransformGui : italicTransformGame;
 
-                thread_local quadf_2d shapeQuad;
+                quadf_2d shapeQuad;
 
                 if (!outline)
                 {
@@ -2336,13 +2324,8 @@ namespace neogfx
                         return glyphChar.shape;
                     shapeQuad = glyphChar.shape;
                 }
-                else if (glyphChar.outlineShape.has_value())
-                    shapeQuad = *glyphChar.outlineShape;
                 else
-                {
-                    auto const radius = static_cast<float>(glyphFont.info().outline().radius);
-                    shapeQuad = expand_quad(glyphChar.shape, vec2f{ radius, radius });
-                }
+                    shapeQuad = glyphChar.outlineShape.value_or(glyphChar.shape);
 
                 if (!italicTransform)
                     return shapeQuad;
@@ -2429,12 +2412,25 @@ namespace neogfx
                     auto& textEffect = drawOp.appearance->effect();
                     auto& textEffect2 = drawOp.appearance->effect2();
 
-                    if ((textEffect != std::nullopt &&
-                        (textEffect->type() == text_effect_type::Glow || textEffect->type() == text_effect_type::Shadow ||
-                         textEffect->type() == text_effect_type::OutlineGlow || textEffect->type() == text_effect_type::OutlineShadow)) ||
-                        (textEffect2 != std::nullopt &&
-                        (textEffect2->type() == text_effect_type::Glow || textEffect2->type() == text_effect_type::Shadow ||
-                         textEffect2->type() == text_effect_type::OutlineGlow || textEffect2->type() == text_effect_type::OutlineShadow)))
+                    auto consider = [&](optional_text_effect const& aEffect)
+                        {
+                            if (!aEffect)
+                                return false;
+                            switch (aEffect->type())
+                            {
+                            case text_effect_type::Outline:
+                                return is_emoji(glyphChar);
+                            case text_effect_type::Glow:
+                            case text_effect_type::Shadow:
+                            case text_effect_type::OutlineGlow:
+                            case text_effect_type::OutlineShadow:
+                                return true;
+                            default:
+                                return false;
+                            }
+                        };
+
+                    if (consider(textEffect) || consider(textEffect2))
                     {
                         if (!filterRegion)
                             filterRegion = bounding_rect().value();
@@ -2528,65 +2524,59 @@ namespace neogfx
                 }
                 break;
             case draw_glyphs_stage::EmojiOutline:
-                for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
+                if (filterRegion)
                 {
-                    auto& glyphText = *drawOp.glyphText;
-                    auto& glyphChar = *drawOp.glyphChar;
-                    auto const& glyphFont = glyphText.glyph_font(glyphChar);
-
-                    if (is_whitespace(glyphChar) || !is_emoji(glyphChar))
-                        continue;
-
-                    for (auto textEffect : drawOp.appearance->being_filtered() ?
-                        std::initializer_list<text_effect const*>{ drawOp.appearance->being_filtered() } :
-                        std::initializer_list<text_effect const*>{
-                            drawOp.appearance->effect() ? &*drawOp.appearance->effect() : nullptr,
-                            drawOp.appearance->effect2() ? &*drawOp.appearance->effect2() : nullptr })
+                    for (auto effect : { 0, 1 })
                     {
-                        if (!textEffect)
-                            continue;
-                        
-                        if (textEffect->ignore_emoji())
-                            continue;
+                        std::optional<scoped_filter<dilate_filter>> filter;
+                        scalar opacity = 1.0;
 
-                        if (textEffect->type() != text_effect_type::Outline &&
-                            !(drawOp.appearance->being_filtered() &&
-                                (textEffect->type() == text_effect_type::OutlineGlow ||
-                                    textEffect->type() == text_effect_type::OutlineShadow)))
-                            continue;
+                        for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
+                        {
+                            if (drawOp.appearance->being_filtered())
+                                continue;
 
-                        auto const& shapeQuad = shape_quad(glyphFont, glyphChar, true);
+                            auto& glyphText = *drawOp.glyphText;
+                            auto& glyphChar = *drawOp.glyphChar;
+                            auto const& glyphFont = glyphText.glyph_font(glyphChar);
 
-                        auto const& glyphQuad = quadf_2d{
-                            (glyphChar.cell[0] + shapeQuad[0]).round(),
-                            (glyphChar.cell[0] + shapeQuad[1]).round(),
-                            (glyphChar.cell[0] + shapeQuad[2]).round(),
-                            (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
+                            if (!is_emoji(glyphChar))
+                                continue;
 
-                        auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
+                            auto const& textEffect = (effect == 0 ? drawOp.appearance->effect() : drawOp.appearance->effect2());
 
-                        auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
-                        auto const& emojiTexture = emojiAtlas.emoji_texture(glyphChar.value).as_sub_texture();
-                        auto const& ink = textEffect->color().with_alpha(
-                            textEffect->type() == text_effect_type::Outline ? textEffect->color().alpha() / 255.0 : 1.0);
-                        tMeshOrigins.push_back(drawOp.origin);
-                        tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
-                        tMeshRenderers.push_back(game::mesh_renderer
+                            if (!textEffect || textEffect->ignore_emoji())
+                                continue;
+
+                            if (textEffect->type() != text_effect_type::Outline)
+                                continue;
+
+                            if (drawOp.appearance->only_calculate_effect())
+                                continue;
+
+                            auto const radius = glyphFont.info().outline().radius;
+
+                            if (radius == 0.0)
+                                continue;
+
+                            if (!filter)
                             {
-                                game::material
-                                {
-                                    ink_maybe_animated(drawOp, ink),
-                                    std::holds_alternative<gradient>(ink) ?
-                                        to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(
-                                            rect{ to_aabb_2d(glyphQuad.begin(), glyphQuad.end()) } + drawOp.origin)) :
-                                        std::optional<game::gradient>{},
-                                    {},
-                                    to_ecs_component(emojiTexture),
-                                    !drawOp.appearance->being_filtered() ?
-                                        shader_effect::ColorizeSpot :
-                                        to_ecs_component(drawOp.appearance->being_filtered()->type())
-                                }
-                            });
+                                filter.emplace(*this, dilate_filter::outline(*filterRegion, radius));
+                                opacity = textEffect->color().alpha() / 255.0;
+                            }
+                            
+                            filter->front_buffer().draw_glyph(
+                                drawOp.point.as<scalar>() + textEffect->offset(),
+                                glyphText,
+                                glyphChar,
+                                drawOp.appearance->as_being_filtered(*textEffect));
+                        }
+
+                        if (filter)
+                        {
+                            scoped_opacity so{ *this, opacity * this->opacity() };
+                            filter = std::nullopt;
+                        }
                     }
                 }
                 break;
@@ -2856,9 +2846,9 @@ namespace neogfx
 
         auto const logicalCoordinates = logical_coordinates();
 
-        thread_local patch_drawable patchDrawable = {};
-        patchDrawable.provider = &aVertexProvider;
-        patchDrawable.items.clear();
+        thread_local patch_drawable tPatchDrawable = {};
+        tPatchDrawable.provider = &aVertexProvider;
+        tPatchDrawable.items.clear();
 
         auto cache = aVertexProvider.cacheable() ? &aVertexProvider.cache() : nullptr;
 
@@ -2870,6 +2860,7 @@ namespace neogfx
             auto& meshRenderer = *meshDrawable.renderer;
             if (!meshRenderer.render)
                 continue;
+
             auto& meshFilter = *meshDrawable.meshFilter;
             bool const cached = cache && meshDrawable.entity != null_entity &&
                 game::is_render_cache_valid_no_lock(*cache, meshDrawable.entity);
@@ -3009,7 +3000,7 @@ namespace neogfx
                     cacheIndices[1] = static_cast<std::uint32_t>(nextIndex);
                 }
 
-                patchDrawable.items.emplace_back(meshDrawable, cacheIndices[0], cacheIndices[1], itemMaterial, itemFaces);
+                tPatchDrawable.items.emplace_back(meshDrawable, cacheIndices[0], cacheIndices[1], itemMaterial, itemFaces);
 
                 return true;
             };
@@ -3030,7 +3021,7 @@ namespace neogfx
                 meshRenderCache.state = game::cache_state::Clean;        
         }
 
-        draw_patch(patchDrawable, aTransformation);
+        draw_patch(tPatchDrawable, aTransformation);
     }
 
     void opengl_rendering_context::draw_patch(patch_drawable& aPatch, const mat44& aTransformation)

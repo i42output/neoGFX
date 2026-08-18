@@ -180,7 +180,7 @@ namespace neogfx
         case text_effect_type::None:
             return shader_effect::None;
         case text_effect_type::Outline:
-            return shader_effect::None;
+            return shader_effect::ColorizeSpot;
         case text_effect_type::Glow:
             return shader_effect::ColorizeSpot;
         case text_effect_type::Shadow:
