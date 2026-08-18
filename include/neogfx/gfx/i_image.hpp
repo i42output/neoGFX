@@ -44,12 +44,17 @@ namespace neogfx
         virtual neogfx::color_format color_format() const = 0;
         virtual texture_sampling sampling() const = 0;
         virtual texture_data_format data_format() const = 0;
+    public:
         virtual const neogfx::size& extents() const = 0;
         virtual void resize(const neogfx::size& aNewSize) = 0;
+    public:
         virtual const void* cpixels() const = 0;
         virtual const void* pixels() const = 0;
         virtual void* pixels() = 0;
         virtual color get_pixel(const point& aPoint) const = 0;
         virtual void set_pixel(const point& aPoint, const color& aColor) = 0;
+    public:
+        virtual bool discard_background_matte() const = 0;
+        virtual void set_discard_background_matte(bool aDiscard) = 0;
     };
 }

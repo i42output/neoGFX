@@ -59,32 +59,37 @@ namespace neogfx
         image(image&& aOther, texture_sampling aSampling);
         ~image();
     public:
-        bool available() const override;
-        bool downloading() const override;
-        double downloading_progress() const override;
-        bool error() const override;
-        i_string const& error_string() const override;
+        bool available() const final;
+        bool downloading() const final;
+        double downloading_progress() const final;
+        bool error() const final;
+        i_string const& error_string() const final;
     public:
-        i_string const& uri() const override;
-        bool is_empty() const override;
-        const void* cdata() const override;
-        const void* data() const override;
-        void* data() override;
-        std::size_t size() const override;
-        hash_digest_type const& hash() const override;
+        i_string const& uri() const final;
+        bool is_empty() const final;
+        const void* cdata() const final;
+        const void* data() const final;
+        void* data() final;
+        std::size_t size() const final;
+        hash_digest_type const& hash() const final;
     public:
-        dimension dpi_scale_factor() const override;
-        neogfx::color_space color_space() const override;
-        neogfx::color_format color_format() const override;
-        texture_sampling sampling() const override;
-        texture_data_format data_format() const override;
-        const neogfx::size& extents() const override;
-        void resize(const neogfx::size& aNewSize) override;
-        const void* cpixels() const override;
-        const void* pixels() const override;
-        void* pixels() override;
-        color get_pixel(const point& aPoint) const override;
-        void set_pixel(const point& aPoint, const color& aColor) override;
+        dimension dpi_scale_factor() const final;
+        neogfx::color_space color_space() const final;
+        neogfx::color_format color_format() const final;
+        texture_sampling sampling() const final;
+        texture_data_format data_format() const final;
+    public:
+        const neogfx::size& extents() const final;
+        void resize(const neogfx::size& aNewSize) final;
+    public:
+        const void* cpixels() const final;
+        const void* pixels() const final;
+        void* pixels() final;
+        color get_pixel(const point& aPoint) const final;
+        void set_pixel(const point& aPoint, const color& aColor) final;
+    public:
+        bool discard_background_matte() const final;
+        void set_discard_background_matte(bool aDiscard) final;
     private:
         bool has_resource() const;
         const i_resource& resource() const;
@@ -102,5 +107,6 @@ namespace neogfx
         mutable cache<data_type> iHash;
         texture_sampling iSampling;
         neogfx::size iSize;
+        bool iDiscardBackgroundMatte = true;
     };
 }

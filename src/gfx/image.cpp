@@ -330,6 +330,15 @@ namespace neogfx
         }
     }
 
+    bool image::discard_background_matte() const
+    {
+        return iDiscardBackgroundMatte;
+    }
+
+    void image::set_discard_background_matte(bool aDiscard)
+    {
+        iDiscardBackgroundMatte = aDiscard;
+    }
     bool image::has_resource() const
     {
         return iResource != nullptr;

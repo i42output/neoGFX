@@ -335,12 +335,13 @@ namespace neogfx
                     // vertical flip, inset by the bleed guard on both axes
                     auto* const dstRow = data.data() +
                         static_cast<std::size_t>(bleedGuard + partExtents.cy - 1 - y) * iStorageSize.cx + bleedGuard;
+                    bool const discardNackgroundMatte = aImage.discard_background_matte();
                     for (std::uint32_t x = 0; x < partExtents.cx; ++x)
                     {
                         auto const alpha = srcRow[x * 4 + 3];
                         for (std::size_t c = 0; c < 4; ++c)
                         {
-                            if (alpha != 0u)
+                            if (alpha != 0u || !discardNackgroundMatte)
                             {
                                 auto const component = srcRow[x * 4 + c];
                                 if constexpr (normalize)
@@ -611,7 +612,7 @@ namespace neogfx
     template <typename T>
     void opengl_texture<T>::set_pixels(const i_image& aImage)
     {
-        set_pixels(rect{ point{}, aImage.extents() }, aImage.cpixels());
+        set_pixels(aImage, rect{ point{}, aImage.extents() });
     }
 
     template <typename T>
@@ -620,6 +621,7 @@ namespace neogfx
         size_u32 const imageExtents = aImage.extents();
         point_u32 const imagePartOrigin = aImagePart.position();
         size_u32 const imagePartExtents = aImagePart.extents();
+        bool const discardNackgroundMatte = aImage.discard_background_matte();
         switch (aImage.color_format())
         {
         case color_format::RGBA8:
@@ -631,8 +633,18 @@ namespace neogfx
                 auto const bleedGuard = static_cast<std::size_t>(bleed_guard());
                 for (std::size_t y = 0; y < imagePartExtents.cy; ++y)
                     for (std::size_t x = 0; x < imagePartExtents.cx; ++x)
+                    {
+                        auto const srcPixelIndex = (y + imagePartOrigin.y) * imageExtents.cx * 4 + (x + imagePartOrigin.x) * 4;
+                        auto const alpha = imageData[srcPixelIndex + 3];
                         for (std::size_t c = 0; c < 4; ++c)
-                            data[(imagePartExtents.cy - bleedGuard - y) * imagePartExtents.cx * 4 + x * 4 + c] = imageData[(y + imagePartOrigin.y) * imageExtents.cx * 4 + (x + imagePartOrigin.x) * 4 + c];
+                        {
+                            auto component = imageData[srcPixelIndex + c];
+                            if (alpha != 0u || !discardNackgroundMatte)
+                                data[(imagePartExtents.cy - bleedGuard - y) * imagePartExtents.cx * 4 + x * 4 + c] = component;
+                            else
+                                data[(imagePartExtents.cy - bleedGuard - y) * imagePartExtents.cx * 4 + x * 4 + c] = 0;
+                        }
+                    }
                 set_pixels(rect{ point{}, imagePartExtents }, &data[0]);
             }
             break;
