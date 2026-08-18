@@ -128,7 +128,8 @@ namespace neogfx
         iColorFormat{ aOther.iColorFormat },
         iData{ aOther.iData },
         iSampling{ aOther.iSampling },
-        iSize{ aOther.iSize }
+        iSize{ aOther.iSize },
+        iDiscardBackgroundMatte{ aOther.iDiscardBackgroundMatte }
     {
     }
 
@@ -141,7 +142,8 @@ namespace neogfx
         iColorFormat{ std::move(aOther.iColorFormat) },
         iData{ std::move(aOther.iData) },
         iSampling{ std::move(aOther.iSampling) },
-        iSize{ std::move(aOther.iSize) }
+        iSize{ std::move(aOther.iSize) },
+        iDiscardBackgroundMatte{ aOther.iDiscardBackgroundMatte }
     {
     }
 

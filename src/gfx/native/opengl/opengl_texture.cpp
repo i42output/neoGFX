@@ -621,33 +621,36 @@ namespace neogfx
         size_u32 const imageExtents = aImage.extents();
         point_u32 const imagePartOrigin = aImagePart.position();
         size_u32 const imagePartExtents = aImagePart.extents();
-        bool const discardNackgroundMatte = aImage.discard_background_matte();
+        bool const discardBackgroundMatte = aImage.discard_background_matte();
         switch (aImage.color_format())
         {
         case color_format::RGBA8:
             {
-                const std::uint8_t* imageData = static_cast<const std::uint8_t*>(aImage.cpixels());
+                if (imagePartOrigin.x + imagePartExtents.cx > imageExtents.cx ||
+                    imagePartOrigin.y + imagePartExtents.cy > imageExtents.cy)
+                    throw std::logic_error("neogfx::opengl_texture::set_pixels: image part out of range");
+
+                auto const* const imageData = static_cast<std::uint8_t const*>(aImage.cpixels());
                 thread_local std::vector<std::uint8_t> data;
-                data.clear();
-                data.resize(imagePartExtents.cx * 4 * imagePartExtents.cy);
-                auto const bleedGuard = static_cast<std::size_t>(bleed_guard());
+                data.assign(static_cast<std::size_t>(imagePartExtents.cx) * imagePartExtents.cy * 4, 0u);
+
                 for (std::size_t y = 0; y < imagePartExtents.cy; ++y)
+                {
+                    auto const* const srcRow = imageData +
+                        ((y + imagePartOrigin.y) * static_cast<std::size_t>(imageExtents.cx) + imagePartOrigin.x) * 4;
+                    auto* const dstRow = data.data() +
+                        (imagePartExtents.cy - 1 - y) * static_cast<std::size_t>(imagePartExtents.cx) * 4;
                     for (std::size_t x = 0; x < imagePartExtents.cx; ++x)
                     {
-                        auto const srcPixelIndex = (y + imagePartOrigin.y) * imageExtents.cx * 4 + (x + imagePartOrigin.x) * 4;
-                        auto const alpha = imageData[srcPixelIndex + 3];
-                        for (std::size_t c = 0; c < 4; ++c)
-                        {
-                            auto component = imageData[srcPixelIndex + c];
-                            if (alpha != 0u || !discardNackgroundMatte)
-                                data[(imagePartExtents.cy - bleedGuard - y) * imagePartExtents.cx * 4 + x * 4 + c] = component;
-                            else
-                                data[(imagePartExtents.cy - bleedGuard - y) * imagePartExtents.cx * 4 + x * 4 + c] = 0;
-                        }
+                        if (srcRow[x * 4 + 3] != 0u || !discardBackgroundMatte)
+                            std::copy_n(&srcRow[x * 4], 4, &dstRow[x * 4]);
                     }
+                }
                 set_pixels(rect{ point{}, imagePartExtents }, &data[0]);
             }
             break;
+        default:
+            throw std::logic_error("neogfx::opengl_texture::set_pixels: unsupported color format");
         }
     }
 
