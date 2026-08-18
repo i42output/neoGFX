@@ -335,13 +335,13 @@ namespace neogfx
                     // vertical flip, inset by the bleed guard on both axes
                     auto* const dstRow = data.data() +
                         static_cast<std::size_t>(bleedGuard + partExtents.cy - 1 - y) * iStorageSize.cx + bleedGuard;
-                    bool const discardNackgroundMatte = aImage.discard_background_matte();
+                    bool const discardBackgroundMatte = aImage.discard_background_matte();
                     for (std::uint32_t x = 0; x < partExtents.cx; ++x)
                     {
                         auto const alpha = srcRow[x * 4 + 3];
                         for (std::size_t c = 0; c < 4; ++c)
                         {
-                            if (alpha != 0u || !discardNackgroundMatte)
+                            if (alpha != 0u || !discardBackgroundMatte)
                             {
                                 auto const component = srcRow[x * 4 + c];
                                 if constexpr (normalize)

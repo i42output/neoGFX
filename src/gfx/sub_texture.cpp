@@ -257,7 +257,7 @@ namespace neogfx
         size_u32 const imageExtents = aImage.extents();
         point_u32 const imagePartOrigin = aImagePart.position();
         size_u32 const imagePartExtents = aImagePart.extents();
-        bool const discardNackgroundMatte = aImage.discard_background_matte();
+        bool const discardBackgroundMatte = aImage.discard_background_matte();
         switch (aImage.color_format())
         {
         case color_format::RGBA8:
@@ -273,7 +273,7 @@ namespace neogfx
                         {
                             auto const component = imageData[srcPixelIndex + c];
                             auto const dstComponentIndex = (imagePartExtents.cy - 1 - y) * imagePartExtents.cx * 4 + x * 4 + c;
-                            if (alpha != 0u || !discardNackgroundMatte)
+                            if (alpha != 0u || !discardBackgroundMatte)
                                 data[dstComponentIndex] = component;
                             else
                                 data[dstComponentIndex] = 0u;
