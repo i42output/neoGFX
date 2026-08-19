@@ -1288,7 +1288,7 @@ namespace neogfx
                 shader_effect::Filter
             },
             optional_mat44{},
-            game::filter{ shader_filter::Dilate, aPass,
+            game::filter{ shader_filter::DilateOctagon, aPass,
                 static_cast<float>(aTaps),
                 static_cast<float>(aDirection.x),
                 static_cast<float>(aDirection.y),
