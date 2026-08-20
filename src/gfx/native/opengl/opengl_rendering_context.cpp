@@ -2561,7 +2561,7 @@ namespace neogfx
 
                             if (!filter)
                             {
-                                filter.emplace(*this, dilate_filter::outline(*filterRegion, radius));
+                                filter.emplace(*this, dilate_filter::fast_outline(*filterRegion, radius));
                                 opacity = textEffect->color().alpha() / 255.0;
                             }
                             

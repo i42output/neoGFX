@@ -245,7 +245,8 @@ namespace neogfx
         virtual void disable_stencil_update() = 0;
         virtual void blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::Blit) = 0;
         virtual i_graphics_context& blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::None) = 0;
-        virtual i_graphics_context& dilate(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, std::uint32_t aTaps, vec2 const& aDirection, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::None) = 0;
+        virtual i_graphics_context& dilate_octagon(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, std::uint32_t aTaps, vec2 const& aDirection, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::None) = 0;
+        virtual i_graphics_context& dilate_disk(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, scalar aRadius, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::None) = 0;
         // gradient
     public:
         virtual void clear_gradient() = 0;
@@ -887,8 +888,6 @@ namespace neogfx
         blending_mode accumulatorBlend = blending_mode::Filter;
         blending_mode finalBlend = blending_mode::FilterFinish;
 
-        // Padding, in pixels, that the ping-pong buffers must carry on every
-        // side for this filter's support to fit. Consumed by scoped_filter.
         scalar outset() const
         {
             return std::max(radius, taps / 2.0);
@@ -906,11 +905,6 @@ namespace neogfx
             return std::max<scalar>(1.0, c * aRadius);
         }
 
-        // Presets. NB: blur_filter::radius is the PASS COUNT consumed by
-        // scoped_filter::execute (each pass = one full convolution, passes > 1
-        // accumulate via accumulatorBlend); apparent blur extent is governed by
-        // sigma/taps, and grows as sqrt(passes) when multi-passing.
-
         static blur_filter smoothing(rect const& aRegion, dimension aExtent,
             blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian,
             blending_mode aAccumulatorBlend = blending_mode::Filter,
@@ -919,12 +913,12 @@ namespace neogfx
             scalar const sigma = aExtent / 3.0;
             return blur_filter{
                 .region = aRegion,
-                .radius = 1.0,                          // single pass: energy-preserving filtering
+                .radius = 1.0,
                 .gain = {},
                 .algorithm = aAlgorithm,
                 .taps = static_cast<scalar>(taps_for(sigma)),
                 .sigma = sigma,
-                .accumulatorBlend = aAccumulatorBlend,  // unused at 1 pass
+                .accumulatorBlend = aAccumulatorBlend,
                 .finalBlend = aFinalBlend };
         }
 
@@ -933,8 +927,6 @@ namespace neogfx
             blending_mode aAccumulatorBlend = blending_mode::Filter,
             blending_mode aFinalBlend = blending_mode::FilterFinish)
         {
-            // Per-pass sigma derived so the OUTERMOST layer's extent equals
-            // aExtent after aPasses accumulations (sigma_total = sigma_pass * sqrt(N)).
             scalar const sigma = aExtent / 3.0 / std::sqrt(static_cast<scalar>(std::max(aPasses, 1u)));
             return blur_filter{
                 .region = aRegion,
@@ -948,63 +940,94 @@ namespace neogfx
         }
     };
 
-    // Morphological dilation (per-texel max) of the filtered region's alpha.
-    // Separable: dilation by a square decomposes exactly into 1D max passes,
-    // and sequential passes Minkowski-sum their structuring elements, so
-    // axis + diagonal pass pairs compose into a regular octagon.
     struct dilate_filter
     {
         rect region;
-        dimension radius;                       // PASS COUNT, as per blur_filter
+        dimension radius;
         neogfx::gain gain = {};
-        scalar extent = 1.0;                    // dilation INRADIUS, in pixels
+        dilation_algorithm algorithm = dilation_algorithm::Octagon;
+        scalar extent = 1.0;
         blending_mode accumulatorBlend = blending_mode::None;
         blending_mode finalBlend = blending_mode::FilterFinish;
 
-        // Per-pass extent giving a regular octagon of inradius `extent`:
-        // e + e*sqrt(2) == extent.
         scalar pass_extent() const
         {
-            return passes() > 2u ? extent / (1.0 + std::numbers::sqrt2) : extent;
+            switch (algorithm)
+            {
+            case dilation_algorithm::Octagon:
+                return passes() > 2u ? extent / (1.0 + std::numbers::sqrt2) : extent;
+            case dilation_algorithm::Disk:
+                return extent;
+            default:
+                return 0.0;
+            }
         }
 
         std::uint32_t passes() const
         {
-            return static_cast<std::uint32_t>(std::max<dimension>(radius, 1.0));
+            switch (algorithm)
+            {
+            case dilation_algorithm::Octagon:
+                return static_cast<std::uint32_t>(std::max<dimension>(radius, 1.0));
+            case dilation_algorithm::Disk:
+                return 1u;
+            default:
+                return 0u;
+            }
         }
 
-        // Exact per-axis reach: the H (or V) pass plus both diagonals, each of
-        // which displaces along x and y equally. Symmetric, so one value serves
-        // both axes.
         scalar outset() const
         {
-            return passes() > 2u ?
-                pass_taps(0u) + 2.0 * pass_taps(2u) :
-                pass_taps(0u);
+            switch (algorithm)
+            {
+            case dilation_algorithm::Octagon:
+                return passes() > 2u ?
+                    pass_taps(0u) + 2.0 * pass_taps(2u) :
+                    pass_taps(0u);
+            case dilation_algorithm::Disk:
+                return extent;
+            default:
+                return 0.0;
+            }
         }
 
         vec2 pass_direction(std::uint32_t aPass) const
         {
-            switch (aPass % 4u)
+            switch (algorithm)
             {
-            case 0u: return vec2{ 1.0, 0.0 };
-            case 1u: return vec2{ 0.0, 1.0 };
-            case 2u: return vec2{ 1.0, 1.0 };
-            case 3u: default: return vec2{ 1.0, -1.0 };
+            case dilation_algorithm::Octagon:
+                switch (aPass % 4u)
+                {
+                case 0u: return vec2{ 1.0, 0.0 };
+                case 1u: return vec2{ 0.0, 1.0 };
+                case 2u: return vec2{ 1.0, 1.0 };
+                case 3u: default: return vec2{ 1.0, -1.0 };
+                }
+            case dilation_algorithm::Disk:
+                return {};
+            default:
+                return {};
             }
         }
 
-        // A diagonal step of (1,1) texels covers sqrt(2) texels of distance.
         std::uint32_t pass_taps(std::uint32_t aPass) const
         {
-            auto const e = pass_extent();
-            return static_cast<std::uint32_t>(std::ceil(
-                (aPass % 4u) < 2u ? e : e / std::numbers::sqrt2));
+            switch (algorithm)
+            {
+            case dilation_algorithm::Octagon:
+                {
+                    auto const e = pass_extent();
+                    return static_cast<std::uint32_t>(std::ceil(
+                        (aPass % 4u) < 2u ? e : e / std::numbers::sqrt2));
+                }
+            case dilation_algorithm::Disk:
+                return 0u;
+            default:
+                return 0u;
+            }
         }
 
-        // Preset. Axis passes alone suffice below ~1.5px, where the octagon
-        // and the square differ by less than a texel.
-        static dilate_filter outline(rect const& aRegion, dimension aExtent,
+        static dilate_filter fast_outline(rect const& aRegion, dimension aExtent,
             neogfx::gain aGain = {},
             blending_mode aFinalBlend = blending_mode::FilterFinish)
         {
@@ -1012,6 +1035,21 @@ namespace neogfx
                 .region = aRegion,
                 .radius = (aExtent < 1.5 ? 2.0 : 4.0),
                 .gain = aGain,
+                .algorithm = dilation_algorithm::Octagon,
+                .extent = aExtent,
+                .accumulatorBlend = blending_mode::None,
+                .finalBlend = aFinalBlend };
+        }
+
+        static dilate_filter smooth_outline(rect const& aRegion, dimension aExtent,
+            neogfx::gain aGain = {},
+            blending_mode aFinalBlend = blending_mode::FilterFinish)
+        {
+            return dilate_filter{
+                .region = aRegion,
+                .radius = 1.0,
+                .gain = aGain,
+                .algorithm = dilation_algorithm::Disk,
                 .extent = aExtent,
                 .accumulatorBlend = blending_mode::None,
                 .finalBlend = aFinalBlend };

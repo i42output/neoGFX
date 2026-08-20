@@ -96,13 +96,17 @@ namespace neogfx
             }
             else if constexpr (std::is_same_v<Filter, dilate_filter>)
             {
-                // Unlike blur, each dilate pass is a single directional max, so
-                // the ping-pong alternates once per pass rather than per filter.
-                accumulator = &(accumulator == &back_buffer() ? front_buffer() : back_buffer()).dilate(
-                    iBufferRect, *accumulator, iBufferRect,
-                    iFilter.pass_taps(static_cast<std::uint32_t>(pass)),
-                    iFilter.pass_direction(static_cast<std::uint32_t>(pass)),
-                    blending_mode::None);
+                if (iFilter.algorithm == dilation_algorithm::Octagon)
+                    accumulator = &(accumulator == &back_buffer() ? front_buffer() : back_buffer()).dilate_octagon(
+                        iBufferRect, *accumulator, iBufferRect,
+                        iFilter.pass_taps(static_cast<std::uint32_t>(pass)),
+                        iFilter.pass_direction(static_cast<std::uint32_t>(pass)),
+                        blending_mode::None);
+                else
+                    accumulator = &(accumulator == &back_buffer() ? front_buffer() : back_buffer()).dilate_disk(
+                        iBufferRect, *accumulator, iBufferRect,
+                        iFilter.extent,
+                        blending_mode::None);
             }
         }
 

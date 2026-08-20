@@ -122,6 +122,13 @@ namespace neogfx
         Gaussian2D
     };
 
+    enum class dilation_algorithm : std::uint32_t
+    {
+        None,
+        Octagon,
+        Disk
+    };
+
     typedef neolib::variant<color, gradient, texture, neolib::pair<texture, rect>, sub_texture, neolib::pair<sub_texture, rect>> brush;
 
     inline brush to_brush(const color_or_gradient& aEffectColor)

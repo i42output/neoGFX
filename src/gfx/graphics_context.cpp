@@ -1266,7 +1266,7 @@ namespace neogfx
         return *lastWritten;
     }
 
-    void dilate(std::int32_t aPass, i_graphics_context& aDestination, rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, std::uint32_t aTaps, vec2 const& aDirection)
+    void dilate_octagon(std::int32_t aPass, i_graphics_context& aDestination, rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, std::uint32_t aTaps, vec2 const& aDirection)
     {
         scoped_render_target srt{ aDestination };
         scoped_scissor ss1{ aDestination, aDestinationRect };
@@ -1295,7 +1295,36 @@ namespace neogfx
                 0.0f, {} });
     }
 
-    i_graphics_context& graphics_context::dilate(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, std::uint32_t aTaps, vec2 const& aDirection, neogfx::blending_mode aBlendingMode)
+    void dilate_disk(std::int32_t aPass, i_graphics_context& aDestination, rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, scalar aRadius)
+    {
+        scoped_render_target srt{ aDestination };
+        scoped_scissor ss1{ aDestination, aDestinationRect };
+
+        auto mesh = aDestination.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
+            to_ecs_component(aDestinationRect) : to_ecs_component(game_rect{ aDestinationRect });
+        auto const& srcViewport = aSource.render_target().viewport();
+        for (auto& uv : mesh.uv)
+            uv = (aSourceRect.top_left() / srcViewport.extents()).to_vec2().as<float>() +
+            uv.scale((aSourceRect.extents() / srcViewport.extents()).to_vec2().as<float>());
+        aDestination.draw_mesh(
+            mesh,
+            game::material
+            {
+                {},
+                {},
+                {},
+                to_ecs_component(aSource.render_target().target_texture()),
+                shader_effect::Filter
+            },
+            optional_mat44{},
+            game::filter{ shader_filter::DilateDisk, aPass,
+                static_cast<float>(aRadius),
+                0.0f,
+                0.0f,
+                0.0f, {} });
+    }
+
+    i_graphics_context& graphics_context::dilate_octagon(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, std::uint32_t aTaps, vec2 const& aDirection, neogfx::blending_mode aBlendingMode)
     {
         aSource.flush();
 
@@ -1303,7 +1332,20 @@ namespace neogfx
         scoped_scissor ss1{ *this, aDestinationRect };
         scoped_blending_mode sbm1{ *this, aBlendingMode };
 
-        neogfx::dilate(0, *this, aDestinationRect, aSource, aSourceRect, aTaps, aDirection);
+        neogfx::dilate_octagon(0, *this, aDestinationRect, aSource, aSourceRect, aTaps, aDirection);
+
+        return *this;
+    }
+
+    i_graphics_context& graphics_context::dilate_disk(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, scalar aRadius, neogfx::blending_mode aBlendingMode)
+    {
+        aSource.flush();
+
+        scoped_render_target srt1{ *this };
+        scoped_scissor ss1{ *this, aDestinationRect };
+        scoped_blending_mode sbm1{ *this, aBlendingMode };
+
+        neogfx::dilate_disk(0, *this, aDestinationRect, aSource, aSourceRect, aRadius);
 
         return *this;
     }

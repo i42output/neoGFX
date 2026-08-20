@@ -43,15 +43,40 @@ void standard_filter_shader(inout vec4 color, inout vec4 function0, inout vec4 f
                 int taps = int(uFilterArguments.x);
                 vec2 stepUv = vec2(uFilterArguments.y, uFilterArguments.z) / uTextureExtents;
                 vec4 best = combined_texel_at(TexCoord);
-                for (int f = 1; f <= taps; ++f)
+                if (best.a != 1.0)
                 {
-                    vec2 o = stepUv * float(f);
-                    vec4 s0 = combined_texel_at(TexCoord - o);
-                    vec4 s1 = combined_texel_at(TexCoord + o);
-                    if (s0.a > best.a)
-                        best = s0;
-                    if (s1.a > best.a)
-                        best = s1;
+                    for (int f = 1; f <= taps; ++f)
+                    {
+                        vec2 o = stepUv * float(f);
+                        vec4 s0 = combined_texel_at(TexCoord - o);
+                        vec4 s1 = combined_texel_at(TexCoord + o);
+                        if (s0.a > best.a)
+                            best = s0;
+                        if (s1.a > best.a)
+                            best = s1;
+                    }
+                }
+                color = best;
+            }
+            break;
+        case 4:
+            {
+                vec4 best = combined_texel_at(TexCoord);
+                if (best.a != 1.0)
+                {
+                    float r = uFilterArguments.x;
+                    vec2 stepUv = vec2(1.0) / uTextureExtents;
+                    for (float x = -r; x <= r; x += 1.0)
+                    {
+                        for (float y = -r; y <= r; y += 1.0)
+                        {
+                            if (x * x + y * y > r * r)
+                                continue;
+                            vec4 s = combined_texel_at(TexCoord + vec2(x, y) * stepUv);
+                            if (s.a > best.a)
+                                best = s;
+                        }
+                    }
                 }
                 color = best;
             }

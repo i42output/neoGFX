@@ -220,6 +220,22 @@ namespace neogfx
         }
     }
 
+    template <std::floating_point ParamT>
+    inline std::optional<game::filter> to_ecs_component(dilation_algorithm aAlgorithm, std::int32_t aPass, ParamT aParameter1, ParamT aParameter2)
+    {
+        switch (aAlgorithm)
+        {
+        case dilation_algorithm::None:
+            return {};
+        case dilation_algorithm::Octagon:
+            return game::filter{ shader_filter::DilateOctagon, aPass, static_cast<float>(aParameter1), static_cast<float>(aParameter2), {}, {}, {} };
+        case dilation_algorithm::Disk:
+            return game::filter{ shader_filter::DilateDisk, aPass, static_cast<float>(aParameter1), static_cast<float>(aParameter2), {}, {}, {} };
+        default:
+            return {};
+        }
+    }
+
     inline game::texture to_ecs_component(const i_texture& aTexture)
     {
         return game::texture
