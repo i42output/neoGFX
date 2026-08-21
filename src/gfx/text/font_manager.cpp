@@ -823,6 +823,28 @@ namespace neogfx
 
     namespace
     {
+        enum class sfnt_kind { none, truetype, cff, collection, woff, woff2 };
+
+        sfnt_kind sniff(const std::filesystem::path& aPath)
+        {
+            std::ifstream f{ aPath, std::ios::binary };
+            std::array<unsigned char, 4> tag{};
+            if (!f.read(reinterpret_cast<char*>(tag.data()), 4))
+                return sfnt_kind::none;
+            auto const v = (std::uint32_t{ tag[0] } << 24) | (std::uint32_t{ tag[1] } << 16) |
+                (std::uint32_t{ tag[2] } << 8) | std::uint32_t{ tag[3] };
+            switch (v)
+            {
+            case 0x00010000: return sfnt_kind::truetype;
+            case 0x74727565: return sfnt_kind::truetype;   // 'true'
+            case 0x4F54544F: return sfnt_kind::cff;        // 'OTTO'
+            case 0x74746366: return sfnt_kind::collection; // 'ttcf'
+            case 0x774F4646: return sfnt_kind::woff;
+            case 0x774F4632: return sfnt_kind::woff2;
+            default:         return sfnt_kind::none;
+            }
+        }
+
         bool has_font_extension(std::filesystem::path const& aPath)
         {
             // FreeType-loadable face containers only; metrics-only sidecars
@@ -863,7 +885,7 @@ namespace neogfx
             if (std::filesystem::exists(fontsDirectory))
                 for (std::filesystem::directory_iterator file(fontsDirectory); file != std::filesystem::directory_iterator(); ++file)
                 {
-                    if (!std::filesystem::is_regular_file(file->status()) || !has_font_extension(file->path()))
+                    if (!std::filesystem::is_regular_file(file->status()) || (!has_font_extension(file->path()) && sniff(file->path()) == sfnt_kind::none))
                         continue;
                     try
                     {
