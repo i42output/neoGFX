@@ -23,6 +23,11 @@
 #define SHADER_EFFECT_MultiplyAlpha 20
 #define SHADER_EFFECT_Filter 30
 #define SHADER_EFFECT_Ignore 99
+#define FILTER_None 0
+#define FILTER_GaussianBlur 1
+#define FILTER_GaussianBlur2D 2
+#define FILTER_DilateOctagon 3
+#define FILTER_DilateDisk 4
 
 vec4 mix3(vec4 a, vec4 b, vec4 c, float t)
 {

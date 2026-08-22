@@ -4,9 +4,9 @@ void standard_filter_shader(inout vec4 color, inout vec4 function0, inout vec4 f
     {
         switch(uFilterType)
         {
-        case 0: // filter: None
+        case FILTER_None:
             break;
-        case 1: // effect: GaussianBlur
+        case FILTER_GaussianBlur:
             {
                 int d = uFilterKernelSize / 2;
                 vec2 axis = uFilterPass == 0 ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
@@ -15,13 +15,14 @@ void standard_filter_shader(inout vec4 color, inout vec4 function0, inout vec4 f
                 for (int f = -d; f <= d; ++f)
                 {
                     float w = texelFetch(uFilterKernel, ivec2(f + d, 0)).r;
-                    sum += texel_at(TexCoord + (axis * float(f)) / uTextureExtents) * w;
+                    vec4 texel = texel_at(TexCoord + (axis * float(f)) / uTextureExtents);
+                    sum += texel * w;
                     weightSum += w;
                 }
                 color = sum / weightSum;
             }
             break;
-        case 2: // effect: GaussianBlur2D
+        case FILTER_GaussianBlur2D:
             {
                 int d = uFilterKernelSize / 2;
                 vec4 sum = vec4(0.0);
@@ -31,14 +32,15 @@ void standard_filter_shader(inout vec4 color, inout vec4 function0, inout vec4 f
                     for (int x = -d; x <= d; ++x)
                     {
                         float w = texelFetch(uFilterKernel, ivec2(x + d, y + d)).r;
-                        sum += texel_at(TexCoord + vec2(float(x), float(y)) / uTextureExtents) * w;
+                        vec4 texel = texel_at(TexCoord + vec2(float(x), float(y)) / uTextureExtents);
+                        sum += texel * w;
                         weightSum += w;
                     }
                 }
                 color = sum / weightSum;
             }
             break;
-        case 3: // filter: Dilate (separable morphological max)
+        case FILTER_DilateOctagon:
             {
                 int taps = int(uFilterArguments.x);
                 vec2 stepUv = vec2(uFilterArguments.y, uFilterArguments.z) / uTextureExtents;
@@ -59,7 +61,7 @@ void standard_filter_shader(inout vec4 color, inout vec4 function0, inout vec4 f
                 color = best;
             }
             break;
-        case 4:
+        case FILTER_DilateDisk:
             {
                 vec4 best = combined_texel_at(TexCoord);
                 if (best.a != 1.0)

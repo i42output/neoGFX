@@ -2693,9 +2693,8 @@ namespace neogfx
                                                 std::optional<game::gradient>{},
                                             {},
                                             to_ecs_component(theGlyph.outline_texture()),
-                                            filterRegion && !textEffect->bright()  ?
-                                                shader_effect::MultiplyAlpha : shader_effect::Ignore
-                                        },
+                                            (filterRegion || drawOp.appearance->being_filtered()) && !drawOp.appearance->bright() ?
+                                                shader_effect::MultiplyAlpha : shader_effect::Ignore },
                                         {},
                                         true,
                                         0,
@@ -2727,9 +2726,8 @@ namespace neogfx
                                         std::optional<game::gradient>{},
                                     {},
                                     to_ecs_component(theGlyph.texture()),
-                                    filterRegion && !drawOp.appearance->bright()  ?
-                                        shader_effect::MultiplyAlpha : shader_effect::Ignore
-                                },
+                                    (filterRegion || drawOp.appearance->being_filtered()) && !drawOp.appearance->bright() ?
+                                        shader_effect::MultiplyAlpha : shader_effect::Ignore },
                                 {},
                                 true,
                                 0,
