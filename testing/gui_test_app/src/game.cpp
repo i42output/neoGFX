@@ -29,6 +29,7 @@
 #include <neogfx/game/animation_filter.hpp>
 
 namespace ng = neogfx;
+using namespace std::chrono_literals;
 using namespace neolib::stdint_suffix;
 
 namespace archetypes
@@ -167,7 +168,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         make_asteroid();
 
     auto const explosionAnimation = ng::regular_sprite_sheet_to_renderable_animation(
-        ecs, "explosion", ":/test/resources/explosion.png", { 4u, 4u }, 0.05);
+        ecs, "explosion", ":/test/resources/explosion.png", { 4u, 4u }, 0.05s );
 
     auto make_explosion = [&ecs, explosionAnimation](const ng::aabb_2df& target, const ng::vec3f& velocity = {}, const ng::optional_color& color = {})
     {
@@ -181,6 +182,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         filter.transformation = ng::mat44f::identity();
         filter.frameAnimationState.autoDestroy = true;
         ng::apply_scaling(*filter.transformation, ng::aabb_extents(target).max(ng::vec2f{ 16.0f, 16.0f }));
+        ng::game::start_animation(ecs, filter);
         ecs.async_create_entity(
             color ? archetypes::missileExplosion : archetypes::explosion,
             material,  
@@ -256,7 +258,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
             }
 
             std::ostringstream text;
-            auto worldTime = static_cast<std::uint64_t>(ng::game::from_step_time(ecs.system<ng::game::time>().world_time()) * 1000.0);
+            auto worldTime = static_cast<std::uint64_t>(ng::game::from_step_time(ecs.system<ng::game::time>().world_time()).count() * 1000.0);
             text.fill('0');
             text << std::setw(2) << worldTime / (1000 * 60 * 60) << " : " << std::setw(2) << worldTime / (1000 * 60) % 60 << " : " << std::setw(2) << worldTime / (1000) % 60 << " . " << std::setw(3) << worldTime % 1000;
             gc.draw_text(ng::point{ 0.0, 0.0 }, text.str(), clockFont, ng::text_format{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
@@ -402,7 +404,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
                                 spaceshipPhysics.angle + ng::vec3f{ 0.0f, 0.0f, ng::to_rad(angle) }
                             },
                             ng::game::box_collider_2d{ 0x1ull, { mesh.vertices.begin(), mesh.vertices.end() } },
-                            ng::game::entity_life_span{ ng::game::to_step_time(ecs, 4.0) });
+                            ng::game::entity_life_span{ ng::game::to_step_time(ecs, 4.0s) });
                     };
                     for (float angle = -30.0f; angle <= 30.0f; angle += 10.0f)
                         make_missile(angle);

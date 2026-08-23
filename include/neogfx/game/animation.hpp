@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <numbers>
 #include <ranges>
 #include <algorithm>
+#include <chrono>
 
 #include <neolib/core/uuid.hpp>
 #include <neolib/core/string.hpp>
@@ -40,7 +41,7 @@ namespace neogfx::game
 {
     struct animation_frame
     {
-        scalar duration;
+        time_interval duration;
         mesh_filter filter;
 
         struct meta : i_component_data::meta
@@ -162,7 +163,7 @@ namespace neogfx::game
 
     struct animation_tween
     {
-        scalar duration;
+        time_interval::rep duration;
         game::patches patches;
         std::optional<vec3f> pivot;
         vec3f_range translation{ { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
@@ -184,7 +185,7 @@ namespace neogfx::game
                         self.rotation);
             } };
 
-        mat44f operator()(scalar timestep) const
+        mat44f operator()(time_interval timestep) const
         {
             using easings_t = std::array<animation_easing, 3u>;
 
@@ -195,7 +196,7 @@ namespace neogfx::game
 
             thread_local std::vector<ease_segment<double>> tSegments;
 
-            auto const t0 = duration > 0.0 ? std::fmod(timestep, duration) / duration : 0.0;
+            auto const t0 = duration > 0.0 ? std::fmod(timestep.count(), duration) / duration : 0.0;
             auto const t = (cycle == tween_cycle::PingPong) ? (t0 < 0.5 ? t0 * 2.0 : (1.0 - t0) * 2.0) : t0;
 
             auto const ease = [t](std::optional<easings_t> const& aEasings) -> vec3f
@@ -418,15 +419,15 @@ namespace neogfx::game
         return rotate(aTween, { aRange.start * std::numbers::pi / 180.0, aRange.end * std::numbers::pi / 180.0 });
     }
 
-    inline animation_tween_ptr add_tween(animation& aAnimation, scalar aDuration, patches const& aPatches)
+    inline animation_tween_ptr add_tween(animation& aAnimation, time_interval const& aDuration, patches const& aPatches)
     {
         if (!aAnimation.tweens)
             aAnimation.tweens.emplace();
-        aAnimation.tweens->push_back(std::make_shared<animation_tween>(aDuration, aPatches));
+        aAnimation.tweens->push_back(std::make_shared<animation_tween>(aDuration.count(), aPatches));
         return aAnimation.tweens->back();
     }
 
-    inline animation_tween_ptr add_tween(animation& aAnimation, scalar aDuration)
+    inline animation_tween_ptr add_tween(animation& aAnimation, time_interval const& aDuration)
     {
         return add_tween(aAnimation, aDuration, { mesh_filter_patch });
     }

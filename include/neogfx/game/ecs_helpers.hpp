@@ -300,7 +300,7 @@ namespace neogfx
         return image_to_material(aEcs, aName, neogfx::image{ aImageResource });
     }
 
-    inline game::animation regular_sprite_sheet_to_animation(const vec2u32& aSpriteSheetExtents, const vec2u32& aCells, const vec2u32& aCellIndexTopLeft, const vec2u32& aCellIndexBottomRight, scalar aDefaultDuration = 0.0)
+    inline game::animation regular_sprite_sheet_to_animation(const vec2u32& aSpriteSheetExtents, const vec2u32& aCells, const vec2u32& aCellIndexTopLeft, const vec2u32& aCellIndexBottomRight, time_interval const& aDefaultDuration = {})
     {
         auto const uvCellExtents = vec2{ 1.0 / aCells.as<scalar>().x, 1.0 / aCells.as<scalar>().y }.as<float>();
         game::animation results;
@@ -331,19 +331,19 @@ namespace neogfx
         return results;
     }
 
-    inline game::animation regular_sprite_sheet_to_animation(const vec2u32& aSpriteSheetExtents, const vec2u32& aCells, scalar aDefaultFrameDuration = 0.0)
+    inline game::animation regular_sprite_sheet_to_animation(const vec2u32& aSpriteSheetExtents, const vec2u32& aCells, time_interval const& aDefaultFrameDuration = {})
     {
         return regular_sprite_sheet_to_animation(aSpriteSheetExtents, aCells, vec2u32{}, vec2u32{ aCells.x - 1u, aCells.y - 1u }, aDefaultFrameDuration);
     }
 
-    inline game::animation regular_sprite_sheet_to_animation(const game::material& aSpriteSheet, const vec2u32& aCells, const vec2u32& aCellIndexTopLeft, const vec2u32& aCellIndexBottomRight, scalar aDefaultFrameDuration = 0.0)
+    inline game::animation regular_sprite_sheet_to_animation(const game::material& aSpriteSheet, const vec2u32& aCells, const vec2u32& aCellIndexTopLeft, const vec2u32& aCellIndexBottomRight, time_interval const& aDefaultFrameDuration = {})
     {
         return regular_sprite_sheet_to_animation(
             aSpriteSheet.sharedTexture ? aSpriteSheet.sharedTexture.value()->extents.as<u32>() : aSpriteSheet.texture->extents.as<u32>(),
             aCells, aCellIndexTopLeft, aCellIndexBottomRight, aDefaultFrameDuration);
     }
 
-    inline game::animation regular_sprite_sheet_to_animation(const game::material& aSpriteSheet, const vec2u32& aCells, scalar aDefaultFrameDuration = 0.0)
+    inline game::animation regular_sprite_sheet_to_animation(const game::material& aSpriteSheet, const vec2u32& aCells, time_interval const& aDefaultFrameDuration = {})
     {
         return regular_sprite_sheet_to_animation(
             aSpriteSheet.sharedTexture ? aSpriteSheet.sharedTexture.value()->extents.as<u32>() : aSpriteSheet.texture->extents.as<u32>(),
@@ -356,7 +356,7 @@ namespace neogfx
         game::animation_filter filter;
     };
     
-    inline renderable_animation regular_sprite_sheet_to_renderable_animation(game::i_ecs& aEcs, std::string const& aName, const neogfx::image& aSpriteSheet, const vec2u32& aCells, scalar aDefaultFrameDuration = 0.0)
+    inline renderable_animation regular_sprite_sheet_to_renderable_animation(game::i_ecs& aEcs, std::string const& aName, const neogfx::image& aSpriteSheet, const vec2u32& aCells, time_interval const& aDefaultFrameDuration = {})
     {
         renderable_animation result;
         result.material = image_to_material(aEcs, aName, aSpriteSheet);
@@ -364,7 +364,7 @@ namespace neogfx
         return result;
     }
 
-    inline renderable_animation regular_sprite_sheet_to_renderable_animation(game::i_ecs& aEcs, std::string const& aName, std::string const& aSpriteSheetResource, const vec2u32& aCells, scalar aDefaultFrameDuration = 0.0)
+    inline renderable_animation regular_sprite_sheet_to_renderable_animation(game::i_ecs& aEcs, std::string const& aName, std::string const& aSpriteSheetResource, const vec2u32& aCells, time_interval const& aDefaultFrameDuration = {})
     {
         return regular_sprite_sheet_to_renderable_animation(aEcs, aName, neogfx::image{ aSpriteSheetResource }, aCells, aDefaultFrameDuration);
     }

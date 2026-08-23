@@ -21,4 +21,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 
 namespace ng = neogfx;
+using namespace std::chrono_literals;
 

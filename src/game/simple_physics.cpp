@@ -89,7 +89,7 @@ namespace neogfx::game
         auto nextTime = previousTime + currentTimestep;
         while ((previousTime = iWorldClock.time.load()) <= now)
         {
-            auto elapsedTime = static_cast<float>(from_step_time(nextTime - previousTime));
+            auto elapsedTime = static_cast<float>(from_step_time(nextTime - previousTime).count());
             this->start_update(1);
             iGameWorld.ApplyingPhysics(previousTime);
             this->start_update(2);

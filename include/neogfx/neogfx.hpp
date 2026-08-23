@@ -22,6 +22,7 @@
 #include <neolib/neolib.hpp>
 #include <string>
 #include <string_view>
+#include <chrono>
 #include <boost/multiprecision/cpp_int.hpp>
 using namespace boost::multiprecision;
 
@@ -56,6 +57,7 @@ namespace neogfx
     using namespace neolib::stdint_suffix;
     using namespace std::string_literals;
     using namespace std::string_view_literals;
+    using namespace std::chrono_literals;
 
     using neolib::sfinae;
 
