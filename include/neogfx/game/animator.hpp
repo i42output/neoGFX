@@ -2,17 +2,17 @@
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
-  
+
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -31,6 +31,12 @@
 
 namespace neogfx::game
 {
+    enum class timer_sharing : bool
+    {
+        Exclusive = false,
+        Shared = true
+    };
+
     class animator : public game::system<animation_filter>
     {
     public:
@@ -49,10 +55,12 @@ namespace neogfx::game
         void update_animations();
     public:
         animation_timer_ptr default_timer();
-        std::pair<animation_timer_ptr, bool> create_timer();
-        std::pair<animation_timer_ptr, bool> create_timer(i64 aEpoch);
-        std::pair<animation_timer_ptr, bool> create_timer(neolib::uuid aId, bool aSingleton = true);
-        std::pair<animation_timer_ptr, bool> create_timer(neolib::uuid aId, i64 aEpoch, bool aSingleton = true);
+        animation_timer_ptr create_timer();
+        animation_timer_ptr create_timer(i64 aEpoch);
+        [[nodiscard]] std::pair<animation_timer_ptr, bool> create_timer(neolib::uuid aId, timer_sharing aSharing = timer_sharing::Shared);
+        [[nodiscard]] std::pair<animation_timer_ptr, bool> create_timer(neolib::uuid aId, i64 aEpoch, timer_sharing aSharing = timer_sharing::Shared);
+        animation_timer_ptr find_shared_timer(neolib::uuid aId) const;
+        std::vector<animation_timer_ptr> find_timers(neolib::uuid aId) const;
     public:
         struct meta
         {
@@ -68,8 +76,14 @@ namespace neogfx::game
             }
         };
     private:
+        struct timer_bucket
+        {
+            animation_timer_weak_ptr shared;
+            std::vector<animation_timer_weak_ptr> exclusive;
+        };
+    private:
         std::atomic<bool> iExternalAnimation = false;
         animation_timer_ptr iDefaultTimer;
-        std::map<neolib::uuid, std::vector<animation_timer_weak_ptr>> iTimers;
+        std::map<neolib::uuid, timer_bucket> iTimers;
     };
-}   
+}
