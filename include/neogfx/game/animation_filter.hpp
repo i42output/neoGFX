@@ -85,8 +85,6 @@ namespace neogfx::game
     };
 
     using animation_timer_ptr = std::shared_ptr<animation_timer>;
-
-    using animation_timer_ptr = std::shared_ptr<animation_timer>;
     using animation_timer_weak_ptr = std::weak_ptr<animation_timer>;
 
     // @todo make componenent data (add meta)
