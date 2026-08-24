@@ -65,13 +65,14 @@ namespace neogfx::game
 
         update_animations();
 
-        for (auto timer = iTimers.begin(); timer != iTimers.end();)
-        {
-            if (timer->expired())
-                timer = iTimers.erase(timer);
-            else
-                ++timer;
-        }
+        for (auto& [id, timers] : iTimers)
+            for (auto timer = timers.begin(); timer != timers.end();)
+            {
+                if (timer->expired())
+                    timer = timers.erase(timer);
+                else
+                    ++timer;
+            }
 
         return true;
     }
@@ -147,15 +148,29 @@ namespace neogfx::game
         return iDefaultTimer;
     }
 
-    animation_timer_ptr animator::create_timer()
+    std::pair<animation_timer_ptr, bool> animator::create_timer()
     {
-        return create_timer(ecs().system<game::time>().world_time());
+        return create_timer(neolib::uuid{}, false);
     }
 
-    animation_timer_ptr animator::create_timer(i64 epoch)
+    std::pair<animation_timer_ptr, bool> animator::create_timer(i64 aEpoch)
     {
-        auto newTimer = std::make_shared<animation_timer>(epoch);
-        iTimers.push_back(newTimer);
-        return newTimer;
+        return create_timer(neolib::uuid{}, aEpoch, false);
+    }
+
+    std::pair<animation_timer_ptr, bool> animator::create_timer(neolib::uuid aId, bool aSingleton)
+    {
+        return create_timer(aId, ecs().system<game::time>().world_time(), aSingleton);
+    }
+
+    std::pair<animation_timer_ptr, bool> animator::create_timer(neolib::uuid aId, i64 aEpoch, bool aSingleton)
+    {
+        if (aSingleton)
+            for (auto& timer : iTimers[aId])
+                if (!timer.expired())
+                    return std::make_pair(timer.lock(), false);
+        auto newTimer = std::make_shared<animation_timer>(aEpoch);
+        iTimers[aId].push_back(newTimer);
+        return std::make_pair(newTimer, true);
     }
 }

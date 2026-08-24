@@ -49,8 +49,10 @@ namespace neogfx::game
         void update_animations();
     public:
         animation_timer_ptr default_timer();
-        animation_timer_ptr create_timer();
-        animation_timer_ptr create_timer(i64 epoch);
+        std::pair<animation_timer_ptr, bool> create_timer();
+        std::pair<animation_timer_ptr, bool> create_timer(i64 aEpoch);
+        std::pair<animation_timer_ptr, bool> create_timer(neolib::uuid aId, bool aSingleton = true);
+        std::pair<animation_timer_ptr, bool> create_timer(neolib::uuid aId, i64 aEpoch, bool aSingleton = true);
     public:
         struct meta
         {
@@ -68,6 +70,6 @@ namespace neogfx::game
     private:
         std::atomic<bool> iExternalAnimation = false;
         animation_timer_ptr iDefaultTimer;
-        std::vector<animation_timer_weak_ptr> iTimers;
+        std::map<neolib::uuid, std::vector<animation_timer_weak_ptr>> iTimers;
     };
 }   
