@@ -109,46 +109,54 @@ namespace neogfx::game
             auto const& info = infos.entity_record_no_lock(entity);
             if (info.destroyed)
                 continue;
-            auto& filter = filters.entity_record(entity);
-            if (!has_animation(filter))
+            auto& af = filters.entity_record(entity);
+            if (!has_animation(af))
                 continue;
-            if (filter.frameAnimationState.active && has_animation_frames(filter))
+            if (af.frameAnimationState.active && has_animation_frames(af))
             {
-                if (!filter.frameAnimationState.currentFrameStartTime)
-                    filter.frameAnimationState.currentFrameStartTime = info.creationTime;
+                if (!af.frameAnimationState.currentFrameStartTime)
+                    af.frameAnimationState.currentFrameStartTime = info.creationTime;
 
-                auto const& frames = to_animation_frames(filter);
-                auto const previousFrame = static_cast<u32>(filter.frameAnimationState.currentFrame % frames.size());
+                auto const& frames = to_animation_frames(af);
+                auto const previousFrame = static_cast<u32>(af.frameAnimationState.currentFrame % frames.size());
                 auto currentFrame = previousFrame;
-                while (now > *filter.frameAnimationState.currentFrameStartTime + to_step_time(frames[currentFrame].duration, worldClock.timestep))
+                while (now > *af.frameAnimationState.currentFrameStartTime + to_step_time(frames[currentFrame].duration, worldClock.timestep))
                 {
                     auto const frameDuration = to_step_time(frames[currentFrame].duration, worldClock.timestep);
                     if (frameDuration == 0)
                         throw std::runtime_error("neogfx::game::animator: frame duration of zero!");
-                    *filter.frameAnimationState.currentFrameStartTime += frameDuration;
+                    *af.frameAnimationState.currentFrameStartTime += frameDuration;
                     currentFrame = static_cast<u32>((currentFrame + 1u) % frames.size());
-                    filter.frameAnimationState.currentFrame = currentFrame;
-                    if (currentFrame == 0 && filter.frameAnimationState.autoDestroy)
+                    af.frameAnimationState.currentFrame = currentFrame;
+                    if (currentFrame == 0)
                     {
-                        ecs().async_destroy_entity(entity);
+                        if (af.frameAnimationState.stopFilterOnComplete)
+                            stop_animation(af);
+                        if (af.frameAnimationState.autoDestroy)
+                            ecs().async_destroy_entity(entity);
                         break;
                     }
                 }
                 if (currentFrame != previousFrame)
                     set_render_cache_dirty_no_lock(cache, entity);
             }
-            for (auto& tweenState : filter.tweenAnimationStates)
-                if (tweenState.second.timer == nullptr)
+            for (auto& tweenStateItem : af.tweenAnimationStates)
+            {
+                auto& tweenState = tweenStateItem.second;
+                if (tweenState.timer == nullptr)
                 {
-                    if (tweenState.second.timerDuration)
+                    if (tweenState.timerDuration)
                     {
-                        tweenState.second.timer = create_timer(now);
-                        tweenState.second.timer->duration = to_step_time(*tweenState.second.timerDuration, worldClock.timestep);
+                        tweenState.timer = create_timer(now);
+                        tweenState.timer->duration = to_step_time(*tweenState.timerDuration, worldClock.timestep);
                     }
                     else
-                        tweenState.second.timer = default_timer();
+                        tweenState.timer = default_timer();
                 }
-            if (has_active_tweens(filter))
+                if (tweenState.stopFilterOnComplete && tweenState.timer->complete())
+                    stop_animation(af);
+            }
+            if (has_active_tweens(af))
                 set_render_cache_dirty_no_lock(cache, entity);
         }
     }

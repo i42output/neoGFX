@@ -94,6 +94,7 @@ namespace neogfx::game
         u32 currentFrame = 0u;
         bool autoDestroy = false;
         std::optional<i64> currentFrameStartTime;
+        bool stopFilterOnComplete = false;
 
         void start(i64 aStepTime)
         {
@@ -111,18 +112,23 @@ namespace neogfx::game
     // @todo make componenent data (add meta)
     struct tween_animation_state
     {
+        define_event(Changed, changed)
+
         bool active = false;
         animation_timer_ptr timer;
         optional_time_interval timerDuration;    // when set and timer is null, animator creates a one-shot timer of this length
+        bool stopFilterOnComplete = false;
 
         void start()
         {
             active = true;
+            changed();
         }
 
         void stop()
         {
             active = false;
+            changed();
         }
     };
 
