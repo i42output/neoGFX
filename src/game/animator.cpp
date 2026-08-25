@@ -139,7 +139,15 @@ namespace neogfx::game
             }
             for (auto& tweenState : filter.tweenAnimationStates)
                 if (tweenState.second.timer == nullptr)
-                    tweenState.second.timer = default_timer();
+                {
+                    if (tweenState.second.timerDuration)
+                    {
+                        tweenState.second.timer = create_timer(now);
+                        tweenState.second.timer->duration = to_step_time(*tweenState.second.timerDuration, worldClock.timestep);
+                    }
+                    else
+                        tweenState.second.timer = default_timer();
+                }
             if (has_active_tweens(filter))
                 set_render_cache_dirty_no_lock(cache, entity);
         }

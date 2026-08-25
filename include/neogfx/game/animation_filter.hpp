@@ -113,6 +113,7 @@ namespace neogfx::game
     {
         bool active = false;
         animation_timer_ptr timer;
+        optional_time_interval timerDuration;    // when set and timer is null, animator creates a one-shot timer of this length
 
         void start()
         {
@@ -524,8 +525,37 @@ namespace neogfx::game
             add_tween(aAnimationFilter, *i);
     }
 
-    inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, std::span<tween_info> aTweens, std::optional<time_interval> const& aDuration = {}, i32 aLayer = 0)
+    using tween_duration_info = std::variant<std::monostate, time_interval, animation_timer_ptr>;
+
+    inline animation_tween& add_tween(animation_filter& aAnimationFilter, tween_info const& aInfo, tween_duration_info const& aDurationInfo)
     {
+        auto& tween = add_tween(aAnimationFilter, aInfo);
+        auto const& tweenPtr = to_animation(aAnimationFilter).tweens->back();
+        if (tweenPtr.get() != &tween)
+            throw std::logic_error("neogfx::game::add_tween");
+        auto& tweenState = aAnimationFilter.tweenAnimationStates[tweenPtr];
+        if (auto timer = std::get_if<animation_timer_ptr>(&aDurationInfo))
+            tweenState.timer = *timer;
+        else if (auto duration = std::get_if<time_interval>(&aDurationInfo))
+            tweenState.timerDuration = *duration;
+        return tween;
+    }
+
+    inline void add_tweens(animation_filter& aAnimationFilter, std::initializer_list<tween_info> const& aInfos,
+        std::initializer_list<tween_duration_info> const& aDurationInfos)
+    {
+        if (aInfos.size() != aDurationInfos.size())
+            throw std::logic_error("neogfx::game::add_tweens");
+        auto durationInfo = aDurationInfos.begin();
+        for (auto i = aInfos.begin(); i != aInfos.end(); ++i, ++durationInfo)
+            add_tween(aAnimationFilter, *i, *durationInfo);
+    }
+
+    inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, std::span<tween_info> aTweens, std::span<tween_duration_info const> aDurationInfos, std::optional<time_interval> const& aDuration = {}, i32 aLayer = 0)
+    {
+        if (!aDurationInfos.empty() && aDurationInfos.size() != aTweens.size())
+            throw std::logic_error("neogfx::game::create_animation");
+
         scoped_component_data_lock<mesh_renderer, mesh_filter, animation_filter, entity_life_span> lock{ aEcs };
 
         if (aDuration)
@@ -543,6 +573,7 @@ namespace neogfx::game
         af.animation.emplace();
 
         std::optional<decltype(all_patches(mr))> defaultPatches;
+        auto durationInfo = aDurationInfos.begin();
         for (auto& tween : aTweens)
         {
             if (tween.patches.empty())
@@ -551,15 +582,32 @@ namespace neogfx::game
                     defaultPatches.emplace(all_patches(mr));
                 tween.patches = *defaultPatches;
             }
-            add_tween(af, tween);
+            if (aDurationInfos.empty())
+                add_tween(af, tween);
+            else
+                add_tween(af, tween, *durationInfo++);
         }
 
         return af;
+    }
+
+    inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, std::span<tween_info> aTweens, std::optional<time_interval> const& aDuration = {}, i32 aLayer = 0)
+    {
+        return create_animation(aEcs, aId, aOrigin, aTweens, std::span<tween_duration_info const>{}, aDuration, aLayer);
     }
 
     template <typename Tweens> requires (!std::is_lvalue_reference_v<Tweens>)
     inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, Tweens&& aTweens, std::optional<time_interval> const& aDuration = {}, i32 aLayer = 0)
     {
         return create_animation(aEcs, aId, aOrigin, std::span<tween_info>{ aTweens }, aDuration, aLayer);
+    }
+
+    template <typename Tweens, typename DurationInfos>
+        requires (!std::is_lvalue_reference_v<Tweens> && !std::is_lvalue_reference_v<DurationInfos>&&
+    std::is_constructible_v<std::span<tween_info>, Tweens&>&&
+        std::is_constructible_v<std::span<tween_duration_info const>, DurationInfos&>)
+        inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, Tweens&& aTweens, DurationInfos&& aDurationInfos, std::optional<time_interval> const& aDuration = {}, i32 aLayer = 0)
+    {
+        return create_animation(aEcs, aId, aOrigin, std::span<tween_info>{ aTweens }, std::span<tween_duration_info const>{ aDurationInfos }, aDuration, aLayer);
     }
 }
