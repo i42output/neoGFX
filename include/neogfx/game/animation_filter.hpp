@@ -379,6 +379,11 @@ namespace neogfx::game
             aAnimationFilter.stop_tweens(aPatch);
     }
 
+    inline void stop_animation_on_tween_complete(animation_filter& aAnimationFilter, std::size_t aTweenIndex = 0u)
+    {
+        aAnimationFilter.tweenAnimationStates.at(to_animation(aAnimationFilter).tweens.value().at(aTweenIndex)).stopFilterOnComplete = true;
+    }
+
     inline bool has_animation_frames(animation_filter const& aAnimationFilter)
     {
         return has_animation(aAnimationFilter) && to_animation(aAnimationFilter).frames;
