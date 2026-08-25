@@ -109,9 +109,11 @@ namespace neogfx::game
             auto const& info = infos.entity_record_no_lock(entity);
             if (info.destroyed)
                 continue;
+
             auto& af = filters.entity_record(entity);
             if (!has_animation(af))
                 continue;
+
             if (af.frameAnimationState.active && has_animation_frames(af))
             {
                 if (!af.frameAnimationState.currentFrameStartTime)
@@ -137,12 +139,14 @@ namespace neogfx::game
                         break;
                     }
                 }
+
                 if (currentFrame != previousFrame)
                     set_render_cache_dirty_no_lock(cache, entity);
             }
-            for (auto& tweenStateItem : af.tweenAnimationStates)
+
+            bool stopFilter = false;
+            for (auto& [tween, tweenState] : af.tweenAnimationStates)
             {
-                auto& tweenState = tweenStateItem.second;
                 if (tweenState.timer == nullptr)
                 {
                     if (tweenState.timerDuration)
@@ -153,9 +157,16 @@ namespace neogfx::game
                     else
                         tweenState.timer = default_timer();
                 }
+                if (!tweenState.active)
+                    continue;
+                tweenState.timer->elapsed(now);   // advance before polling
                 if (tweenState.stopFilterOnComplete && tweenState.timer->complete())
-                    stop_animation(af);
+                    stopFilter = true;
             }
+            
+            if (stopFilter)
+                stop_animation(af);
+
             if (has_active_tweens(af))
                 set_render_cache_dirty_no_lock(cache, entity);
         }

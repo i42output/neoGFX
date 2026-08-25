@@ -90,6 +90,8 @@ namespace neogfx::game
     // @todo make componenent data (add meta)
     struct frame_animation_state
     {
+        define_event(Changed, changed)
+
         bool active = false;
         u32 currentFrame = 0u;
         bool autoDestroy = false;
@@ -98,14 +100,22 @@ namespace neogfx::game
 
         void start(i64 aStepTime)
         {
-            active = true;
-            currentFrame = 0u;
-            currentFrameStartTime = aStepTime;
+            if (!active)
+            {
+                active = true;
+                currentFrame = 0u;
+                currentFrameStartTime = aStepTime;
+                changed();
+            }
         }
 
         void stop()
         {
-            active = false;
+            if (active)
+            {
+                active = false;
+                changed();
+            }
         }
     };
 
@@ -121,14 +131,20 @@ namespace neogfx::game
 
         void start()
         {
-            active = true;
-            changed();
+            if (!active)
+            {
+                active = true;
+                changed();
+            }
         }
 
         void stop()
         {
-            active = false;
-            changed();
+            if (active)
+            {
+                active = false;
+                changed();
+            }
         }
     };
 
