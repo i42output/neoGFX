@@ -133,7 +133,10 @@ namespace neogfx::game
                     if (currentFrame == 0)
                     {
                         if (af.frameAnimationState.stopFilterOnComplete)
+                        {
+                            af.frameAnimationState.stopFilterOnComplete = false;
                             stop_animation(af);
+                        }
                         if (af.frameAnimationState.autoDestroy)
                             ecs().async_destroy_entity(entity);
                         break;
@@ -161,7 +164,10 @@ namespace neogfx::game
                     continue;
                 tweenState.timer->elapsed(now);   // advance before polling
                 if (tweenState.stopFilterOnComplete && tweenState.timer->complete())
+                {
+                    tweenState.stopFilterOnComplete = false;
                     stopFilter = true;
+                }
             }
             
             if (stopFilter)

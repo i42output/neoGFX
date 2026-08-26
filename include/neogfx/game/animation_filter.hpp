@@ -379,9 +379,26 @@ namespace neogfx::game
             aAnimationFilter.stop_tweens(aPatch);
     }
 
-    inline void stop_animation_on_tween_complete(animation_filter& aAnimationFilter, std::size_t aTweenIndex = 0u)
+    inline void stop_animation_on_tween_complete(animation_filter& aAnimationFilter, animation_tween_ptr const& aTween)
     {
-        aAnimationFilter.tweenAnimationStates.at(to_animation(aAnimationFilter).tweens.value().at(aTweenIndex)).stopFilterOnComplete = true;
+        auto existing = aAnimationFilter.tweenAnimationStates.find(aTween);
+        if (existing == aAnimationFilter.tweenAnimationStates.end())
+            throw std::logic_error("neogfx::game::stop_animation_on_tween_complete: tween not present in filter!");
+        existing->second.stopFilterOnComplete = true;
+    }
+
+    inline void stop_animation_on_tween_complete(animation_filter& aAnimationFilter, patch_ptr const& aPatch)
+    {
+        for (auto const& tween : aAnimationFilter.active_tweens(aPatch))
+            aAnimationFilter.tweenAnimationStates.at(tween).stopFilterOnComplete = true;
+    }
+
+    inline void stop_animation_on_tween_complete(animation_filter& aAnimationFilter, u32 aTweenIndex = 0u)
+    {
+        auto const& tweens = aAnimationFilter.asset_tweens();
+        if (aTweenIndex >= tweens.size())
+            throw std::logic_error("neogfx::game::stop_animation_on_tween_complete: bad tween index!");
+        stop_animation_on_tween_complete(aAnimationFilter, tweens[aTweenIndex]);
     }
 
     inline bool has_animation_frames(animation_filter const& aAnimationFilter)
