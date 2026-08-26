@@ -147,7 +147,6 @@ namespace neogfx::game
                     set_render_cache_dirty_no_lock(cache, entity);
             }
 
-            bool stopFilter = false;
             for (auto& [tween, tweenState] : af.tweenAnimationStates)
             {
                 if (tweenState.timer == nullptr)
@@ -160,18 +159,26 @@ namespace neogfx::game
                     else
                         tweenState.timer = default_timer();
                 }
-                if (!tweenState.active)
-                    continue;
-                tweenState.timer->elapsed(now);   // advance before polling
-                if (tweenState.stopFilterOnComplete && tweenState.timer->complete())
+            }
+
+            for (auto const& ct : af.completionTimers)
+            {
+                if (auto timer = std::get_if<animation_timer_ptr>(&ct))
                 {
-                    tweenState.stopFilterOnComplete = false;
-                    stopFilter = true;
+                    (**timer).elapsed(now); // advance before polling
+                    if ((**timer).complete())
+                        stop_animation(af);
+                }
+                else if (auto tween = std::get_if<animation_tween_ptr>(&ct))
+                {
+                    if (auto& tweenTimer = af.tweenAnimationStates.at(*tween).timer)
+                    {
+                        tweenTimer->elapsed(now); // advance before polling
+                        if (tweenTimer->complete())
+                            stop_animation(af);
+                    }
                 }
             }
-            
-            if (stopFilter)
-                stop_animation(af);
 
             if (has_active_tweens(af))
                 set_render_cache_dirty_no_lock(cache, entity);

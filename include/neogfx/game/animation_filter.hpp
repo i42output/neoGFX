@@ -127,7 +127,6 @@ namespace neogfx::game
         bool active = false;
         animation_timer_ptr timer;
         optional_time_interval timerDuration;    // when set and timer is null, animator creates a one-shot timer of this length
-        bool stopFilterOnComplete = false;
 
         void start()
         {
@@ -158,6 +157,8 @@ namespace neogfx::game
         frame_animation_state frameAnimationState;
         // @todo add to meta
         std::unordered_map<animation_tween_ptr, tween_animation_state> tweenAnimationStates;
+        // @todo add to meta
+        std::set<std::variant<animation_tween_ptr, animation_timer_ptr>> completionTimers;
 
         animation_tweens const& asset_tweens() const
         {
@@ -384,13 +385,21 @@ namespace neogfx::game
         auto existing = aAnimationFilter.tweenAnimationStates.find(aTween);
         if (existing == aAnimationFilter.tweenAnimationStates.end())
             throw std::logic_error("neogfx::game::stop_animation_on_tween_complete: tween not present in filter!");
-        existing->second.stopFilterOnComplete = true;
+        if (existing->second.timer)
+            aAnimationFilter.completionTimers.insert(existing->second.timer);
+        else
+            aAnimationFilter.completionTimers.insert(aTween);
     }
 
     inline void stop_animation_on_tween_complete(animation_filter& aAnimationFilter, patch_ptr const& aPatch)
     {
         for (auto const& tween : aAnimationFilter.active_tweens(aPatch))
-            aAnimationFilter.tweenAnimationStates.at(tween).stopFilterOnComplete = true;
+        {
+            if (aAnimationFilter.tweenAnimationStates.at(tween).timer)
+                aAnimationFilter.completionTimers.insert(aAnimationFilter.tweenAnimationStates.at(tween).timer);
+            else
+                aAnimationFilter.completionTimers.insert(tween);
+        }
     }
 
     inline void stop_animation_on_tween_complete(animation_filter& aAnimationFilter, u32 aTweenIndex = 0u)
