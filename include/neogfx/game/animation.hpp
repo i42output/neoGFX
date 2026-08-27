@@ -157,6 +157,7 @@ namespace neogfx::game
 
     enum class tween_cycle : std::uint32_t
     {
+        OneShot,
         Loop,
         PingPong
     };
@@ -196,7 +197,12 @@ namespace neogfx::game
 
             thread_local std::vector<ease_segment<double>> tSegments;
 
-            auto const t0 = duration > 0.0 ? std::fmod(timestep.count(), duration) / duration : 0.0;
+            auto const t0 =
+                (duration > 0.0 ? 
+                    (cycle != tween_cycle::OneShot ?
+                        std::fmod(timestep.count(), duration) / duration :
+                        std::min(timestep.count() / duration, 1.0)) : 
+                    0.0);
             auto const t = (cycle == tween_cycle::PingPong) ? (t0 < 0.5 ? t0 * 2.0 : (1.0 - t0) * 2.0) : t0;
 
             auto const ease = [t](std::optional<easings_t> const& aEasings) -> vec3f
