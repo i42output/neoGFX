@@ -545,7 +545,7 @@ namespace neogfx::game
         time_interval duration;
         vec3_range range;
         game::patches patches;
-        tween_cycle cycle = tween_cycle::Loop;
+        tween_cycle cycle;
         std::optional<vec3f> pivot;
     };
 

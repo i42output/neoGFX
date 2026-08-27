@@ -155,11 +155,24 @@ namespace neogfx::game
         };
     };
 
-    enum class tween_cycle : std::uint32_t
+    enum class tween_shape : std::uint32_t
     {
-        OneShot,
         Loop,
         PingPong
+    };
+
+    enum class tween_repeat : std::uint32_t
+    {
+        Continuous,
+        OneShot
+    };
+
+    struct tween_cycle
+    {
+        tween_shape shape = tween_shape::Loop;
+        tween_repeat repeat = tween_repeat::Continuous;
+
+        auto operator<=>(tween_cycle const&) const = default;
     };
 
     struct animation_tween
@@ -173,7 +186,7 @@ namespace neogfx::game
         std::optional<std::array<animation_easing, 3u>> translationEasings;
         std::optional<std::array<animation_easing, 3u>> scalingEasings;
         std::optional<std::array<animation_easing, 3u>> rotationEasings;
-        tween_cycle cycle = tween_cycle::Loop;
+        tween_cycle cycle = { tween_shape::Loop, tween_repeat::Continuous };
 
         mutable std::optional<std::function<mat44f(vec3f const&, vec3f const&, vec3f const&)>> transformationMatrixFunction;
         function_factory<animation_tween> transformationMatrixFunctionFactory{
@@ -198,12 +211,12 @@ namespace neogfx::game
             thread_local std::vector<ease_segment<double>> tSegments;
 
             auto const t0 =
-                (duration > 0.0 ? 
-                    (cycle != tween_cycle::OneShot ?
+                (duration > 0.0 ?
+                    (cycle.repeat == tween_repeat::Continuous ?
                         std::fmod(timestep.count(), duration) / duration :
-                        std::min(timestep.count() / duration, 1.0)) : 
-                    0.0);
-            auto const t = (cycle == tween_cycle::PingPong) ? (t0 < 0.5 ? t0 * 2.0 : (1.0 - t0) * 2.0) : t0;
+                        std::clamp(timestep.count() / duration, 0.0, 1.0)) :
+                    (cycle.repeat == tween_repeat::OneShot ? 1.0 : 0.0));
+            auto const t = (cycle.shape == tween_shape::PingPong) ? (t0 < 0.5 ? t0 * 2.0 : (1.0 - t0) * 2.0) : t0;
 
             auto const ease = [t](std::optional<easings_t> const& aEasings) -> vec3f
                 {
