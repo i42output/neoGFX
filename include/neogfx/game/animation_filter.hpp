@@ -173,12 +173,24 @@ namespace neogfx::game
         auto active_tweens() const
         {
             return asset_tweens() | std::views::filter([this](animation_tween_ptr const& aTween)
-                { return tweenAnimationStates.contains(aTween); });
+                { return tweenAnimationStates.contains(aTween) && tweenAnimationStates.at(aTween).active; });
+        }
+
+        auto inactive_tweens() const
+        {
+            return asset_tweens() | std::views::filter([this](animation_tween_ptr const& aTween)
+                { return tweenAnimationStates.contains(aTween) && !tweenAnimationStates.at(aTween).active; });
         }
 
         auto active_tweens(patch_ptr const& aPatch) const
         {
             return active_tweens() | std::views::filter([aPatch](animation_tween_ptr const& aTween)
+                { return std::ranges::contains(aTween->patches, aPatch); });
+        }
+
+        auto inactive_tweens(patch_ptr const& aPatch) const
+        {
+            return inactive_tweens() | std::views::filter([aPatch](animation_tween_ptr const& aTween)
                 { return std::ranges::contains(aTween->patches, aPatch); });
         }
 
@@ -203,13 +215,13 @@ namespace neogfx::game
 
         void start_tweens()
         {
-            for (auto& tween : active_tweens())
+            for (auto& tween : inactive_tweens())
                 tweenAnimationStates[tween].start();
         }
 
         void start_tweens(patch_ptr const& aPatch)
         {
-            for (auto& tween : active_tweens(aPatch))
+            for (auto& tween : inactive_tweens(aPatch))
                 tweenAnimationStates[tween].start();
         }
 
@@ -232,8 +244,6 @@ namespace neogfx::game
             for (auto& tween : active_tweens(aPatch))
             {
                 auto& tweenState = tweenAnimationStates.at(tween);
-                if (!tweenState.active)
-                    continue;
                 std::visit([&](auto& attachment)
                     {
                         using attachment_type = std::decay_t<decltype(attachment)>;
@@ -585,8 +595,7 @@ namespace neogfx::game
             }();
         tween.cycle = {
             aInfo.cycle.shape.value_or(tween_shape::Loop),
-            aInfo.cycle.repeat.value_or(aInfo.cycle.duration.has_value() ?
-                tween_repeat::OneShot : tween_repeat::Continuous) };
+            aInfo.cycle.repeat.value_or(tween_repeat::Continuous) };
         tween.pivot = aInfo.pivot;
         auto const& tweenPtr = to_animation(aAnimationFilter).tweens->back();
         if (tweenPtr.get() != &tween)
