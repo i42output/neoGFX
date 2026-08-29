@@ -75,7 +75,7 @@ namespace video_poker
                     {
                         ng::game::tween_type::Translate, 1.0s,
                         { ng::vec3{ 0.0, -20.0_dip, 0.0 }, ng::vec3{ 0.0, 20.0_dip, 0.0 } },
-                        {}, ng::game::tween_cycle::PingPong
+                        {}, { ng::game::tween_shape::PingPong }
                     } }),
                 2.0s, 2);
 

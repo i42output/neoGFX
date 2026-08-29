@@ -949,6 +949,12 @@
     <ClInclude Include="x64\Release\GeneratedFiles\standard-texture.vert.hpp">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\game\i_sequencer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\game\sequencer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\..\src\resources.nrc" />
@@ -1286,6 +1292,9 @@
     </ClCompile>
     <ClCompile Include="x64\Release\GeneratedFiles\resources.res.cpp">
       <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\game\sequencer.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/animation.hpp>
 #include <neogfx/game/entity_life_span.hpp>
+#include <neogfx/game/i_sequencer.hpp>
 
 namespace neogfx::game
 {
@@ -125,8 +126,7 @@ namespace neogfx::game
         define_event(Changed, changed)
 
         bool active = false;
-        animation_timer_ptr timer;
-        optional_time_interval timerDuration;    // when set and timer is null, animator creates a one-shot timer of this length
+        std::variant<std::monostate, sequencer_track_id, animation_timer_ptr, time_interval> attachment;
 
         void start()
         {
@@ -185,7 +185,10 @@ namespace neogfx::game
         bool any_active_tweens() const
         {
             return std::ranges::any_of(tweenAnimationStates, [](auto const& aTweenState)
-                { return aTweenState.second.active && aTweenState.second.timer && aTweenState.second.timer->running(); });
+                { return 
+                    aTweenState.second.active && 
+                    std::holds_alternative<animation_timer_ptr>(aTweenState.second.attachment) && 
+                    std::get<animation_timer_ptr>(aTweenState.second.attachment)->running(); });
         }
 
         void start_frames(i64 aStepTime)
@@ -229,8 +232,18 @@ namespace neogfx::game
             for (auto& tween : active_tweens(aPatch))
             {
                 auto& tweenState = tweenAnimationStates.at(tween);
-                if (tweenState.active)
-                    result *= (*tween)(tweenState.timer ? from_step_time(tweenState.timer->elapsed(aStepTime)) : 0.0s);
+                if (!tweenState.active)
+                    continue;
+                std::visit([&](auto& attachment)
+                    {
+                        using attachment_type = std::decay_t<decltype(attachment)>;
+                        if constexpr (std::is_same_v<attachment_type, sequencer_track_id>)
+                            ;// todo
+                        else if constexpr (std::is_same_v<attachment_type, animation_timer_ptr>)
+                            result *= (*tween)(from_step_time(attachment->elapsed(aStepTime)));
+                        else
+                            result *= (*tween)(0.0s);
+                    }, tweenState.attachment);
             }
 
             return result;
@@ -385,8 +398,8 @@ namespace neogfx::game
         auto existing = aAnimationFilter.tweenAnimationStates.find(aTween);
         if (existing == aAnimationFilter.tweenAnimationStates.end())
             throw std::logic_error("neogfx::game::stop_animation_on_tween_complete: tween not present in filter!");
-        if (existing->second.timer)
-            aAnimationFilter.completionTimers.insert(existing->second.timer);
+        if (std::holds_alternative<animation_timer_ptr>(existing->second.attachment))
+            aAnimationFilter.completionTimers.insert(std::get<animation_timer_ptr>(existing->second.attachment));
         else
             aAnimationFilter.completionTimers.insert(aTween);
     }
@@ -394,12 +407,7 @@ namespace neogfx::game
     inline void stop_animation_on_tween_complete(animation_filter& aAnimationFilter, patch_ptr const& aPatch)
     {
         for (auto const& tween : aAnimationFilter.active_tweens(aPatch))
-        {
-            if (aAnimationFilter.tweenAnimationStates.at(tween).timer)
-                aAnimationFilter.completionTimers.insert(aAnimationFilter.tweenAnimationStates.at(tween).timer);
-            else
-                aAnimationFilter.completionTimers.insert(tween);
-        }
+            stop_animation_on_tween_complete(aAnimationFilter, tween);
     }
 
     inline void stop_animation_on_tween_complete(animation_filter& aAnimationFilter, u32 aTweenIndex = 0u)
@@ -539,13 +547,21 @@ namespace neogfx::game
 
     enum class tween_type : std::uint32_t { Translate, Scale, Rotate, RotateDeg };
 
+    struct tween_cycle_info
+    {
+        std::optional<tween_shape> shape;
+        std::optional<tween_repeat> repeat;
+        optional_time_interval duration;
+        std::variant<std::monostate, animation_timer_ptr, sequencer_track_id> attachment;
+    };
+
     struct tween_info
     {
         tween_type type;
         time_interval duration;
         vec3_range range;
         game::patches patches;
-        tween_cycle cycle;
+        tween_cycle_info cycle;
         std::optional<vec3f> pivot;
     };
 
@@ -567,8 +583,21 @@ namespace neogfx::game
                     throw std::logic_error("neogfx::game::add_tween: unknown tween type");
                 }
             }();
-        tween.cycle = aInfo.cycle;
+        tween.cycle = {
+            aInfo.cycle.shape.value_or(tween_shape::Loop),
+            aInfo.cycle.repeat.value_or(aInfo.cycle.duration.has_value() ?
+                tween_repeat::OneShot : tween_repeat::Continuous) };
         tween.pivot = aInfo.pivot;
+        auto const& tweenPtr = to_animation(aAnimationFilter).tweens->back();
+        if (tweenPtr.get() != &tween)
+            throw std::logic_error("neogfx::game::add_tween");
+        auto& tweenState = aAnimationFilter.tweenAnimationStates[tweenPtr];
+        if (auto sequencerTrackId = std::get_if<sequencer_track_id>(&aInfo.cycle.attachment))
+            tweenState.attachment = *sequencerTrackId;
+        else if (auto timer = std::get_if<animation_timer_ptr>(&aInfo.cycle.attachment))
+            tweenState.attachment = *timer;
+        else if (aInfo.cycle.duration)
+            tweenState.attachment = *aInfo.cycle.duration;
         return tween;
     }
 
@@ -578,37 +607,8 @@ namespace neogfx::game
             add_tween(aAnimationFilter, *i);
     }
 
-    using tween_duration_info = std::variant<std::monostate, time_interval, animation_timer_ptr>;
-
-    inline animation_tween& add_tween(animation_filter& aAnimationFilter, tween_info const& aInfo, tween_duration_info const& aDurationInfo)
+    inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, std::span<tween_info> aTweens, std::optional<time_interval> const& aDuration = {}, i32 aLayer = 0)
     {
-        auto& tween = add_tween(aAnimationFilter, aInfo);
-        auto const& tweenPtr = to_animation(aAnimationFilter).tweens->back();
-        if (tweenPtr.get() != &tween)
-            throw std::logic_error("neogfx::game::add_tween");
-        auto& tweenState = aAnimationFilter.tweenAnimationStates[tweenPtr];
-        if (auto timer = std::get_if<animation_timer_ptr>(&aDurationInfo))
-            tweenState.timer = *timer;
-        else if (auto duration = std::get_if<time_interval>(&aDurationInfo))
-            tweenState.timerDuration = *duration;
-        return tween;
-    }
-
-    inline void add_tweens(animation_filter& aAnimationFilter, std::initializer_list<tween_info> const& aInfos,
-        std::initializer_list<tween_duration_info> const& aDurationInfos)
-    {
-        if (aInfos.size() != aDurationInfos.size())
-            throw std::logic_error("neogfx::game::add_tweens");
-        auto durationInfo = aDurationInfos.begin();
-        for (auto i = aInfos.begin(); i != aInfos.end(); ++i, ++durationInfo)
-            add_tween(aAnimationFilter, *i, *durationInfo);
-    }
-
-    inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, std::span<tween_info> aTweens, std::span<tween_duration_info const> aDurationInfos, std::optional<time_interval> const& aDuration = {}, i32 aLayer = 0)
-    {
-        if (!aDurationInfos.empty() && aDurationInfos.size() != aTweens.size())
-            throw std::logic_error("neogfx::game::create_animation");
-
         scoped_component_data_lock<mesh_renderer, mesh_filter, animation_filter, entity_life_span> lock{ aEcs };
 
         if (aDuration)
@@ -626,7 +626,6 @@ namespace neogfx::game
         af.animation.emplace();
 
         std::optional<decltype(all_patches(mr))> defaultPatches;
-        auto durationInfo = aDurationInfos.begin();
         for (auto& tween : aTweens)
         {
             if (tween.patches.empty())
@@ -635,32 +634,15 @@ namespace neogfx::game
                     defaultPatches.emplace(all_patches(mr));
                 tween.patches = *defaultPatches;
             }
-            if (aDurationInfos.empty())
-                add_tween(af, tween);
-            else
-                add_tween(af, tween, *durationInfo++);
+            add_tween(af, tween);
         }
 
         return af;
-    }
-
-    inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, std::span<tween_info> aTweens, std::optional<time_interval> const& aDuration = {}, i32 aLayer = 0)
-    {
-        return create_animation(aEcs, aId, aOrigin, aTweens, std::span<tween_duration_info const>{}, aDuration, aLayer);
     }
 
     template <typename Tweens> requires (!std::is_lvalue_reference_v<Tweens>)
     inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, Tweens&& aTweens, std::optional<time_interval> const& aDuration = {}, i32 aLayer = 0)
     {
         return create_animation(aEcs, aId, aOrigin, std::span<tween_info>{ aTweens }, aDuration, aLayer);
-    }
-
-    template <typename Tweens, typename DurationInfos>
-        requires (!std::is_lvalue_reference_v<Tweens> && !std::is_lvalue_reference_v<DurationInfos>&&
-    std::is_constructible_v<std::span<tween_info>, Tweens&>&&
-        std::is_constructible_v<std::span<tween_duration_info const>, DurationInfos&>)
-        inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, Tweens&& aTweens, DurationInfos&& aDurationInfos, std::optional<time_interval> const& aDuration = {}, i32 aLayer = 0)
-    {
-        return create_animation(aEcs, aId, aOrigin, std::span<tween_info>{ aTweens }, std::span<tween_duration_info const>{ aDurationInfos }, aDuration, aLayer);
     }
 }

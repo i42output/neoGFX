@@ -149,16 +149,15 @@ namespace neogfx::game
 
             for (auto& [tween, tweenState] : af.tweenAnimationStates)
             {
-                if (tweenState.timer == nullptr)
+                if (std::holds_alternative<time_interval>(tweenState.attachment))
                 {
-                    if (tweenState.timerDuration)
-                    {
-                        tweenState.timer = create_timer(now);
-                        tweenState.timer->duration = to_step_time(*tweenState.timerDuration, worldClock.timestep);
-                    }
-                    else
-                        tweenState.timer = default_timer();
+                    auto const duration = std::get<time_interval>(tweenState.attachment);
+                    auto const newTimer = create_timer(now);
+                    tweenState.attachment = newTimer;
+                    newTimer->duration = to_step_time(duration, worldClock.timestep);
                 }
+                else if (std::holds_alternative<std::monostate>(tweenState.attachment))
+                    tweenState.attachment = default_timer();
             }
 
             for (auto const& ct : af.completionTimers)
@@ -171,10 +170,10 @@ namespace neogfx::game
                 }
                 else if (auto tween = std::get_if<animation_tween_ptr>(&ct))
                 {
-                    if (auto& tweenTimer = af.tweenAnimationStates.at(*tween).timer)
+                    if (auto* tweenTimer = std::get_if<animation_timer_ptr>(&af.tweenAnimationStates.at(*tween).attachment))
                     {
-                        tweenTimer->elapsed(now); // advance before polling
-                        if (tweenTimer->complete())
+                        (**tweenTimer).elapsed(now); // advance before polling
+                        if ((**tweenTimer).complete())
                             stop_animation(af);
                     }
                 }
