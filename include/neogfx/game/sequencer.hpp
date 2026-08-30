@@ -21,8 +21,9 @@
 
 #include <neogfx/game/i_sequencer.hpp>
 
-#include <atomic>
+#include <cstddef>
 #include <cstdint>
+#include <atomic>
 #include <memory>
 #include <stdexcept>
 #include <vector>
