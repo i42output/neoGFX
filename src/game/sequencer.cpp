@@ -38,8 +38,32 @@ namespace neogfx
             constexpr sequencer_position TocksPerSecond = 1000000;
         }
 
+        bool sequencer::is_multi_threaded() const
+        {
+            return iMutex.is<std::recursive_mutex>();
+        }
+
+        bool sequencer::is_single_threaded() const
+        {
+            return iMutex.is<neolib::null_mutex>();
+        }
+
+        void sequencer::set_multi_threaded()
+        {
+            if (!is_multi_threaded())
+                iMutex.emplace<std::recursive_mutex>();
+        }
+
+        void sequencer::set_single_threaded()
+        {
+            if (!is_single_threaded())
+                iMutex.emplace<neolib::null_mutex>();
+        }
+
         sequencer_track_id sequencer::create_track()
         {
+            std::unique_lock lock{ iMutex };
+
             auto const trackId = static_cast<sequencer_track_id>(iNextTrackCookie++);
             iTracks.emplace(trackId, track_entry{});
             return trackId;
@@ -47,6 +71,8 @@ namespace neogfx
 
         void sequencer::delete_track(sequencer_track_id aTrack)
         {
+            std::unique_lock lock{ iMutex };
+
             auto existingTrack = iTracks.find(aTrack);
             if (existingTrack == iTracks.end())
                 throw track_not_found{};
@@ -57,16 +83,22 @@ namespace neogfx
 
         i_sequencer_clip const& sequencer::clip(sequencer_clip_id aClipId) const
         {
+            std::unique_lock lock{ iMutex };
+
             return *entry(aClipId).clip;
         }
 
         i_sequencer_clip& sequencer::clip(sequencer_clip_id aClipId)
         {
+            std::unique_lock lock{ iMutex };
+
             return *entry(aClipId).clip;
         }
 
         sequencer_clip_id sequencer::add_clip(i_ref_ptr<i_sequencer_clip> const& aClip, sequencer_track_id aTrack, sequencer_position aStart, sequencer_duration aDuration)
         {
+            std::unique_lock lock{ iMutex };
+
             if (aClip.ptr() == nullptr)
                 throw no_clip{};
             auto& theTrack = find_track(aTrack);
@@ -88,6 +120,8 @@ namespace neogfx
 
         void sequencer::delete_clip(sequencer_clip_id aClipId)
         {
+            std::unique_lock lock{ iMutex };
+
             auto existingClip = iClips.find(aClipId);
             if (existingClip == iClips.end())
                 throw clip_not_found{};
@@ -99,11 +133,15 @@ namespace neogfx
 
         bool sequencer::is_playing() const
         {
+            std::unique_lock lock{ iMutex };
+
             return iState == transport_state::Playing;
         }
 
         sequencer_position sequencer::position() const
         {
+            std::unique_lock lock{ iMutex };
+
             if (iState == transport_state::Playing)
                 return iPosition + (now() - iAnchor);
             return iPosition;
@@ -111,6 +149,8 @@ namespace neogfx
 
         void sequencer::play()
         {
+            std::unique_lock lock{ iMutex };
+
             if (iState == transport_state::Playing)
                 return;
             iAnchor = now();
@@ -119,6 +159,8 @@ namespace neogfx
 
         void sequencer::pause()
         {
+            std::unique_lock lock{ iMutex };
+
             if (iState != transport_state::Playing)
                 return;
             iPosition = position();
@@ -128,11 +170,15 @@ namespace neogfx
 
         void sequencer::rewind()
         {
+            std::unique_lock lock{ iMutex };
+
             seek(0);
         }
 
         void sequencer::seek(sequencer_position aPosition)
         {
+            std::unique_lock lock{ iMutex };
+
             iPosition = std::max<sequencer_position>(aPosition, 0);
             iAnchor = now();
             for (auto& theTrack : iTracks)
@@ -141,6 +187,8 @@ namespace neogfx
 
         void sequencer::stop()
         {
+            std::unique_lock lock{ iMutex };
+
             iState = transport_state::Stopped;
             iPosition = 0;
             iAnchor = now();
@@ -150,6 +198,8 @@ namespace neogfx
 
         optional_sequencer_clip_info sequencer::current_clip(sequencer_track_id aTrack) const
         {
+            std::unique_lock lock{ iMutex };
+
             auto const& theTrack = find_track(aTrack);
             auto const currentPosition = position();
             auto const cursor = find_cursor(theTrack, currentPosition);
@@ -163,6 +213,8 @@ namespace neogfx
 
         optional_sequencer_clip_info sequencer::next_clip(sequencer_track_id aTrack) const
         {
+            std::unique_lock lock{ iMutex };
+
             auto const& theTrack = find_track(aTrack);
             auto const currentPosition = position();
             for (auto cursor = find_cursor(theTrack, currentPosition); cursor != theTrack.clips.size(); ++cursor)
@@ -176,6 +228,8 @@ namespace neogfx
 
         void sequencer::update()
         {
+            std::unique_lock lock{ iMutex };
+
             auto const currentPosition = position();
             for (auto& theTrack : iTracks)
                 update_track(theTrack.second, currentPosition);
@@ -183,11 +237,15 @@ namespace neogfx
 
         sequencer::transport_state sequencer::state() const
         {
+            std::unique_lock lock{ iMutex };
+
             return iState;
         }
 
         sequencer_position sequencer::now() const
         {
+            std::unique_lock lock{ iMutex };
+
             static_assert(TocksPerSecond == std::chrono::microseconds::period::den);
             return std::chrono::duration_cast<std::chrono::microseconds>(
                 std::chrono::steady_clock::now().time_since_epoch()).count();
@@ -195,6 +253,8 @@ namespace neogfx
 
         void sequencer::update_track(track_entry& aTrack, sequencer_position aPosition)
         {
+            std::unique_lock lock{ iMutex };
+
             aTrack.active = {};
             while (aTrack.cursor != aTrack.clips.size())
             {
@@ -222,6 +282,8 @@ namespace neogfx
 
         void sequencer::resync_track(track_entry& aTrack, sequencer_position aPosition)
         {
+            std::unique_lock lock{ iMutex };
+
             aTrack.cursor = find_cursor(aTrack, aPosition);
             aTrack.active = {};
             for (std::size_t index = 0; index != aTrack.clips.size(); ++index)
@@ -230,6 +292,8 @@ namespace neogfx
 
         std::size_t sequencer::find_cursor(track_entry const& aTrack, sequencer_position aPosition) const
         {
+            std::unique_lock lock{ iMutex };
+
             // first clip that has not yet ended at aPosition
             auto const cursor = std::lower_bound(aTrack.clips.begin(), aTrack.clips.end(), aPosition,
                 [this](sequencer_clip_id aLhs, sequencer_position aRhs) { return entry(aLhs).end() <= aRhs; });
@@ -238,6 +302,8 @@ namespace neogfx
 
         sequencer::clip_entry const& sequencer::entry(sequencer_clip_id aClipId) const
         {
+            std::unique_lock lock{ iMutex };
+
             auto existingClip = iClips.find(aClipId);
             if (existingClip == iClips.end())
                 throw clip_not_found{};
@@ -246,11 +312,15 @@ namespace neogfx
 
         sequencer::clip_entry& sequencer::entry(sequencer_clip_id aClipId)
         {
+            std::unique_lock lock{ iMutex };
+
             return const_cast<clip_entry&>(const_cast<sequencer const*>(this)->entry(aClipId));
         }
 
         sequencer::track_entry const& sequencer::find_track(sequencer_track_id aTrack) const
         {
+            std::unique_lock lock{ iMutex };
+
             auto existingTrack = iTracks.find(aTrack);
             if (existingTrack == iTracks.end())
                 throw track_not_found{};
@@ -259,6 +329,8 @@ namespace neogfx
 
         sequencer::track_entry& sequencer::find_track(sequencer_track_id aTrack)
         {
+            std::unique_lock lock{ iMutex };
+
             return const_cast<track_entry&>(const_cast<sequencer const*>(this)->find_track(aTrack));
         }
     }

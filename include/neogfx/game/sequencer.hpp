@@ -24,6 +24,9 @@
 #include <map>
 #include <stdexcept>
 #include <vector>
+#include <mutex>
+
+#include <neolib/core/mutex.hpp>
 
 namespace neogfx
 {
@@ -67,6 +70,11 @@ namespace neogfx
             sequencer() = default;
             ~sequencer() = default;
         public:
+            bool is_multi_threaded() const final;
+            bool is_single_threaded() const final;
+            void set_multi_threaded() final;
+            void set_single_threaded() final;
+        public:
             sequencer_track_id create_track() final;
             void delete_track(sequencer_track_id aTrack) final;
         public:
@@ -103,6 +111,7 @@ namespace neogfx
             track_entry const& find_track(sequencer_track_id aTrack) const;
             track_entry& find_track(sequencer_track_id aTrack);
         private:
+            mutable neolib::multi_mutex<std::recursive_mutex, neolib::null_mutex> iMutex;
             neolib::cookie iNextTrackCookie = 0;
             neolib::cookie iNextClipCookie = 0;
             clip_map iClips;
