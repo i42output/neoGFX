@@ -140,11 +140,6 @@ namespace neogfx
         class i_sequencer : public i_service
         {
         public:
-            virtual bool is_multi_threaded() const= 0;
-            virtual bool is_single_threaded() const = 0;
-            virtual void set_multi_threaded() = 0;
-            virtual void set_single_threaded() = 0;
-        public:
             virtual sequencer_track_id create_track() = 0;
             virtual void delete_track(sequencer_track_id aTrack) = 0;
         public:
