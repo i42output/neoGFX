@@ -527,10 +527,10 @@ int main(int argc, char* argv[])
             window.effectWidthSlider.set_value(2);
             window.effectAux1Slider.set_value(5);
             auto s = window.textEdit.default_style();
-            s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::color::Orange, window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
+            s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::color::Orange.lighter(0x40), window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
             window.textEdit.set_default_style(s);
             s = window.textEditEditor.default_style();
-            s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::color::Orange, window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
+            s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::color::Orange.lighter(0x40), window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
             window.textEditEditor.set_default_style(s);
         });
         window.effectWidthSlider.ValueChanged([&]()
@@ -539,7 +539,10 @@ int main(int argc, char* argv[])
             auto& textEffect = s.character().text_effect();
             if (textEffect == std::nullopt)
                 return;
-            s.character().set_text_effect(ng::text_effect{ window.editGlow.is_checked() ? ng::text_effect_type::Glow : window.editShadow.is_checked() ? ng::text_effect_type::Shadow : ng::text_effect_type::Outline, textEffect->color(), window.effectWidthSlider.value(), {}, textEffect->aux1() });
+            s.character().set_text_effect(ng::text_effect{ window.editGlow.is_checked() ? 
+                ng::text_effect_type::Glow : window.editShadow.is_checked() ? 
+                    ng::text_effect_type::Shadow : ng::text_effect_type::Outline, 
+                textEffect->color(), window.effectWidthSlider.value(), {}, textEffect->aux1() });
             window.textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << window.effectWidthSlider.value() << std::endl << window.effectAux1Slider.value() << std::endl;
@@ -552,7 +555,7 @@ int main(int argc, char* argv[])
             auto& textEffect = s.character().text_effect();
             if (textEffect == std::nullopt)
                 return;
-            s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, textEffect->color(), textEffect->width(), {}, window.effectAux1Slider.value() });
+            s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, textEffect->color(), textEffect->width(), {}, window.effectAux1Slider.value()});
             window.textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << window.effectWidthSlider.value() << std::endl << window.effectAux1Slider.value() << std::endl;

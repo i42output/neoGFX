@@ -501,6 +501,12 @@ namespace neogfx
             else
                 set_flags(flags() & ~text_effect_flags::Bright);
         }
+        text_effect with_bright(bool aBright = true) const
+        {
+            auto result = *this;
+            result.set_bright(aBright);
+            return result;
+        }
         bool ignore_emoji() const
         {
             return (flags() & text_effect_flags::IgnoreEmoji) == text_effect_flags::IgnoreEmoji;
@@ -512,7 +518,7 @@ namespace neogfx
             else
                 set_flags(flags() & ~text_effect_flags::IgnoreEmoji);
         }
-        text_effect with_emoji_ignored(bool aIgnored) const
+        text_effect with_emoji_ignored(bool aIgnored = true) const
         {
             auto result = *this;
             result.set_ignore_emoji(aIgnored);
