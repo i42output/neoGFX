@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <concepts>
+#include <cstddef>
 #include <type_traits>
 #include <utility>
 
@@ -37,6 +38,11 @@ namespace neogfx
     {
         static_assert(std::is_integral_v<neolib::cookie>,
             "sequencer id types require neolib::cookie to be an integral type");
+
+        // a sequence is a group of tracks sharing one transport; sequences play
+        // independently of one another
+        enum class sequencer_sequence_id : neolib::cookie {};
+        using optional_sequencer_sequence_id = std::optional<sequencer_sequence_id>;
 
         enum class sequencer_track_id : neolib::cookie {};
         using optional_sequencer_track_id = std::optional<sequencer_track_id>;
@@ -77,7 +83,7 @@ namespace neogfx
         using sequencer_clip_ptr = neolib::ref_ptr<i_sequencer_clip>;
 
         template <typename Payload>
-        concept SequencerClipPayload = requires (Payload& aPayload, sequencer_offset aPosition)
+        concept SequencerClipPayload = requires (Payload & aPayload, sequencer_offset aPosition)
         {
             { aPayload.advance(aPosition) };
         };
@@ -140,8 +146,22 @@ namespace neogfx
         class i_sequencer : public i_service
         {
         public:
-            virtual sequencer_track_id create_track() = 0;
+            virtual sequencer_sequence_id create_sequence() = 0;
+            virtual void delete_sequence(sequencer_sequence_id aSequence) = 0;
+            // the sequence every track lands on when no sequence is named; exists for
+            // the lifetime of the sequencer and cannot be deleted
+            virtual sequencer_sequence_id default_sequence() const = 0;
+        public:
+            virtual sequencer_track_id create_track(sequencer_sequence_id aSequence) = 0;
             virtual void delete_track(sequencer_track_id aTrack) = 0;
+            virtual sequencer_sequence_id track_sequence(sequencer_track_id aTrack) const = 0;
+        public:
+            // indices address a snapshot taken during the call; an index is only good
+            // until the next edit, so resolve it to an id before doing anything with it
+            virtual std::size_t sequence_count() const = 0;
+            virtual sequencer_sequence_id sequence_at(std::size_t aIndex) const = 0;
+            virtual std::size_t track_count(sequencer_sequence_id aSequence) const = 0;
+            virtual sequencer_track_id track_at(sequencer_sequence_id aSequence, std::size_t aIndex) const = 0;
         public:
             virtual i_sequencer_clip const& clip(sequencer_clip_id aClipId) const = 0;
             virtual i_sequencer_clip& clip(sequencer_clip_id aClipId) = 0;
@@ -149,15 +169,16 @@ namespace neogfx
             virtual sequencer_clip_id add_clip(i_ref_ptr<i_sequencer_clip> const& aClip, sequencer_track_id aTrack, sequencer_position aStart, sequencer_duration aDuration) = 0;
             virtual void delete_clip(sequencer_clip_id aClipId) = 0;
         public:
-            virtual bool is_playing() const = 0;
-            virtual sequencer_position position() const = 0;
+            virtual bool is_playing(sequencer_sequence_id aSequence) const = 0;
+            virtual sequencer_position position(sequencer_sequence_id aSequence) const = 0;
         public:
-            virtual void play() = 0;
-            virtual void pause() = 0;
-            virtual void rewind() = 0;
-            virtual void seek(sequencer_position aPosition) = 0;
-            virtual void stop() = 0;
+            virtual void play(sequencer_sequence_id aSequence) = 0;
+            virtual void pause(sequencer_sequence_id aSequence) = 0;
+            virtual void rewind(sequencer_sequence_id aSequence) = 0;
+            virtual void seek(sequencer_sequence_id aSequence, sequencer_position aPosition) = 0;
+            virtual void stop(sequencer_sequence_id aSequence) = 0;
         public:
+            // a clip's position is its own track's sequence position
             virtual optional_sequencer_clip_info current_clip(sequencer_track_id aTrack) const = 0;
             virtual optional_sequencer_clip_info next_clip(sequencer_track_id aTrack) const = 0;
         public:
@@ -165,6 +186,39 @@ namespace neogfx
             sequencer_clip_id emplace_clip(sequencer_track_id aTrack, sequencer_position aStart, sequencer_duration aDuration, Args&&... aArgs)
             {
                 return add_clip(make_sequencer_clip<Payload>(std::forward<Args>(aArgs)...), aTrack, aStart, aDuration);
+            }
+        public:
+            sequencer_track_id create_track() 
+            { 
+                return create_track(default_sequence()); 
+            }
+            bool is_playing() const 
+            { 
+                return is_playing(default_sequence()); 
+            }
+            sequencer_position position() const 
+            { 
+                return position(default_sequence()); 
+            }
+            void play() 
+            { 
+                play(default_sequence()); 
+            }
+            void pause() 
+            { 
+                pause(default_sequence()); 
+            }
+            void rewind() 
+            { 
+                rewind(default_sequence()); 
+            }
+            void seek(sequencer_position aPosition) 
+            { 
+                seek(default_sequence(), aPosition); 
+            }
+            void stop() 
+            { 
+                stop(default_sequence()); 
             }
         public:
             static uuid const& iid() { static uuid const sIid{ 0xa2fe8afe, 0x4483, 0x4b66, 0x8ee4, { 0x70, 0xd2, 0xf, 0x4e, 0xfc, 0xd0 } }; return sIid; }

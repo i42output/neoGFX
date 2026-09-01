@@ -44,17 +44,71 @@ namespace neogfx
 
         sequencer::sequencer() :
             iTimeline{ std::make_shared<timeline const>() },
-            iTransport{ std::make_shared<transport const>() }
-        {}
-
-        sequencer_track_id sequencer::create_track()
+            iSequences{ std::make_shared<sequence_set const>() }
         {
+            iDefaultSequence = create_sequence();
+        }
+
+        sequencer_sequence_id sequencer::create_sequence()
+        {
+            auto const sequenceId = static_cast<sequencer_sequence_id>(iNextSequenceCookie.fetch_add(1, std::memory_order_relaxed));
+            neolib::rcu_update(iSequences, [sequenceId](sequence_set& aSequences)
+                {
+                    auto const insertAt = std::lower_bound(aSequences.sequences.begin(), aSequences.sequences.end(), sequenceId,
+                        [](sequence_entry const& aLhs, sequencer_sequence_id aRhs) { return aLhs.id < aRhs; });
+                    aSequences.sequences.insert(insertAt, sequence_entry{ sequenceId, transport{} });
+                    ++aSequences.generation;
+                });
+            return sequenceId;
+        }
+
+        void sequencer::delete_sequence(sequencer_sequence_id aSequence)
+        {
+            if (aSequence == iDefaultSequence)
+                throw cannot_delete_default_sequence{};
+            if (find_sequence(*iSequences.load(std::memory_order_acquire), aSequence) == npos)
+                throw sequence_not_found{};
+            // tracks go first: a sequence momentarily without tracks is harmless, a track
+            // momentarily without a sequence is not
+            neolib::rcu_update(iTimeline, [aSequence](timeline& aTimeline)
+                {
+                    aTimeline.clips.erase(std::remove_if(aTimeline.clips.begin(), aTimeline.clips.end(),
+                        [&aTimeline, aSequence](clip_locator const& aLocator)
+                        {
+                            auto const trackIndex = find_track(aTimeline, aLocator.track);
+                            return trackIndex != npos && aTimeline.tracks[trackIndex].sequence == aSequence;
+                        }), aTimeline.clips.end());
+                    aTimeline.tracks.erase(std::remove_if(aTimeline.tracks.begin(), aTimeline.tracks.end(),
+                        [aSequence](track_entry const& aEntry) { return aEntry.sequence == aSequence; }), aTimeline.tracks.end());
+                    ++aTimeline.generation;
+                });
+            neolib::rcu_update(iSequences, [aSequence](sequence_set& aSequences)
+                {
+                    auto const sequenceIndex = find_sequence(aSequences, aSequence);
+                    if (sequenceIndex == npos)
+                        throw sequence_not_found{};
+                    aSequences.sequences.erase(std::next(aSequences.sequences.begin(), sequenceIndex));
+                    ++aSequences.generation;
+                });
+        }
+
+        sequencer_sequence_id sequencer::default_sequence() const
+        {
+            return iDefaultSequence;
+        }
+
+        sequencer_track_id sequencer::create_track(sequencer_sequence_id aSequence)
+        {
+            // the sequence must exist before a track names it; a sequence deleted
+            // between this check and publication takes the new track with it
+            if (find_sequence(*iSequences.load(std::memory_order_acquire), aSequence) == npos)
+                throw sequence_not_found{};
             auto const trackId = static_cast<sequencer_track_id>(iNextTrackCookie.fetch_add(1, std::memory_order_relaxed));
-            neolib::rcu_update(iTimeline, [trackId](timeline& aTimeline)
+            neolib::rcu_update(iTimeline, [trackId, aSequence](timeline& aTimeline)
                 {
                     auto const insertAt = std::lower_bound(aTimeline.tracks.begin(), aTimeline.tracks.end(), trackId,
                         [](track_entry const& aLhs, sequencer_track_id aRhs) { return aLhs.id < aRhs; });
-                    aTimeline.tracks.insert(insertAt, track_entry{ trackId, std::make_shared<track_clips const>() });
+                    aTimeline.tracks.insert(insertAt, track_entry{ trackId, aSequence, std::make_shared<track_clips const>() });
                     ++aTimeline.generation;
                 });
             return trackId;
@@ -72,6 +126,47 @@ namespace neogfx
                         [aTrack](clip_locator const& aLocator) { return aLocator.track == aTrack; }), aTimeline.clips.end());
                     ++aTimeline.generation;
                 });
+        }
+
+        sequencer_sequence_id sequencer::track_sequence(sequencer_track_id aTrack) const
+        {
+            auto const currentTimeline = iTimeline.load(std::memory_order_acquire);
+            auto const trackIndex = find_track(*currentTimeline, aTrack);
+            if (trackIndex == npos)
+                throw track_not_found{};
+            return currentTimeline->tracks[trackIndex].sequence;
+        }
+
+        std::size_t sequencer::sequence_count() const
+        {
+            return iSequences.load(std::memory_order_acquire)->sequences.size();
+        }
+
+        sequencer_sequence_id sequencer::sequence_at(std::size_t aIndex) const
+        {
+            auto const currentSequences = iSequences.load(std::memory_order_acquire);
+            if (aIndex >= currentSequences->sequences.size())
+                throw sequence_not_found{};
+            return currentSequences->sequences[aIndex].id;
+        }
+
+        std::size_t sequencer::track_count(sequencer_sequence_id aSequence) const
+        {
+            if (find_sequence(*iSequences.load(std::memory_order_acquire), aSequence) == npos)
+                throw sequence_not_found{};
+            auto const currentTimeline = iTimeline.load(std::memory_order_acquire);
+            return static_cast<std::size_t>(std::count_if(currentTimeline->tracks.begin(), currentTimeline->tracks.end(),
+                [aSequence](track_entry const& aEntry) { return aEntry.sequence == aSequence; }));
+        }
+
+        sequencer_track_id sequencer::track_at(sequencer_sequence_id aSequence, std::size_t aIndex) const
+        {
+            // linear: tracks are stored by id, not grouped by sequence
+            auto const currentTimeline = iTimeline.load(std::memory_order_acquire);
+            for (auto const& theTrack : currentTimeline->tracks)
+                if (theTrack.sequence == aSequence && aIndex-- == 0)
+                    return theTrack.id;
+            throw track_not_found{};
         }
 
         i_sequencer_clip const& sequencer::clip(sequencer_clip_id aClipId) const
@@ -146,19 +241,23 @@ namespace neogfx
                 });
         }
 
-        bool sequencer::is_playing() const
+        bool sequencer::is_playing(sequencer_sequence_id aSequence) const
         {
-            return iTransport.load(std::memory_order_acquire)->state == transport_state::Playing;
+            return state(aSequence) == transport_state::Playing;
         }
 
-        sequencer_position sequencer::position() const
+        sequencer_position sequencer::position(sequencer_sequence_id aSequence) const
         {
-            return position_of(*iTransport.load(std::memory_order_acquire), now());
+            auto const currentSequences = iSequences.load(std::memory_order_acquire);
+            auto const sequenceIndex = find_sequence(*currentSequences, aSequence);
+            if (sequenceIndex == npos)
+                throw sequence_not_found{};
+            return position_of(currentSequences->sequences[sequenceIndex].playhead, now());
         }
 
-        void sequencer::play()
+        void sequencer::play(sequencer_sequence_id aSequence)
         {
-            neolib::rcu_update(iTransport, [this](transport& aTransport)
+            modify_transport(aSequence, [this](transport& aTransport)
                 {
                     if (aTransport.state == transport_state::Playing)
                         return;
@@ -167,9 +266,9 @@ namespace neogfx
                 });
         }
 
-        void sequencer::pause()
+        void sequencer::pause(sequencer_sequence_id aSequence)
         {
-            neolib::rcu_update(iTransport, [this](transport& aTransport)
+            modify_transport(aSequence, [this](transport& aTransport)
                 {
                     if (aTransport.state != transport_state::Playing)
                         return;
@@ -180,14 +279,14 @@ namespace neogfx
                 });
         }
 
-        void sequencer::rewind()
+        void sequencer::rewind(sequencer_sequence_id aSequence)
         {
-            seek(0);
+            seek(aSequence, 0);
         }
 
-        void sequencer::seek(sequencer_position aPosition)
+        void sequencer::seek(sequencer_sequence_id aSequence, sequencer_position aPosition)
         {
-            neolib::rcu_update(iTransport, [this, aPosition](transport& aTransport)
+            modify_transport(aSequence, [this, aPosition](transport& aTransport)
                 {
                     aTransport.position = std::max<sequencer_position>(aPosition, 0);
                     aTransport.anchor = now();
@@ -195,9 +294,9 @@ namespace neogfx
                 });
         }
 
-        void sequencer::stop()
+        void sequencer::stop(sequencer_sequence_id aSequence)
         {
-            neolib::rcu_update(iTransport, [this](transport& aTransport)
+            modify_transport(aSequence, [this](transport& aTransport)
                 {
                     aTransport.state = transport_state::Stopped;
                     aTransport.position = 0;
@@ -213,7 +312,10 @@ namespace neogfx
             if (trackIndex == npos)
                 throw track_not_found{};
             auto const& trackClips = *currentTimeline->tracks[trackIndex].clips;
-            auto const currentPosition = position();
+            auto const trackPosition = track_position(*currentTimeline, trackIndex);
+            if (!trackPosition)
+                return {};
+            auto const currentPosition = *trackPosition;
             auto const cursor = find_cursor(trackClips, currentPosition);
             if (cursor == trackClips.size())
                 return {};
@@ -230,7 +332,10 @@ namespace neogfx
             if (trackIndex == npos)
                 throw track_not_found{};
             auto const& trackClips = *currentTimeline->tracks[trackIndex].clips;
-            auto const currentPosition = position();
+            auto const trackPosition = track_position(*currentTimeline, trackIndex);
+            if (!trackPosition)
+                return {};
+            auto const currentPosition = *trackPosition;
             for (auto cursor = find_cursor(trackClips, currentPosition); cursor != trackClips.size(); ++cursor)
                 if (trackClips[cursor].start > currentPosition)
                     return sequencer_clip_info{ trackClips[cursor].id, 0 };
@@ -242,23 +347,45 @@ namespace neogfx
             // both snapshots are held for the duration of the update so that clips
             // cannot be destroyed underneath us by a concurrent edit
             auto const currentTimeline = iTimeline.load(std::memory_order_acquire);
-            auto const currentTransport = iTransport.load(std::memory_order_acquire);
-            auto const currentPosition = position_of(*currentTransport, now());
+            auto const currentSequences = iSequences.load(std::memory_order_acquire);
+            // one clock reading for the whole update, so that sequences advancing
+            // together stay in step with each other
+            auto const currentTock = now();
             if (currentTimeline->generation != iSeenGeneration ||
-                currentTransport->seekGeneration != iSeenSeekGeneration ||
+                currentSequences->generation != iSeenSequenceGeneration ||
                 iPlayback.size() != currentTimeline->tracks.size())
             {
-                resync(*currentTimeline, currentPosition);
+                resync(*currentTimeline, *currentSequences, currentTock);
                 iSeenGeneration = currentTimeline->generation;
-                iSeenSeekGeneration = currentTransport->seekGeneration;
+                iSeenSequenceGeneration = currentSequences->generation;
             }
             for (std::size_t index = 0; index != currentTimeline->tracks.size(); ++index)
-                update_track(*currentTimeline->tracks[index].clips, iPlayback[index], currentPosition);
+            {
+                auto& thePlayback = iPlayback[index];
+                // the track's sequence was deleted after this snapshot of the timeline
+                // was taken; the track is on its way out with it
+                if (thePlayback.sequenceIndex == npos)
+                    continue;
+                auto const& theTransport = currentSequences->sequences[thePlayback.sequenceIndex].playhead;
+                auto const sequencePosition = position_of(theTransport, currentTock);
+                // a discontinuity on one sequence resyncs that sequence's tracks only
+                if (thePlayback.seenSeekGeneration != theTransport.seekGeneration)
+                {
+                    thePlayback.cursor = find_cursor(*currentTimeline->tracks[index].clips, sequencePosition);
+                    thePlayback.active = {};
+                    thePlayback.seenSeekGeneration = theTransport.seekGeneration;
+                }
+                update_track(*currentTimeline->tracks[index].clips, thePlayback, sequencePosition);
+            }
         }
 
-        sequencer::transport_state sequencer::state() const
+        sequencer::transport_state sequencer::state(sequencer_sequence_id aSequence) const
         {
-            return iTransport.load(std::memory_order_acquire)->state;
+            auto const currentSequences = iSequences.load(std::memory_order_acquire);
+            auto const sequenceIndex = find_sequence(*currentSequences, aSequence);
+            if (sequenceIndex == npos)
+                throw sequence_not_found{};
+            return currentSequences->sequences[sequenceIndex].playhead.state;
         }
 
         sequencer_position sequencer::now() const
@@ -273,6 +400,15 @@ namespace neogfx
             if (aTransport.state == transport_state::Playing)
                 return aTransport.position + (aNow - aTransport.anchor);
             return aTransport.position;
+        }
+
+        std::size_t sequencer::find_sequence(sequence_set const& aSequences, sequencer_sequence_id aSequence)
+        {
+            auto const existingSequence = std::lower_bound(aSequences.sequences.begin(), aSequences.sequences.end(), aSequence,
+                [](sequence_entry const& aLhs, sequencer_sequence_id aRhs) { return aLhs.id < aRhs; });
+            if (existingSequence == aSequences.sequences.end() || existingSequence->id != aSequence)
+                return npos;
+            return static_cast<std::size_t>(std::distance(aSequences.sequences.begin(), existingSequence));
         }
 
         std::size_t sequencer::find_track(timeline const& aTimeline, sequencer_track_id aTrack)
@@ -366,12 +502,34 @@ namespace neogfx
             aTimeline.clips = std::move(updatedIndex);
         }
 
-        void sequencer::resync(timeline const& aTimeline, sequencer_position aPosition)
+        std::optional<sequencer_position> sequencer::track_position(timeline const& aTimeline, std::size_t aTrackIndex) const
+        {
+            auto const currentSequences = iSequences.load(std::memory_order_acquire);
+            auto const sequenceIndex = find_sequence(*currentSequences, aTimeline.tracks[aTrackIndex].sequence);
+            if (sequenceIndex == npos)
+                return {};
+            return position_of(currentSequences->sequences[sequenceIndex].playhead, now());
+        }
+
+        void sequencer::resync(timeline const& aTimeline, sequence_set const& aSequences, sequencer_position aNow)
         {
             iPlayback.clear();
             iPlayback.reserve(aTimeline.tracks.size());
             for (auto const& theTrack : aTimeline.tracks)
-                iPlayback.push_back(playback{ theTrack.id, find_cursor(*theTrack.clips, aPosition), {} });
+            {
+                auto const sequenceIndex = find_sequence(aSequences, theTrack.sequence);
+                auto const sequencePosition = (sequenceIndex != npos ?
+                    position_of(aSequences.sequences[sequenceIndex].playhead, aNow) : sequencer_position{});
+                auto const seenSeekGeneration = (sequenceIndex != npos ?
+                    aSequences.sequences[sequenceIndex].playhead.seekGeneration : std::uint64_t{});
+                iPlayback.push_back(playback{
+                    theTrack.id,
+                    theTrack.sequence,
+                    sequenceIndex,
+                    find_cursor(*theTrack.clips, sequencePosition),
+                    seenSeekGeneration,
+                    {} });
+            }
         }
 
         void sequencer::update_track(track_clips const& aClips, playback& aPlayback, sequencer_position aPosition)
