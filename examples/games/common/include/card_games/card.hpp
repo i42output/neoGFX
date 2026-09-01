@@ -139,6 +139,10 @@ namespace neogames
             {
                 return iDiscarded;
             }
+            bool held() const
+            {
+                return !discarded();
+            }
             void discard()
             {
                 iDiscarded = true;
@@ -148,6 +152,10 @@ namespace neogames
             {
                 iDiscarded = false;
                 changed(*this);
+            }
+            void hold()
+            {
+                undiscard();
             }
         public:
             std::string to_string() const
