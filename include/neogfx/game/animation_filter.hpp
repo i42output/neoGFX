@@ -120,28 +120,60 @@ namespace neogfx::game
         }
     };
 
+    enum class tween_stop : std::uint32_t
+    {
+        Reset,      // stop contributing entirely (the transformation reverts to identity)
+        HoldAtEnd,  // freeze at t = 1.0
+        HoldHere    // freeze at whatever position the tween had reached
+    };
+
     // @todo make componenent data (add meta)
     struct tween_animation_state
     {
         define_event(Changed, changed)
 
         bool active = false;
+        std::optional<scalar> hold;   // when set, the tween is frozen at this normalized position
         std::variant<std::monostate, sequencer_track_id, animation_timer_ptr, time_interval> attachment;
+
+        // still advancing
+        bool running() const
+        {
+            return active;
+        }
+
+        // advancing or frozen; either way it contributes to the transformation
+        bool contributing() const
+        {
+            return active || hold.has_value();
+        }
 
         void start()
         {
-            if (!active)
+            if (!active || hold)
             {
                 active = true;
+                hold = std::nullopt;
                 changed();
             }
         }
 
         void stop()
         {
-            if (active)
+            if (contributing())
             {
                 active = false;
+                hold = std::nullopt;
+                changed();
+            }
+        }
+
+        void hold_at(scalar aT)
+        {
+            if (active || hold != aT)
+            {
+                active = false;
+                hold = aT;
                 changed();
             }
         }
@@ -194,13 +226,25 @@ namespace neogfx::game
                 { return std::ranges::contains(aTween->patches, aPatch); });
         }
 
+        auto contributing_tweens() const
+        {
+            return asset_tweens() | std::views::filter([this](animation_tween_ptr const& aTween)
+                { return tweenAnimationStates.contains(aTween) && tweenAnimationStates.at(aTween).contributing(); });
+        }
+
+        auto contributing_tweens(patch_ptr const& aPatch) const
+        {
+            return contributing_tweens() | std::views::filter([aPatch](animation_tween_ptr const& aTween)
+                { return std::ranges::contains(aTween->patches, aPatch); });
+        }
+
         bool any_active_tweens() const
         {
             return std::ranges::any_of(tweenAnimationStates, [](auto const& aTweenState)
-                { return 
-                    aTweenState.second.active && 
-                    std::holds_alternative<animation_timer_ptr>(aTweenState.second.attachment) && 
-                    std::get<animation_timer_ptr>(aTweenState.second.attachment)->running(); });
+                { return
+                aTweenState.second.running() &&
+                std::holds_alternative<animation_timer_ptr>(aTweenState.second.attachment) &&
+                std::get<animation_timer_ptr>(aTweenState.second.attachment)->running(); });
         }
 
         void start_frames(i64 aStepTime)
@@ -225,34 +269,73 @@ namespace neogfx::game
                 tweenAnimationStates[tween].start();
         }
 
-        void stop_tweens()
+        void stop_tween(animation_tween_ptr const& aTween, tween_stop aStop = tween_stop::Reset)
         {
-            for (auto& tween : active_tweens())
-                tweenAnimationStates[tween].stop();
+            auto& tweenState = tweenAnimationStates[aTween];
+            switch (aStop)
+            {
+            case tween_stop::HoldAtEnd:
+                tweenState.hold_at(1.0);
+                break;
+            case tween_stop::HoldHere:
+                tweenState.hold_at(current_normalized_time(*aTween, tweenState));
+                break;
+            case tween_stop::Reset:
+            default:
+                tweenState.stop();
+                break;
+            }
         }
 
-        void stop_tweens(patch_ptr const& aPatch)
+        void stop_tweens(tween_stop aStop = tween_stop::Reset)
         {
-            for (auto& tween : active_tweens(aPatch))
-                tweenAnimationStates[tween].stop();
+            for (auto& tween : contributing_tweens())
+                stop_tween(tween, aStop);
+        }
+
+        void stop_tweens(patch_ptr const& aPatch, tween_stop aStop = tween_stop::Reset)
+        {
+            for (auto& tween : contributing_tweens(aPatch))
+                stop_tween(tween, aStop);
+        }
+
+        // the attached timer already carries the last elapsed time, so freezing in place
+        // does not require the caller to supply a step time
+        static scalar current_normalized_time(animation_tween const& aTween, tween_animation_state const& aState)
+        {
+            if (aState.hold)
+                return *aState.hold;
+            if (auto timer = std::get_if<animation_timer_ptr>(&aState.attachment); timer != nullptr && *timer != nullptr)
+                return aTween.normalized_time(from_step_time((*timer)->lastElapsed), (*timer)->complete());
+            return 0.0;
         }
 
         mat44f operator()(i64 aStepTime, patch_ptr const& aPatch) const
         {
             auto result = mat44f::identity();
 
-            for (auto& tween : active_tweens(aPatch))
+            for (auto& tween : contributing_tweens(aPatch))
             {
                 auto& tweenState = tweenAnimationStates.at(tween);
+                if (tweenState.hold)
+                {
+                    result *= tween->at(*tweenState.hold);
+                    continue;
+                }
                 std::visit([&](auto& attachment)
                     {
                         using attachment_type = std::decay_t<decltype(attachment)>;
                         if constexpr (std::is_same_v<attachment_type, sequencer_track_id>)
                             ;// todo
                         else if constexpr (std::is_same_v<attachment_type, animation_timer_ptr>)
-                            result *= (*tween)(from_step_time(attachment->elapsed(aStepTime)));
+                        {
+                            // sequenced deliberately: complete() is polled after elapsed() has
+                            // advanced the timer, which argument evaluation order would not guarantee
+                            auto const elapsed = from_step_time(attachment->elapsed(aStepTime));
+                            result *= tween->at(tween->normalized_time(elapsed, attachment->complete()));
+                        }
                         else
-                            result *= (*tween)(0.0s);
+                            result *= tween->at(0.0);
                     }, tweenState.attachment);
             }
 
@@ -376,12 +459,12 @@ namespace neogfx::game
             aAnimationFilter.start_tweens(aPatch);
     }
 
-    inline void stop_animation(animation_filter& aAnimationFilter)
+    inline void stop_animation(animation_filter& aAnimationFilter, tween_stop aStop = tween_stop::Reset)
     {
         if (has_animation(aAnimationFilter))
         {
             aAnimationFilter.stop_frames();
-            aAnimationFilter.stop_tweens();
+            aAnimationFilter.stop_tweens(aStop);
         }
     }
 
@@ -391,16 +474,16 @@ namespace neogfx::game
             aAnimationFilter.stop_frames();
     }
 
-    inline void stop_tween_animation(animation_filter& aAnimationFilter)
+    inline void stop_tween_animation(animation_filter& aAnimationFilter, tween_stop aStop = tween_stop::Reset)
     {
         if (has_animation(aAnimationFilter))
-            aAnimationFilter.stop_tweens();
+            aAnimationFilter.stop_tweens(aStop);
     }
 
-    inline void stop_tween_animation(animation_filter& aAnimationFilter, patch_ptr const& aPatch)
+    inline void stop_tween_animation(animation_filter& aAnimationFilter, patch_ptr const& aPatch, tween_stop aStop = tween_stop::Reset)
     {
         if (has_animation(aAnimationFilter))
-            aAnimationFilter.stop_tweens(aPatch);
+            aAnimationFilter.stop_tweens(aPatch, aStop);
     }
 
     inline void stop_animation_on_tween_complete(animation_filter& aAnimationFilter, animation_tween_ptr const& aTween)
@@ -650,7 +733,7 @@ namespace neogfx::game
     }
 
     template <typename Tweens> requires (!std::is_lvalue_reference_v<Tweens>)
-    inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, Tweens&& aTweens, std::optional<time_interval> const& aDuration = {}, i32 aLayer = 0)
+        inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, Tweens&& aTweens, std::optional<time_interval> const& aDuration = {}, i32 aLayer = 0)
     {
         return create_animation(aEcs, aId, aOrigin, std::span<tween_info>{ aTweens }, aDuration, aLayer);
     }

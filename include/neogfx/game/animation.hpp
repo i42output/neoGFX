@@ -199,7 +199,39 @@ namespace neogfx::game
                         self.rotation);
             } };
 
-        mat44f operator()(time_interval timestep) const
+        // Maps elapsed time onto a normalized cycle position, honouring shape and repeat.
+        //
+        // aTimeStopped closes the interval at the top. While time is advancing a Continuous
+        // tween wraps on [0, 1) because another cycle follows, but once the driving clock has
+        // stopped there is no next cycle and the correct value is the limit from below, so an
+        // exact landing on a cycle boundary resolves to 1.0 rather than 0.0. PingPong then
+        // maps that back to 0.0, which is genuinely where a PingPong cycle ends.
+        scalar normalized_time(time_interval timestep, bool aTimeStopped = false) const
+        {
+            if (duration <= 0.0)
+                return (cycle.repeat == tween_repeat::OneShot ? 1.0 : 0.0);
+
+            auto const cycles = timestep.count() / duration;
+
+            auto t0 =
+                (cycle.repeat == tween_repeat::Continuous ?
+                    std::fmod(timestep.count(), duration) / duration :
+                    std::clamp(cycles, 0.0, 1.0));
+
+            if (aTimeStopped && t0 == 0.0 && cycles > 0.0)
+                t0 = 1.0;
+
+            return (cycle.shape == tween_shape::PingPong) ? (t0 < 0.5 ? t0 * 2.0 : (1.0 - t0) * 2.0) : t0;
+        }
+
+        mat44f operator()(time_interval timestep, bool aTimeStopped = false) const
+        {
+            return at(normalized_time(timestep, aTimeStopped));
+        }
+
+        // evaluates the tween at an explicit normalized position; t = 1.0 is the end pose
+        // irrespective of cycle shape or repeat mode
+        mat44f at(scalar t) const
         {
             using easings_t = std::array<animation_easing, 3u>;
 
@@ -209,14 +241,6 @@ namespace neogfx::game
                 animation_easing{ { easing::Linear }, { 1.0 } } };
 
             thread_local std::vector<ease_segment<double>> tSegments;
-
-            auto const t0 =
-                (duration > 0.0 ?
-                    (cycle.repeat == tween_repeat::Continuous ?
-                        std::fmod(timestep.count(), duration) / duration :
-                        std::clamp(timestep.count() / duration, 0.0, 1.0)) :
-                    (cycle.repeat == tween_repeat::OneShot ? 1.0 : 0.0));
-            auto const t = (cycle.shape == tween_shape::PingPong) ? (t0 < 0.5 ? t0 * 2.0 : (1.0 - t0) * 2.0) : t0;
 
             auto const ease = [t](std::optional<easings_t> const& aEasings) -> vec3f
                 {
