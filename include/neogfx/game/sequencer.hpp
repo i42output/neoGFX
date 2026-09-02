@@ -121,6 +121,10 @@ namespace neogfx
                 sequencer_clip_id id;
                 sequencer_track_id track;
                 sequencer_clip_ptr clip;
+                // duplicated from the track's clip entry so that a lookup by clip id alone
+                // stays one binary search over the index
+                sequencer_position start;
+                sequencer_duration duration;
             };
             // ordered by clip id
             using clip_index = std::vector<clip_locator>;
@@ -209,6 +213,8 @@ namespace neogfx
             void delete_clip(sequencer_clip_id aClipId) final;
             void clear_track(sequencer_track_id aTrack) final;
         public:
+            void update() final;
+        public:
             bool is_playing(sequencer_sequence_id aSequence) const final;
             sequencer_position position(sequencer_sequence_id aSequence) const final;
         public:
@@ -230,14 +236,12 @@ namespace neogfx
         public:
             optional_sequencer_clip_info current_clip(sequencer_track_id aTrack) const final;
             optional_sequencer_clip_info next_clip(sequencer_track_id aTrack) const final;
+            optional_sequencer_clip_info clip_info(sequencer_clip_id aClipId) const final;
         public:
             // add many clips as one edit; strongly preferred to repeated add_clip when
             // populating a timeline, which would copy the affected track once per clip
             clip_ids add_clips(clip_definitions const& aClips);
         public:
-            // must be pumped by exactly one thread, once per frame or once per tock;
-            // advances every sequence
-            void update();
             transport_state state(sequencer_sequence_id aSequence) const;
             // prefer this to clip(): the reference returned by clip() is only valid for
             // as long as the caller holds a reference of its own

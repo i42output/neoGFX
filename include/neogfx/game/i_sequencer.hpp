@@ -129,7 +129,7 @@ namespace neogfx
             Payload iPayload;
         };
 
-        struct null_sequencer_clip_payload 
+        struct null_sequencer_clip_payload
         {
             void advance(sequencer_offset) {}
         };
@@ -144,6 +144,7 @@ namespace neogfx
         {
             sequencer_clip_id id;
             sequencer_duration elapsed;
+            sequencer_duration duration;
         };
 
         using optional_sequencer_clip_info = std::optional<sequencer_clip_info>;
@@ -175,6 +176,10 @@ namespace neogfx
             virtual void delete_clip(sequencer_clip_id aClipId) = 0;
             virtual void clear_track(sequencer_track_id aTrack) = 0;
         public:
+            // must be pumped by exactly one thread, once per frame, before anything reads
+            // a clip position; advances every sequence
+            virtual void update() = 0;
+        public:
             virtual bool is_playing(sequencer_sequence_id aSequence) const = 0;
             virtual sequencer_position position(sequencer_sequence_id aSequence) const = 0;
         public:
@@ -187,6 +192,12 @@ namespace neogfx
             // a clip's position is its own track's sequence position
             virtual optional_sequencer_clip_info current_clip(sequencer_track_id aTrack) const = 0;
             virtual optional_sequencer_clip_info next_clip(sequencer_track_id aTrack) const = 0;
+            // as current_clip but keyed by clip, for a caller holding a clip id and no track.
+            // Nothing is returned before the playhead reaches the clip, or once the clip or
+            // its sequence is gone; elapsed is clamped to duration once the playhead is past,
+            // so a bound tween lands on its end pose rather than snapping back. Deliberately
+            // does not throw on an unknown clip: the caller is the render path
+            virtual optional_sequencer_clip_info clip_info(sequencer_clip_id aClipId) const = 0;
         public:
             template <typename Payload = null_sequencer_clip_payload, typename... Args >
             sequencer_clip_id emplace_clip(sequencer_track_id aTrack, sequencer_position aStart, sequencer_duration aDuration, Args&&... aArgs)

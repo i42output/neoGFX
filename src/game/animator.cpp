@@ -29,6 +29,7 @@
 #include <neogfx/game/game_world.hpp>
 #include <neogfx/game/simple_physics.hpp>
 #include <neogfx/game/animation_filter.hpp>
+#include <neogfx/game/i_sequencer.hpp>
 #include <neogfx/game/mesh_render_cache.hpp>
 
 namespace neogfx::game
@@ -61,6 +62,11 @@ namespace neogfx::game
             return false;
         if (paused())
             return false;
+
+        // the sequencer, when the application uses one, is pumped from here: exactly one
+        // thread, once per frame, before any clip-attached tween is evaluated
+        if (services::service_registered<i_sequencer>())
+            service<i_sequencer>().update();
 
         update_animations();
 

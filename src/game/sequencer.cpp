@@ -25,6 +25,7 @@
 #include <utility>
 
 #include <neolib/core/rcu.hpp>
+#include <neolib/ecs/chrono.hpp>
 
 template<> neogfx::game::i_sequencer& services::start_service<neogfx::game::i_sequencer>()
 {
@@ -38,8 +39,9 @@ namespace neogfx
     {
         namespace
         {
-            // one tock == one microsecond; replace with the shared timer's resolution
-            constexpr sequencer_position TocksPerSecond = 1000000;
+            // one tock == one flick, so that clip positions and ECS step time are the same
+            // unit and to_step_time/from_step_time apply to them unchanged
+            constexpr sequencer_position TocksPerSecond = neolib::ecs::chrono::flicks::period::den;
         }
 
         sequencer::sequencer() :
@@ -343,7 +345,7 @@ namespace neogfx
             auto const& candidate = trackClips[cursor];
             if (currentPosition < candidate.start)
                 return {};
-            return sequencer_clip_info{ candidate.id, currentPosition - candidate.start };
+            return sequencer_clip_info{ candidate.id, currentPosition - candidate.start, candidate.duration };
         }
 
         optional_sequencer_clip_info sequencer::next_clip(sequencer_track_id aTrack) const
@@ -359,8 +361,28 @@ namespace neogfx
             auto const currentPosition = *trackPosition;
             for (auto cursor = find_cursor(trackClips, currentPosition); cursor != trackClips.size(); ++cursor)
                 if (trackClips[cursor].start > currentPosition)
-                    return sequencer_clip_info{ trackClips[cursor].id, 0 };
+                    return sequencer_clip_info{ trackClips[cursor].id, 0, trackClips[cursor].duration };
             return {};
+        }
+
+        optional_sequencer_clip_info sequencer::clip_info(sequencer_clip_id aClipId) const
+        {
+            auto const currentTimeline = iTimeline.load(std::memory_order_acquire);
+            auto const clipIndex = find_clip(*currentTimeline, aClipId);
+            if (clipIndex == npos)
+                return {};
+            auto const& locator = currentTimeline->clips[clipIndex];
+            auto const trackIndex = find_track(*currentTimeline, locator.track);
+            if (trackIndex == npos)
+                return {};
+            auto const trackPosition = track_position(*currentTimeline, trackIndex);
+            if (!trackPosition)
+                return {};
+            auto const currentPosition = *trackPosition;
+            if (currentPosition < locator.start)
+                return {};
+            return sequencer_clip_info{ aClipId,
+                std::min(currentPosition - locator.start, locator.duration), locator.duration };
         }
 
         void sequencer::update()
@@ -411,9 +433,12 @@ namespace neogfx
 
         sequencer_position sequencer::now() const
         {
-            static_assert(TocksPerSecond == std::chrono::microseconds::period::den);
-            return std::chrono::duration_cast<std::chrono::microseconds>(
-                std::chrono::steady_clock::now().time_since_epoch()).count();
+            static_assert(TocksPerSecond == neolib::ecs::chrono::flicks::period::den);
+            // measured from first use rather than the clock's own epoch: a flick is 1/705600000s,
+            // so converting a full time_since_epoch would overflow the intermediate
+            static auto const sEpoch = std::chrono::steady_clock::now();
+            return std::chrono::duration_cast<neolib::ecs::chrono::flicks>(
+                std::chrono::steady_clock::now() - sEpoch).count();
         }
 
         sequencer_position sequencer::position_of(transport const& aTransport, sequencer_position aNow)
@@ -493,7 +518,8 @@ namespace neogfx
             clip_index locators;
             locators.reserve(aDefinitions.size());
             for (std::size_t index = 0; index != aDefinitions.size(); ++index)
-                locators.push_back(clip_locator{ aIds[index], aDefinitions[index].track, aDefinitions[index].clip });
+                locators.push_back(clip_locator{ aIds[index], aDefinitions[index].track, aDefinitions[index].clip,
+                    aDefinitions[index].start, aDefinitions[index].duration });
             return locators;
         }
 

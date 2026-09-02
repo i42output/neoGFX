@@ -241,10 +241,15 @@ namespace neogfx::game
         bool any_active_tweens() const
         {
             return std::ranges::any_of(tweenAnimationStates, [](auto const& aTweenState)
-                { return
-                aTweenState.second.running() &&
-                std::holds_alternative<animation_timer_ptr>(aTweenState.second.attachment) &&
-                std::get<animation_timer_ptr>(aTweenState.second.attachment)->running(); });
+                {
+                    if (!aTweenState.second.running())
+                        return false;
+                    if (auto timer = std::get_if<animation_timer_ptr>(&aTweenState.second.attachment))
+                        return *timer != nullptr && (*timer)->running();
+                    if (auto clipId = std::get_if<sequencer_clip_id>(&aTweenState.second.attachment))
+                        return service<i_sequencer>().clip_info(*clipId).has_value();
+                    return false;
+                });
         }
 
         void start_frames(i64 aStepTime)
@@ -307,6 +312,11 @@ namespace neogfx::game
                 return *aState.hold;
             if (auto timer = std::get_if<animation_timer_ptr>(&aState.attachment); timer != nullptr && *timer != nullptr)
                 return aTween.normalized_time(from_step_time((*timer)->lastElapsed), (*timer)->complete());
+            if (auto clipId = std::get_if<sequencer_clip_id>(&aState.attachment))
+            {
+                if (auto const clip = service<i_sequencer>().clip_info(*clipId))
+                    return aTween.normalized_time(from_step_time(clip->elapsed), clip->elapsed >= clip->duration);
+            }
             return 0.0;
         }
 
@@ -325,8 +335,16 @@ namespace neogfx::game
                 std::visit([&](auto& attachment)
                     {
                         using attachment_type = std::decay_t<decltype(attachment)>;
-                        if constexpr (std::is_same_v<attachment_type, sequencer_track_id>)
-                            ;// todo
+                        if constexpr (std::is_same_v<attachment_type, sequencer_clip_id>)
+                        {
+                            // the sequencer is pumped once per frame by the animator, so every
+                            // clip-attached tween in this frame reads the same playhead
+                            if (auto const clip = service<i_sequencer>().clip_info(attachment))
+                                result *= tween->at(tween->normalized_time(
+                                    from_step_time(clip->elapsed), clip->elapsed >= clip->duration));
+                            else
+                                result *= tween->at(0.0);
+                        }
                         else if constexpr (std::is_same_v<attachment_type, animation_timer_ptr>)
                         {
                             // sequenced deliberately: complete() is polled after elapsed() has
@@ -687,9 +705,11 @@ namespace neogfx::game
         auto& tweenState = aAnimationFilter.tweenAnimationStates[tweenPtr];
         if (auto sequencerTrackId = std::get_if<sequencer_track_id>(&aInfo.cycle.attachment))
             tweenState.attachment = service<i_sequencer>().emplace_clip<>(
-                *sequencerTrackId, 
-                to_step_time(aEcs, aInfo.cycle.after.value_or(time_interval{ 0.0 })),
-                to_step_time(aEcs, aInfo.cycle.duration.value()));
+                *sequencerTrackId,
+                neolib::ecs::chrono::to_flicks(
+                    aInfo.cycle.after.value_or(time_interval{ 0.0 }).count()).count(),
+                neolib::ecs::chrono::to_flicks(
+                    aInfo.cycle.duration.value_or(aInfo.duration).count()).count());
         else if (auto sequencerClipId = std::get_if<sequencer_clip_id>(&aInfo.cycle.attachment))
             tweenState.attachment = *sequencerClipId;
         else if (auto timer = std::get_if<animation_timer_ptr>(&aInfo.cycle.attachment))
