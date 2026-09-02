@@ -129,7 +129,12 @@ namespace neogfx
             Payload iPayload;
         };
 
-        template <typename Payload, typename... Args>
+        struct null_sequencer_clip_payload 
+        {
+            void advance(sequencer_offset) {}
+        };
+
+        template <typename Payload = null_sequencer_clip_payload, typename... Args>
         inline sequencer_clip_ptr make_sequencer_clip(Args&&... aArgs)
         {
             return make_ref<sequencer_clip<Payload>>(std::forward<Args>(aArgs)...);
@@ -183,7 +188,7 @@ namespace neogfx
             virtual optional_sequencer_clip_info current_clip(sequencer_track_id aTrack) const = 0;
             virtual optional_sequencer_clip_info next_clip(sequencer_track_id aTrack) const = 0;
         public:
-            template <typename Payload, typename... Args>
+            template <typename Payload = null_sequencer_clip_payload, typename... Args >
             sequencer_clip_id emplace_clip(sequencer_track_id aTrack, sequencer_position aStart, sequencer_duration aDuration, Args&&... aArgs)
             {
                 return add_clip(make_sequencer_clip<Payload>(std::forward<Args>(aArgs)...), aTrack, aStart, aDuration);

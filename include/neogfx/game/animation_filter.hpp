@@ -134,7 +134,7 @@ namespace neogfx::game
 
         bool active = false;
         std::optional<scalar> hold;   // when set, the tween is frozen at this normalized position
-        std::variant<std::monostate, sequencer_track_id, sequencer_clip_id, animation_timer_ptr, time_interval> attachment;
+        std::variant<std::monostate, sequencer_clip_id, animation_timer_ptr, time_interval> attachment;
 
         // still advancing
         bool running() const
@@ -659,7 +659,7 @@ namespace neogfx::game
         std::optional<vec3f> pivot;
     };
 
-    inline animation_tween& add_tween(animation_filter& aAnimationFilter, tween_info const& aInfo)
+    inline animation_tween& add_tween(i_ecs& aEcs, animation_filter& aAnimationFilter, tween_info const& aInfo)
     {
         auto& tween = [&]() -> animation_tween&
             {
@@ -686,7 +686,10 @@ namespace neogfx::game
             throw std::logic_error("neogfx::game::add_tween");
         auto& tweenState = aAnimationFilter.tweenAnimationStates[tweenPtr];
         if (auto sequencerTrackId = std::get_if<sequencer_track_id>(&aInfo.cycle.attachment))
-            tweenState.attachment = *sequencerTrackId;
+            tweenState.attachment = service<i_sequencer>().emplace_clip<>(
+                *sequencerTrackId, 
+                to_step_time(aEcs, aInfo.cycle.after.value_or(time_interval{ 0.0 })),
+                to_step_time(aEcs, aInfo.cycle.duration.value()));
         else if (auto sequencerClipId = std::get_if<sequencer_clip_id>(&aInfo.cycle.attachment))
             tweenState.attachment = *sequencerClipId;
         else if (auto timer = std::get_if<animation_timer_ptr>(&aInfo.cycle.attachment))
@@ -696,10 +699,10 @@ namespace neogfx::game
         return tween;
     }
 
-    inline void add_tweens(animation_filter& aAnimationFilter, std::initializer_list<tween_info> const& aInfos)
+    inline void add_tweens(i_ecs& aEcs, animation_filter& aAnimationFilter, std::initializer_list<tween_info> const& aInfos)
     {
         for (auto i = aInfos.begin(); i != aInfos.end(); ++i)
-            add_tween(aAnimationFilter, *i);
+            add_tween(aEcs, aAnimationFilter, *i);
     }
 
     inline animation_filter& create_animation(i_ecs& aEcs, entity_id aId, vec3f const& aOrigin, std::span<tween_info> aTweens, std::optional<time_interval> const& aDuration = {}, i32 aLayer = 0)
@@ -729,7 +732,7 @@ namespace neogfx::game
                     defaultPatches.emplace(all_patches(mr));
                 tween.patches = *defaultPatches;
             }
-            add_tween(af, tween);
+            add_tween(aEcs, af, tween);
         }
 
         return af;
