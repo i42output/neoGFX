@@ -134,7 +134,7 @@ namespace neogfx::game
 
         bool active = false;
         std::optional<scalar> hold;   // when set, the tween is frozen at this normalized position
-        std::variant<std::monostate, sequencer_track_id, animation_timer_ptr, time_interval> attachment;
+        std::variant<std::monostate, sequencer_track_id, sequencer_clip_id, animation_timer_ptr, time_interval> attachment;
 
         // still advancing
         bool running() const
