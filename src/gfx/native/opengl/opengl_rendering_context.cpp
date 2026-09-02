@@ -2,17 +2,17 @@
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015-2026 Leigh Johnston.  All Rights Reserved.
-  
+
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -41,7 +41,7 @@
 
 namespace neogfx
 {
-    namespace 
+    namespace
     {
         inline bool uv_swap_v(logical_coordinate_system lhs, logical_coordinate_system rhs)
         {
@@ -238,7 +238,7 @@ namespace neogfx
 
     opengl_rendering_context::opengl_rendering_context(const i_render_target& aTarget, neogfx::blending_mode aBlendingMode) :
         iRenderingEngine{ service<i_rendering_engine>() },
-        iTarget{ aTarget }, 
+        iTarget{ aTarget },
         iWidget{ nullptr },
         iInFlush{ false },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
@@ -253,8 +253,8 @@ namespace neogfx
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
         set_gain(vec4{ 1.0, 1.0, 1.0, 1.0 });
 
-        iSink += render_target().target_deactivating([&]() 
-            { 
+        iSink += render_target().target_deactivating([&]()
+            {
 #ifdef NEOGFX_DEBUG
                 if (service<i_debug>().item() == this)
                     service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": target_deactivating" << std::endl;
@@ -577,11 +577,11 @@ namespace neogfx
                 }
                 break;
             case graphics_operation::LineStippleOn:
-                {
-                    auto const& lso = static_variant_cast<const graphics_operation::line_stipple_on&>(**(std::prev(opBatch.cend())));
-                    line_stipple_on(lso.stipple);
-                }
-                break;
+            {
+                auto const& lso = static_variant_cast<const graphics_operation::line_stipple_on&>(**(std::prev(opBatch.cend())));
+                line_stipple_on(lso.stipple);
+            }
+            break;
             case graphics_operation::LineStippleOff:
                 line_stipple_off();
                 break;
@@ -842,7 +842,7 @@ namespace neogfx
         bool const scissorOn = (applying_scissor() || iFastState.scissorCounter >= 0);
         glCheck((scissorOn ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST)));
     }
-    
+
     void opengl_rendering_context::scissor_off()
     {
         bool const scissorOff = (applying_scissor() || iFastState.scissorCounter < 0);
@@ -885,7 +885,7 @@ namespace neogfx
     {
         return iSlowState.multisample.value_or(true);
     }
-    
+
     void opengl_rendering_context::set_multisample(bool aMultisample)
     {
         if (iSlowState.multisample != aMultisample || slow_state_invalid())
@@ -1110,7 +1110,7 @@ namespace neogfx
                     set_blending_mode(currentBlendingMode.value());
                 break;
             }
-        }    
+        }
     }
 
     void opengl_rendering_context::line_stipple_on(stipple const& aStipple)
@@ -1266,14 +1266,14 @@ namespace neogfx
         disable_multisample disableMultisample{ *this };
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawPixelOps.cend() - aDrawPixelOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawPixelOps.cend() - aDrawPixelOps.cbegin())) };
 
             for (auto op = aDrawPixelOps.cbegin(); op != aDrawPixelOps.cend(); ++op)
             {
                 update_state(*op);
 
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_pixel&>(**op);
-                auto rectVertices = rect_vertices<vec3f>(rect{ drawOp.point + origin(), size{1.0, 1.0}}, mesh_type::Triangles);
+                auto rectVertices = rect_vertices<vec3f>(rect{ drawOp.point + origin(), size{1.0, 1.0} }, mesh_type::Triangles);
                 for (auto const& v : rectVertices)
                     triangleRenderer.push_back({ v,
                             vec4f{{
@@ -1306,7 +1306,7 @@ namespace neogfx
                 update_state(*op);
 
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_line&>(**op);
-                auto const& adjust = (drawOp.pen.anti_aliased() || static_cast<std::int32_t>(drawOp.pen.width()) % 2 == 0 ? point{} : point{0.5, 0.5});
+                auto const& adjust = (drawOp.pen.anti_aliased() || static_cast<std::int32_t>(drawOp.pen.width()) % 2 == 0 ? point{} : point{ 0.5, 0.5 });
                 auto const& from = drawOp.from + origin() + adjust;
                 auto const& to = drawOp.to + origin() + adjust;
                 auto boundingRect = rect{ from.min(to), from.max(to) }.inflated(drawOp.pen.width());
@@ -1322,13 +1322,13 @@ namespace neogfx
                         function,
                         vec4{ from.x, from.y, to.x, to.y }.as<float>(),
                         vec4{},
-                        vec4{ 
+                        vec4{
                             0.0,
                             !logical_operation_active() && !snap_to_pixel() ?
                                 drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
-                            0.0, 
+                            0.0,
                             drawOp.pen.width() }.as<float>() });
             }
         }
@@ -1350,7 +1350,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Triangle);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawTriangleOps.cend() - aDrawTriangleOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawTriangleOps.cend() - aDrawTriangleOps.cbegin())) };
 
             for (auto op = aDrawTriangleOps.cbegin(); op != aDrawTriangleOps.cend(); ++op)
             {
@@ -1376,7 +1376,7 @@ namespace neogfx
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
                             !logical_operation_active() ?
-                                drawOp.pen.anti_aliased() ? 
+                                drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
                             0.0,
@@ -1405,7 +1405,7 @@ namespace neogfx
                 auto const& rc = drawOp.rect + origin();
 
                 if (rc.top_left().z == 0.0 && rc.bottom_right().z == 0.0 &&
-                    ((std::holds_alternative<color>(drawOp.fill) && 
+                    ((std::holds_alternative<color>(drawOp.fill) &&
                         static_variant_cast<color>(drawOp.fill).alpha() == 0xFF) ||
                         std::holds_alternative<std::monostate>(drawOp.fill)))
                 {
@@ -1429,10 +1429,10 @@ namespace neogfx
                         {
                             auto const& fixedRc = rc.with_y(
                                 logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame ?
-                                    rc.y : 
-                                    rendering_area(false).cy - rc.cy - rc.y) +
-                                        (render_target().target_type() == render_target_type::Texture ?
-                                            point{ render_target().target_texture().bleed_guard() } : point{});
+                                rc.y :
+                                rendering_area(false).cy - rc.cy - rc.y) +
+                                (render_target().target_type() == render_target_type::Texture ?
+                                    point{ render_target().target_texture().bleed_guard() } : point{});
                             apply_scissor(fixedRc.intersection(scissor_rect() ? *scissor_rect() : fixedRc));
                             clear(static_variant_cast<color>(drawOp.fill));
                             if (iUpdatingStencil)
@@ -1479,7 +1479,7 @@ namespace neogfx
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
                             !logical_operation_active() && !snap_to_pixel() ?
-                                drawOp.pen.anti_aliased() ? 
+                                drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
                             0.0,
@@ -1508,7 +1508,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::RoundedRect);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawRoundedRectOps.cend() - aDrawRoundedRectOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawRoundedRectOps.cend() - aDrawRoundedRectOps.cbegin())) };
 
             for (auto op = aDrawRoundedRectOps.cbegin(); op != aDrawRoundedRectOps.cend(); ++op)
             {
@@ -1587,7 +1587,7 @@ namespace neogfx
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
                             !logical_operation_active() ?
-                                drawOp.pen.anti_aliased() ? 
+                                drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
                             0.0,
@@ -1683,7 +1683,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Ellipse);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllipseOps.cend() - aDrawEllipseOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllipseOps.cend() - aDrawEllipseOps.cbegin())) };
 
             for (auto op = aDrawEllipseOps.cbegin(); op != aDrawEllipseOps.cend(); ++op)
             {
@@ -1736,7 +1736,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Circle);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawCircleOps.cend() - aDrawCircleOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawCircleOps.cend() - aDrawCircleOps.cbegin())) };
 
             for (auto op = aDrawCircleOps.cbegin(); op != aDrawCircleOps.cend(); ++op)
             {
@@ -1760,7 +1760,7 @@ namespace neogfx
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
                             !logical_operation_active() ?
-                                drawOp.pen.anti_aliased() ? 
+                                drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
                             0.0,
@@ -1789,7 +1789,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Pie);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawPieOps.cend() - aDrawPieOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawPieOps.cend() - aDrawPieOps.cbegin())) };
 
             for (auto op = aDrawPieOps.cbegin(); op != aDrawPieOps.cend(); ++op)
             {
@@ -1813,7 +1813,7 @@ namespace neogfx
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
                             !logical_operation_active() ?
-                                drawOp.pen.anti_aliased() ? 
+                                drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
                             0.0,
@@ -1842,7 +1842,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Arc);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawArcOps.cend() - aDrawArcOps.cbegin()))};
+            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawArcOps.cend() - aDrawArcOps.cbegin())) };
 
             for (auto op = aDrawArcOps.cbegin(); op != aDrawArcOps.cend(); ++op)
             {
@@ -1866,7 +1866,7 @@ namespace neogfx
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
                             !logical_operation_active() ?
-                                drawOp.pen.anti_aliased() ? 
+                                drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
                             0.0,
@@ -1925,45 +1925,45 @@ namespace neogfx
         switch (aPathShape)
         {
         case path_shape::Polygon:
+        {
+            if (std::holds_alternative<gradient>(aFill))
+                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
+            else if (std::holds_alternative<gradient>(aPen.color()))
+                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aPen.color()));
+
+            rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Polygon);
+
             {
-                if (std::holds_alternative<gradient>(aFill))
-                    rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
-                else if (std::holds_alternative<gradient>(aPen.color()))
-                    rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aPen.color()));
+                opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u) };
 
-                rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Polygon);
+                auto boundingRect = aBoundingRect.inflated(aPen.width() * 2.0) + origin();
+                auto boundingRectVertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(*this, aPen.color(), boundingRect);
 
-                {
-                    opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u) };
-
-                    auto boundingRect = aBoundingRect.inflated(aPen.width() * 2.0) + origin();
-                    auto boundingRectVertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
-                    auto const function = to_function(*this, aPen.color(), boundingRect);
-
-                    for (auto const& v : boundingRectVertices)
-                        triangleRenderer.push_back({ v,
-                            std::holds_alternative<color>(aFill) ?
-                                static_variant_cast<color>(aFill).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(aFill) ? 0.0f : 1.0f },
-                            {},
-                            function,
-                            vec4u32{ aPath.first, aPath.last }.as<float>(),
-                            vec4{ origin().to_vec3() }.as<float>(),
-                            vec4{
-                                aPen.width() ? aPen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
-                                !logical_operation_active() ?
-                                    aPen.anti_aliased() ?
-                                        0.5 : 0.0 :
-                                    0.0,
+                for (auto const& v : boundingRectVertices)
+                    triangleRenderer.push_back({ v,
+                        std::holds_alternative<color>(aFill) ?
+                            static_variant_cast<color>(aFill).as<float>() :
+                            vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(aFill) ? 0.0f : 1.0f },
+                        {},
+                        function,
+                        vec4u32{ aPath.first, aPath.last }.as<float>(),
+                        vec4{ origin().to_vec3() }.as<float>(),
+                        vec4{
+                            aPen.width() ? aPen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
+                            !logical_operation_active() ?
+                                aPen.anti_aliased() ?
+                                    0.5 : 0.0 :
                                 0.0,
-                                aPen.width() }.as<float>(),
-                            std::holds_alternative<color>(aPen.color()) ?
-                                static_variant_cast<color>(aPen.color()).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(aPen.color()) ? 0.0f : 1.0f },
-                            aPen.secondary_color().value_or(vec4{}).with_combined_alpha(iFastState.opacity).as<float>() });
-                }
+                            0.0,
+                            aPen.width() }.as<float>(),
+                        std::holds_alternative<color>(aPen.color()) ?
+                            static_variant_cast<color>(aPen.color()).as<float>() :
+                            vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(aPen.color()) ? 0.0f : 1.0f },
+                        aPen.secondary_color().value_or(vec4{}).with_combined_alpha(iFastState.opacity).as<float>() });
             }
-            break;
+        }
+        break;
         default:
             throw std::logic_error("opengl_rendering_context::draw_path: path shape not yet implemented");
         }
@@ -1982,7 +1982,7 @@ namespace neogfx
             draw_shape(shapeOp.mesh, shapeOp.position, shapeOp.pen);
         }
     }
-        
+
     void opengl_rendering_context::draw_shape(const game::mesh& aMesh, const vec3& aPosition, const pen& aPen)
     {
         if (!aPen.width())
@@ -2009,8 +2009,8 @@ namespace neogfx
 
         for (auto const& v : triangles)
             triangleRenderer.push_back({ v + pos,
-                std::holds_alternative<color>(aPen.color()) ? 
-                    static_variant_cast<color>(aPen.color()).as<float>() : 
+                std::holds_alternative<color>(aPen.color()) ?
+                    static_variant_cast<color>(aPen.color()).as<float>() :
                     vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                 {},
                 function });
@@ -2155,7 +2155,7 @@ namespace neogfx
         }
         if (!tMeshDrawables[aLayer].empty())
         {
-            draw_meshes(tLock, as_vertex_provider<>(*this), aLayer, 
+            draw_meshes(tLock, as_vertex_provider<>(*this), aLayer,
                 &*tMeshDrawables[aLayer].begin(), &*tMeshDrawables[aLayer].begin() + tMeshDrawables[aLayer].size(), aTransformation);
         }
         if (aLayer >= tMaxLayer)
@@ -2196,7 +2196,7 @@ namespace neogfx
                 while (a != drawOp.attributes.end() && (g - drawOp.begin) >= a->end)
                     ++a;
                 auto& glyphChar = *g;
-                drawGlyphCache.emplace_back(origin(), drawOp.point, &drawOp.glyphText.content(), 
+                drawGlyphCache.emplace_back(origin(), drawOp.point, &drawOp.glyphText.content(),
                     &glyphChar, a != drawOp.attributes.end() && (g - drawOp.begin) >= a->start ? &a->attributes : nullptr, drawOp.showMnemonics);
             }
         }
@@ -2231,7 +2231,7 @@ namespace neogfx
             Adornments
         };
     }
-        
+
     void opengl_rendering_context::draw_glyphs(const draw_glyph* aBegin, const draw_glyph* aEnd)
     {
         // Ensure texture shader enabled as glyph shader depends on it...
@@ -2256,48 +2256,48 @@ namespace neogfx
         auto& tMeshDrawables = tDrawGlyphArrays.drawables;
 
         auto draw = [&](draw_glyphs_stage aStage)
-        {
-            auto passThroughCleanup = [&]() { rendering_engine().default_shader_program().texture_shader().set_pass_through(false); };
-            std::optional<neolib::scoped_cleanup<decltype(passThroughCleanup)>> scu;
-            if (aStage == draw_glyphs_stage::GlyphOutline || aStage == draw_glyphs_stage::Glyph)
             {
-                rendering_engine().default_shader_program().texture_shader().set_pass_through(true);
-                scu.emplace(passThroughCleanup);
-            }
+                auto passThroughCleanup = [&]() { rendering_engine().default_shader_program().texture_shader().set_pass_through(false); };
+                std::optional<neolib::scoped_cleanup<decltype(passThroughCleanup)>> scu;
+                if (aStage == draw_glyphs_stage::GlyphOutline || aStage == draw_glyphs_stage::Glyph)
+                {
+                    rendering_engine().default_shader_program().texture_shader().set_pass_through(true);
+                    scu.emplace(passThroughCleanup);
+                }
 
-            for (std::size_t i = 0; i < tMeshFilters.size(); ++i)
-                tMeshDrawables.emplace_back(tMeshOrigins[i], tMeshFilters[i], tMeshRenderers[i]);
-            optional_ecs_render_lock ignore;
-            if (!tMeshDrawables.empty())
-                draw_meshes(ignore, as_vertex_provider<>(*this), 0, &*tMeshDrawables.begin(), &*tMeshDrawables.begin() + tMeshDrawables.size(), mat44::identity());
+                for (std::size_t i = 0; i < tMeshFilters.size(); ++i)
+                    tMeshDrawables.emplace_back(tMeshOrigins[i], tMeshFilters[i], tMeshRenderers[i]);
+                optional_ecs_render_lock ignore;
+                if (!tMeshDrawables.empty())
+                    draw_meshes(ignore, as_vertex_provider<>(*this), 0, &*tMeshDrawables.begin(), &*tMeshDrawables.begin() + tMeshDrawables.size(), mat44::identity());
 
-            tMeshOrigins.clear();
-            tMeshFilters.clear();
-            tMeshRenderers.clear();
-            tMeshDrawables.clear();
-        };
+                tMeshOrigins.clear();
+                tMeshFilters.clear();
+                tMeshRenderers.clear();
+                tMeshDrawables.clear();
+            };
 
         optional_rect boundingRect;
 
         auto bounding_rect = [&]()
-        {
-            if (!boundingRect)
             {
-                for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
+                if (!boundingRect)
                 {
-                    auto const& glyphChar = *drawOp.glyphChar;
-                    // todo: union of AABB of cell and shape quads(, and transform?)
-                    auto const aabb = to_aabb_2d(glyphChar.cell.begin(), glyphChar.cell.end());
-                    rect glyphRect{ aabb };
-                    glyphRect.translate(point{ drawOp.point });
-                    if (boundingRect == std::nullopt)
-                        boundingRect = glyphRect;
-                    else
-                        boundingRect->combine(glyphRect);
+                    for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
+                    {
+                        auto const& glyphChar = *drawOp.glyphChar;
+                        // todo: union of AABB of cell and shape quads(, and transform?)
+                        auto const aabb = to_aabb_2d(glyphChar.cell.begin(), glyphChar.cell.end());
+                        rect glyphRect{ aabb };
+                        glyphRect.translate(point{ drawOp.point });
+                        if (boundingRect == std::nullopt)
+                            boundingRect = glyphRect;
+                        else
+                            boundingRect->combine(glyphRect);
+                    }
                 }
-            }
-            return boundingRect;
-        };
+                return boundingRect;
+            };
 
         auto shape_quad = [&](font const& glyphFont, glyph_char const& glyphChar, bool outline = false) -> quadf_2d
             {
@@ -2355,9 +2355,9 @@ namespace neogfx
                 else
                     return to_ecs_component(
                         mix(
-                            std::get<color>(*aGlyph.appearance->paper()), 
-                            std::get<color>(aGlyph.appearance->ink()), 
-                            partitioned_ease(aGlyph.appearance->animation()->easing(), 
+                            std::get<color>(*aGlyph.appearance->paper()),
+                            std::get<color>(aGlyph.appearance->ink()),
+                            partitioned_ease(aGlyph.appearance->animation()->easing(),
                                 std::fmod(since.count() * aGlyph.appearance->animation()->frequency(), 1.0))));
             };
 
@@ -2388,8 +2388,8 @@ namespace neogfx
             };
 
         for (auto stage : {
-            draw_glyphs_stage::Paper, 
-            draw_glyphs_stage::SpecialEffects, 
+            draw_glyphs_stage::Paper,
+            draw_glyphs_stage::SpecialEffects,
             draw_glyphs_stage::EmojiOutline,
             draw_glyphs_stage::Emoji,
             draw_glyphs_stage::GlyphOutline,
@@ -2437,10 +2437,10 @@ namespace neogfx
                         if (!blendingMode)
                             blendingMode.emplace(*this, drawOp.appearance->bright() ? blending_mode::Default : blending_mode::Filter);
                     }
-                        
+
                     if (drawOp.appearance->paper() != std::nullopt)
                     {
-                        auto const& mesh = to_ecs_component(drawOp.point + quadf{glyphChar.cell[0], glyphChar.cell[1], glyphChar.cell[2], glyphChar.cell[3]}, mesh_type::Triangles);
+                        auto const& mesh = to_ecs_component(drawOp.point + quadf{ glyphChar.cell[0], glyphChar.cell[1], glyphChar.cell[2], glyphChar.cell[3] }, mesh_type::Triangles);
 
                         tMeshOrigins.push_back(drawOp.origin);
                         tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
@@ -2449,8 +2449,8 @@ namespace neogfx
                                 game::material{
                                     paper_maybe_animated(drawOp),
                                     std::holds_alternative<gradient>(*drawOp.appearance->paper()) ?
-                                        to_ecs_component(std::get<gradient>(*drawOp.appearance->paper()).with_bounding_box_if_none(bounding_rect().value() + drawOp.origin)) : 
-                                        std::optional<game::gradient>{}}});
+                                        to_ecs_component(std::get<gradient>(*drawOp.appearance->paper()).with_bounding_box_if_none(bounding_rect().value() + drawOp.origin)) :
+                                        std::optional<game::gradient>{}} });
                     }
                 }
                 break;
@@ -2497,9 +2497,9 @@ namespace neogfx
                                     (textEffect->flags() & text_effect_flags::Glow) != text_effect_flags::Glow ?
                                     textEffect->width() : 1.0);
                                 auto const glow = ((textEffect->flags() & text_effect_flags::Glow) == text_effect_flags::Glow ?
-                                    ( bright ? 
-                                        neogfx::gain{ blur_filter::glow_gain(textEffect->width()) } : 
-                                        vec4{ 1.0, 1.0, 1.0, blur_filter::glow_gain(textEffect->width()) }) : 
+                                    (bright ?
+                                        neogfx::gain{ blur_filter::glow_gain(textEffect->width()) } :
+                                        vec4{ 1.0, 1.0, 1.0, blur_filter::glow_gain(textEffect->width()) }) :
                                     neogfx::gain{});
                                 auto const blend = (bright ? blending_mode::Lighten : blending_mode::FilterFinish);
                                 filter.emplace(*this, blur_filter{
@@ -2564,7 +2564,7 @@ namespace neogfx
                                 filter.emplace(*this, dilate_filter::fast_outline(*filterRegion, radius));
                                 opacity = textEffect->color().alpha() / 255.0;
                             }
-                            
+
                             filter->front_buffer().draw_glyph(
                                 drawOp.point.as<scalar>() + textEffect->offset(),
                                 glyphText,
@@ -2612,15 +2612,15 @@ namespace neogfx
                             game::material
                             {
                                 ink_maybe_animated(drawOp, ink),
-                                std::holds_alternative<gradient>(ink) ? 
+                                std::holds_alternative<gradient>(ink) ?
                                     to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(
-                                        rect{ to_aabb_2d(glyphQuad.begin(), glyphQuad.end()) } + drawOp.origin)) : 
+                                        rect{ to_aabb_2d(glyphQuad.begin(), glyphQuad.end()) } + drawOp.origin)) :
                                     std::optional<game::gradient>{},
-                                {}, 
+                                {},
                                 to_ecs_component(emojiTexture),
                                 !drawOp.appearance->being_filtered() ?
-                                    drawOp.appearance->ignore_emoji() ? 
-                                        shader_effect::None : shader_effect::Colorize : 
+                                    drawOp.appearance->ignore_emoji() ?
+                                        shader_effect::None : shader_effect::Colorize :
                                     drawOp.appearance->being_filtered()->ignore_emoji() ?
                                         shader_effect::None : to_ecs_component(drawOp.appearance->being_filtered()->type())
                             }
@@ -2629,190 +2629,190 @@ namespace neogfx
                 break;
             case draw_glyphs_stage::GlyphOutline:
             case draw_glyphs_stage::Glyph:
+            {
+                bool updateGlyphShader = true;
+
+                for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                 {
-                    bool updateGlyphShader = true;
+                    auto& glyphText = *drawOp.glyphText;
+                    auto& glyphChar = *drawOp.glyphChar;
 
-                    for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
+                    if (is_whitespace(glyphChar) || is_emoji(glyphChar))
+                        continue;
+
+                    auto const& theGlyph = glyphText.glyph(glyphChar);
+                    auto const& glyphFont = glyphText.glyph_font(glyphChar);
+
+                    if (updateGlyphShader)
                     {
-                        auto& glyphText = *drawOp.glyphText;
-                        auto& glyphChar = *drawOp.glyphChar;
+                        updateGlyphShader = false;
+                        rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, glyphText, glyphChar);
+                    }
 
-                        if (is_whitespace(glyphChar) || is_emoji(glyphChar))
+                    bool const subpixelRender = subpixel(glyphChar) && theGlyph.subpixel();
+
+                    if (stage == draw_glyphs_stage::GlyphOutline)
+                    {
+                        if (!theGlyph.has_outline_texture())
                             continue;
 
-                        auto const& theGlyph = glyphText.glyph(glyphChar);
-                        auto const& glyphFont = glyphText.glyph_font(glyphChar);
-
-                        if (updateGlyphShader)
+                        for (auto textEffect : drawOp.appearance->being_filtered() ?
+                            std::initializer_list<text_effect const*>{ drawOp.appearance->being_filtered() } :
+                            std::initializer_list<text_effect const*>{
+                                drawOp.appearance->effect() ? &*drawOp.appearance->effect() : nullptr,
+                                drawOp.appearance->effect2() ? &*drawOp.appearance->effect2() : nullptr })
                         {
-                            updateGlyphShader = false;
-                            rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, glyphText, glyphChar);
-                        }
-
-                        bool const subpixelRender = subpixel(glyphChar) && theGlyph.subpixel();
-
-                        if (stage == draw_glyphs_stage::GlyphOutline)
-                        {
-                            if (!theGlyph.has_outline_texture())
+                            if (!textEffect)
+                                continue;
+                            if (textEffect->type() != text_effect_type::Outline &&
+                                !(drawOp.appearance->being_filtered() &&
+                                    (textEffect->type() == text_effect_type::OutlineGlow ||
+                                        textEffect->type() == text_effect_type::OutlineShadow)))
                                 continue;
 
-                            for (auto textEffect : drawOp.appearance->being_filtered() ?
-                                std::initializer_list<text_effect const*>{ drawOp.appearance->being_filtered() } : 
-                                std::initializer_list<text_effect const*>{
-                                    drawOp.appearance->effect() ? &*drawOp.appearance->effect() : nullptr,
-                                    drawOp.appearance->effect2() ? &*drawOp.appearance->effect2() : nullptr })
-                            {
-                                if (!textEffect)
-                                    continue;
-                                if (textEffect->type() != text_effect_type::Outline &&
-                                    !(drawOp.appearance->being_filtered() &&
-                                        (textEffect->type() == text_effect_type::OutlineGlow ||
-                                         textEffect->type() == text_effect_type::OutlineShadow)))
-                                    continue;
+                            auto const& shapeQuad = shape_quad(glyphFont, glyphChar, true);
 
-                                auto const& shapeQuad = shape_quad(glyphFont, glyphChar, true);
+                            auto const& glyphQuad = quadf_2d{
+                                (glyphChar.cell[0] + shapeQuad[0]).round(),
+                                (glyphChar.cell[0] + shapeQuad[1]).round(),
+                                (glyphChar.cell[0] + shapeQuad[2]).round(),
+                                (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
 
-                                auto const& glyphQuad = quadf_2d{
-                                    (glyphChar.cell[0] + shapeQuad[0]).round(),
-                                    (glyphChar.cell[0] + shapeQuad[1]).round(),
-                                    (glyphChar.cell[0] + shapeQuad[2]).round(),
-                                    (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
-
-                                auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
-                                auto const& ink = textEffect->color().with_alpha(
-                                    textEffect->type() == text_effect_type::Outline ? textEffect->color().alpha() / 255.0 : 1.0);
-                                tMeshOrigins.push_back(drawOp.origin);
-                                tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
-                                tMeshRenderers.push_back(
-                                    game::mesh_renderer{
-                                        game::material{
-                                            ink_maybe_animated(drawOp, ink),
-                                            std::holds_alternative<gradient>(ink) ?
-                                                to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(
-                                                    rect{ to_aabb_2d(glyphQuad.begin(), glyphQuad.end()) } + drawOp.origin)) :
-                                                std::optional<game::gradient>{},
-                                            {},
-                                            to_ecs_component(theGlyph.outline_texture()),
-                                            (filterRegion || drawOp.appearance->being_filtered()) && !drawOp.appearance->bright() ?
-                                                shader_effect::MultiplyAlpha : shader_effect::Ignore },
+                            auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
+                            auto const& ink = textEffect->color().with_alpha(
+                                textEffect->type() == text_effect_type::Outline ? textEffect->color().alpha() / 255.0 : 1.0);
+                            tMeshOrigins.push_back(drawOp.origin);
+                            tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
+                            tMeshRenderers.push_back(
+                                game::mesh_renderer{
+                                    game::material{
+                                        ink_maybe_animated(drawOp, ink),
+                                        std::holds_alternative<gradient>(ink) ?
+                                            to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(
+                                                rect{ to_aabb_2d(glyphQuad.begin(), glyphQuad.end()) } + drawOp.origin)) :
+                                            std::optional<game::gradient>{},
                                         {},
-                                        true,
-                                        0,
-                                        true,
-                                        {}, subpixelRender });
-                            }
-                            continue;
+                                        to_ecs_component(theGlyph.outline_texture()),
+                                        (filterRegion || drawOp.appearance->being_filtered()) && !drawOp.appearance->bright() ?
+                                            shader_effect::MultiplyAlpha : shader_effect::Ignore },
+                                    {},
+                                    true,
+                                    0,
+                                    true,
+                                    {}, subpixelRender });
                         }
+                        continue;
+                    }
 
+                    auto const& shapeQuad = shape_quad(glyphFont, glyphChar);
+
+                    auto const& glyphQuad = quadf_2d{
+                        (glyphChar.cell[0] + shapeQuad[0]).round(),
+                        (glyphChar.cell[0] + shapeQuad[1]).round(),
+                        (glyphChar.cell[0] + shapeQuad[2]).round(),
+                        (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
+
+                    auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
+                    auto const& ink = !filtered_content_ink_is_effect_color(drawOp.appearance->being_filtered()) ?
+                        drawOp.appearance->ink() : drawOp.appearance->being_filtered()->color().with_alpha(1.0);
+                    tMeshOrigins.push_back(drawOp.origin);
+                    tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
+                    tMeshRenderers.push_back(
+                        game::mesh_renderer{
+                            game::material{
+                                ink_maybe_animated(drawOp, ink),
+                                std::holds_alternative<gradient>(ink) ?
+                                    to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(rect{ to_aabb_2d(glyphQuad.begin(), glyphQuad.end()) } + drawOp.origin)) :
+                                    std::optional<game::gradient>{},
+                                {},
+                                to_ecs_component(theGlyph.texture()),
+                                (filterRegion || drawOp.appearance->being_filtered()) && !drawOp.appearance->bright() ?
+                                    shader_effect::MultiplyAlpha : shader_effect::Ignore },
+                            {},
+                            true,
+                            0,
+                            true,
+                            {}, subpixelRender });
+                }
+            }
+            break;
+            case draw_glyphs_stage::Adornments:
+            {
+                for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
+                {
+                    auto& glyphText = *drawOp.glyphText;
+                    auto& glyphChar = *drawOp.glyphChar;
+                    auto const baseline = static_cast<float>(glyphText.baseline());
+                    auto const& pos = drawOp.point;
+
+                    if (underline(glyphChar) || (drawOp.showMnemonics && neogfx::mnemonic(glyphChar)))
+                    {
+                        auto const& ink = !filtered_content_ink_is_effect_color(drawOp.appearance->being_filtered()) ?
+                            drawOp.appearance->ink() : drawOp.appearance->being_filtered()->color();
+
+                        auto const& glyphFont = glyphText.glyph_font(glyphChar);
                         auto const& shapeQuad = shape_quad(glyphFont, glyphChar);
 
-                        auto const& glyphQuad = quadf_2d{
-                            (glyphChar.cell[0] + shapeQuad[0]).round(),
-                            (glyphChar.cell[0] + shapeQuad[1]).round(),
-                            (glyphChar.cell[0] + shapeQuad[2]).round(),
-                            (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
+                        auto const& majorFont = glyphText.major_font();
+                        auto const yUnderline = std::floor(static_cast<float>(majorFont.native_font_face().underline_position()));
+                        auto const cyUnderline = std::round(static_cast<float>(majorFont.native_font_face().underline_thickness()));
 
-                        auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
-                        auto const& ink = !filtered_content_ink_is_effect_color(drawOp.appearance->being_filtered()) ?
-                            drawOp.appearance->ink() : drawOp.appearance->being_filtered()->color().with_alpha(1.0);
-                        tMeshOrigins.push_back(drawOp.origin);
-                        tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
-                        tMeshRenderers.push_back(
-                            game::mesh_renderer{
-                                game::material{
-                                    ink_maybe_animated(drawOp, ink),
-                                    std::holds_alternative<gradient>(ink) ?
-                                        to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(rect{ to_aabb_2d(glyphQuad.begin(), glyphQuad.end()) } + drawOp.origin)) :
-                                        std::optional<game::gradient>{},
-                                    {},
-                                    to_ecs_component(theGlyph.texture()),
-                                    (filterRegion || drawOp.appearance->being_filtered()) && !drawOp.appearance->bright() ?
-                                        shader_effect::MultiplyAlpha : shader_effect::Ignore },
-                                {},
-                                true,
-                                0,
-                                true,
-                                {}, subpixelRender });
-                    }
-                }
-                break;
-            case draw_glyphs_stage::Adornments:
-                {
-                    for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
-                    {
-                        auto& glyphText = *drawOp.glyphText;
-                        auto& glyphChar = *drawOp.glyphChar;
-                        auto const baseline = static_cast<float>(glyphText.baseline());
-                        auto const& pos = drawOp.point;
-
-                        if (underline(glyphChar) || (drawOp.showMnemonics && neogfx::mnemonic(glyphChar)))
+                        if (drawOp.appearance->smart_underline() &&
+                            !is_whitespace(glyphChar) && !is_emoji(glyphChar) &&
+                            (glyphFont.style() & font_style::EmulatedItalic) != font_style::EmulatedItalic &&
+                            logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
                         {
-                            auto const& ink = !filtered_content_ink_is_effect_color(drawOp.appearance->being_filtered()) ?
-                                drawOp.appearance->ink() : drawOp.appearance->being_filtered()->color();
+                            auto const& theGlyph = glyphText.glyph(glyphChar);
 
-                            auto const& glyphFont = glyphText.glyph_font(glyphChar);
-                            auto const& shapeQuad = shape_quad(glyphFont, glyphChar);
+                            auto const& testLine = texture_line_segment{
+                                { -shapeQuad[0].x, shapeQuad[0].y - (baseline - yUnderline) },
+                                { -shapeQuad[0].x + glyphChar.cell[1].x - glyphChar.cell[0].x, shapeQuad[0].y - (baseline - yUnderline)} };
 
-                            auto const& majorFont = glyphText.major_font();
-                            auto const yUnderline = std::floor(static_cast<float>(majorFont.native_font_face().underline_position()));
-                            auto const cyUnderline = std::round(static_cast<float>(majorFont.native_font_face().underline_thickness()));
-
-                            if (drawOp.appearance->smart_underline() &&
-                                !is_whitespace(glyphChar) && !is_emoji(glyphChar) &&
-                                (glyphFont.style() & font_style::EmulatedItalic) != font_style::EmulatedItalic &&
-                                logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
+                            thread_local vector<texture_line_segment> lineSegments;
+                            lineSegments = theGlyph.texture().intersection(testLine, rect{ point{}, theGlyph.texture().extents() },
+                                vec2{ std::max<scalar>(3.0_dip, drawOp.appearance->effect() ? drawOp.appearance->effect().value().width() : 0.0), 1.0 });
+                            for (auto& segment : lineSegments)
                             {
-                                auto const& theGlyph = glyphText.glyph(glyphChar);
-
-                                auto const& testLine = texture_line_segment{
-                                    { -shapeQuad[0].x, shapeQuad[0].y - (baseline - yUnderline) },
-                                    { -shapeQuad[0].x + glyphChar.cell[1].x - glyphChar.cell[0].x, shapeQuad[0].y - (baseline - yUnderline)}};
-
-                                thread_local vector<texture_line_segment> lineSegments;
-                                lineSegments = theGlyph.texture().intersection(testLine, rect{ point{}, theGlyph.texture().extents() },
-                                    vec2{ std::max<scalar>( 3.0_dip, drawOp.appearance->effect() ? drawOp.appearance->effect().value().width() : 0.0), 1.0});
-                                for (auto& segment : lineSegments)
-                                {
-                                    segment.v1.x += (shapeQuad[0].x + glyphChar.cell[0].x);
-                                    segment.v2.x += (shapeQuad[0].x + glyphChar.cell[0].x);
-                                    /// @todo apply any transformation to the line segment
-                                }
-                                if (lineSegments.empty())
-                                    draw_line(
-                                        pos + vec3f{ glyphChar.cell[0].x, glyphChar.cell[0].y + baseline - yUnderline },
-                                        pos + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yUnderline },
-                                        pen{ ink, cyUnderline, false });
-                                else
-                                {
-                                    auto lineSegment = lineSegments.begin();
-                                    for (float x = glyphChar.cell[0].x; lineSegment != lineSegments.end() && x < glyphChar.cell[1].x;)
-                                    {
-                                        draw_line(
-                                            pos + vec3f{ x, glyphChar.cell[0].y + baseline - yUnderline },
-                                            pos + vec3f{ static_cast<float>(lineSegment->v1.x), glyphChar.cell[1].y + baseline - yUnderline },
-                                            pen{ ink, cyUnderline, false });
-                                        x = static_cast<float>(lineSegment->v2.x);
-                                        if (++lineSegment == lineSegments.end())
-                                        {
-                                            draw_line(
-                                                pos + vec3f{ x, glyphChar.cell[0].y + baseline - yUnderline },
-                                                pos + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yUnderline },
-                                                pen{ ink, cyUnderline, false });
-                                        }
-                                    }
-                                }
+                                segment.v1.x += (shapeQuad[0].x + glyphChar.cell[0].x);
+                                segment.v2.x += (shapeQuad[0].x + glyphChar.cell[0].x);
+                                /// @todo apply any transformation to the line segment
                             }
-                            else
-                            {
+                            if (lineSegments.empty())
                                 draw_line(
                                     pos + vec3f{ glyphChar.cell[0].x, glyphChar.cell[0].y + baseline - yUnderline },
                                     pos + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yUnderline },
                                     pen{ ink, cyUnderline, false });
+                            else
+                            {
+                                auto lineSegment = lineSegments.begin();
+                                for (float x = glyphChar.cell[0].x; lineSegment != lineSegments.end() && x < glyphChar.cell[1].x;)
+                                {
+                                    draw_line(
+                                        pos + vec3f{ x, glyphChar.cell[0].y + baseline - yUnderline },
+                                        pos + vec3f{ static_cast<float>(lineSegment->v1.x), glyphChar.cell[1].y + baseline - yUnderline },
+                                        pen{ ink, cyUnderline, false });
+                                    x = static_cast<float>(lineSegment->v2.x);
+                                    if (++lineSegment == lineSegments.end())
+                                    {
+                                        draw_line(
+                                            pos + vec3f{ x, glyphChar.cell[0].y + baseline - yUnderline },
+                                            pos + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yUnderline },
+                                            pen{ ink, cyUnderline, false });
+                                    }
+                                }
                             }
+                        }
+                        else
+                        {
+                            draw_line(
+                                pos + vec3f{ glyphChar.cell[0].x, glyphChar.cell[0].y + baseline - yUnderline },
+                                pos + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yUnderline },
+                                pen{ ink, cyUnderline, false });
                         }
                     }
                 }
-                break;
+            }
+            break;
             }
             draw(stage);
         }
@@ -2822,7 +2822,7 @@ namespace neogfx
     {
         draw_mesh(game::mesh_filter{ { aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {}, true, 0, true, aFilter }, aTransformation);
     }
-    
+
     void opengl_rendering_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation)
     {
         if (!aMeshRenderer.render)
@@ -2841,7 +2841,7 @@ namespace neogfx
     void opengl_rendering_context::draw_meshes(optional_ecs_render_lock& aLock, i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)
     {
         auto const logicalCoordinates = logical_coordinates();
-        auto const defaultDecalOffset = logicalCoordinates.z_far() * 1e-5f;
+        auto const defaultDecalOffset = static_cast<float>(logicalCoordinates.z_far() * 1e-5);
 
         thread_local patch_drawable tPatchDrawable = {};
         tPatchDrawable.provider = &aVertexProvider;
@@ -2903,118 +2903,118 @@ namespace neogfx
             auto const& material = meshRenderer.material;
             vec4f const defaultColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 
-            auto add_item = [&](vec2u32& cacheIndices, game::scene_layer aItemLayer, auto const& mesh, auto const& patch)
-            {
-                if (aItemLayer != aLayer)
-                    return false;
-
-                auto const& itemFaces = (patch == game::mesh_filter_patch ? faces : patch->faces);
-                if (itemFaces.empty())
-                    return false;
-
-                auto const& itemMaterial = (patch == game::mesh_filter_patch ? material : patch->material);
-
-                optional_mat44f itemTransformation;
-                if (meshDrawable.animationFilter)
-                    itemTransformation = (*meshDrawable.animationFilter)(iStepTime, patch);
-                if (transformation)
+            auto add_item = [&](vec2u32& cacheIndices, game::scene_layer aItemLayer, auto const& mesh, auto const& patch, std::size_t aDecalRank)
                 {
-                    if (itemTransformation)
-                        itemTransformation = *transformation * *itemTransformation;
-                    else
-                        itemTransformation = transformation;
-                }
+                    if (aItemLayer != aLayer)
+                        return false;
 
-                auto const function = itemMaterial.gradient != std::nullopt && itemMaterial.gradient->boundingBox ?
-                    vec4f{
-                        itemMaterial.gradient->boundingBox->min.x, itemMaterial.gradient->boundingBox->min.y,
-                        itemMaterial.gradient->boundingBox->max.x, itemMaterial.gradient->boundingBox->max.y } :
-                    meshRenderer.filter != std::nullopt && meshRenderer.filter->boundingBox ?
+                    auto const& itemFaces = (patch == game::mesh_filter_patch ? faces : patch->faces);
+                    if (itemFaces.empty())
+                        return false;
+
+                    auto const& itemMaterial = (patch == game::mesh_filter_patch ? material : patch->material);
+
+                    optional_mat44f itemTransformation;
+                    if (meshDrawable.animationFilter)
+                        itemTransformation = (*meshDrawable.animationFilter)(iStepTime, patch);
+                    if (transformation)
+                    {
+                        if (itemTransformation)
+                            itemTransformation = *transformation * *itemTransformation;
+                        else
+                            itemTransformation = transformation;
+                    }
+
+                    auto const function = itemMaterial.gradient != std::nullopt && itemMaterial.gradient->boundingBox ?
+                        vec4f{
+                            itemMaterial.gradient->boundingBox->min.x, itemMaterial.gradient->boundingBox->min.y,
+                            itemMaterial.gradient->boundingBox->max.x, itemMaterial.gradient->boundingBox->max.y } :
+                            meshRenderer.filter != std::nullopt && meshRenderer.filter->boundingBox ?
                         vec4f{
                             meshRenderer.filter->boundingBox->min.x, meshRenderer.filter->boundingBox->min.y,
                             meshRenderer.filter->boundingBox->max.x, meshRenderer.filter->boundingBox->max.y } :
-                        vec4f{};
+                            vec4f{};
 
-                if (meshRenderCache.state != game::cache_state::Clean)
-                {
-                    if (patch_drawable::has_texture(meshRenderer, itemMaterial))
+                    if (meshRenderCache.state != game::cache_state::Clean)
                     {
-                        auto const& materialTexture = patch_drawable::texture(meshRenderer, itemMaterial);
-                        auto nextTextureId = materialTexture.id.cookie();
-                        if (uvCalculator == nullptr || textureId == std::nullopt || *textureId != nextTextureId || materialSubtexture != materialTexture.subTexture)
+                        if (patch_drawable::has_texture(meshRenderer, itemMaterial))
                         {
-                            textureId = nextTextureId;
-                            materialSubtexture = materialTexture.subTexture;
-                            auto const& texture = *service<i_texture_manager>().find_texture(nextTextureId);
-                            uvCalculator = &texture.uv_calculator(materialTexture.subTexture);
-                        }
-                    }
-                    else
-                        uvCalculator = nullptr;
-                    
-                    auto const vertexCount = itemFaces.size() * 3;
-                    auto const currentCachedVertexCount = cacheIndices[1] - cacheIndices[0];
-                    auto vertexStartIndex = cacheIndices[0];
-                    if (vertexCount != currentCachedVertexCount || meshRenderCache.state == game::cache_state::Invalid)
-                    {
-                        if (meshRenderCache.state != game::cache_state::Invalid)
-                            vertices.reclaim(cacheIndices[0], cacheIndices[1]);
-                        vertexStartIndex = static_cast<std::uint32_t>(vertices.find_space_for(vertexCount));
-                    }
-
-                    auto nextIndex = vertexStartIndex;
-
-                    for (auto const& face : itemFaces)
-                    {
-                        for (auto faceVertexIndex : face)
-                        {
-                            auto v = mesh.vertices[faceVertexIndex];
-                            if (patch != game::mesh_filter_patch && aItemLayer == meshRenderer.layer && patch->applyDecalOffset)
-                                v.z += patch->decalOffset.value_or(defaultDecalOffset);
-
-                            auto const& xyz = (itemTransformation ? *itemTransformation * v : v) + origin;
-                            auto const& rgba = (itemMaterial.color != std::nullopt ? itemMaterial.color->rgba : defaultColor);
-                            auto const& uv = (uvCalculator ? (*uvCalculator)(mesh.uv[faceVertexIndex]) : vec2f{});
-                            auto const& xyzw = function;
-                            if (nextIndex == vertices.size())
-                                vertices.emplace_back(xyz, rgba, uv, xyzw);
-                            else
+                            auto const& materialTexture = patch_drawable::texture(meshRenderer, itemMaterial);
+                            auto nextTextureId = materialTexture.id.cookie();
+                            if (uvCalculator == nullptr || textureId == std::nullopt || *textureId != nextTextureId || materialSubtexture != materialTexture.subTexture)
                             {
-                                auto& vertex = vertices[nextIndex];
-                                vertex.xyz = xyz;
-                                vertex.rgba = rgba;
-                                vertex.st = uv;
-                                vertex.xyzw = xyzw;
+                                textureId = nextTextureId;
+                                materialSubtexture = materialTexture.subTexture;
+                                auto const& texture = *service<i_texture_manager>().find_texture(nextTextureId);
+                                uvCalculator = &texture.uv_calculator(materialTexture.subTexture);
                             }
-                            if (md->debug)
-                                vertices[nextIndex].debug.x = 1.0f;
-                            ++nextIndex;
                         }
+                        else
+                            uvCalculator = nullptr;
+
+                        auto const vertexCount = itemFaces.size() * 3;
+                        auto const currentCachedVertexCount = cacheIndices[1] - cacheIndices[0];
+                        auto vertexStartIndex = cacheIndices[0];
+                        if (vertexCount != currentCachedVertexCount || meshRenderCache.state == game::cache_state::Invalid)
+                        {
+                            if (meshRenderCache.state != game::cache_state::Invalid)
+                                vertices.reclaim(cacheIndices[0], cacheIndices[1]);
+                            vertexStartIndex = static_cast<std::uint32_t>(vertices.find_space_for(vertexCount));
+                        }
+
+                        auto nextIndex = vertexStartIndex;
+
+                        for (auto const& face : itemFaces)
+                        {
+                            for (auto faceVertexIndex : face)
+                            {
+                                auto v = mesh.vertices[faceVertexIndex];
+                                if (patch != game::mesh_filter_patch && aItemLayer == meshRenderer.layer && patch->applyDecalOffset)
+                                    v.z += patch->decalOffset.value_or(defaultDecalOffset * static_cast<float>(aDecalRank));
+
+                                auto const& xyz = (itemTransformation ? *itemTransformation * v : v) + origin;
+                                auto const& rgba = (itemMaterial.color != std::nullopt ? itemMaterial.color->rgba : defaultColor);
+                                auto const& uv = (uvCalculator ? (*uvCalculator)(mesh.uv[faceVertexIndex]) : vec2f{});
+                                auto const& xyzw = function;
+                                if (nextIndex == vertices.size())
+                                    vertices.emplace_back(xyz, rgba, uv, xyzw);
+                                else
+                                {
+                                    auto& vertex = vertices[nextIndex];
+                                    vertex.xyz = xyz;
+                                    vertex.rgba = rgba;
+                                    vertex.st = uv;
+                                    vertex.xyzw = xyzw;
+                                }
+                                if (md->debug)
+                                    vertices[nextIndex].debug.x = 1.0f;
+                                ++nextIndex;
+                            }
+                        }
+
+                        cacheIndices[0] = static_cast<std::uint32_t>(vertexStartIndex);
+                        cacheIndices[1] = static_cast<std::uint32_t>(nextIndex);
                     }
 
-                    cacheIndices[0] = static_cast<std::uint32_t>(vertexStartIndex);
-                    cacheIndices[1] = static_cast<std::uint32_t>(nextIndex);
-                }
+                    tPatchDrawable.items.emplace_back(meshDrawable, cacheIndices[0], cacheIndices[1], itemMaterial, itemFaces);
 
-                tPatchDrawable.items.emplace_back(meshDrawable, cacheIndices[0], cacheIndices[1], itemMaterial, itemFaces);
+                    return true;
+                };
 
-                return true;
-            };
-
-            add_item(meshRenderCache.meshVertexArrayIndices, meshRenderer.layer, mesh, game::mesh_filter_patch);
+            add_item(meshRenderCache.meshVertexArrayIndices, meshRenderer.layer, mesh, game::mesh_filter_patch, 0);
             auto const patchCount = meshRenderer.patches.size();
             meshRenderCache.patchVertexArrayIndices.resize(patchCount);
             bool outstandingPatches = false;
             for (std::size_t patchIndex = 0; patchIndex < patchCount; ++patchIndex)
             {
                 auto& patch = meshRenderer.patches[patchIndex];
-                add_item(meshRenderCache.patchVertexArrayIndices[patchIndex], patch->layer.value_or(meshRenderer.layer), mesh, patch);
+                add_item(meshRenderCache.patchVertexArrayIndices[patchIndex], patch->layer.value_or(meshRenderer.layer), mesh, patch, patchIndex + 1);
                 if (patch->layer.has_value() && patch->layer.value() > aLayer)
                     outstandingPatches = true;
             }
             if (cache && !outstandingPatches &&
                 (meshDrawable.animationFilter == nullptr || !meshDrawable.animationFilter->any_active_tweens()))
-                meshRenderCache.state = game::cache_state::Clean;        
+                meshRenderCache.state = game::cache_state::Clean;
         }
 
         draw_patch(tPatchDrawable, aTransformation);
@@ -3046,27 +3046,27 @@ namespace neogfx
             auto const& transformation = aTransformation.as<float>();
 
             auto calc_bounding_rect = [&vertices, &aPatch](const patch_drawable::item& aItem) -> rect
-            {
-                return game::bounding_rect(vertices, *aItem.faces, mat44f::identity(), aItem.vertexArrayIndexStart);
-            };
+                {
+                    return game::bounding_rect(vertices, *aItem.faces, mat44f::identity(), aItem.vertexArrayIndexStart);
+                };
 
             auto calc_sampling = [&aPatch, &calc_bounding_rect](const patch_drawable::item& aItem) -> texture_sampling
-            {
-                if (!aItem.has_texture())
-                    return texture_sampling::Normal;
-                auto const& texture = *service<i_texture_manager>().find_texture(aItem.texture().id.cookie());
-                auto sampling = (aItem.texture().sampling != std::nullopt ? *aItem.texture().sampling : texture.sampling());
-                if (sampling == texture_sampling::Scaled)
                 {
-                    auto const extents = size_u32{ texture.extents() };
-                    auto const outputRect = calc_bounding_rect(aItem);
-                    if (extents / 2u * 2u == extents && (outputRect.cx > extents.cx || outputRect.cy > extents.cy))
-                        sampling = texture_sampling::Nearest;
-                    else
-                        sampling = texture_sampling::Normal;
-                }
-                return sampling;
-            };
+                    if (!aItem.has_texture())
+                        return texture_sampling::Normal;
+                    auto const& texture = *service<i_texture_manager>().find_texture(aItem.texture().id.cookie());
+                    auto sampling = (aItem.texture().sampling != std::nullopt ? *aItem.texture().sampling : texture.sampling());
+                    if (sampling == texture_sampling::Scaled)
+                    {
+                        auto const extents = size_u32{ texture.extents() };
+                        auto const outputRect = calc_bounding_rect(aItem);
+                        if (extents / 2u * 2u == extents && (outputRect.cx > extents.cx || outputRect.cy > extents.cy))
+                            sampling = texture_sampling::Nearest;
+                        else
+                            sampling = texture_sampling::Normal;
+                    }
+                    return sampling;
+                };
 
             std::size_t faceCount = item->faces->size();
             auto sampling = calc_sampling(*item);
@@ -3074,10 +3074,10 @@ namespace neogfx
 
             while (next != aPatch.items.end() &&
                 std::prev(next)->vertexArrayIndexEnd == next->vertexArrayIndexStart &&
-                game::batchable(*item->material, *next->material) && 
+                game::batchable(*item->material, *next->material) &&
                 sampling == calc_sampling(*next) &&
                 item->meshDrawable->renderer->depthTest == next->meshDrawable->renderer->depthTest)
-            {   
+            {
                 faceCount += next->faces->size();
                 ++next;
             }
@@ -3119,14 +3119,14 @@ namespace neogfx
 
                 if (sampling != texture_sampling::Multisample)
                 {
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? 
-                        GL_LINEAR : 
+                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ?
+                        GL_LINEAR :
                         GL_NEAREST));
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling == texture_sampling::NormalMipmap ? 
-                        GL_LINEAR_MIPMAP_LINEAR : 
-                        sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ? 
-                            GL_LINEAR : 
-                            GL_NEAREST));
+                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling == texture_sampling::NormalMipmap ?
+                        GL_LINEAR_MIPMAP_LINEAR :
+                        sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ?
+                        GL_LINEAR :
+                        GL_NEAREST));
                 }
 
                 rendering_engine().default_shader_program().texture_shader().set_texture(texture);
@@ -3168,12 +3168,12 @@ namespace neogfx
 
     void opengl_rendering_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect)
     {
-        auto mesh = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ? 
+        auto mesh = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
             to_ecs_component(aRect) : to_ecs_component(game_rect{ aRect });
         auto const& texViewport = aTexture.as_render_target().viewport();
         for (auto& uv : mesh.uv)
-            uv = (aTextureRect.top_left() / texViewport.extents()).to_vec2().as<float>() + 
-                uv.scale((aTextureRect.extents() / texViewport.extents()).to_vec2().as<float>());
+            uv = (aTextureRect.top_left() / texViewport.extents()).to_vec2().as<float>() +
+            uv.scale((aTextureRect.extents() / texViewport.extents()).to_vec2().as<float>());
         draw_mesh(
             mesh,
             game::material
