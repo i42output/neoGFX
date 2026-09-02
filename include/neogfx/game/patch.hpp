@@ -36,6 +36,8 @@ namespace neogfx::game
         game::faces faces;
         std::optional<vec3f> origin;
         std::optional<i32> layer;
+        bool applyDecalOffset = false;
+        std::optional<float> decalOffset;
 
         struct meta : i_component_data::meta
         {
@@ -51,7 +53,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 4;
+                return 6;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -65,6 +67,10 @@ namespace neogfx::game
                     return component_data_field_type::Vec3f | component_data_field_type::Optional;
                 case 3:
                     return component_data_field_type::Int32 | component_data_field_type::Optional;
+                case 4:
+                    return component_data_field_type::Bool;
+                case 5:
+                    return component_data_field_type::Float32 | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }
@@ -81,6 +87,10 @@ namespace neogfx::game
                     return neolib::uuid{};
                 case 3:
                     return neolib::uuid{};
+                case 4:
+                    return neolib::uuid{};
+                case 5:
+                    return neolib::uuid{};
                 default:
                     throw invalid_field_index();
                 }
@@ -92,7 +102,9 @@ namespace neogfx::game
                     "Material",
                     "Faces",
                     "Origin",
-                    "Layer"
+                    "Layer",
+                    "Apply Decal Offset",
+                    "Decal Offset"
                 };
                 return sFieldNames[aFieldIndex];
             }

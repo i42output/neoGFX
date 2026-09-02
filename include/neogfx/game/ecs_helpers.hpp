@@ -385,6 +385,14 @@ namespace neogfx
         return patch;
     }
 
+    template <typename Geometry>
+    inline game::patch_ptr add_decal_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const Geometry& aGeometry, const neogfx::i_texture& aTexture, const mat33f& aTextureTransform = mat33f::identity())
+    {
+        auto patch = add_patch(aMesh, aMeshRenderer, aGeometry, aTexture, aTextureTransform);
+        patch->applyDecalOffset = true;
+        return patch;
+    }
+
     struct patch_info
     {
         rect geometry;
@@ -394,6 +402,7 @@ namespace neogfx
         mat33f textureTransform = mat33f::identity();
         vec3f offset = {};
         bool ignore = false;
+        bool applyDecalOffset = false;
     };
 
     inline game::patch_ptr add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, patch_info const& aInfo)
@@ -402,6 +411,7 @@ namespace neogfx
         auto patch = add_patch(aMesh, aMeshRenderer, aInfo.geometry, aInfo.texture, aInfo.textureTransform);
         patch->layer = aInfo.layer;
         patch->origin = aInfo.origin;
+        patch->applyDecalOffset = aInfo.applyDecalOffset;
         for (auto v = std::next(aMesh.vertices.begin(), vertexStart); v != aMesh.vertices.end(); ++v)
             *v += aInfo.offset;
         return patch;

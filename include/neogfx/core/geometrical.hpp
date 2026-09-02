@@ -84,6 +84,18 @@ namespace neogfx
 
         vec2 bottomLeft;
         vec2 topRight;
+        std::optional<scalar> zFar;
+        std::optional<scalar> zNear;
+
+        scalar z_far() const
+        {
+            return zFar.value_or(std::max(topRight.x - bottomLeft.x, std::abs(topRight.y - bottomLeft.y)));
+        }
+
+        scalar z_near() const
+        {
+            return zNear.value_or(-z_far());
+        }
 
         bool is_gui_orientation() const
         {

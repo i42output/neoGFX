@@ -90,8 +90,8 @@ namespace neogfx
                 float const right = topRight.x;
                 float const bottom = bottomLeft.y;
                 float const top = topRight.y;
-                float const zFar = 1.0f;
-                float const zNear = -1.0f;
+                float const zFar = static_cast<float>(logicalCoordinates.z_far());
+                float const zNear = static_cast<float>(logicalCoordinates.z_near());
                 uProjectionMatrix = mat44f{
                     { 2.0f / (right - left), 0.0f, 0.0f, -(right + left) / (right - left) },
                     { 0.0f, 2.0f / (top - bottom), 0.0f, -(top + bottom) / (top - bottom) },

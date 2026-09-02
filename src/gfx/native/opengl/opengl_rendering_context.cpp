@@ -2840,9 +2840,8 @@ namespace neogfx
 
     void opengl_rendering_context::draw_meshes(optional_ecs_render_lock& aLock, i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)
     {
-        auto const defaultDecalOffset = 1e-5f;
-
         auto const logicalCoordinates = logical_coordinates();
+        auto const defaultDecalOffset = logicalCoordinates.z_far() * 1e-5f;
 
         thread_local patch_drawable tPatchDrawable = {};
         tPatchDrawable.provider = &aVertexProvider;
@@ -2970,9 +2969,8 @@ namespace neogfx
                         for (auto faceVertexIndex : face)
                         {
                             auto v = mesh.vertices[faceVertexIndex];
-                            // @todo make decal offset behaviour configurable
-                            if (patch != game::mesh_filter_patch && aItemLayer == meshRenderer.layer && v.z == 0.0)
-                                v.z = defaultDecalOffset;
+                            if (patch != game::mesh_filter_patch && aItemLayer == meshRenderer.layer && patch->applyDecalOffset)
+                                v.z += patch->decalOffset.value_or(defaultDecalOffset);
 
                             auto const& xyz = (itemTransformation ? *itemTransformation * v : v) + origin;
                             auto const& rgba = (itemMaterial.color != std::nullopt ? itemMaterial.color->rgba : defaultColor);

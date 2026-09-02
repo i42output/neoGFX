@@ -121,7 +121,7 @@ namespace neogames
             thread_local auto const cardBackgroundVertices = ng::rounded_rect_vertices<ng::vec3f>(ng::rect{ ng::point{}, ng::size{1.0, kBridgeCardSize.cy / kBridgeCardSize.cx } }.with_centered_origin(), 0.1, ng::mesh_type::Triangles, 20);
 
             ng::game::mesh mesh{ cardBackgroundVertices, ng::game::vertices_2d{cardBackgroundVertices.size(), ng::vec2f{} }, ng::game::default_faces(cardBackgroundVertices) };
-            ng::game::mesh_renderer meshRenderer{ ng::game::material{ ng::to_ecs_component( ng::color::White) } };
+            ng::game::mesh_renderer mr{ ng::game::material{ ng::to_ecs_component( ng::color::White) } };
 
             const ng::mat33 uvRotate180{ { -1.0, 0.0, 0.0 }, { 0.0, -1.0, 0.0 }, { 1.0, 1.0, 1.0 } };
 
@@ -129,26 +129,28 @@ namespace neogames
 
             ng::dimension const valueDimension = 0.25;
 
+            std::size_t const firstPatchVertex = mesh.vertices.size();
+
             // Card value textures...
             auto const cardValueUpperLeft = ng::rect{ aabb.top_left(), ng::size{ valueDimension } };
             auto const cardValueBottomRight = ng::rect{ aabb.bottom_right() + ng::delta{ -valueDimension }, ng::size{ valueDimension } };
-            auto& upperLeftPatch = *ng::add_patch(mesh, meshRenderer, cardValueUpperLeft, aCardTextures.value_texture(aCard));
+            auto& upperLeftPatch = *ng::add_decal_patch(mesh, mr, cardValueUpperLeft, aCardTextures.value_texture(aCard));
             upperLeftPatch.material.color = ng::to_ecs_component(aCard == basic_card<GameTraits>::color::Black ? ng::color::Black : ng::color{ 213, 0, 0 });
-            auto& bottomRightPatch = *ng::add_patch(mesh, meshRenderer, cardValueBottomRight, aCardTextures.value_texture(aCard), uvRotate180);
+            auto& bottomRightPatch = *ng::add_decal_patch(mesh, mr, cardValueBottomRight, aCardTextures.value_texture(aCard), uvRotate180);
             bottomRightPatch.material.color = ng::to_ecs_component(aCard == basic_card<GameTraits>::color::Black ? ng::color::Black : ng::color{ 213, 0, 0 });
 
             // Card suit textures under card value textures...
             auto const cardSuitUpperLeft = cardValueUpperLeft.translated(ng::point{ 0.0, valueDimension }).deflated(ng::size{ 0.055 }).translated(ng::point{ 0.0, -0.055 });
             auto const cardSuitBottomRight = cardValueBottomRight.translated(ng::point{ 0.0, -valueDimension }).deflated(ng::size{ 0.055 }).translated(ng::point{ 0.0, 0.055 });
-            ng::add_patch(mesh, meshRenderer, cardSuitUpperLeft, aCardTextures.suit_texture(aCard));
-            ng::add_patch(mesh, meshRenderer, cardSuitBottomRight, aCardTextures.suit_texture(aCard), uvRotate180);
+            ng::add_decal_patch(mesh, mr, cardSuitUpperLeft, aCardTextures.suit_texture(aCard));
+            ng::add_decal_patch(mesh, mr, cardSuitBottomRight, aCardTextures.suit_texture(aCard), uvRotate180);
 
             // Card face textures...
             auto faceTextureRects = face_texture_rects(aabb.deflated(ng::size{ 0.04 }), static_cast<typename basic_card<GameTraits>::value>(aCard));
             for (auto const& r : faceTextureRects)
-                ng::add_patch(mesh, meshRenderer, r.first, aCardTextures.face_texture(aCard), r.second ? uvRotate180 : ng::mat33::identity());
+                ng::add_decal_patch(mesh, mr, r.first, aCardTextures.face_texture(aCard), r.second ? uvRotate180 : ng::mat33::identity());
 
-            return aEcs.create_entity(cardArchetype, ng::game::box_collider_2d{ {}, { cardBackgroundVertices.begin(), cardBackgroundVertices.end() } }, ng::game::mesh_filter{{}, mesh, {}}, meshRenderer);
+            return aEcs.create_entity(cardArchetype, ng::game::box_collider_2d{ {}, { cardBackgroundVertices.begin(), cardBackgroundVertices.end() } }, ng::game::mesh_filter{{}, mesh, {}}, mr);
         }
     }
 }
