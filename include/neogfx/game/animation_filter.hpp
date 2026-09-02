@@ -687,6 +687,8 @@ namespace neogfx::game
         auto& tweenState = aAnimationFilter.tweenAnimationStates[tweenPtr];
         if (auto sequencerTrackId = std::get_if<sequencer_track_id>(&aInfo.cycle.attachment))
             tweenState.attachment = *sequencerTrackId;
+        else if (auto sequencerClipId = std::get_if<sequencer_clip_id>(&aInfo.cycle.attachment))
+            tweenState.attachment = *sequencerClipId;
         else if (auto timer = std::get_if<animation_timer_ptr>(&aInfo.cycle.attachment))
             tweenState.attachment = *timer;
         else if (aInfo.cycle.duration)
