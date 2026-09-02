@@ -644,8 +644,9 @@ namespace neogfx::game
     {
         std::optional<tween_shape> shape;
         std::optional<tween_repeat> repeat;
-        optional_time_interval duration;
-        std::variant<std::monostate, animation_timer_ptr, sequencer_track_id> attachment;
+        std::optional<time_interval> duration;
+        std::optional<time_interval> after;
+        std::variant<std::monostate, animation_timer_ptr, sequencer_track_id, sequencer_clip_id> attachment;
     };
 
     struct tween_info

@@ -207,6 +207,7 @@ namespace neogfx
         public:
             sequencer_clip_id add_clip(i_ref_ptr<i_sequencer_clip> const& aClip, sequencer_track_id aTrack, sequencer_position aStart, sequencer_duration aDuration) final;
             void delete_clip(sequencer_clip_id aClipId) final;
+            void clear_track(sequencer_track_id aTrack) final;
         public:
             bool is_playing(sequencer_sequence_id aSequence) const final;
             sequencer_position position(sequencer_sequence_id aSequence) const final;

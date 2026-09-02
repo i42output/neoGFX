@@ -241,6 +241,27 @@ namespace neogfx
                 });
         }
 
+        void sequencer::clear_track(sequencer_track_id aTrack)
+        {
+            neolib::rcu_update(iTimeline, [aTrack](timeline& aTimeline)
+                {
+                    auto const trackIndex = find_track(aTimeline, aTrack);
+                    if (trackIndex == npos)
+                        throw track_not_found{};
+                    auto& theTrack = aTimeline.tracks[trackIndex];
+                    // already empty: bumping the generation would cost the update thread
+                    // a full resync for no change at all
+                    if (theTrack.clips->empty())
+                        return;
+                    // only this track's storage is replaced, so every other track stays
+                    // shared with the previous snapshot
+                    theTrack.clips = std::make_shared<track_clips const>();
+                    aTimeline.clips.erase(std::remove_if(aTimeline.clips.begin(), aTimeline.clips.end(),
+                        [aTrack](clip_locator const& aLocator) { return aLocator.track == aTrack; }), aTimeline.clips.end());
+                    ++aTimeline.generation;
+                });
+        }
+
         bool sequencer::is_playing(sequencer_sequence_id aSequence) const
         {
             return state(aSequence) == transport_state::Playing;

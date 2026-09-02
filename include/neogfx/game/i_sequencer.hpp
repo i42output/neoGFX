@@ -168,6 +168,7 @@ namespace neogfx
         public:
             virtual sequencer_clip_id add_clip(i_ref_ptr<i_sequencer_clip> const& aClip, sequencer_track_id aTrack, sequencer_position aStart, sequencer_duration aDuration) = 0;
             virtual void delete_clip(sequencer_clip_id aClipId) = 0;
+            virtual void clear_track(sequencer_track_id aTrack) = 0;
         public:
             virtual bool is_playing(sequencer_sequence_id aSequence) const = 0;
             virtual sequencer_position position(sequencer_sequence_id aSequence) const = 0;
@@ -188,37 +189,37 @@ namespace neogfx
                 return add_clip(make_sequencer_clip<Payload>(std::forward<Args>(aArgs)...), aTrack, aStart, aDuration);
             }
         public:
-            sequencer_track_id create_track() 
-            { 
-                return create_track(default_sequence()); 
+            sequencer_track_id create_track()
+            {
+                return create_track(default_sequence());
             }
-            bool is_playing() const 
-            { 
-                return is_playing(default_sequence()); 
+            bool is_playing() const
+            {
+                return is_playing(default_sequence());
             }
-            sequencer_position position() const 
-            { 
-                return position(default_sequence()); 
+            sequencer_position position() const
+            {
+                return position(default_sequence());
             }
-            void play() 
-            { 
-                play(default_sequence()); 
+            void play()
+            {
+                play(default_sequence());
             }
-            void pause() 
-            { 
-                pause(default_sequence()); 
+            void pause()
+            {
+                pause(default_sequence());
             }
-            void rewind() 
-            { 
-                rewind(default_sequence()); 
+            void rewind()
+            {
+                rewind(default_sequence());
             }
-            void seek(sequencer_position aPosition) 
-            { 
-                seek(default_sequence(), aPosition); 
+            void seek(sequencer_position aPosition)
+            {
+                seek(default_sequence(), aPosition);
             }
-            void stop() 
-            { 
-                stop(default_sequence()); 
+            void stop()
+            {
+                stop(default_sequence());
             }
         public:
             static uuid const& iid() { static uuid const sIid{ 0xa2fe8afe, 0x4483, 0x4b66, 0x8ee4, { 0x70, 0xd2, 0xf, 0x4e, 0xfc, 0xd0 } }; return sIid; }
