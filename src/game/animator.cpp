@@ -176,10 +176,16 @@ namespace neogfx::game
                 }
                 else if (auto tween = std::get_if<animation_tween_ptr>(&ct))
                 {
-                    if (auto* tweenTimer = std::get_if<animation_timer_ptr>(&af.tweenAnimationStates.at(*tween).attachment))
+                    auto const& attachment = af.tweenAnimationStates.at(*tween).attachment;
+                    if (auto* tweenTimer = std::get_if<animation_timer_ptr>(&attachment))
                     {
                         (**tweenTimer).elapsed(now); // advance before polling
                         if ((**tweenTimer).complete())
+                            stop_animation(af);
+                    }
+                    else if (auto* clipId = std::get_if<sequencer_clip_id>(&attachment))
+                    {
+                        if (auto const clip = service<i_sequencer>().clip_info(*clipId); clip && clip->elapsed >= clip->duration)
                             stop_animation(af);
                     }
                 }
