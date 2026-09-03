@@ -67,8 +67,7 @@ namespace neogfx
         public:
             skip_iterator(const value_type* aBegin, const value_type* aEnd, std::size_t aSkipAmount = 2u, std::size_t aPasses = 1) :
                 iBegin{ aBegin }, iEnd{ aEnd }, iSkipAmount{ std::max<std::size_t>(1u, std::min<std::size_t>(aEnd - aBegin, aSkipAmount)) }, iPasses{ aPasses }, iNext{ aBegin }, iSkipPass{ 1u }, iPass{ 1u }
-            {
-            }
+            {}
             skip_iterator() = delete;
         public:
             std::size_t skip_amount() const
@@ -2968,11 +2967,15 @@ namespace neogfx
                         {
                             for (auto faceVertexIndex : face)
                             {
-                                auto v = mesh.vertices[faceVertexIndex];
-                                if (patch != game::mesh_filter_patch && aItemLayer == meshRenderer.layer && patch->applyDecalOffset)
-                                    v.z += patch->decalOffset.value_or(defaultDecalOffset * static_cast<float>(aDecalRank));
+                                auto const& v = mesh.vertices[faceVertexIndex];
 
-                                auto const& xyz = (itemTransformation ? *itemTransformation * v : v) + origin;
+                                // the decal offset is a depth separation in projection space, so it is
+                                // applied after the item transformation: applied before, it would be in
+                                // mesh local space and any rotation would turn it into lateral movement
+                                auto xyz = (itemTransformation ? *itemTransformation * v : v) + origin;
+                                if (patch != game::mesh_filter_patch && aItemLayer == meshRenderer.layer && patch->applyDecalOffset)
+                                    xyz.z += patch->decalOffset.value_or(defaultDecalOffset * static_cast<float>(aDecalRank));
+
                                 auto const& rgba = (itemMaterial.color != std::nullopt ? itemMaterial.color->rgba : defaultColor);
                                 auto const& uv = (uvCalculator ? (*uvCalculator)(mesh.uv[faceVertexIndex]) : vec2f{});
                                 auto const& xyzw = function;
