@@ -2924,15 +2924,16 @@ namespace neogfx
                             itemTransformation = transformation;
                     }
 
-                    auto const function = itemMaterial.gradient != std::nullopt && itemMaterial.gradient->boundingBox ?
-                        vec4f{
-                            itemMaterial.gradient->boundingBox->min.x, itemMaterial.gradient->boundingBox->min.y,
-                            itemMaterial.gradient->boundingBox->max.x, itemMaterial.gradient->boundingBox->max.y } :
-                            meshRenderer.filter != std::nullopt && meshRenderer.filter->boundingBox ?
-                        vec4f{
-                            meshRenderer.filter->boundingBox->min.x, meshRenderer.filter->boundingBox->min.y,
-                            meshRenderer.filter->boundingBox->max.x, meshRenderer.filter->boundingBox->max.y } :
-                            vec4f{};
+                    auto const function = (
+                        itemMaterial.gradient && itemMaterial.gradient->boundingBox ?
+                            vec4f{
+                                itemMaterial.gradient->boundingBox->min.x, itemMaterial.gradient->boundingBox->min.y,
+                                itemMaterial.gradient->boundingBox->max.x, itemMaterial.gradient->boundingBox->max.y } :
+                            meshRenderer.filter && meshRenderer.filter->boundingBox ?
+                                vec4f{
+                                    meshRenderer.filter->boundingBox->min.x, meshRenderer.filter->boundingBox->min.y,
+                                    meshRenderer.filter->boundingBox->max.x, meshRenderer.filter->boundingBox->max.y } :
+                                vec4f{});
 
                     if (meshRenderCache.state != game::cache_state::Clean)
                     {
@@ -2940,7 +2941,7 @@ namespace neogfx
                         {
                             auto const& materialTexture = patch_drawable::texture(meshRenderer, itemMaterial);
                             auto nextTextureId = materialTexture.id.cookie();
-                            if (uvCalculator == nullptr || textureId == std::nullopt || *textureId != nextTextureId || materialSubtexture != materialTexture.subTexture)
+                            if (uvCalculator == nullptr || !textureId || *textureId != nextTextureId || materialSubtexture != materialTexture.subTexture)
                             {
                                 textureId = nextTextureId;
                                 materialSubtexture = materialTexture.subTexture;
@@ -2976,7 +2977,7 @@ namespace neogfx
                                 if (patch != game::mesh_filter_patch && aItemLayer == meshRenderer.layer && patch->applyDecalOffset)
                                     xyz.z += patch->decalOffset.value_or(defaultDecalOffset * static_cast<float>(aDecalRank));
 
-                                auto const& rgba = (itemMaterial.color != std::nullopt ? itemMaterial.color->rgba : defaultColor);
+                                auto const& rgba = (itemMaterial.color ? itemMaterial.color->rgba : defaultColor);
                                 auto const& uv = (uvCalculator ? (*uvCalculator)(mesh.uv[faceVertexIndex]) : vec2f{});
                                 auto const& xyzw = function;
                                 if (nextIndex == vertices.size())
