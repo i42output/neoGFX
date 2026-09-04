@@ -958,11 +958,11 @@ namespace neogfx
                 glCheck(glDisable(GL_CULL_FACE));
                 break;
             case neogfx::face_culling::Front:
-                glCheck(glCullFace(GL_FRONT));
+                glCheck(glCullFace(!logical_coordinates().flipped() ? GL_FRONT : GL_BACK));
                 glCheck(glEnable(GL_CULL_FACE));
                 break;
             case neogfx::face_culling::Back:
-                glCheck(glCullFace(GL_BACK));
+                glCheck(glCullFace(!logical_coordinates().flipped() ? GL_BACK : GL_FRONT));
                 glCheck(glEnable(GL_CULL_FACE));
                 break;
             case neogfx::face_culling::FrontAndBack:

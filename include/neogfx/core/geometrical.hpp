@@ -97,10 +97,16 @@ namespace neogfx
             return zNear.value_or(-z_far());
         }
 
+        bool flipped() const
+        {
+            return ((topRight.x - bottomLeft.x) < 0.0) != ((topRight.y - bottomLeft.y) < 0.0);
+        }
+
         bool is_gui_orientation() const
         {
             return bottomLeft.y > topRight.y;
         }
+
         bool is_game_orientation() const
         {
             return !is_gui_orientation();

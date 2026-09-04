@@ -44,8 +44,8 @@ namespace neogfx
 
     enum class front_face : std::uint32_t
     {
-        CounterClockwise    = winding_order::CounterClockwise,
-        Clockwise           = winding_order::Clockwise
+        CounterClockwise    = static_cast<std::uint32_t>(winding_order::CounterClockwise),
+        Clockwise           = static_cast<std::uint32_t>(winding_order::Clockwise)
     };
 
     enum class face_culling : std::uint32_t
