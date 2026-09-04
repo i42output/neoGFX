@@ -175,6 +175,11 @@ namespace neogfx::game
             throw invalid_layer();
         iLayers[aLayer] = false;
     }
+
+    void canvas::cull_faces(face_culling aCulling)
+    {
+        iFaceCulling = aCulling;
+    }
         
     logical_coordinate_system canvas::logical_coordinate_system() const
     {
@@ -237,6 +242,9 @@ namespace neogfx::game
             {
                 if (have_ecs() && ecs().component_registered<mesh_renderer>())
                 {
+                    std::optional<scoped_face_culling> sfc;
+                    if (iFaceCulling.value_or(face_culling::None) != face_culling::None)
+                        sfc.emplace(aGc, *iFaceCulling);
                     scoped_component_data_lock<mesh_renderer> lgMeshRenderer{ ecs() };
                     aGc.clear_depth_buffer();
                     RenderingEntities(aGc, 0);
@@ -249,6 +257,9 @@ namespace neogfx::game
             {
                 if (have_ecs() && ecs().component_registered<mesh_renderer>())
                 {
+                    std::optional<scoped_face_culling> sfc;
+                    if (iFaceCulling.value_or(face_culling::None) != face_culling::None)
+                        sfc.emplace(aGc, *iFaceCulling);
                     scoped_component_data_lock<mesh_renderer> lgMeshRenderer{ ecs() };
                     for (scene_layer layer = 1; layer < layers(); ++layer)
                     {

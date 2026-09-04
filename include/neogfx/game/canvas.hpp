@@ -57,6 +57,8 @@ namespace neogfx::game
         void show_layer(scene_layer aLayer);
         void hide_layer(scene_layer aLayer);
     public:
+        void cull_faces(face_culling aCulling);
+    public:
         neogfx::logical_coordinate_system logical_coordinate_system() const override;
     public:
         void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
@@ -66,6 +68,7 @@ namespace neogfx::game
     private:
         std::shared_ptr<game::i_ecs> iEcs;
         std::vector<bool> iLayers;
+        std::optional<face_culling> iFaceCulling;
         sink iSink;
         std::optional<widget_timer> iUpdater;
         bool iEcsPaused;

@@ -922,7 +922,7 @@ namespace neogfx
 
     front_face opengl_rendering_context::front_face() const
     {
-        return iSlowState.frontFace.value_or(neogfx::front_face::CCW);
+        return iSlowState.frontFace.value_or(neogfx::front_face::CounterClockwise);
     }
 
     void opengl_rendering_context::set_front_face(neogfx::front_face aFrontFace)
@@ -932,10 +932,10 @@ namespace neogfx
             iSlowState.frontFace = aFrontFace;
             switch (iSlowState.frontFace.value())
             {
-            case neogfx::front_face::CCW:
+            case neogfx::front_face::CounterClockwise:
                 glCheck(glFrontFace(GL_CCW));
                 break;
-            case neogfx::front_face::CW:
+            case neogfx::front_face::Clockwise:
                 glCheck(glFrontFace(GL_CW));
                 break;
             }

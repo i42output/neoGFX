@@ -36,10 +36,16 @@
 
 namespace neogfx
 {
+    enum class winding_order : std::uint32_t
+    {
+        CounterClockwise,
+        Clockwise
+    };
+
     enum class front_face : std::uint32_t
     {
-        CW,
-        CCW
+        CounterClockwise    = winding_order::CounterClockwise,
+        Clockwise           = winding_order::Clockwise
     };
 
     enum class face_culling : std::uint32_t

@@ -25,6 +25,7 @@
 
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/core/geometrical.hpp>
+#include <neogfx/gfx/primitives.hpp>
 #include <neogfx/game/i_ecs.hpp>
 #include <neogfx/game/i_component_data.hpp>
 
@@ -85,6 +86,54 @@ namespace neogfx::game
     inline mesh operator*(const mat44f& aLhs, const mesh& aRhs)
     {
         return mesh{ aLhs * aRhs.vertices, aRhs.uv, aRhs.faces };
+    }
+
+    // twice the signed area of the face projected onto the plane normal to aAxis; positive
+    // is counter-clockwise seen from the positive aAxis side. n.b. the default axis makes
+    // this the XY projection, so in a y-down (GUI) coordinate space the visual sense of
+    // "counter-clockwise" is the reverse of the y-up one
+    inline float face_signed_area(const vertices& aVertices, const face& aFace, const vec3f& aAxis = vec3f{ 0.0f, 0.0f, 1.0f })
+    {
+        auto const& v0 = aVertices[static_cast<vertices::size_type>(aFace[0u])];
+        auto const& v1 = aVertices[static_cast<vertices::size_type>(aFace[1u])];
+        auto const& v2 = aVertices[static_cast<vertices::size_type>(aFace[2u])];
+        return (v1 - v0).cross(v2 - v0).dot(aAxis);
+    }
+
+    // nothing for a degenerate face: zero area has no winding to report
+    inline std::optional<winding_order> face_winding(const vertices& aVertices, const face& aFace, const vec3f& aAxis = vec3f{ 0.0f, 0.0f, 1.0f })
+    {
+        auto const area = face_signed_area(aVertices, aFace, aAxis);
+        if (area > 0.0f)
+            return winding_order::CounterClockwise;
+        else if (area < 0.0f)
+            return winding_order::Clockwise;
+        return {};
+    }
+
+    // true if the face was reversed; degenerate faces are left alone
+    inline bool set_winding(const vertices& aVertices, face& aFace, winding_order aOrder, const vec3f& aAxis = vec3f{ 0.0f, 0.0f, 1.0f })
+    {
+        auto const existing = face_winding(aVertices, aFace, aAxis);
+        if (!existing || *existing == aOrder)
+            return false;
+        std::swap(aFace[1u], aFace[2u]);
+        return true;
+    }
+
+    // returns the number of faces reversed. UV is indexed by vertex, so it needs no fixup
+    inline std::size_t set_winding(const vertices& aVertices, faces::iterator aFirst, faces::iterator aLast, winding_order aOrder, const vec3f& aAxis = vec3f{ 0.0f, 0.0f, 1.0f })
+    {
+        std::size_t result = 0;
+        for (auto f = aFirst; f != aLast; ++f)
+            if (set_winding(aVertices, *f, aOrder, aAxis))
+                ++result;
+        return result;
+    }
+
+    inline std::size_t set_winding(mesh& aMesh, winding_order aOrder, const vec3f& aAxis = vec3f{ 0.0f, 0.0f, 1.0f })
+    {
+        return set_winding(aMesh.vertices, aMesh.faces.begin(), aMesh.faces.end(), aOrder, aAxis);
     }
 
     inline rect bounding_rect(const vertices& aVertices, const mat44f& aTransformation = mat44f::identity())
