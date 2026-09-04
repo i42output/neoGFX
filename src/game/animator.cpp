@@ -161,9 +161,21 @@ namespace neogfx::game
                     auto const newTimer = create_timer(now);
                     tweenState.attachment = newTimer;
                     newTimer->duration = to_step_time(duration, worldClock.timestep);
+                    if (tweenState.after)
+                        newTimer->delay = to_step_time(*tweenState.after, worldClock.timestep);
                 }
                 else if (std::holds_alternative<std::monostate>(tweenState.attachment))
-                    tweenState.attachment = default_timer();
+                {
+                    if (!tweenState.after)
+                        tweenState.attachment = default_timer();
+                    else
+                    {
+                        // the default timer is shared, so a delayed tween needs its own
+                        auto const newTimer = create_timer(now);
+                        newTimer->delay = to_step_time(*tweenState.after, worldClock.timestep);
+                        tweenState.attachment = newTimer;
+                    }
+                }
             }
 
             for (auto const& ct : af.completionTimers)

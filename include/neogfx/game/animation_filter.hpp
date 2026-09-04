@@ -41,6 +41,7 @@ namespace neogfx::game
     {
         i64 epoch = 0;
         i64 lastElapsed = 0;
+        i64 delay = 0;                  // wait this long after epoch before advancing
         std::optional<i64> duration;    // one-shot when set; nullopt runs indefinitely
         bool paused = false;
 
@@ -58,7 +59,11 @@ namespace neogfx::game
         {
             if (!paused)
             {
-                lastElapsed = aStepTime - epoch;
+                // held at zero through the delay, so a delayed tween contributes its
+                // start value rather than a negative normalized time
+                lastElapsed = aStepTime - epoch - delay;
+                if (lastElapsed < 0)
+                    lastElapsed = 0;
                 if (duration && lastElapsed > *duration)
                     lastElapsed = *duration;
             }
@@ -73,7 +78,9 @@ namespace neogfx::game
 
         void resume(i64 aStepTime)
         {
-            epoch = aStepTime - lastElapsed;
+            // pausing during the delay consumes it: lastElapsed is zero, so the tween
+            // starts advancing from the moment it resumes
+            epoch = aStepTime - lastElapsed - delay;
             paused = false;
         }
 
@@ -93,7 +100,7 @@ namespace neogfx::game
     {
         define_event(Changed, changed)
 
-        bool active = false;
+            bool active = false;
         u32 currentFrame = 0u;
         bool autoDestroy = false;
         std::optional<i64> currentFrameStartTime;
@@ -135,6 +142,7 @@ namespace neogfx::game
         bool active = false;
         std::optional<scalar> hold;   // when set, the tween is frozen at this normalized position
         std::variant<std::monostate, sequencer_clip_id, animation_timer_ptr, time_interval> attachment;
+        std::optional<time_interval> after;   // timer attachments only; consumed when the timer is created
 
         // still advancing
         bool running() const
@@ -714,8 +722,12 @@ namespace neogfx::game
             tweenState.attachment = *sequencerClipId;
         else if (auto timer = std::get_if<animation_timer_ptr>(&aInfo.cycle.attachment))
             tweenState.attachment = *timer;
-        else if (aInfo.cycle.duration)
-            tweenState.attachment = *aInfo.cycle.duration;
+        else
+        {
+            tweenState.after = aInfo.cycle.after;
+            if (aInfo.cycle.duration)
+                tweenState.attachment = *aInfo.cycle.duration;
+        }
         return tween;
     }
 
