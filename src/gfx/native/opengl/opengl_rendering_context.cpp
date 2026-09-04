@@ -949,20 +949,26 @@ namespace neogfx
 
     void opengl_rendering_context::set_face_culling(neogfx::face_culling aCulling)
     {
-        if (iSlowState.faceCulling != aCulling || slow_state_invalid())
+        // a flipped projection reverses the winding the rasterizer sees, so the face we
+        // must ask GL to cull is the opposite of the one requested. n.b. this is not the
+        // same as flipping glFrontFace: anything else keyed off facedness (gl_FrontFacing,
+        // two-sided stencil, per-face glPolygonMode) still sees the unflipped sense
+        auto const flipped = logical_coordinates().flipped();
+        if (iSlowState.faceCulling != aCulling || iSlowState.faceCullingFlipped != flipped || slow_state_invalid())
         {
             iSlowState.faceCulling = aCulling;
+            iSlowState.faceCullingFlipped = flipped;
             switch (iSlowState.faceCulling.value())
             {
             case neogfx::face_culling::None:
                 glCheck(glDisable(GL_CULL_FACE));
                 break;
             case neogfx::face_culling::Front:
-                glCheck(glCullFace(!logical_coordinates().flipped() ? GL_FRONT : GL_BACK));
+                glCheck(glCullFace(!flipped ? GL_FRONT : GL_BACK));
                 glCheck(glEnable(GL_CULL_FACE));
                 break;
             case neogfx::face_culling::Back:
-                glCheck(glCullFace(!logical_coordinates().flipped() ? GL_BACK : GL_FRONT));
+                glCheck(glCullFace(!flipped ? GL_BACK : GL_FRONT));
                 glCheck(glEnable(GL_CULL_FACE));
                 break;
             case neogfx::face_culling::FrontAndBack:
@@ -2926,14 +2932,14 @@ namespace neogfx
 
                     auto const function = (
                         itemMaterial.gradient && itemMaterial.gradient->boundingBox ?
-                            vec4f{
-                                itemMaterial.gradient->boundingBox->min.x, itemMaterial.gradient->boundingBox->min.y,
-                                itemMaterial.gradient->boundingBox->max.x, itemMaterial.gradient->boundingBox->max.y } :
+                        vec4f{
+                            itemMaterial.gradient->boundingBox->min.x, itemMaterial.gradient->boundingBox->min.y,
+                            itemMaterial.gradient->boundingBox->max.x, itemMaterial.gradient->boundingBox->max.y } :
                             meshRenderer.filter && meshRenderer.filter->boundingBox ?
-                                vec4f{
-                                    meshRenderer.filter->boundingBox->min.x, meshRenderer.filter->boundingBox->min.y,
-                                    meshRenderer.filter->boundingBox->max.x, meshRenderer.filter->boundingBox->max.y } :
-                                vec4f{});
+                        vec4f{
+                            meshRenderer.filter->boundingBox->min.x, meshRenderer.filter->boundingBox->min.y,
+                            meshRenderer.filter->boundingBox->max.x, meshRenderer.filter->boundingBox->max.y } :
+                            vec4f{});
 
                     if (meshRenderCache.state != game::cache_state::Clean)
                     {
