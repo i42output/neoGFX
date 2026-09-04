@@ -28,8 +28,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/material.hpp>
 #include <neogfx/game/filter.hpp>
+#include <neogfx/game/mesh.hpp>
 #include <neogfx/game/patch.hpp>
-    
+
 namespace neogfx::game
 {
     struct mesh_renderer
@@ -120,17 +121,17 @@ namespace neogfx::game
             static void update(mesh_renderer& aData, i_ecs&, entity_id)
             {
                 std::sort(aData.patches.begin(), aData.patches.end(), [](const patch_ptr& lhsPtr, const patch_ptr& rhsPtr)
-                {
-                    auto& lhs = *lhsPtr;
-                    auto& rhs = *rhsPtr;
-                    auto lhsTexture = lhs.material.texture != std::nullopt ? 
-                        lhs.material.texture->id : lhs.material.sharedTexture != std::nullopt ? 
+                    {
+                        auto& lhs = *lhsPtr;
+                        auto& rhs = *rhsPtr;
+                        auto lhsTexture = lhs.material.texture != std::nullopt ?
+                            lhs.material.texture->id : lhs.material.sharedTexture != std::nullopt ?
                             lhs.material.sharedTexture.value()->id : neolib::cookie_ref_ptr{};
-                    auto rhsTexture = rhs.material.texture != std::nullopt ?
-                        rhs.material.texture->id : rhs.material.sharedTexture != std::nullopt ?
-                        rhs.material.sharedTexture.value()->id : neolib::cookie_ref_ptr{};
-                    return lhsTexture < rhsTexture;
-                });
+                        auto rhsTexture = rhs.material.texture != std::nullopt ?
+                            rhs.material.texture->id : rhs.material.sharedTexture != std::nullopt ?
+                            rhs.material.sharedTexture.value()->id : neolib::cookie_ref_ptr{};
+                        return lhsTexture < rhsTexture;
+                    });
             }
         };
     };
@@ -138,5 +139,24 @@ namespace neogfx::game
     inline bool batchable(const mesh_renderer& lhs, const mesh_renderer& rhs)
     {
         return batchable(lhs.material, rhs.material) && batchable(lhs.filter, rhs.filter) && !lhs.barrier && !rhs.barrier;
+    }
+
+    // a patch's faces index the vertices of the mesh it was added to, so those have to be
+    // supplied: the patch does not own them. Returns the number of faces reversed
+    inline std::size_t set_winding(const vertices& aVertices, patch& aPatch, winding_order aOrder, const vec3f& aAxis = vec3f{ 0.0f, 0.0f, 1.0f })
+    {
+        return set_winding(aVertices, aPatch.faces.begin(), aPatch.faces.end(), aOrder, aAxis);
+    }
+
+    // the mesh's own faces plus those of every patch on the renderer. Both index the same
+    // vertex array, which is why the mesh is needed alongside the renderer. Returns the
+    // total number of faces reversed
+    inline std::size_t set_winding(mesh& aMesh, mesh_renderer& aMeshRenderer, winding_order aOrder, const vec3f& aAxis = vec3f{ 0.0f, 0.0f, 1.0f })
+    {
+        auto result = set_winding(aMesh, aOrder, aAxis);
+        for (auto& patch : aMeshRenderer.patches)
+            if (patch != nullptr)
+                result += set_winding(aMesh.vertices, *patch, aOrder, aAxis);
+        return result;
     }
 }

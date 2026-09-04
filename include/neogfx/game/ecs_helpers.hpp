@@ -2,17 +2,17 @@
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2018, 2020 Leigh Johnston.  All Rights Reserved.
-  
+
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -126,6 +126,31 @@ namespace neogfx
         return to_ecs_component(result, aQuad, aMeshType, aTransformation, aOffset);
     }
 
+    // an existing mesh as the source geometry: its faces are taken to index its own
+    // vertices from zero and are rebased by aOffset, as with the other conversions. The
+    // mesh type is implicit in the faces it already has, so that argument is ignored.
+    // aResult may alias aMesh, in which case the transformation and rebase are in place
+    inline game::mesh const& to_ecs_component(game::mesh& aResult, game::mesh const& aMesh, mesh_type = mesh_type::Triangles, optional_mat44f const& aTransformation = {}, std::uint32_t aOffset = 0)
+    {
+        if (&aResult != &aMesh)
+        {
+            aResult.vertices = aMesh.vertices;
+            aResult.uv = aMesh.uv;
+            aResult.faces = aMesh.faces;
+        }
+        if (aTransformation)
+            for (auto& v : aResult.vertices)
+                v = *aTransformation * v;
+        if (aOffset != 0u)
+            for (auto& f : aResult.faces)
+            {
+                f[0u] += aOffset;
+                f[1u] += aOffset;
+                f[2u] += aOffset;
+            }
+        return aResult;
+    }
+
     inline game::mesh const& to_ecs_component(const quad& aQuad, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, std::uint32_t aOffset = 0)
     {
         thread_local game::mesh result;
@@ -158,7 +183,7 @@ namespace neogfx
     {
         return game::gradient
         {
-            neolib::cookie_ref_ptr{ service<i_gradient_manager>(), aGradient.id() }, 
+            neolib::cookie_ref_ptr{ service<i_gradient_manager>(), aGradient.id() },
             aGradient.bounding_box() ? aGradient.bounding_box()->to_aabb_2df() : std::optional<aabb_2df>{}
         };
     }
@@ -355,7 +380,7 @@ namespace neogfx
         game::material material;
         game::animation_filter filter;
     };
-    
+
     inline renderable_animation regular_sprite_sheet_to_renderable_animation(game::i_ecs& aEcs, std::string const& aName, const neogfx::image& aSpriteSheet, const vec2u32& aCells, time_interval const& aDefaultFrameDuration = {})
     {
         renderable_animation result;
@@ -370,7 +395,7 @@ namespace neogfx
     }
 
     template <typename Geometry>
-    inline game::patch_ptr add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const Geometry& aGeometry, const neogfx::i_texture& aTexture, const mat33f& aTextureTransform = mat33f::identity())
+    inline game::patch_ptr add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const Geometry& aGeometry, const game::material& aMaterial, const mat33f& aTextureTransform = mat33f::identity())
     {
         thread_local game::mesh patchMesh;
         to_ecs_component(patchMesh, aGeometry, mesh_type::Triangles, std::nullopt, static_cast<std::uint32_t>(aMesh.vertices.size()));
@@ -381,16 +406,28 @@ namespace neogfx
         aMesh.uv.insert(aMesh.uv.end(), patchMesh.uv.begin(), patchMesh.uv.end());
         auto patch = aMeshRenderer.patches.emplace_back(std::make_shared<game::patch>());
         patch->faces.insert(patch->faces.end(), patchMesh.faces.begin(), patchMesh.faces.end());
-        patch->material.texture = to_ecs_component(aTexture);
+        patch->material = aMaterial;
+        return patch;
+    }
+
+    template <typename Geometry>
+    inline game::patch_ptr add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const Geometry& aGeometry, const neogfx::i_texture& aTexture, const mat33f& aTextureTransform = mat33f::identity())
+    {
+        return add_patch(aMesh, aMeshRenderer, aGeometry, game::material{ .texture = to_ecs_component(aTexture) }, aTextureTransform);
+    }
+
+    template <typename Geometry>
+    inline game::patch_ptr add_decal_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const Geometry& aGeometry, const game::material& aMaterial, const mat33f& aTextureTransform = mat33f::identity())
+    {
+        auto patch = add_patch(aMesh, aMeshRenderer, aGeometry, aMaterial, aTextureTransform);
+        patch->applyDecalOffset = true;
         return patch;
     }
 
     template <typename Geometry>
     inline game::patch_ptr add_decal_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const Geometry& aGeometry, const neogfx::i_texture& aTexture, const mat33f& aTextureTransform = mat33f::identity())
     {
-        auto patch = add_patch(aMesh, aMeshRenderer, aGeometry, aTexture, aTextureTransform);
-        patch->applyDecalOffset = true;
-        return patch;
+        return add_decal_patch(aMesh, aMeshRenderer, aGeometry, game::material{ .texture = to_ecs_component(aTexture) }, aTextureTransform);
     }
 
     struct patch_info

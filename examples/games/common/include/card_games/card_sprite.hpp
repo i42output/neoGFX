@@ -110,7 +110,7 @@ namespace neogames
         }
 
         template <typename GameTraits>
-        ng::game::entity_id create_card_sprite(ng::game::i_ecs& aEcs, const i_card_textures& aCardTextures, const basic_card<GameTraits>& aCard)
+        ng::game::entity_id create_card_sprite(ng::game::i_ecs& aEcs, const i_card_textures& aCardTextures, const basic_card<GameTraits>& aCard, std::optional<ng::game::material> const& aBacking = {})
         {
             // We could have a separate texture for each of the 52 cards but instead we build the
             // card mesh up here using texture atlas textures.
@@ -125,7 +125,16 @@ namespace neogames
 
             const ng::mat33 uvRotate180{ { -1.0, 0.0, 0.0 }, { 0.0, -1.0, 0.0 }, { 1.0, 1.0, 1.0 } };
 
-            thread_local auto const aabb = ng::game::bounding_rect(mesh).deflated(ng::size{ 0.02, 0.02 });
+            thread_local auto const aabbMesh = ng::game::bounding_rect(mesh);
+            thread_local auto const aabb = aabbMesh.deflated(ng::size{ 0.02, 0.02 });
+
+            if (aBacking)
+            {
+                if (!aBacking->texture && !aBacking->sharedTexture)
+                    ng::add_patch(mesh, mr, mesh, *aBacking);
+                else
+                    ng::add_decal_patch(mesh, mr, aabbMesh, *aBacking);
+            }
 
             ng::dimension const valueDimension = 0.25;
 
