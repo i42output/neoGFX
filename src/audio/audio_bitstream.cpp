@@ -22,10 +22,14 @@
 #include <neogfx/audio/audio_bitstream.ipp>
 #include <neogfx/audio/i_audio_waveform.hpp>
 #include <neogfx/audio/i_audio_instrument.hpp>
+#include <neogfx/audio/i_audio_sample.hpp>
+#include <neogfx/audio/i_audio_oscillator.hpp>
 
 namespace neogfx
 {
     template class audio_bitstream<i_audio_bitstream>;
     template class audio_bitstream<i_audio_waveform>;
     template class audio_bitstream<i_audio_instrument>;
+    template class audio_bitstream<i_audio_sample>;
+    template class audio_bitstream<i_audio_oscillator>;
 }
