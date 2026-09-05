@@ -184,6 +184,12 @@ namespace neogfx
 		iSources.clear();
 	}
 
+	void audio_device::play(i_audio_bitstream& aBitstream)
+	{
+		auto const duration = std::chrono::duration<double>{ static_cast<double>(aBitstream.length()) / aBitstream.sample_rate() };
+		play(aBitstream, duration);
+	}
+
 	void audio_device::play(i_audio_bitstream& aBitstream, std::chrono::duration<double> const& aDuration)
 	{
 		auto const now = std::chrono::steady_clock::now();
@@ -191,7 +197,7 @@ namespace neogfx
 		// expired sources are removed here rather than in the audio callback so that nothing is destroyed on the audio thread
 		std::erase_if(iSources, [&](auto const& aSource) { return aSource.expiryTime != std::nullopt && *aSource.expiryTime <= now; });
 		iSources.push_back(source{
-			ref_ptr<i_audio_bitstream>{ ref_ptr<i_audio_bitstream>{},& aBitstream },
+			ref_ptr<i_audio_bitstream>{ ref_ptr<i_audio_bitstream>{}, &aBitstream },
 			now + std::chrono::duration_cast<std::chrono::milliseconds>(aDuration) });
 	}
 }

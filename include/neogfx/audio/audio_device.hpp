@@ -60,6 +60,7 @@ namespace neogfx
 		void start() final;
 		void stop() final;
 	public:
+		void play(i_audio_bitstream& aBitstream) final;
 		void play(i_audio_bitstream& aBitstream, std::chrono::duration<double> const& aDuration) final;
 	private:
 		mutable std::recursive_mutex iMutex;

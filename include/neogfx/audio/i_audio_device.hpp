@@ -69,6 +69,7 @@ namespace neogfx
 		virtual void start() = 0;
 		virtual void stop() = 0;
 	public:
+		virtual void play(i_audio_bitstream& aBitstream) = 0;
 		virtual void play(i_audio_bitstream& aBitstream, std::chrono::duration<double> const& aDuration) = 0;
 	};
 }
