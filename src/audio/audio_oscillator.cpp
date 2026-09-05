@@ -19,13 +19,15 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <bit>
+
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/audio/audio_oscillator.hpp>
 
 namespace neogfx
 {
     audio_oscillator::audio_oscillator(audio_sample_rate aSampleRate, float aFrequency, float aAmplitude, oscillator_function aFunction) :
-        audio_bitstream{ aSampleRate, aAmplitude}, iFrequency{ aFrequency }, iFunction{ aFunction }
+        audio_bitstream{ aSampleRate, aAmplitude }, iFrequency{ aFrequency }, iFunction{ aFunction }
     {
     }
 
@@ -73,13 +75,12 @@ namespace neogfx
     void audio_oscillator::generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames)
     {
         generate_from(aChannel, iCursor, aFrameCount, aOutputFrames);
+        iCursor += static_cast<audio_sample_count>(aFrameCount);
     }
 
     void audio_oscillator::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
     {
-        iCursor = static_cast<audio_sample_index>(aFrameFrom);
-
-        // todo: multiple channels
+        auto const outputChannels = channel_count(aChannel);
 
         switch (function())
         {
@@ -87,10 +88,12 @@ namespace neogfx
             // todo
             break;
         case oscillator_function::Sine:
-            for (auto cursor = iCursor; cursor < iCursor + static_cast<audio_sample_count>(aFrameCount); ++cursor)
+            for (auto cursor = static_cast<audio_sample_index>(aFrameFrom); cursor < aFrameFrom + static_cast<audio_sample_count>(aFrameCount); ++cursor)
             {
                 auto x = static_cast<float>(cursor) / sample_rate() * math::two_pi<float>() * frequency();
-                *(aOutputFrames++) = std::sin(x) * amplitude();
+                auto const value = std::sin(x) * amplitude();
+                for (std::uint64_t channel = 0ULL; channel < outputChannels; ++channel)
+                    *(aOutputFrames++) += value;
             }
             break;
         case oscillator_function::Square:
@@ -105,7 +108,5 @@ namespace neogfx
         default:
             break;
         }
-
-        iCursor += static_cast<audio_sample_count>(aFrameCount);
     }
 }

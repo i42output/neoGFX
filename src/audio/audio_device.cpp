@@ -19,6 +19,9 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <algorithm>
+#include <bit>
+
 #include <neogfx/audio/audio_device.hpp>
 
 #ifdef _WIN32
@@ -124,11 +127,18 @@ namespace neogfx
 			{
 				auto& device = *static_cast<audio_device*>(pDevice->pUserData);
 				auto const channels = to_audio_channels(pDevice->playback.channelMap, pDevice->playback.channels);
+				auto const now = std::chrono::steady_clock::now();
+				auto const output = static_cast<float*>(pOutput);
+				std::fill(output, output + frameCount * channel_count(channels), 0.0f);
 				std::unique_lock lock{ device.iMutex };
 				for (auto& source : device.iSources)
 				{
-					if (source.expiryTime > std::chrono::steady_clock::now())
-						source.bitstream->generate(channels, frameCount, static_cast<float*>(pOutput));
+					// a source without an expiry time plays until it is stopped
+					if (source.expiryTime != std::nullopt && *source.expiryTime <= now)
+						continue;
+					// the cursor lives here rather than in the bitstream so that the same bitstream can back several sources at once
+					source.bitstream->generate_from(channels, source.cursor, frameCount, output);
+					source.cursor += frameCount;
 				}
 			};
 
@@ -170,13 +180,18 @@ namespace neogfx
 	void audio_device::stop()
 	{
 		ma_device_stop(std::any_cast<ma_device>(&iHandle));
+		std::unique_lock lock{ iMutex };
+		iSources.clear();
 	}
 
 	void audio_device::play(i_audio_bitstream& aBitstream, std::chrono::duration<double> const& aDuration)
 	{
+		auto const now = std::chrono::steady_clock::now();
 		std::unique_lock lock{ iMutex };
+		// expired sources are removed here rather than in the audio callback so that nothing is destroyed on the audio thread
+		std::erase_if(iSources, [&](auto const& aSource) { return aSource.expiryTime != std::nullopt && *aSource.expiryTime <= now; });
 		iSources.push_back(source{
 			ref_ptr<i_audio_bitstream>{ ref_ptr<i_audio_bitstream>{},& aBitstream },
-			std::chrono::steady_clock::now() + std::chrono::duration_cast<std::chrono::milliseconds>(aDuration) });
+			now + std::chrono::duration_cast<std::chrono::milliseconds>(aDuration) });
 	}
 }

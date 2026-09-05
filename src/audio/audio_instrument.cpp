@@ -2,17 +2,17 @@
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
-  
+
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -44,7 +44,7 @@ namespace neogfx
     {
         return play_note(static_cast<time_point>(aWhen.count() * sample_rate()), aNote, aDuration, aAmplitude);
     }
-        
+
     audio_instrument::time_point audio_instrument::play_note(time_point aWhen, note aNote, std::chrono::duration<double> const& aDuration, float aAmplitude)
     {
         auto noteLength = service<i_audio>().instrument_atlas().instrument(iInstrument, sample_rate(), aNote).length();
@@ -72,6 +72,7 @@ namespace neogfx
     void audio_instrument::generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames)
     {
         generate_from(aChannel, iOutputCursor, aFrameCount, aOutputFrames);
+        iOutputCursor += aFrameCount;
     }
 
     void audio_instrument::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
@@ -83,15 +84,15 @@ namespace neogfx
             auto pos = aFrameFrom - next->start;
             auto count = std::min(next->noteLength.value() - pos, aFrameCount);
             thread_local std::vector<float> buffer;
-            buffer.resize(count);
+            // the note is generated as mono and replicated across the requested channels below, so buffer holds one sample per frame
+            buffer.assign(static_cast<std::size_t>(count), 0.0f);
             if (next->note)
                 service<i_audio>().instrument_atlas().instrument(iInstrument, sample_rate(), next->note.value()).generate_from(
-                    aChannel, pos, count, buffer.data());
+                    audio_channel::Mono, pos, count, buffer.data());
             auto output = aOutputFrames;
             for (auto const& sample : buffer)
                 for (int channel = 0; channel < channel_count(aChannel); ++channel)
                     (*output++) += (sample * next->amplitude.value() * apply_envelope(pos + &sample - &buffer[0], next->duration));
         }
-        iOutputCursor += aFrameCount;
     }
 }

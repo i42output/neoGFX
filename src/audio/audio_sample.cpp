@@ -52,6 +52,7 @@ namespace neogfx
 	void audio_sample::generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames)
 	{
 		generate_from(aChannel, iCursor, aFrameCount, aOutputFrames);
+		iCursor = std::min(iCursor + aFrameCount, length());
 	}
 
 	void audio_sample::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
@@ -59,7 +60,6 @@ namespace neogfx
 		auto const sourceChannels = channel_count(iChannels);
 		auto const outputChannels = channel_count(aChannel);
 
-		std::fill(aOutputFrames, aOutputFrames + aFrameCount * outputChannels, 0.0f);
 		if (aFrameFrom >= length() || sourceChannels == 0ULL || outputChannels == 0ULL)
 			return;
 		auto const count = std::min(length() - aFrameFrom, aFrameCount);
@@ -77,22 +77,20 @@ namespace neogfx
 			if (sourceChannels == 1ULL)
 			{
 				for (audio_frame_count frame = 0ULL; frame < count; ++frame, output += outputChannels)
-					*output = sourceFrames[frame];
+					*output += sourceFrames[frame];
 			}
 			else if ((iChannels & channel) != audio_channel::None)
 			{
 				auto source = std::next(sourceFrames, static_cast<std::ptrdiff_t>(channel_index(iChannels, channel)));
 				for (audio_frame_count frame = 0ULL; frame < count; ++frame, output += outputChannels, source += sourceChannels)
-					*output = *source;
+					*output += *source;
 			}
 			else if (channel == audio_channel::Mono)
 			{
 				auto source = sourceFrames;
 				for (audio_frame_count frame = 0ULL; frame < count; ++frame, output += outputChannels, source += sourceChannels)
-					*output = std::accumulate(source, std::next(source, static_cast<std::ptrdiff_t>(sourceChannels)), 0.0f) / static_cast<float>(sourceChannels);
+					*output += std::accumulate(source, std::next(source, static_cast<std::ptrdiff_t>(sourceChannels)), 0.0f) / static_cast<float>(sourceChannels);
 			}
 		}
-
-		iCursor = aFrameFrom + count;
 	}
 }
