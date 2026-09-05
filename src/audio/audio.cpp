@@ -2,25 +2,28 @@
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
-  
+
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
 
+#include <numeric>
+
 #include <neogfx/audio/audio.hpp>
 #include <neogfx/audio/audio_device.hpp>
+#include <neogfx/audio/audio_sample.hpp>
 
 #define MINIAUDIO_IMPLEMENTATION
 #ifdef _WIN32
@@ -73,24 +76,24 @@ namespace neogfx
             throw std::logic_error("neogfx::to_audio_sample_format");
         }
     }
-        
+
     audio::audio() : iContext{ ma_context{} }
     {
         if (ma_context_init(NULL, 0, NULL, std::any_cast<ma_context>(&iContext)) != MA_SUCCESS)
             throw std::runtime_error{ "neogfx::audio::audio" };
 
         auto callback = [](ma_context* pContext, ma_device_type deviceType, const ma_device_info* pInfo, void* pUserData) -> ma_bool32
-        {
-            vector<audio_data_format> dataFormats;
-            for (std::size_t dataFormatIndex = 0; dataFormatIndex < pInfo->nativeDataFormatCount; ++dataFormatIndex)
-                dataFormats.emplace_back(
-                    to_audio_sample_format(pInfo->nativeDataFormats[dataFormatIndex].format),
-                    pInfo->nativeDataFormats[dataFormatIndex].channels,
-                    static_cast<audio_sample_rate>(pInfo->nativeDataFormats[dataFormatIndex].sampleRate));
-            auto& audioObj = *static_cast<audio*>(pUserData);
-            audioObj.iDeviceInfos.emplace_back(pInfo->id, to_audio_device_type(deviceType), string{ pInfo->name }, pInfo->isDefault, dataFormats);
-            return MA_TRUE;
-        };
+            {
+                vector<audio_data_format> dataFormats;
+                for (std::size_t dataFormatIndex = 0; dataFormatIndex < pInfo->nativeDataFormatCount; ++dataFormatIndex)
+                    dataFormats.emplace_back(
+                        to_audio_sample_format(pInfo->nativeDataFormats[dataFormatIndex].format),
+                        pInfo->nativeDataFormats[dataFormatIndex].channels,
+                        static_cast<audio_sample_rate>(pInfo->nativeDataFormats[dataFormatIndex].sampleRate));
+                auto& audioObj = *static_cast<audio*>(pUserData);
+                audioObj.iDeviceInfos.emplace_back(pInfo->id, to_audio_device_type(deviceType), string{ pInfo->name }, pInfo->isDefault, dataFormats);
+                return MA_TRUE;
+            };
 
         ma_context_enumerate_devices(std::any_cast<ma_context>(&iContext), callback, this);
     }
@@ -134,7 +137,15 @@ namespace neogfx
 
     void audio::create_audio_sample(i_audio_clip const& aClip, i_ref_ptr<i_audio_sample>& aSample)
     {
-        // todo
+        // todo: multiple channels (audio_sample is mono for now, so downmix)
+
+        auto const channels = aClip.channels();
+        std::vector<float> frames;
+        frames.reserve(static_cast<std::size_t>(aClip.length()));
+        auto source = aClip.cdata();
+        for (audio_frame_index frame = 0ULL; channels != 0u && frame < aClip.length(); ++frame, source += channels)
+            frames.push_back(std::accumulate(source, source + channels, 0.0f) / channels);
+        aSample = make_ref<audio_sample>(aClip.sample_rate(), std::move(frames));
     }
 
     i_audio_instrument_atlas& audio::instrument_atlas()
