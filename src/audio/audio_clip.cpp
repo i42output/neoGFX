@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <bit>
 #include <filesystem>
 
 #include <neolib/io/uri.hpp>
@@ -37,9 +38,46 @@ namespace neogfx
     {
         constexpr std::size_t DECODE_CHUNK_FRAMES = 16384u;
 
-        void read_all_pcm_frames(ma_decoder& aDecoder, audio_data_format& aDataFormat, std::vector<float>& aPcmFrames)
+        audio_channel to_audio_channel(ma_channel aChannel)
+        {
+            if (aChannel == MA_CHANNEL_NONE || aChannel > 64u)
+                return audio_channel::None;
+            return static_cast<audio_channel>(1ULL << (aChannel - 1u));
+        }
+
+        audio_channel channels_of(ma_decoder& aDecoder)
+        {
+            auto const channels = aDecoder.outputChannels;
+            ma_channel channelMap[MA_MAX_CHANNELS] = {};
+            ma_format format;
+            ma_uint32 channelCount;
+            ma_uint32 sampleRate;
+            auto build = [&]()
+                {
+                    auto result = audio_channel::None;
+                    for (ma_uint32 channel = 0u; channel < channels; ++channel)
+                        result = result | to_audio_channel(channelMap[channel]);
+                    return result;
+                };
+
+            auto result = audio_channel::None;
+            if (ma_decoder_get_data_format(&aDecoder, &format, &channelCount, &sampleRate, channelMap, sizeof(channelMap) / sizeof(channelMap[0])) == MA_SUCCESS)
+                result = build();
+
+            // a channel mask can't represent a map with duplicate or unknown channels, so fall back to the standard map
+            if (channel_count(result) != channels)
+            {
+                ma_channel_map_init_standard(ma_standard_channel_map_default, channelMap, sizeof(channelMap) / sizeof(channelMap[0]), channels);
+                result = build();
+            }
+
+            return result;
+        }
+
+        void read_all_pcm_frames(ma_decoder& aDecoder, audio_data_format& aDataFormat, audio_channel& aChannels, std::vector<float>& aPcmFrames)
         {
             aDataFormat = audio_data_format{ audio_sample_format::F32, aDecoder.outputChannels, static_cast<audio_sample_rate>(aDecoder.outputSampleRate) };
+            aChannels = channels_of(aDecoder);
 
             ma_uint64 lengthInFrames = 0ULL;
             if (ma_decoder_get_length_in_pcm_frames(&aDecoder, &lengthInFrames) == MA_SUCCESS)
@@ -50,7 +88,7 @@ namespace neogfx
             {
                 ma_uint64 framesRead = 0ULL;
                 auto const result = ma_decoder_read_pcm_frames(&aDecoder, &chunk[0], DECODE_CHUNK_FRAMES, &framesRead);
-                aPcmFrames.insert(aPcmFrames.end(), chunk.begin(), std::next(chunk.begin(), framesRead * aDecoder.outputChannels));
+                aPcmFrames.insert(aPcmFrames.end(), chunk.begin(), std::next(chunk.begin(), static_cast<std::ptrdiff_t>(framesRead * aDecoder.outputChannels)));
                 if (result != MA_SUCCESS || framesRead < DECODE_CHUNK_FRAMES)
                     break;
             }
@@ -81,6 +119,11 @@ namespace neogfx
         return iDataFormat;
     }
 
+    audio_channel audio_clip::channels() const
+    {
+        return iChannels;
+    }
+
     audio_frame_count audio_clip::length() const
     {
         return iDataFormat.channels != 0u ? iPcmFrames.size() / iDataFormat.channels : 0ULL;
@@ -104,7 +147,7 @@ namespace neogfx
                 throw failed_to_load_clip(uri);
             try
             {
-                read_all_pcm_frames(decoder, iDataFormat, iPcmFrames);
+                read_all_pcm_frames(decoder, iDataFormat, iChannels, iPcmFrames);
             }
             catch (...)
             {
@@ -130,7 +173,7 @@ namespace neogfx
             throw failed_to_decode_clip(iUri.to_std_string());
         try
         {
-            read_all_pcm_frames(decoder, iDataFormat, iPcmFrames);
+            read_all_pcm_frames(decoder, iDataFormat, iChannels, iPcmFrames);
         }
         catch (...)
         {

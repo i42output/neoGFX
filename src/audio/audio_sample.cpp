@@ -19,6 +19,9 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <bit>
+#include <numeric>
+
 #include <neogfx/audio/audio_sample.hpp>
 
 #ifdef _WIN32
@@ -28,15 +31,22 @@
 
 namespace neogfx
 {
-	audio_sample::audio_sample(audio_sample_rate aSampleRate, std::vector<float>&& aPcmFrames) :
+	audio_sample::audio_sample(audio_sample_rate aSampleRate, std::vector<float>&& aPcmFrames, audio_channel aChannels) :
 		audio_bitstream<i_audio_sample>{ aSampleRate },
-		iPcmFrames{ std::move(aPcmFrames) }
+		iPcmFrames{ std::move(aPcmFrames) },
+		iChannels{ aChannels }
 	{
+	}
+
+	audio_channel audio_sample::channels() const
+	{
+		return iChannels;
 	}
 
 	audio_frame_count audio_sample::length() const
 	{
-		return iPcmFrames.size();
+		auto const channels = channel_count(iChannels);
+		return channels != 0ULL ? iPcmFrames.size() / channels : 0ULL;
 	}
 
 	void audio_sample::generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames)
@@ -46,13 +56,43 @@ namespace neogfx
 
 	void audio_sample::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
 	{
-		// todo multiple channels
+		auto const sourceChannels = channel_count(iChannels);
+		auto const outputChannels = channel_count(aChannel);
 
-		std::fill(aOutputFrames, aOutputFrames + aFrameCount, 0.0f);
-		if (aFrameFrom >= iPcmFrames.size())
+		std::fill(aOutputFrames, aOutputFrames + aFrameCount * outputChannels, 0.0f);
+		if (aFrameFrom >= length() || sourceChannels == 0ULL || outputChannels == 0ULL)
 			return;
-		auto count = std::min(iPcmFrames.size() - aFrameFrom, aFrameCount);
-		std::copy(std::next(iPcmFrames.begin(), aFrameFrom), std::next(iPcmFrames.begin(), aFrameFrom + count), aOutputFrames);
+		auto const count = std::min(length() - aFrameFrom, aFrameCount);
+		auto const sourceFrames = std::next(iPcmFrames.data(), static_cast<std::ptrdiff_t>(aFrameFrom * sourceChannels));
+
+		// each requested channel is taken from the corresponding source channel; a mono source is present in all of
+		// them, a mono request is the downmix of all of them, and anything the source hasn't got is left silent
+		std::uint64_t outputChannelIndex = 0ULL;
+		for (auto remaining = static_cast<std::uint64_t>(aChannel); remaining != 0ULL; ++outputChannelIndex)
+		{
+			auto const channel = static_cast<audio_channel>(remaining & (~remaining + 1ULL));
+			remaining &= ~static_cast<std::uint64_t>(channel);
+
+			auto output = std::next(aOutputFrames, static_cast<std::ptrdiff_t>(outputChannelIndex));
+			if (sourceChannels == 1ULL)
+			{
+				for (audio_frame_count frame = 0ULL; frame < count; ++frame, output += outputChannels)
+					*output = sourceFrames[frame];
+			}
+			else if ((iChannels & channel) != audio_channel::None)
+			{
+				auto source = std::next(sourceFrames, static_cast<std::ptrdiff_t>(channel_index(iChannels, channel)));
+				for (audio_frame_count frame = 0ULL; frame < count; ++frame, output += outputChannels, source += sourceChannels)
+					*output = *source;
+			}
+			else if (channel == audio_channel::Mono)
+			{
+				auto source = sourceFrames;
+				for (audio_frame_count frame = 0ULL; frame < count; ++frame, output += outputChannels, source += sourceChannels)
+					*output = std::accumulate(source, std::next(source, static_cast<std::ptrdiff_t>(sourceChannels)), 0.0f) / static_cast<float>(sourceChannels);
+			}
+		}
+
 		iCursor = aFrameFrom + count;
 	}
 }

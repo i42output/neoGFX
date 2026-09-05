@@ -40,6 +40,7 @@ namespace neogfx
 	public:
 		i_string const& uri() const final;
 		audio_data_format const& data_format() const final;
+		audio_channel channels() const final;
 		audio_frame_count length() const final;
 		float const* cdata() const final;
 	private:
@@ -48,6 +49,7 @@ namespace neogfx
 	private:
 		string iUri;
 		audio_data_format iDataFormat = { audio_sample_format::F32, 0u, 0ULL };
+		audio_channel iChannels = audio_channel::None;
 		std::vector<float> iPcmFrames;
 	};
 }

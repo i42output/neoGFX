@@ -34,10 +34,10 @@ namespace neogfx
 	public:
 		virtual i_string const& uri() const = 0;
 		virtual audio_data_format const& data_format() const = 0;
+		virtual audio_channel channels() const = 0;
 		virtual audio_frame_count length() const = 0;
 		virtual float const* cdata() const = 0;
 	public:
 		audio_sample_rate sample_rate() const { return data_format().sampleRate; }
-		std::uint32_t channels() const { return data_format().channels; }
 	};
 }

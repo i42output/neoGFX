@@ -2,17 +2,17 @@
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
-  
+
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -45,6 +45,21 @@ namespace neogfx
 		}
 	}
 
+	inline audio_channel to_audio_channel(ma_channel aChannel)
+	{
+		if (aChannel == MA_CHANNEL_NONE || aChannel > 64u)
+			return audio_channel::None;
+		return static_cast<audio_channel>(1ULL << (aChannel - 1u));
+	}
+
+	inline audio_channel to_audio_channels(ma_channel const* aChannelMap, ma_uint32 aChannels)
+	{
+		auto result = audio_channel::None;
+		for (ma_uint32 channel = 0u; channel < aChannels; ++channel)
+			result = result | to_audio_channel(aChannelMap[channel]);
+		return result;
+	}
+
 	inline ma_format from_audio_sample_format(audio_sample_format aFormat)
 	{
 		switch (aFormat)
@@ -68,17 +83,14 @@ namespace neogfx
 
 	audio_device_info::audio_device_info(audio_device_id aId, audio_device_type aType, i_string const& aName, bool aIsDefault, vector<audio_data_format> const& aDataFormats) :
 		iId{ aId }, iType{ aType }, iName{ aName }, iIsDefault{ aIsDefault }, iDataFormats{ aDataFormats }
-	{
-	}
+	{}
 
 	audio_device_info::audio_device_info(i_audio_device_info const& aOther) :
 		iId{ aOther.id() }, iType{ aOther.type() }, iName{ aOther.name() }, iIsDefault{ aOther.is_default() }
-	{
-	}
+	{}
 
 	audio_device_info::~audio_device_info()
-	{
-	}
+	{}
 
 	audio_device_id audio_device_info::id() const
 	{
@@ -109,16 +121,16 @@ namespace neogfx
 		iInfo{ aDeviceInfo }, iDataFormat{ aDataFormat }
 	{
 		auto callback = [](ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
-		{
-			auto& device = *static_cast<audio_device*>(pDevice->pUserData);
-			std::unique_lock lock{ device.iMutex };
-			for (auto& source : device.iSources)
 			{
-				// todo: channel mapping
-				if (source.expiryTime > std::chrono::steady_clock::now())
-					source.bitstream->generate(audio_channel::Left | audio_channel::Right, frameCount, static_cast<float*>(pOutput));
-			}
-		};
+				auto& device = *static_cast<audio_device*>(pDevice->pUserData);
+				auto const channels = to_audio_channels(pDevice->playback.channelMap, pDevice->playback.channels);
+				std::unique_lock lock{ device.iMutex };
+				for (auto& source : device.iSources)
+				{
+					if (source.expiryTime > std::chrono::steady_clock::now())
+						source.bitstream->generate(channels, frameCount, static_cast<float*>(pOutput));
+				}
+			};
 
 		iConfig = ma_device_config_init(from_audio_device_type(aDeviceInfo.type()));
 		auto& config = *std::any_cast<ma_device_config>(&iConfig);
@@ -129,12 +141,12 @@ namespace neogfx
 		config.sampleRate = static_cast<decltype(config.sampleRate)>(aDataFormat.sampleRate);
 		config.dataCallback = callback;
 		config.pUserData = this;
-		
+
 		iHandle = ma_device{};
 		if (ma_device_init(NULL, &config, std::any_cast<ma_device>(&iHandle)) != MA_SUCCESS)
 			throw std::runtime_error("neogfx::audio_device::audio_device");
 	}
-		
+
 	audio_device::~audio_device()
 	{
 		ma_device_uninit(std::any_cast<ma_device>(&iHandle));
@@ -164,7 +176,7 @@ namespace neogfx
 	{
 		std::unique_lock lock{ iMutex };
 		iSources.push_back(source{
-			ref_ptr<i_audio_bitstream>{ ref_ptr<i_audio_bitstream>{}, &aBitstream },
+			ref_ptr<i_audio_bitstream>{ ref_ptr<i_audio_bitstream>{},& aBitstream },
 			std::chrono::steady_clock::now() + std::chrono::duration_cast<std::chrono::milliseconds>(aDuration) });
 	}
 }

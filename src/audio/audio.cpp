@@ -19,7 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 
-#include <numeric>
+#include <bit>
 
 #include <neogfx/audio/audio.hpp>
 #include <neogfx/audio/audio_device.hpp>
@@ -99,8 +99,7 @@ namespace neogfx
     }
 
     audio::~audio()
-    {
-    }
+    {}
 
     i_vector<i_audio_device_info> const& audio::available_devices()
     {
@@ -132,20 +131,12 @@ namespace neogfx
     }
 
     void audio::destroy_device(i_audio_device& aDevice)
-    {
-    }
+    {}
 
     void audio::create_audio_sample(i_audio_clip const& aClip, i_ref_ptr<i_audio_sample>& aSample)
     {
-        // todo: multiple channels (audio_sample is mono for now, so downmix)
-
-        auto const channels = aClip.channels();
-        std::vector<float> frames;
-        frames.reserve(static_cast<std::size_t>(aClip.length()));
-        auto source = aClip.cdata();
-        for (audio_frame_index frame = 0ULL; channels != 0u && frame < aClip.length(); ++frame, source += channels)
-            frames.push_back(std::accumulate(source, source + channels, 0.0f) / channels);
-        aSample = make_ref<audio_sample>(aClip.sample_rate(), std::move(frames));
+        auto const samples = static_cast<std::size_t>(aClip.length() * channel_count(aClip.channels()));
+        aSample = make_ref<audio_sample>(aClip.sample_rate(), std::vector<float>(aClip.cdata(), aClip.cdata() + samples), aClip.channels());
     }
 
     i_audio_instrument_atlas& audio::instrument_atlas()
