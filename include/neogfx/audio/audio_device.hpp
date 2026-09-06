@@ -61,7 +61,7 @@ namespace neogfx
 		void stop() final;
 	public:
 		using i_audio_device::play;
-		audio_playback_id play(i_audio_bitstream& aBitstream, audio_frame_index aFrom, std::optional<std::chrono::duration<double>> const& aDuration) final;
+		audio_playback_id play(i_audio_bitstream& aBitstream, audio_frame_index aFrom, std::optional<std::chrono::duration<double>> const& aDuration, float aGain) final;
 		void stop(audio_playback_id aPlayback) final;
 	private:
 		mutable std::recursive_mutex iMutex;
@@ -76,8 +76,11 @@ namespace neogfx
 			std::optional<std::chrono::steady_clock::time_point> expiryTime;
 			// the playback position lives here rather than in the bitstream so that one bitstream can back several sources at once
 			audio_frame_index cursor = 0ULL;
+			float gain = 1.0f;
 		};
 		std::vector<source> iSources;
+		// scratch for sources that are not played at unity gain; only touched by the audio thread
+		std::vector<float> iGainBuffer;
 		audio_playback_id iNextPlaybackId = 1ULL;
 	};
 }

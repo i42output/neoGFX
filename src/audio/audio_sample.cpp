@@ -59,6 +59,7 @@ namespace neogfx
 	{
 		auto const sourceChannels = channel_count(iChannels);
 		auto const outputChannels = channel_count(aChannel);
+		auto const gain = amplitude();
 
 		if (aFrameFrom >= length() || sourceChannels == 0ULL || outputChannels == 0ULL)
 			return;
@@ -77,19 +78,19 @@ namespace neogfx
 			if (sourceChannels == 1ULL)
 			{
 				for (audio_frame_count frame = 0ULL; frame < count; ++frame, output += outputChannels)
-					*output += sourceFrames[frame];
+					*output += sourceFrames[frame] * gain;
 			}
 			else if ((iChannels & channel) != audio_channel::None)
 			{
 				auto source = std::next(sourceFrames, static_cast<std::ptrdiff_t>(channel_index(iChannels, channel)));
 				for (audio_frame_count frame = 0ULL; frame < count; ++frame, output += outputChannels, source += sourceChannels)
-					*output += *source;
+					*output += *source * gain;
 			}
 			else if (channel == audio_channel::Mono)
 			{
 				auto source = sourceFrames;
 				for (audio_frame_count frame = 0ULL; frame < count; ++frame, output += outputChannels, source += sourceChannels)
-					*output += std::accumulate(source, std::next(source, static_cast<std::ptrdiff_t>(sourceChannels)), 0.0f) / static_cast<float>(sourceChannels);
+					*output += std::accumulate(source, std::next(source, static_cast<std::ptrdiff_t>(sourceChannels)), 0.0f) / static_cast<float>(sourceChannels) * gain;
 			}
 		}
 	}

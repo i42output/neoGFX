@@ -47,8 +47,10 @@ namespace neogfx
         // a frame that advances by more than this is treated as a seek rather than as playback
         static constexpr game::sequencer_duration DEFAULT_TOLERANCE = neolib::ecs::chrono::to_flicks(0.25).count();
     public:
-        audio_playback(i_audio_device& aDevice, i_audio_bitstream& aBitstream, game::sequencer_duration aTolerance = DEFAULT_TOLERANCE) :
-            iDevice{ aDevice }, iBitstream{ aBitstream }, iTolerance{ aTolerance }
+        // aGain scales this clip's playback only: the same bitstream can be sequenced at different
+        // volumes on different clips
+        audio_playback(i_audio_device& aDevice, i_audio_bitstream& aBitstream, float aGain = 1.0f, game::sequencer_duration aTolerance = DEFAULT_TOLERANCE) :
+            iDevice{ aDevice }, iBitstream{ aBitstream }, iGain{ aGain }, iTolerance{ aTolerance }
         {
         }
         ~audio_playback()
@@ -85,7 +87,7 @@ namespace neogfx
                 return;
             }
             stop();
-            iPlayback = iDevice.play(iBitstream, from, i_audio_device::duration_of(iBitstream, from));
+            iPlayback = iDevice.play(iBitstream, from, i_audio_device::duration_of(iBitstream, from), iGain);
         }
         void stop()
         {
@@ -98,6 +100,7 @@ namespace neogfx
     private:
         i_audio_device& iDevice;
         i_audio_bitstream& iBitstream;
+        float iGain;
         game::sequencer_duration iTolerance;
         game::sequencer_offset iPosition = 0;
         audio_playback_id iPlayback = 0ULL;

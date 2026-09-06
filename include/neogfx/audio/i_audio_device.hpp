@@ -71,19 +71,28 @@ namespace neogfx
 		virtual void start() = 0;
 		virtual void stop() = 0;
 	public:
-		// a duration of std::nullopt plays until stopped
-		virtual audio_playback_id play(i_audio_bitstream& aBitstream, audio_frame_index aFrom, std::optional<std::chrono::duration<double>> const& aDuration) = 0;
+		// a duration of std::nullopt plays until stopped; aGain scales this playback only, leaving
+		// the bitstream's own amplitude alone, so one bitstream can play at several volumes at once
+		virtual audio_playback_id play(i_audio_bitstream& aBitstream, audio_frame_index aFrom, std::optional<std::chrono::duration<double>> const& aDuration, float aGain) = 0;
 		virtual void stop(audio_playback_id aPlayback) = 0;
 	public:
+		audio_playback_id play(i_audio_bitstream& aBitstream, audio_frame_index aFrom, std::optional<std::chrono::duration<double>> const& aDuration)
+		{
+			return play(aBitstream, aFrom, aDuration, 1.0f);
+		}
 		audio_playback_id play(i_audio_bitstream& aBitstream, std::chrono::duration<double> const& aDuration)
 		{
-			return play(aBitstream, 0ULL, aDuration);
+			return play(aBitstream, 0ULL, aDuration, 1.0f);
 		}
 		// plays the whole of aBitstream from the beginning; a bitstream with no length of its own,
 		// such as a waveform, plays until it is stopped
 		audio_playback_id play(i_audio_bitstream& aBitstream)
 		{
-			return play(aBitstream, 0ULL, duration_of(aBitstream));
+			return play(aBitstream, 0ULL, duration_of(aBitstream), 1.0f);
+		}
+		audio_playback_id play(i_audio_bitstream& aBitstream, float aGain)
+		{
+			return play(aBitstream, 0ULL, duration_of(aBitstream), aGain);
 		}
 	public:
 		static std::optional<std::chrono::duration<double>> duration_of(i_audio_bitstream const& aBitstream, audio_frame_index aFrom = 0ULL)
