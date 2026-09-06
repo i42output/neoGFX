@@ -39,8 +39,8 @@ namespace neogfx
         time_point rest(std::chrono::duration<double> const& aDuration) final;
     public:
         audio_frame_count length() const final;
-        void generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames) final;
-        void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames) final;
+        void generate(audio_channel aChannel, audio_frame_count aFrameCount, float aGain, float* aOutputFrames) final;
+        void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float aGain, float* aOutputFrames) final;
     private:
         neogfx::instrument iInstrument;
         time_point iInputCursor = 0ULL;

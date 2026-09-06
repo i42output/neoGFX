@@ -39,8 +39,8 @@ namespace neogfx
         void set_function(std::function<float(float)> const& aFunction) final; ///< Note: not plugin-safe.
     public:
         audio_frame_count length() const final;
-        void generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames) final;
-        void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames) final;
+        void generate(audio_channel aChannel, audio_frame_count aFrameCount, float aGain, float* aOutputFrames) final;
+        void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float aGain, float* aOutputFrames) final;
     private:
         float iFrequency;
         oscillator_function iFunction;

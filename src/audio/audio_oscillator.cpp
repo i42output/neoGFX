@@ -72,13 +72,13 @@ namespace neogfx
         return sample_rate();
     }
 
-    void audio_oscillator::generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames)
+    void audio_oscillator::generate(audio_channel aChannel, audio_frame_count aFrameCount, float aGain, float* aOutputFrames)
     {
-        generate_from(aChannel, iCursor, aFrameCount, aOutputFrames);
+        generate_from(aChannel, iCursor, aFrameCount, aGain, aOutputFrames);
         iCursor += static_cast<audio_sample_count>(aFrameCount);
     }
 
-    void audio_oscillator::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
+    void audio_oscillator::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float aGain, float* aOutputFrames)
     {
         auto const outputChannels = channel_count(aChannel);
 
@@ -91,7 +91,7 @@ namespace neogfx
             for (auto cursor = static_cast<audio_sample_index>(aFrameFrom); cursor < aFrameFrom + static_cast<audio_sample_count>(aFrameCount); ++cursor)
             {
                 auto x = static_cast<float>(cursor) / sample_rate() * math::two_pi<float>() * frequency();
-                auto const value = std::sin(x) * amplitude();
+                auto const value = std::sin(x) * amplitude() * aGain;
                 for (std::uint64_t channel = 0ULL; channel < outputChannels; ++channel)
                     *(aOutputFrames++) += value;
             }

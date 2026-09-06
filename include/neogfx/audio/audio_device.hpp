@@ -79,8 +79,6 @@ namespace neogfx
 			float gain = 1.0f;
 		};
 		std::vector<source> iSources;
-		// scratch for sources that are not played at unity gain; only touched by the audio thread
-		std::vector<float> iGainBuffer;
 		audio_playback_id iNextPlaybackId = 1ULL;
 	};
 }

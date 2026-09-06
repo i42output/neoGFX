@@ -49,17 +49,17 @@ namespace neogfx
 		return channels != 0ULL ? iPcmFrames.size() / channels : 0ULL;
 	}
 
-	void audio_sample::generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames)
+	void audio_sample::generate(audio_channel aChannel, audio_frame_count aFrameCount, float aGain, float* aOutputFrames)
 	{
-		generate_from(aChannel, iCursor, aFrameCount, aOutputFrames);
+		generate_from(aChannel, iCursor, aFrameCount, aGain, aOutputFrames);
 		iCursor = std::min(iCursor + aFrameCount, length());
 	}
 
-	void audio_sample::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
+	void audio_sample::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float aGain, float* aOutputFrames)
 	{
 		auto const sourceChannels = channel_count(iChannels);
 		auto const outputChannels = channel_count(aChannel);
-		auto const gain = amplitude();
+		auto const gain = amplitude() * aGain;
 
 		if (aFrameFrom >= length() || sourceChannels == 0ULL || outputChannels == 0ULL)
 			return;

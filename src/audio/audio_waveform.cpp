@@ -80,38 +80,39 @@ namespace neogfx
         return 0ULL;
     }
 
-    void audio_waveform::generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames)
+    void audio_waveform::generate(audio_channel aChannel, audio_frame_count aFrameCount, float aGain, float* aOutputFrames)
     {
         for (auto const& o : iOscillators)
         {
             thread_local std::vector<float> componentResult;
             componentResult.assign(static_cast<std::size_t>(aFrameCount), 0.0f);
 
-            o->generate(audio_channel::Mono, aFrameCount, componentResult.data());
+            // the components are summed at unity and this waveform's own gain applied to the sum below
+            o->generate(audio_channel::Mono, aFrameCount, 1.0f, componentResult.data());
 
             auto outputSample = aOutputFrames;
             for (auto sampleComponent : componentResult)
             {
                 for (int channel = 0; channel < channel_count(aChannel); ++channel)
-                    *(outputSample++) += (sampleComponent * amplitude());
+                    *(outputSample++) += (sampleComponent * amplitude() * aGain);
             }
         }
     }
         
-    void audio_waveform::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
+    void audio_waveform::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float aGain, float* aOutputFrames)
     {
         for (auto const& o : iOscillators)
         {
             thread_local std::vector<float> componentResult;
             componentResult.assign(static_cast<std::size_t>(aFrameCount), 0.0f);
 
-            o->generate_from(audio_channel::Mono, aFrameFrom, aFrameCount, componentResult.data());
+            o->generate_from(audio_channel::Mono, aFrameFrom, aFrameCount, 1.0f, componentResult.data());
 
             auto outputSample = aOutputFrames;
             for (auto sampleComponent : componentResult)
             {
                 for (int channel = 0; channel < channel_count(aChannel); ++channel)
-                    *(outputSample++) += (sampleComponent * amplitude());
+                    *(outputSample++) += (sampleComponent * amplitude() * aGain);
             }
         }
     }

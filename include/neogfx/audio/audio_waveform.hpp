@@ -44,8 +44,8 @@ namespace neogfx
         void remove_oscillator(i_audio_oscillator const& aOscillator) final;
     public:
         audio_frame_count length() const final;
-        void generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames) final;
-        void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames) final;
+        void generate(audio_channel aChannel, audio_frame_count aFrameCount, float aGain, float* aOutputFrames) final;
+        void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float aGain, float* aOutputFrames) final;
     private:
         std::vector<ref_ptr<i_audio_oscillator>> iOscillators;
     };

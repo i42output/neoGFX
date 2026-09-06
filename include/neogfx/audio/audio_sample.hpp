@@ -33,8 +33,8 @@ namespace neogfx
 	public:
 		audio_channel channels() const;
 		audio_frame_count length() const override;
-		void generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames) override;
-		void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames) override;
+		void generate(audio_channel aChannel, audio_frame_count aFrameCount, float aGain, float* aOutputFrames) override;
+		void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float aGain, float* aOutputFrames) override;
 	private:
 		std::vector<float> iPcmFrames;
 		audio_channel iChannels;

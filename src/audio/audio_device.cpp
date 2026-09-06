@@ -136,19 +136,7 @@ namespace neogfx
 					// a source without an expiry time plays until it is stopped
 					if (source.expiryTime != std::nullopt && *source.expiryTime <= now)
 						continue;
-					if (source.gain == 1.0f)
-						source.bitstream->generate_from(channels, source.cursor, frameCount, output);
-					else
-					{
-						// generated separately so that this source's gain does not scale what is already mixed
-						auto const samples = static_cast<std::size_t>(frameCount * channel_count(channels));
-						if (device.iGainBuffer.size() < samples)
-							device.iGainBuffer.resize(samples);
-						std::fill_n(device.iGainBuffer.begin(), samples, 0.0f);
-						source.bitstream->generate_from(channels, source.cursor, frameCount, device.iGainBuffer.data());
-						for (std::size_t sample = 0u; sample != samples; ++sample)
-							output[sample] += device.iGainBuffer[sample] * source.gain;
-					}
+					source.bitstream->generate_from(channels, source.cursor, frameCount, source.gain, output);
 					source.cursor += frameCount;
 				}
 			};

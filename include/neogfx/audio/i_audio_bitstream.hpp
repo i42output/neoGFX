@@ -46,11 +46,12 @@ namespace neogfx
     public:
         virtual audio_frame_count length() const = 0;
         /// @brief Add aFrameCount frames, starting at this bitstream's own cursor, to aOutputFrames; the cursor is advanced by aFrameCount.
-        virtual void generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames) = 0;
+        virtual void generate(audio_channel aChannel, audio_frame_count aFrameCount, float aGain, float* aOutputFrames) = 0;
         /// @brief Add aFrameCount frames, starting at aFrameFrom, to aOutputFrames, which holds aFrameCount frames of channel_count(aChannel)
         ///        interleaved samples and must be silenced by the caller first. Frames are added, not assigned, so that several bitstreams can
         ///        be mixed into the same buffer; no internal cursor is modified, so the same bitstream can be played more than once at a time,
-        ///        each playback keeping its own cursor.
-        virtual void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames) = 0;
+        ///        each playback keeping its own cursor. aGain scales this call's contribution only, on top of the bitstream's own
+        ///        amplitude, so that one bitstream can be mixed into the same buffer at several volumes at once.
+        virtual void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float aGain, float* aOutputFrames) = 0;
     };
 }

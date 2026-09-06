@@ -69,13 +69,13 @@ namespace neogfx
             return 0ULL;
     }
 
-    void audio_instrument::generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames)
+    void audio_instrument::generate(audio_channel aChannel, audio_frame_count aFrameCount, float aGain, float* aOutputFrames)
     {
-        generate_from(aChannel, iOutputCursor, aFrameCount, aOutputFrames);
+        generate_from(aChannel, iOutputCursor, aFrameCount, aGain, aOutputFrames);
         iOutputCursor += aFrameCount;
     }
 
-    void audio_instrument::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
+    void audio_instrument::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float aGain, float* aOutputFrames)
     {
         for (auto next = iComposition.begin(); next != iComposition.end(); ++next)
         {
@@ -88,11 +88,11 @@ namespace neogfx
             buffer.assign(static_cast<std::size_t>(count), 0.0f);
             if (next->note)
                 service<i_audio>().instrument_atlas().instrument(iInstrument, sample_rate(), next->note.value()).generate_from(
-                    audio_channel::Mono, pos, count, buffer.data());
+                    audio_channel::Mono, pos, count, 1.0f, buffer.data());
             auto output = aOutputFrames;
             for (auto const& sample : buffer)
                 for (int channel = 0; channel < channel_count(aChannel); ++channel)
-                    (*output++) += (sample * next->amplitude.value() * apply_envelope(pos + &sample - &buffer[0], next->duration));
+                    (*output++) += (sample * next->amplitude.value() * aGain * apply_envelope(pos + &sample - &buffer[0], next->duration));
         }
     }
 }
