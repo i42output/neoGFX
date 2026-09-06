@@ -27,126 +27,126 @@ namespace neogfx
 {
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(alignment aAlignment) :
-        base_type{}, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
+        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(string const& aText, alignment aAlignment) :
-        base_type{}, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
+        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
     {
         init();
     }
     
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(const i_texture& aTexture, alignment aAlignment) :
-        base_type{}, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
+        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(const i_image& aImage, alignment aAlignment) :
-        base_type{}, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
+        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(string const& aText, const i_texture& aTexture, alignment aAlignment) :
-        base_type{}, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
+        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(string const& aText, const i_image& aImage, alignment aAlignment) :
-        base_type{}, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
+        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_widget& aParent, alignment aAlignment) :
-        base_type{ aParent }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
+        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_widget& aParent, string const& aText, alignment aAlignment) :
-        base_type{ aParent }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
+        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_widget& aParent, const i_texture& aTexture, alignment aAlignment) :
-        base_type{ aParent }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
+        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_widget& aParent, const i_image& aImage, alignment aAlignment) :
-        base_type{ aParent }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
+        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_widget& aParent, string const& aText, const i_texture& aTexture, alignment aAlignment) :
-        base_type{ aParent }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
+        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_widget& aParent, string const& aText, const i_image& aImage, alignment aAlignment) :
-        base_type{ aParent }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
+        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_layout& aLayout, alignment aAlignment) :
-        base_type{ aLayout }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
+        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_layout& aLayout, string const& aText, alignment aAlignment) :
-        base_type{ aLayout }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
+        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_layout& aLayout, const i_texture& aTexture, alignment aAlignment) :
-        base_type{ aLayout }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
+        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_layout& aLayout, const i_image& aImage, alignment aAlignment) :
-        base_type{ aLayout }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
+        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_layout& aLayout, string const& aText, const i_texture& aTexture, alignment aAlignment) :
-        base_type{ aLayout }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
+        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_layout& aLayout, string const& aText, const i_image& aImage, alignment aAlignment) :
-        base_type{ aLayout }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
+        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
     {
         init();
     }
@@ -199,7 +199,7 @@ namespace neogfx
     template <typename ButtonInterface>
     inline bool button<ButtonInterface>::is_pressed() const
     {
-        return iPressed;
+        return iPressed.has_value();
     }
 
     template <typename ButtonInterface>
@@ -353,7 +353,7 @@ namespace neogfx
         if (aButton == mouse_button::Left)
         {
             as_widget().update();
-            iPressed = true;
+            iPressed = why_pressed::SingleClick;
             Pressed();
         }
     }
@@ -365,7 +365,8 @@ namespace neogfx
         if (aButton == mouse_button::Left)
         {
             as_widget().update();
-            DoubleClicked();
+            iPressed = why_pressed::DoubleClick;
+            Pressed();
         }
     }
 
@@ -380,9 +381,23 @@ namespace neogfx
             if (wasCapturing)
             {
                 destroyed_flag destroyed{ *this };
-                iPressed = false;
-                if (as_widget().client_rect().contains(aPosition))
-                    handle_clicked();
+                if (iPressed)
+                {
+                    auto const why = *iPressed;
+                    iPressed = std::nullopt;
+                    if (as_widget().client_rect().contains(aPosition))
+                    {
+                        switch (why)
+                        {
+                        case why_pressed::SingleClick:
+                            handle_clicked();
+                            break;
+                        case why_pressed::DoubleClick:
+                            handle_double_clicked();
+                            break;
+                        }
+                    }
+                }
                 if (!destroyed)
                     Released();
             }
@@ -411,6 +426,15 @@ namespace neogfx
         destroyed_flag destroyed{ *this };
         Clicked();
         if (!destroyed && iCheckable != button_checkable::NotCheckable)
+            toggle();
+    }
+
+    template <typename ButtonInterface>
+    inline void button<ButtonInterface>::handle_double_clicked()
+    {
+        destroyed_flag destroyed{ *this };
+        DoubleClicked();
+        if (!destroyed && iCheckable == button_checkable::BiState)
             toggle();
     }
 

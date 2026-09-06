@@ -116,6 +116,7 @@ namespace neogfx
         // button
     protected:
         virtual void handle_clicked();
+        virtual void handle_double_clicked();
     protected:
         virtual bool can_toggle() const;
         virtual const std::optional<bool>& checked_state() const;
@@ -128,7 +129,12 @@ namespace neogfx
         void init();
     private:
         sink iSink;
-        bool iPressed;
+        enum class why_pressed
+        {
+            SingleClick,
+            DoubleClick
+        };
+        std::optional<why_pressed> iPressed;
         button_checkable iCheckable;
         button_checked_state iCheckedState;
         horizontal_layout iLayout;
