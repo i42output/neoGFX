@@ -199,6 +199,7 @@ namespace neogfx
         public:
             sequencer_track_id create_track(sequencer_sequence_id aSequence) final;
             void delete_track(sequencer_track_id aTrack) final;
+            void remove_all(sequencer_sequence_id aSequence) final;
             sequencer_sequence_id track_sequence(sequencer_track_id aTrack) const final;
         public:
             std::size_t sequence_count() const final;
@@ -212,6 +213,7 @@ namespace neogfx
             sequencer_clip_id add_clip(i_ref_ptr<i_sequencer_clip> const& aClip, sequencer_track_id aTrack, sequencer_position aStart, sequencer_duration aDuration) final;
             void delete_clip(sequencer_clip_id aClipId) final;
             void clear_track(sequencer_track_id aTrack) final;
+            void clear_all(sequencer_sequence_id aSequence) final;
         public:
             void update() final;
         public:

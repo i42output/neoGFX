@@ -184,6 +184,8 @@ namespace neogfx
         public:
             virtual sequencer_track_id create_track(sequencer_sequence_id aSequence) = 0;
             virtual void delete_track(sequencer_track_id aTrack) = 0;
+            // deletes every track belonging to aSequence, and their clips with them
+            virtual void remove_all(sequencer_sequence_id aSequence) = 0;
             virtual sequencer_sequence_id track_sequence(sequencer_track_id aTrack) const = 0;
         public:
             // indices address a snapshot taken during the call; an index is only good
@@ -199,6 +201,8 @@ namespace neogfx
             virtual sequencer_clip_id add_clip(i_ref_ptr<i_sequencer_clip> const& aClip, sequencer_track_id aTrack, sequencer_position aStart, sequencer_duration aDuration) = 0;
             virtual void delete_clip(sequencer_clip_id aClipId) = 0;
             virtual void clear_track(sequencer_track_id aTrack) = 0;
+            // empties every track belonging to aSequence, leaving the tracks themselves in place
+            virtual void clear_all(sequencer_sequence_id aSequence) = 0;
         public:
             // must be pumped by exactly one thread, once per frame, before anything reads
             // a clip position; advances every sequence

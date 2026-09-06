@@ -130,6 +130,29 @@ namespace neogfx
                 });
         }
 
+        void sequencer::remove_all(sequencer_sequence_id aSequence)
+        {
+            neolib::rcu_update(iTimeline, [aSequence](timeline& aTimeline)
+                {
+                    // the clip index goes first, while the tracks it resolves against are still there
+                    auto const clipCount = aTimeline.clips.size();
+                    aTimeline.clips.erase(std::remove_if(aTimeline.clips.begin(), aTimeline.clips.end(),
+                        [&aTimeline, aSequence](clip_locator const& aLocator)
+                        {
+                            auto const trackIndex = find_track(aTimeline, aLocator.track);
+                            return trackIndex != npos && aTimeline.tracks[trackIndex].sequence == aSequence;
+                        }), aTimeline.clips.end());
+                    auto const trackCount = aTimeline.tracks.size();
+                    aTimeline.tracks.erase(std::remove_if(aTimeline.tracks.begin(), aTimeline.tracks.end(),
+                        [aSequence](track_entry const& aEntry) { return aEntry.sequence == aSequence; }), aTimeline.tracks.end());
+                    // nothing belonged to the sequence: bumping the generation would cost the
+                    // update thread a full resync for no change at all
+                    if (aTimeline.tracks.size() == trackCount && aTimeline.clips.size() == clipCount)
+                        return;
+                    ++aTimeline.generation;
+                });
+        }
+
         sequencer_sequence_id sequencer::track_sequence(sequencer_track_id aTrack) const
         {
             auto const currentTimeline = iTimeline.load(std::memory_order_acquire);
@@ -260,6 +283,32 @@ namespace neogfx
                     theTrack.clips = std::make_shared<track_clips const>();
                     aTimeline.clips.erase(std::remove_if(aTimeline.clips.begin(), aTimeline.clips.end(),
                         [aTrack](clip_locator const& aLocator) { return aLocator.track == aTrack; }), aTimeline.clips.end());
+                    ++aTimeline.generation;
+                });
+        }
+
+        void sequencer::clear_all(sequencer_sequence_id aSequence)
+        {
+            neolib::rcu_update(iTimeline, [aSequence](timeline& aTimeline)
+                {
+                    bool cleared = false;
+                    for (auto& theTrack : aTimeline.tracks)
+                    {
+                        // as clear_track, one track at a time: an empty track is left alone so that
+                        // its storage stays shared with the previous snapshot
+                        if (theTrack.sequence != aSequence || theTrack.clips->empty())
+                            continue;
+                        theTrack.clips = std::make_shared<track_clips const>();
+                        cleared = true;
+                    }
+                    if (!cleared)
+                        return;
+                    aTimeline.clips.erase(std::remove_if(aTimeline.clips.begin(), aTimeline.clips.end(),
+                        [&aTimeline, aSequence](clip_locator const& aLocator)
+                        {
+                            auto const trackIndex = find_track(aTimeline, aLocator.track);
+                            return trackIndex != npos && aTimeline.tracks[trackIndex].sequence == aSequence;
+                        }), aTimeline.clips.end());
                     ++aTimeline.generation;
                 });
         }
@@ -417,6 +466,13 @@ namespace neogfx
                     thePlayback.cursor = find_cursor(*currentTimeline->tracks[index].clips, sequencePosition);
                     thePlayback.active = {};
                     thePlayback.seenSeekGeneration = theTransport.seekGeneration;
+                }
+                // a sequence that is not playing does not advance its clips: a stopped or paused
+                // playhead parked inside a clip must not keep offering it to the clip as a position
+                if (theTransport.state != transport_state::Playing)
+                {
+                    thePlayback.active = {};
+                    continue;
                 }
                 update_track(*currentTimeline->tracks[index].clips, thePlayback, sequencePosition);
             }
