@@ -2,17 +2,17 @@
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
-
+  
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-
+  
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-
+  
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -40,12 +40,17 @@ namespace neogfx
         virtual float amplitude() const = 0;
         virtual void set_amplitude(float aAmplitude) = 0;
         virtual bool has_envelope() const = 0;
-        virtual adsr_envelope const& envelope() const = 0;
+        virtual adsr_envelope const& envelope() const = 0;  
         virtual void clear_envelope() = 0;
         virtual void set_envelope(adsr_envelope const& aEnvelope) = 0;
     public:
         virtual audio_frame_count length() const = 0;
+        /// @brief Add aFrameCount frames, starting at this bitstream's own cursor, to aOutputFrames; the cursor is advanced by aFrameCount.
         virtual void generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames) = 0;
+        /// @brief Add aFrameCount frames, starting at aFrameFrom, to aOutputFrames, which holds aFrameCount frames of channel_count(aChannel)
+        ///        interleaved samples and must be silenced by the caller first. Frames are added, not assigned, so that several bitstreams can
+        ///        be mixed into the same buffer; no internal cursor is modified, so the same bitstream can be played more than once at a time,
+        ///        each playback keeping its own cursor.
         virtual void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames) = 0;
     };
 }

@@ -27,7 +27,7 @@
 namespace neogfx
 {
     audio_oscillator::audio_oscillator(audio_sample_rate aSampleRate, float aFrequency, float aAmplitude, oscillator_function aFunction) :
-        audio_bitstream{ aSampleRate, aAmplitude }, iFrequency{ aFrequency }, iFunction{ aFunction }
+        audio_bitstream{ aSampleRate, aAmplitude}, iFrequency{ aFrequency }, iFunction{ aFunction }
     {
     }
 

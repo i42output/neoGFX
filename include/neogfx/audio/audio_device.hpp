@@ -2,17 +2,17 @@
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
-
+  
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-
+  
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-
+  
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -60,8 +60,9 @@ namespace neogfx
 		void start() final;
 		void stop() final;
 	public:
-		void play(i_audio_bitstream& aBitstream) final;
-		void play(i_audio_bitstream& aBitstream, std::chrono::duration<double> const& aDuration) final;
+		using i_audio_device::play;
+		audio_playback_id play(i_audio_bitstream& aBitstream, audio_frame_index aFrom, std::optional<std::chrono::duration<double>> const& aDuration) final;
+		void stop(audio_playback_id aPlayback) final;
 	private:
 		mutable std::recursive_mutex iMutex;
 		audio_device_info iInfo;
@@ -70,10 +71,13 @@ namespace neogfx
 		audio_device_handle iHandle;
 		struct source
 		{
+			audio_playback_id id;
 			ref_ptr<i_audio_bitstream> bitstream; // todo: should be i_audio_bitstream
 			std::optional<std::chrono::steady_clock::time_point> expiryTime;
+			// the playback position lives here rather than in the bitstream so that one bitstream can back several sources at once
 			audio_frame_index cursor = 0ULL;
 		};
 		std::vector<source> iSources;
+		audio_playback_id iNextPlaybackId = 1ULL;
 	};
 }

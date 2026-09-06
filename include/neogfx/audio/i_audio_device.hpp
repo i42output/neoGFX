@@ -22,8 +22,10 @@
 #include <neogfx/neogfx.hpp>
 
 #include <chrono>
+#include <optional>
 
 #include <neogfx/audio/audio_primitives.hpp>
+#include <neogfx/audio/i_audio_bitstream.hpp>
 
 namespace neogfx
 {
@@ -69,7 +71,27 @@ namespace neogfx
 		virtual void start() = 0;
 		virtual void stop() = 0;
 	public:
-		virtual void play(i_audio_bitstream& aBitstream) = 0;
-		virtual void play(i_audio_bitstream& aBitstream, std::chrono::duration<double> const& aDuration) = 0;
+		// a duration of std::nullopt plays until stopped
+		virtual audio_playback_id play(i_audio_bitstream& aBitstream, audio_frame_index aFrom, std::optional<std::chrono::duration<double>> const& aDuration) = 0;
+		virtual void stop(audio_playback_id aPlayback) = 0;
+	public:
+		audio_playback_id play(i_audio_bitstream& aBitstream, std::chrono::duration<double> const& aDuration)
+		{
+			return play(aBitstream, 0ULL, aDuration);
+		}
+		// plays the whole of aBitstream from the beginning; a bitstream with no length of its own,
+		// such as a waveform, plays until it is stopped
+		audio_playback_id play(i_audio_bitstream& aBitstream)
+		{
+			return play(aBitstream, 0ULL, duration_of(aBitstream));
+		}
+	public:
+		static std::optional<std::chrono::duration<double>> duration_of(i_audio_bitstream const& aBitstream, audio_frame_index aFrom = 0ULL)
+		{
+			if (aBitstream.length() == 0ULL || aBitstream.sample_rate() == 0ULL || aFrom >= aBitstream.length())
+				return {};
+			return std::chrono::duration<double>{
+				static_cast<double>(aBitstream.length() - aFrom) / static_cast<double>(aBitstream.sample_rate()) };
+		}
 	};
 }

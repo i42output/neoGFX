@@ -1000,6 +1000,9 @@ namespace neogfx
     typedef std::uint64_t audio_frame_index;
     typedef std::uint64_t audio_frame_count;
 
+    // identifies one playback of a bitstream on a device; zero is never issued and means "no playback"
+    typedef std::uint64_t audio_playback_id;
+
     template <typename SampleType, std::size_t Channels>
     using audio_frame = std::array<SampleType, Channels>;
 

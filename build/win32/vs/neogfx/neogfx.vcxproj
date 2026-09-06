@@ -246,6 +246,7 @@
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_instrument.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_instrument_atlas.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_oscillator.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_playback.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_primitives.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_sample.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_waveform.hpp" />

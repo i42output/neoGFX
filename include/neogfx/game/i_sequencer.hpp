@@ -30,6 +30,7 @@
 #include <neolib/core/i_jar.hpp>
 #include <neolib/core/reference_counted.hpp>
 
+#include <neogfx/game/chrono.hpp>
 #include <neogfx/game/i_ecs.hpp>
 
 namespace neogfx
@@ -53,6 +54,22 @@ namespace neogfx
         using sequencer_position = i64;
         using sequencer_offset = i64;
         using sequencer_duration = i64;
+
+        // one tock is one flick; these are the conversions between a tock count and seconds
+        inline sequencer_position to_position(time_interval const& aTime)
+        {
+            return chrono::to_flicks(aTime.count()).count();
+        }
+
+        inline sequencer_duration to_duration(time_interval const& aTime)
+        {
+            return chrono::to_flicks(aTime.count()).count();
+        }
+
+        inline time_interval to_time_interval(sequencer_position aPosition)
+        {
+            return time_interval{ chrono::to_seconds(chrono::flicks{ aPosition }) };
+        }
 
         class i_sequencer_clip : public neolib::i_reference_counted
         {
@@ -86,6 +103,13 @@ namespace neogfx
         concept SequencerClipPayload = requires (Payload & aPayload, sequencer_offset aPosition)
         {
             { aPayload.advance(aPosition) };
+        };
+
+        // a payload that knows how long it lasts, so that a clip need not be given a duration
+        template <typename Payload>
+        concept SequencerClipPayloadWithDuration = SequencerClipPayload<Payload> && requires (Payload const& aPayload)
+        {
+            { aPayload.duration() } -> std::convertible_to<time_interval>;
         };
 
         template <SequencerClipPayload Payload>
@@ -183,6 +207,12 @@ namespace neogfx
             virtual bool is_playing(sequencer_sequence_id aSequence) const = 0;
             virtual sequencer_position position(sequencer_sequence_id aSequence) const = 0;
         public:
+            // as position, in seconds rather than tocks; pairs with the time_interval overloads of emplace_clip
+            time_interval position_s(sequencer_sequence_id aSequence) const
+            {
+                return to_time_interval(position(aSequence));
+            }
+        public:
             virtual void play(sequencer_sequence_id aSequence) = 0;
             virtual void pause(sequencer_sequence_id aSequence) = 0;
             virtual void rewind(sequencer_sequence_id aSequence) = 0;
@@ -204,6 +234,27 @@ namespace neogfx
             {
                 return add_clip(make_sequencer_clip<Payload>(std::forward<Args>(aArgs)...), aTrack, aStart, aDuration);
             }
+            // as above, in seconds rather than tocks
+            template <typename Payload = null_sequencer_clip_payload, typename... Args >
+            sequencer_clip_id emplace_clip(sequencer_track_id aTrack, time_interval const& aStart, time_interval const& aDuration, Args&&... aArgs)
+            {
+                return emplace_clip<Payload>(aTrack, to_position(aStart), to_duration(aDuration), std::forward<Args>(aArgs)...);
+            }
+            // no duration: the clip lasts as long as its payload says it does
+            template <SequencerClipPayloadWithDuration Payload, typename... Args >
+                requires std::constructible_from<Payload, Args...>
+            sequencer_clip_id emplace_clip(sequencer_track_id aTrack, sequencer_position aStart, Args&&... aArgs)
+            {
+                auto clip = make_sequencer_clip<Payload>(std::forward<Args>(aArgs)...);
+                auto const duration = to_duration(clip->template payload<Payload>().duration());
+                return add_clip(clip, aTrack, aStart, duration);
+            }
+            template <SequencerClipPayloadWithDuration Payload, typename... Args >
+                requires std::constructible_from<Payload, Args...>
+            sequencer_clip_id emplace_clip(sequencer_track_id aTrack, time_interval const& aStart, Args&&... aArgs)
+            {
+                return emplace_clip<Payload>(aTrack, to_position(aStart), std::forward<Args>(aArgs)...);
+            }
         public:
             sequencer_track_id create_track()
             {
@@ -216,6 +267,10 @@ namespace neogfx
             sequencer_position position() const
             {
                 return position(default_sequence());
+            }
+            time_interval position_s() const
+            {
+                return position_s(default_sequence());
             }
             void play()
             {

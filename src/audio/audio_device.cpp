@@ -136,7 +136,6 @@ namespace neogfx
 					// a source without an expiry time plays until it is stopped
 					if (source.expiryTime != std::nullopt && *source.expiryTime <= now)
 						continue;
-					// the cursor lives here rather than in the bitstream so that the same bitstream can back several sources at once
 					source.bitstream->generate_from(channels, source.cursor, frameCount, output);
 					source.cursor += frameCount;
 				}
@@ -184,20 +183,26 @@ namespace neogfx
 		iSources.clear();
 	}
 
-	void audio_device::play(i_audio_bitstream& aBitstream)
-	{
-		auto const duration = std::chrono::duration<double>{ static_cast<double>(aBitstream.length()) / aBitstream.sample_rate() };
-		play(aBitstream, duration);
-	}
-
-	void audio_device::play(i_audio_bitstream& aBitstream, std::chrono::duration<double> const& aDuration)
+	audio_playback_id audio_device::play(i_audio_bitstream& aBitstream, audio_frame_index aFrom, std::optional<std::chrono::duration<double>> const& aDuration)
 	{
 		auto const now = std::chrono::steady_clock::now();
 		std::unique_lock lock{ iMutex };
 		// expired sources are removed here rather than in the audio callback so that nothing is destroyed on the audio thread
 		std::erase_if(iSources, [&](auto const& aSource) { return aSource.expiryTime != std::nullopt && *aSource.expiryTime <= now; });
+		auto const playback = iNextPlaybackId++;
 		iSources.push_back(source{
-			ref_ptr<i_audio_bitstream>{ ref_ptr<i_audio_bitstream>{}, &aBitstream },
-			now + std::chrono::duration_cast<std::chrono::milliseconds>(aDuration) });
+			playback,
+			ref_ptr<i_audio_bitstream>{ ref_ptr<i_audio_bitstream>{},& aBitstream },
+			aDuration != std::nullopt ?
+				std::optional<std::chrono::steady_clock::time_point>{ now + std::chrono::duration_cast<std::chrono::milliseconds>(*aDuration) } :
+				std::optional<std::chrono::steady_clock::time_point>{},
+			aFrom });
+		return playback;
+	}
+
+	void audio_device::stop(audio_playback_id aPlayback)
+	{
+		std::unique_lock lock{ iMutex };
+		std::erase_if(iSources, [aPlayback](auto const& aSource) { return aSource.id == aPlayback; });
 	}
 }
