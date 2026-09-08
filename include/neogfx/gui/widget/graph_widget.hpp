@@ -20,6 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neogfx/game/mesh.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/widget.ipp>
 #include <neogfx/gui/widget/i_graph_widget.hpp>
@@ -359,8 +360,11 @@ namespace neogfx
         void render(i_graph_widget<x_abstract_type, y_abstract_type, traits_type> const& aWidget, i_graphics_context& aGc) const override
         {
             render_plot(aWidget, aGc);
-            render_x_axis(aWidget, aGc);
-            render_y_axis(aWidget, aGc);
+            if ((aWidget.flags() & graph_widget_flags::NoAxes) == graph_widget_flags::None)
+            {
+                render_x_axis(aWidget, aGc);
+                render_y_axis(aWidget, aGc);
+            }
         }
         void render_plot(i_graph_widget<x_abstract_type, y_abstract_type, traits_type> const& aWidget, i_graphics_context& aGc) const override
         {
@@ -370,15 +374,195 @@ namespace neogfx
         }
         void render_series(i_graph_widget<x_abstract_type, y_abstract_type, traits_type> const& aWidget, i_graphics_context& aGc, i_series const& aSeries) const override
         {
-            // todo
+            if (aSeries.no_data())
+                return;
+
+            auto const plotArea = plot_area(aWidget, aGc);
+            if (plotArea.cx <= 0.0 || plotArea.cy <= 0.0)
+                return;
+
+            auto const& appearance = aWidget.default_series_appearance();
+            auto const linePen = appearance.pen().has_value() ?
+                appearance.pen().value() :
+                pen{ aWidget.palette_color(color_role::Text), 1.0_dip };
+
+            auto const transform = transform_to_px(aWidget, plotArea);
+            auto const xOrigin = x_view_min(aWidget);
+            auto const yOrigin = y_view_min(aWidget);
+
+            auto const& data = aSeries.data();
+
+            thread_local std::vector<point> tPoints;
+            auto& points = tPoints;
+            points.clear();
+            points.reserve(data.size());
+            for (std::size_t i = 0; i < data.size(); ++i)
+            {
+                auto const& d = data[i];
+                auto p = to_px(plotArea, transform, x_delta(d, xOrigin), y_delta(d, yOrigin));
+                if constexpr (!std::is_arithmetic_v<x_type>)
+                    p.x = ordinal_x_px(plotArea, i, data.size());
+                points.push_back(p);
+            }
+
+            if (points.size() < 2)
+                return;
+
+            scoped_scissor scissor{ aGc, plotArea };
+
+            if (appearance.fill().has_value())
+            {
+                auto const baseline = plotArea.bottom();
+                thread_local game::mesh tFillMesh;
+                auto& fillMesh = tFillMesh;
+                fillMesh.vertices.clear();
+                fillMesh.uv.clear();
+                fillMesh.faces.clear();
+                fillMesh.vertices.reserve(points.size() * 2u);
+                fillMesh.uv.reserve(points.size() * 2u);
+                fillMesh.faces.reserve((points.size() - 1u) * 2u);
+                for (auto const& p : points)
+                {
+                    fillMesh.vertices.push_back(vec3f{ static_cast<float>(p.x), static_cast<float>(p.y), 0.0f });
+                    fillMesh.vertices.push_back(vec3f{ static_cast<float>(p.x), static_cast<float>(baseline), 0.0f });
+                    fillMesh.uv.push_back(vec2f{});
+                    fillMesh.uv.push_back(vec2f{});
+                }
+                for (std::uint32_t v = 0u; v + 3u < static_cast<std::uint32_t>(fillMesh.vertices.size()); v += 2u)
+                {
+                    fillMesh.faces.push_back(game::face{ v, v + 1u, v + 2u });
+                    fillMesh.faces.push_back(game::face{ v + 1u, v + 3u, v + 2u });
+                }
+                aGc.draw_shape(fillMesh, vec3{}, pen{}, to_brush(appearance.fill().value()));
+            }
+
+            for (std::size_t i = 1u; i < points.size(); ++i)
+                aGc.draw_line(points[i - 1u], points[i], linePen);
         }
         void render_x_axis(i_graph_widget<x_abstract_type, y_abstract_type, traits_type> const& aWidget, i_graphics_context& aGc) const override
         {
-            // todo
+            auto const plotArea = plot_area(aWidget, aGc);
+            if (plotArea.cx <= 0.0)
+                return;
+
+            auto const axisArea = x_axis_area(aWidget, aGc);
+            auto const axisY = axisArea.top();
+            auto const tickLength = x_tick_length_px(aWidget);
+            auto const axisPen = pen{ aWidget.palette_color(color_role::Text), 1.0_dip };
+
+            aGc.draw_line(point{ plotArea.left(), axisY }, point{ plotArea.right(), axisY }, axisPen);
+
+            auto const transform = transform_to_px(aWidget, plotArea);
+            auto const xOrigin = x_view_min(aWidget);
+
+            auto const draw_tick = [&](scalar aX_px, scalar aLength)
+            {
+                aGc.draw_line(point{ aX_px, axisY }, point{ aX_px, axisY + aLength }, axisPen);
+            };
+
+            if constexpr (std::is_arithmetic_v<x_type>)
+            {
+                x_type xMin;
+                x_type xMax;
+                y_type ignore;
+                aWidget.get_view(xMin, xMax, ignore, ignore);
+                using calc_type = std::conditional_t<std::is_floating_point_v<x_type>, x_type, double>;
+                auto const tick_px = [&](x_type const& aTick)
+                {
+                    return to_px(plotArea, transform, static_cast<scalar>(aTick) - xOrigin, 0.0).x;
+                };
+                if (aWidget.x_axis().has_minor_tick() && aWidget.x_axis().minor_tick() > x_type{})
+                {
+                    auto const& minorTick = aWidget.x_axis().minor_tick();
+                    for (auto tick = static_cast<x_type>(std::ceil(static_cast<calc_type>(xMin) / static_cast<calc_type>(minorTick)) * static_cast<calc_type>(minorTick));
+                        tick >= xMin && tick <= xMax; tick += minorTick)
+                        draw_tick(tick_px(tick), tickLength / 2.0);
+                }
+                if (aWidget.x_axis().has_major_tick() && aWidget.x_axis().major_tick() > x_type{})
+                {
+                    auto const& majorTick = aWidget.x_axis().major_tick();
+                    for (auto tick = static_cast<x_type>(std::ceil(static_cast<calc_type>(xMin) / static_cast<calc_type>(majorTick)) * static_cast<calc_type>(majorTick));
+                        tick >= xMin && tick <= xMax; tick += majorTick)
+                    {
+                        auto const tickPx = tick_px(tick);
+                        draw_tick(tickPx, tickLength);
+                        render_x_label(tick, aWidget, aGc,
+                            point{ tickPx, axisY + tickLength + x_label_extents(tick, aWidget, aGc, graph_rendering_element::AxisLabel).cy / 2.0 },
+                            graph_rendering_element::AxisLabel);
+                    }
+                }
+            }
+            else
+            {
+                for (auto const& s : aWidget.series())
+                {
+                    if (!s->visible())
+                        continue;
+                    auto const& data = s->data();
+                    for (std::size_t i = 0; i < data.size(); ++i)
+                    {
+                        auto const tickPx = ordinal_x_px(plotArea, i, data.size());
+                        draw_tick(tickPx, tickLength);
+                        render_x_label(data[i].x(), aWidget, aGc,
+                            point{ tickPx, axisY + tickLength + x_label_extents(data[i].x(), aWidget, aGc, graph_rendering_element::AxisLabel).cy / 2.0 },
+                            graph_rendering_element::AxisLabel);
+                    }
+                }
+            }
         }
         void render_y_axis(i_graph_widget<x_abstract_type, y_abstract_type, traits_type> const& aWidget, i_graphics_context& aGc) const override
         {
-            // todo
+            auto const plotArea = plot_area(aWidget, aGc);
+            if (plotArea.cy <= 0.0)
+                return;
+
+            auto const axisArea = y_axis_area(aWidget, aGc);
+            auto const axisX = axisArea.right();
+            auto const tickLength = y_tick_length_px(aWidget);
+            auto const axisPen = pen{ aWidget.palette_color(color_role::Text), 1.0_dip };
+
+            aGc.draw_line(point{ axisX, plotArea.top() }, point{ axisX, plotArea.bottom() }, axisPen);
+
+            auto const transform = transform_to_px(aWidget, plotArea);
+            auto const yOrigin = y_view_min(aWidget);
+
+            auto const draw_tick = [&](scalar aY_px, scalar aLength)
+            {
+                aGc.draw_line(point{ axisX, aY_px }, point{ axisX - aLength, aY_px }, axisPen);
+            };
+
+            if constexpr (std::is_arithmetic_v<y_type>)
+            {
+                y_type yMin;
+                y_type yMax;
+                x_type ignore;
+                aWidget.get_view(ignore, ignore, yMin, yMax);
+                using calc_type = std::conditional_t<std::is_floating_point_v<y_type>, y_type, double>;
+                auto const tick_px = [&](y_type const& aTick)
+                {
+                    return to_px(plotArea, transform, 0.0, static_cast<scalar>(aTick) - yOrigin).y;
+                };
+                if (aWidget.y_axis().has_minor_tick() && aWidget.y_axis().minor_tick() > y_type{})
+                {
+                    auto const& minorTick = aWidget.y_axis().minor_tick();
+                    for (auto tick = static_cast<y_type>(std::ceil(static_cast<calc_type>(yMin) / static_cast<calc_type>(minorTick)) * static_cast<calc_type>(minorTick));
+                        tick >= yMin && tick <= yMax; tick += minorTick)
+                        draw_tick(tick_px(tick), tickLength / 2.0);
+                }
+                if (aWidget.y_axis().has_major_tick() && aWidget.y_axis().major_tick() > y_type{})
+                {
+                    auto const& majorTick = aWidget.y_axis().major_tick();
+                    for (auto tick = static_cast<y_type>(std::ceil(static_cast<calc_type>(yMin) / static_cast<calc_type>(majorTick)) * static_cast<calc_type>(majorTick));
+                        tick >= yMin && tick <= yMax; tick += majorTick)
+                    {
+                        auto const tickPx = tick_px(tick);
+                        draw_tick(tickPx, tickLength);
+                        render_y_label(tick, aWidget, aGc,
+                            point{ axisArea.left() + (axisArea.cx - tickLength) / 2.0, tickPx },
+                            graph_rendering_element::AxisLabel);
+                    }
+                }
+            }
         }
         void render_x_label(x_abstract_type const& aX, i_graph_widget<x_abstract_type, y_abstract_type, traits_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
@@ -393,6 +577,8 @@ namespace neogfx
         [[nodiscard]] rect plot_area(i_graph_widget<x_abstract_type, y_abstract_type, traits_type> const& aWidget, i_graphics_context& aGc) const override
         {
             auto const& cr = aWidget.client_rect(false);
+            if ((aWidget.flags() & graph_widget_flags::NoAxes) != graph_widget_flags::None)
+                return cr;
             point const topLeft{ y_axis_area(aWidget, aGc).right(), cr.top() };
             point const bottomRight{ cr.right(), x_axis_area(aWidget, aGc).top() };
             return rect{ topLeft, bottomRight - topLeft };
@@ -494,6 +680,98 @@ namespace neogfx
         void clear_y_tick_length_px() override
         {
             iYTickLength_px = std::nullopt;
+        }
+        // mapping
+    private:
+        // Data offsets passed to the transform are relative to the view minimum, so that a pure
+        // scale matrix (see i_graph_widget::set_scale_to_px) maps the view onto the plot area.
+        [[nodiscard]] mat33 transform_to_px(i_graph_widget<x_abstract_type, y_abstract_type, traits_type> const& aWidget, rect const& aPlotArea) const
+        {
+            if (aWidget.has_view_transform_to_px())
+                return aWidget.view_transform_to_px();
+            auto result = mat33::identity();
+            result[0][0] = x_scale_to_px(aWidget, aPlotArea);
+            result[1][1] = y_scale_to_px(aWidget, aPlotArea);
+            return result;
+        }
+        [[nodiscard]] point to_px(rect const& aPlotArea, mat33 const& aTransform, scalar aX, scalar aY) const
+        {
+            auto const transformed = aTransform * vec3{ aX, aY, 1.0 };
+            return aPlotArea.bottom_left() + point{ transformed.x, -transformed.y };
+        }
+        [[nodiscard]] scalar ordinal_x_px(rect const& aPlotArea, std::size_t aIndex, std::size_t aCount) const
+        {
+            if (aCount == 0u)
+                return aPlotArea.left();
+            return aPlotArea.left() + (static_cast<scalar>(aIndex) + 0.5) * aPlotArea.cx / static_cast<scalar>(aCount);
+        }
+        [[nodiscard]] scalar x_scale_to_px(i_graph_widget<x_abstract_type, y_abstract_type, traits_type> const& aWidget, rect const& aPlotArea) const
+        {
+            if constexpr (std::is_arithmetic_v<x_type>)
+            {
+                x_type xMin;
+                x_type xMax;
+                y_type ignore;
+                aWidget.get_view(xMin, xMax, ignore, ignore);
+                auto const range = static_cast<scalar>(xMax) - static_cast<scalar>(xMin);
+                return range != 0.0 ? aPlotArea.cx / range : 0.0;
+            }
+            else
+                return 0.0;
+        }
+        [[nodiscard]] scalar y_scale_to_px(i_graph_widget<x_abstract_type, y_abstract_type, traits_type> const& aWidget, rect const& aPlotArea) const
+        {
+            if constexpr (std::is_arithmetic_v<y_type>)
+            {
+                y_type yMin;
+                y_type yMax;
+                x_type ignore;
+                aWidget.get_view(ignore, ignore, yMin, yMax);
+                auto const range = static_cast<scalar>(yMax) - static_cast<scalar>(yMin);
+                return range != 0.0 ? aPlotArea.cy / range : 0.0;
+            }
+            else
+                return 0.0;
+        }
+        [[nodiscard]] scalar x_view_min(i_graph_widget<x_abstract_type, y_abstract_type, traits_type> const& aWidget) const
+        {
+            if constexpr (std::is_arithmetic_v<x_type>)
+            {
+                x_type xMin;
+                x_type xMax;
+                y_type ignore;
+                aWidget.get_view(xMin, xMax, ignore, ignore);
+                return static_cast<scalar>(xMin);
+            }
+            else
+                return 0.0;
+        }
+        [[nodiscard]] scalar y_view_min(i_graph_widget<x_abstract_type, y_abstract_type, traits_type> const& aWidget) const
+        {
+            if constexpr (std::is_arithmetic_v<y_type>)
+            {
+                y_type yMin;
+                y_type yMax;
+                x_type ignore;
+                aWidget.get_view(ignore, ignore, yMin, yMax);
+                return static_cast<scalar>(yMin);
+            }
+            else
+                return 0.0;
+        }
+        [[nodiscard]] scalar x_delta(typename i_series::i_datum const& aDatum, scalar aViewMin) const
+        {
+            if constexpr (std::is_arithmetic_v<x_type>)
+                return static_cast<scalar>(aDatum.x()) - aViewMin;
+            else
+                return 0.0;
+        }
+        [[nodiscard]] scalar y_delta(typename i_series::i_datum const& aDatum, scalar aViewMin) const
+        {
+            if constexpr (std::is_arithmetic_v<y_type>)
+                return static_cast<scalar>(aDatum.y()) - aViewMin;
+            else
+                return 0.0;
         }
     private:
         std::optional<scalar> iXTickLength_px;

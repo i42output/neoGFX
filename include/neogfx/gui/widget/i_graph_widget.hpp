@@ -36,7 +36,8 @@ namespace neogfx
 
     enum class graph_widget_flags : std::uint32_t
     {
-        None = 0x00,
+        None    = 0x00,
+        NoAxes  = 0x01  // spark graph: plot fills the client rect, no axes, ticks or labels
     };
 
     inline constexpr graph_widget_flags operator|(graph_widget_flags aLhs, graph_widget_flags aRhs)
