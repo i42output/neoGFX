@@ -23,6 +23,24 @@
 
 namespace neogfx
 {
+    namespace
+    {
+        size max_border_radius(group_box const& aOwner, size const& aDefault)
+        {
+            auto const radii = aOwner.effective_border_radius();
+            if (radii == std::nullopt)
+                return aDefault;
+            scoped_units su{ aOwner, units::Pixels };
+            size result;
+            for (auto const& corner : radii.value())
+            {
+                result.cx = std::max(result.cx, corner[0].value());
+                result.cy = std::max(result.cy, corner[1].value());
+            }
+            return result;
+        }
+    }
+
     class group_box_title_layout : public horizontal_layout
     {
     public:
@@ -30,6 +48,7 @@ namespace neogfx
             horizontal_layout{ aOwner.layout() },
             iOwner{ aOwner }
         {
+            set_size_policy(size_constraint::Expanding);
             set_padding({});
             set_spacing({});
         }
@@ -63,8 +82,8 @@ namespace neogfx
             case group_box_border_style::Line:
                 {
                     auto const defaultPadding = dpi_scale(group_box::DEFAULT_PADDING);
-                    auto const rx = iOwner.corner_radii_x().value_or(vec4{ defaultPadding * 2.0, defaultPadding, defaultPadding * 2.0, defaultPadding });
-                    return neogfx::padding{ rx.max(), 0.0, rx.max(), 0.0 };
+                    auto const radii = max_border_radius(iOwner, size{ defaultPadding * 2.0, defaultPadding });
+                    return neogfx::padding{ radii.cx, 0.0, radii.cx, 0.0 };
                 }
             }
         }
@@ -100,11 +119,10 @@ namespace neogfx
             if (has_padding())
                 return vertical_layout::padding();
             auto const defaultPadding = dpi_scale(group_box::DEFAULT_PADDING);
-            auto const rx = iOwner.corner_radii_x().value_or(vec4{ defaultPadding, defaultPadding, defaultPadding, defaultPadding }).
-                max(vec4{ defaultPadding, defaultPadding, defaultPadding, defaultPadding });
-            auto const ry = iOwner.corner_radii_y().value_or(vec4{ defaultPadding, defaultPadding, defaultPadding, defaultPadding }).
-                max(vec4{ defaultPadding, defaultPadding, defaultPadding, defaultPadding });
-            return neogfx::padding{ rx.max(), ry.max(), rx.max(), ry.max() };
+            auto const radii = max_border_radius(iOwner, size{ defaultPadding, defaultPadding });
+            auto const cx = std::max(radii.cx, defaultPadding);
+            auto const cy = std::max(radii.cy, defaultPadding);
+            return neogfx::padding{ cx, cy, cx, cy };
         }
         size spacing() const override
         {
@@ -321,8 +339,22 @@ namespace neogfx
 
         pen const borderPen{ border_color(), thickness };
 
-        if (has_corner_radii())
-            aGc.draw_ellipse_rect(borderRect, *corner_radii_x(), *corner_radii_y(), borderPen);
+        auto const borderRadii = effective_border_radius();
+
+        if (borderRadii.has_value())
+        {
+            auto to_vec2 = [&](std::array<length, 2u> const& l)
+            {
+                basic_length<vec2> lx{ vec2{ l[0].unconverted_value(), 0.0 }, l[0].units() };
+                basic_length<vec2> ly{ vec2{ 0.0, l[1].unconverted_value(), }, l[1].units() };
+                return vec2{ lx.value().x, ly.value().y };
+            };
+            aGc.draw_ellipse_rect(
+                borderRect,
+                vec4{ to_vec2(borderRadii.value()[0]).x, to_vec2(borderRadii.value()[1]).x, to_vec2(borderRadii.value()[2]).x, to_vec2(borderRadii.value()[3]).x },
+                vec4{ to_vec2(borderRadii.value()[0]).y, to_vec2(borderRadii.value()[1]).y, to_vec2(borderRadii.value()[2]).y, to_vec2(borderRadii.value()[3]).y },
+                borderPen);
+        }
         else
             aGc.draw_rect(borderRect, borderPen);
 
@@ -380,26 +412,29 @@ namespace neogfx
         }
     }
 
-    bool group_box::has_corner_radii() const
+    std::optional<border_radii> const& group_box::border_radius() const
     {
-        return iCornerRadiiX != std::nullopt;
+        return iBorderRadii;
     }
 
-    std::optional<vec4> const& group_box::corner_radii_x() const
+    void group_box::set_border_radius(std::optional<border_radii> const& aBorderRadii)
     {
-        return iCornerRadiiX;
+        if (iBorderRadii != aBorderRadii)
+        {
+            iBorderRadii = aBorderRadii;
+            update_layout();
+            update();
+        }
     }
 
-    std::optional<vec4> const& group_box::corner_radii_y() const
+    void group_box::set_border_radius(length const& aBorderRadius)
     {
-        return iCornerRadiiY;
+        set_border_radius(border_radii{ { { aBorderRadius, aBorderRadius }, { aBorderRadius, aBorderRadius }, { aBorderRadius, aBorderRadius }, { aBorderRadius, aBorderRadius } } });
     }
 
-    void group_box::set_corner_radii(std::optional<vec4> const& aCornerRadiiX, std::optional<vec4> const& aCornerRadiiY)
+    std::optional<border_radii> group_box::effective_border_radius() const
     {
-        iCornerRadiiX = aCornerRadiiX;
-        iCornerRadiiY = (aCornerRadiiY != std::nullopt ? aCornerRadiiY : aCornerRadiiX);
-        update();
+        return style_sheet_value("." + class_name(), "border-radius", border_radius());
     }
 
     bool group_box::has_border_color() const

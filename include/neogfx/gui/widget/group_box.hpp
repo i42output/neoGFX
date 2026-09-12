@@ -105,10 +105,10 @@ namespace neogfx
         virtual void set_border_style(group_box_border_style aBorderStyle);
         virtual dimension border_thickness() const;
         virtual void set_border_thickness(dimension aBorderThickness);
-        virtual bool has_corner_radii() const;
-        virtual std::optional<vec4> const& corner_radii_x() const;
-        virtual std::optional<vec4> const& corner_radii_y() const;
-        virtual void set_corner_radii(std::optional<vec4> const& aCornerRadiiX, std::optional<vec4> const& aCornerRadiiY = std::nullopt);
+        std::optional<border_radii> const& border_radius() const;
+        void set_border_radius(std::optional<border_radii> const& aBorderRadii = {});
+        void set_border_radius(length const& aBorderRadius);
+        std::optional<border_radii> effective_border_radius() const;
         virtual bool has_border_color() const;
         virtual color border_color() const;
         virtual void set_border_color(const optional_color& aBorderColor);
@@ -128,8 +128,7 @@ namespace neogfx
         ref_ptr<i_layout> iItemLayout;
         group_box_border_style iBorderStyle = group_box_border_style::None;
         dimension iBorderThickness = DEFAULT_BORDER_THICKNESS;
-        std::optional<vec4> iCornerRadiiX;
-        std::optional<vec4> iCornerRadiiY;
+        std::optional<border_radii> iBorderRadii;
         define_property(property_category::color, optional_color, BorderColor, border_color)
         define_property(property_category::color, optional_color, FillColor, fill_color)
         define_property(property_category::other_appearance, double, FillOpacity, fill_opacity, 1.0)

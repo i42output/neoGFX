@@ -29,8 +29,6 @@ namespace neogfx
     extern template class widget<i_push_button>;
     extern template class button<i_push_button>;
 
-    using border_radii = std::array<std::array<length, 2u>, 4u>;
-
     class push_button : public button<i_push_button>
     {
         meta_object(button<i_push_button>)

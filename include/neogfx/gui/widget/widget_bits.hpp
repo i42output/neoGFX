@@ -21,8 +21,12 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neogfx/core/units.hpp>
+
 namespace neogfx
 {
+    using border_radii = std::array<std::array<length, 2u>, 4u>;
+
     enum class widget_type : std::uint32_t
     {
         Client      = 0x00000001,
