@@ -480,6 +480,7 @@ namespace neogfx
                 enabled() ? 
                     parent_layout().layout_item_enabled(*this) : 
                     parent_layout().layout_item_disabled(*this);
+            update_layout(true, true);
         }
     }
 
