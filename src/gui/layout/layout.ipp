@@ -271,6 +271,10 @@ namespace neogfx
                 *availableSpaceForChildren -= internal_spacing().size();
             std::uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
             std::uint32_t itemsZeroSized = 0;
+            // our own size policy governs the major axis just as it does the minor axis below
+            if (AxisPolicy::size_policy_x(ourSizePolicy) == size_constraint::Expanding ||
+                AxisPolicy::size_policy_x(ourSizePolicy) == size_constraint::Maximum)
+                AxisPolicy::cx(result) = size::max_dimension();
             for (auto const& itemRef : items())
             {
                 auto const& item = *itemRef;
