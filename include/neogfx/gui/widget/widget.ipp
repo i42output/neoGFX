@@ -1709,7 +1709,17 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline bool widget<Interface>::effectively_visible() const
     {
-        return visible() && (widget::is_root() || !has_parent() || parent().effectively_visible());
+        if (!visible())
+            return false;
+        // a disabled layout hides what it lays out
+        for (i_layout_item const* item = this; item->has_parent_layout(); )
+        {
+            auto const& parentLayout = item->parent_layout();
+            if (!parentLayout.visible())
+                return false;
+            item = &parentLayout;
+        }
+        return widget::is_root() || !has_parent() || parent().effectively_visible();
     }
 
     template <WidgetInterface Interface>
