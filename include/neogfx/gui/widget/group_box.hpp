@@ -28,9 +28,17 @@
 
 namespace neogfx
 {
+    enum class group_box_border_style : std::uint32_t
+    {
+        None,
+        Line
+    };
+
     class group_box : public widget<>
     {
         meta_object(widget<>)
+        friend class group_box_title_layout;
+        friend class group_box_item_layout;
     private:
         typedef group_box property_context_type;
     private:
@@ -39,17 +47,21 @@ namespace neogfx
         class box : public widget<>
         {
         public:
-            box(group_box& aParent);
+            box(group_box& aOwner);
         protected:
             void paint(i_graphics_context& aGc) const override;
         protected:
             color palette_color(color_role aColorRole) const override;
         private:
-            group_box& iParent;
+            group_box& iOwner;
         };
     private:
         static constexpr scalar DEFAULT_PADDING = 5.0;
         static constexpr scalar DEFAULT_SPACING = 5.0;
+        static constexpr scalar DEFAULT_BORDER_THICKNESS = 1.0;
+        static constexpr scalar DEFAULT_LABEL_GAP_MM = 1.0;
+        static constexpr std::int32_t STENCIL_BORDER = 1;
+        static constexpr std::int32_t STENCIL_LABEL = 2;
     public:
         struct not_checkable : std::logic_error { not_checkable() : std::logic_error("neogfx::group_box::not_checkable") {} };
     public:
@@ -57,6 +69,10 @@ namespace neogfx
         group_box(i_widget& aParent, std::string const& aText = std::string());
         group_box(i_layout& aLayout, std::string const& aText = std::string());
     public:
+        void set_title_layout(i_layout& aTitleLayout);
+        void set_title_layout(i_ref_ptr<i_layout> const& aTitleLayout);
+        const i_layout& title_layout() const;
+        i_layout& title_layout();
         i_string const& text() const;
         void set_text(i_string const& aText);
         bool is_checkable() const;
@@ -79,10 +95,20 @@ namespace neogfx
             return static_cast<LayoutT&>(item_layout());
         }
     public:
+        void paint(i_graphics_context& aGc) const override;
+    public:
         neogfx::size_policy size_policy() const override;
     public:
         color palette_color(color_role aColorRole) const override;
     public:
+        virtual group_box_border_style border_style() const;
+        virtual void set_border_style(group_box_border_style aBorderStyle);
+        virtual dimension border_thickness() const;
+        virtual void set_border_thickness(dimension aBorderThickness);
+        virtual bool has_corner_radii() const;
+        virtual std::optional<vec4> const& corner_radii_x() const;
+        virtual std::optional<vec4> const& corner_radii_y() const;
+        virtual void set_corner_radii(std::optional<vec4> const& aCornerRadiiX, std::optional<vec4> const& aCornerRadiiY = std::nullopt);
         virtual bool has_border_color() const;
         virtual color border_color() const;
         virtual void set_border_color(const optional_color& aBorderColor);
@@ -96,10 +122,14 @@ namespace neogfx
         void update_widgets();
     private:
         vertical_layout iLayout;
-        horizontal_layout iTitleLayout;
+        ref_ptr<i_layout> iTitleLayout;
         std::variant<std::monostate, label_ptr, check_box_ptr> iTitle;
         box iBox;
         ref_ptr<i_layout> iItemLayout;
+        group_box_border_style iBorderStyle = group_box_border_style::None;
+        dimension iBorderThickness = DEFAULT_BORDER_THICKNESS;
+        std::optional<vec4> iCornerRadiiX;
+        std::optional<vec4> iCornerRadiiY;
         define_property(property_category::color, optional_color, BorderColor, border_color)
         define_property(property_category::color, optional_color, FillColor, fill_color)
         define_property(property_category::other_appearance, double, FillOpacity, fill_opacity, 1.0)

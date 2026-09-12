@@ -75,13 +75,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>$(ProjectName)d</TargetName>
     <OutDir>$(ProjectDir)\..\..\..\..\lib\</OutDir>
-    <IntDir>
-    </IntDir>
+    <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)\..\..\..\..\lib\</OutDir>
-    <IntDir>
-    </IntDir>
+    <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">
     <OutDir>$(ProjectDir)\..\..\..\..\lib\</OutDir>
