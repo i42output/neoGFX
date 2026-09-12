@@ -322,8 +322,8 @@ namespace neogfx
             point{ cr.right() - thickness / 2.0, cr.bottom() - thickness / 2.0 }.ceil() };
         // ...but is masked out where the title (plus its gap) sits
         rect const titleMask{
-            point{ titleRect.left() - gap, borderRect.top() - thickness },
-            point{ titleRect.right() + gap, borderRect.top() + thickness } };
+            point{ titleRect.left() - gap, titleRect.top() },
+            point{ titleRect.right() + gap, titleRect.bottom() } };
 
         aGc.clear_stencil_buffer();
         aGc.enable_stencil_test();
