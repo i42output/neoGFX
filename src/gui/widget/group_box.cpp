@@ -48,7 +48,7 @@ namespace neogfx
             horizontal_layout{ aOwner.layout() },
             iOwner{ aOwner }
         {
-            set_size_policy(size_constraint::Expanding);
+            set_size_policy(size_constraint::Expanding, size_constraint::Minimum);
             set_padding({});
             set_spacing({});
         }
@@ -64,9 +64,9 @@ namespace neogfx
                 return horizontal_layout::margin();
             case group_box_border_style::Line:
                 {
-                    auto const titleRect = iOwner.to_client_coordinates(iOwner.has_check_box() ?
-                        iOwner.check_box().non_client_rect() : iOwner.label().non_client_rect());
-                    return horizontal_layout::margin().with_bottom(-std::ceil(titleRect.extents().cy / 2.0));
+                    auto const titleExtents = iOwner.has_check_box() ?
+                        iOwner.check_box().minimum_size() : iOwner.label().minimum_size();
+                    return horizontal_layout::margin().with_bottom(-std::ceil(titleExtents.cy / 2.0));
                 }
             }
         }
