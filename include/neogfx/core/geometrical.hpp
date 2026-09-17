@@ -293,8 +293,8 @@ namespace neogfx
         basic_size max(const basic_size& aOther) const { return basic_size{ std::max(cx, aOther.cx), std::max(cy, aOther.cy), std::max(cz, aOther.cz) }; }
         bool less_than(const basic_size& aOther) const { return cx < aOther.cx && cy < aOther.cy; };
         bool less_than_or_equal(const basic_size& aOther) const { return cx <= aOther.cx && cy <= aOther.cy; };
-        bool greater_than(const basic_size& aOther) const { return cy > aOther.cy && cy > aOther.cy; };
-        bool greater_than_or_equal(const basic_size& aOther) const { return cy >= aOther.cy && cy >= aOther.cy; };
+        bool greater_than(const basic_size& aOther) const { return cx > aOther.cx && cy > aOther.cy; };
+        bool greater_than_or_equal(const basic_size& aOther) const { return cx >= aOther.cx && cy >= aOther.cy; };
         dimension_type magnitude() const { throw_on_bad_size(*this); return std::sqrt(cx * cx + cy * cy); }
         basic_size with_cx(dimension_type d) const { return basic_size{ d, cy, cz }; }
         basic_size with_cy(dimension_type d) const { return basic_size{ cx, d, cz }; }

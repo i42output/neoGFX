@@ -828,12 +828,13 @@ namespace neogfx
 
     void opengl_rendering_context::validate_fast_state()
     {
-        iSharedFastStateGeneration = shared_fast_state_generation().load();
+        // we have just (re)applied our state to GL, so any other context's cached state is now stale
+        iSharedFastStateGeneration = ++shared_fast_state_generation();
     }
 
     void opengl_rendering_context::validate_slow_state()
     {
-        iSharedSlowStateGeneration = shared_slow_state_generation().load();
+        iSharedSlowStateGeneration = ++shared_slow_state_generation();
     }
 
     void opengl_rendering_context::scissor_on()
@@ -2209,18 +2210,28 @@ namespace neogfx
         if (drawGlyphCache.empty())
             return;
 
+        // the glyph effect filters use our current origin, so each sub-batch is drawn at its own origin
+        auto const savedOrigin = iFastState.origin;
+        auto restoreOrigin = [&]() { iFastState.origin = savedOrigin; };
+        neolib::scoped_cleanup<decltype(restoreOrigin)> sco{ restoreOrigin };
+
         auto start = drawGlyphCache.begin();
         for (auto next = std::next(start); next != drawGlyphCache.end(); ++next)
         {
-            if (!graphics_operation::batchable(*start->glyphText, *next->glyphText, *start->glyphChar, *next->glyphChar) ||
+            if (start->origin != next->origin ||
+                !graphics_operation::batchable(*start->glyphText, *next->glyphText, *start->glyphChar, *next->glyphChar) ||
                 !graphics_operation::batchable(*start->appearance, *next->appearance))
             {
+                iFastState.origin = start->origin;
                 draw_glyphs(&*start, &*next);
                 start = next;
             }
         }
         if (start != drawGlyphCache.end())
+        {
+            iFastState.origin = start->origin;
             draw_glyphs(&*start, std::next(&*std::prev(drawGlyphCache.end())));
+        }
     }
 
     namespace

@@ -96,7 +96,7 @@ namespace neogfx
     {
         typedef tab_stop abstract_type;
 
-        scalar pos;
+        scalar pos = 0.0;
         neogfx::alignment alignment = neogfx::alignment::Left;
 
         std::partial_ordering operator<=>(tab_stop const&) const noexcept = default;
@@ -880,7 +880,7 @@ namespace neogfx
     struct blur_filter
     {
         rect region;
-        dimension radius;
+        dimension radius = 0.0;
         gain gain = {};
         blurring_algorithm algorithm = blurring_algorithm::Gaussian;
         scalar taps = 5.0;
@@ -943,7 +943,7 @@ namespace neogfx
     struct dilate_filter
     {
         rect region;
-        dimension radius;
+        dimension radius = 0.0;
         neogfx::gain gain = {};
         dilation_algorithm algorithm = dilation_algorithm::Octagon;
         scalar extent = 1.0;

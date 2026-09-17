@@ -114,12 +114,18 @@ namespace neogfx
     public:
         void begin_rendering() const final
         {
-            iRenderQueueContext.lastFastState.reset();
-            iRenderQueueContext.lastSlowState.reset();
+            if (iRenderingCount++ == 0u)
+            {
+                iRenderQueueContext.lastFastState.reset();
+                iRenderQueueContext.lastSlowState.reset();
+            }
         }
         void end_rendering() const final
         {
-            clear_rendering_queues(true);
+            if (iRenderingCount == 0u)
+                throw std::logic_error("neogfx::render_target::end_rendering: not rendering");
+            if (--iRenderingCount == 0u)
+                clear_rendering_queues(true);
         }
         neogfx::rendering_queue& rendering_queue() const final
         {
@@ -150,8 +156,6 @@ namespace neogfx
             if (aEndRendering)
             {
                 iRenderQueueContext.clipRegionStack.clear();
-                iRenderQueueContext.fastStateGeneration = 0u;
-                iRenderQueueContext.slowStateGeneration = 0u;
                 iRenderQueueContext.lastFastState.reset();
                 iRenderQueueContext.lastSlowState.reset();
             }
@@ -171,6 +175,7 @@ namespace neogfx
         mutable neogfx::rendering_queue iQueue;
         mutable neogfx::optimised_rendering_queue iOptimisedQueue;
         mutable bool iOptimisedQueueExtant = false;
+        mutable std::uint32_t iRenderingCount = 0u;
     };
 
 }

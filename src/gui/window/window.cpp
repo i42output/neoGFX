@@ -186,7 +186,6 @@ namespace neogfx
     window::~window()
     {
         set_destroying();
-        update_modality(true);
         if (window_manager().has_window(*this))
             window_manager().remove_window(*this);
         close();
@@ -508,6 +507,14 @@ namespace neogfx
     {
         if (iClosed)
             return;
+        // ancestors must be re-enabled before the native window is destroyed: the window manager
+        // will not activate a disabled owner, so it activates the next window in the z-order
+        // instead, which briefly appears before the owner comes back
+        if (!iModalityRestored)
+        {
+            iModalityRestored = true;
+            update_modality(true);
+        }
         if (has_layout())
             layout().remove_all();
         remove_all();

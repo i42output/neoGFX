@@ -94,7 +94,7 @@ namespace neogfx
                 iInUse = false;
             }
         public:
-            bool in_use()
+            bool in_use() const
             {
                 return iInUse;
             }

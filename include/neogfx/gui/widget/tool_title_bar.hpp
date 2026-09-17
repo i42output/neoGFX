@@ -50,6 +50,7 @@ namespace neogfx
         const text_widget& title_widget() const override;
         text_widget& title_widget() override;
     protected:
+        neogfx::size_policy size_policy() const override;
         size minimum_size(optional_size const& aAvailableSpace = {}) const override;
     protected:
         neogfx::widget_type widget_type() const override;

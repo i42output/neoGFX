@@ -188,9 +188,11 @@ namespace neogfx
     graphics_context::graphics_context(graphics_context const& aOther) :
         iType{ aOther.iType },
         iRenderTarget{ aOther.iRenderTarget },
+        iRenderWidget{ aOther.iRenderWidget },
         iRenderingContext{ aOther.active() ? aOther.rendering_context().clone() : nullptr },
         iDefaultFont{ aOther.iDefaultFont },
-        iOrigin{ aOther.origin() },
+        iOrigin{ aOther.iOrigin },
+        iRedirectOrigin{ aOther.iRedirectOrigin },
         iExtents{ aOther.extents() },
         iLayer{ LayerWidget },
         iLogicalCoordinateSystem{ aOther.iLogicalCoordinateSystem },
@@ -907,7 +909,11 @@ namespace neogfx
         if (attached())
         {
             if (!active())
+            {
                 iRenderingContext = render_target().create_rendering_context(iBlendingMode);
+                // the queue is shared by every context on the target, so don't inherit another context's origin
+                iRenderingContext->enqueue(graphics_operation::set_origin{ iOrigin.value_or(point{}) });
+            }
             return *iRenderingContext;
         }
         throw unattached();

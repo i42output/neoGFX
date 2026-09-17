@@ -226,6 +226,7 @@ namespace neogfx
         mutable neogfx::window_placement iPlacement;
         bool iCentering;
         bool iClosed;
+        bool iModalityRestored = false;
         sink iSink;
         ref_ptr<i_surface_window> iSurfaceWindow;
         bool iReadyToRender;

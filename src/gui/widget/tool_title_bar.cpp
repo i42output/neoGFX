@@ -105,6 +105,16 @@ namespace neogfx
         return iTitle;
     }
 
+    size_policy tool_title_bar::size_policy() const
+    {
+        if (has_size_policy())
+            return widget::size_policy();
+        else if (has_fixed_size())
+            return size_constraint::Fixed;
+        else
+            return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
+    }
+
     size tool_title_bar::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())

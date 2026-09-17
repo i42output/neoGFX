@@ -940,10 +940,13 @@ namespace neogfx
                 result = wndproc(hwnd, msg, wparam, lparam);
                 break;
             case WM_NCACTIVATE:
-                {
-                    suppress_style ss{ hwnd, WS_VISIBLE };
-                    result = wndproc(hwnd, msg, wparam, lparam);
-                }
+                // clearing WS_VISIBLE to stop DefWindowProc redrawing the non-client area takes the
+                // window out of DWM composition for the duration of the call, so whatever is behind it
+                // is composited instead: a flicker whenever activation changes
+                if (CUSTOM_DECORATION)
+                    result = TRUE; // we draw the frame ourselves, so DefWindowProc must not touch it
+                else
+                    result = wndproc(hwnd, msg, wparam, -1); // -1 suppresses the non-client redraw
                 break;
             case WM_SETTEXT:
                 result = wndproc(hwnd, msg, wparam, lparam);

@@ -333,15 +333,16 @@ namespace neogfx
 
         void renderer::pop_target()
         {
-            auto const currentlyActive = active_target();
-            if (currentlyActive)
-            {
-                currentlyActive->target_release();
-                currentlyActive->deactivate_target();
-                iTargetStack.pop_back();
-                if (!iTargetStack.empty())
-                    iTargetStack.back()->activate_target();
-            }
+            if (iTargetStack.empty())
+                return;
+            auto const popped = iTargetStack.back();
+            bool const wasActive = (active_target() == popped);
+            popped->target_release();
+            if (wasActive)
+                popped->deactivate_target();
+            iTargetStack.pop_back();
+            if (wasActive && !iTargetStack.empty())
+                iTargetStack.back()->activate_target();
         }
 
         const i_render_target* renderer::active_target() const

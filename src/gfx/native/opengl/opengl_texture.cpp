@@ -874,6 +874,8 @@ namespace neogfx
     void opengl_texture<T>::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const
     {
         iLogicalCoordinateSystem = aSystem;
+        if (aSystem != neogfx::logical_coordinate_system::Specified)
+            iLogicalCoordinates.reset();
 
         iUvCalculator.reset();
     }

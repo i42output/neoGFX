@@ -108,7 +108,7 @@ namespace neogfx
         return iTitle;
     }
 
-    neogfx::size_policy normal_title_bar::size_policy() const
+    size_policy normal_title_bar::size_policy() const
     {
         if (has_size_policy())
             return widget::size_policy();
