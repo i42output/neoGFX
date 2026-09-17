@@ -240,6 +240,7 @@ namespace neogfx
         iOptionLayout.set_padding(neogfx::padding{});
         iOptionLayout.set_size_policy(size_constraint::Minimum);
         iStandardButtonLayout.set_padding(neogfx::padding{});
+        iStandardButtonLayout.set_size_policy(size_constraint::Minimum);
     }
 
     bool dialog_button_box::can_reject() const

@@ -87,7 +87,8 @@ void draw_line(inout vec4 color, inout vec4 function1, inout vec4 function2, ino
         discard;
     else
     {
-        float a = spot_alpha(1.0 - smoothstep(function3.y == 0.0 ? 0.5 : 0.0, function3.w / 2.0, abs(d0)), function3.y);
+        // solid out to the pen's half width, anti-aliased beyond it, as the other shapes are
+        float a = function3.y == 0.0 ? 1.0 : spot_alpha(1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0)), function3.y);
         color = vec4(color.xyz, color.a * a);
     }
 }
@@ -250,7 +251,8 @@ void draw_pie(inout vec4 color, inout vec4 function1, inout vec4 function2, inou
 {
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
 
-    float a0 = PI * 0.5 + function2.x * 0.5;
+    // the shape is symmetric about the bisector of its start and end angles
+    float a0 = PI * 0.5 + (function1.w + function2.x) * 0.5;
     vec2 p0 = (fragPos.xy - function1.xy) * mat2(cos(a0), -sin(a0), sin(a0), cos(a0));
     float d0 = sdPie(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
@@ -274,7 +276,8 @@ void draw_arc(inout vec4 color, inout vec4 function1, inout vec4 function2, inou
     vec4 noOutline = vec4(0.0);
     draw_pie(color, function1, function2, noOutline, function4, function5);
 
-    float a0 = PI * 0.5 + function2.x * 0.5;
+    // the shape is symmetric about the bisector of its start and end angles
+    float a0 = PI * 0.5 + (function1.w + function2.x) * 0.5;
     vec2 p0 = (fragPos.xy - function1.xy) * mat2(cos(a0), -sin(a0), sin(a0), cos(a0));
     float d0 = sdArc(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
