@@ -79,8 +79,10 @@ namespace neogfx
         }
         void activate(i_widget& aWidget) final
         {
+            if (active(aWidget))
+                return;
             if (active())
-                throw std::logic_error("neogfx::emoticon_translator::activate: already active!");
+                deactivate();
             iActiveWidget = &aWidget;
             iSink = aWidget.destroying([&]() { if (active(aWidget)) deactivate(); });
             service<i_keyboard>().filter_keyboard(*this);
@@ -110,6 +112,7 @@ namespace neogfx
 
             std::set<std::string> availableEmoji;
             std::optional<std::string> selectedEmoji;
+            std::string const emoticon = iBuffer;
 
             for (auto const& emojiAlternatives : iEmoticonMatches)
                 for (auto const& emoji : emojiAlternatives->second)
@@ -152,6 +155,8 @@ namespace neogfx
 
                     neolib::scoped_flag sf{ iSelectorOpen };
                     auto const reason = contextMenu.exec();
+                    if (!active()) // nested event loop may have deactivated us
+                        return;
                     if (reason == context_menu::exit_reason::Cancelled)
                         aSuppressBufferClear = true;
                 }
@@ -159,13 +164,13 @@ namespace neogfx
 
             if (selectedEmoji.has_value())
             {
-                std::u32string const codePoints = neolib::utf8_to_utf32(iBuffer);
+                std::u32string const codePoints = neolib::utf8_to_utf32(emoticon);
                 for (std::size_t i = 0; i < codePoints.size(); ++i)
                     iActiveWidget->key_pressed(ScanCode_BACKSPACE, KeyCode_BACKSPACE, key_modifier::None);
                 auto const& toInsert = string{ selectedEmoji.value() } + string{ aHaveExtra ? aText : std::string_view{} };
                 iActiveWidget->text_input(toInsert);
                 if (availableEmoji.size() == 1) // only need undo if we didn't popup a menu
-                    iLastTranslationForUndo.emplace(std::make_tuple(std::chrono::steady_clock::now(), iBuffer, toInsert));
+                    iLastTranslationForUndo.emplace(std::make_tuple(std::chrono::steady_clock::now(), emoticon, toInsert));
             }
         }
     private:

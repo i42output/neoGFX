@@ -825,7 +825,8 @@ namespace neogfx
         if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine)
             cursor().set_position(iText.size());
 
-        if ((iCaps & text_edit_caps::TranslateEmoticons) == text_edit_caps::TranslateEmoticons)
+        if ((iCaps & text_edit_caps::TranslateEmoticons) == text_edit_caps::TranslateEmoticons &&
+            service<i_emoticon_translator>().active(*this))
             service<i_emoticon_translator>().deactivate();
 
         update(true);
