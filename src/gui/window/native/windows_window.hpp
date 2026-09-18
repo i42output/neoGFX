@@ -139,6 +139,7 @@ namespace neogfx
         private:
             static window* new_window();
             void init();
+            bool has_focus() const;
             void update_position(optional_point const& aPosition) const;
             void update_extents(optional_size const& aExtents) const;
         private:

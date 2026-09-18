@@ -619,6 +619,13 @@ namespace neogfx
             return is_effectively_active() && iActive;
         }
 
+        bool window::has_focus() const
+        {
+            // a child window of ours (e.g. a hosted browser control) holding the focus counts as us holding it
+            auto const focus = ::GetFocus();
+            return focus == iHandle || (focus != NULL && ::IsChild(iHandle, focus));
+        }
+
         void window::activate()
         {
             if ((surface_window().style() & window_style::NoActivate) == window_style::NoActivate)
@@ -626,12 +633,20 @@ namespace neogfx
             if (!enabled())
                 return;
             if (is_active())
+            {
+                // activation and keyboard focus are not the same thing: a window can be the active
+                // window with the focus left at NULL (e.g. after ::EnableWindow(FALSE) took it away)
+                if (!has_focus())
+                    ::SetFocus(iHandle);
                 return;
+            }
             if (!visible())
                 show();
 
             ::SetForegroundWindow(iHandle);
             ::SetWindowPos(iHandle, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+            if (!has_focus())
+                ::SetFocus(iHandle);
 
             if (!iActive)
             {
@@ -701,6 +716,9 @@ namespace neogfx
         {
             bool wasEnabled = (::IsWindowEnabled(iHandle) == TRUE);
             ::EnableWindow(iHandle, aEnable);
+            // disabling a window takes the keyboard focus away from it and re-enabling does not give it back
+            if (aEnable && ::GetForegroundWindow() == iHandle && !has_focus())
+                ::SetFocus(iHandle);
             if (wasEnabled != aEnable)
             {
                 if (aEnable)
@@ -812,6 +830,14 @@ namespace neogfx
 #endif
             LRESULT result = 0;
             bool const CUSTOM_DECORATION = (self.surface_window().style() & window_style::TitleBar) == window_style::TitleBar;
+            if ((msg == WM_SYSKEYDOWN || msg == WM_SYSKEYUP || msg == WM_SYSCHAR) && ::GetFocus() == NULL)
+            {
+                // no window has the keyboard focus so Windows has posted an ordinary keystroke to the
+                // active window as a system key message; take the focus and treat it as the ordinary key
+                // message it is (letting DefWindowProc see WM_SYSCHAR here is what makes it beep)
+                ::SetFocus(hwnd);
+                msg = (msg == WM_SYSKEYDOWN ? WM_KEYDOWN : msg == WM_SYSKEYUP ? WM_KEYUP : WM_CHAR);
+            }
             switch (msg)
             {
             case WM_NCMOUSEMOVE:

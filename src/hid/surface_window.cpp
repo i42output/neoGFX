@@ -489,6 +489,18 @@ namespace neogfx
         native_window().activate();
         if (as_window().has_focused_widget())
             as_window().focused_widget().focus_gained(focus_reason::WindowActivation);
+        else
+        {
+            // nothing holds the focus (the window may have had no focusable widget, or been asked for
+            // focus before it was visible, when widget::set_focus is a no-op) so give it to the first
+            // widget that will take it, otherwise keyboard input has nowhere to go
+            auto& windowWidget = as_window().as_widget();
+            i_widget* w = &windowWidget.after();
+            while (w != &windowWidget && !w->can_set_focus(focus_reason::Tab))
+                w = &w->after();
+            if (w->can_set_focus(focus_reason::Tab))
+                w->set_focus(focus_reason::WindowActivation);
+        }
         if (is_nested_window())
             parent_surface().as_surface_window().as_window().set_focused_widget(as_window().as_widget(), focus_reason::WindowActivation);
     }
