@@ -795,6 +795,7 @@ namespace neogfx
         void set_alignment(neogfx::alignment aAlignment);
     public:
         style current_style() const;
+        style style_at(position_type aPosition) const;
         void apply_style(style const& aStyle);
         void apply_style(position_type aStart, position_type aEnd, style const& aStyle);
         style next_style() const;

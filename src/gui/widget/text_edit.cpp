@@ -1737,15 +1737,21 @@ namespace neogfx
 
     text_edit::style text_edit::current_style() const
     {
+        auto position = static_cast<position_type>(cursor().anchor());
+        if (position != 0 && cursor().position() == cursor().anchor())
+            --position;
+        return style_at(position);
+    }
+
+    text_edit::style text_edit::style_at(position_type aPosition) const
+    {
         if (iText.empty())
         {
             style defaultStyle{ default_style() };
             defaultStyle.character().set_font_if_none(font());
             return defaultStyle;
         }
-        auto t = std::next(iText.begin(), cursor().anchor());
-        if (t != iText.begin() && cursor().position() == cursor().anchor())
-            t = std::prev(t);
+        auto const t = std::next(iText.begin(), std::min(aPosition, static_cast<position_type>(iText.size() - 1u)));
         auto const g = to_glyph(t);
         auto style = glyph_style(g, iColumns.at(glyph_position(g - glyphs().begin(), true).column_index()));
         style.character().set_font_if_none(g != glyphs().end() ? glyphs().glyph_font(*g) : font());
@@ -1756,7 +1762,8 @@ namespace neogfx
     {
         if (cursor().position() == cursor().anchor())
         {
-            set_default_style(aStyle);
+            // style the text that is typed next; changing the default style here would restyle
+            // every character that still refers to it
             iNextStyle = aStyle;
         }
         else
