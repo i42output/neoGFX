@@ -997,7 +997,7 @@ int main(int argc, char* argv[])
                 ng::gradient{ ng::color::Yellow, ng::color::Blue, ng::gradient_direction::Vertical },
                 ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0_dip } };
             auto const sampleFont = ng::service<ng::i_app>().current_style().font().
-                with_size(16.0).with_style(ng::font_style::Bold);
+                with_size(16.0).with_style(ng::font_style::Bold).with_outline(ng::stroke{ 2.0_dip });
 
             auto& splitter = window.layoutTextWidgetCutoffs.emplace<ng::splitter>();
             auto& testPane = splitter.layout().emplace<ng::group_box>(std::string{ "Drag the splitter" });
