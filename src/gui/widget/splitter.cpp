@@ -63,12 +63,19 @@ namespace neogfx
             return neogfx::size_policy{size_constraint::Minimum, size_constraint::Expanding};
     }
 
-    i_widget& splitter::get_widget_at(const point& aPosition)
+    const i_widget& splitter::get_widget_at(const point& aPosition) const
     {
+        // the const overload is the one the hit testing of our parent recurses into: without it the
+        // separator is never found and the item either side of it takes the mouse
         auto s = separator_at(aPosition);
         if (s != std::nullopt)
             return *this;
         return widget::get_widget_at(aPosition);
+    }
+
+    i_widget& splitter::get_widget_at(const point& aPosition)
+    {
+        return const_cast<i_widget&>(to_const(*this).get_widget_at(aPosition));
     }
 
     void splitter::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
@@ -207,9 +214,28 @@ namespace neogfx
 
     std::optional<splitter::separator_type> splitter::separator_at(const point& aPosition) const
     {
+        // the gap between two items can be narrower than anyone can reasonably aim at, so the area
+        // that grabs the separator is never less than this
+        scalar const tolerance = 6.0_dip;
         for (std::uint32_t i = 1u; i < layout().count(); ++i)
-            if (separator_rect(layout(), {i - 1u, i}).contains(aPosition))
-                    return separator_type{ i - 1u, i };
+        {
+            auto separator = separator_rect(layout(), { i - 1u, i });
+            if (layout().direction() == layout_direction::Horizontal)
+            {
+                if (separator.cx < tolerance)
+                {
+                    separator.x -= (tolerance - separator.cx) / 2.0;
+                    separator.cx = tolerance;
+                }
+            }
+            else if (separator.cy < tolerance)
+            {
+                separator.y -= (tolerance - separator.cy) / 2.0;
+                separator.cy = tolerance;
+            }
+            if (separator.contains(aPosition))
+                return separator_type{ i - 1u, i };
+        }
         return {};
     }
 }

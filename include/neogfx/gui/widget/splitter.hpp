@@ -57,6 +57,7 @@ namespace neogfx
     public:
         neogfx::size_policy size_policy() const override;
     public:
+        const i_widget& get_widget_at(const point& aPosition) const override;
         i_widget& get_widget_at(const point& aPosition) override;
     public:
         void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
