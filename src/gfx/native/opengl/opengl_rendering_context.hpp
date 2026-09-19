@@ -295,6 +295,7 @@ namespace neogfx
         void set_offset(const optional_vec2& aOffset) final;
         void blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, neogfx::blending_mode aBlendingMode) final;
         bool gradient_set() const final;
+        void apply_gradients(i_gradient_shader& aShader, std::optional<gradient> const& aBase = {});
         void apply_gradient(i_gradient_shader& aShader) final;
     public:
         bool snap_to_pixel() const;
@@ -324,6 +325,9 @@ namespace neogfx
         void line_stipple_on(stipple const& aStipple);
         void line_stipple_off();
         void set_gradient(const gradient& aGradient);
+        void push_filter_gradient(const gradient& aGradient);
+        void pop_filter_gradient();
+        void apply_filter_gradient();
         void clear_gradient();
         bool is_subpixel_rendering_on() const;
         void subpixel_rendering_on();
@@ -432,6 +436,7 @@ namespace neogfx
         bool iSnapToPixel;
         bool iSnapToPixelUsesOffset;
         std::optional<gradient> iGradient;
+        std::vector<gradient> iFilterGradients;
         game::i_ecs* iEcs = nullptr;
         i64 iStepTime = 0;
         use_shader_program iUseDefaultShaderProgram; // must be last

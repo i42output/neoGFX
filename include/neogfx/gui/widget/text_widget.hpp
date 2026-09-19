@@ -42,6 +42,7 @@ namespace neogfx
         neogfx::size_policy size_policy() const override;
         neogfx::padding padding() const override;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+        void resized() override;
     public:
         void paint(i_graphics_context& aGc) const override;
     public:
@@ -74,6 +75,8 @@ namespace neogfx
     private:
         void init();
         const glyph_text_t& glyph_text() const;
+        void elide(i_graphics_context& aGc) const;
+        gradient fade_gradient(point const& aTextPosition, size const& aTextSize) const;
         void reset_cache();
     private:
         string iText;

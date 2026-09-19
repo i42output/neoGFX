@@ -444,6 +444,16 @@ namespace neogfx
         rendering_context().enqueue(graphics_operation::set_gradient{ aGradient.with_bounding_box(to_device_units(aBoundingBox)) });
     }
 
+    void graphics_context::push_filter_gradient(gradient const& aGradient, rect const& aBoundingBox)
+    {
+        rendering_context().enqueue(graphics_operation::push_filter_gradient{ aGradient.with_bounding_box(to_device_units(aBoundingBox)) });
+    }
+
+    void graphics_context::pop_filter_gradient()
+    {
+        rendering_context().enqueue(graphics_operation::pop_filter_gradient{});
+    }
+
     void graphics_context::set_pixel(point const& aPoint, color const& aColor)
     {
         rendering_context().enqueue(graphics_operation::set_pixel{ to_device_units(aPoint), aColor });

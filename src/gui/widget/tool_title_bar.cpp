@@ -34,7 +34,7 @@ namespace neogfx
             update_state();
         }, std::chrono::milliseconds{ 100 } },
         iLayout{ *this },
-        iTitle{ iLayout, aTitle, text_widget_type::SingleLine, text_widget_flags::CutOff },
+        iTitle{ iLayout, aTitle, text_widget_type::SingleLine, text_widget_flags::UseFade },
         iPinButton{ iLayout, push_button_style::TitleBar },
         iUnpinButton{ iLayout, push_button_style::TitleBar },
         iCloseButton{ iLayout, push_button_style::TitleBar },

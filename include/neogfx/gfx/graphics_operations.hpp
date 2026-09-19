@@ -185,6 +185,15 @@ namespace neogfx
             gradient gradient;
         };
 
+        struct push_filter_gradient
+        {
+            gradient gradient;
+        };
+
+        struct pop_filter_gradient
+        {
+        };
+
         struct set_pixel
         {
             point point;
@@ -375,6 +384,8 @@ namespace neogfx
             disable_stencil_update,
             clear_gradient,
             set_gradient,
+            push_filter_gradient,
+            pop_filter_gradient,
             set_pixel,
             blit,
             draw_pixel,
@@ -431,25 +442,27 @@ namespace neogfx
             DisableStencilUpdate        = 30,
             ClearGradient               = 31,
             SetGradient                 = 32,
-            SetPixel                    = 33,
-            Blit                        = 34,
-            DrawPixel                   = 35,
-            DrawLine                    = 36,
-            DrawTriangle                = 37,
-            DrawRect                    = 38,
-            DrawRoundedRect             = 39,
-            DrawEllipseRect             = 40,
-            DrawCheckerboard            = 41,
-            DrawCircle                  = 42,
-            DrawEllipse                 = 43,
-            DrawPie                     = 44,
-            DrawArc                     = 45,
-            DrawCubicBezier             = 46,
-            DrawPath                    = 47,
-            DrawShape                   = 48,
-            DrawEntities                = 49,
-            DrawGlyph                   = 50,
-            DrawMesh                    = 51
+            PushFilterGradient          = 33,
+            PopFilterGradient           = 34,
+            SetPixel                    = 35,
+            Blit                        = 36,
+            DrawPixel                   = 37,
+            DrawLine                    = 38,
+            DrawTriangle                = 39,
+            DrawRect                    = 40,
+            DrawRoundedRect             = 41,
+            DrawEllipseRect             = 42,
+            DrawCheckerboard            = 43,
+            DrawCircle                  = 44,
+            DrawEllipse                 = 45,
+            DrawPie                     = 46,
+            DrawArc                     = 47,
+            DrawCubicBezier             = 48,
+            DrawPath                    = 49,
+            DrawShape                   = 50,
+            DrawEntities                = 51,
+            DrawGlyph                   = 52,
+            DrawMesh                    = 53
         };
 
         std::string to_string(operation_type aOpType);

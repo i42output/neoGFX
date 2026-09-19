@@ -434,7 +434,7 @@ namespace neogfx
 
     bool opengl_rendering_context::gradient_set() const
     {
-        return !!iGradient;
+        return iGradient != std::nullopt || !iFilterGradients.empty();
     }
 
     void opengl_rendering_context::blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, neogfx::blending_mode aBlendingMode)
@@ -454,9 +454,24 @@ namespace neogfx
         draw_texture(aDestinationRect, aTexture, aSourceRect, {}, shaderEffect);
     }
 
+    void opengl_rendering_context::apply_gradients(i_gradient_shader& aShader, std::optional<gradient> const& aBase)
+    {
+        // a gradient set on the context, or brought by whatever is being drawn, colors it; a gradient
+        // composed onto the context filters its alpha, whether anything is coloring it or not. Each
+        // has geometry of its own, so the shader evaluates them separately rather than either being
+        // merged into the other; only the last composed gradient is used, as a second filter would
+        // need a third set of uniforms
+        auto const& base = (aBase != std::nullopt ? aBase : iGradient);
+
+        if (base != std::nullopt)
+            aShader.set_gradient(*this, *base);
+        else
+            aShader.clear_gradient();
+    }
+
     void opengl_rendering_context::apply_gradient(i_gradient_shader& aShader)
     {
-        aShader.set_gradient(*this, *iGradient);
+        apply_gradients(aShader);
     }
 
     bool opengl_rendering_context::snap_to_pixel() const
@@ -614,6 +629,14 @@ namespace neogfx
             case graphics_operation::SetGradient:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                     set_gradient(static_variant_cast<const graphics_operation::set_gradient&>(**op).gradient);
+                break;
+            case graphics_operation::PushFilterGradient:
+                for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
+                    push_filter_gradient(static_variant_cast<const graphics_operation::push_filter_gradient&>(**op).gradient);
+                break;
+            case graphics_operation::PopFilterGradient:
+                for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
+                    pop_filter_gradient();
                 break;
             case graphics_operation::ClearGradient:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
@@ -1132,6 +1155,30 @@ namespace neogfx
     void opengl_rendering_context::set_gradient(const gradient& aGradient)
     {
         iGradient = aGradient;
+    }
+
+    void opengl_rendering_context::push_filter_gradient(const gradient& aGradient)
+    {
+        iFilterGradients.push_back(aGradient);
+        apply_filter_gradient();
+    }
+
+    void opengl_rendering_context::apply_filter_gradient()
+    {
+        // a filter gradient outlives the gradients that color what is drawn, of which there is one
+        // per draw operation, so it is applied when it changes rather than with each of them
+        auto& shader = rendering_engine().default_shader_program().gradient_shader();
+        if (!iFilterGradients.empty())
+            shader.set_filter_gradient(*this, iFilterGradients.back());
+        else
+            shader.clear_filter_gradient();
+    }
+
+    void opengl_rendering_context::pop_filter_gradient()
+    {
+        if (!iFilterGradients.empty())
+            iFilterGradients.pop_back();
+        apply_filter_gradient();
     }
 
     void opengl_rendering_context::clear_gradient()
@@ -3112,9 +3159,12 @@ namespace neogfx
             }
 
             if (item->material->gradient)
-                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, *item->material->gradient);
-            else if (iGradient)
-                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, *iGradient);
+                // whatever is being drawn brought a gradient of its own: ours filter it rather than
+                // one replacing the other
+                apply_gradients(rendering_engine().default_shader_program().gradient_shader(),
+                    service<i_gradient_manager>().find_gradient(item->material->gradient->id.cookie()));
+            else if (gradient_set())
+                apply_gradients(rendering_engine().default_shader_program().gradient_shader());
             else
                 rendering_engine().default_shader_program().gradient_shader().clear_gradient();
 

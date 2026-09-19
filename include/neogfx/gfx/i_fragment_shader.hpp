@@ -50,6 +50,10 @@ namespace neogfx
         virtual void clear_gradient() = 0;
         virtual void set_gradient(i_rendering_context& aContext, gradient const& aGradient) = 0;
         virtual void set_gradient(i_rendering_context& aContext, game::gradient const& aGradient) = 0;
+        // a gradient composited over whatever is being drawn, contributing its alpha only; it is
+        // independent of the gradient above and stays in effect until cleared
+        virtual void clear_filter_gradient() = 0;
+        virtual void set_filter_gradient(i_rendering_context& aContext, gradient const& aGradient) = 0;
     };
 
     class i_texture_shader : public i_fragment_shader

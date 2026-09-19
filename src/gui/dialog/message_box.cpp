@@ -248,7 +248,7 @@ namespace neogfx
         iLayout3.set_alignment(neogfx::alignment::Left);
         iLayout3.set_padding(neogfx::padding{});
 
-        title_bar().title_widget().set_flags(title_bar().title_widget().flags() & ~text_widget_flags::CutOff);
+        title_bar().title_widget().set_flags(title_bar().title_widget().flags() & ~(text_widget_flags::UseEllipsis | text_widget_flags::UseFade));
 
         size maxTextSize{ service<i_window_manager>().desktop_rect(root()).width() / 3.0, size::max_dimension() };
         text().set_maximum_size(maxTextSize);

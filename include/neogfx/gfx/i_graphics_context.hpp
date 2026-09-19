@@ -251,6 +251,10 @@ namespace neogfx
     public:
         virtual void clear_gradient() = 0;
         virtual void set_gradient(gradient const& aGradient, rect const& aBoundingBox) = 0;
+        // adds a gradient that filters the alpha of what is drawn, leaving its color, and whatever
+        // gradient of its own it may have, as they are (see scoped_gradient_filter)
+        virtual void push_filter_gradient(gradient const& aGradient, rect const& aBoundingBox) = 0;
+        virtual void pop_filter_gradient() = 0;
         // shape
     public:
         virtual void set_pixel(point const& aPoint, color const& aColor) = 0;
@@ -775,6 +779,24 @@ namespace neogfx
         ~scoped_scissor_suppression()
         {
             iGc.scissor_on();
+        }
+    private:
+        i_graphics_context& iGc;
+    };
+
+    // filters the alpha of everything drawn while it is in scope; whatever is drawn keeps its own
+    // color and its own gradient, which the filter is evaluated independently of
+    class scoped_gradient_filter
+    {
+    public:
+        scoped_gradient_filter(i_graphics_context& aGc, gradient const& aGradient, rect const& aBoundingBox) :
+            iGc{ aGc }
+        {
+            iGc.push_filter_gradient(aGradient, aBoundingBox);
+        }
+        ~scoped_gradient_filter()
+        {
+            iGc.pop_filter_gradient();
         }
     private:
         i_graphics_context& iGc;

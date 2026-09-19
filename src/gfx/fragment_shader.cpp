@@ -33,6 +33,22 @@ namespace neogfx
         standard_fragment_shader{ aName }
     {
         disable();
+        // the shader refers to the filter gradient whether one is set or not, and a cached uniform
+        // only comes into being, with a type, once it has been given a value
+        uFilterGradientEnabled = false;
+        uFilterGradientGuiCoordinates = false;
+        uFilterGradientDirection = gradient_direction::Horizontal;
+        uFilterGradientAngle = 0.0f;
+        uFilterGradientStartFrom = -1;
+        uFilterGradientSize = gradient_size::ClosestSide;
+        uFilterGradientShape = gradient_shape::Ellipse;
+        uFilterGradientExponents = vec2f{ 2.0f, 2.0f };
+        uFilterGradientCenter = vec2f{};
+        uFilterGradientTile = false;
+        uFilterGradientTileParams = vec3i32{};
+        uFilterGradientColorCount = 0;
+        uFilterGradientColorRow = 0;
+        uFilterGradientBoundingBox = vec4f{};
     }
 
     void standard_gradient_shader::generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const
@@ -47,6 +63,47 @@ namespace neogfx
     void standard_gradient_shader::clear_gradient()
     {
         uGradientEnabled = false;
+    }
+
+    void standard_gradient_shader::clear_filter_gradient()
+    {
+        uFilterGradientEnabled = false;
+    }
+
+    void standard_gradient_shader::set_filter_gradient(i_rendering_context& aContext, gradient const& aGradient)
+    {
+        // a filter has to bring its own bounding box: the one the gradient above is evaluated
+        // against arrives with the vertices of whatever is being drawn
+        if (aGradient.bounding_box() == std::nullopt)
+        {
+            clear_filter_gradient();
+            return;
+        }
+        enable();
+        uFilterGradientGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
+        uFilterGradientDirection = aGradient.direction();
+        uFilterGradientAngle = std::holds_alternative<double>(aGradient.orientation()) ? static_cast<float>(static_variant_cast<double>(aGradient.orientation())) : 0.0f;
+        uFilterGradientStartFrom = std::holds_alternative<corner>(aGradient.orientation()) ? static_cast<int>(static_variant_cast<corner>(aGradient.orientation())) : -1;
+        uFilterGradientSize = aGradient.size();
+        uFilterGradientShape = aGradient.shape();
+        uFilterGradientExponents = (aGradient.exponents() != std::nullopt ? aGradient.exponents()->as<float>() : vec2f{ 2.0f, 2.0f });
+        basic_point<float> const gradientCenter = (aGradient.center() != std::nullopt ? *aGradient.center() : point{});
+        uFilterGradientCenter = vec2f{ gradientCenter.x, gradientCenter.y };
+        uFilterGradientTile = (aGradient.tile() != std::nullopt);
+        if (aGradient.tile() != std::nullopt)
+            uFilterGradientTileParams = vec3{ aGradient.tile()->extents.cx, aGradient.tile()->extents.cy, aGradient.tile()->aligned ? 1.0 : 0.0 }.as<std::int32_t>();
+        else
+            uFilterGradientTileParams = vec3i32{};
+        auto const& boundingBox = *aGradient.bounding_box();
+        uFilterGradientBoundingBox = vec4f{
+            static_cast<float>(boundingBox.left()), static_cast<float>(boundingBox.top()),
+            static_cast<float>(boundingBox.right()), static_cast<float>(boundingBox.bottom()) };
+        auto const& colorsSampler = aGradient.colors().sampler();
+        uFilterGradientColorCount = static_cast<int>(colorsSampler.data().extents().cx);
+        uFilterGradientColorRow = static_cast<int>(aGradient.colors().sampler_row());
+        colorsSampler.data().bind(static_cast<std::uint32_t>(reserved_texture_unit::ColorSampler));
+        uGradientColors = sampler2DRect{ static_cast<std::uint32_t>(reserved_texture_unit::ColorSampler) };
+        uFilterGradientEnabled = true;
     }
 
     void standard_gradient_shader::set_gradient(i_rendering_context& aContext, gradient const& aGradient)

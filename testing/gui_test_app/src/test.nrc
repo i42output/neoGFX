@@ -1097,6 +1097,13 @@
                         }
                     }
                     tab_page: {
+                        id: pageTextWidgetCutoffs
+                        tab_text: "Text Widget Cutoffs"
+                        vertical_layout: {
+                            id: layoutTextWidgetCutoffs
+                        }
+                    }
+                    tab_page: {
                         id: pageFoo
                         tab_text: "Foo"
                         tab_image: ":/test/resources/channel.png"

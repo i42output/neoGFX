@@ -62,6 +62,8 @@ namespace neogfx
             case DisableStencilUpdate: return "DisableStencilUpdate";
             case ClearGradient: return "ClearGradient";
             case SetGradient: return "SetGradient";
+            case PushFilterGradient: return "PushFilterGradient";
+            case PopFilterGradient: return "PopFilterGradient";
             case SetPixel: return "SetPixel";
             case Blit: return "Blit";
             case DrawPixel: return "DrawPixel";

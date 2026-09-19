@@ -113,6 +113,8 @@ namespace neogfx
         void clear_gradient() final;
         void set_gradient(i_rendering_context& aContext, gradient const& aGradient) final;
         void set_gradient(i_rendering_context& aContext, game::gradient const& aGradient) final;
+        void clear_filter_gradient() final;
+        void set_filter_gradient(i_rendering_context& aContext, gradient const& aGradient) final;
     private:
         cache_uniform(uGradientGuiCoordinates)
         cache_uniform(uGradientDirection)
@@ -130,6 +132,20 @@ namespace neogfx
         cache_uniform(uGradientFilterSize)
         cache_uniform(uGradientFilter)
         cache_uniform(uGradientEnabled)
+        cache_uniform(uFilterGradientGuiCoordinates)
+        cache_uniform(uFilterGradientDirection)
+        cache_uniform(uFilterGradientAngle)
+        cache_uniform(uFilterGradientStartFrom)
+        cache_uniform(uFilterGradientSize)
+        cache_uniform(uFilterGradientShape)
+        cache_uniform(uFilterGradientExponents)
+        cache_uniform(uFilterGradientCenter)
+        cache_uniform(uFilterGradientTile)
+        cache_uniform(uFilterGradientTileParams)
+        cache_uniform(uFilterGradientColorCount)
+        cache_uniform(uFilterGradientColorRow)
+        cache_uniform(uFilterGradientBoundingBox)
+        cache_uniform(uFilterGradientEnabled)
     };
 
     class standard_texture_shader : public standard_fragment_shader<i_texture_shader>

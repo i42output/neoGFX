@@ -19,7 +19,10 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <algorithm>
+#include <neolib/core/string_utf.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gfx/gradient.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/text_widget.hpp>
@@ -100,9 +103,10 @@ namespace neogfx
                 result.cx = std::min(std::ceil(result.cx), maximum_size().cx);
                 result.cy = std::min(std::ceil(result.cy), maximum_size().cy);
             }
-            if ((flags() & text_widget_flags::CutOff) == text_widget_flags::CutOff)
+            if ((flags() & text_widget_flags::CutOff) == text_widget_flags::CutOff ||
+                (flags() & text_widget_flags::UseEllipsis) == text_widget_flags::UseEllipsis ||
+                (flags() & text_widget_flags::UseFade) == text_widget_flags::UseFade)
                 result.cx = 1.0;
-            // todo: ellipsis
             if (result.cx == 0.0 && (flags() & text_widget_flags::TakesSpaceWhenEmpty) == text_widget_flags::TakesSpaceWhenEmpty)
                 result.cx = 1.0;
 #ifdef NEOGFX_DEBUG
@@ -110,6 +114,17 @@ namespace neogfx
                 service<debug::logger>() << neolib::logger::severity::Debug << "text_widget::minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
 #endif // NEOGFX_DEBUG
             return units_converter{ *this }.from_device_units(result);
+        }
+    }
+
+    void text_widget::resized()
+    {
+        widget::resized();
+        // the text is elided to fit the width we have just been given
+        if (!multi_line() && (flags() & (text_widget_flags::UseEllipsis | text_widget_flags::UseFade)) != text_widget_flags::None)
+        {
+            reset_cache();
+            update();
         }
     }
 
@@ -166,6 +181,12 @@ namespace neogfx
 
         textPosition += size{ textEffectOutset };
 
+        std::optional<scoped_gradient_filter> fade;
+        if (!multi_line() && (flags() & text_widget_flags::UseFade) == text_widget_flags::UseFade &&
+            textSize.cx > client_rect(false).width())
+            fade.emplace(aGc, fade_gradient(textPosition, textSize),
+                rect{ textPosition, textSize } + aGc.origin());
+
         if (iCacheTexture)
         {
             aGc.draw_texture(point{}, iCacheTexture.value());
@@ -194,6 +215,51 @@ namespace neogfx
             }
             aGc.draw_texture(point{}, iCacheTexture.value());
         }
+    }
+
+    gradient text_widget::fade_gradient(point const& aTextPosition, size const& aTextSize) const
+    {
+        auto const clientRect = client_rect(false);
+
+        // fade the alpha out at whichever of our edges the text runs past, which depends on how the
+        // text is aligned; the positions are fractions of the text, which is what the bounding box is
+        auto const fadeWidth = std::min(font().height(), aTextSize.cx) / aTextSize.cx;
+        auto const leadingEdge = std::clamp((clientRect.left() - aTextPosition.x) / aTextSize.cx, 0.0, 1.0);
+        auto const trailingEdge = std::clamp((clientRect.right() - aTextPosition.x) / aTextSize.cx, 0.0, 1.0);
+        bool const fadeLeading = (leadingEdge > 0.0);
+        bool const fadeTrailing = (trailingEdge < 1.0);
+
+        gradient::alpha_stop_list alphaStops;
+        if (fadeLeading)
+        {
+            alphaStops.push_back(gradient::alpha_stop{ leadingEdge, 0_u8 });
+            alphaStops.push_back(gradient::alpha_stop{ std::min(leadingEdge + fadeWidth, 1.0), 255_u8 });
+        }
+        else
+            alphaStops.push_back(gradient::alpha_stop{ 0.0, 255_u8 });
+        if (fadeTrailing)
+        {
+            alphaStops.push_back(gradient::alpha_stop{ std::max(trailingEdge - fadeWidth, 0.0), 255_u8 });
+            alphaStops.push_back(gradient::alpha_stop{ trailingEdge, 0_u8 });
+        }
+        else
+            alphaStops.push_back(gradient::alpha_stop{ 1.0, 255_u8 });
+
+        // too narrow for both fades to fit between the edges, so fade the lot
+        if (!std::is_sorted(alphaStops.begin(), alphaStops.end(),
+            [](auto const& aLhs, auto const& aRhs) { return aLhs.first() < aRhs.first(); }))
+        {
+            alphaStops.clear();
+            alphaStops.push_back(gradient::alpha_stop{ 0.0, 255_u8 });
+            alphaStops.push_back(gradient::alpha_stop{ 1.0, 0_u8 });
+        }
+
+        // the colors are immaterial: a gradient composed onto the context filters the alpha of what
+        // is drawn and leaves its color, gradient or not, as it is
+        return gradient{
+            gradient::color_stop_list{ { 0.0, color::White }, { 1.0, color::White } },
+            alphaStops,
+            gradient_direction::Horizontal };
     }
 
     void text_widget::set_font(optional_font const& aFont)
@@ -462,9 +528,58 @@ namespace neogfx
                     iGlyphText = gc.to_multiline_glyph_text(iText, font(), 0.0, iAlignment & neogfx::alignment::Horizontal);
             }
             else
+            {
                 iGlyphText = gc.to_glyph_text(iText, font());
+                // the fade takes precedence: it truncates by fading the text out, not by ending it
+                if ((flags() & text_widget_flags::UseEllipsis) == text_widget_flags::UseEllipsis &&
+                    (flags() & text_widget_flags::UseFade) != text_widget_flags::UseFade)
+                    elide(gc);
+            }
         }
         return iGlyphText;
+    }
+
+    void text_widget::elide(i_graphics_context& aGc) const
+    {
+        // the extent of the text includes what the outline and the text effects add to it
+        scalar decorations = font().info().outline().radius * 2.0;
+        scalar textEffectOutset = 0.0;
+        if (text_format().effect())
+            textEffectOutset = std::max(textEffectOutset, text_format().effect()->outset());
+        if (text_format().effect2())
+            textEffectOutset = std::max(textEffectOutset, text_format().effect2()->outset());
+        decorations += textEffectOutset * 2.0;
+
+        auto const availableWidth = client_rect(false).width() - decorations;
+
+        if (availableWidth <= 0.0 || aGc.glyph_text_extent(std::get<neogfx::glyph_text>(iGlyphText)).cx <= availableWidth)
+            return;
+
+        char32_t constexpr ELLIPSIS = U'\x2026';
+
+        auto const text = neolib::utf8_to_utf32(iText.to_std_string());
+
+        // the most characters that fit with the ellipsis in tow
+        std::size_t characters = 0u;
+        std::size_t lo = 0u;
+        std::size_t hi = text.size();
+        while (lo <= hi)
+        {
+            auto const candidateLength = lo + (hi - lo) / 2u;
+            auto const candidate = aGc.to_glyph_text(text.substr(0u, candidateLength) + ELLIPSIS, font());
+            if (aGc.glyph_text_extent(candidate).cx <= availableWidth)
+            {
+                characters = candidateLength;
+                lo = candidateLength + 1u;
+            }
+            else if (candidateLength == 0u)
+                break;
+            else
+                hi = candidateLength - 1u;
+        }
+
+        iGlyphText = aGc.to_glyph_text(text.substr(0u, characters) + ELLIPSIS, font());
+        iTextExtent = std::nullopt;
     }
 
     void text_widget::reset_cache()

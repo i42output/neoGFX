@@ -31,7 +31,7 @@ namespace neogfx
         iInnerLayout{ iOuterLayout },
         iButtonLayout{ iOuterLayout },
         iIcon{ iInnerLayout, service<i_app>().default_window_icon() },
-        iTitle{ iInnerLayout, aTitle, text_widget_type::SingleLine, text_widget_flags::CutOff },
+        iTitle{ iInnerLayout, aTitle, text_widget_type::SingleLine, text_widget_flags::UseFade },
         iButtonSpacer{ iButtonLayout },
         iMinimizeButton{ iButtonLayout, push_button_style::TitleBar },
         iMaximizeButton{ iButtonLayout, push_button_style::TitleBar },

@@ -158,6 +158,8 @@ namespace neogfx
     public:
         void clear_gradient() final;
         void set_gradient(gradient const& aGradient, rect const& aBoundingBox) final;
+        void push_filter_gradient(gradient const& aGradient, rect const& aBoundingBox) final;
+        void pop_filter_gradient() final;
         // shape
     public:
         void set_pixel(point const& aPoint, color const& aColor) final;

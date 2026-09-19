@@ -2,6 +2,10 @@
 #include <neolib/chrono/fast_clock.hpp>
 
 #include "test.hpp"
+#include <neogfx/gfx/gradient.hpp>
+#include <neogfx/gui/widget/group_box.hpp>
+#include <neogfx/gui/widget/splitter.hpp>
+#include <neogfx/gui/widget/text_widget.hpp>
 
 void signal_handler(int signal)
 {
@@ -962,6 +966,94 @@ int main(int argc, char* argv[])
         });
 
         ng::service<ng::i_window_manager>().restore_mouse_cursor(window);
+
+        // every way a text_widget can deal with not being given the width its text wants; the pane
+        // they are in is what gives it to them, so dragging the splitter is what cuts the text off
+        {
+            ng::string const sampleText{ "The quick brown fox jumps over the lazy dog" };
+
+            struct cutoff_variant { std::string flags; ng::text_widget_flags value; std::string does; };
+            std::vector<cutoff_variant> const cutoffVariants
+            {
+                { "None", ng::text_widget_flags::None,
+                    "no truncation: the widget keeps the width of its text, maximum size or not" },
+                { "CutOff", ng::text_widget_flags::CutOff,
+                    "the text is simply clipped at the widget's edge" },
+                { "UseEllipsis", ng::text_widget_flags::UseEllipsis,
+                    "the text ends with an ellipsis at the widget's edge" },
+                { "UseFade", ng::text_widget_flags::UseFade,
+                    "the text fades out at whichever of the widget's edges it runs past" }
+            };
+
+            struct alignment_variant { std::string name; ng::alignment value; };
+            std::vector<alignment_variant> const alignmentVariants
+            {
+                { "left aligned, so it runs past the right edge", ng::alignment::Left },
+                { "centered, so it runs past both edges", ng::alignment::Center },
+                { "right aligned, so it runs past the left edge", ng::alignment::Right }
+            };
+
+            auto const sampleFormat = ng::text_format{
+                ng::gradient{ ng::color::Yellow, ng::color::Blue, ng::gradient_direction::Vertical },
+                ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0_dip } };
+            auto const sampleFont = ng::service<ng::i_app>().current_style().font().
+                with_size(16.0).with_style(ng::font_style::Bold);
+
+            auto& splitter = window.layoutTextWidgetCutoffs.emplace<ng::splitter>();
+            auto& testPane = splitter.layout().emplace<ng::group_box>(std::string{ "Drag the splitter" });
+            testPane.set_size_policy(ng::size_constraint::Expanding);
+            auto& testLayout = testPane.item_layout();
+            auto& sparePane = splitter.layout().emplace<ng::group_box>(std::string{ "Spare room" });
+            sparePane.set_size_policy(ng::size_constraint::Expanding);
+
+            {
+                auto& caption = testLayout.emplace<ng::text_widget>(
+                    ng::string{ "The text as it is, with no flags set:" },
+                    ng::text_widget_type::SingleLine, ng::text_widget_flags::CutOff);
+                caption.set_alignment(ng::alignment::Left | ng::alignment::VCenter);
+                caption.set_size_policy(ng::size_constraint::Expanding);
+                auto& row = testLayout.emplace<ng::horizontal_layout>();
+                auto& whole = row.emplace<ng::text_widget>(sampleText, ng::text_widget_type::SingleLine);
+                whole.set_alignment(ng::alignment::Left | ng::alignment::VCenter);
+                whole.set_font(sampleFont);
+                whole.set_text_format(sampleFormat);
+                row.emplace<ng::horizontal_spacer>();
+            }
+
+            for (auto const& cutoffVariant : cutoffVariants)
+            {
+                auto& heading = testLayout.emplace<ng::text_widget>(
+                    ng::string{ "text_widget_flags::" + cutoffVariant.flags + " -- " + cutoffVariant.does },
+                    ng::text_widget_type::SingleLine, ng::text_widget_flags::CutOff);
+                heading.set_font(heading.font().with_style(ng::font_style::Bold));
+                heading.set_alignment(ng::alignment::Left | ng::alignment::VCenter);
+                heading.set_size_policy(ng::size_constraint::Expanding);
+
+                for (auto const& alignmentVariant : alignmentVariants)
+                {
+                    auto& caption = testLayout.emplace<ng::text_widget>(
+                        ng::string{ alignmentVariant.name + ":" },
+                        ng::text_widget_type::SingleLine, ng::text_widget_flags::CutOff);
+                    caption.set_alignment(ng::alignment::Left | ng::alignment::VCenter);
+                    caption.set_size_policy(ng::size_constraint::Expanding);
+                    auto& row = testLayout.emplace<ng::horizontal_layout>();
+                    auto& truncated = row.emplace<ng::text_widget>(
+                        sampleText, ng::text_widget_type::SingleLine, cutoffVariant.value);
+                    truncated.set_alignment(alignmentVariant.value | ng::alignment::VCenter);
+                    truncated.set_font(sampleFont);
+                    // a vertical gradient with a black outline: the fade is horizontal and the outline
+                    // is a color, so this is the text keeping its own ink, geometry and effects while
+                    // the fade contributes nothing but alpha
+                    truncated.set_text_format(sampleFormat);
+                    // Expanding, otherwise the layout gives these their minimum size, which these
+                    // flags deliberately make tiny, rather than the width the window has to give
+                    truncated.set_size_policy(ng::size_constraint::Expanding);
+                    row.emplace<ng::horizontal_spacer>();
+                }
+            }
+
+            testLayout.emplace<ng::vertical_spacer>();
+        }
 
         window.layoutLots.set_padding(ng::padding{});
 
