@@ -255,6 +255,10 @@ namespace neogfx
         // gradient of its own it may have, as they are (see scoped_gradient_filter)
         virtual void push_filter_gradient(gradient const& aGradient, rect const& aBoundingBox) = 0;
         virtual void pop_filter_gradient() = 0;
+        // transform
+    public:
+        virtual optional_mat44 transform() const = 0; ///< @todo
+        virtual void set_transform(optional_mat44 const& aTransform = {}) = 0; ///< @todo
         // shape
     public:
         virtual void set_pixel(point const& aPoint, color const& aColor) = 0;
@@ -276,8 +280,6 @@ namespace neogfx
         virtual void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer = 0) = 0;
         virtual void draw_focus_rect(rect const& aRect) = 0;
         // text
-        /// @todo: polymorphic interface requires `i_string` not `string`.
-        /// @todo: integrate polymorphic i_u32string when available.
     public:
         virtual font const& default_font() const = 0;
         virtual void set_default_font(font const& aDefaultFont) = 0;
@@ -376,10 +378,13 @@ namespace neogfx
         virtual void draw_texture(game::mesh const& aMesh, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) = 0;
         // 3D
     public:
-        // todo: set_transformation et al
         virtual void draw_mesh(game::mesh const& aMesh, game::material const& aMaterial, optional_mat44 const& aTransformation = optional_mat44{}, std::optional<game::filter> const& aFilter = {}) = 0;
         // helpers
     public:
+        void rotate_2d(scalar aAngle_deg)
+        {
+            /// @todo
+        }
         size text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd) const
         {
             return text_extent(std::to_address(aTextBegin), std::to_address(aTextEnd));
