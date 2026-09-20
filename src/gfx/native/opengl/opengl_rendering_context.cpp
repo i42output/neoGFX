@@ -1527,6 +1527,14 @@ namespace neogfx
                         static_variant_cast<color>(drawOp.fill).alpha() == 0xFF) ||
                         std::holds_alternative<std::monostate>(drawOp.fill)))
                 {
+                    // scissor_rect() is stored in device (y-up) space, so any comparison with rc
+                    // must use rc transformed into that same space (see #217)
+                    auto const& fixedRc = rc.with_y(
+                        logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame ?
+                        rc.y :
+                        rendering_area(false).cy - rc.cy - rc.y) +
+                        (render_target().target_type() == render_target_type::Texture ?
+                            point{ render_target().target_texture().bleed_guard() } : point{});
                     bool optimise = false;
                     if (!logical_operation_active() && iFastState.opacity == 1.0 && (!iStencilEnabled || iUpdatingStencil))
                     {
@@ -1535,8 +1543,8 @@ namespace neogfx
                             optimise = true;
                         else if (scissor_rect() != std::nullopt)
                         {
-                            auto const& tl = scissor_rect().value().top_left() - rc.top_left();
-                            auto const& br = rc.bottom_right() - scissor_rect().value().bottom_right();
+                            auto const& tl = scissor_rect().value().top_left() - fixedRc.top_left();
+                            auto const& br = fixedRc.bottom_right() - scissor_rect().value().bottom_right();
                             if (tl.x > penWidth && tl.y > penWidth && br.x > penWidth && br.y > penWidth)
                                 optimise = true;
                         }
@@ -1545,12 +1553,6 @@ namespace neogfx
                     {
                         if (std::holds_alternative<color>(drawOp.fill))
                         {
-                            auto const& fixedRc = rc.with_y(
-                                logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame ?
-                                rc.y :
-                                rendering_area(false).cy - rc.cy - rc.y) +
-                                (render_target().target_type() == render_target_type::Texture ?
-                                    point{ render_target().target_texture().bleed_guard() } : point{});
                             apply_scissor(fixedRc.intersection(scissor_rect() ? *scissor_rect() : fixedRc));
                             clear(static_variant_cast<color>(drawOp.fill));
                             if (iUpdatingStencil)
