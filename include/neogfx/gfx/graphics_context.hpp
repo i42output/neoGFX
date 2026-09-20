@@ -76,6 +76,7 @@ namespace neogfx
         vec2 to_device_units(const vec2& aValue) const final;
         rect to_device_units(rect const& aValue) const final;
         path to_device_units(const path& aValue) const final;
+        mat44 to_device_units(mat44 const& aTransform) const;
         delta from_device_units(const delta& aValue) const final;
         size from_device_units(size const& aValue) const final;
         point from_device_units(point const& aValue) const final;
@@ -160,6 +161,12 @@ namespace neogfx
         void set_gradient(gradient const& aGradient, rect const& aBoundingBox) final;
         void push_filter_gradient(gradient const& aGradient, rect const& aBoundingBox) final;
         void pop_filter_gradient() final;
+        // transform
+    public:
+        optional_mat44 transform() const final;
+        void set_transform(optional_mat44 const& aTransform = {}) final;
+        void push_transform(mat44 const& aTransform) final;
+        void pop_transform() final;
         // shape
     public:
         void set_pixel(point const& aPoint, color const& aColor) final;

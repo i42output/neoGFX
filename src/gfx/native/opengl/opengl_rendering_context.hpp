@@ -293,6 +293,10 @@ namespace neogfx
         void set_origin(const point& aOrigin) final;
         vec2 offset() const final;
         void set_offset(const optional_vec2& aOffset) final;
+        optional_mat44 transform() const final;
+        void set_transform(const optional_mat44& aTransform = {}) final;
+        void push_transform(const mat44& aTransform) final;
+        void pop_transform() final;
         void blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, neogfx::blending_mode aBlendingMode) final;
         bool gradient_set() const final;
         void apply_gradients(i_gradient_shader& aShader, std::optional<gradient> const& aBase = {});
@@ -433,6 +437,9 @@ namespace neogfx
         std::optional<std::uint8_t> iLastDrawGlyphFallbackFontIndex;
         sink iSink;
         optional_vec2 iOffset;
+        // each entry is the product of everything pushed up to and including it, so the current
+        // transform is simply the back of the stack
+        std::vector<mat44> iTransforms;
         bool iSnapToPixel;
         bool iSnapToPixelUsesOffset;
         std::optional<gradient> iGradient;

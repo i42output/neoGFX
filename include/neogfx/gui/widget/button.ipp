@@ -27,126 +27,126 @@ namespace neogfx
 {
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(alignment aAlignment) :
-        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
+        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(string const& aText, alignment aAlignment) :
-        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
+        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aText, label_type::MultiLine, aAlignment }
     {
         init();
     }
     
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(const i_texture& aTexture, alignment aAlignment) :
-        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
+        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(const i_image& aImage, alignment aAlignment) :
-        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
+        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aImage, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(string const& aText, const i_texture& aTexture, alignment aAlignment) :
-        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
+        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aText, aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(string const& aText, const i_image& aImage, alignment aAlignment) :
-        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
+        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aText, aImage, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_widget& aParent, alignment aAlignment) :
-        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
+        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_widget& aParent, string const& aText, alignment aAlignment) :
-        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
+        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aText, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_widget& aParent, const i_texture& aTexture, alignment aAlignment) :
-        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
+        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_widget& aParent, const i_image& aImage, alignment aAlignment) :
-        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
+        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aImage, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_widget& aParent, string const& aText, const i_texture& aTexture, alignment aAlignment) :
-        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
+        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aText, aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_widget& aParent, string const& aText, const i_image& aImage, alignment aAlignment) :
-        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
+        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aText, aImage, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_layout& aLayout, alignment aAlignment) :
-        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
+        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_layout& aLayout, string const& aText, alignment aAlignment) :
-        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
+        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aText, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_layout& aLayout, const i_texture& aTexture, alignment aAlignment) :
-        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aTexture, label_type::MultiLine, aAlignment }
+        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_layout& aLayout, const i_image& aImage, alignment aAlignment) :
-        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
+        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aImage, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_layout& aLayout, string const& aText, const i_texture& aTexture, alignment aAlignment) :
-        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
+        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aText, aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
     inline button<ButtonInterface>::button(i_layout& aLayout, string const& aText, const i_image& aImage, alignment aAlignment) :
-        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
+        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLabel{ make_button_layout(neogfx::layout_direction::Horizontal), aText, aImage, label_type::MultiLine, aAlignment }
     {
         init();
     }
@@ -179,6 +179,27 @@ namespace neogfx
         if (size_policy().vertical_constraint() != size_constraint::Minimum)
             result.cy = size::max_dimension();
         return result;
+    }
+
+    template <typename ButtonInterface>
+    inline i_layout& button<ButtonInterface>::make_button_layout(neogfx::layout_direction aDirection)
+    {
+        ref_ptr<i_layout> newLayout = (aDirection == neogfx::layout_direction::Vertical ?
+            ref_ptr<i_layout>{ make_ref<vertical_layout>() } :
+            ref_ptr<i_layout>{ make_ref<horizontal_layout>() });
+        // set_layout takes ownership and moves any items the outgoing layout was holding across
+        as_widget().set_layout(newLayout);
+        as_widget().layout().set_padding(neogfx::padding{});
+        as_widget().layout().set_alignment(alignment::Center | alignment::VCenter);
+        return as_widget().layout();
+    }
+
+    template <typename ButtonInterface>
+    inline void button<ButtonInterface>::set_layout_direction(neogfx::layout_direction aDirection)
+    {
+        if (as_widget().has_layout() && as_widget().layout().direction() == aDirection)
+            return;
+        make_button_layout(aDirection);
     }
 
     template <typename ButtonInterface>
@@ -500,8 +521,6 @@ namespace neogfx
         Unchecked.set_trigger_type(trigger_type::Asynchronous);
         Indeterminate.set_trigger_type(trigger_type::Asynchronous);
 
-        as_widget().layout().set_padding(neogfx::padding{});
-        as_widget().layout().set_alignment(alignment::Center | alignment::VCenter);
         as_widget().set_focus_policy(focus_policy::TabFocus);
 
         auto label_text_updated = [this]()

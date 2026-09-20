@@ -238,6 +238,7 @@ namespace neogfx
             }
             else
                 iCloseButton.reset();
+            update_orientation();
         }
     }
 
@@ -444,7 +445,49 @@ namespace neogfx
         };
         iSink += service<i_surface_manager>().dpi_changed([this, update_image](i_surface&) { update_image(); });
         update_image();
+        iSink += iContainer.style_changed([this]() { update_orientation(); });
+        update_orientation();
         iContainer.adding_tab(*this);
+    }
+
+    void tab_button::update_orientation()
+    {
+        auto const style = container().tab_container_style();
+        bool const vertical = (style & tab_container_style::TabOrientationMask) == tab_container_style::TabOrientationVertical;
+
+        bool const leftHandTabs = (style & tab_container_style::TabAlignmentMask) == tab_container_style::TabAlignmentLeft;
+
+        // the baseline faces the container border, so left hand tabs read top to bottom and right
+        // hand tabs read bottom to top
+        angle rotation = 0.0;
+        if (vertical)
+            rotation = (leftHandTabs ? to_rad(90.0) : -to_rad(90.0));
+
+        text_widget().set_rotation(rotation);
+        image_widget().set_rotation(rotation);
+
+        // the image leads in reading order, which runs up the tab when the text reads bottom to top
+        if (rotation == 0.0)
+            label().set_placement(label_placement::ImageTextHorizontal);
+        else if (rotation < 0.0)
+            label().set_placement(label_placement::TextImageVertical);
+        else
+            label().set_placement(label_placement::ImageTextVertical);
+
+        // we lay out the label and the close button; that line runs along the tab, so it is
+        // vertical when the text is and horizontal otherwise
+        set_layout_direction(rotation == 0.0 ?
+            neogfx::layout_direction::Horizontal : neogfx::layout_direction::Vertical);
+
+        // the close button goes at the top for left hand tabs and at the bottom for right hand ones
+        bool const closeButtonFirst = (vertical && leftHandTabs);
+
+        layout().remove_all();
+        if (iCloseButton && closeButtonFirst)
+            layout().add(*iCloseButton);
+        layout().add(label());
+        if (iCloseButton && !closeButtonFirst)
+            layout().add(*iCloseButton);
     }
 
     void tab_button::update_appearance()

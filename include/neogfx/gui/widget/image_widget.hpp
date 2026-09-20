@@ -59,6 +59,8 @@ namespace neogfx
         void set_image_color(const color_or_gradient& aImageColor) override;
         void set_aspect_ratio(neogfx::aspect_ratio aAspectRatio) override;
         void set_placement(cardinal aPlacement) override;
+        angle rotation() const override;
+        void set_rotation(angle aRotation) override;
         void set_dpi_auto_scale(bool aDpiAutoScale) override;
     public:
         rect placement_rect() const;
@@ -68,6 +70,7 @@ namespace neogfx
         color_or_gradient iColor;
         neogfx::aspect_ratio iAspectRatio;
         cardinal iPlacement;
+        angle iRotation = 0.0;
         bool iDpiAutoScale;
     };
 }

@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <cmath>
 #include <memory>
 #include <numbers>
 #ifdef _WIN32
@@ -255,10 +256,6 @@ namespace neogfx
         // gradient of its own it may have, as they are (see scoped_gradient_filter)
         virtual void push_filter_gradient(gradient const& aGradient, rect const& aBoundingBox) = 0;
         virtual void pop_filter_gradient() = 0;
-        // transform
-    public:
-        virtual optional_mat44 transform() const = 0; ///< @todo
-        virtual void set_transform(optional_mat44 const& aTransform = {}) = 0; ///< @todo
         // shape
     public:
         virtual void set_pixel(point const& aPoint, color const& aColor) = 0;
@@ -660,6 +657,47 @@ namespace neogfx
     private:
         i_graphics_context& iGc;
         point iPreviousOrigin;
+    };
+
+    class scoped_transform
+    {
+    public:
+        // the transform is expressed in the coordinate space of the graphics context, i.e. relative
+        // to its origin; it composes with (rather than replaces) any transform already in effect
+        scoped_transform(i_graphics_context& aGc, mat44 const& aTransform) :
+            iGc{ aGc }
+        {
+            iGc.push_transform(aTransform);
+        }
+        // rotation about aPivot; a positive angle is clockwise in the GUI coordinate system
+        scoped_transform(i_graphics_context& aGc, angle aAngle, point const& aPivot) :
+            scoped_transform{ aGc, rotation(aAngle, aPivot) }
+        {
+        }
+        ~scoped_transform()
+        {
+            iGc.pop_transform();
+        }
+    public:
+        // the extents of the axis-aligned box bounding aExtents once rotated by aAngle
+        static size rotated_extents(size const& aExtents, angle aAngle)
+        {
+            auto const c = std::abs(std::cos(aAngle));
+            auto const s = std::abs(std::sin(aAngle));
+            return size{ aExtents.cx * c + aExtents.cy * s, aExtents.cx * s + aExtents.cy * c };
+        }
+        static mat44 rotation(angle aAngle, point const& aPivot = {})
+        {
+            auto const c = std::cos(aAngle);
+            auto const s = std::sin(aAngle);
+            return mat44{
+                { c, s, 0.0, 0.0 },
+                { -s, c, 0.0, 0.0 },
+                { 0.0, 0.0, 1.0, 0.0 },
+                { aPivot.x - c * aPivot.x + s * aPivot.y, aPivot.y - s * aPivot.x - c * aPivot.y, 0.0, 1.0 } };
+        }
+    private:
+        i_graphics_context& iGc;
     };
 
     class scoped_render_widget

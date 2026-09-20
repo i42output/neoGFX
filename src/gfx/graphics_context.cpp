@@ -454,6 +454,43 @@ namespace neogfx
         rendering_context().enqueue(graphics_operation::pop_filter_gradient{});
     }
 
+    mat44 graphics_context::to_device_units(mat44 const& aTransform) const
+    {
+        // the linear part is unit agnostic; the translation column is not
+        auto result = aTransform;
+        auto const translation = to_device_units(point{ result[3][0], result[3][1] });
+        result[3][0] = translation.x;
+        result[3][1] = translation.y;
+        return result;
+    }
+
+    optional_mat44 graphics_context::transform() const
+    {
+        // the stack lives in the rendering context, so the queue has to be drained before it can
+        // answer for anything we have enqueued since
+        if (attached() && active())
+            rendering_context().flush();
+        return rendering_context().transform();
+    }
+
+    void graphics_context::set_transform(optional_mat44 const& aTransform)
+    {
+        if (aTransform)
+            rendering_context().enqueue(graphics_operation::set_transform{ to_device_units(*aTransform) });
+        else
+            rendering_context().enqueue(graphics_operation::set_transform{});
+    }
+
+    void graphics_context::push_transform(mat44 const& aTransform)
+    {
+        rendering_context().enqueue(graphics_operation::push_transform{ to_device_units(aTransform) });
+    }
+
+    void graphics_context::pop_transform()
+    {
+        rendering_context().enqueue(graphics_operation::pop_transform{});
+    }
+
     void graphics_context::set_pixel(point const& aPoint, color const& aColor)
     {
         rendering_context().enqueue(graphics_operation::set_pixel{ to_device_units(aPoint), aColor });

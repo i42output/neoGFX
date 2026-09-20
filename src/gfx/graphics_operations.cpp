@@ -82,6 +82,9 @@ namespace neogfx
             case DrawEntities: return "DrawEntities";
             case DrawGlyph: return "DrawGlyph";
             case DrawMesh: return "DrawMesh";
+            case SetTransform: return "SetTransform";
+            case PushTransform: return "PushTransform";
+            case PopTransform: return "PopTransform";
             default: return "";
             }
         }

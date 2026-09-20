@@ -312,14 +312,27 @@ int main(int argc, char* argv[])
 
         window.button1.clicked([&window]()
         {
-            if ((window.tabPages.tab_container_style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentTop)
-                window.tabPages.set_tab_container_style(ng::tab_container_style::TabAlignmentBottom);
-            else if ((window.tabPages.tab_container_style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentBottom)
-                window.tabPages.set_tab_container_style(ng::tab_container_style::TabAlignmentLeft);
-            else if ((window.tabPages.tab_container_style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentLeft)
-                window.tabPages.set_tab_container_style(ng::tab_container_style::TabAlignmentRight);
-            else if ((window.tabPages.tab_container_style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentRight)
-                window.tabPages.set_tab_container_style(ng::tab_container_style::TabAlignmentTop);
+            static const ng::tab_container_style sPlacements[] =
+            {
+                ng::tab_container_style::TabAlignmentTop,
+                ng::tab_container_style::TabAlignmentTop | ng::tab_container_style::TabOrientationVertical,
+                ng::tab_container_style::TabAlignmentBottom,
+                ng::tab_container_style::TabAlignmentBottom | ng::tab_container_style::TabOrientationVertical,
+                ng::tab_container_style::TabAlignmentLeft,
+                ng::tab_container_style::TabAlignmentLeft | ng::tab_container_style::TabOrientationVertical,
+                ng::tab_container_style::TabAlignmentRight,
+                ng::tab_container_style::TabAlignmentRight | ng::tab_container_style::TabOrientationVertical
+            };
+            auto const placementMask = ng::tab_container_style::TabAlignmentMask | ng::tab_container_style::TabOrientationMask;
+            auto const style = window.tabPages.tab_container_style();
+            std::size_t next = 0u;
+            for (std::size_t i = 0u; i < std::size(sPlacements); ++i)
+                if (sPlacements[i] == (style & placementMask))
+                {
+                    next = (i + 1u) % std::size(sPlacements);
+                    break;
+                }
+            window.tabPages.set_tab_container_style((style & ~placementMask) | sPlacements[next]);
         });
         window.buttonChina.clicked([&window]() 
         { 

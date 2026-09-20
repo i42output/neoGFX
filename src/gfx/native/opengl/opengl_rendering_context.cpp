@@ -432,6 +432,32 @@ namespace neogfx
         iOffset = aOffset;
     }
 
+    optional_mat44 opengl_rendering_context::transform() const
+    {
+        if (iTransforms.empty())
+            return {};
+        return iTransforms.back();
+    }
+
+    void opengl_rendering_context::set_transform(const optional_mat44& aTransform)
+    {
+        iTransforms.clear();
+        if (aTransform)
+            iTransforms.push_back(*aTransform);
+    }
+
+    void opengl_rendering_context::push_transform(const mat44& aTransform)
+    {
+        iTransforms.push_back(iTransforms.empty() ? aTransform : iTransforms.back() * aTransform);
+    }
+
+    void opengl_rendering_context::pop_transform()
+    {
+        if (iTransforms.empty())
+            throw std::logic_error("neogfx::opengl_rendering_context::pop_transform: transform stack empty");
+        iTransforms.pop_back();
+    }
+
     bool opengl_rendering_context::gradient_set() const
     {
         return iGradient != std::nullopt || !iFilterGradients.empty();
@@ -572,6 +598,15 @@ namespace neogfx
                     else
                         render_target().set_viewport(rect{ render_target().target_origin(), render_target().extents() }.as<std::int32_t>());
                 }
+                break;
+            case graphics_operation::SetTransform:
+                set_transform(static_variant_cast<const graphics_operation::set_transform&>(**(std::prev(opBatch.cend()))).transform);
+                break;
+            case graphics_operation::PushTransform:
+                push_transform(static_variant_cast<const graphics_operation::push_transform&>(**(std::prev(opBatch.cend()))).transform);
+                break;
+            case graphics_operation::PopTransform:
+                pop_transform();
                 break;
             case graphics_operation::SnapToPixelOn:
                 set_snap_to_pixel(true);

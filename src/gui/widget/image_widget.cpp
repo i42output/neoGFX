@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
 
 
@@ -84,7 +85,10 @@ namespace neogfx
     {
         if (has_minimum_size() || iTexture.is_empty() || size_policy() == size_constraint::DefaultMinimumExpanding)
             return widget::minimum_size(aAvailableSpace);
-        size result = units_converter{ *this }.from_device_units(image_size() ? image_size().value() : iTexture.extents()) + internal_spacing().size();
+        size imageExtents = units_converter{ *this }.from_device_units(image_size() ? image_size().value() : iTexture.extents());
+        if (iRotation != 0.0)
+            imageExtents = scoped_transform::rotated_extents(imageExtents, iRotation);
+        size result = imageExtents + internal_spacing().size();
         if (iDpiAutoScale)
             result *= (dpi_scale_factor() / iTexture.dpi_scale_factor());
         return to_units(*this, scoped_units::current_units(), result);
@@ -96,6 +100,9 @@ namespace neogfx
             return;
         if (service<i_debug>().layout_item() == this)
             aGc.flush();
+        std::optional<scoped_transform> rotate;
+        if (iRotation != 0.0)
+            rotate.emplace(aGc, iRotation, client_rect().center());
         aGc.draw_texture(placement_rect(), iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : iColor, 
             effectively_disabled() ? shader_effect::Monochrome : iColor != none ? shader_effect::Colorize : shader_effect::None);
         if (service<i_debug>().layout_item() == this)
@@ -185,6 +192,21 @@ namespace neogfx
         }
     }
 
+    angle image_widget::rotation() const
+    {
+        return iRotation;
+    }
+
+    void image_widget::set_rotation(angle aRotation)
+    {
+        if (iRotation != aRotation)
+        {
+            iRotation = aRotation;
+            update_layout();
+            update();
+        }
+    }
+
     void image_widget::set_dpi_auto_scale(bool aDpiAutoScale)
     {
         if (iDpiAutoScale != aDpiAutoScale)
@@ -201,7 +223,14 @@ namespace neogfx
         if (iDpiAutoScale)
             imageExtents *= (dpi_scale_factor() / iTexture.dpi_scale_factor());
         rect placementRect{ point{}, imageExtents };
-        auto const clientRect = client_rect();
+        auto clientRect = client_rect();
+        if (iRotation != 0.0)
+        {
+            auto const unrotated = scoped_transform::rotated_extents(clientRect.extents(), -iRotation);
+            clientRect = rect{ point{
+                clientRect.center().x - unrotated.cx / 2.0,
+                clientRect.center().y - unrotated.cy / 2.0 }, unrotated };
+        }
         if (iAspectRatio == aspect_ratio::Stretch)
         {
             placementRect.cx = clientRect.width();
@@ -299,6 +328,8 @@ namespace neogfx
             placementRect.position() = point{ clientRect.width() - placementRect.width(), clientRect.height() - placementRect.height() };
             break;
         }
+        if (iRotation != 0.0)
+            placementRect.position() += clientRect.position();
         return floor_rasterized(placementRect);
     }
 }

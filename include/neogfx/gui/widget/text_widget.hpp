@@ -58,6 +58,8 @@ namespace neogfx
         void set_flags(text_widget_flags aFlags) override;
         neogfx::alignment alignment() const override;
         void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
+        angle rotation() const override;
+        void set_rotation(angle aRotation) override;
         bool is_aligning_to() const override;
         i_text_widget const& aligning_to() const override;
         using i_text_widget::align_to;
@@ -88,6 +90,7 @@ namespace neogfx
         text_widget_type iType;
         text_widget_flags iFlags;
         neogfx::alignment iAlignment;
+        angle iRotation = 0.0;
         ref_ptr<i_text_widget const> iAlignmentTo;
         optional_text_format iTextAppearance;
         widget_timer iAnimator;

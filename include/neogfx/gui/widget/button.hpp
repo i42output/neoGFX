@@ -27,6 +27,7 @@
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
+#include <neogfx/gui/layout/vertical_layout.hpp>
 
 namespace neogfx
 {
@@ -115,6 +116,8 @@ namespace neogfx
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
         // button
     protected:
+        void set_layout_direction(neogfx::layout_direction aDirection);
+    protected:
         virtual void handle_clicked();
         virtual void handle_double_clicked();
     protected:
@@ -127,6 +130,7 @@ namespace neogfx
         i_widget& mnemonic_widget() override;
     private:
         void init();
+        i_layout& make_button_layout(neogfx::layout_direction aDirection);
     private:
         sink iSink;
         enum class why_pressed
@@ -137,7 +141,6 @@ namespace neogfx
         std::optional<why_pressed> iPressed;
         button_checkable iCheckable;
         button_checked_state iCheckedState;
-        horizontal_layout iLayout;
         size_policy_of_parent<neogfx::label, layout_item_category::Widget> iLabel;
     };
 }

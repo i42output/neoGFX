@@ -35,7 +35,7 @@ namespace neogfx
         TabAlignmentRight           = 0x0003,
         TabAlignmentMask            = 0x0003,
         TabOrientationHorizontal    = 0x0000,
-        TabOrientationVertical      = 0x0004, // todo
+        TabOrientationVertical      = 0x0004,
         TabOrientationMask          = 0x0004,
         MultiRow                    = 0x0010,
         ResizeToPages               = 0x1000

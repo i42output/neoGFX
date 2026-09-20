@@ -38,6 +38,8 @@ namespace neogfx
         virtual void set_image_color(const color_or_gradient& aImageColor) = 0;
         virtual void set_aspect_ratio(neogfx::aspect_ratio aAspectRatio) = 0;
         virtual void set_placement(cardinal aPlacement) = 0;
+        virtual angle rotation() const = 0;
+        virtual void set_rotation(angle aRotation) = 0;
         virtual void set_dpi_auto_scale(bool aDpiAutoScale) = 0;
     };
 }

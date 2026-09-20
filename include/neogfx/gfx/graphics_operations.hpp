@@ -65,6 +65,20 @@ namespace neogfx
             std::optional<mat33> viewTransformation;
         };
 
+        struct set_transform
+        {
+            optional_mat44 transform;
+        };
+
+        struct push_transform
+        {
+            mat44 transform;
+        };
+
+        struct pop_transform
+        {
+        };
+
         struct scissor_on
         {
         };
@@ -404,7 +418,10 @@ namespace neogfx
             draw_shape,
             draw_entities,
             draw_glyphs,
-            draw_mesh
+            draw_mesh,
+            set_transform,
+            push_transform,
+            pop_transform
         > operation;
 
         enum operation_type
@@ -462,7 +479,10 @@ namespace neogfx
             DrawShape                   = 50,
             DrawEntities                = 51,
             DrawGlyph                   = 52,
-            DrawMesh                    = 53
+            DrawMesh                    = 53,
+            SetTransform                = 54,
+            PushTransform               = 55,
+            PopTransform                = 56
         };
 
         std::string to_string(operation_type aOpType);

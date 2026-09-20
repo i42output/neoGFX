@@ -75,6 +75,8 @@ namespace neogfx
         virtual void set_flags(text_widget_flags aFlags) = 0;
         virtual neogfx::alignment alignment() const = 0;
         virtual void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) = 0;
+        virtual angle rotation() const = 0;
+        virtual void set_rotation(angle aRotation) = 0;
         virtual bool is_aligning_to() const = 0;
         virtual i_text_widget const& aligning_to() const = 0;
         virtual void align_to(i_ref_ptr<i_text_widget const> const& aOtherWidget) = 0;

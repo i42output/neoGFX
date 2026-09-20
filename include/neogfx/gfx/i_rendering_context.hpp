@@ -125,6 +125,13 @@ namespace neogfx
         virtual void set_origin(point const& aOrigin) = 0;
         virtual vec2 offset() const = 0;
         virtual void set_offset(optional_vec2 const& aOffset) = 0;
+        // transforms are applied to everything drawn, about the context origin, with any
+        // translation component in device units; transform() is the product of the stack,
+        // outermost first, so the most recently pushed matrix is the one applied first
+        virtual optional_mat44 transform() const = 0;
+        virtual void set_transform(optional_mat44 const& aTransform = {}) = 0;
+        virtual void push_transform(mat44 const& aTransform) = 0;
+        virtual void pop_transform() = 0;
         virtual vec4 gain() const = 0;
         virtual void set_gain(vec4 const& aGain) = 0;
         virtual void blit(rect const& aDestinationRect, i_texture const& aTexture, rect const& aSourceRect, blending_mode aBlendingMode = blending_mode::Blit) = 0;

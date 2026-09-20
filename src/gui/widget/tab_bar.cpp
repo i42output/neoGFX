@@ -102,9 +102,14 @@ namespace neogfx
     {
         if (has_size_policy())
             return framed_scrollable_widget::size_policy();
-        return (tab_container_style() & neogfx::tab_container_style::TabOrientationHorizontal) == neogfx::tab_container_style::TabOrientationHorizontal ?
-            neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Minimum } : 
-            neogfx::size_policy{ size_constraint::Minimum, size_constraint::MinimumExpanding };
+        switch (tab_container_style() & neogfx::tab_container_style::TabAlignmentMask)
+        {
+        case neogfx::tab_container_style::TabAlignmentLeft:
+        case neogfx::tab_container_style::TabAlignmentRight:
+            return neogfx::size_policy{ size_constraint::Minimum, size_constraint::MinimumExpanding };
+        default:
+            return neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Minimum };
+        }
     }
 
     size tab_bar::minimum_size(optional_size const& aAvailableSpace) const

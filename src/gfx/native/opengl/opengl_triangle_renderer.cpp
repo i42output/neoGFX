@@ -237,7 +237,29 @@ namespace neogfx
 
     void opengl_triangle_renderer::set_transformation(const optional_mat44& aTransformation)
     {
-        iVertexBuffer.set_transformation(aTransformation);
+        auto const& contextTransform = iParent.transform();
+
+        if (!contextTransform)
+        {
+            iVertexBuffer.set_transformation(aTransformation);
+            return;
+        }
+
+        // the context transform is expressed relative to the context origin but vertices reach the
+        // shader with that origin already added, so conjugate the transform by the origin
+        auto const translation = [](scalar x, scalar y)
+            {
+                return mat44{
+                    { 1.0, 0.0, 0.0, 0.0 },
+                    { 0.0, 1.0, 0.0, 0.0 },
+                    { 0.0, 0.0, 1.0, 0.0 },
+                    { x, y, 0.0, 1.0 } };
+            };
+
+        auto const origin = iParent.origin();
+        auto const transform = translation(origin.x, origin.y) * *contextTransform * translation(-origin.x, -origin.y);
+
+        iVertexBuffer.set_transformation(aTransformation ? transform * *aTransformation : transform);
     }
 
     const opengl_vertex_buffer<>::vertex_array& opengl_triangle_renderer::vertices() const

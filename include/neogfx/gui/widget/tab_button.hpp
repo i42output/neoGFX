@@ -82,6 +82,7 @@ namespace neogfx
     private:
         void init();
         void update_appearance();
+        void update_orientation();
     private:
         i_tab_container& iContainer;
         void* iData = nullptr;

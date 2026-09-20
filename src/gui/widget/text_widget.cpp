@@ -97,6 +97,8 @@ namespace neogfx
         else
         {
             size extent = units_converter{ *this }.to_device_units(text_extent().max(size_hint_extent()));
+            if (iRotation != 0.0)
+                extent = scoped_transform::rotated_extents(extent, iRotation);
             size result = extent + units_converter{ *this }.to_device_units(internal_spacing().size());
             if (has_maximum_size())
             {
@@ -138,18 +140,30 @@ namespace neogfx
         scoped_mnemonics sm{ aGc, service<i_keyboard>().is_key_pressed(ScanCode_LALT) && has_root() && root().is_active() };
 
         size textSize = text_extent();
+        auto const clientRect = client_rect(false);
+        // when rotated the text is laid out in the box the client rect came from, i.e. the one that
+        // maps onto the client rect under the rotation, and is then rotated about its centre
+        auto const textRect = [&]() -> rect
+            {
+                if (iRotation == 0.0)
+                    return clientRect;
+                auto const unrotated = scoped_transform::rotated_extents(clientRect.extents(), -iRotation);
+                return rect{ point{
+                    clientRect.center().x - unrotated.cx / 2.0,
+                    clientRect.center().y - unrotated.cy / 2.0 }, unrotated };
+            }();
         point textPosition;
         switch (iAlignment & neogfx::alignment::Horizontal)
         {
         case neogfx::alignment::Left:
         case neogfx::alignment::Justify:
-            textPosition.x = client_rect(false).left();
+            textPosition.x = textRect.left();
             break;
         case neogfx::alignment::Center:
-            textPosition.x = std::floor(client_rect(false).left() + (client_rect(false).width() - textSize.cx) / 2.0);
+            textPosition.x = std::floor(textRect.left() + (textRect.width() - textSize.cx) / 2.0);
             break;
         case neogfx::alignment::Right:
-            textPosition.x = std::floor((client_rect(false).right() - textSize.cx));
+            textPosition.x = std::floor((textRect.right() - textSize.cx));
             break;
         default:
             break;
@@ -157,13 +171,13 @@ namespace neogfx
         switch (iAlignment & neogfx::alignment::Vertical)
         {
         case neogfx::alignment::Top:
-            textPosition.y = client_rect(false).top();
+            textPosition.y = textRect.top();
             break;
         case neogfx::alignment::VCenter:
-            textPosition.y = std::floor(client_rect(false).top() + (client_rect(false).height() - textSize.cy) / 2.0);
+            textPosition.y = std::floor(textRect.top() + (textRect.height() - textSize.cy) / 2.0);
             break;
         case neogfx::alignment::Bottom:
-            textPosition.y = std::floor((client_rect(false).bottom() - textSize.cy));
+            textPosition.y = std::floor((textRect.bottom() - textSize.cy));
             break;
         default:
             break;
@@ -183,9 +197,13 @@ namespace neogfx
 
         std::optional<scoped_gradient_filter> fade;
         if (!multi_line() && (flags() & text_widget_flags::UseFade) == text_widget_flags::UseFade &&
-            textSize.cx > client_rect(false).width())
+            textSize.cx > textRect.width())
             fade.emplace(aGc, fade_gradient(textPosition, textSize),
                 rect{ textPosition, textSize } + aGc.origin());
+
+        std::optional<scoped_transform> rotate;
+        if (iRotation != 0.0)
+            rotate.emplace(aGc, iRotation, clientRect.center());
 
         if (iCacheTexture)
         {
@@ -392,6 +410,22 @@ namespace neogfx
         {
             iAlignmentTo = nullptr;
             update_layout();
+        }
+    }
+
+    angle text_widget::rotation() const
+    {
+        return iRotation;
+    }
+
+    void text_widget::set_rotation(angle aRotation)
+    {
+        if (iRotation != aRotation)
+        {
+            iRotation = aRotation;
+            reset_cache();
+            update_layout();
+            update();
         }
     }
 
