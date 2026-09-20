@@ -312,6 +312,25 @@ namespace neogfx
         iData = aData;
     }
 
+    bool tab_button::update(const rect& aUpdateRect)
+    {
+        auto const updated = (!is_selected() ?
+            push_button::update(aUpdateRect) :
+            push_button::update(to_client_coordinates(non_client_rect().inflate(delta{ 2.0, 2.0 }))));
+
+        // our path runs over the tab page container's border, so that border has to be repainted
+        // along the length of the whole bar whenever any tab repaints
+        if (updated && container().has_parent_container())
+        {
+            auto& bar = container().as_widget();
+            auto& pageContainer = container().parent_container().as_widget();
+            pageContainer.update(
+                pageContainer.to_client_coordinates(bar.non_client_rect()).inflate(delta{ 5.0, 5.0 }));
+        }
+
+        return updated;
+    }
+
     rect tab_button::path_bounding_rect() const
     {
         scoped_units su{ *this, units::Pixels };
@@ -387,13 +406,6 @@ namespace neogfx
         return push_button::palette_color(aColorRole);
     }
 
-    bool tab_button::update(const rect& aUpdateRect)
-    {
-        if (!is_selected())
-            return push_button::update(aUpdateRect);
-        else
-            return push_button::update(to_client_coordinates(non_client_rect().inflate(delta{ 2.0, 2.0 })));
-    }
 
     void tab_button::mouse_entered(const point& aPosition)
     {
@@ -511,6 +523,11 @@ namespace neogfx
         // runs top to bottom instead: what aligned along the tab now aligns across it and vice versa
         label().set_alignment(rotation == 0.0 ? iLabelAlignment : transposed(iLabelAlignment));
 
+        // label::set_alignment passes its alignment on to the text widget, but that one is applied
+        // inside the rotation, in unrotated terms, so it wants the original axes back
+        if (rotation != 0.0)
+            text_widget().set_alignment(iLabelAlignment);
+
         // the image leads in reading order, which runs up the tab when the text reads bottom to top
         if (rotation == 0.0)
             label().set_placement(label_placement::ImageTextHorizontal);
@@ -523,6 +540,13 @@ namespace neogfx
         // vertical when the text is and horizontal otherwise
         set_layout_direction(rotation == 0.0 ?
             neogfx::layout_direction::Horizontal : neogfx::layout_direction::Vertical);
+
+        // the lead-in runs along the tab, so it belongs at whichever end the text starts from;
+        // left on a horizontal tab, the bottom or the top on a vertical one
+        layout().set_padding(rotation == 0.0 ?
+            neogfx::padding{ 2.0, 0.0, 0.0, 0.0 } : rotation < 0.0 ?
+                neogfx::padding{ 0.0, 0.0, 0.0, 2.0 } :
+                neogfx::padding{ 0.0, 2.0, 0.0, 0.0 });
 
         // the close button always follows the text in reading order, so it comes first in layout
         // order only where that order runs against the text, i.e. where the text reads bottom to top

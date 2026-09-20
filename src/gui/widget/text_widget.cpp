@@ -152,6 +152,17 @@ namespace neogfx
                     clientRect.center().x - unrotated.cx / 2.0,
                     clientRect.center().y - unrotated.cy / 2.0 }, unrotated };
             }();
+        // rotated, the vertical axis is the one across the widget, and aligning on this string's
+        // measured extent would put text of differing heights in differing places; quantising to
+        // whole lines removes the dependence on the glyphs while still counting the lines
+        auto const alignExtent = [&]() -> dimension
+            {
+                if (iRotation == 0.0)
+                    return textSize.cy;
+                auto const lineHeight = font().height();
+                return std::max(1.0, std::round(textSize.cy / lineHeight)) * lineHeight;
+            }();
+
         point textPosition;
         switch (iAlignment & neogfx::alignment::Horizontal)
         {
@@ -174,10 +185,10 @@ namespace neogfx
             textPosition.y = textRect.top();
             break;
         case neogfx::alignment::VCenter:
-            textPosition.y = std::floor(textRect.top() + (textRect.height() - textSize.cy) / 2.0);
+            textPosition.y = std::floor(textRect.top() + (textRect.height() - alignExtent) / 2.0);
             break;
         case neogfx::alignment::Bottom:
-            textPosition.y = std::floor((textRect.bottom() - textSize.cy));
+            textPosition.y = std::floor((textRect.bottom() - alignExtent));
             break;
         default:
             break;
@@ -203,7 +214,14 @@ namespace neogfx
 
         std::optional<scoped_transform> rotate;
         if (iRotation != 0.0)
-            rotate.emplace(aGc, iRotation, clientRect.center());
+        {
+            // a quarter turn maps whole pixels to whole pixels only if the pivot's components share
+            // a fractional part, so pin both the pivot and the text to the pixel grid; otherwise the
+            // text lands half a pixel out, by differing amounts depending on the widget's extents
+            textPosition = point{ std::round(textPosition.x), std::round(textPosition.y) };
+            rotate.emplace(aGc, iRotation,
+                point{ std::round(clientRect.center().x), std::round(clientRect.center().y) });
+        }
 
         if (iCacheTexture)
         {
