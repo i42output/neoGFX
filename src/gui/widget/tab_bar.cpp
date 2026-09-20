@@ -412,10 +412,12 @@ namespace neogfx
             layout().set_alignment(alignment::Left | alignment::Top);
             break;
         case neogfx::tab_container_style::TabAlignmentLeft:
-            layout().set_alignment(alignment::Right);
+            // as with the horizontal cases, the tabs pack from the start of the bar and overflow
+            // past the end rather than being distributed over the space available
+            layout().set_alignment(alignment::Right | alignment::Top);
             break;
         case neogfx::tab_container_style::TabAlignmentRight:
-            layout().set_alignment(alignment::Left);
+            layout().set_alignment(alignment::Left | alignment::Top);
             break;
         }
         layout().set_padding(neogfx::padding{});

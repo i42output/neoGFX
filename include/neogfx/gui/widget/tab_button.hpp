@@ -87,6 +87,7 @@ namespace neogfx
         i_tab_container& iContainer;
         void* iData = nullptr;
         std::unique_ptr<close_button> iCloseButton;
+        neogfx::alignment iLabelAlignment = alignment::Left | alignment::VCenter;
         bool iStandardImageSize;
         bool iSelectedState;
         widget_timer iUpdater;

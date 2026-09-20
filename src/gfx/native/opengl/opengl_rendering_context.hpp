@@ -277,6 +277,7 @@ namespace neogfx
         i_optimised_rendering_queue const& optimised_queue() const;
         void enqueue(const graphics_operation::operation& aOperation) final;
         void flush() final;
+        void flush(graphics_operation::operation_type aOperationType) final;
         void add_filter(i_rendering_context_filter& aFilter) final;
         void remove_filter(i_rendering_context_filter& aFilter) final;
     public:

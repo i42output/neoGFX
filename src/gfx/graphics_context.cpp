@@ -252,6 +252,12 @@ namespace neogfx
             rendering_context().flush();
     }
 
+    void graphics_context::flush(graphics_operation::operation_type aOperationType)
+    {
+        if (attached() && active())
+            rendering_context().flush(aOperationType);
+    }
+
     void graphics_context::add_filter(i_rendering_context_filter& aFilter)
     {
         rendering_context().add_filter(aFilter);
@@ -466,10 +472,15 @@ namespace neogfx
 
     optional_mat44 graphics_context::transform() const
     {
-        // the stack lives in the rendering context, so the queue has to be drained before it can
-        // answer for anything we have enqueued since
+        // the stack lives in the rendering context, so the queue has to be drained as far as the
+        // most recent transform op before it can answer; whichever of the three is last, draining
+        // for all of them leaves nothing transform related still queued
         if (attached() && active())
-            rendering_context().flush();
+        {
+            rendering_context().flush(graphics_operation::SetTransform);
+            rendering_context().flush(graphics_operation::PushTransform);
+            rendering_context().flush(graphics_operation::PopTransform);
+        }
         return rendering_context().transform();
     }
 

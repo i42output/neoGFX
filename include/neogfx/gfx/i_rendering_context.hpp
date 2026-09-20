@@ -108,6 +108,9 @@ namespace neogfx
         virtual i_rendering_queue& queue() const = 0;
         virtual void enqueue(graphics_operation::operation const& aOperation) = 0;
         virtual void flush() = 0;
+        // flushes only as far as the most recent entry of the given type, inclusive, and does
+        // nothing at all if the queue holds no such entry
+        virtual void flush(graphics_operation::operation_type aOperationType) = 0;
         virtual void add_filter(i_rendering_context_filter& aFilter) = 0;
         virtual void remove_filter(i_rendering_context_filter& aFilter) = 0;
     public:

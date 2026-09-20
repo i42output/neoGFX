@@ -445,9 +445,50 @@ namespace neogfx
         };
         iSink += service<i_surface_manager>().dpi_changed([this, update_image](i_surface&) { update_image(); });
         update_image();
+        iLabelAlignment = label().alignment();
         iSink += iContainer.style_changed([this]() { update_orientation(); });
         update_orientation();
         iContainer.adding_tab(*this);
+    }
+
+    namespace
+    {
+        alignment transposed(alignment aAlignment)
+        {
+            alignment result = alignment::None;
+
+            switch (aAlignment & alignment::Horizontal)
+            {
+            case alignment::Left:
+                result = result | alignment::Top;
+                break;
+            case alignment::Center:
+                result = result | alignment::VCenter;
+                break;
+            case alignment::Right:
+                result = result | alignment::Bottom;
+                break;
+            default:
+                break;
+            }
+
+            switch (aAlignment & alignment::Vertical)
+            {
+            case alignment::Top:
+                result = result | alignment::Left;
+                break;
+            case alignment::VCenter:
+                result = result | alignment::Center;
+                break;
+            case alignment::Bottom:
+                result = result | alignment::Right;
+                break;
+            default:
+                break;
+            }
+
+            return result;
+        }
     }
 
     void tab_button::update_orientation()
@@ -457,14 +498,18 @@ namespace neogfx
 
         bool const leftHandTabs = (style & tab_container_style::TabAlignmentMask) == tab_container_style::TabAlignmentLeft;
 
-        // the baseline faces the container border, so left hand tabs read top to bottom and right
-        // hand tabs read bottom to top
+        // the baseline faces the container border, so left hand tabs read bottom to top and right
+        // hand tabs read top to bottom
         angle rotation = 0.0;
         if (vertical)
-            rotation = (leftHandTabs ? to_rad(90.0) : -to_rad(90.0));
+            rotation = (leftHandTabs ? -to_rad(90.0) : to_rad(90.0));
 
         text_widget().set_rotation(rotation);
         image_widget().set_rotation(rotation);
+
+        // the alignment was written for a tab running left to right, so transpose it when the tab
+        // runs top to bottom instead: what aligned along the tab now aligns across it and vice versa
+        label().set_alignment(rotation == 0.0 ? iLabelAlignment : transposed(iLabelAlignment));
 
         // the image leads in reading order, which runs up the tab when the text reads bottom to top
         if (rotation == 0.0)
@@ -479,8 +524,9 @@ namespace neogfx
         set_layout_direction(rotation == 0.0 ?
             neogfx::layout_direction::Horizontal : neogfx::layout_direction::Vertical);
 
-        // the close button goes at the top for left hand tabs and at the bottom for right hand ones
-        bool const closeButtonFirst = (vertical && leftHandTabs);
+        // the close button always follows the text in reading order, so it comes first in layout
+        // order only where that order runs against the text, i.e. where the text reads bottom to top
+        bool const closeButtonFirst = (rotation < 0.0);
 
         layout().remove_all();
         if (iCloseButton && closeButtonFirst)

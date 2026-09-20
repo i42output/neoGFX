@@ -548,6 +548,36 @@ namespace neogfx
         return batchable(*aLeft, *aRight);
     }
 
+    void opengl_rendering_context::flush(graphics_operation::operation_type aOperationType)
+    {
+        if (iInFlush)
+            return;
+
+        auto& q = queue();
+
+        auto found = q.end();
+        for (auto i = q.begin(); i != q.end(); ++i)
+            if (static_cast<graphics_operation::operation_type>((*i).index()) == aOperationType)
+                found = i;
+
+        if (found == q.end())
+            return;
+
+        // everything after the most recent entry of that type stays queued; flush() leaves the
+        // queue consumed, so the first of these enqueues is what clears it out
+        auto const tailStart = std::next(found);
+        thread_local std::vector<graphics_operation::operation> tail;
+        tail.assign(tailStart, q.end());
+        q.erase(tailStart, q.end());
+
+        flush();
+
+        for (auto const& op : tail)
+            enqueue(op);
+
+        tail.clear();
+    }
+
     void opengl_rendering_context::flush()
     {
         if (iInFlush)
