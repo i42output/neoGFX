@@ -58,6 +58,7 @@ namespace neogfx
         void set_flags(text_widget_flags aFlags) override;
         neogfx::alignment alignment() const override;
         void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
+        dimension quantized_text_height(dimension aHeight) const;
         angle rotation() const override;
         void set_rotation(angle aRotation) override;
         bool is_aligning_to() const override;

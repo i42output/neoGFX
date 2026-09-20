@@ -96,7 +96,13 @@ namespace neogfx
             return widget::minimum_size(aAvailableSpace);
         else
         {
-            size extent = units_converter{ *this }.to_device_units(text_extent().max(size_hint_extent()));
+            size extent = text_extent().max(size_hint_extent());
+            if (iRotation != 0.0)
+                // rotated, the measured height becomes our width; that height is measured from the
+                // glyph run, so it varies with the string, and quantising it to whole lines keeps
+                // widgets holding different text the same width and therefore aligned with one another
+                extent.cy = quantized_text_height(extent.cy);
+            extent = units_converter{ *this }.to_device_units(extent);
             if (iRotation != 0.0)
                 extent = scoped_transform::rotated_extents(extent, iRotation);
             size result = extent + units_converter{ *this }.to_device_units(internal_spacing().size());
@@ -155,13 +161,7 @@ namespace neogfx
         // rotated, the vertical axis is the one across the widget, and aligning on this string's
         // measured extent would put text of differing heights in differing places; quantising to
         // whole lines removes the dependence on the glyphs while still counting the lines
-        auto const alignExtent = [&]() -> dimension
-            {
-                if (iRotation == 0.0)
-                    return textSize.cy;
-                auto const lineHeight = font().height();
-                return std::max(1.0, std::round(textSize.cy / lineHeight)) * lineHeight;
-            }();
+        auto const alignExtent = (iRotation != 0.0 ? quantized_text_height(textSize.cy) : textSize.cy);
 
         point textPosition;
         switch (iAlignment & neogfx::alignment::Horizontal)
@@ -487,6 +487,14 @@ namespace neogfx
             reset_cache();
             update();
         }
+    }
+
+    dimension text_widget::quantized_text_height(dimension aHeight) const
+    {
+        // the glyph run's measured height depends on which glyphs are in it; rounding to whole
+        // lines keeps it dependent only on the font and the number of lines
+        auto const lineHeight = font().height();
+        return std::max(1.0, std::round(aHeight / lineHeight)) * lineHeight;
     }
 
     size text_widget::text_extent() const
