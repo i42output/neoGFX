@@ -492,9 +492,20 @@ namespace neogfx
     dimension text_widget::quantized_text_height(dimension aHeight) const
     {
         // the glyph run's measured height depends on which glyphs are in it; rounding to whole
-        // lines keeps it dependent only on the font and the number of lines
+        // lines keeps it dependent only on the font and the number of lines. the outsets that
+        // text_extent adds are not part of that, so they come off first and go back on after,
+        // otherwise rounding either eats them or claims an extra line
+        scalar outset = font().info().outline().radius * 2.0;
+        scalar effectOutset = 0.0;
+        if (text_format().effect())
+            effectOutset = std::max(effectOutset, text_format().effect()->outset());
+        if (text_format().effect2())
+            effectOutset = std::max(effectOutset, text_format().effect2()->outset());
+        outset += effectOutset * 2.0;
+
         auto const lineHeight = font().height();
-        return std::max(1.0, std::round(aHeight / lineHeight)) * lineHeight;
+        auto const lines = std::max(1.0, std::round((aHeight - outset) / lineHeight));
+        return std::ceil(lines * lineHeight + outset);
     }
 
     size text_widget::text_extent() const

@@ -679,17 +679,23 @@ namespace neogfx
             iGc.pop_transform();
         }
     public:
+        // std::cos(pi/2) is 6e-17 rather than zero, and that residue survives into extents that
+        // are later rounded up, turning into a whole spurious pixel; snap it away
+        static scalar snapped(scalar aValue)
+        {
+            return (std::abs(aValue) < 1.0e-12 ? 0.0 : aValue);
+        }
         // the extents of the axis-aligned box bounding aExtents once rotated by aAngle
         static size rotated_extents(size const& aExtents, angle aAngle)
         {
-            auto const c = std::abs(std::cos(aAngle));
-            auto const s = std::abs(std::sin(aAngle));
+            auto const c = std::abs(snapped(std::cos(aAngle)));
+            auto const s = std::abs(snapped(std::sin(aAngle)));
             return size{ aExtents.cx * c + aExtents.cy * s, aExtents.cx * s + aExtents.cy * c };
         }
         static mat44 rotation(angle aAngle, point const& aPivot = {})
         {
-            auto const c = std::cos(aAngle);
-            auto const s = std::sin(aAngle);
+            auto const c = snapped(std::cos(aAngle));
+            auto const s = snapped(std::sin(aAngle));
             return mat44{
                 { c, s, 0.0, 0.0 },
                 { -s, c, 0.0, 0.0 },
