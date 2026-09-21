@@ -139,8 +139,49 @@ namespace neogfx
             fallback_font_info default_fallback_font_info()
             {
 #ifdef WIN32
-                // TODO: Use fallback font info from registry
-                return fallback_font_info{ { "Segoe UI Symbol", "Noto Sans CJK JP", "Nirmala UI", "Arial Unicode MS" } };
+                // Use the GDI font link (fallback) lists from the registry, i.e. the fonts Windows itself
+                // falls back to when the base font lacks a glyph. Entries are "<file>,<family>[,<scale>,<scale>]".
+                std::vector<string> fallbackFontFamilies;
+                auto add_family = [&fallbackFontFamilies](string const& aFamily)
+                {
+                    if (!aFamily.empty() && std::find(fallbackFontFamilies.begin(), fallbackFontFamilies.end(), aFamily) == fallbackFontFamilies.end())
+                        fallbackFontFamilies.push_back(aFamily);
+                };
+                auto add_system_link = [&add_family](wchar_t const* aBaseFamily)
+                {
+                    wchar_t const* const systemLinkKey = L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\FontLink\\SystemLink";
+                    DWORD size = 0;
+                    if (::RegGetValueW(HKEY_LOCAL_MACHINE, systemLinkKey, aBaseFamily, RRF_RT_REG_MULTI_SZ, NULL, NULL, &size) != ERROR_SUCCESS || size == 0)
+                        return;
+                    std::vector<wchar_t> buffer(size / sizeof(wchar_t) + 2, L'\0');
+                    size = static_cast<DWORD>(buffer.size() * sizeof(wchar_t));
+                    if (::RegGetValueW(HKEY_LOCAL_MACHINE, systemLinkKey, aBaseFamily, RRF_RT_REG_MULTI_SZ, NULL, &buffer[0], &size) != ERROR_SUCCESS)
+                        return;
+                    for (wchar_t const* entry = &buffer[0]; *entry != L'\0'; )
+                    {
+                        std::wstring const link{ entry };
+                        entry += link.size() + 1;
+                        auto const familyStart = link.find(L',');
+                        if (familyStart == std::wstring::npos)
+                            continue;
+                        auto const familyEnd = link.find(L',', familyStart + 1);
+                        std::wstring const family = link.substr(familyStart + 1, familyEnd == std::wstring::npos ? std::wstring::npos : familyEnd - familyStart - 1);
+                        add_family(neolib::utf16_to_utf8(reinterpret_cast<const char16_t*>(family.c_str())));
+                    }
+                };
+                add_system_link(L"Segoe UI");
+                add_system_link(L"Tahoma");
+                add_system_link(L"Microsoft Sans Serif");
+                // The GDI font link lists only cover CJK and symbols; the per-script fonts below are what DirectWrite
+                // falls back to for the remaining scripts (Indic, African, Canadian Syllabics, Thai, etc.) and are not
+                // in the registry, so they are appended here (followed by the previous hard-coded defaults).
+                for (auto const& family : {
+                    "Segoe UI Symbol", "Segoe UI Historic", "Nirmala UI", "Ebrima", "Gadugi", "Euphemia", "Leelawadee UI",
+                    "Javanese Text", "Myanmar Text", "Mongolian Baiti", "Microsoft Himalaya", "Microsoft New Tai Lue",
+                    "Microsoft PhagsPa", "Microsoft Tai Le", "Microsoft Yi Baiti", "Sylfaen",
+                    "Noto Sans CJK JP", "Arial Unicode MS" })
+                    add_family(family);
+                return fallback_font_info{ std::move(fallbackFontFamilies) };
 #else
                 throw std::logic_error("neogfx::detail::platform_specific::default_fallback_font_info: Unknown system");
 #endif
