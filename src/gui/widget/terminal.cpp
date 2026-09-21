@@ -1205,28 +1205,28 @@ namespace neogfx
     font const& terminal::normal_font() const
     {
         if (iNormalFont == std::nullopt)
-            iNormalFont = font();
+            iNormalFont = font().with_ligatures(false);
         return iNormalFont.value();
     }
 
     font const& terminal::bold_font() const
     {
         if (iBoldFont == std::nullopt)
-            iBoldFont = neogfx::font{ font().with_style_xor(font_style::Bold) };
+            iBoldFont = neogfx::font{ font().with_style_xor(font_style::Bold).with_ligatures(false) };
         return iBoldFont.value();
     }
 
     font const& terminal::italic_font() const
     {
         if (iItalicFont == std::nullopt)
-            iItalicFont = neogfx::font{ font().with_style_xor(font_style::Italic) };
+            iItalicFont = neogfx::font{ font().with_style_xor(font_style::Italic).with_ligatures(false) };
         return iItalicFont.value();
     }
 
     font const& terminal::bold_italic_font() const
     {
         if (iBoldItalicFont == std::nullopt)
-            iBoldItalicFont = neogfx::font{ font().with_style_xor(font_style::Italic | font_style::BoldItalic) };
+            iBoldItalicFont = neogfx::font{ font().with_style_xor(font_style::Italic | font_style::BoldItalic).with_ligatures(false) };
         return iBoldItalicFont.value();
     }
 
@@ -1474,4 +1474,4 @@ namespace neogfx
 
     }
 
-}
+}

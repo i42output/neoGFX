@@ -1085,7 +1085,7 @@ namespace neogfx
             {
                 if (cursor().position() == cursor().anchor())
                 {
-                    if (cursor().position() < glyphs().size())
+                    if (cursor().position() < iText.size())
                     {
                         auto const from = cursor().position();
                         auto const to = cursor().position() + 1;
@@ -1190,7 +1190,7 @@ namespace neogfx
                 overwrite_cursor_available() &&
                 (service<i_keyboard>().locks() & keyboard_locks::InsertLock) != keyboard_locks::InsertLock)
             {
-                if (cursor().position() < glyphs().size())
+                if (cursor().position() < iText.size())
                 {
                     auto const from = cursor().position();
                     auto const to = cursor().position() + 1;
@@ -1950,8 +1950,10 @@ namespace neogfx
         cursor().set_position(from_glyph(glyphs().begin() + aGlyphPosition).first, aMoveAnchor);
     }
 
-    std::pair<text_edit::document_glyphs::difference_type, bool> text_edit::glyph_hit_test(const point& aPosition, bool aAdjustForScrollPosition) const
+    std::pair<text_edit::document_glyphs::difference_type, bool> text_edit::glyph_hit_test(const point& aPosition, bool aAdjustForScrollPosition, position_type* aClusterOffset) const
     {
+        if (aClusterOffset != nullptr)
+            *aClusterOffset = 0;
         if (iGlyphParagraphs.empty())
             return std::make_pair(0, false);
         auto const columnIndex = column_hit_test(aPosition, aAdjustForScrollPosition);
@@ -1996,6 +1998,20 @@ namespace neogfx
                 auto const glyphAdvance = glyph.cell_extents().x;
                 if (adjustedPosition.x >= glyph.cell[0].x - lineStartX && adjustedPosition.x < glyph.cell[0].x - lineStartX + glyphAdvance)
                 {
+                    auto const clusterSize = glyph.clusters.second - glyph.clusters.first;
+                    if (aClusterOffset != nullptr && clusterSize > 1 && glyphAdvance != 0.0)
+                    {
+                        // Ligature (or other multi-character glyph): pick the nearest character boundary
+                        // within the glyph assuming the characters are evenly spaced across it.
+                        auto const fraction = (adjustedPosition.x - (glyph.cell[0].x - lineStartX)) / glyphAdvance;
+                        auto const offset = static_cast<position_type>(std::round(
+                            (direction(glyph) == text_direction::LTR ? fraction : 1.0 - fraction) * clusterSize));
+                        if (offset > 0 && offset < static_cast<position_type>(clusterSize))
+                        {
+                            *aClusterOffset = offset;
+                            return std::make_pair(gi, true);
+                        }
+                    }
                     bool const inLeftHalf = adjustedPosition.x < glyph.cell[0].x - lineStartX + glyphAdvance / 2.0 || glyphAdvance == 0.0;
                     if (direction(glyph) == text_direction::LTR)
                         return std::make_pair(inLeftHalf ? gi : gi + 1, true);
@@ -2022,12 +2038,13 @@ namespace neogfx
 
     std::pair<text_edit::position_type, bool> text_edit::document_hit_test_ex(const point& aPosition, bool aAdjustForScrollPosition) const
     {
-        auto const glyphPosition = glyph_hit_test(aPosition, aAdjustForScrollPosition);
+        position_type clusterOffset = 0;
+        auto const glyphPosition = glyph_hit_test(aPosition, aAdjustForScrollPosition, &clusterOffset);
         if (glyphPosition.first < static_cast<document_glyphs::difference_type>(glyphs().size()))
         {
             auto const glyphParagraph = glyph_to_paragraph(glyphPosition.first);
             if (glyphParagraph != iGlyphParagraphs.end())
-                return std::make_pair(glyphParagraph->text_begin_index() + glyphs()[glyphPosition.first].clusters.first, glyphPosition.second);
+                return std::make_pair(glyphParagraph->text_begin_index() + glyphs()[glyphPosition.first].clusters.first + clusterOffset, glyphPosition.second);
         }
         return std::make_pair(iText.size(), false);
     }
@@ -3348,8 +3365,9 @@ namespace neogfx
             bool selected = false;
             if (cursor().position() != cursor().anchor())
             {
-                auto gp = static_cast<cursor::position_type>(from_glyph(documentGlyph).first);
-                selected = (gp >= std::min(cursor().position(), cursor().anchor()) && gp < std::max(cursor().position(), cursor().anchor()));
+                auto const gp = from_glyph(documentGlyph);
+                selected = (static_cast<cursor::position_type>(gp.second) > std::min(cursor().position(), cursor().anchor()) && 
+                    static_cast<cursor::position_type>(gp.first) < std::max(cursor().position(), cursor().anchor()));
             }
             auto const& style = glyph_style(documentGlyph, iColumns[aColumn.index()]);
             auto const& glyphColor = with_bounding_box(style.character().glyph_color() == neolib::none ?
@@ -3416,6 +3434,7 @@ namespace neogfx
         auto cursorPos = glyph_position(cursorGlyphIndex, true);
         dimension yHeight = 0.0;
         std::optional<scalar> xWidth;
+        scalar xOffset = 0.0;
         scalar yOffset = 0.0;
         if (cursorPos.glyph && cursorPos.glyph.value() != glyphs().end())
         {
@@ -3424,6 +3443,18 @@ namespace neogfx
             yHeight = cursorPos.line.value()->extents.cy;
             yOffset = glyph.cell[0].as<scalar>().y;
             xWidth = cursorPos.glyph.value()->cell_extents().as<scalar>().x;
+            // Cursor within a ligature (or other multi-character glyph): the cursor is placed at the
+            // character boundary assuming the characters are evenly spaced across the glyph.
+            auto const& cursorGlyph = *cursorPos.glyph.value();
+            auto const cursorGlyphChars = from_glyph(cursorPos.glyph.value());
+            auto const clusterSize = cursorGlyphChars.second - cursorGlyphChars.first;
+            if (clusterSize > 1 && cursor().position() > cursorGlyphChars.first && cursor().position() < cursorGlyphChars.second)
+            {
+                auto const characterWidth = xWidth.value() / static_cast<scalar>(clusterSize);
+                auto const characterOffset = static_cast<scalar>(cursor().position() - cursorGlyphChars.first);
+                xOffset = (direction(cursorGlyph) != text_direction::RTL ? characterWidth * characterOffset : -characterWidth * characterOffset);
+                xWidth = characterWidth;
+            }
         }
         else if (cursorPos.lineStart && cursorPos.lineStart.value() != cursorPos.lineEnd.value())
             yHeight = cursorPos.line.value()->extents.cy;
@@ -3451,7 +3482,7 @@ namespace neogfx
         auto const columnRectSansPadding = column_rect(cursorPos.column_index());
         rect cursorRect{ 
             point{ cursorPos.pos - 
-                point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + columnRectSansPadding.top_left() + point{ 0.0, yOffset },
+                point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + columnRectSansPadding.top_left() + point{ xOffset, yOffset },
             size{ static_cast<scalar>(cursor().width(*this, xWidth)), yHeight } };
         if (cursorRect.right() > columnRectSansPadding.right())
             cursorRect.x += (columnRectSansPadding.right() - cursorRect.right());
@@ -3490,4 +3521,4 @@ namespace neogfx
             paddingAdjust = std::max(paddingAdjust, calc_padding_adjust(*s));
         return paddingAdjust;
     }
-}
+}

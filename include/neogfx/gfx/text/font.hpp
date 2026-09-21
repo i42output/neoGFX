@@ -204,6 +204,9 @@ namespace neogfx
         bool hinting() const;
         void enable_hinting();
         void disable_hinting();
+        bool ligatures() const;
+        void enable_ligatures();
+        void disable_ligatures();
     public:
         font_info with_style(font_style aStyle) const;
         font_info with_style_xor(font_style aStyle) const;
@@ -212,6 +215,7 @@ namespace neogfx
         font_info with_size(point_size aSize) const;
         font_info with_outline(stroke aOutline) const;
         font_info with_hinting(bool aHinting) const;
+        font_info with_ligatures(bool aLigatures) const;
     public:
         auto operator<=>(const font_info& aRhs) const = default;
     public:
@@ -227,6 +231,7 @@ namespace neogfx
         stroke iOutline;
         bool iKerning;
         bool iHinting;
+        bool iLigatures;
     };
 
     using optional_font_info = optional<font_info>;
@@ -274,6 +279,7 @@ namespace neogfx
         font with_size(point_size aSize) const;
         font with_outline(stroke aOutline) const;
         font with_hinting(bool aHinting) const;
+        font with_ligatures(bool aLigatures) const;
     public:
         font_id id() const;
         font_info const& info() const;
@@ -295,6 +301,7 @@ namespace neogfx
         dimension line_spacing() const;
         bool kerning() const;
         dimension kerning(std::uint32_t aLeftGlyphIndex, std::uint32_t aRightGlyphIndex) const;
+        bool ligatures() const;
         bool is_bitmap_font() const;
         std::uint32_t num_fixed_sizes() const;
         point_size fixed_size(std::uint32_t aFixedSizeIndex) const;

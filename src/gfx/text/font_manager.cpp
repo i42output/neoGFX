@@ -247,7 +247,7 @@ namespace neogfx
         class glyphs
         {
         public:
-            glyphs(i_graphics_context const& aParent, const font& aFont, const glyph_text_factory::glyph_run& aGlyphRun) :
+            glyphs(i_graphics_context const& aParent, const font& aFont, const glyph_text_factory::glyph_run& aGlyphRun, bool aLigatures) :
                 iParent{ aParent },
                 iFont{ static_cast<font_face_handle*>(aFont.native_font_face().handle())->harfbuzzFont },
                 iGlyphRun{ aGlyphRun },
@@ -259,14 +259,19 @@ namespace neogfx
                 hb_buffer_set_cluster_level(iBuf, HB_BUFFER_CLUSTER_LEVEL_CHARACTERS);
                 hb_buffer_add_utf32(iBuf, reinterpret_cast<const std::uint32_t*>(aGlyphRun.start), static_cast<int>(aGlyphRun.end - aGlyphRun.start), 0, static_cast<int>(aGlyphRun.end - aGlyphRun.start));
                 scoped_kerning sk{ aFont.kerning() };
-                /// @todo add ligature support to neogfx::font...
-                static hb_feature_t features[2];
+                // Ligatures (a single glyph covering more than one character) are enabled by default
+                // by HarfBuzz; when disabled for this font (see font::ligatures()) we turn the standard
+                // and discretionary ligature features off so that every cluster maps to a single glyph.
+                static hb_feature_t noLigatures[2];
                 static bool init = [](hb_feature_t* features) {
                     hb_feature_from_string("liga=0", -1, &features[0]);
                     hb_feature_from_string("dlig=0", -1, &features[1]); 
                     return true;
-                    }(features);
-                hb_shape(iFont, iBuf, features, 2);
+                    }(noLigatures);
+                if (aLigatures)
+                    hb_shape(iFont, iBuf, nullptr, 0);
+                else
+                    hb_shape(iFont, iBuf, noLigatures, 2);
                 unsigned int glyphCount = 0;
                 auto glyphInfo = hb_buffer_get_glyph_infos(iBuf, &glyphCount);
                 iGlyphInfo.assign(glyphInfo, glyphInfo + glyphCount);
@@ -295,8 +300,18 @@ namespace neogfx
             {
                 for (std::uint32_t i = 0; i < glyph_count(); ++i)
                 {
-                    auto const tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::next(iGlyphRun.start, i), iGlyphRun.end);
+                    auto const tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::next(iGlyphRun.start, glyph_info(i).cluster), iGlyphRun.end);
                     if (glyph_info(i).codepoint == 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
+                        return true;
+                }
+                return false;
+            }
+            bool has_visible_glyphs() const
+            {
+                for (std::uint32_t i = 0; i < glyph_count(); ++i)
+                {
+                    auto const tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::next(iGlyphRun.start, glyph_info(i).cluster), iGlyphRun.end);
+                    if (glyph_info(i).codepoint != 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
                         return true;
                 }
                 return false;
@@ -318,14 +333,20 @@ namespace neogfx
             thread_local std::vector<font> fontsTried;
             auto tryFont = aFont;
             fontsTried.push_back(aFont);
-            iGlyphsList.emplace_back(glyphs{ aParent, tryFont, aGlyphRun });
+            bool const ligatures = aFont.ligatures();
+            // A fallback font may only form ligatures if no earlier font in the chain contributed any
+            // visible glyphs to this run, otherwise a ligature in the fallback font could span a
+            // character already rendered by the earlier font and its cluster would go unmatched below.
+            bool fallbackLigatures = ligatures;
+            iGlyphsList.emplace_back(glyphs{ aParent, tryFont, aGlyphRun, ligatures });
             while (iGlyphsList.back().needs_fallback_font())
             {
+                fallbackLigatures = fallbackLigatures && !iGlyphsList.back().has_visible_glyphs();
                 if (tryFont.has_fallback() && std::find(fontsTried.begin(), fontsTried.end(), tryFont.fallback()) == fontsTried.end())
                 {
                     tryFont = tryFont.fallback();
                     fontsTried.push_back(tryFont);
-                    iGlyphsList.emplace_back(glyphs{ aParent, tryFont, aGlyphRun });
+                    iGlyphsList.emplace_back(glyphs{ aParent, tryFont, aGlyphRun, fallbackLigatures });
                 }
                 else
                 {
@@ -336,7 +357,7 @@ namespace neogfx
                     iGlyphsList.emplace_back(glyphs{ aParent, aFont, glyph_text_factory::glyph_run{
                         &lastResort[0], &lastResort[0] + lastResort.size(), 
                         aGlyphRun.currentLineDirection, aGlyphRun.direction, 
-                        aGlyphRun.mnemonic, aGlyphRun.script } });
+                        aGlyphRun.mnemonic, aGlyphRun.script }, ligatures });
                     break;
                 }
             }
@@ -645,6 +666,10 @@ namespace neogfx
             std::string::size_type sourceClusterRunStart = runs[i].start - &codePoints[0];
             glyph_shapes shapes{ aGc, aFontSelector.select_font(sourceClusterRunStart), runs[i] };
 
+            // Number of characters in this run: the cluster of the logically last glyph in the run
+            // extends to here (not just one character), which matters when that glyph is a ligature.
+            std::u32string::size_type const runLength = runs[i].end - runs[i].start;
+
             for (std::uint32_t j = 0; j < shapes.glyph_count(); ++j)
             {
                 std::u32string::size_type startCluster = shapes.glyph_info(j).cluster;
@@ -654,15 +679,17 @@ namespace neogfx
                     std::uint32_t k = j + 1;
                     while (k < shapes.glyph_count() && shapes.glyph_info(k).cluster == startCluster)
                         ++k;
-                    endCluster = (k < shapes.glyph_count() ? shapes.glyph_info(k).cluster : startCluster + 1);
+                    endCluster = (k < shapes.glyph_count() ? shapes.glyph_info(k).cluster : runLength);
                 }
                 else
                 {
                     std::uint32_t k = j;
                     while (k > 0 && shapes.glyph_info(k).cluster == startCluster)
                         --k;
-                    endCluster = (shapes.glyph_info(k).cluster != startCluster ? shapes.glyph_info(k).cluster : startCluster + 1);
+                    endCluster = (shapes.glyph_info(k).cluster != startCluster ? shapes.glyph_info(k).cluster : runLength);
                 }
+                if (endCluster <= startCluster)
+                    endCluster = startCluster + 1;
                 startCluster += (runs[i].start - &codePoints[0]);
                 endCluster += (runs[i].start - &codePoints[0]);
 
@@ -1374,4 +1401,4 @@ namespace neogfx
                 ++i;
         }
     }
-}
+}

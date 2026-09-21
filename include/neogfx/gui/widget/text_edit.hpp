@@ -894,7 +894,7 @@ namespace neogfx
         void animate();
         void update_cursor();
         void make_cursor_visible(bool aForcePreviewScroll = false);
-        std::pair<document_glyphs::difference_type, bool> glyph_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
+        std::pair<document_glyphs::difference_type, bool> glyph_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true, position_type* aClusterOffset = nullptr) const;
         void make_visible(position_info const& aGlyphPosition, point const& aPreview = {});
         style glyph_style(document_glyphs::const_iterator aGlyphChar, const document_column& aColumn) const;
         void draw_glyphs(i_graphics_context& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
@@ -953,4 +953,4 @@ namespace neogfx
     };
 
     extern template class basic_glyph_text_content<text_edit::glyph_container_type>;
-}
+}

@@ -107,7 +107,8 @@ namespace neogfx
         iWeight{ font_weight::Normal },
         iOutline{ 0.0 },
         iKerning{ true },
-        iHinting{ true }
+        iHinting{ true },
+        iLigatures{ true }
     {
     }
 
@@ -119,7 +120,8 @@ namespace neogfx
         iSize{ aSize }, 
         iOutline{ 0.0 },
         iKerning{ true },
-        iHinting{ true }
+        iHinting{ true },
+        iLigatures{ true }
     {
     }
 
@@ -131,7 +133,8 @@ namespace neogfx
         iSize{ aSize }, 
         iOutline{ 0.0 },
         iKerning{ true },
-        iHinting{ true }
+        iHinting{ true },
+        iLigatures{ true }
     {
     }
 
@@ -144,7 +147,8 @@ namespace neogfx
         iSize{ aSize }, 
         iOutline{ 0.0 },
         iKerning{ true },
-        iHinting{ true }
+        iHinting{ true },
+        iLigatures{ true }
     {
     }
 
@@ -157,7 +161,8 @@ namespace neogfx
         iSize{ aSize },
         iOutline{ 0.0 },
         iKerning{ true },
-        iHinting{ true }
+        iHinting{ true },
+        iLigatures{ true }
     {
     }
 
@@ -170,7 +175,8 @@ namespace neogfx
         iSize{ aOther.iSize }, 
         iOutline{ aOther.iOutline },
         iKerning{ aOther.iKerning },
-        iHinting{ aOther.iHinting }
+        iHinting{ aOther.iHinting },
+        iLigatures{ aOther.iLigatures }
     {
     }
 
@@ -189,6 +195,7 @@ namespace neogfx
         iOutline = aOther.iOutline;
         iKerning = aOther.iKerning;
         iHinting = aOther.iHinting;
+        iLigatures = aOther.iLigatures;
         return *this;
     }
 
@@ -296,6 +303,21 @@ namespace neogfx
         iHinting = false;
     }
 
+    bool font_info::ligatures() const
+    {
+        return iLigatures;
+    }
+
+    void font_info::enable_ligatures()
+    {
+        iLigatures = true;
+    }
+
+    void font_info::disable_ligatures()
+    {
+        iLigatures = false;
+    }
+
     font_info font_info::with_style(font_style aStyle) const
     {
         font_info result{ *this };
@@ -350,6 +372,16 @@ namespace neogfx
             result.enable_hinting();
         else
             result.disable_hinting();
+        return result;
+    }
+
+    font_info font_info::with_ligatures(bool aLigatures) const
+    {
+        font_info result = *this;
+        if (aLigatures)
+            result.enable_ligatures();
+        else
+            result.disable_ligatures();
         return result;
     }
 
@@ -560,6 +592,11 @@ namespace neogfx
         return info().with_hinting(aHinting);
     }
 
+    font font::with_ligatures(bool aLigatures) const
+    {
+        return info().with_ligatures(aLigatures);
+    }
+
     font_id font::id() const
     {
         return native_font_face().id();
@@ -653,6 +690,11 @@ namespace neogfx
         return info().kerning();
     }
 
+    bool font::ligatures() const
+    {
+        return info().ligatures();
+    }
+
     dimension font::kerning(std::uint32_t aLeftGlyphIndex, std::uint32_t aRightGlyphIndex) const
     {
         if (kerning())
@@ -702,4 +744,4 @@ namespace neogfx
     {
         return iInstance->native_font_face();
     }
-}
+}
