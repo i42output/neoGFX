@@ -1536,7 +1536,11 @@ namespace neogfx
                         (render_target().target_type() == render_target_type::Texture ?
                             point{ render_target().target_texture().bleed_guard() } : point{});
                     bool optimise = false;
-                    if (!logical_operation_active() && iFastState.opacity == 1.0 && (!iStencilEnabled || iUpdatingStencil))
+                    // the clear fast-path executes immediately whereas non-optimised rects in this batch are
+                    // deferred to the triangle renderer, so once anything has been deferred we must not clear
+                    // or it would be drawn out of order (deferred fill painted on top of later rects)
+                    bool const deferredPending = (maybeVertexArrays != std::nullopt && !maybeVertexArrays->empty());
+                    if (!deferredPending && !logical_operation_active() && iFastState.opacity == 1.0 && (!iStencilEnabled || iUpdatingStencil))
                     {
                         auto const penWidth = drawOp.pen.width();
                         if (penWidth == 0.0)

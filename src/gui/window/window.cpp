@@ -1236,8 +1236,9 @@ namespace neogfx
                     oldEnteredWidget->mouse_left();
             }
             iEnteredWidget = newEnteredWidget;
-            if (!event_consumed(iEnteredWidget->mouse_entered_event()(aPosition)))
-                iEnteredWidget->mouse_entered(aPosition);
+            point const widgetPosition = aPosition - iEnteredWidget->origin();
+            if (!event_consumed(iEnteredWidget->mouse_entered_event()(widgetPosition)))
+                iEnteredWidget->mouse_entered(widgetPosition);
         }
     }
 
