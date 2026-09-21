@@ -229,6 +229,7 @@ namespace neogfx
             text_direction direction;
             bool mnemonic;
             hb_script_t script;
+            std::uint8_t level;
         };
         typedef std::vector<glyph_run> run_list;
     public:
@@ -479,6 +480,8 @@ namespace neogfx
         text_direction currentLineDirection = get_text_direction(emojiAtlas, codePoints, codePoints + codePointCount);
         text_direction previousLineDirection = currentLineDirection;
         text_direction previousDirection = currentLineDirection;
+        text_direction previousStrongDirection = currentLineDirection;
+        std::uint8_t previousLevel = (currentLineDirection == text_direction::RTL ? 1 : 0);
         const char32_t* runStart = &codePoints[0];
         std::u32string::size_type lastCodePointIndex = codePointCount - 1;
         font previousFont = aFontSelector.select_font(0);
@@ -499,18 +502,23 @@ namespace neogfx
             case PDF:
                 if (!directionStack.empty())
                     directionStack.pop_back();
+                previousStrongDirection = directionStack.empty() ? currentLineDirection : directionStack.back().first;
                 break;
             case LRE:
                 directionStack.push_back(std::make_pair(text_direction::LTR, false));
+                previousStrongDirection = text_direction::LTR;
                 break;
             case RLE:
                 directionStack.push_back(std::make_pair(text_direction::RTL, false));
+                previousStrongDirection = text_direction::RTL;
                 break;
             case LRO:
                 directionStack.push_back(std::make_pair(text_direction::LTR, true));
+                previousStrongDirection = text_direction::LTR;
                 break;
             case RLO:
                 directionStack.push_back(std::make_pair(text_direction::RTL, true));
+                previousStrongDirection = text_direction::RTL;
                 break;
             default:
                 break;
@@ -532,41 +540,36 @@ namespace neogfx
                     currentLineDirection = text_direction::LTR;
                 else
                     currentLineDirection = get_text_direction(emojiAtlas, codePoints + codePointIndex, codePoints + codePointCount, currentLineDirection);
+                previousStrongDirection = currentLineDirection;
             }
 
-            text_direction currentDirection = get_text_direction(emojiAtlas, codePoints + codePointIndex, codePoints + codePointCount, currentLineDirection, previousDirection);
-            if (currentDirection == text_direction::RTL && currentCategory == text_category::Digit)
-                currentDirection = text_direction::LTR;
-            
-            auto bidi_check = [&directionStack](text_category aCategory, text_direction aDirection)
-            {
-                if (!directionStack.empty())
-                {
-                    switch (aCategory)
-                    {
-                    case text_category::LTR:
-                    case text_category::RTL:
-                    case text_category::Digit:
-                    case text_category::Emoji:
-                        if (directionStack.back().second == true)
-                            return directionStack.back().first;
-                        break;
-                    case text_category::Mark:
-                    case text_category::None:
-                    case text_category::Whitespace:
-                    case text_category::Mnemonic:
-                        return directionStack.back().first;
-                    default:
-                        break;
-                    }
-                }
-                return aDirection;
-            };
-            
+            text_direction const embeddingDirection = directionStack.empty() ? currentLineDirection : directionStack.back().first;
+
+            text_direction currentDirection = currentLineDirection;
             if (!newLine)
-                currentDirection = bidi_check(currentCategory, currentDirection);
-            else
-                currentDirection = currentLineDirection;
+            {
+                if (!directionStack.empty() && directionStack.back().second == true) // LRO/RLO
+                    currentDirection = embeddingDirection;
+                else
+                    currentDirection = get_text_direction(emojiAtlas, codePoints + codePointIndex, codePoints + codePointCount, embeddingDirection, previousStrongDirection, previousDirection, previousCategory);
+            }
+
+            // UAX #9 embedding level (X1-X9) and resolved level (I1/I2) of this character.
+            std::uint8_t embeddingLevel = (currentLineDirection == text_direction::RTL ? 1 : 0);
+            for (auto const& embedding : directionStack)
+                embeddingLevel = (embedding.first == text_direction::LTR ? (embeddingLevel + 2) & ~1 : (embeddingLevel + 1) | 1);
+            std::uint8_t currentLevel = embeddingLevel;
+            if (!newLine && !(!directionStack.empty() && directionStack.back().second == true))
+            {
+                bool const evenLevel = (embeddingLevel % 2 == 0);
+                if (is_part_of_number(emojiAtlas, codePoints + codePointIndex, codePoints + codePointCount, previousCategory))
+                    currentLevel += (evenLevel ? (previousStrongDirection == text_direction::RTL ? 2 : 0) : 1);
+                else if (currentDirection == (evenLevel ? text_direction::RTL : text_direction::LTR))
+                    currentLevel += 1;
+            }
+
+            if (currentCategory == text_category::LTR || currentCategory == text_category::RTL)
+                previousStrongDirection = currentDirection;
             
             textDirections.push_back(character_type{ currentCategory, currentDirection });
 
@@ -579,42 +582,59 @@ namespace neogfx
                 currentCategory == text_category::Mnemonic ||
                 previousCategory == text_category::Mnemonic ||
                 previousLineDirection != currentLineDirection ||
-                previousDirection != currentDirection;
+                previousDirection != currentDirection ||
+                previousLevel != currentLevel;
 
             if (currentCategory == text_category::Emoji)
                 hasEmojis = true;
             
             if (newRun && codePointIndex > 0)
             {
-                runs.emplace_back(runStart, &codePoints[codePointIndex], previousLineDirection, previousDirection, previousCategory == text_category::Mnemonic, previousScript);
+                runs.emplace_back(runStart, &codePoints[codePointIndex], previousLineDirection, previousDirection, previousCategory == text_category::Mnemonic, previousScript, previousLevel);
                 runStart = &codePoints[codePointIndex];
             }
 
             previousLineDirection = currentLineDirection;
             previousDirection = currentDirection;
+            previousLevel = currentLevel;
             previousCategory = currentCategory;
             previousScript = currentScript;
             previousFont = currentFont;
         }
 
-        runs.emplace_back(runStart, &codePoints[lastCodePointIndex + 1], previousLineDirection, previousDirection, previousCategory == text_category::Mnemonic, previousScript);
+        runs.emplace_back(runStart, &codePoints[lastCodePointIndex + 1], previousLineDirection, previousDirection, previousCategory == text_category::Mnemonic, previousScript, previousLevel);
 
         float lineStart = 0.0f;
         vec2f previousAdvance = {};
         quadf_2d previousCell = {};
 
-        auto runFrom = runs.begin();
-        for (auto runTo = runs.begin(); runTo != runs.end(); ++runTo)
+        // UAX #9 L2: from the highest level down to the lowest odd level, reverse every maximal contiguous
+        // sequence of runs at that level or higher. A line break is a level 0 run (see newLine handling above)
+        // so each line is reordered independently.
+        int highestLevel = 0;
+        int lowestOddLevel = 256; // levels are std::uint8_t
+        for (auto const& run : runs)
         {
-            if (runTo->currentLineDirection != runFrom->currentLineDirection)
+            highestLevel = std::max(highestLevel, static_cast<int>(run.level));
+            if (run.level % 2 == 1)
+                lowestOddLevel = std::min(lowestOddLevel, static_cast<int>(run.level));
+        }
+        for (int level = highestLevel; level >= lowestOddLevel; --level)
+        {
+            for (auto runFrom = runs.begin(); runFrom != runs.end();)
             {
-                if (runFrom->currentLineDirection == text_direction::RTL)
-                    std::reverse(runFrom, runTo);
+                if (runFrom->level < level)
+                {
+                    ++runFrom;
+                    continue;
+                }
+                auto runTo = std::next(runFrom);
+                while (runTo != runs.end() && runTo->level >= level)
+                    ++runTo;
+                std::reverse(runFrom, runTo);
                 runFrom = runTo;
             }
         }
-        if (runFrom->currentLineDirection == text_direction::RTL)
-            std::reverse(runFrom, runs.end());
 
         for (std::size_t i = 0; i < runs.size(); ++i)
         {

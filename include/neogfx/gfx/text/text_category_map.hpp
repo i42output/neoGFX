@@ -2235,44 +2235,106 @@ namespace neogfx
         return get_text_category(aEmojiAtlas, &aCodePoint, &aCodePoint + 1);
     }
 
-    inline text_direction get_text_direction(const i_emoji_atlas& aEmojiAtlas, const char32_t* aCodePoint, const char32_t* aCodePointEnd, std::optional<text_direction> aLineDirection = std::nullopt, std::optional<text_direction> aCurrentDirection = std::nullopt)
+    // Paragraph (line) direction (UAX #9 P2/P3): the direction of the first strong character
+    // before the end of the line, otherwise aDefaultDirection.
+    inline text_direction get_text_direction(const i_emoji_atlas& aEmojiAtlas, const char32_t* aCodePoint, const char32_t* aCodePointEnd, std::optional<text_direction> aDefaultDirection = std::nullopt)
     {
-        if (aCodePoint != aCodePointEnd)
+        for (auto nextCodePoint = aCodePoint; nextCodePoint != aCodePointEnd && *nextCodePoint != U'\r' && *nextCodePoint != U'\n'; ++nextCodePoint)
         {
-            if (*aCodePoint != U'\r' && *aCodePoint != U'\n' && aLineDirection && aLineDirection.value() == text_direction::RTL)
+            switch (get_text_category(aEmojiAtlas, nextCodePoint, aCodePointEnd))
             {
-                if (get_text_category(aEmojiAtlas, aCodePoint, aCodePointEnd) != text_category::LTR)
-                    return text_direction::RTL;
-            }
-            auto nextCodePoint = aCodePoint;
-            while (nextCodePoint != aCodePointEnd)
-            {
-                switch (get_text_category(aEmojiAtlas, nextCodePoint, aCodePointEnd))
-                {
-                case text_category::LTR:
-                    return text_direction::LTR;
-                case text_category::RTL:
-                    return text_direction::RTL;
-                case text_category::Mark:
-                    if (aCurrentDirection)
-                        return aCurrentDirection.value();
-                    break;
-                case text_category::Whitespace:
-                case text_category::None:
-                    if (aCurrentDirection && aCurrentDirection.value() == text_direction::LTR)
-                        return text_direction::LTR;
-                    break;
-                default:
-                    break;
-                }
-                ++nextCodePoint;
+            case text_category::LTR:
+                return text_direction::LTR;
+            case text_category::RTL:
+                return text_direction::RTL;
+            default:
+                break;
             }
         }
-        return aCurrentDirection ? aCurrentDirection.value() : aLineDirection ? aLineDirection.value() : text_direction::LTR;
+        return aDefaultDirection ? aDefaultDirection.value() : text_direction::LTR;
     }
 
-    inline text_direction get_text_direction(const i_emoji_atlas& aEmojiAtlas, char32_t aCodePoint, std::optional<text_direction> aLineDirection = std::nullopt, std::optional<text_direction> aCurrentDirection = std::nullopt)
+    inline text_direction get_text_direction(const i_emoji_atlas& aEmojiAtlas, char32_t aCodePoint, std::optional<text_direction> aDefaultDirection = std::nullopt)
     {
-        return get_text_direction(aEmojiAtlas, &aCodePoint, &aCodePoint + 1, aLineDirection, aCurrentDirection);
+        return get_text_direction(aEmojiAtlas, &aCodePoint, &aCodePoint + 1, aDefaultDirection);
+    }
+
+    // European number terminators (UAX #9 bidi class ET) that are common in UI text.
+    inline bool is_number_terminator(char32_t aCodePoint)
+    {
+        switch (aCodePoint)
+        {
+        case U'#': case U'$': case U'%': case U'\u00A2': case U'\u00A3': case U'\u00A4': case U'\u00A5':
+        case U'\u00B0': case U'\u00B1': case U'\u2030': case U'\u20AC': case U'\u20B9':
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    // UAX #9 W4/W5: a digit, a single separator between two digits, or a terminator adjacent to a digit.
+    inline bool is_part_of_number(const i_emoji_atlas& aEmojiAtlas, const char32_t* aCodePoint, const char32_t* aCodePointEnd, text_category aPreviousCategory)
+    {
+        if (aCodePoint == aCodePointEnd)
+            return false;
+        auto const category = get_text_category(aEmojiAtlas, aCodePoint, aCodePointEnd);
+        if (category == text_category::Digit)
+            return true;
+        if (category != text_category::None)
+            return false;
+        auto const nextCategory = std::next(aCodePoint) != aCodePointEnd ? get_text_category(aEmojiAtlas, std::next(aCodePoint), aCodePointEnd) : text_category::Unknown;
+        if (aPreviousCategory == text_category::Digit && nextCategory == text_category::Digit)
+            return true;
+        return is_number_terminator(*aCodePoint) && (aPreviousCategory == text_category::Digit || nextCategory == text_category::Digit);
+    }
+
+    // Resolves the direction of the character at aCodePoint, following the weak/neutral rules of UAX #9 (W1-W7, N1-N2):
+    //  - strong characters (LTR/RTL) keep their own direction;
+    //  - digits are always laid out LTR; for the purpose of resolving neighbouring neutrals a number takes the direction of
+    //    the last strong character before it (W2/W7 plus N1's "numbers act as R"), which is why it never changes aPreviousStrongDirection;
+    //  - a single separator between two digits, or a terminator next to a digit, joins the number (W4/W5);
+    //  - marks take the direction of the preceding character (W1);
+    //  - any other neutral takes the direction of the surrounding strong text if both sides agree (N1), else the
+    //    embedding (line) direction (N2).
+    // aPreviousStrongDirection is the direction of the last strong (LTR/RTL) character before aCodePoint on this line,
+    // initially the line direction; aPreviousDirection and aPreviousCategory describe the immediately preceding character.
+    inline text_direction get_text_direction(const i_emoji_atlas& aEmojiAtlas, const char32_t* aCodePoint, const char32_t* aCodePointEnd, text_direction aLineDirection, text_direction aPreviousStrongDirection, text_direction aPreviousDirection, text_category aPreviousCategory)
+    {
+        if (aCodePoint == aCodePointEnd)
+            return aLineDirection;
+        switch (get_text_category(aEmojiAtlas, aCodePoint, aCodePointEnd))
+        {
+        case text_category::LTR:
+            return text_direction::LTR;
+        case text_category::RTL:
+            return text_direction::RTL;
+        case text_category::Mark:
+            return aPreviousDirection;
+        default:
+            break;
+        }
+        if (is_part_of_number(aEmojiAtlas, aCodePoint, aCodePointEnd, aPreviousCategory))
+            return text_direction::LTR;
+        text_direction nextStrongDirection = aLineDirection;
+        for (auto nextCodePoint = std::next(aCodePoint); nextCodePoint != aCodePointEnd && *nextCodePoint != U'\r' && *nextCodePoint != U'\n'; ++nextCodePoint)
+        {
+            auto const nextStrongCategory = get_text_category(aEmojiAtlas, nextCodePoint, aCodePointEnd);
+            if (nextStrongCategory == text_category::LTR)
+            {
+                nextStrongDirection = text_direction::LTR;
+                break;
+            }
+            if (nextStrongCategory == text_category::RTL)
+            {
+                nextStrongDirection = text_direction::RTL;
+                break;
+            }
+            if (nextStrongCategory == text_category::Digit)
+            {
+                nextStrongDirection = aPreviousStrongDirection;
+                break;
+            }
+        }
+        return nextStrongDirection == aPreviousStrongDirection ? nextStrongDirection : aLineDirection;
     }
 }
