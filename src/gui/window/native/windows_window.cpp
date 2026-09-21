@@ -1520,6 +1520,24 @@ namespace neogfx
                     MINMAXINFO& mmi = *reinterpret_cast<MINMAXINFO*>(lparam);
                     mmi.ptMinTrackSize.x = static_cast<LONG>(self.surface_window().as_widget().minimum_size().cx);
                     mmi.ptMinTrackSize.y = static_cast<LONG>(self.surface_window().as_widget().minimum_size().cy);
+                    if (CUSTOM_DECORATION)
+                    {
+                        // The whole window rect is client area (see WM_NCCALCSIZE), so when maximized
+                        // size the window to the monitor work area inflated by the neoGFX window frame
+                        // (so the frame sits off-screen, as a native frame would) rather than letting
+                        // Windows inflate it by the WS_THICKFRAME border, which would otherwise leave
+                        // part of the client area off-screen.
+                        MONITORINFO mi{};
+                        mi.cbSize = sizeof(mi);
+                        if (::GetMonitorInfo(::MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST), &mi))
+                        {
+                            auto const frame = self.surface_window().as_widget().border();
+                            mmi.ptMaxPosition.x = mi.rcWork.left - mi.rcMonitor.left - static_cast<LONG>(frame.left);
+                            mmi.ptMaxPosition.y = mi.rcWork.top - mi.rcMonitor.top - static_cast<LONG>(frame.top);
+                            mmi.ptMaxSize.x = (mi.rcWork.right - mi.rcWork.left) + static_cast<LONG>(frame.left + frame.right);
+                            mmi.ptMaxSize.y = (mi.rcWork.bottom - mi.rcWork.top) + static_cast<LONG>(frame.top + frame.bottom);
+                        }
+                    }
                     result = 0;
                 }
                 break;
@@ -1676,7 +1694,9 @@ namespace neogfx
 
         border window::border_thickness() const
         {
-            if ((surface_window().style() & window_style::Resize) == window_style::Resize)
+            if (is_maximized())
+                iBorderThickness = border{};
+            else if ((surface_window().style() & window_style::Resize) == window_style::Resize)
             {
                 RECT borderThickness;
                 ::SetRectEmpty(&borderThickness);

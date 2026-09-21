@@ -419,7 +419,9 @@ namespace neogfx
     border virtual_window::border_thickness() const
     {
         iBorderThickness = border{ 1.0, 1.0, 1.0, 1.0 };
-        if ((surface_window().style() & window_style::Resize) == window_style::Resize)
+        if (is_maximized())
+            iBorderThickness = border{};
+        else if ((surface_window().style() & window_style::Resize) == window_style::Resize)
         {
             iBorderThickness += service<i_app>().current_style().border(border_role::Window);
             iBorderThickness += service<i_app>().current_style().padding(padding_role::Window);

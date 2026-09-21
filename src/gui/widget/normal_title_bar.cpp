@@ -196,7 +196,10 @@ namespace neogfx
             iMinimizeButton.enable(!isIconic && isEnabled);
             iMaximizeButton.enable(!isMaximized && isEnabled);
             iRestoreButton.enable(!isRestored && isEnabled);
-            iCloseButton.enable(root().can_close() && isEnabled);
+            // can_close() is false for a strong window until app::exec() is running, but the window's
+            // first paint can happen before that; don't flash a disabled close box (execution_started
+            // re-runs this with the real value).
+            iCloseButton.enable((root().can_close() || !service<i_app>().in_exec()) && isEnabled);
             iMinimizeButton.show(!isIconic && (root().style() & window_style::MinimizeBox) == window_style::MinimizeBox);
             iMaximizeButton.show(!isMaximized && (root().style() & window_style::MaximizeBox) == window_style::MaximizeBox);
             iRestoreButton.show(!isRestored && (root().style() & (window_style::MinimizeBox | window_style::MaximizeBox)) != window_style::Invalid);

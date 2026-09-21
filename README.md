@@ -54,7 +54,7 @@ Message Box                     | 100     |
 Menu                            | 100     | 
 Nested windows                  | 90      |     
 MDI                             | 0       |
-Tabs                            | 95      |     Vertical tabs
+Tabs                            | 100     |
 Toolbars                        | 90      |     Drop-down button support
 Layout Managers                 | 95      |     Need to fully support size policies
 Label                           | 100     |     
