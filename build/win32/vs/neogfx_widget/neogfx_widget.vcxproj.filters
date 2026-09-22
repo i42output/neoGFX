@@ -52,6 +52,9 @@
     <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\window\tooltip.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\menu_item_widget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -504,6 +507,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\window\popup_menu.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\window\tooltip.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\progress_bar.hpp">

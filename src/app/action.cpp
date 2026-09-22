@@ -172,7 +172,7 @@ namespace neogfx
     i_string const& action::help_text() const
     {
         if (iHelpText != std::nullopt)
-            return *iToolTipText;
+            return *iHelpText;
         else if (iText != std::nullopt)
             return *iText;
         else if (iToolTipText != std::nullopt)

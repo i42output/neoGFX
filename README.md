@@ -70,7 +70,7 @@ Check Box                       | 100     |
 Radio Button                    | 100     |
 Combo Box                       | 95      |     Glob and regex filters; review UX.
 Group Box                       | 100     |
-Tool Tips                       | 0       |
+Tool Tips                       | 100     |
 Status Bar                      | 100     |
 Progress Bar                    | 95      |
 Docks							| 75      |

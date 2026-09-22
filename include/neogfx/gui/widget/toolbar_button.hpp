@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/app/i_action.hpp>
+#include <neogfx/gui/widget/timer.hpp>
+#include <neogfx/gui/window/tooltip.hpp>
 #include "push_button.hpp"
 
 namespace neogfx
@@ -55,13 +57,20 @@ namespace neogfx
     public:
         virtual void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier);
         virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
+        virtual void mouse_moved(const point& aPosition, key_modifier aKeyModifier);
+        virtual void mouse_entered(const point& aPosition);
+        virtual void mouse_left();
     protected:
         virtual void handle_clicked();
     private:
         void init();
         void update_state();
+        void tooltip_timer_expired();
+        void hide_tooltip();
     private:
         ref_ptr<i_action> iAction;
         sink iSink;
+        widget_timer iTooltipTimer;
+        std::unique_ptr<tooltip> iTooltip;
     };
 }
