@@ -1737,6 +1737,9 @@ namespace neogfx
 
     text_edit::style text_edit::current_style() const
     {
+        // a style applied with no selection is pending for the text typed next; it is the current style until the cursor moves
+        if (iNextStyle != std::nullopt && cursor().position() == cursor().anchor())
+            return *iNextStyle;
         auto position = static_cast<position_type>(cursor().anchor());
         if (position != 0 && cursor().position() == cursor().anchor())
             --position;
