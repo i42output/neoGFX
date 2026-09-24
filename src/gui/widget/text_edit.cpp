@@ -3539,15 +3539,22 @@ namespace neogfx
             else if (!iGlyphColumns[0].lines.empty())
                 y = iGlyphColumns[0].lines.front().ypos(); // honour vertical alignment
             y = std::round(documentTop + y);
-            // no room below the last line when it sits flush with the bottom (bottom alignment or scrolled to end): centre on the bottom edge
+            // after the last line (only when the end of the document is in view; if it is scrolled off the bottom leave it where it is):
+            // bottom alignment: dotted line on the visible bottom edge (the paint clip rect, which extends into the padding);
+            // otherwise: drop half an icon so the icon clears the line, or if there is not that much room centre in the gap above the visible bottom edge
             if (afterLastLine)
             {
-                // the visible bottom edge is the paint clip rect, which extends into the padding
                 rect visibleRect = default_clip_rect().intersection(clientRect);
                 visibleRect.inflate(size{ padding_adjust() });
-                // only when the end of the document is in view; if it is scrolled off the bottom leave it where it is
-                if (y <= visibleRect.bottom() && y + std::ceil(iconExtent.cy / 2.0) > visibleRect.bottom())
-                    y = visibleRect.bottom() - 1.0;
+                auto const visibleBottom = visibleRect.bottom() - 1.0;
+                if (y <= visibleBottom)
+                {
+                    auto const defaultAlignment = default_style().paragraph().alignment().as_std_optional().value_or(alignment());
+                    if ((defaultAlignment & neogfx::alignment::Vertical) == neogfx::alignment::Bottom)
+                        y = visibleBottom;
+                    else
+                        y = std::min(y + std::ceil(iconExtent.cy / 2.0), std::round((y + visibleBottom) / 2.0));
+                }
             }
             if (y + iconExtent.cy < clientRect.top() || y - iconExtent.cy > clientRect.bottom())
                 continue;
