@@ -511,7 +511,7 @@ namespace neogfx
             document_span span;
             coordinate ypos;
             mutable height_map heightMap;
-            column_breaks columnBreaks;
+            column_breaks columnBreaks; // glyph offsets (relative to the paragraph) of the column delimiters
             line_breaks lineBreaks;
 
             document_text::difference_type text_begin_index() const
@@ -898,6 +898,7 @@ namespace neogfx
         void refresh_paragraph(document_text::const_iterator aWhere, ptrdiff_t aDelta);
         void refresh_columns();
         void refresh_lines();
+        std::pair<document_glyphs::difference_type, document_glyphs::difference_type> column_glyph_span(glyph_paragraph const& aParagraph, std::size_t aColumnIndex) const;
         void animate();
         void update_cursor();
         void make_cursor_visible(bool aForcePreviewScroll = false);
