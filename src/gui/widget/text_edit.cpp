@@ -3509,6 +3509,7 @@ namespace neogfx
         {
             // a bookmark is drawn below the line containing the character preceding it
             coordinate y = 0.0;
+            bool afterLastLine = false;
             if (bookmark > 0)
             {
                 glyph_line const* match = nullptr;
@@ -3533,8 +3534,12 @@ namespace neogfx
                 // centre between this line and the next (paragraph spacing may separate them)
                 if (following != nullptr && following->ypos() > y)
                     y = (y + following->ypos()) / 2.0;
+                afterLastLine = (following == nullptr);
             }
             y = std::round(documentTop + y);
+            // no room below the last line when it sits flush with the bottom (bottom alignment or scrolled to end)
+            if (afterLastLine)
+                y = std::min(y, clientRect.bottom() - std::ceil(iconExtent.cy / 2.0));
             if (y + iconExtent.cy < clientRect.top() || y - iconExtent.cy > clientRect.bottom())
                 continue;
 
