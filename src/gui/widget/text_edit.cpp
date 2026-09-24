@@ -3536,6 +3536,8 @@ namespace neogfx
                     y = (y + following->ypos()) / 2.0;
                 afterLastLine = (following == nullptr);
             }
+            else if (!iGlyphColumns[0].lines.empty())
+                y = iGlyphColumns[0].lines.front().ypos(); // honour vertical alignment
             y = std::round(documentTop + y);
             // no room below the last line when it sits flush with the bottom (bottom alignment or scrolled to end)
             if (afterLastLine)
