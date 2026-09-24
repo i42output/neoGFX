@@ -127,6 +127,10 @@ namespace neogfx
                 iRowLayout.set_parent_widget(&parent_widget());
             return iRowLayout;
         }
+        // the grid may have been given its parent widget after construction (created unparented, then added to a layout); 
+        // layout::set_parent_widget() doesn't reach the row layout as it isn't one of the grid's items
+        if (has_parent_widget() && !iRowLayout.has_parent_widget())
+            iRowLayout.set_parent_widget(&parent_widget());
         if (aItem->has_parent_layout() && &aItem->parent_layout() == this)
             throw item_already_added();
         if (iCells.find(cell_coordinates{aColumn, aRow}) != iCells.end())

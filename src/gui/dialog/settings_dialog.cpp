@@ -25,6 +25,7 @@
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/dialog/settings_dialog.hpp>
+#include <neogfx/gui/layout/grid_layout.hpp>
 #include <neogfx/gui/widget/line_edit.hpp>
 #include <neogfx/gui/widget/check_box.hpp>
 #include <neogfx/gui/widget/drop_list.hpp>
@@ -328,11 +329,13 @@ namespace neogfx
         ref_ptr<i_setting_widget_factory> iUserFactory;
     };
 
-    settings_dialog::settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory, ref_ptr<i_setting_icons> aIcons) :
+    settings_dialog::settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory, ref_ptr<i_setting_icons> aIcons, 
+        std::set<std::string> const& aGridGroups) :
         dialog{ "Settings", window_style::DefaultDialog },
         iSettings{ aSettings },
         iWidgetFactory{ make_ref<default_setting_widget_factory>(aSettings, aWidgetFactory) },
         iIcons{ aIcons },
+        iGridGroups{ aGridGroups },
         iLayout{ client_layout() },
         iTree{ iLayout },
         iDetails{ iLayout },
@@ -342,11 +345,13 @@ namespace neogfx
         init();
     }
 
-    settings_dialog::settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory, ref_ptr<i_setting_icons> aIcons) :
+    settings_dialog::settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory, ref_ptr<i_setting_icons> aIcons, 
+        std::set<std::string> const& aGridGroups) :
         dialog{ aParent, "Settings", window_style::DefaultDialog },
         iSettings{ aSettings },
         iWidgetFactory{ make_ref<default_setting_widget_factory>(aSettings, aWidgetFactory) },
         iIcons{ aIcons },
+        iGridGroups{ aGridGroups },
         iLayout{ client_layout() },
         iTree{ iLayout },
         iDetails{ iLayout },
@@ -476,6 +481,7 @@ namespace neogfx
                 }
         }
 
+        std::map<std::string, std::pair<grid_layout*, std::uint32_t>> groupGrids; // grid, next free row
         for (auto const& setting : iSettings.all_settings_ordered())
         {
             if (setting->format().empty())
@@ -487,12 +493,55 @@ namespace neogfx
             auto groupWidget = groupWidgets.find(keyBits[0] + "." + keyBits[1]);
             if (groupWidget == groupWidgets.end())
                 continue;
+
+            // grid groups: each setting takes a row: a label cell (its leading label) and, to its right, a cell for everything else
+            std::string format = setting->format().to_std_string();
+            grid_layout* grid = nullptr;
+            std::uint32_t gridRow = 0u;
+            std::uint32_t const gridColumn = 0u;
+            if (iGridGroups.contains(groupWidget->first))
+            {
+                auto& groupGrid = groupGrids[groupWidget->first];
+                if (groupGrid.first == nullptr)
+                {
+                    groupGrid.first = &groupWidget->second->layout().emplace<grid_layout>(alignment::Left | alignment::VCenter);
+                    groupGrid.first->set_padding({});
+                }
+                grid = groupGrid.first;
+                gridRow = groupGrid.second++;
+                // cells are added strictly in order (label cell, then widget cell): grid_layout loses cells when
+                // an out of order add has to replace the spacer it filled a gap with
+                std::string leadingLabel;
+                if (!setting->constraints().optional()) // an optional setting's label is its check box
+                {
+                    auto labelEnd = format.find('%');
+                    while (labelEnd != std::string::npos && labelEnd + 1 < format.size() && format[labelEnd + 1] == '%')
+                        labelEnd = format.find('%', labelEnd + 2);
+                    leadingLabel = format.substr(0, labelEnd);
+                    format.erase(0, leadingLabel.size());
+                    for (auto escaped = leadingLabel.find("%%"); escaped != std::string::npos; escaped = leadingLabel.find("%%", escaped + 1))
+                        leadingLabel.erase(escaped, 1);
+                }
+                grid->add_item_at_position(gridRow, gridColumn, make_ref<label>(translate(leadingLabel)));
+            }
+
             i_layout* itemLayout = nullptr;
             auto new_layout = [&]()
             {
-                if (itemLayout != nullptr)
-                    itemLayout->add_spacer();
-                itemLayout = &groupWidget->second->layout().add<horizontal_layout>();
+                if (grid != nullptr)
+                {
+                    if (itemLayout != nullptr)
+                        return; // a grid cell holds a single line
+                    auto cellLayout = make_ref<horizontal_layout>();
+                    grid->add_item_at_position(gridRow, gridColumn + 1u, cellLayout);
+                    itemLayout = &*cellLayout;
+                }
+                else
+                {
+                    if (itemLayout != nullptr)
+                        itemLayout->add_spacer();
+                    itemLayout = &groupWidget->second->layout().add<horizontal_layout>();
+                }
                 itemLayout->set_padding({});
                 itemLayout->set_size_policy(size_constraint::Minimum, size_constraint::Minimum);
             };
@@ -536,7 +585,7 @@ namespace neogfx
                 }
             };
 
-            for (auto ch : setting->format().to_std_string())
+            for (auto ch : format)
             {
                 switch (ch)
                 {
@@ -586,7 +635,7 @@ namespace neogfx
                 }
             }
             emit_label();
-            if (itemLayout != nullptr)
+            if (grid == nullptr && itemLayout != nullptr)
                 itemLayout->add_spacer();
         }
 

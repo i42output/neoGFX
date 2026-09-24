@@ -21,6 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <set>
+
 #include <neogfx/app/settings.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/gui/widget/tree_view.hpp>
@@ -52,8 +54,12 @@ namespace neogfx
     {
         meta_object(dialog)
     public:
-        settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {}, ref_ptr<i_setting_icons> aIcons = {});
-        settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {}, ref_ptr<i_setting_icons> aIcons = {});
+        // aGridGroups: keys of groups (e.g. "environment.formats") whose settings are laid out in a grid: a column
+        // of labels and a column of widgets, one setting per row
+        settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {}, ref_ptr<i_setting_icons> aIcons = {}, 
+            std::set<std::string> const& aGridGroups = {});
+        settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {}, ref_ptr<i_setting_icons> aIcons = {}, 
+            std::set<std::string> const& aGridGroups = {});
         ~settings_dialog();
     private:
         void init();
@@ -62,6 +68,7 @@ namespace neogfx
 
         ref_ptr<i_setting_widget_factory> iWidgetFactory;
         ref_ptr<i_setting_icons> iIcons;
+        std::set<std::string> iGridGroups;
         neolib::i_setting* iFocusedTextSetting = nullptr;
         sink iSink;
         horizontal_layout iLayout;
