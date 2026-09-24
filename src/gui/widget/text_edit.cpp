@@ -571,6 +571,7 @@ namespace neogfx
         }, std::chrono::milliseconds{ 16 } },
         iSuppressTextChangedNotification{ 0u },
         iWantedToNotifyTextChanged{ 0u },
+        iBookmarkIcon{ image{ ":/neogfx/resources/icons/bookmark_small.png", 1.0, texture_sampling::Normal } },
         iOutOfMemory{ false }
     {
         init();
@@ -595,6 +596,7 @@ namespace neogfx
         }, std::chrono::milliseconds{ 16 } },
         iSuppressTextChangedNotification{ 0u },
         iWantedToNotifyTextChanged{ 0u },
+        iBookmarkIcon{ image{ ":/neogfx/resources/icons/bookmark_small.png", 1.0, texture_sampling::Normal } },
         iOutOfMemory{ false }
     {
         init();
@@ -619,6 +621,7 @@ namespace neogfx
         }, std::chrono::milliseconds{ 16 } },
         iSuppressTextChangedNotification{ 0u },
         iWantedToNotifyTextChanged{ 0u },
+        iBookmarkIcon{ image{ ":/neogfx/resources/icons/bookmark_small.png", 1.0, texture_sampling::Normal } },
         iOutOfMemory{ false }
     {
         init();
@@ -3497,13 +3500,10 @@ namespace neogfx
             return;
 
         auto const textColor = default_text_color();
-        auto const clientRect = client_rect();
+        auto const clientRect = client_rect(false);
         auto const documentTop = column_rect(0).top() - vertical_scrollbar().position();
 
-        if (iBookmarkIcon == std::nullopt || iBookmarkIcon->first != textColor)
-            iBookmarkIcon.emplace(textColor, outlined_icon(texture{ image{ ":/neogfx/resources/icons/bookmark_small.png" } }, textColor));
-
-        auto const iconExtent = iBookmarkIcon->second.extents();
+        auto const iconExtent = iBookmarkIcon.extents();
 
         for (auto const bookmark : iBookmarks)
         {
@@ -3539,7 +3539,7 @@ namespace neogfx
                 continue;
 
             aGc.draw_line(point{ clientRect.left() + iconExtent.cx + 1.0_dip, y }, point{ clientRect.right(), y }, pen{ textColor, line_style::Dot });
-            aGc.draw_texture(rect{ point{ clientRect.left(), std::round(y - iconExtent.cy / 2.0) }, iconExtent }, iBookmarkIcon->second);
+            aGc.draw_texture(rect{ point{ clientRect.left(), std::round(y - iconExtent.cy / 2.0) }, iconExtent }, iBookmarkIcon, textColor, shader_effect::ColorizeAlpha);
         }
     }
 

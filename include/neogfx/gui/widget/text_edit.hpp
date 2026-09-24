@@ -951,7 +951,7 @@ namespace neogfx
         std::optional<std::pair<text_edit::position_type, text_edit::position_type>> iSelectedUri;
         std::optional<password_bits> iPasswordBits;
         std::vector<position_type> iBookmarks;
-        mutable std::optional<std::pair<color, texture>> iBookmarkIcon;
+        texture iBookmarkIcon;
         bool iOutOfMemory;
     public:
         define_property(property_category::other, bool, ReadOnly, read_only, false)

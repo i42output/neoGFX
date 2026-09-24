@@ -21,9 +21,9 @@
 
 namespace neogfx
 {
-    texture colored_icon(const texture& aSource, const optional_color& aColor, scalar const aOutline, texture_sampling aSampling)
+    texture colored_icon(const texture& aSource, const optional_color& aColor, scalar const aOutline)
     {
-        texture result{ aSource.extents(), 1.0, aSampling };
+        texture result{ aSource.extents(), 1.0, aSource.sampling() };
 
         graphics_context gc{ result };
         scoped_render_target srt{ gc };
@@ -41,23 +41,4 @@ namespace neogfx
 
         return result;
     };
-
-    texture outlined_icon(const texture& aSource, const color& aColor, const optional_color& aOutlineColor, scalar const aOutline, texture_sampling aSampling)
-    {
-        texture result{ aSource.extents(), 1.0, aSampling };
-
-        graphics_context gc{ result };
-        scoped_render_target srt{ gc };
-
-        rect const targetRect{ point{}, aSource.extents() };
-
-        {
-            scoped_filter sf{ gc, blur_filter{ targetRect, aOutline } };
-            sf.front_buffer().draw_texture(targetRect, aSource, aOutlineColor.value_or(aColor.light() ? color::Black : color::White));
-        }
-
-        gc.draw_texture(targetRect, aSource, aColor, shader_effect::ColorizeAlpha);
-
-        return result;
-    }
 }
