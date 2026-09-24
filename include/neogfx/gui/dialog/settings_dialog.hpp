@@ -62,6 +62,7 @@ namespace neogfx
 
         ref_ptr<i_setting_widget_factory> iWidgetFactory;
         ref_ptr<i_setting_icons> iIcons;
+        neolib::i_setting* iFocusedTextSetting = nullptr;
         sink iSink;
         horizontal_layout iLayout;
         tree_view iTree;

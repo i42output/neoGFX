@@ -270,6 +270,7 @@ namespace neogfx
             optional_dimension maxWidth;
             neogfx::padding padding;
             std::optional<text_edit::style> style;
+            optional_color separator; // vertical line at the column's right edge
 
             auto operator<=>(column_info const&) const = default;
         };

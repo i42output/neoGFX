@@ -753,6 +753,14 @@ namespace neogfx
             x += glyphColumn.width;
         }
 
+        for (auto columnIndex = 0u; columnIndex < iColumns.size(); ++columnIndex)
+            if (iColumns[columnIndex].info.separator)
+            {
+                auto const separatorX = std::floor(column_rect(columnIndex, true).right() - horizontal_scrollbar().position()) + 0.5;
+                aGc.draw_line(point{ separatorX, client_rect(false).top() }, point{ separatorX, client_rect(false).bottom() },
+                    pen{ iColumns[columnIndex].info.separator.value(), false });
+            }
+
         draw_bookmarks(aGc);
 
         if (has_focus() && !read_only())
@@ -2326,6 +2334,8 @@ namespace neogfx
     void text_edit::set_columns(std::size_t aColumnCount)
     {
         iColumns.resize(aColumnCount);
+        if (iGlyphColumns.size() > iColumns.size())
+            iGlyphColumns.resize(iColumns.size(), { this });
         refresh_paragraph(iText.begin(), 0);
     }
 
@@ -2333,6 +2343,8 @@ namespace neogfx
     {
         iColumns.resize(1);
         iColumns[0] = {};
+        if (iGlyphColumns.size() > iColumns.size())
+            iGlyphColumns.resize(iColumns.size(), { this });
         refresh_paragraph(iText.begin(), 0);
     }
 

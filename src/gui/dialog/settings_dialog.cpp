@@ -437,6 +437,28 @@ namespace neogfx
         iTree.set_model(treeModel);
         iTree.set_presentation_model(treePresentationModel);
 
+        button_box().add_button(standard_button::RestoreDefaults, button_role::Action, "Restore Default"_t);
+
+        auto update_restore_default = [this]()
+        {
+            button_box().button(standard_button::RestoreDefaults).enable(iFocusedTextSetting != nullptr &&
+                iFocusedTextSetting->default_value().is_set() && iFocusedTextSetting->value(true) != iFocusedTextSetting->default_value());
+        };
+        update_restore_default();
+
+        auto track_text_setting = [this, update_restore_default](neolib::i_setting& aSetting, ref_ptr<i_widget> const& aWidget)
+        {
+            if (aWidget && aSetting.value().type() == neolib::setting_type::String)
+                iSink += aWidget->focus_event([this, &aSetting, update_restore_default](neogfx::focus_event aEvent, focus_reason)
+                {
+                    if (aEvent == neogfx::focus_event::FocusGained)
+                        iFocusedTextSetting = &aSetting;
+                    else if (iFocusedTextSetting == &aSetting)
+                        iFocusedTextSetting = nullptr;
+                    update_restore_default();
+                });
+        };
+
         std::map<std::string, ref_ptr<setting_group_widget>> groupWidgets;
         for (auto const& category : iSettings.all_categories())
         {
@@ -532,12 +554,12 @@ namespace neogfx
                         bits.clear();
                         bits = neolib::tokens(*nextArgument, ":"s);
                         if (bits.size() == 1 && bits[0][0] == '?')
-                            iWidgetFactory->create_widget(*setting, *itemLayout, string{ bits[0].substr(1) }, iSink);
+                            track_text_setting(*setting, iWidgetFactory->create_widget(*setting, *itemLayout, string{ bits[0].substr(1) }, iSink));
                         else if (bits.size() == 2 && bits[1][0] == '?')
                         {
                             auto existing = iSettings.all_settings().find(string{ bits[0] });
                             if (existing != iSettings.all_settings().end())
-                                iWidgetFactory->create_widget(*existing->second(), *itemLayout, string{ bits[1].substr(1) }, iSink);
+                                track_text_setting(*existing->second(), iWidgetFactory->create_widget(*existing->second(), *itemLayout, string{ bits[1].substr(1) }, iSink));
                         }
                         nextArgument = {};
                     }
@@ -607,7 +629,11 @@ namespace neogfx
 
         auto update_buttons = [&]()
         {
-            if (iSettings.modified())
+            // not iSettings.modified(): that also reports applied-but-unsaved changes, which is the case 
+            // while apply_changes() is still notifying setting_changed
+            bool const hasPendingChanges = std::any_of(iSettings.all_settings().begin(), iSettings.all_settings().end(),
+                [](auto const& aSetting) { return aSetting.second()->modified(); });
+            if (hasPendingChanges)
             {
                 button_box().enable_role(button_role::Apply);
                 button_box().enable_role(button_role::Destructive);
@@ -620,14 +646,16 @@ namespace neogfx
         };
         update_buttons();
 
-        iSink += iSettings.setting_changing([update_buttons](const neolib::i_setting&)
+        iSink += iSettings.setting_changing([update_buttons, update_restore_default](const neolib::i_setting&)
         {
             update_buttons();
+            update_restore_default();
         });
 
-        iSink += iSettings.setting_changed([update_buttons](const neolib::i_setting&)
+        iSink += iSettings.setting_changed([update_buttons, update_restore_default](const neolib::i_setting&)
         {
             update_buttons();
+            update_restore_default();
         });
 
         HaveResult([&](dialog_result aResult)
@@ -652,6 +680,10 @@ namespace neogfx
                 break;
             case standard_button::Discard:
                 iSettings.discard_changes();
+                break;
+            case standard_button::RestoreDefaults:
+                if (iFocusedTextSetting != nullptr)
+                    iFocusedTextSetting->set_value(iFocusedTextSetting->default_value());
                 break;
             }
         });
