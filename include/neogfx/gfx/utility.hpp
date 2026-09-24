@@ -27,5 +27,6 @@
 
 namespace neogfx
 {
-    texture colored_icon(const texture& aSource, const optional_color& aColor = {}, scalar const aOutline = 4.0_dip);
+    texture colored_icon(const texture& aSource, const optional_color& aColor = {}, scalar const aOutline = 4.0_dip, texture_sampling aSampling = texture_sampling::Multisample);
+    texture outlined_icon(const texture& aSource, const color& aColor, const optional_color& aOutlineColor = {}, scalar const aOutline = 4.0_dip, texture_sampling aSampling = texture_sampling::Multisample);
 }

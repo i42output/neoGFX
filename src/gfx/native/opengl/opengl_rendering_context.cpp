@@ -1123,6 +1123,11 @@ namespace neogfx
                 glCheck(glBlendEquation(GL_FUNC_ADD));
                 glCheck(glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
                 break;
+            case neogfx::blending_mode::Premultiply:
+                glCheck(glEnable(GL_BLEND));
+                glCheck(glBlendEquation(GL_FUNC_ADD));
+                glCheck(glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
+                break;
             }
         }
     }

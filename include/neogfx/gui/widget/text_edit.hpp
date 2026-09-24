@@ -839,6 +839,12 @@ namespace neogfx
         std::size_t insert_text(position_type aPosition, std::string const& aText, bool aMoveCursor = false) { return insert_text(aPosition, string{ aText }, aMoveCursor); }
         std::size_t insert_text(position_type aPosition, std::string const& aText, format const& aFormat, bool aMoveCursor = false) { return insert_text(aPosition, string{ aText }, aFormat, aMoveCursor); }
         void delete_text(position_type aStart, position_type aEnd);
+    public:
+        std::vector<position_type> const& bookmarks() const;
+        void add_bookmark(position_type aPosition);
+        void remove_bookmark(position_type aPosition);
+        void clear_bookmarks();
+    public:
         std::size_t columns() const;
         void set_columns(std::size_t aColumnCount);
         void remove_columns();
@@ -899,6 +905,7 @@ namespace neogfx
         style glyph_style(document_glyphs::const_iterator aGlyphChar, const document_column& aColumn) const;
         void draw_glyphs(i_graphics_context& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
         void draw_cursor(i_graphics_context& aGc) const;
+        void draw_bookmarks(i_graphics_context& aGc) const;
         rect cursor_rect() const;
         double calc_padding_adjust(style const& aStyle) const;
         double padding_adjust() const;
@@ -943,6 +950,8 @@ namespace neogfx
         std::uint32_t iWantedToNotifyTextChanged;
         std::optional<std::pair<text_edit::position_type, text_edit::position_type>> iSelectedUri;
         std::optional<password_bits> iPasswordBits;
+        std::vector<position_type> iBookmarks;
+        mutable std::optional<std::pair<color, texture>> iBookmarkIcon;
         bool iOutOfMemory;
     public:
         define_property(property_category::other, bool, ReadOnly, read_only, false)

@@ -65,7 +65,8 @@ namespace neogfx
         Blit,
         Lighten,
         Filter,
-        FilterFinish
+        FilterFinish,
+        Premultiply     // straight alpha source over premultiplied target (e.g. drawing into a transparent texture)
     };
 
     enum class smoothing_mode : std::uint32_t

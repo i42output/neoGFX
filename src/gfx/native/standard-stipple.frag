@@ -10,7 +10,13 @@ void standard_stipple_shader(inout vec4 color, inout vec4 function0, inout vec4 
         {
             if (function3.w == 0.0)
                 return;
-            if (uShape == SHAPE_Rect)
+            if (uShape == SHAPE_Line)
+            {
+                vec2 lineVector = function1.zw - function1.xy;
+                float lineLength = length(lineVector);
+                d = lineLength > 0.0 ? floor(dot(pixelPos - function1.xy, lineVector / lineLength)) : 0.0;
+            }
+            else if (uShape == SHAPE_Rect)
             {
                 vec2 p0 = pixelPos - function1.xy;
                 vec2 b0 = function1.zw * 0.5;

@@ -28,6 +28,7 @@
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gfx/utility.hpp>
 #include <neogfx/gfx/text/text_category_map.hpp>
 #include <neogfx/gfx/text/glyph_text.ipp>
 #include <neogfx/gfx/text/i_emoticon_translator.hpp>
@@ -749,6 +750,8 @@ namespace neogfx
             x += glyphColumn.width;
         }
 
+        draw_bookmarks(aGc);
+
         if (has_focus() && !read_only())
             draw_cursor(aGc);
     }
@@ -1342,6 +1345,7 @@ namespace neogfx
         // todo: more intelligent undo
         iText.swap(iPreviousText);
         iUtf8TextCache = std::nullopt;
+        std::erase_if(iBookmarks, [&](position_type aBookmark) { return aBookmark > static_cast<position_type>(iText.size()); });
 
         refresh_paragraph(iText.begin(), 0);
         update();
@@ -2106,6 +2110,7 @@ namespace neogfx
         iStyleMap.clear();
         iTags.clear();
         iTagMap.clear();
+        iBookmarks.clear();
         refresh_columns();
         if (iPreviousText != iText && !iUpdatingContents)
             notify_text_changed();
@@ -2120,10 +2125,18 @@ namespace neogfx
     {
         if (paragraph_count() > 1)
         {
-            auto const start = aParagraphIndex > 0 ?
-                boost::find_nth(text(), "\n", static_cast<int>(aParagraphIndex - 1)).end() : text().begin();
-            auto const end = boost::find_nth(text(), "\n", static_cast<int>(aParagraphIndex)).end();
-            delete_text(std::distance(text().begin(), start), std::distance(text().begin(), end));
+            auto start = iText.cbegin();
+            for (std::size_t i = 0; i < aParagraphIndex; ++i)
+            {
+                start = std::find(start, iText.cend(), U'\n');
+                if (start == iText.cend())
+                    return;
+                ++start;
+            }
+            auto end = std::find(start, iText.cend(), U'\n');
+            if (end != iText.cend())
+                ++end;
+            delete_text(std::distance(iText.cbegin(), start), std::distance(iText.cbegin(), end));
         }
         else
             clear();
@@ -2201,12 +2214,55 @@ namespace neogfx
             if (existingTag != iTagMap.end())
                 (**existingTag).release();
         }
+        for (auto& bookmark : iBookmarks)
+        {
+            if (bookmark >= aEnd)
+                bookmark -= eraseAmount;
+            else if (bookmark > aStart)
+                bookmark = aStart;
+        }
+        iBookmarks.erase(std::unique(iBookmarks.begin(), iBookmarks.end()), iBookmarks.end());
         refresh_paragraph(iText.erase(eraseBegin, eraseEnd), -eraseAmount);
 
         update();
 
         if (iPreviousText != iText)
             notify_text_changed();
+    }
+
+    std::vector<text_edit::position_type> const& text_edit::bookmarks() const
+    {
+        return iBookmarks;
+    }
+
+    void text_edit::add_bookmark(position_type aPosition)
+    {
+        aPosition = std::clamp<position_type>(aPosition, 0, static_cast<position_type>(iText.size()));
+        auto const existing = std::lower_bound(iBookmarks.begin(), iBookmarks.end(), aPosition);
+        if (existing == iBookmarks.end() || *existing != aPosition)
+        {
+            iBookmarks.insert(existing, aPosition);
+            update();
+        }
+    }
+
+    void text_edit::remove_bookmark(position_type aPosition)
+    {
+        auto const existing = std::lower_bound(iBookmarks.begin(), iBookmarks.end(), aPosition);
+        if (existing != iBookmarks.end() && *existing == aPosition)
+        {
+            iBookmarks.erase(existing);
+            update();
+        }
+    }
+
+    void text_edit::clear_bookmarks()
+    {
+        if (!iBookmarks.empty())
+        {
+            iBookmarks.clear();
+            update();
+        }
     }
 
     bool text_edit::same_paragraph(position_type aFirstGlyphPos, position_type aSecondGlyphPos) const
@@ -2635,6 +2691,10 @@ namespace neogfx
                 next = nextEnd;
             }
         }
+
+        for (auto& bookmark : iBookmarks)
+            if (bookmark > aPosition)
+                bookmark += insertionSize;
 
         if (!aClearFirst)
             refresh_paragraph(insertionPoint, insertionSize);
@@ -3431,6 +3491,58 @@ namespace neogfx
         }
     }
 
+    void text_edit::draw_bookmarks(i_graphics_context& aGc) const
+    {
+        if (iBookmarks.empty() || iGlyphColumns.empty())
+            return;
+
+        auto const textColor = default_text_color();
+        auto const clientRect = client_rect();
+        auto const documentTop = column_rect(0).top() - vertical_scrollbar().position();
+
+        if (iBookmarkIcon == std::nullopt || iBookmarkIcon->first != textColor)
+            iBookmarkIcon.emplace(textColor, outlined_icon(texture{ image{ ":/neogfx/resources/icons/bookmark_small.png" } }, textColor));
+
+        auto const iconExtent = iBookmarkIcon->second.extents();
+
+        for (auto const bookmark : iBookmarks)
+        {
+            // a bookmark is drawn below the line containing the character preceding it
+            coordinate y = 0.0;
+            if (bookmark > 0)
+            {
+                glyph_line const* match = nullptr;
+                glyph_line const* following = nullptr;
+                for (auto const& column : iGlyphColumns)
+                {
+                    auto line = std::upper_bound(column.lines.begin(), column.lines.end(), bookmark - 1,
+                        [](position_type cp, glyph_line const& l) { return cp < l.text_begin_index(); });
+                    if (line == column.lines.begin())
+                        continue;
+                    auto const next = line;
+                    --line;
+                    if (match == nullptr || match->text_begin_index() < line->text_begin_index())
+                    {
+                        match = &*line;
+                        following = (next != column.lines.end() ? &*next : nullptr);
+                    }
+                }
+                if (match == nullptr)
+                    continue;
+                y = match->ypos() + match->extents.cy;
+                // centre between this line and the next (paragraph spacing may separate them)
+                if (following != nullptr && following->ypos() > y)
+                    y = (y + following->ypos()) / 2.0;
+            }
+            y = std::round(documentTop + y);
+            if (y + iconExtent.cy < clientRect.top() || y - iconExtent.cy > clientRect.bottom())
+                continue;
+
+            aGc.draw_line(point{ clientRect.left() + iconExtent.cx + 1.0_dip, y }, point{ clientRect.right(), y }, pen{ textColor, line_style::Dot });
+            aGc.draw_texture(rect{ point{ clientRect.left(), std::round(y - iconExtent.cy / 2.0) }, iconExtent }, iBookmarkIcon->second);
+        }
+    }
+
     rect text_edit::cursor_rect() const
     {
         auto cursorGlyphIndex = cursor_glyph_position();
@@ -3524,4 +3636,4 @@ namespace neogfx
             paddingAdjust = std::max(paddingAdjust, calc_padding_adjust(*s));
         return paddingAdjust;
     }
-}
+}

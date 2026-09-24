@@ -29,5 +29,7 @@
         file: resources/icons/open.png
         file: resources/icons/openfolder.png
         file: resources/icons/paste.png
+        file: resources/icons/bookmark.png
+        file: resources/icons/bookmark_small.png
     }
 }
