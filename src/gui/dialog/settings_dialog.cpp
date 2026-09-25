@@ -402,17 +402,17 @@ namespace neogfx
     class setting_group_widget : public widget<>
     {
     public:
-        setting_group_widget(std::string const& aTitle) :
+        setting_group_widget(std::string const& aTitle, bool aSubgroup = false) :
             iLayout{ *this },
             iTitle{ iLayout, translate(aTitle) }
         {
             set_padding({});
             set_size_policy(size_constraint::Expanding, size_constraint::Minimum);
             iLayout.set_padding({});
-            auto reset_font = [&]()
+            auto reset_font = [&, aSubgroup]()
             {
                 iTitle.text_widget().set_font(
-                    service<i_app>().current_style().font().with_size(service<i_app>().current_style().font().size() * 1.25).with_underline(true));
+                    service<i_app>().current_style().font().with_size(service<i_app>().current_style().font().size() * (aSubgroup ? 1.125 : 1.25)).with_underline(true));
             };
             iSink += service<i_app>().current_style_changed([this, reset_font](style_aspect aAspect)
             {
@@ -478,6 +478,18 @@ namespace neogfx
                     treeModel->item(c)->push_back(settingGroupWidget);
                     treeModel->item(g)->push_back(settingGroupWidget);
                     groupWidgets[group.first().to_std_string()] = settingGroupWidget;
+                    auto existingSubgroups = iSettings.all_subgroups().find(group.first());
+                    if (existingSubgroups != iSettings.all_subgroups().end())
+                        for (auto const& subgroup : existingSubgroups->second())
+                        {
+                            auto s = treeModel->append_item(g, make_ref<setting_group_widget_list::element_type>(), subgroup.second());
+                            auto settingSubgroupWidget = make_ref<setting_group_widget>(subgroup.second().to_std_string(), true);
+                            iDetailLayout.add(settingSubgroupWidget);
+                            treeModel->item(c)->push_back(settingSubgroupWidget);
+                            treeModel->item(g)->push_back(settingSubgroupWidget);
+                            treeModel->item(s)->push_back(settingSubgroupWidget);
+                            groupWidgets[subgroup.first().to_std_string()] = settingSubgroupWidget;
+                        }
                 }
         }
 
@@ -489,8 +501,15 @@ namespace neogfx
             thread_local std::vector<std::string> keyBits;
             keyBits.clear();
             keyBits = neolib::tokens(setting->key().to_std_string(), "."s);
-            keyBits.resize(2);
-            auto groupWidget = groupWidgets.find(keyBits[0] + "." + keyBits[1]);
+            // category.group.subgroup.setting or category.group.setting
+            auto groupWidget = groupWidgets.end();
+            if (keyBits.size() >= 4u)
+                groupWidget = groupWidgets.find(keyBits[0] + "." + keyBits[1] + "." + keyBits[2]);
+            if (groupWidget == groupWidgets.end())
+            {
+                keyBits.resize(2);
+                groupWidget = groupWidgets.find(keyBits[0] + "." + keyBits[1]);
+            }
             if (groupWidget == groupWidgets.end())
                 continue;
 
