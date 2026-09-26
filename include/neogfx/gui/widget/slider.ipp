@@ -19,6 +19,9 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cmath>
+#include <limits>
 #include <neolib/core/scoped.hpp>
 #include <neogfx/gui/widget/slider.hpp>
 
@@ -128,14 +131,37 @@ namespace neogfx
     inline void basic_slider<T>::set_normalized_value(double aValue)
     {
         double const stepValue = normalized_step_value();
+        bool const atMaximum = aValue >= 1.0; // keep maximum reachable when it is not on the step grid
         double steps = 0.0;
         auto r = std::modf(aValue / stepValue, &steps);
-        if (r > stepValue / 2.0)
+        if (r >= 0.5)
             steps += 1.0;
-        aValue = std::max(0.0, std::min(1.0, steps * stepValue));
+        aValue = atMaximum ? 1.0 : std::max(0.0, std::min(1.0, steps * stepValue));
         neolib::scoped_flag sf{ iSettingNormalizedValue };
         auto const range = maximum() - minimum();
         auto denormalized = range * aValue + minimum();
+        if constexpr (std::is_floating_point_v<value_type>)
+        {
+            // Compute from the step count rather than via the normalized value, then remove
+            // residual floating point noise (e.g. -40.00000000000001) by rounding to the
+            // type's decimal precision relative to the magnitudes involved.
+            if (aValue <= 0.0)
+                denormalized = minimum();
+            else if (aValue >= 1.0)
+                denormalized = maximum();
+            else if (step() != value_type{})
+            {
+                denormalized = minimum() + steps * step();
+                double const magnitude = std::max({ std::abs(static_cast<double>(minimum())), std::abs(steps * step()), std::abs(denormalized) });
+                if (magnitude != 0.0)
+                {
+                    double const scale = std::pow(10.0, std::numeric_limits<value_type>::digits10 - 1 - std::floor(std::log10(magnitude)));
+                    denormalized = std::round(denormalized * scale) / scale;
+                    if (denormalized == 0.0)
+                        denormalized = 0.0; // no -0.0
+                }
+            }
+        }
         if (std::is_integral<value_type>())
         {
             if (denormalized < 0.0)

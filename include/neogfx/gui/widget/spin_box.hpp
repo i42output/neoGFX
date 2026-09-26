@@ -90,6 +90,8 @@ namespace neogfx
     private:
         void do_step(step_direction aDirection, std::uint32_t aAmount = 1);
         std::optional<value_type> string_to_value(i_string const& aString) const;
+        std::uint32_t decimal_places() const;
+        string effective_format() const;
         void init();
         void update_size_hint();
         void update_arrows();

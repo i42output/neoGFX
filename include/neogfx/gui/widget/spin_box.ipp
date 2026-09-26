@@ -21,6 +21,7 @@
 
 #include <cmath>
 #include <format>
+#include <limits>
 #include <neolib/core/scoped.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/i_basic_services.hpp>
@@ -316,17 +317,18 @@ namespace neogfx
             std::string hintText;
             try
             {
+                auto const format = effective_format();
                 std::string tryText;
-                tryText = neolib::format(iFormat, minimum());
+                tryText = neolib::format(format, minimum());
                 if (tryText.length() > hintText.length())
                     hintText = tryText;
-                tryText = neolib::format(iFormat, minimum() + step());
+                tryText = neolib::format(format, minimum() + step());
                 if (tryText.length() > hintText.length())
                     hintText = tryText;
-                tryText = neolib::format(iFormat, maximum());
+                tryText = neolib::format(format, maximum());
                 if (tryText.length() > hintText.length())
                     hintText = tryText;
-                tryText = neolib::format(iFormat, maximum() - step());
+                tryText = neolib::format(format, maximum() - step());
                 if (tryText.length() > hintText.length())
                     hintText = tryText;
             }
@@ -422,7 +424,7 @@ namespace neogfx
     {
         iMinimum = aMinimum;
         std::string text;
-        try { text = neolib::format(iFormat, minimum()); } catch (...) {}
+        try { text = neolib::format(effective_format(), minimum()); } catch (...) {}
         if (text_box().text().empty())
             text_box().set_text(string{ text });
         ConstraintsChanged.trigger();
@@ -470,6 +472,25 @@ namespace neogfx
     template <typename T>
     inline void basic_spin_box<T>::set_value(value_type aValue, bool aNotify)
     {
+        if constexpr (std::is_floating_point_v<value_type>)
+        {
+            // Remove floating point noise (e.g. -40.00000000000001) by snapping to the step grid
+            // but only if the value is already within rounding error of a grid point; genuinely
+            // off-grid values are left alone.
+            if (step() != value_type{} && std::isfinite(aValue))
+            {
+                double const value = aValue;
+                double const min = minimum();
+                double const stepValue = step();
+                double const scale = std::pow(10.0, static_cast<double>(decimal_places()));
+                double const onGrid = min + std::round((value - min) / stepValue) * stepValue;
+                double const snapped = std::round(onGrid * scale) / scale;
+                double const tolerance = std::max(std::abs(stepValue) * 1.0e-6,
+                    std::abs(value) * std::numeric_limits<value_type>::epsilon() * 16.0);
+                if (std::abs(snapped - value) <= tolerance)
+                    aValue = (snapped == 0.0 ? value_type{} : static_cast<value_type>(snapped));
+            }
+        }
         aValue = std::max(minimum(), std::min(maximum(), aValue));
         if (iValue != aValue)
         {
@@ -542,7 +563,64 @@ namespace neogfx
     inline string basic_spin_box<T>::value_to_string() const
     {
         string text;
-        try { text = neolib::format(iFormat, value()); } catch (...) {}
+        try { text = neolib::format(effective_format(), value()); } catch (...) {}
         return text;
+    }
+
+    template <typename T>
+    inline std::uint32_t basic_spin_box<T>::decimal_places() const
+    {
+        if constexpr (std::is_floating_point_v<value_type>)
+        {
+            auto places = [](value_type aValue) -> std::uint32_t
+            {
+                double const x = std::abs(static_cast<double>(aValue));
+                if (x == 0.0 || !std::isfinite(x))
+                    return 0u;
+                double const tolerance = std::numeric_limits<value_type>::epsilon() * 100.0;
+                double scale = 1.0;
+                for (std::uint32_t d = 0u; d < static_cast<std::uint32_t>(std::numeric_limits<value_type>::digits10); ++d, scale *= 10.0)
+                {
+                    double const scaled = x * scale;
+                    if (std::abs(scaled - std::round(scaled)) <= tolerance * std::max(1.0, scaled))
+                        return d;
+                }
+                return static_cast<std::uint32_t>(std::numeric_limits<value_type>::digits10);
+            };
+            return std::max(places(step()), places(minimum()));
+        }
+        else
+            return 0u;
+    }
+
+    template <typename T>
+    inline string basic_spin_box<T>::effective_format() const
+    {
+        // For floating point types, bare "{0}" / "{}" placeholders get a fixed precision derived
+        // from the step (and minimum); explicit format specs (e.g. "{:.3f}") are left untouched.
+        if constexpr (std::is_floating_point_v<value_type>)
+        {
+            if (step() != value_type{})
+            {
+                auto const precision = std::format(":.{}f", decimal_places());
+                std::string result = iFormat.to_std_string();
+                for (std::string_view placeholder : { std::string_view{ "{0}" }, std::string_view{ "{}" } })
+                {
+                    std::string const replacement = std::string{ placeholder.substr(0, placeholder.size() - 1) } + precision + "}";
+                    for (auto pos = result.find(placeholder); pos != std::string::npos; pos = result.find(placeholder, pos))
+                    {
+                        if (pos > 0 && result[pos - 1] == '{') // escaped brace
+                        {
+                            pos += placeholder.size();
+                            continue;
+                        }
+                        result.replace(pos, placeholder.size(), replacement);
+                        pos += replacement.size();
+                    }
+                }
+                return string{ result };
+            }
+        }
+        return iFormat;
     }
 }
