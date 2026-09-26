@@ -207,48 +207,6 @@ namespace chess
         return pieceColors;
     }();
 
-    std::array<double, 256> constexpr sPieceValuesWhite = []()
-    {
-        std::array<double, 256> pieceValuesWhite = {};
-        pieceValuesWhite[static_cast<std::size_t>(piece::Pawn)] = 1.0;
-        pieceValuesWhite[static_cast<std::size_t>(piece::WhitePawn)] = 1.0;
-        pieceValuesWhite[static_cast<std::size_t>(piece::BlackPawn)] = -1.0;
-        pieceValuesWhite[static_cast<std::size_t>(piece::Knight)] = 3.05;
-        pieceValuesWhite[static_cast<std::size_t>(piece::WhiteKnight)] = 3.05;
-        pieceValuesWhite[static_cast<std::size_t>(piece::BlackKnight)] = -3.05;
-        pieceValuesWhite[static_cast<std::size_t>(piece::Bishop)] = 3.33;
-        pieceValuesWhite[static_cast<std::size_t>(piece::WhiteBishop)] = 3.33;
-        pieceValuesWhite[static_cast<std::size_t>(piece::BlackBishop)] = -3.33;
-        pieceValuesWhite[static_cast<std::size_t>(piece::Rook)] = 5.63;
-        pieceValuesWhite[static_cast<std::size_t>(piece::WhiteRook)] = 5.63;
-        pieceValuesWhite[static_cast<std::size_t>(piece::BlackRook)] = -5.63;
-        pieceValuesWhite[static_cast<std::size_t>(piece::Queen)] = 9.5;
-        pieceValuesWhite[static_cast<std::size_t>(piece::WhiteQueen)] = 9.5;
-        pieceValuesWhite[static_cast<std::size_t>(piece::BlackQueen)] = -9.5;
-        return pieceValuesWhite;
-    }();
-
-    std::array<double, 256> constexpr sPieceValuesBlack = []()
-    {
-        std::array<double, 256> pieceValuesBlack = {};
-        pieceValuesBlack[static_cast<std::size_t>(piece::Pawn)] = 1.0;
-        pieceValuesBlack[static_cast<std::size_t>(piece::WhitePawn)] = -1.0;
-        pieceValuesBlack[static_cast<std::size_t>(piece::BlackPawn)] = 1.0;
-        pieceValuesBlack[static_cast<std::size_t>(piece::Knight)] = 3.05;
-        pieceValuesBlack[static_cast<std::size_t>(piece::WhiteKnight)] = -3.05;
-        pieceValuesBlack[static_cast<std::size_t>(piece::BlackKnight)] = 3.05;
-        pieceValuesBlack[static_cast<std::size_t>(piece::Bishop)] = 3.33;
-        pieceValuesBlack[static_cast<std::size_t>(piece::WhiteBishop)] = -3.33;
-        pieceValuesBlack[static_cast<std::size_t>(piece::BlackBishop)] = 3.33;
-        pieceValuesBlack[static_cast<std::size_t>(piece::Rook)] = 5.63;
-        pieceValuesBlack[static_cast<std::size_t>(piece::WhiteRook)] = -5.63;
-        pieceValuesBlack[static_cast<std::size_t>(piece::BlackRook)] = 5.63;
-        pieceValuesBlack[static_cast<std::size_t>(piece::Queen)] = 9.5;
-        pieceValuesBlack[static_cast<std::size_t>(piece::WhiteQueen)] = -9.5;
-        pieceValuesBlack[static_cast<std::size_t>(piece::BlackQueen)] = 9.5;
-        return pieceValuesBlack;
-    }();
-
     inline piece piece_type(piece p)
     {
         return sPieceTypes[static_cast<std::size_t>(p)];
@@ -262,21 +220,6 @@ namespace chess
     inline piece piece_opponent_color(piece p)
     {
         return piece_color(p) == piece::White ? piece::Black : piece::White;
-    }
-
-    template <chess::piece Color>
-    inline double piece_value(chess::piece piece);
-
-    template <>
-    inline double piece_value<chess::piece::White>(chess::piece piece)
-    {
-        return sPieceValuesWhite[static_cast<std::size_t>(piece)];
-    }
-
-    template <>
-    inline double piece_value<chess::piece::Black>(chess::piece piece)
-    {
-        return sPieceValuesBlack[static_cast<std::size_t>(piece)];
     }
 
     struct invalid_piece_character : std::runtime_error { invalid_piece_character() : std::runtime_error{ "chess::invalid_piece_character" } {} };
@@ -307,4 +250,4 @@ namespace chess
             throw invalid_piece_character();
         }
     }
-}
+}

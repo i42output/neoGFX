@@ -16,99 +16,130 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <atomic>
+#include <algorithm>
+#include <thread>
+
+#include <stockparrot/chess.hpp>
+
 #include <chess/ai.hpp>
 
 namespace chess
 {
-    extern std::atomic<std::uint64_t> sNodeCounter;
-
     namespace
     {
-        template <typename T>
-        void debug_moves(T const& moves, int ply, bool extra = false, bool extraExtra = false)
+        // Castling rights are inferred from king/rook home squares as the position
+        // has no move history at this point (matching move_validator behaviour).
+        std::string to_fen(mailbox_position const& aPosition)
         {
-            std::vector<std::pair<const game_tree_node*, const game_tree_node*>> debug;
-            for (auto const& m : moves)
-                debug.push_back(std::make_pair(&m, &m));
-
-            std::sort(debug.begin(), debug.end(),
-                [](auto const& d1, auto const& d2)
+            auto const at = [&](coordinate x, coordinate y) { return piece_at(aPosition.rep, coordinates{ x, y }); };
+            std::string result;
+            for (coordinate y = 8u; y-- > 0u;)
             {
-                return std::forward_as_tuple(d1.second->move->from, d1.second->move->to) <
-                    std::forward_as_tuple(d2.second->move->from, d2.second->move->to);
-            });
-
-            auto di = debug.begin();
-            for (auto const& m : moves)
-                (di++)->first = &m;
-
-            for (auto const& d : debug)
-            {
-                std::cout << "(ply " << ply << "): " << to_string(*d.first->move) << ":  " << std::setw(12) << *d.first->eval;
-                std::cout << "  " << to_string(*d.second->move) << ": " << std::setw(12) << *d.second->eval;
-                std::cout << std::endl;
-                if (extra)
+                std::uint32_t empty = 0u;
+                for (coordinate x = 0u; x <= 7u; ++x)
                 {
-                    for (auto const& child : *d.first->children)
+                    auto const p = at(x, y);
+                    if (p == piece::None)
                     {
-                        std::cout << "\t" << to_string(*child.move) << ":  " << std::setw(12) << *child.eval << std::endl;
-                        if (extraExtra)
-                        {
-                            for (auto const& childChild : *child.children)
-                            {
-                                std::cout << "\t\t" << to_string(*childChild.move) << ":  " << std::setw(12) << *childChild.eval << std::endl;
-                            }
-                        }
+                        ++empty;
+                        continue;
                     }
+                    if (empty != 0u)
+                    {
+                        result += static_cast<char>('0' + empty);
+                        empty = 0u;
+                    }
+                    result += to_string(p);
                 }
+                if (empty != 0u)
+                    result += static_cast<char>('0' + empty);
+                if (y > 0u)
+                    result += '/';
             }
+            result += aPosition.turn == player::White ? " w " : " b ";
+            std::string castling;
+            if (at(4u, 0u) == piece::WhiteKing && at(7u, 0u) == piece::WhiteRook)
+                castling += 'K';
+            if (at(4u, 0u) == piece::WhiteKing && at(0u, 0u) == piece::WhiteRook)
+                castling += 'Q';
+            if (at(4u, 7u) == piece::BlackKing && at(7u, 7u) == piece::BlackRook)
+                castling += 'k';
+            if (at(4u, 7u) == piece::BlackKing && at(0u, 7u) == piece::BlackRook)
+                castling += 'q';
+            result += castling.empty() ? "-" : castling;
+            result += " - 0 1";
+            return result;
+        }
+
+        std::string setup_fen(mailbox_position aPosition)
+        {
+            while (unmake(aPosition));
+            return to_fen(aPosition);
         }
     }
 
-    template <typename Representation, player Player>
-    ai<Representation, Player>::ai(std::int32_t aPly) :
-        async_thread{ "chess::ai" },
-        iPly{ aPly },
-        iMoveTables{ generate_move_tables<representation_type>() },
-        iPosition{ chess::setup_position<representation_type>() },
-        iTable{ DEFAULT_TABLE_SIZE, table_entry{} }
+    struct ai::engine_client : uci::i_uci_client
     {
-        for (unsigned int t = 1u; t <= std::thread::hardware_concurrency(); ++t)
-            iThreads.emplace_back(*this, iPly);
-        start();
+        ai& owner;
+        std::optional<std::string> bestMove;
+
+        engine_client(ai& aOwner) :
+            owner{ aOwner }
+        {
+        }
+
+        void response(uci::i_uci&, std::string const&) override
+        {
+        }
+        void info(uci::i_uci&, std::int64_t, std::chrono::milliseconds, std::int64_t, std::int64_t aNodesPerSecond, std::int64_t, std::string const&) override
+        {
+            owner.iNodesPerSecond = static_cast<std::uint64_t>(aNodesPerSecond);
+        }
+        void bestmove(uci::i_uci&, std::string const& aBestMove) override
+        {
+            bestMove = aBestMove;
+        }
+    };
+
+    ai::ai(chess::player aPlayer, std::chrono::milliseconds aMoveTime) :
+        async_thread{ "chess::ai" },
+        iPlayer{ aPlayer },
+        iMoveTime{ aMoveTime },
+        iPosition{ chess::setup_position<mailbox_rep>() },
+        iSetupFen{ setup_fen(iPosition) },
+        iEngineClient{ std::make_unique<engine_client>(*this) },
+        iEngine{ std::make_unique<stockparrot::Engine>() }
+    {
+        iEngine->connect(*iEngineClient);
+        iEngine->setoption("Threads", std::to_string(std::max(1u, std::thread::hardware_concurrency())));
         Decided([&](move const& aBestMove)
         {
             play(aBestMove);
         });
+        start();
     }
 
-    template <typename Representation, player Player>
-    ai<Representation, Player>::~ai()
+    ai::~ai()
     {
         {
             std::lock_guard<std::mutex> lk{ iSignalMutex };
             iFinished = true;
         }
         iSignal.notify_one();
-        iThreads.clear();
-        async_task::cancel();
+        async_task::cancel(); // waits for any in-progress search to complete
     }
         
-    template <typename Representation, player Player>
-    player_type ai<Representation, Player>::type() const
+    player_type ai::type() const
     {
         return player_type::AI;
     }
 
-    template <typename Representation, player Player>
-    player ai<Representation, Player>::player() const
+    player ai::player() const
     {
-        return Player;
+        return iPlayer;
     }
 
-    template <typename Representation, player Player>
-    void ai<Representation, Player>::greet(i_player& aOpponent)
+    void ai::greet(i_player& aOpponent)
     {
         iSink = aOpponent.moved([&](move const& aMove)
         {
@@ -117,8 +148,7 @@ namespace chess
         });
     }
 
-    template <typename Representation, player Player>
-    void ai<Representation, Player>::play()
+    void ai::play()
     {
         {
             std::unique_lock<std::mutex> lk{ iSignalMutex };
@@ -127,22 +157,23 @@ namespace chess
         iSignal.notify_one();
     }
 
-    template <typename Representation, player Player>
-    void ai<Representation, Player>::stop()
+    void ai::stop()
     {
-        for (auto& t : iThreads)
-            t.stop();
+        // stockparrot searches are bounded by iMoveTime and cannot be interrupted;
+        // clearing iPlaying causes the result of an in-progress search to be discarded.
+        iPlaying = false;
     }
 
-    template <typename Representation, player Player>
-    void ai<Representation, Player>::finish()
+    void ai::finish()
     {
-        for (auto& t : iThreads)
-            t.finish();
+        {
+            std::lock_guard<std::mutex> lk{ iSignalMutex };
+            iFinished = true;
+        }
+        iSignal.notify_one();
     }
 
-    template <typename Representation, player Player>
-    bool ai<Representation, Player>::play(move const& aMove)
+    bool ai::play(move const& aMove)
     {
         std::unique_lock lk{ iMutex };
         make(iPosition, aMove);
@@ -150,15 +181,13 @@ namespace chess
         return true;
     }
 
-    template <typename Representation, player Player>
-    void ai<Representation, Player>::undo()
+    void ai::undo()
     {
-        iRootNode = std::nullopt;
+        std::unique_lock lk{ iMutex };
         unmake(iPosition);
     }
 
-    template <typename Representation, player Player>
-    bool ai<Representation, Player>::do_work(neolib::yield_type aYieldType)
+    bool ai::do_work(neolib::yield_type aYieldType)
     {
         bool didWork = async_task::do_work(aYieldType);
 
@@ -169,152 +198,56 @@ namespace chess
             lk.unlock();
             if (iPlaying && !iFinished)
             {
-                auto bestMove = execute();
-                iPlaying = false;
-                if (bestMove)
-                    Decided(*bestMove->move);
+                auto const bestMove = execute();
+                bool const stopped = !iPlaying.exchange(false);
+                if (bestMove && !stopped && !iFinished)
+                    Decided(*bestMove);
             }
         }
 
         return didWork;
     }
 
-    template <typename Representation, player Player>
-    game_tree_node const* ai<Representation, Player>::execute()
+    std::optional<move> ai::execute()
     {
         std::unique_lock lk{ iMutex };
-        if (!iRootNode)
-        {
-            if (!iPosition.moveHistory.empty())
-                iRootNode.emplace(iPosition.moveHistory.back());
-            else
-                iRootNode.emplace();
-            iRootNode->children.emplace();
-            valid_moves<Player>(iMoveTables, iPosition, *iRootNode);
-        }
-        else
-        {
-            if (iRootNode->children == std::nullopt)
-            {
-                iRootNode->children.emplace();
-                valid_moves<Player>(iMoveTables, iPosition, *iRootNode);
-            }
-            auto existing = std::find_if(iRootNode->children->begin(), iRootNode->children->end(), [&](game_tree_node const& n) { return n.move == iPosition.moveHistory.back(); });
-            if (existing == iRootNode->children->end())
-                throw node_not_found();
-            game_tree_node temp = std::move(*existing);
-            iRootNode = std::move(temp);
-        }
-        sort_nodes<Player>(iMoveTables, iPosition, *iRootNode);
+        auto const snapshot = iPosition;
+        auto const setupFen = iSetupFen;
+        lk.unlock();
 
-        auto& children = *(*iRootNode).children;
+        std::string moves;
+        for (auto const& m : snapshot.moveHistory)
+            moves += (moves.empty() ? "" : " ") + to_string(m);
 
-        // todo: opening book and/or sensible white first move...
-        if (children.size() > 0u)
-        {
-            std::vector<game_tree_node> bestMoves;
-            std::vector<std::future<game_tree_node>> futures;
-            futures.reserve(children.size());
-            auto iterThread = iThreads.begin();
-            for (auto& child : children)
-            {
-                futures.emplace_back(iterThread->eval(iPosition, std::move(child)).get_future());
-                if (++iterThread == iThreads.end())
-                    iterThread = iThreads.begin();
-            }
-            
-            sNodeCounter = 0;
-            iNodesPerSecond = std::nullopt;
-            iStartTime = std::chrono::steady_clock::now();
+        iEngineClient->bestMove = std::nullopt;
+        iNodesPerSecond = 0;
+        iEngine->position(uci::fen{ setupFen }, moves);
+        iEngine->go({ uci::movetime{ static_cast<std::int32_t>(iMoveTime.count()) } });
 
-            lk.unlock();
-
-            for (auto& t : iThreads)
-                t.start();
-            
-            for (auto& future : futures)
-                bestMoves.push_back(std::move(future.get()));
-
-            lk.lock();
-            iNodesPerSecond = nodes_per_second();
-            iStartTime = std::nullopt;
-            lk.unlock();
-
-            std::sort(bestMoves.begin(), bestMoves.end(),
-                [](auto const& m1, auto const& m2)
-                {
-                    return m1.eval > m2.eval;
-                });
-
-            debug_moves(bestMoves, iPly);
-
-            auto const bestMoveEval = *bestMoves[0].eval;
-            constexpr double MATE_CUTOFF = 1.0e10;
-            bool const bestMoveIsMate = (bestMoveEval > MATE_CUTOFF);
-            if (bestMoveIsMate || !iUseDecimator)
-            {
-                iRootNode = std::move(bestMoves[0]);
-                return &*iRootNode;
-            }
-            else
-            {
-                auto const decimator = 0.125 * (iPosition.moveHistory.size() + 1); // todo: involve difficulty level?
-                auto similarEnd = std::remove_if(bestMoves.begin(), bestMoves.end(),
-                    [bestMoveEval, decimator](auto const& m)
-                    {
-                        return static_cast<std::int64_t>(*m.eval * decimator) != static_cast<std::int64_t>(bestMoveEval * decimator);
-                    });
-                thread_local std::random_device tEntropy;
-                thread_local std::mt19937 tGenerator{ tEntropy() };
-                std::uniform_int_distribution<std::ptrdiff_t> options{ 0, std::distance(bestMoves.begin(), similarEnd) - 1 };
-                iRootNode = std::move(bestMoves[options(tGenerator)]);
-            }
-            return &*iRootNode;
-        }
-        return nullptr;
+        lk.lock();
+        // discard the result if the position changed (undo/setup) while searching or there is no legal move
+        if (iPosition != snapshot || !iEngineClient->bestMove || *iEngineClient->bestMove == "0000")
+            return {};
+        auto result = parse_uci_move(*iEngineClient->bestMove);
+        if (result.promoteTo)
+            result.promoteTo = static_cast<piece>(iPlayer) | *result.promoteTo;
+        return result;
     }
 
-    template <typename Representation, player Player>
-    bool ai<Representation, Player>::playing() const
+    bool ai::playing() const
     {
         return iPlaying;
     }
 
-    template <typename Representation, player Player>
-    void ai<Representation, Player>::setup(mailbox_position const& aSetup)
-    {
-        if constexpr (std::is_same_v<representation_type, mailbox_rep>)
-        {
-            std::unique_lock lk{ iMutex };
-            iRootNode = std::nullopt;
-            iPosition = aSetup;
-        }
-        else
-        {
-            std::unique_lock lk{ iMutex };
-            iRootNode = std::nullopt;
-            iPosition = bitboard_position{ {}, aSetup.turn, aSetup.moveHistory };
-            for (coordinate x = 0u; x <= 7u; ++x)
-                for (coordinate y = 0u; y <= 7u; ++y)
-                    set_piece(iPosition.rep, coordinates{ x, y }, aSetup.rep[y][x]);
-        }
-        iUseDecimator = (iPosition == chess::setup_position<representation_type>());
-    }
-
-    template <typename Representation, player Player>
-    std::uint64_t ai<Representation, Player>::nodes_per_second() const
+    void ai::setup(mailbox_position const& aSetup)
     {
         std::unique_lock lk{ iMutex };
-        if (iNodesPerSecond)
-            return *iNodesPerSecond;
-        else if (iStartTime)
-            return static_cast<std::uint64_t>(sNodeCounter / std::chrono::duration<double>(std::chrono::steady_clock::now() - *iStartTime).count());
-        else
-            return 0;
+        iPosition = aSetup;
+        iSetupFen = setup_fen(aSetup);
     }
 
-    template class ai<mailbox_rep, player::White>;
-    template class ai<mailbox_rep, player::Black>;
-    template class ai<bitboard_rep, player::White>;
-    template class ai<bitboard_rep, player::Black>;
+    std::uint64_t ai::nodes_per_second() const
+    {
+        return iNodesPerSecond;
+    }
 }

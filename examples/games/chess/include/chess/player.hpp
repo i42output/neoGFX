@@ -31,21 +31,6 @@ namespace chess
         Black   = static_cast<std::uint8_t>(piece::Black)
     };
 
-    template <player Player>
-    inline double player_piece_value(chess::piece piece);
-
-    template <>
-    inline double player_piece_value<chess::player::White>(chess::piece piece)
-    {
-        return piece_value<chess::piece::White>(piece);
-    }
-
-    template <>
-    inline double player_piece_value<chess::player::Black>(chess::piece piece)
-    {
-        return piece_value<chess::piece::Black>(piece);
-    }
-
     template <typename T = std::size_t>
     inline T as_cardinal(player p)
     {
@@ -63,4 +48,4 @@ namespace chess
     {
         return p == player::White ? opponent_v<player::White> : opponent_v<player::Black>;
     }
-}
+}

@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <tuple>
-#include <bit>
 #include <vector>
 #include <ostream>
 
@@ -69,9 +68,14 @@ namespace chess
         }
     };
 
+    inline std::string to_string(piece aPiece, std::string const& aNone = ".");
+
     inline std::string to_string(move const& aMove)
     {
-        return { static_cast<char>('a' + aMove.from.x), static_cast<char>('1' + aMove.from.y), static_cast<char>('a' + aMove.to.x), static_cast<char>('1' + aMove.to.y) };
+        std::string result{ static_cast<char>('a' + aMove.from.x), static_cast<char>('1' + aMove.from.y), static_cast<char>('a' + aMove.to.x), static_cast<char>('1' + aMove.to.y) };
+        if (aMove.promoteTo)
+            result += to_string(piece::Black | piece_type(*aMove.promoteTo)); // UCI: lowercase promotion piece
+        return result;
     }
 
     template <typename chess::player Player>
@@ -85,90 +89,14 @@ namespace chess
 
     typedef std::array<std::array<piece, 8>, 8> mailbox_rep;
     
-    typedef std::uint64_t bitboard;
-    typedef std::uint64_t bit_position;
-
-    inline constexpr bitboard bit_from_bit_position(bit_position aBitPosition)
-    {
-        return 1ull << aBitPosition;
-    }
-
-    inline constexpr bit_position bit_position_from_bit(bitboard aBitboard)
-    {
-        return static_cast<bit_position>(std::countr_zero(aBitboard));
-    }
-
-    inline constexpr coordinates coordinates_from_bit_position(bit_position aBitPosition)
-    {
-        return coordinates{ static_cast<std::uint32_t>(aBitPosition % 8ull), static_cast<std::uint32_t>(aBitPosition / 8ull) };
-    }
-
-    inline constexpr bit_position bit_position_from_coordinates(coordinates const& aPosition)
-    {
-        return aPosition.x + aPosition.y * 8ull;
-    }
-
-    inline constexpr bitboard bit_from_coordinates(coordinates const& aPosition)
-    {
-        return bit_from_bit_position(bit_position_from_coordinates(aPosition));
-    }
-
-    struct bitboard_rep
-    {
-        bitboard pieces;
-        std::array<bitboard, PIECE_COLORS> byPieceColor;
-        std::array<bitboard, PIECE_TYPES> byPieceType;
-        std::array<piece, SQUARES> bySquare;
-
-        auto operator<=>(bitboard_rep const& rhs) const
-        {
-            return std::forward_as_tuple(pieces, byPieceColor, byPieceType) <=>
-                std::forward_as_tuple(rhs.pieces, rhs.byPieceColor, rhs.byPieceType);
-        };
-        bool operator==(bitboard_rep const& rhs) const
-        {
-            return std::forward_as_tuple(pieces, byPieceColor, byPieceType) ==
-                std::forward_as_tuple(rhs.pieces, rhs.byPieceColor, rhs.byPieceType);
-        };
-    };
-
     inline piece piece_at(mailbox_rep const& aRep, coordinates const& aCoordinates)
     {
         return aRep[aCoordinates.y][aCoordinates.x];
     }
 
-    inline piece piece_at(bitboard_rep const& aRep, coordinates const& aCoordinates)
-    {
-        return aRep.bySquare[bit_position_from_coordinates(aCoordinates)];
-    }
-        
     inline void set_piece(mailbox_rep& aRep, coordinates const& aCoordinates, piece aPiece)
     {
         aRep[aCoordinates.y][aCoordinates.x] = aPiece;
-    }
-
-    inline void set_piece(bitboard_rep& aRep, coordinates const& aCoordinates, piece aPiece)
-    {
-        auto const square = bit_position_from_coordinates(aCoordinates);
-        auto const bit = bit_from_bit_position(square);
-        auto const oldPiece = aRep.bySquare[square];
-        aRep.bySquare[square] = aPiece;
-        if (aPiece == piece::None)
-        {
-            aRep.pieces &= ~bit;
-            aRep.byPieceColor[as_color_cardinal(piece::White)] &= ~bit;
-            aRep.byPieceColor[as_color_cardinal(piece::Black)] &= ~bit;
-            aRep.byPieceType[as_cardinal(oldPiece)] &= ~bit;
-        }
-        else
-        {
-            aRep.pieces |= bit;
-            aRep.byPieceColor[as_color_cardinal(aPiece)] |= bit;
-            aRep.byPieceColor[as_color_cardinal(piece_opponent_color(aPiece))] &= ~bit;
-            if (oldPiece != piece::None)
-                aRep.byPieceType[as_cardinal(oldPiece)] &= ~bit;
-            aRep.byPieceType[as_cardinal(aPiece)] |= bit;
-        }
     }
 
     template <typename Representation>
@@ -193,22 +121,9 @@ namespace chess
         }
     };
 
-    template <>
-    struct basic_position<bitboard_rep>
-    {
-        bitboard_rep rep;
-        player turn;
-        std::vector<move> moveHistory;
-
-        auto operator<=>(basic_position<bitboard_rep> const&) const = default;
-    };
-
     using mailbox_position = basic_position<mailbox_rep>;
-    using bitboard_position = basic_position<bitboard_rep>;
 
-    using position = bitboard_position;
-
-    inline std::string to_string(piece aPiece, std::string const& aNone = ".")
+    inline std::string to_string(piece aPiece, std::string const& aNone)
     {
         switch (aPiece)
         {
@@ -250,21 +165,6 @@ namespace chess
             aStream << y << " ";
             for (coordinate x = 0u; x <= 7u; ++x)
                 aStream << to_string(aPosition.rep[y][x]);
-            aStream << " " << y << std::endl;
-        }
-        aStream << std::endl << "  01234567" << std::endl;
-        return aStream;
-    }
-
-    template <typename CharT, typename CharTraitsT>
-    inline std::basic_ostream<CharT, CharTraitsT>& operator<<(std::basic_ostream<CharT, CharTraitsT>& aStream, bitboard_position const& aPosition)
-    {
-        aStream << "  01234567" << std::endl << std::endl;
-        for (coordinate y = 7u; y >= 0u && y <= 7u; --y)
-        {
-            aStream << y << " ";
-            for (coordinate x = 0u; x <= 7u; ++x)
-                aStream << to_string(aPosition.rep.bySquare[x + y * 8u]);
             aStream << " " << y << std::endl;
         }
         aStream << std::endl << "  01234567" << std::endl;
@@ -520,39 +420,4 @@ namespace chess
 
     template <typename Representation>
     basic_position<Representation> const& setup_position();
-
-    struct eval_info
-    {
-        double material = 0.0;
-        double mobility = 0.0;
-        double attack = 0.0;
-        double defend = 0.0;
-        bool mobilityPlayer = false;
-        bool mobilityOpponent = false;
-        bool mobilityPlayerKing = false;
-        bool mobilityOpponentKing = false;
-        double checkedPlayerKing = 0.0;
-        double checkedOpponentKing = 0.0;
-        double eval;
-        std::chrono::microseconds time_usec;
-    };
-
-    enum class eval_node 
-    {
-        Branch      = 0,
-        Terminal    = 1
-    };
-
-    struct eval_result
-    {
-        eval_node node;
-        double eval;
-    };
-
-    template <typename Representation, player Player>
-    struct eval
-    {
-        eval_result operator()(move_tables<Representation> const& aTables, basic_position<Representation>& aPosition, double aPly, eval_info* aEvalInfo = nullptr);
-        eval_result operator()(move_tables<Representation> const& aTables, basic_position<Representation>& aPosition, double aPly, eval_info& aEvalInfo);
-    };
-}
+}

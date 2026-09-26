@@ -258,11 +258,6 @@ namespace chess::gui
             update();
             return true;
         }
-        else if (aKeyCode == ng::key_code_e::KeyCode_SLASH)
-        {
-            display_query();
-            return true;
-        }
         else
             return widget<>::key_pressed(aScanCode, aKeyCode, aKeyModifier);
     }
@@ -353,7 +348,6 @@ namespace chess::gui
                 iPosition.rep[square->y][square->x] = piece::None;
                 current_player().setup(iPosition);
                 next_player().setup(iPosition);
-                display_eval();
             });
             contextMenu.exec();
         }
@@ -505,7 +499,6 @@ namespace chess::gui
         iPosition.moveHistory.clear();
         current_player().setup(iPosition);
         next_player().setup(iPosition);
-        display_eval();
         Changed();
         update();
     }
@@ -648,67 +641,9 @@ namespace chess::gui
         make(iPosition, aMove);
         if (iMoveValidator.in_check(iPosition.turn, iPosition))
             iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());
-        display_eval();
         if (!iInRedo)
             iUndoneMoves.clear();
         update();
-    }
-
-    template <typename CharT, typename CharTraitsT>
-    inline std::basic_ostream<CharT, CharTraitsT>& operator<<(std::basic_ostream<CharT, CharTraitsT>& aStream, eval_info const& aEvalInfo)
-    {
-        aStream << "material: " << std::round(aEvalInfo.material) << std::endl;
-        aStream << "mobility: " << std::round(aEvalInfo.mobility) << std::endl;
-        aStream << "attack: " << std::round(aEvalInfo.attack) << std::endl;
-        aStream << "defend: " << std::round(aEvalInfo.defend) << std::endl;
-        aStream << "mobilityPlayer: " << aEvalInfo.mobilityPlayer << std::endl;
-        aStream << "mobilityPlayerKing: " << aEvalInfo.mobilityPlayerKing << std::endl;
-        aStream << "checkedPlayerKing: " << std::round(aEvalInfo.checkedPlayerKing) << std::endl;
-        aStream << "mobilityOpponent: " << aEvalInfo.mobilityOpponent << std::endl;
-        aStream << "mobilityOpponentKing: " << aEvalInfo.mobilityOpponentKing << std::endl;
-        aStream << "checkedOpponentKing: " << std::round(aEvalInfo.checkedOpponentKing) << std::endl;
-        aStream << "eval: " << std::round(aEvalInfo.eval) << std::endl;
-        aStream << "eval time: " << aEvalInfo.time_usec.count() << " us" << std::endl;
-        return aStream;
-    }
-
-    void board::display_eval() const
-    {
-        eval_info evalInfo;
-        double eval = iMoveValidator.eval(current_player().player(), iPosition, evalInfo);
-        std::cerr << std::setprecision(4);
-        if (iEditBoard)
-            std::cerr << "[EDIT BOARD]" << std::endl;
-        std::cerr << evalInfo;
-    }
-
-    void board::display_query() const
-    {
-        std::cerr << std::endl << "[QUERY START]" << std::endl << std::endl;
-        std::vector<std::pair<chess::move, eval_info>> results;
-        auto queryBoard = iPosition;
-        for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
-            for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
-                for (coordinate xTo = 0u; xTo<= 7u; ++xTo)
-                    for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
-                    {
-                        chess::move const candidateMove{ coordinates{ xFrom, yFrom }, coordinates{ xTo, yTo } };
-                        if (iMoveValidator.can_move(queryBoard.turn, queryBoard, candidateMove))
-                        {
-                            make(queryBoard, candidateMove);
-                            eval_info evalInfo;
-                            double eval = iMoveValidator.eval(current_player().player(), queryBoard, evalInfo);
-                            results.push_back(std::make_pair(candidateMove, evalInfo));
-                            unmake(queryBoard);
-                        }
-                    }
-        std::sort(results.begin(), results.end(), [](auto const& lhs, auto const& rhs) { return lhs.second.eval > rhs.second.eval; });
-        for (auto const& m : results)
-        {
-            std::cerr << "*** " << to_string(m.first) << " ***" << std::endl;
-            std::cerr << m.second;
-        }
-        std::cerr << std::endl << "[QUERY END]" << std::endl << std::endl;
     }
 
     void board::animate_move(chess::move const& aMove)
@@ -853,4 +788,4 @@ namespace chess::gui
                     return coordinates{ x, y };
         return {};
     }
-}
+}

@@ -98,8 +98,6 @@ namespace chess::gui
         i_player& black_player() override;
     private:
         void moved(chess::move const& aMove);
-        void display_eval() const;
-        void display_query() const;
     private:
         void animate_move(chess::move const& aMove);
         std::optional<std::pair<animation const*, ng::point>> animating_to(coordinates const& aMovePos, std::chrono::steady_clock::time_point const& aTime = std::chrono::steady_clock::now()) const;
@@ -136,4 +134,4 @@ namespace chess::gui
         mutable std::deque<animation> iAnimations;
         std::optional<std::pair<bool, std::chrono::steady_clock::time_point>> iFlashCheck;
     };
-}
+}

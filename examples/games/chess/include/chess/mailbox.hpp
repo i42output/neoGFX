@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <limits>
 #include <array>
-#include <chrono>
 
 #include <chess/primitives.hpp>
 
@@ -182,58 +181,4 @@ namespace chess
             }
         return false;
     }
-
-    template <player Player, typename ResultContainer>
-    inline void sort_nodes(move_tables<mailbox_rep> const& aTables, mailbox_position const& aPosition, ResultContainer& aResult)
-    {
-        std::sort(as_valid_moves(aResult).begin(), as_valid_moves(aResult).end(), [&](auto const& lhs, auto const& rhs)
-        {
-            mailbox_position lhsBoard = aPosition;
-            mailbox_position rhsBoard = aPosition;
-            make(lhsBoard, as_move(lhs));
-            make(rhsBoard, as_move(rhs));
-            return eval<mailbox_rep, Player>{}(aTables, lhsBoard, 2.0).eval < eval<mailbox_rep, Player>{}(aTables, rhsBoard, 2.0).eval;
-        });
-    }
-
-    template <player Player>
-    inline void valid_moves(move_tables<mailbox_rep> const& aTables, mailbox_position& aPosition, game_tree_node& aResult)
-    {
-        as_valid_moves(aResult).clear();
-        for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
-            for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
-                for (coordinate xTo = 0u; xTo <= 7u; ++xTo)
-                    for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
-                    {
-                        move candidateMove{ { xFrom, yFrom }, { xTo, yTo } };
-                        if (can_move<>(aTables, Player, aPosition, candidateMove))
-                        {
-                            auto const movingPiece = piece_at(aPosition, candidateMove.from);
-                            auto const targetPiece = piece_at(aPosition, candidateMove.to);
-                            candidateMove.isCapture = static_cast<player>(targetPiece & piece::COLOR_MASK) == opponent_v<Player>;
-                            if (piece_type(movingPiece) == piece::Pawn)
-                            {
-                                if (candidateMove.from.x != candidateMove.to.x)
-                                    candidateMove.isCapture = true;
-                                auto const movingPieceColor = piece_color(movingPiece);
-                                if ((movingPieceColor == piece::White && candidateMove.to.y == promotion_rank_v<player::White>) ||
-                                    (movingPieceColor == piece::Black && candidateMove.to.y == promotion_rank_v<player::Black>))
-                                {
-                                    candidateMove.promoteTo = piece::Queen | movingPieceColor;
-                                    as_valid_moves(aResult).emplace_back(candidateMove);
-                                    candidateMove.promoteTo = piece::Rook | movingPieceColor;
-                                    as_valid_moves(aResult).emplace_back(candidateMove);
-                                    candidateMove.promoteTo = piece::Bishop | movingPieceColor;
-                                    as_valid_moves(aResult).emplace_back(candidateMove);
-                                    candidateMove.promoteTo = piece::Knight | movingPieceColor;
-                                    as_valid_moves(aResult).emplace_back(candidateMove);
-                                }
-                                else
-                                    as_valid_moves(aResult).emplace_back(candidateMove);
-                            }
-                            else
-                                as_valid_moves(aResult).emplace_back(candidateMove);
-                        }
-                    }
-    }
-}
+}

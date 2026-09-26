@@ -31,12 +31,9 @@ namespace chess
         case player_type::NetworkedHuman:
             throw not_implemented_yet{ "default_player_factory::create_player" };
         case player_type::AI:
-            if (aPlayer == chess::player::White)
-                return std::make_unique<ai<bitboard_rep, chess::player::White>>();
-            else
-                return std::make_unique<ai<bitboard_rep, chess::player::Black>>();
+            return std::make_unique<ai>(aPlayer);
         default:
             throw std::invalid_argument{ "default_player_factory::create_player" };
         }
     }
-}
+}

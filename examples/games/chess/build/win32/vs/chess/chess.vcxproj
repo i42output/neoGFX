@@ -90,7 +90,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(DevDirNeogfx)\examples\games\chess\include;$(DevDirNeogfx)\examples\games\common\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeogfx)\examples\games\chess\include;$(DevDirStockparrot)\include;$(DevDirNeogfx)\examples\games\common\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -111,7 +111,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(DevDirNeogfx)\examples\games\chess\include;$(DevDirNeogfx)\examples\games\common\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeogfx)\examples\games\chess\include;$(DevDirStockparrot)\include;$(DevDirNeogfx)\examples\games\common\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -132,7 +132,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(DevDirNeogfx)\examples\games\chess\include;$(DevDirNeogfx)\examples\games\common\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeogfx)\examples\games\chess\include;$(DevDirStockparrot)\include;$(DevDirNeogfx)\examples\games\common\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -153,7 +153,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(DevDirNeogfx)\examples\games\chess\include;$(DevDirNeogfx)\examples\games\common\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeogfx)\examples\games\chess\include;$(DevDirStockparrot)\include;$(DevDirNeogfx)\examples\games\common\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -167,8 +167,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\include\chess\ai_thread.hpp" />
-    <ClInclude Include="..\..\..\..\include\chess\bitboard.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\board.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\ai.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\chess.hpp" />
@@ -179,13 +177,10 @@
     <ClInclude Include="..\..\..\..\include\chess\i_player.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\mailbox.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\move_validator.hpp" />
-    <ClInclude Include="..\..\..\..\include\chess\node.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\piece.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\player.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\position.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\primitives.hpp" />
-    <ClInclude Include="..\..\..\..\include\chess\table.hpp" />
-    <ClInclude Include="..\..\..\..\include\chess\zobrist.hpp" />
     <ClInclude Include="Resource.h" />
   </ItemGroup>
   <ItemGroup>
@@ -196,8 +191,6 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\src\ai_thread.cpp" />
-    <ClCompile Include="..\..\..\..\src\bitboard.cpp" />
     <ClCompile Include="..\..\..\..\src\board.cpp" />
     <ClCompile Include="..\..\..\..\src\ai.cpp" />
     <ClCompile Include="..\..\..\..\src\default_player_factory.cpp" />
@@ -230,4 +223,4 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-</Project>
+</Project>
