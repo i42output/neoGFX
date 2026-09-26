@@ -25,6 +25,8 @@
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/dialog/settings_dialog.hpp>
+#include <cctype>
+#include <limits>
 #include <neogfx/gui/layout/grid_layout.hpp>
 #include <neogfx/gui/widget/line_edit.hpp>
 #include <neogfx/gui/widget/check_box.hpp>
@@ -58,8 +60,11 @@ namespace neogfx
         ref_ptr<i_widget> operator()(neolib::i_setting& aSetting, i_layout& aLayout, sink& aSink)
         {
             auto settingWidget = make_ref<setting_widget<basic_slider_box<T>>>(aSetting, aLayout);
-            settingWidget->set_minimum(aSetting.constraints().minimum_value<T>());
-            settingWidget->set_maximum(aSetting.constraints().maximum_value<T>());
+            // an unconstrained setting gets its type's full range (a spin box's own default range is [0, 0])
+            settingWidget->set_minimum(aSetting.constraints().has_minimum_value() ? 
+                aSetting.constraints().minimum_value<T>() : std::numeric_limits<T>::lowest());
+            settingWidget->set_maximum(aSetting.constraints().has_maximum_value() ? 
+                aSetting.constraints().maximum_value<T>() : std::numeric_limits<T>::max());
             if (aSetting.constraints().has_step_value())
                 settingWidget->set_step(aSetting.constraints().step_value<T>());
             else
@@ -208,7 +213,7 @@ namespace neogfx
                         for (auto& ee : e.enumerators())
                             enumModel->insert_item(enumModel->end(), ee.first(), iSettings.friendly_text(aSetting, ee.second()));
                         settingWidget->set_model(enumModel);
-                        auto enumPresentationModel = make_ref<basic_item_presentation_model<basic_item_model<neolib::i_enum::underlying_type>>>();
+                        auto enumPresentationModel = make_ref<default_drop_list_presentation_model<basic_item_model<neolib::i_enum::underlying_type>>>(*settingWidget);
                         settingWidget->set_presentation_model(enumPresentationModel);
                         aSink += settingWidget->selection_changed([&, settingWidget, enumModel](const optional_item_model_index& aCurrentIndex)
                         {
@@ -427,6 +432,47 @@ namespace neogfx
         sink iSink;
     };
 
+    void settings_dialog::update_array_rows(std::string const& aArrayKey)
+    {
+        auto const count = iSettings.setting(string{ aArrayKey + "_count" }).value<std::uint32_t>(true);
+        auto& rows = iArrayRows[aArrayKey];
+        if (rows.size() < count)
+        {
+            // rows for elements that have none yet: neolib registers elements (in element, then field, order) as the 
+            // count grows, including for a pending count
+            auto const firstNewIndex = rows.size();
+            std::vector<neolib::i_setting*> newElementSettings;
+            for (auto const& setting : iSettings.all_settings_ordered())
+            {
+                string key;
+                std::uint32_t index = 0u;
+                std::uint32_t field = 0u;
+                string title;
+                if (iSettings.setting_array_element(*setting, key, index, field, title) && key.to_std_string() == aArrayKey && 
+                    index >= firstNewIndex && index < count)
+                    newElementSettings.push_back(&*setting);
+            }
+            for (auto* setting : newElementSettings)
+                iAddSettingWidget(*setting);
+        }
+        for (std::size_t rowIndex = 0u; rowIndex < rows.size(); ++rowIndex)
+        {
+            bool const visible = rowIndex < count;
+            auto& row = rows[rowIndex];
+            if (row.title != nullptr)
+                row.title->show(visible);
+            for (auto* widget : row.widgets)
+                widget->show(visible);
+            for (auto* cell : row.cells)
+            {
+                cell->enable(visible);
+                for (layout_item_index itemIndex = 0u; itemIndex < cell->count(); ++itemIndex)
+                    if (cell->item_at(itemIndex).is_widget())
+                        cell->item_at(itemIndex).as_widget().show(visible);
+            }
+        }
+    }
+
     void settings_dialog::init()
     {
         set_minimum_size(size{ 700_dip, 446_dip });
@@ -464,7 +510,6 @@ namespace neogfx
                 });
         };
 
-        std::map<std::string, ref_ptr<setting_group_widget>> groupWidgets;
         for (auto const& category : iSettings.all_categories())
         {
             auto c = treeModel->insert_item(treeModel->send(), make_ref<setting_group_widget_list::element_type>(), category.second());
@@ -477,7 +522,7 @@ namespace neogfx
                     iDetailLayout.add(settingGroupWidget);
                     treeModel->item(c)->push_back(settingGroupWidget);
                     treeModel->item(g)->push_back(settingGroupWidget);
-                    groupWidgets[group.first().to_std_string()] = settingGroupWidget;
+                    iGroupWidgets[group.first().to_std_string()] = &*settingGroupWidget;
                     auto existingSubgroups = iSettings.all_subgroups().find(group.first());
                     if (existingSubgroups != iSettings.all_subgroups().end())
                         for (auto const& subgroup : existingSubgroups->second())
@@ -488,60 +533,120 @@ namespace neogfx
                             treeModel->item(c)->push_back(settingSubgroupWidget);
                             treeModel->item(g)->push_back(settingSubgroupWidget);
                             treeModel->item(s)->push_back(settingSubgroupWidget);
-                            groupWidgets[subgroup.first().to_std_string()] = settingSubgroupWidget;
+                            iGroupWidgets[subgroup.first().to_std_string()] = &*settingSubgroupWidget;
                         }
                 }
         }
 
-        std::map<std::string, std::pair<grid_layout*, std::uint32_t>> groupGrids; // grid, next free row
-        for (auto const& setting : iSettings.all_settings_ordered())
+        // a setting's widgets; kept, as settings array rows are added after init() (when the array grows)
+        iAddSettingWidget = [this, track_text_setting](neolib::i_setting& aSetting)
         {
+            neolib::i_setting* const setting = &aSetting;
             if (setting->format().empty())
-                continue;
+                return;
             thread_local std::vector<std::string> keyBits;
             keyBits.clear();
             keyBits = neolib::tokens(setting->key().to_std_string(), "."s);
             // category.group.subgroup.setting or category.group.setting
-            auto groupWidget = groupWidgets.end();
+            auto groupWidget = iGroupWidgets.end();
             if (keyBits.size() >= 4u)
-                groupWidget = groupWidgets.find(keyBits[0] + "." + keyBits[1] + "." + keyBits[2]);
-            if (groupWidget == groupWidgets.end())
+                groupWidget = iGroupWidgets.find(keyBits[0] + "." + keyBits[1] + "." + keyBits[2]);
+            if (groupWidget == iGroupWidgets.end())
             {
                 keyBits.resize(2);
-                groupWidget = groupWidgets.find(keyBits[0] + "." + keyBits[1]);
+                groupWidget = iGroupWidgets.find(keyBits[0] + "." + keyBits[1]);
             }
-            if (groupWidget == groupWidgets.end())
-                continue;
+            if (groupWidget == iGroupWidgets.end())
+                return;
 
-            // grid groups: each setting takes a row: a label cell (its leading label) and, to its right, a cell for everything else
+            // grid groups: each setting takes a row: a label cell (its leading label) and, to its right, a cell for everything else;
+            // setting array elements go in a table (itself in a row of a grid group): a header row of field titles (the fields'
+            // leading labels) then a row per element: the element's title and a cell per field
+            // (cells are added in order, left to right within each row: grid_layout loses cells when an out of order add has 
+            // to replace the spacer it filled a gap with)
             std::string format = setting->format().to_std_string();
-            grid_layout* grid = nullptr;
-            std::uint32_t gridRow = 0u;
-            std::uint32_t const gridColumn = 0u;
-            if (iGridGroups.contains(groupWidget->first))
+            auto take_leading_label = [&]() -> std::string
             {
-                auto& groupGrid = groupGrids[groupWidget->first];
+                if (setting->constraints().optional()) // an optional setting's label is its check box
+                    return {};
+                auto labelEnd = format.find('%');
+                while (labelEnd != std::string::npos && labelEnd + 1 < format.size() && format[labelEnd + 1] == '%')
+                    labelEnd = format.find('%', labelEnd + 2);
+                std::string leadingLabel = format.substr(0, labelEnd);
+                format.erase(0, leadingLabel.size());
+                for (auto escaped = leadingLabel.find("%%"); escaped != std::string::npos; escaped = leadingLabel.find("%%", escaped + 1))
+                    leadingLabel.erase(escaped, 1);
+                return leadingLabel;
+            };
+            auto group_grid = [&]() -> std::pair<grid_layout*, std::uint32_t>&
+            {
+                auto& groupGrid = iGroupGrids[groupWidget->first];
                 if (groupGrid.first == nullptr)
                 {
                     groupGrid.first = &groupWidget->second->layout().emplace<grid_layout>(alignment::Left | alignment::VCenter);
                     groupGrid.first->set_padding({});
                 }
+                return groupGrid;
+            };
+            string arrayKey;
+            std::uint32_t arrayIndex = 0u;
+            std::uint32_t arrayField = 0u;
+            string elementTitle;
+            grid_layout* grid = nullptr;
+            std::uint32_t gridRow = 0u;
+            std::uint32_t gridWidgetColumn = 1u;
+            array_row* arrayRow = nullptr;
+            if (iSettings.setting_array_element(*setting, arrayKey, arrayIndex, arrayField, elementTitle))
+            {
+                auto const key = arrayKey.to_std_string();
+                // elements up to the array's pending count (the dialog edits pending changes)
+                if (arrayIndex >= iSettings.setting(string{ key + "_count" }).value<std::uint32_t>(true))
+                    return;
+                auto& table = iArrayTables[key];
+                if (table == nullptr)
+                {
+                    auto& countSetting = iSettings.setting(string{ key + "_count" });
+                    iSink += countSetting.changing([this, key]() { update_array_rows(key); });
+                    iSink += countSetting.changed([this, key]() { update_array_rows(key); });
+                    auto newTable = make_ref<grid_layout>(alignment::Left | alignment::VCenter);
+                    newTable->set_padding({});
+                    if (iGridGroups.contains(groupWidget->first))
+                    {
+                        auto& groupGrid = group_grid();
+                        auto const row = groupGrid.second++;
+                        groupGrid.first->add_item_at_position(row, 0u, make_ref<label>(translate(std::string{})));
+                        groupGrid.first->add_item_at_position(row, 1u, newTable);
+                    }
+                    else
+                        groupWidget->second->layout().add(newTable);
+                    newTable->add_item_at_position(0u, 0u, make_ref<label>(translate(std::string{})));
+                    table = &*newTable;
+                }
+                grid = table;
+                gridRow = arrayIndex + 1u;
+                gridWidgetColumn = arrayField + 1u;
+                auto fieldTitle = take_leading_label();
+                while (!fieldTitle.empty() && (fieldTitle.back() == ':' || std::isspace(static_cast<unsigned char>(fieldTitle.back()))))
+                    fieldTitle.pop_back();
+                if (arrayIndex == 0u)
+                    grid->add_item_at_position(0u, gridWidgetColumn, make_ref<label>(translate(fieldTitle)));
+                auto& rows = iArrayRows[key];
+                if (rows.size() <= arrayIndex)
+                    rows.resize(arrayIndex + 1u);
+                arrayRow = &rows[arrayIndex];
+                if (arrayField == 0u)
+                {
+                    auto title = make_ref<label>(translate(elementTitle.to_std_string()));
+                    grid->add_item_at_position(gridRow, 0u, title);
+                    arrayRow->title = &*title;
+                }
+            }
+            else if (iGridGroups.contains(groupWidget->first))
+            {
+                auto& groupGrid = group_grid();
                 grid = groupGrid.first;
                 gridRow = groupGrid.second++;
-                // cells are added strictly in order (label cell, then widget cell): grid_layout loses cells when
-                // an out of order add has to replace the spacer it filled a gap with
-                std::string leadingLabel;
-                if (!setting->constraints().optional()) // an optional setting's label is its check box
-                {
-                    auto labelEnd = format.find('%');
-                    while (labelEnd != std::string::npos && labelEnd + 1 < format.size() && format[labelEnd + 1] == '%')
-                        labelEnd = format.find('%', labelEnd + 2);
-                    leadingLabel = format.substr(0, labelEnd);
-                    format.erase(0, leadingLabel.size());
-                    for (auto escaped = leadingLabel.find("%%"); escaped != std::string::npos; escaped = leadingLabel.find("%%", escaped + 1))
-                        leadingLabel.erase(escaped, 1);
-                }
-                grid->add_item_at_position(gridRow, gridColumn, make_ref<label>(translate(leadingLabel)));
+                grid->add_item_at_position(gridRow, 0u, make_ref<label>(translate(take_leading_label())));
             }
 
             i_layout* itemLayout = nullptr;
@@ -552,8 +657,10 @@ namespace neogfx
                     if (itemLayout != nullptr)
                         return; // a grid cell holds a single line
                     auto cellLayout = make_ref<horizontal_layout>();
-                    grid->add_item_at_position(gridRow, gridColumn + 1u, cellLayout);
+                    grid->add_item_at_position(gridRow, gridWidgetColumn, cellLayout);
                     itemLayout = &*cellLayout;
+                    if (arrayRow != nullptr)
+                        arrayRow->cells.push_back(itemLayout);
                 }
                 else
                 {
@@ -584,16 +691,17 @@ namespace neogfx
                 if (!nextLabel.empty())
                 {
                     auto& optionalCheckBox = itemLayout->add(make_ref<check_box>(translate(nextLabel)));
-                    iSink += optionalCheckBox.Checked([&]()
+                    // (setting by value: it's local to this call and the handlers outlive it)
+                    iSink += optionalCheckBox.Checked([setting]()
                     { 
                         if (setting->is_default(true))
                             setting->set_value(setting->default_value()); 
                     });
-                    iSink += optionalCheckBox.Unchecked([&]()
+                    iSink += optionalCheckBox.Unchecked([setting]()
                     { 
                         setting->clear(); 
                     });
-                    auto update_check_box = [&]()
+                    auto update_check_box = [&optionalCheckBox, setting]()
                     {
                         optionalCheckBox.set_checked(!setting->is_default(true));
                     };
@@ -656,7 +764,21 @@ namespace neogfx
             emit_label();
             if (grid == nullptr && itemLayout != nullptr)
                 itemLayout->add_spacer();
-        }
+            // a table cell holding a single widget: the widget goes in the table itself, as the column's heading does, so 
+            // the two are aligned (the cell's layout was only needed to create it)
+            if (arrayRow != nullptr && itemLayout != nullptr && itemLayout->count() == 1u && itemLayout->item_at(0u).is_widget())
+            {
+                ref_ptr<i_widget> cellWidget{ &itemLayout->item_at(0u).as_widget() };
+                itemLayout->remove_at(0u);
+                // no expanding (e.g. a check box expands for its text) as the cell's layout didn't: its size policy was Minimum
+                cellWidget->set_size_policy(size_constraint::Minimum, size_constraint::Minimum);
+                arrayRow->cells.pop_back(); // the cell's layout is replaced by the widget
+                grid->add_item_at_position(gridRow, gridWidgetColumn, cellWidget);
+                arrayRow->widgets.push_back(&*cellWidget);
+            }
+        };
+        for (auto const& setting : iSettings.all_settings_ordered())
+            iAddSettingWidget(*setting);
 
         iDetailLayout.add_spacer();
 
@@ -681,6 +803,9 @@ namespace neogfx
             if (aCurrentIndex)
                 for (auto& w : *treeModel->item(iTree.presentation_model().to_item_model_index(*aCurrentIndex)))
                     w->show();
+            // start the newly shown details at the top: the previous details' scroll position doesn't apply to them
+            iDetails.vertical_scrollbar().set_position(0.0);
+            iDetails.horizontal_scrollbar().set_position(0.0);
         };
         iTree.selection_model().current_index_changed(update_details);
         update_details(iTree.selection_model().current_index_maybe(), {});

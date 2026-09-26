@@ -22,6 +22,9 @@
 #include <neogfx/neogfx.hpp>
 
 #include <set>
+#include <map>
+#include <vector>
+#include <functional>
 
 #include <neogfx/app/settings.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
@@ -30,6 +33,8 @@
 
 namespace neogfx
 {
+    class grid_layout;
+
     class i_setting_widget_factory : public i_reference_counted
     {
     public:
@@ -63,6 +68,15 @@ namespace neogfx
         ~settings_dialog();
     private:
         void init();
+        // a setting array's element count changed (pending or applied): add rows for new elements; show rows up to the count
+        void update_array_rows(std::string const& aArrayKey);
+    private:
+        struct array_row
+        {
+            i_widget* title = nullptr;
+            std::vector<i_widget*> widgets; // cell widgets placed in the table itself
+            std::vector<i_layout*> cells; // cells holding more than a single widget
+        };
     private:
         neolib::i_settings& iSettings;
 
@@ -70,6 +84,12 @@ namespace neogfx
         ref_ptr<i_setting_icons> iIcons;
         std::set<std::string> iGridGroups;
         neolib::i_setting* iFocusedTextSetting = nullptr;
+        // widget creation state (settings array rows are added after init())
+        std::map<std::string, i_widget*> iGroupWidgets; // group or subgroup key -> its widget
+        std::map<std::string, std::pair<grid_layout*, std::uint32_t>> iGroupGrids; // grid, next free row
+        std::map<std::string, grid_layout*> iArrayTables; // setting array key -> its table
+        std::map<std::string, std::vector<array_row>> iArrayRows; // setting array key -> its rows (by element index)
+        std::function<void(neolib::i_setting&)> iAddSettingWidget;
         sink iSink;
         horizontal_layout iLayout;
         tree_view iTree;

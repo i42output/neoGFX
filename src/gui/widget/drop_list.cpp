@@ -37,6 +37,7 @@ namespace neogfx
         iDropList{ aDropList }
     {
         set_padding(neogfx::padding{});
+        set_read_only(true); // the list offers choices; its items are never edited in place
         if (!iDropList.editable())
             enable_hot_tracking();
         set_selection_model(iDropList.iSelectionModel);

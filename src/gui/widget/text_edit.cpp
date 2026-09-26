@@ -407,7 +407,7 @@ namespace neogfx
 
     bool text_edit::style::operator==(const style& aRhs) const
     {
-        return std::forward_as_tuple(iCharacter) == std::forward_as_tuple(aRhs.iCharacter);
+        return std::forward_as_tuple(iCharacter, iParagraph) == std::forward_as_tuple(aRhs.iCharacter, aRhs.iParagraph);
     }
 
     bool text_edit::style::operator!=(const style& aRhs) const
@@ -417,7 +417,7 @@ namespace neogfx
 
     bool text_edit::style::operator<(const style& aRhs) const
     {
-        return std::forward_as_tuple(iCharacter) < std::forward_as_tuple(aRhs.iCharacter);
+        return std::forward_as_tuple(iCharacter, iParagraph) < std::forward_as_tuple(aRhs.iCharacter, aRhs.iParagraph);
     }
 
     text_edit::character_style const& text_edit::style::character() const
@@ -1852,15 +1852,13 @@ namespace neogfx
 
     std::size_t text_edit::column_hit_test(const point& aPosition, bool aAdjustForScrollPosition) const
     {
-        auto ajustedPosition = (aAdjustForScrollPosition ? aPosition + point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } : aPosition);
-        for (std::size_t ci = 0; ci < columns(); ++ci)
-            if (column_rect(ci).contains(ajustedPosition))
+        // by x only: column rects are page (not document) rects, so they don't contain a scrolled document position's y; 
+        // the padding either side of a column belongs to it
+        auto const x = (aAdjustForScrollPosition ? aPosition.x + horizontal_scrollbar().position() : aPosition.x);
+        for (std::size_t ci = 0; ci + 1 < columns(); ++ci)
+            if (x < column_rect(ci, true).right())
                 return ci;
-        if (ajustedPosition.x < column_rect(0).left())
-            return 0;
-        else if (ajustedPosition.x >= column_rect(columns() - 1).right())
-            return columns() - 1;
-        return 0;
+        return columns() - 1;
     }
 
     // Absolute glyph range of a paragraph's segment for a column; the column delimiter glyphs belong to no segment.
@@ -3199,7 +3197,7 @@ namespace neogfx
                                 ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
                                 xLine += (columnAvailableWidth - lineExtents.cx);
                             else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
-                                xLine += std::ceil((columnAvailableWidth - lineExtents.cx, 0.0) / 2.0);
+                                xLine += std::ceil(std::max(columnAvailableWidth - lineExtents.cx, 0.0) / 2.0);
 
                             lines.emplace_back(
                                 this,
@@ -3256,7 +3254,7 @@ namespace neogfx
                                     ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
                                     xLine += (columnAvailableWidth - lineExtents.cx);
                                 else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
-                                    xLine += std::ceil((columnAvailableWidth - lineExtents.cx, 0.0) / 2.0);
+                                    xLine += std::ceil(std::max(columnAvailableWidth - lineExtents.cx, 0.0) / 2.0);
 
                                 lines.emplace_back(
                                     this,
@@ -3394,7 +3392,7 @@ namespace neogfx
                                 ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
                                 xLine += (columnAvailableWidth - lineExtents.cx);
                             else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
-                                xLine += std::ceil((columnAvailableWidth - lineExtents.cx, 0.0) / 2.0);
+                                xLine += std::ceil(std::max(columnAvailableWidth - lineExtents.cx, 0.0) / 2.0);
 
                             lines.emplace_back(
                                 this,
