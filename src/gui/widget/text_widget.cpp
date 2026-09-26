@@ -143,7 +143,10 @@ namespace neogfx
             service<debug::logger>() << neolib::logger::severity::Debug << "text_widget::paint(...)" << std::endl;
 #endif // NEOGFX_DEBUG
 
-        scoped_mnemonics sm{ aGc, service<i_keyboard>().is_key_pressed(ScanCode_LALT) && has_root() && root().is_active() };
+        // popup menus never become the active window but accept their items' mnemonics without Alt, so always show them there
+        bool const inPopupMenu = has_root() &&
+            (root().style() & (window_style::Popup | window_style::Menu)) == (window_style::Popup | window_style::Menu);
+        scoped_mnemonics sm{ aGc, inPopupMenu || (service<i_keyboard>().is_key_pressed(ScanCode_LALT) && has_root() && root().is_active()) };
 
         size textSize = text_extent();
         auto const clientRect = client_rect(false);

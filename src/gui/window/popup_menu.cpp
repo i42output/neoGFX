@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 
+#include <boost/locale.hpp>
 #include <neolib/core/scoped.hpp>
 
 #include <neogfx/app/i_app.hpp>
@@ -346,10 +347,35 @@ namespace neogfx
         if (!has_menu() || !menu().is_open())
             return false;
 
+        // within an open popup menu an item's mnemonic selects it without Alt
+        if (sys_text_input(aText))
+            return true;
+
         if (aText != "\r" && aText != "\n")
             service<i_basic_services>().system_beep();
 
         return true;
+    }
+
+    bool popup_menu::sys_text_input(i_string const& aText)
+    {
+        if (!has_menu() || !menu().is_open())
+            return false;
+
+        static boost::locale::generator gen;
+        static std::locale loc = gen("en_US.UTF-8");
+        auto const input = boost::locale::to_lower(aText.to_std_string(), loc);
+        for (i_menu::item_index i = 0; i < menu().count(); ++i)
+        {
+            auto& itemWidget = menu_layout().get_widget_at<menu_item_widget>(i);
+            auto const m = itemWidget.mnemonic();
+            if (!m.empty() && menu().item_at(i).available() && boost::locale::to_lower(m.as_std_string(), loc) == input)
+            {
+                itemWidget.mnemonic_execute(); // may destroy this popup's contents; return without touching members
+                return true;
+            }
+        }
+        return false;
     }
 
     void popup_menu::init()
