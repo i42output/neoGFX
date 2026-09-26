@@ -229,15 +229,27 @@ namespace neogfx
     rect slider_impl::bar_box() const
     {
         rect result = client_rect(false);
-        result.deflate(size{ std::ceil((iOrientation == slider_orientation::Horizontal ? result.height() : result.width()) / 2.5) });
+        dimension const extent = std::min<dimension>(22.0_dip, iOrientation == slider_orientation::Horizontal ? result.height() : result.width());
+        if (iOrientation == slider_orientation::Horizontal)
+        {
+            result.y += std::floor((result.cy - extent) / 2.0);
+            result.cy = extent;
+        }
+        else
+        {
+            result.x += std::floor((result.cx - extent) / 2.0);
+            result.cx = extent;
+        }
+        result.deflate(size{ std::ceil(extent / 2.5) });
         result.deflate(size{ 1.0, 1.0 });
         return result;
     }
 
     rect slider_impl::indicator_box() const
     {
+        dimension const extent = std::min<dimension>(22.0_dip, iOrientation == slider_orientation::Horizontal ? client_rect(false).height() : client_rect(false).width());
         rect result{ normalized_value_to_position(normalized_value()), size{} };
-        result.inflate(size{ std::ceil((iOrientation == slider_orientation::Horizontal ? client_rect(false).height() : client_rect(false).width()) / 3.0) });
+        result.inflate(size{ std::ceil(extent / 3.0) });
         return result;
     }
 
