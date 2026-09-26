@@ -1,4 +1,4 @@
-// app.hpp
+//// app.hpp
 /*
 neoGFX Design Studio
 Copyright(C) 2021 Leigh Johnston

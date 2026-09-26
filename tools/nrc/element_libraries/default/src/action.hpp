@@ -43,6 +43,8 @@ namespace neogfx::nrc
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
+            if (aName == "text" || aName == "image")
+                return; // handled by action itself (see ctor, emit_ctor and emit_body)
             ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override

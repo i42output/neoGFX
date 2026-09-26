@@ -21,6 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 
+#include <bit>
+#include <algorithm>
+#include <vector>
 #include <neolib/neolib.hpp>
 #include <neolib/core/i_reference_counted.hpp>
 #include <neolib/core/i_optional.hpp>
@@ -339,8 +342,24 @@ namespace neogfx::nrc
             auto es = neolib::enum_to_string(aEnumValue).to_std_string();
             if (es[0] != '0')
                 return aEnumName + "::" + es;
-            else
-                return "static_cast<" + aEnumName + ">(" + es + ")";
+            // not a single enumerator: try to express as a combination of named enumerators (flags)
+            using ut = std::make_unsigned_t<std::underlying_type_t<Enum>>;
+            std::vector<std::pair<ut, std::string>> enumerators;
+            for (auto const& e : neolib::enum_enumerators<Enum>())
+                if (static_cast<ut>(e.first()) != 0u && (enumerators.empty() || enumerators.back().first != static_cast<ut>(e.first())))
+                    enumerators.emplace_back(static_cast<ut>(e.first()), e.second().to_std_string());
+            std::stable_sort(enumerators.begin(), enumerators.end(), [](auto const& lhs, auto const& rhs) { return std::popcount(lhs.first) > std::popcount(rhs.first); });
+            auto remaining = static_cast<ut>(aEnumValue);
+            std::string combination;
+            for (auto const& e : enumerators)
+                if ((remaining & e.first) == e.first)
+                {
+                    remaining &= ~e.first;
+                    combination += (combination.empty() ? "" : " | ") + aEnumName + "::" + e.second;
+                }
+            if (remaining == 0u && !combination.empty())
+                return combination;
+            return "static_cast<" + aEnumName + ">(" + es + ")";
         }
         template <typename T>
         static const T& convert_emit_argument(const T& aArgument)
