@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
         chess::gui::board board{ window.client_layout(), moveValidator };
 
         chess::default_player_factory playerFactory;
-        board.new_game(playerFactory, chess::player_type::AI, chess::player_type::AI);
+        board.new_game(playerFactory, chess::player_type::Human, chess::player_type::AI);
 
         auto board_changed = [&]()
         {
