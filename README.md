@@ -62,7 +62,7 @@ Button                          | 100     |
 Table View                      | 95      |     Selection; cell widget
 Tree View                       | 95      |
 List View                       | 95      |
-Text Edit                       | 90      |     Columns; rich text (HTML); undo/redo
+Text Edit                       | 95      |     Rich text (HTML); undo/redo
 Line Edit                       | 100     |     
 Spin Box                        | 100     |
 Slider                          | 90      |     Keyboard

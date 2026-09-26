@@ -1222,7 +1222,7 @@ namespace neogfx
 
     void window::mouse_entered(const point& aPosition)
     {
-        if (iHandlingMouseEntered)
+        if (iHandlingMouseEntered || iHandlingMouseLeft)
             return;
         neolib::scoped_flag sf{ iHandlingMouseEntered };
         i_widget& widgetUnderMouse = (!surface().has_capturing_widget() ? widget_for_mouse_event(aPosition) : surface().capturing_widget());
@@ -1230,21 +1230,24 @@ namespace neogfx
         i_widget* oldEnteredWidget = iEnteredWidget;
         if (newEnteredWidget != oldEnteredWidget)
         {
+            iEnteredWidget = newEnteredWidget;
             if (oldEnteredWidget != nullptr)
             {
                 if (!event_consumed(oldEnteredWidget->mouse_left_event()()))
                     oldEnteredWidget->mouse_left();
             }
-            iEnteredWidget = newEnteredWidget;
-            point const widgetPosition = aPosition - iEnteredWidget->origin();
-            if (!event_consumed(iEnteredWidget->mouse_entered_event()(widgetPosition)))
-                iEnteredWidget->mouse_entered(widgetPosition);
+            if (iEnteredWidget != nullptr)
+            {
+                point const widgetPosition = aPosition - iEnteredWidget->origin();
+                if (!event_consumed(iEnteredWidget->mouse_entered_event()(widgetPosition)))
+                    iEnteredWidget->mouse_entered(widgetPosition);
+            }
         }
     }
 
     void window::mouse_left()
     {
-        if (iHandlingMouseLeft)
+        if (iHandlingMouseLeft || iHandlingMouseEntered)
             return;
         neolib::scoped_flag sf{ iHandlingMouseLeft };
         i_widget* oldEnteredWidget = iEnteredWidget;

@@ -29,6 +29,8 @@
 #include <limits>
 #include <neogfx/gui/layout/grid_layout.hpp>
 #include <neogfx/gui/widget/line_edit.hpp>
+#include <neogfx/gui/widget/push_button.hpp>
+#include <neogfx/app/file_dialog.hpp>
 #include <neogfx/gui/widget/check_box.hpp>
 #include <neogfx/gui/widget/drop_list.hpp>
 #include <neogfx/gui/widget/slider_box.hpp>
@@ -252,6 +254,54 @@ namespace neogfx
                             neolib::scoped_flag sf{ settingWidget->updating };
                             settingWidget->set_color(aSetting.value<color>(true));
                         });
+                        result = settingWidget;
+                    }
+                    else if (aSetting.value().type_name() == "std::filesystem::path")
+                    {
+                        // a text field then a "Browse..." button
+                        auto settingWidget = make_ref<setting_widget<line_edit>>(aSetting, aLayout);
+                        auto const update_text = [&, settingWidget]()
+                            {
+                                settingWidget->set_text(string{ neolib::path_to_utf8(aSetting.value<std::filesystem::path>(true)) });
+                                settingWidget->cursor().set_position(0u);
+                            };
+                        update_text();
+                        aSink += settingWidget->TextChanged([&, settingWidget]()
+                            {
+                                if (!settingWidget->updating)
+                                {
+                                    neolib::scoped_flag sf{ settingWidget->updating };
+                                    aSetting.set_value(neolib::utf8_to_path(settingWidget->text().to_std_string()));
+                                }
+                            });
+                        aSink += aSetting.changing([&, settingWidget, update_text]()
+                            {
+                                if (!settingWidget->updating)
+                                {
+                                    neolib::scoped_flag sf{ settingWidget->updating };
+                                    update_text();
+                                }
+                            });
+                        aSink += aSetting.changed([&, settingWidget, update_text]()
+                            {
+                                if (!settingWidget->updating)
+                                {
+                                    neolib::scoped_flag sf{ settingWidget->updating };
+                                    update_text();
+                                }
+                            });
+                        if (!aFormat.empty())
+                            settingWidget->set_size_hint(size_hint{ aFormat });
+                        auto browse = make_ref<push_button>("Browse..."_t);
+                        aLayout.add(browse);
+                        aSink += browse->Clicked([&, settingWidget]()
+                            {
+                                auto const& current = aSetting.value<std::filesystem::path>(true);
+                                auto const chosen = open_file_dialog(*settingWidget, file_dialog_spec{ {}, 
+                                    current.empty() ? optional_file_path{} : optional_file_path{ neolib::path_to_utf8(current) } });
+                                if (chosen && !chosen->empty())
+                                    aSetting.set_value(neolib::utf8_to_path(chosen->front()));
+                            });
                         result = settingWidget;
                     }
                     else if (aSetting.value().type_name() == "neogfx::gradient")
@@ -499,7 +549,7 @@ namespace neogfx
 
         auto track_text_setting = [this, update_restore_default](neolib::i_setting& aSetting, ref_ptr<i_widget> const& aWidget)
         {
-            if (aWidget && aSetting.value().type() == neolib::setting_type::String)
+            if (aWidget && (aSetting.value().type() == neolib::setting_type::String || aSetting.value().type_name() == "std::filesystem::path"))
                 iSink += aWidget->focus_event([this, &aSetting, update_restore_default](neogfx::focus_event aEvent, focus_reason)
                 {
                     if (aEvent == neogfx::focus_event::FocusGained)
