@@ -365,6 +365,8 @@ namespace neogfx
             if (column(aColumnIndex).flags != aFlags)
             {
                 column(aColumnIndex).flags = aFlags;
+                reset_cell_meta(aColumnIndex);
+                reset_position_meta(0);
                 ColumnInfoChanged(aColumnIndex);
             }
         }
@@ -679,6 +681,10 @@ namespace neogfx
             if (cell_meta(aIndex).flags != aFlags)
             {
                 cell_meta(aIndex).flags = aFlags;
+                reset_position_meta(aIndex.row());
+                cache_cell_meta_extents(aIndex, std::nullopt);
+                if (attached())
+                    cell_extents(aIndex, attachment());
                 ItemChanged(aIndex);
             }
         }
