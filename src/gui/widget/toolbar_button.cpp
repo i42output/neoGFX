@@ -25,42 +25,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
     toolbar_button::toolbar_button(i_action& aAction) : 
-        push_button{ aAction.button_text(), push_button_style::Toolbar }, iAction{ ref_ptr<i_action>{}, &aAction },
+        base_type{ aAction.button_text(), push_button_style::Toolbar }, iAction{ ref_ptr<i_action>{}, &aAction },
         iTooltipTimer{ *this, [this](widget_timer&) { tooltip_timer_expired(); }, tooltip::INITIAL_DELAY, false }
     {
         init();
     }
 
     toolbar_button::toolbar_button(ref_ptr<i_action> aAction) :
-        push_button{ aAction->button_text(), push_button_style::Toolbar }, iAction{ aAction },
+        base_type{ aAction->button_text(), push_button_style::Toolbar }, iAction{ aAction },
         iTooltipTimer{ *this, [this](widget_timer&) { tooltip_timer_expired(); }, tooltip::INITIAL_DELAY, false }
     {
         init();
     }
 
     toolbar_button::toolbar_button(i_widget& aParent, i_action& aAction) :
-        push_button{ aParent, aAction.button_text(), push_button_style::Toolbar }, iAction{ ref_ptr<i_action>{}, &aAction },
+        base_type{ aParent, aAction.button_text(), push_button_style::Toolbar }, iAction{ ref_ptr<i_action>{}, &aAction },
         iTooltipTimer{ *this, [this](widget_timer&) { tooltip_timer_expired(); }, tooltip::INITIAL_DELAY, false }
     {
         init();
     }
 
     toolbar_button::toolbar_button(i_widget& aParent, ref_ptr<i_action> aAction) :
-        push_button{ aParent, aAction->button_text(), push_button_style::Toolbar }, iAction{ aAction },
+        base_type{ aParent, aAction->button_text(), push_button_style::Toolbar }, iAction{ aAction },
         iTooltipTimer{ *this, [this](widget_timer&) { tooltip_timer_expired(); }, tooltip::INITIAL_DELAY, false }
     {
         init();
     }
 
     toolbar_button::toolbar_button(i_layout& aLayout, i_action& aAction) :
-        push_button{ aLayout, aAction.button_text(), push_button_style::Toolbar }, iAction{ ref_ptr<i_action>{}, &aAction },
+        base_type{ aLayout, aAction.button_text(), push_button_style::Toolbar }, iAction{ ref_ptr<i_action>{}, &aAction },
         iTooltipTimer{ *this, [this](widget_timer&) { tooltip_timer_expired(); }, tooltip::INITIAL_DELAY, false }
     {
         init();
     }
 
     toolbar_button::toolbar_button(i_layout& aLayout, ref_ptr<i_action> aAction) :
-        push_button{ aLayout, aAction->button_text(), push_button_style::Toolbar }, iAction{ aAction },
+        base_type{ aLayout, aAction->button_text(), push_button_style::Toolbar }, iAction{ aAction },
         iTooltipTimer{ *this, [this](widget_timer&) { tooltip_timer_expired(); }, tooltip::INITIAL_DELAY, false }
     {
         init();
@@ -69,10 +69,15 @@ namespace neogfx
     toolbar_button::~toolbar_button()
     {
     }
+
+    neogfx::object_type toolbar_button::object_type() const
+    {
+        return object_type::ToolbarButton;
+    }
     
     void toolbar_button::layout_items_completed()
     {
-        push_button::layout_items_completed();
+        base_type::layout_items_completed();
         if (capturing())
         {
             point pt = label().position();
@@ -93,8 +98,8 @@ namespace neogfx
 
     neogfx::size_policy toolbar_button::size_policy() const
     {
-        if (push_button::has_size_policy() || !action().is_separator())
-            return push_button::size_policy();
+        if (base_type::has_size_policy() || !action().is_separator())
+            return base_type::size_policy();
         else if (has_fixed_size())
             return size_constraint::Fixed;
         else
@@ -103,7 +108,7 @@ namespace neogfx
 
     size toolbar_button::minimum_size(optional_size const& aAvailableSpace) const
     {
-        auto result = push_button::minimum_size(aAvailableSpace);
+        auto result = base_type::minimum_size(aAvailableSpace);
         if (!has_minimum_size() && action().is_separator())
             result = internal_spacing().size() + units_converter{ *this }.from_device_units(size{ 2.0 });
         return result;
@@ -111,7 +116,7 @@ namespace neogfx
 
     size toolbar_button::maximum_size(optional_size const& aAvailableSpace) const
     {
-        auto result = push_button::maximum_size(aAvailableSpace);
+        auto result = base_type::maximum_size(aAvailableSpace);
         // todo: vertical toolbars
         if (!has_maximum_size() && action().is_separator())
             result = { internal_spacing().size().cx + units_converter{ *this }.from_device_units(2.0), size::max_size().cy };
@@ -121,7 +126,7 @@ namespace neogfx
     void toolbar_button::paint(i_graphics_context& aGc) const
     {
         if (!action().is_separator())
-            push_button::paint(aGc);
+            base_type::paint(aGc);
         else
         {
             scoped_units su{ *this, units::Pixels };
@@ -139,15 +144,15 @@ namespace neogfx
 
     color toolbar_button::base_color() const
     {
-        if (push_button::has_base_color())
-            return push_button::base_color();
+        if (base_type::has_base_color())
+            return base_type::base_color();
         return color{};
     }
 
     focus_policy toolbar_button::focus_policy() const
     {
         if (has_focus_policy())
-            return push_button::focus_policy();
+            return base_type::focus_policy();
         return neogfx::focus_policy::NoFocus;
     }
 
@@ -155,19 +160,19 @@ namespace neogfx
     {
         // Windows hides the tip on button down; a subsequent mouse move re-arms it.
         hide_tooltip();
-        push_button::mouse_button_clicked(aButton, aPosition, aKeyModifier);
+        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         layout_items(false);
     }
 
     void toolbar_button::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
-        push_button::mouse_button_released(aButton, aPosition);
+        base_type::mouse_button_released(aButton, aPosition);
         layout_items(false);
     }
 
     void toolbar_button::mouse_moved(const point& aPosition, key_modifier aKeyModifier)
     {
-        push_button::mouse_moved(aPosition, aKeyModifier);
+        base_type::mouse_moved(aPosition, aKeyModifier);
         if (action().is_separator() || action().tool_tip_text().empty())
             return;
         if (iTooltip != nullptr)
@@ -186,7 +191,7 @@ namespace neogfx
 
     void toolbar_button::mouse_entered(const point& aPosition)
     {
-        push_button::mouse_entered(aPosition);
+        base_type::mouse_entered(aPosition);
         if (action().is_separator() || action().tool_tip_text().empty())
             return;
         // RESHOW_DELAY if another tip was visible a moment ago, else INITIAL_DELAY.
@@ -197,12 +202,12 @@ namespace neogfx
     void toolbar_button::mouse_left()
     {
         hide_tooltip();
-        push_button::mouse_left();
+        base_type::mouse_left();
     }
 
     void toolbar_button::handle_clicked()
     {
-        push_button::handle_clicked();
+        base_type::handle_clicked();
         if (action().is_enabled() && !action().is_separator())
         {
             action().triggered()();

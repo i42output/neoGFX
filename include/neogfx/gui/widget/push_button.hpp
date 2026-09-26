@@ -29,30 +29,31 @@ namespace neogfx
     extern template class widget<i_push_button>;
     extern template class button<i_push_button>;
 
-    class push_button : public button<i_push_button>
+    template <typename PushButtonInterface = i_push_button>
+    class basic_push_button : public button<PushButtonInterface>
     {
-        meta_object(button<i_push_button>)
+        meta_object(button<PushButtonInterface>)
     public:
         static const std::uint32_t kMaxAnimationFrame = 10;
     public:
-        push_button(push_button_style aStyle = push_button_style::Normal);
-        push_button(string const& aText, push_button_style aStyle = push_button_style::Normal);
-        push_button(const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
-        push_button(const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
-        push_button(string const& aText, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
-        push_button(string const& aText, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
-        push_button(i_widget& aParent, push_button_style aStyle = push_button_style::Normal);
-        push_button(i_widget& aParent, string const& aText, push_button_style aStyle = push_button_style::Normal);
-        push_button(i_widget& aParent, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
-        push_button(i_widget& aParent, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
-        push_button(i_widget& aParent, string const& aText, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
-        push_button(i_widget& aParent, string const& aText, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
-        push_button(i_layout& aLayout, push_button_style aStyle = push_button_style::Normal);
-        push_button(i_layout& aLayout, string const& aText, push_button_style aStyle = push_button_style::Normal);
-        push_button(i_layout& aLayout, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
-        push_button(i_layout& aLayout, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
-        push_button(i_layout& aLayout, string const& aText, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
-        push_button(i_layout& aLayout, string const& aText, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(string const& aText, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(string const& aText, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(string const& aText, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(i_widget& aParent, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(i_widget& aParent, string const& aText, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(i_widget& aParent, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(i_widget& aParent, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(i_widget& aParent, string const& aText, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(i_widget& aParent, string const& aText, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(i_layout& aLayout, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(i_layout& aLayout, string const& aText, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(i_layout& aLayout, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(i_layout& aLayout, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(i_layout& aLayout, string const& aText, const i_texture& aTexture, push_button_style aStyle = push_button_style::Normal);
+        basic_push_button(i_layout& aLayout, string const& aText, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
         // button
     public:
         size minimum_size(optional_size const& aAvailableSpace = {}) const override;
@@ -108,7 +109,7 @@ namespace neogfx
         optional_color iBorderColor;
         optional_color iOuterBorderColor;
         optional_color iHoverColor;
-        define_style_sheet_value(iStyleSheetFaceColor, color, "background-color", base_color())
+        define_style_sheet_value(iStyleSheetFaceColor, color, "background-color", this->base_color())
         define_style_sheet_value(iStyleSheetBorderColor, color, "border-color", effective_border_color())
         std::optional<border_radii> iBorderRadii;
         mutable std::optional<std::pair<neogfx::font, size>> iStandardButtonWidth;
@@ -116,4 +117,8 @@ namespace neogfx
         sink iSink;
         sink iSink2;
     };
+
+    extern template class basic_push_button<i_push_button>;
+
+    typedef basic_push_button<i_push_button> push_button;
 }

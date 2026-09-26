@@ -1,7 +1,7 @@
-// button.cpp
+// i_toolbar_button.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2026 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -17,17 +17,19 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 #include <neogfx/neogfx.hpp>
 
-#include <neogfx/gui/widget/button.ipp>
+#include <neogfx/app/i_action.hpp>
 #include <neogfx/gui/widget/i_push_button.hpp>
-#include <neogfx/gui/widget/i_toolbar_button.hpp>
 
 namespace neogfx
 {
-    template class button<>;
-    template class button<i_push_button>;
-    template class button<i_toolbar_button>;
-    template class button<i_radio_button>;
+    class i_toolbar_button : public i_push_button
+    {
+    public:
+        virtual const i_action& action() const = 0;
+        virtual i_action& action() = 0;
+    };
 }
-

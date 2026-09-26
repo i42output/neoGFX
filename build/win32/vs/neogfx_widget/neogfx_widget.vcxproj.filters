@@ -429,6 +429,9 @@
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_push_button.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_toolbar_button.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_scrollbar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -618,6 +621,9 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="..\..\..\..\include\neogfx\gui\widget\button.ipp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\..\include\neogfx\gui\widget\push_button.ipp">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

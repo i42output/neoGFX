@@ -22,6 +22,7 @@
 #include <neogfx/gui/widget/widget.ipp>
 #include <neogfx/gui/widget/i_button.hpp>
 #include <neogfx/gui/widget/i_push_button.hpp>
+#include <neogfx/gui/widget/i_toolbar_button.hpp>
 #include <neogfx/gui/widget/i_image_widget.hpp>
 #include <neogfx/gui/widget/i_text_widget.hpp>
 #include <neogfx/gui/widget/i_menu_item_widget.hpp>
@@ -42,6 +43,7 @@ namespace neogfx
     template class widget<>;
     template class widget<i_button>;
     template class widget<i_push_button>;
+    template class widget<i_toolbar_button>;
     template class widget<i_radio_button>;
     template class widget<i_image_widget>;
     template class widget<i_text_widget>;

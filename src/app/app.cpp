@@ -35,10 +35,13 @@
 #include <neogfx/gfx/text/i_emoticon_translator.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/surface_manager.hpp>
+#include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/hid/i_hid_devices.hpp>
 #include <neogfx/app/resource_manager.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
+#include <neogfx/gui/widget/i_menu_item_widget.hpp>
+#include <neogfx/gui/widget/i_toolbar_button.hpp>
 #include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/core/i_transition_animator.hpp>
 #include <neogfx/gui/window/i_native_window.hpp>
@@ -873,6 +876,58 @@ namespace neogfx
         return didSome;
     }
 
+    namespace
+    {
+        struct action_presence
+        {
+            bool presented = false;
+            bool enabled = false;
+        };
+
+        void find_action_presence(i_menu_item const& aItem, i_action const& aAction, bool aPresenterEnabled, action_presence& aResult)
+        {
+            if (aItem.type() == menu_item_type::SubMenu)
+            {
+                auto const& subMenu = aItem.sub_menu();
+                for (i_menu::item_index i = 0; i < subMenu.count(); ++i)
+                    find_action_presence(subMenu.item_at(i), aAction, aPresenterEnabled, aResult);
+            }
+            else if (&aItem.action() == &aAction)
+            {
+                aResult.presented = true;
+                aResult.enabled = aResult.enabled || aPresenterEnabled;
+            }
+        }
+
+        void find_action_presence(i_widget const& aWidget, i_action const& aAction, action_presence& aResult)
+        {
+            auto const type = aWidget.object_type() & object_type::MASK_RESERVED_SPECIFIC;
+            if (type == object_type::MenuItem || type == object_type::ToolbarButton)
+            {
+                bool const presenterEnabled = aWidget.effectively_enabled() && (!aWidget.has_root() || aWidget.root().window_enabled());
+                if (type == object_type::MenuItem)
+                    find_action_presence(static_cast<i_menu_item_widget const&>(aWidget).menu_item(), aAction, presenterEnabled, aResult);
+                else if (&static_cast<i_toolbar_button const&>(aWidget).action() == &aAction)
+                {
+                    aResult.presented = true;
+                    aResult.enabled = aResult.enabled || presenterEnabled;
+                }
+            }
+            for (auto const& child : aWidget.children())
+                find_action_presence(*child, aAction, aResult);
+        }
+
+        // an action presented only in disabled windows (e.g. the owner of an active modal dialog) must not respond to its shortcut
+        bool action_shortcut_blocked(i_action const& aAction)
+        {
+            action_presence result;
+            auto const& wm = service<i_window_manager>();
+            for (std::size_t w = 0; w < wm.window_count() && !result.enabled; ++w)
+                find_action_presence(wm.window(w).as_widget(), aAction, result);
+            return result.presented && !result.enabled;
+        }
+    }
+
     bool app::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
         if (aScanCode == ScanCode_LALT)
@@ -886,6 +941,11 @@ namespace neogfx
                 auto matchResult = a.second()->shortcut()->matches(iKeySequence.begin(), iKeySequence.end());
                 if (matchResult == key_sequence::match::Full)
                 {
+                    // the standard edit actions act on the focused widget so are exempt
+                    bool const standardEditAction = &*a.second() == &actionUndo || &*a.second() == &actionRedo || &*a.second() == &actionCut ||
+                        &*a.second() == &actionCopy || &*a.second() == &actionPaste || &*a.second() == &actionDelete || &*a.second() == &actionSelectAll;
+                    if (!standardEditAction && action_shortcut_blocked(*a.second()))
+                        continue;
                     iKeySequence.clear();
                     a.second()->triggered()();
                     if (a.second()->is_checkable())

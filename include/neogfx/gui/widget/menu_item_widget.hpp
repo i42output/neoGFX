@@ -40,6 +40,8 @@ namespace neogfx
         menu_item_widget(i_layout& aLayout, i_menu& aMenu, i_menu_item& aMenuItem);
         ~menu_item_widget();
     public:
+        neogfx::object_type object_type() const override;
+    public:
         i_menu& menu() const override;
         i_menu_item& menu_item() const override;
     public:

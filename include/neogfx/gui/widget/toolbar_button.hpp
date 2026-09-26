@@ -22,15 +22,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/app/i_action.hpp>
+#include <neogfx/gui/widget/i_toolbar_button.hpp>
 #include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/gui/window/tooltip.hpp>
 #include "push_button.hpp"
 
 namespace neogfx
 {
-    class toolbar_button : public push_button
+    extern template class widget<i_toolbar_button>;
+    extern template class button<i_toolbar_button>;
+    extern template class basic_push_button<i_toolbar_button>;
+
+    class toolbar_button : public basic_push_button<i_toolbar_button>
     {
-        meta_object(push_button)
+        meta_object(basic_push_button<i_toolbar_button>)
     public:
         toolbar_button(i_action& aAction);
         toolbar_button(ref_ptr<i_action> aAction);
@@ -39,11 +44,13 @@ namespace neogfx
         toolbar_button(i_layout& aLayout, i_action& aAction);
         toolbar_button(i_layout& aLayout, ref_ptr<i_action> aAction);
         ~toolbar_button();
+    public:
+        neogfx::object_type object_type() const override;
     protected:
         virtual void layout_items_completed();
     public:
-        const i_action& action() const;
-        i_action& action();
+        const i_action& action() const override;
+        i_action& action() override;
     public:
         virtual neogfx::size_policy size_policy() const;
         virtual size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const;

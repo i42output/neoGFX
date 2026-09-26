@@ -50,6 +50,11 @@ namespace neogfx
         iSubMenuOpener.reset();
     }
 
+    neogfx::object_type menu_item_widget::object_type() const
+    {
+        return object_type::MenuItem;
+    }
+
     i_menu& menu_item_widget::menu() const
     {
         return iMenu;

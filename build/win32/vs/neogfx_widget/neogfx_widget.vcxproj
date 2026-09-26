@@ -363,6 +363,7 @@
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_menu_item.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_menu_item_widget.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_push_button.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_toolbar_button.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_scrollbar.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_skin.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_skinnable_item.hpp" />
@@ -424,6 +425,7 @@
     <ClInclude Include="..\..\..\..\include\neogfx\gui\window\popup_menu.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\window\tooltip.hpp" />
     <None Include="..\..\..\..\include\neogfx\gui\widget\button.ipp" />
+    <None Include="..\..\..\..\include\neogfx\gui\widget\push_button.ipp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
