@@ -16,6 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cstdlib>
+#include <iomanip>
+#include <sstream>
+
 #include <neogfx/core/easing.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/action.hpp>
@@ -26,6 +30,89 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace chess::gui
 {
     constexpr std::chrono::seconds SHOW_VALID_MOVES_AFTER_s{ 2 };
+
+    namespace
+    {
+        // UCI moves in standard algebraic notation, played out from aPosition; a move that isn't legal there
+        // (an evaluation gone stale after an undo, say) and those after it are left in UCI notation
+        std::vector<std::string> to_san(i_move_validator const& aMoveValidator, mailbox_position aPosition, std::vector<std::string> const& aUciMoves)
+        {
+            auto const square = [](coordinates const& aSquare)
+            {
+                return std::string{ static_cast<char>('a' + aSquare.x), static_cast<char>('1' + aSquare.y) };
+            };
+            std::vector<std::string> result;
+            bool legal = true;
+            for (auto const& uciMove : aUciMoves)
+            {
+                std::optional<move> m;
+                if (legal)
+                {
+                    try { m = parse_uci_move(uciMove); } catch (invalid_uci_move const&) {} catch (invalid_piece_character const&) {}
+                    auto const mover = static_cast<piece>(aPosition.turn);
+                    if (m && m->promoteTo)
+                        m->promoteTo = mover | piece_type(*m->promoteTo);
+                    legal = m && piece_color(piece_at(aPosition.rep, m->from)) == mover && aMoveValidator.can_move(aPosition.turn, aPosition, *m);
+                }
+                if (!legal)
+                {
+                    result.push_back(uciMove);
+                    continue;
+                }
+                auto const movingPiece = piece_at(aPosition.rep, m->from);
+                auto const type = piece_type(movingPiece);
+                bool const capture = piece_at(aPosition.rep, m->to) != piece::None || (type == piece::Pawn && m->from.x != m->to.x);
+                std::string san;
+                if (type == piece::King && std::abs(static_cast<int>(m->to.x) - static_cast<int>(m->from.x)) == 2)
+                    san = (m->to.x > m->from.x ? "O-O" : "O-O-O");
+                else if (type == piece::Pawn)
+                {
+                    if (capture)
+                        san = std::string{ static_cast<char>('a' + m->from.x) } + "x";
+                    san += square(m->to);
+                    if (m->promoteTo)
+                        san += "=" + chess::to_string(piece::White | piece_type(*m->promoteTo));
+                }
+                else
+                {
+                    san = chess::to_string(piece::White | type);
+                    // name the file, else the rank, else both, when another piece of the same kind can also move there
+                    bool ambiguous = false;
+                    bool sameFile = false;
+                    bool sameRank = false;
+                    for (coordinate y = 0u; y <= 7u; ++y)
+                        for (coordinate x = 0u; x <= 7u; ++x)
+                        {
+                            coordinates const other{ x, y };
+                            if (other != m->from && piece_at(aPosition.rep, other) == movingPiece &&
+                                aMoveValidator.can_move(aPosition.turn, aPosition, move{ other, m->to }))
+                            {
+                                ambiguous = true;
+                                sameFile = sameFile || other.x == m->from.x;
+                                sameRank = sameRank || other.y == m->from.y;
+                            }
+                        }
+                    if (ambiguous)
+                        san += !sameFile ? square(m->from).substr(0, 1) : !sameRank ? square(m->from).substr(1, 1) : square(m->from);
+                    if (capture)
+                        san += "x";
+                    san += square(m->to);
+                }
+                make(aPosition, *m);
+                if (aMoveValidator.in_check(aPosition.turn, aPosition))
+                {
+                    bool canReply = false;
+                    for (coordinate y = 0u; !canReply && y <= 7u; ++y)
+                        for (coordinate x = 0u; !canReply && x <= 7u; ++x)
+                            if (piece_color(piece_at(aPosition.rep, coordinates{ x, y })) == static_cast<piece>(aPosition.turn))
+                                canReply = aMoveValidator.has_moves(aPosition.turn, aPosition, coordinates{ x, y });
+                    san += (canReply ? "+" : "#");
+                }
+                result.push_back(san);
+            }
+            return result;
+        }
+    }
     constexpr ng::scalar BORDER = 24.0;
 
     board::board(ng::i_layout& aLayout, i_move_validator const& aMoveValidator) :
@@ -41,7 +128,7 @@ namespace chess::gui
         iColorBlackPiece{ ng::color::Gray10 },
         iColorizePieces{ true },
         iAnimator{ *this, [this](ng::widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 } },
-        iSquareIdentification{ square_identification::None },
+        iSquareIdentification{ square_identification::Inner },
         iShowValidMoves{ false },
         iEditBoard{ false }
     {
@@ -63,8 +150,51 @@ namespace chess::gui
         set_focus();
     }
 
+    board::evaluation_window::evaluation_window(ng::i_widget& aParent, ng::point const& aPosition) :
+        window{ aParent, ng::window_placement{ ng::rect{ aPosition, ng::size{ 260.0_dip, 440.0_dip } } }, "Stockparrot Evaluation"_t,
+            ng::window_style::Weak | ng::window_style::Tool | ng::window_style::TitleBar | ng::window_style::Close |
+            ng::window_style::InitiallyRenderable,
+            ng::frame_style::WindowFrame, ng::scrollbar_style::None },
+        text{ window.client_layout(), ng::string{ "Waiting for search..." }, ng::text_widget_type::MultiLine }
+    {
+        window.client_layout().set_padding(ng::padding{ 8.0_dip, 6.0_dip });
+        // the window isn't resizable, so its client takes the layout's size policy and would otherwise be sized
+        // to the initial text's minimum; the client manages its own layout, so later text changes never grow it
+        window.client_layout().set_size_policy(ng::size_constraint::Expanding);
+        window.client_layout().add_spacer();
+        text.set_alignment(ng::alignment::Left | ng::alignment::Top);
+        // the principal variation fills the space below the summary top to bottom, then continues in the next column
+        window.client_widget().painting_children([this](ng::i_graphics_context& aGc)
+        {
+            pvWidth = 0.0;
+            if (pvLines.empty())
+                return;
+            auto const& font = text.font();
+            auto const lineHeight = font.height();
+            auto const columnSpacing = 16.0_dip;
+            auto const clientRect = window.client_widget().client_rect(false);
+            auto const padding = window.client_layout().padding();
+            ng::point const origin{ clientRect.left() + padding.left, text.position().y + text.extents().cy + window.client_layout().spacing().cy };
+            auto const available = clientRect.bottom() - padding.bottom - origin.y;
+            std::size_t const rows = std::max<std::size_t>(1u, static_cast<std::size_t>(std::max(available, 0.0) / lineHeight));
+            auto x = origin.x;
+            for (std::size_t first = 0u; first < pvLines.size(); first += rows)
+            {
+                ng::scalar columnWidth = 0.0;
+                for (std::size_t r = first; r < std::min(pvLines.size(), first + rows); ++r)
+                {
+                    aGc.draw_text(ng::point{ x, origin.y + static_cast<ng::scalar>(r - first) * lineHeight }, pvLines[r], font, text.text_color());
+                    columnWidth = std::max(columnWidth, aGc.text_extent(pvLines[r], font).cx);
+                }
+                x += columnWidth + columnSpacing;
+            }
+            pvWidth = x - columnSpacing - origin.x;
+        });
+    }
+
     board::~board()
     {
+        iEvaluationWindow.reset();
         white_player().finish();
         black_player().finish();
     }
@@ -258,6 +388,11 @@ namespace chess::gui
             update();
             return true;
         }
+        else if (aKeyCode == ng::key_code_e::KeyCode_e)
+        {
+            show_evaluation(!evaluation_shown());
+            return true;
+        }
         else
             return widget<>::key_pressed(aScanCode, aKeyCode, aKeyModifier);
     }
@@ -333,9 +468,13 @@ namespace chess::gui
             ng::context_menu contextMenu{ *this, aPosition + non_client_rect().top_left() + root().window_position() };
             ng::action actionEditBoard{ "Edit Board"_t };
             ng::action actionErase{ "Erase"_t };
+            ng::action actionShowEvaluation{ "Show Evaluation"_t };
             actionEditBoard.set_checkable(true);
             actionEditBoard.set_checked(iEditBoard);
+            actionShowEvaluation.set_checkable(true);
+            actionShowEvaluation.set_checked(evaluation_shown());
             contextMenu.menu().add_action(actionEditBoard);
+            contextMenu.menu().add_action(actionShowEvaluation);
             if (iEditBoard && square)
             {
                 contextMenu.menu().add_separator();
@@ -349,7 +488,13 @@ namespace chess::gui
                 current_player().setup(iPosition);
                 next_player().setup(iPosition);
             });
+            // the popup is created/destroyed once the menu has closed rather than from within its event
+            std::optional<bool> showEvaluation;
+            actionShowEvaluation.Checked([&]() { showEvaluation = true; });
+            actionShowEvaluation.Unchecked([&]() { showEvaluation = false; });
             contextMenu.exec();
+            if (showEvaluation)
+                show_evaluation(*showEvaluation);
         }
         update();
     }
@@ -665,6 +810,107 @@ namespace chess::gui
         }
     }
 
+    bool board::evaluation_shown() const
+    {
+        return iEvaluationWindow && !iEvaluationWindow->window.is_closed();
+    }
+
+    void board::show_evaluation(bool aShow)
+    {
+        if (aShow == evaluation_shown())
+            return;
+        iEvaluationWindow.reset();
+        if (aShow)
+        {
+            // top right of the main window, clear of the toolbar
+            iEvaluationWindow.emplace(*this, root().window_position() + ng::point{ root().extents().cx - 260.0_dip - 16.0_dip, 64.0_dip });
+            root().activate(); // the popup activates when shown; give the keyboard back to the board
+            update_evaluation();
+        }
+    }
+
+    void board::update_evaluation()
+    {
+        if (!iEvaluationWindow)
+            return;
+        if (iEvaluationWindow->window.is_closed()) // closed by the user via its close button
+        {
+            iEvaluationWindow.reset();
+            return;
+        }
+
+        // show the side to move's search; while a human is to move keep showing the opponent AI's last result
+        i_player const* searcher = &current_player();
+        auto evaluation = searcher->current_evaluation();
+        if (!evaluation)
+        {
+            searcher = &next_player();
+            evaluation = searcher->current_evaluation();
+        }
+
+        std::ostringstream oss;
+        std::vector<std::string> pvLines;
+        if (!evaluation)
+            oss << (current_player().playing() ? "Searching..." : "No evaluation");
+        else
+        {
+            // the line in standard algebraic notation, played out from the position searched: the current one, or
+            // while the opponent is to move the one before the searcher's last move; converted only when it changes
+            std::vector<std::string> uciMoves{ evaluation->bestMove };
+            uciMoves.insert(uciMoves.end(), evaluation->continuation.begin(), evaluation->continuation.end());
+            auto& ew = *iEvaluationWindow;
+            if (ew.pvUci != uciMoves || ew.pvPly != iPosition.moveHistory.size())
+            {
+                auto searched = iPosition;
+                if (searched.turn != searcher->player())
+                    unmake(searched);
+                ew.pvSan = to_san(iMoveValidator, searched, uciMoves);
+                ew.pvUci = std::move(uciMoves);
+                ew.pvPly = iPosition.moveHistory.size();
+            }
+
+            // scores are reported from the searching player's perspective; display from White's
+            bool const white = (searcher->player() == player::White);
+            oss << (white ? "White" : "Black") << (searcher->playing() ? " (searching)" : " (last search)") << "\n";
+            oss << "Best move: " << ew.pvSan[0] << "\n";
+            oss << "Evaluation: ";
+            if (evaluation->mateIn)
+            {
+                auto const mateIn = white ? *evaluation->mateIn : -*evaluation->mateIn;
+                oss << (mateIn > 0 ? "+M" : "-M") << std::abs(mateIn);
+            }
+            else
+                oss << std::showpos << std::fixed << std::setprecision(2) << (white ? evaluation->score : -evaluation->score) / 100.0 << std::noshowpos;
+            oss << "\n";
+            oss << "Depth: " << evaluation->depth << "   Nodes: " << evaluation->nodes <<
+                "   Time: " << std::fixed << std::setprecision(1) << evaluation->time.count() / 1000.0 << "s";
+
+            // the principal variation: the best move then the expected replies, to the end of the searched line
+            oss << "\n\nPrincipal variation:";
+            bool whiteToMove = white;
+            for (std::size_t i = 0u; i < ew.pvSan.size(); ++i, whiteToMove = !whiteToMove)
+            {
+                std::ostringstream line;
+                line << std::setw(3) << (i + 1u) << ". " << (whiteToMove ? "White  " : "Black  ") << ew.pvSan[i];
+                pvLines.push_back(line.str());
+            }
+        }
+
+        auto& ew = *iEvaluationWindow;
+        if (ew.text.text().to_std_string() != oss.str())
+            ew.text.set_text(ng::string{ oss.str() });
+        if (ew.pvLines != pvLines)
+        {
+            ew.pvLines = std::move(pvLines);
+            ew.window.client_widget().update();
+        }
+
+        // widen the window if the columns didn't fit across it when last painted
+        auto const shortfall = ew.pvWidth + ew.window.client_layout().padding().size().cx - ew.window.client_widget().client_rect(false).cx;
+        if (shortfall > 0.0)
+            ew.window.resize(ew.window.extents() + ng::size{ std::ceil(shortfall), 0.0 });
+    }
+
     void board::animate_move(chess::move const& aMove)
     {
         auto const movingPiece = iPosition.rep[aMove.from.y][aMove.from.x];
@@ -735,6 +981,8 @@ namespace chess::gui
         else
             oss << nodesPerSecond / 1000000.0 << " MN/s";
         root().status_bar().set_message(ng::string{ oss.str() });
+
+        update_evaluation();
 
         if (iLastSelectionEventTime || !iAnimations.empty() || iFlashCheck)
         {
@@ -807,4 +1055,4 @@ namespace chess::gui
                     return coordinates{ x, y };
         return {};
     }
-}
+}

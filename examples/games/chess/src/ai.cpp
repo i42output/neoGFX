@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <algorithm>
+#include <sstream>
 #include <thread>
 
 #include <stockparrot/chess.hpp>
@@ -91,9 +92,27 @@ namespace chess
         void response(uci::i_uci&, std::string const&) override
         {
         }
-        void info(uci::i_uci&, std::int64_t, std::chrono::milliseconds, std::int64_t, std::int64_t aNodesPerSecond, std::int64_t, std::string const&) override
+        // called on the search thread once per completed iterative deepening depth
+        void info(uci::i_uci&, std::int64_t aDepth, std::chrono::milliseconds aTime, std::int64_t aNodes, std::int64_t aNodesPerSecond, std::int64_t aBestScore, std::string const& aPv) override
         {
             owner.iNodesPerSecond = static_cast<std::uint64_t>(aNodesPerSecond);
+            auto const score = static_cast<int>(aBestScore);
+            // aPv is the principal variation: best move first, then the expected continuation
+            std::istringstream pv{ aPv };
+            std::string bestMove;
+            pv >> bestMove;
+            std::vector<std::string> continuation;
+            for (std::string move; pv >> move;)
+                continuation.push_back(move);
+            std::unique_lock lk{ owner.iMutex };
+            owner.iEvaluation = evaluation{
+                static_cast<std::int32_t>(aDepth),
+                aTime,
+                aNodes,
+                score,
+                stockparrot::isMateScore(score) ? std::optional<std::int32_t>{ stockparrot::mateDistance(score) } : std::nullopt,
+                bestMove,
+                std::move(continuation) };
         }
         void bestmove(uci::i_uci&, std::string const& aBestMove) override
         {
@@ -214,6 +233,7 @@ namespace chess
         std::unique_lock lk{ iMutex };
         auto const snapshot = iPosition;
         auto const setupFen = iSetupFen;
+        iEvaluation = std::nullopt;
         lk.unlock();
 
         std::string moves;
@@ -253,5 +273,11 @@ namespace chess
     std::uint64_t ai::nodes_per_second() const
     {
         return iNodesPerSecond;
+    }
+
+    std::optional<chess::evaluation> ai::current_evaluation() const
+    {
+        std::unique_lock lk{ iMutex };
+        return iEvaluation;
     }
 }

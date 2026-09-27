@@ -38,6 +38,22 @@ namespace neogfx
         meta_object(widget<i_title_bar>)
     public:
         typedef i_title_bar abstract_type;
+    private:
+        // the title text defers hit testing to the title bar so that it can be used to drag the window
+        class title_text : public text_widget
+        {
+        public:
+            using text_widget::text_widget;
+        public:
+            widget_part part(const point& aPosition) const override
+            {
+                return parent().part(aPosition);
+            }
+            bool ignore_non_client_mouse_events(bool aConsiderAncestors = true) const override
+            {
+                return false;
+            };
+        };
     public:
         tool_title_bar(i_standard_layout_container& aContainer, std::string const& aTitle = std::string{});
     public:
@@ -54,6 +70,7 @@ namespace neogfx
         size minimum_size(optional_size const& aAvailableSpace = {}) const override;
     protected:
         neogfx::widget_type widget_type() const override;
+        widget_part part(const point& aPosition) const override;
     protected:
         color palette_color(color_role aColorRole) const override;
     protected:
@@ -66,7 +83,7 @@ namespace neogfx
         i_standard_layout_container& iContainer;
         widget_timer iUpdater;
         horizontal_layout iLayout;
-        text_widget iTitle;
+        title_text iTitle;
         push_button iPinButton;
         push_button iUnpinButton;
         push_button iCloseButton;

@@ -62,6 +62,7 @@ namespace chess
         void setup(mailbox_position const& aSetup) override;
     public:
         std::uint64_t nodes_per_second() const override;
+        std::optional<chess::evaluation> current_evaluation() const override;
     private:
         bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override;
     private:
@@ -80,6 +81,7 @@ namespace chess
         std::atomic<bool> iPlaying = false;
         std::atomic<bool> iFinished = false;
         std::atomic<std::uint64_t> iNodesPerSecond = 0;
+        std::optional<chess::evaluation> iEvaluation; // guarded by iMutex
         ng::sink iSink;
     };
 }

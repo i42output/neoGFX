@@ -128,6 +128,15 @@ namespace neogfx
         return neogfx::widget_type::NonClient;
     }
 
+    widget_part tool_title_bar::part(const point& aPosition) const
+    {
+        // only the title bar of a top-level tool window drags its window; a docked tool's
+        // title bar belongs to a container inside some other window and must not move it
+        if (&iContainer.as_widget() == &root().as_widget())
+            return widget_part{ root().as_widget(), widget_part::TitleBar };
+        return widget::part(aPosition);
+    }
+
     color tool_title_bar::palette_color(color_role aColorRole) const
     {
         if (has_palette_color(aColorRole))

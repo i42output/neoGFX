@@ -75,4 +75,9 @@ namespace chess
     {
         return 0;
     }
+
+    std::optional<chess::evaluation> human::current_evaluation() const
+    {
+        return {};
+    }
 }

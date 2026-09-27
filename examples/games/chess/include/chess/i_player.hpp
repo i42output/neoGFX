@@ -18,6 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <chrono>
+#include <optional>
+#include <string>
+#include <vector>
+
 #include <chess/chess.hpp>
 #include <chess/primitives.hpp>
 
@@ -28,6 +33,18 @@ namespace chess
         Human,
         NetworkedHuman,
         AI
+    };
+
+    // latest completed search iteration; scores are from the searching player's perspective
+    struct evaluation
+    {
+        std::int32_t depth;
+        std::chrono::milliseconds time;
+        std::int64_t nodes;
+        std::int32_t score; // centipawns
+        std::optional<std::int32_t> mateIn; // moves; negative if the searching player is being mated
+        std::string bestMove; // UCI notation
+        std::vector<std::string> continuation; // UCI notation; expected moves after bestMove, alternating sides
     };
 
     class i_player 
@@ -50,6 +67,7 @@ namespace chess
         virtual void setup(mailbox_position const& aSetup) = 0;
     public:
         virtual std::uint64_t nodes_per_second() const = 0;
+        virtual std::optional<chess::evaluation> current_evaluation() const = 0;
     };
 
     class i_player_factory

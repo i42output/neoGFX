@@ -44,6 +44,7 @@ namespace chess
         void setup(mailbox_position const& aSetup) override;
     public:
         std::uint64_t nodes_per_second() const override;
+        std::optional<chess::evaluation> current_evaluation() const override;
     private:
         ng::sink iSink;
         chess::player iPlayer;

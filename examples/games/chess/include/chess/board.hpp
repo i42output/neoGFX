@@ -21,6 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/gui/widget/widget.hpp>
+#include <neogfx/gui/widget/text_widget.hpp>
+#include <neogfx/gui/window/window.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/texture_atlas.hpp>
 
@@ -98,6 +100,10 @@ namespace chess::gui
         i_player& black_player() override;
     public:
         void set_flipped(bool aFlipped);
+        bool evaluation_shown() const;
+        void show_evaluation(bool aShow);
+    private:
+        void update_evaluation();
     private:
         void moved(chess::move const& aMove);
     private:
@@ -135,5 +141,17 @@ namespace chess::gui
         bool iEditBoard;
         mutable std::deque<animation> iAnimations;
         std::optional<std::pair<bool, std::chrono::steady_clock::time_point>> iFlashCheck;
+        struct evaluation_window
+        {
+            ng::window window;
+            ng::text_widget text;
+            std::vector<std::string> pvLines; // the principal variation, painted below the summary in columns left to right
+            ng::scalar pvWidth = 0.0; // width the columns took when last painted
+            std::vector<std::string> pvUci; // the principal variation as last converted, and the game ply it was converted at
+            std::size_t pvPly = 0u;
+            std::vector<std::string> pvSan; // ... and in standard algebraic notation
+            evaluation_window(ng::i_widget& aParent, ng::point const& aPosition);
+        };
+        std::optional<evaluation_window> iEvaluationWindow;
     };
 }
