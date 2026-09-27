@@ -23,7 +23,7 @@ namespace neogfx
 {
     texture colored_icon(const texture& aSource, const optional_color& aColor, scalar const aOutline)
     {
-        texture result{ aSource.extents(), 1.0, aSource.sampling() };
+        texture result{ aSource.extents(), 1.0, texture_sampling::Multisample };
 
         graphics_context gc{ result };
         scoped_render_target srt{ gc };
