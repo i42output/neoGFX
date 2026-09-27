@@ -20,8 +20,39 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <chess/human.hpp>
 #include <chess/ai.hpp>
 
+#include <algorithm>
+
 namespace chess
 {
+    namespace
+    {
+        struct ai_skill
+        {
+            std::chrono::milliseconds moveTime;
+            std::optional<std::int32_t> maxDepth;
+        };
+
+        // index is skill level - 1; level 8 (the default) matches the previous fixed AI settings
+        ai_skill const sAiSkills[default_player_factory::MaxSkillLevel] =
+        {
+            { std::chrono::milliseconds{ 250 }, 1 },
+            { std::chrono::milliseconds{ 500 }, 2 },
+            { std::chrono::milliseconds{ 750 }, 3 },
+            { std::chrono::milliseconds{ 1000 }, 4 },
+            { std::chrono::milliseconds{ 1500 }, 5 },
+            { std::chrono::milliseconds{ 2000 }, 6 },
+            { std::chrono::milliseconds{ 2500 }, 8 },
+            { std::chrono::milliseconds{ 3000 }, std::nullopt },
+            { std::chrono::milliseconds{ 5000 }, std::nullopt },
+            { std::chrono::milliseconds{ 10000 }, std::nullopt }
+        };
+    }
+
+    void default_player_factory::set_ai_skill_level(chess::player aPlayer, std::uint32_t aSkillLevel)
+    {
+        iAiSkillLevel[as_cardinal(aPlayer)] = std::clamp(aSkillLevel, MinSkillLevel, MaxSkillLevel);
+    }
+
     std::unique_ptr<i_player> default_player_factory::create_player(player_type aType, chess::player aPlayer)
     {
         switch (aType) 
@@ -31,7 +62,10 @@ namespace chess
         case player_type::NetworkedHuman:
             throw not_implemented_yet{ "default_player_factory::create_player" };
         case player_type::AI:
-            return std::make_unique<ai>(aPlayer);
+        {
+            auto const& skill = sAiSkills[iAiSkillLevel[as_cardinal(aPlayer)] - 1u];
+            return std::make_unique<ai>(aPlayer, skill.moveTime, skill.maxDepth);
+        }
         default:
             throw std::invalid_argument{ "default_player_factory::create_player" };
         }

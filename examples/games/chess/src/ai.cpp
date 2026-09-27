@@ -101,10 +101,11 @@ namespace chess
         }
     };
 
-    ai::ai(chess::player aPlayer, std::chrono::milliseconds aMoveTime) :
+    ai::ai(chess::player aPlayer, std::chrono::milliseconds aMoveTime, std::optional<std::int32_t> aMaxDepth) :
         async_thread{ "chess::ai" },
         iPlayer{ aPlayer },
         iMoveTime{ aMoveTime },
+        iMaxDepth{ aMaxDepth },
         iPosition{ chess::setup_position<mailbox_rep>() },
         iSetupFen{ setup_fen(iPosition) },
         iEngineClient{ std::make_unique<engine_client>(*this) },
@@ -222,7 +223,10 @@ namespace chess
         iEngineClient->bestMove = std::nullopt;
         iNodesPerSecond = 0;
         iEngine->position(uci::fen{ setupFen }, moves);
-        iEngine->go({ uci::movetime{ static_cast<std::int32_t>(iMoveTime.count()) } });
+        uci::go_params goParams{ uci::movetime{ static_cast<std::int32_t>(iMoveTime.count()) } };
+        if (iMaxDepth)
+            goParams.push_back(uci::depth{ *iMaxDepth });
+        iEngine->go(goParams);
 
         lk.lock();
         // discard the result if the position changed (undo/setup) while searching or there is no legal move

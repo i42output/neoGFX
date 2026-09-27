@@ -452,9 +452,64 @@ namespace neogfx
                     auto s = find_span(cell_coordinates{ col, row });
                     if (s == iSpans.end() || s->first.y == s->second.y)
                         maxRowHeight[row] = std::max(maxRowHeight[row], i->second->extents().cy);
-                    if (s == iSpans.end() || s->first.x == s->second.x)
-                        maxColWidth[col] = std::max(maxColWidth[col], i->second->extents().cx);
                 }
+            }
+        }
+        // Column widths are resolved across the whole grid rather than taken from the widest cell produced by 
+        // each row layout: rows are laid out independently so an expanding cell in a row whose other cells are 
+        // narrow would claim width that another row's wider cells need, making the grid overflow its extents.
+        {
+            thread_local std::vector<bool> expandingColumn(iDimensions.cx, false);
+            expandingColumn.clear();
+            size::dimension_type used = 0.0;
+            std::uint32_t visibleColumnCount = 0u;
+            for (cell_coordinate col = 0; col < iDimensions.cx; ++col)
+            {
+                if (!is_column_visible(col))
+                    continue;
+                ++visibleColumnCount;
+                maxColWidth[col] = column_minimum_size(col, availableSize);
+                used += maxColWidth[col];
+                for (auto const& cell : iCells)
+                {
+                    if (cell.first.x != col || cell.second->is_spacer() || !cell.second->visible())
+                        continue;
+                    auto const s = find_span(cell.first);
+                    if (s != iSpans.end() && s->first.x != s->second.x)
+                        continue;
+                    auto const constraint = cell.second->effective_size_policy().horizontal_constraint();
+                    if (constraint == size_constraint::Expanding || constraint == size_constraint::Maximum)
+                        expandingColumn[col] = true;
+                }
+            }
+            if (visibleColumnCount > 1u)
+                used += spacing().cx * (visibleColumnCount - 1u);
+            // share leftover width equally between expanding columns, redistributing any a column can't take
+            auto leftover = availableSize.cx - used;
+            while (leftover > 0.0)
+            {
+                std::uint32_t growable = 0u;
+                for (cell_coordinate col = 0; col < iDimensions.cx; ++col)
+                    if (expandingColumn[col] && maxColWidth[col] < column_maximum_size(col, availableSize))
+                        ++growable;
+                if (growable == 0u)
+                    break;
+                auto const share = leftover / growable;
+                bool capped = false;
+                for (cell_coordinate col = 0; col < iDimensions.cx; ++col)
+                {
+                    if (!expandingColumn[col])
+                        continue;
+                    auto const columnMaximum = column_maximum_size(col, availableSize);
+                    if (maxColWidth[col] >= columnMaximum)
+                        continue;
+                    auto const grown = std::min(maxColWidth[col] + share, columnMaximum);
+                    capped = capped || grown == columnMaximum;
+                    leftover -= grown - maxColWidth[col];
+                    maxColWidth[col] = grown;
+                }
+                if (!capped)
+                    break;
             }
         }
         point rowPos = availablePos;

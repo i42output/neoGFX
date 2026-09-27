@@ -11,6 +11,7 @@
 #include <chess/board.hpp>
 #include <chess/human.hpp>
 #include <chess/default_player_factory.hpp>
+#include <chess/new_game_dialog.hpp>
 
 namespace ng = neogfx;
 using namespace ng::unit_literals;
@@ -91,7 +92,22 @@ int main(int argc, char* argv[])
         chess::gui::board board{ window.client_layout(), moveValidator };
 
         chess::default_player_factory playerFactory;
-        board.new_game(playerFactory, chess::player_type::Human, chess::player_type::AI);
+        chess::gui::new_game_settings newGameSettings;
+        std::string const baseTitle = window.title_text().to_std_string();
+
+        auto start_new_game = [&]()
+        {
+            auto const& s = newGameSettings;
+            auto const whiteIndex = s.index_of(chess::player::White);
+            auto const blackIndex = s.index_of(chess::player::Black);
+            playerFactory.set_ai_skill_level(chess::player::White, s.players[whiteIndex].skillLevel);
+            playerFactory.set_ai_skill_level(chess::player::Black, s.players[blackIndex].skillLevel);
+            board.new_game(playerFactory, s.type_of(whiteIndex), s.type_of(blackIndex));
+            board.set_flipped(s.type_of(blackIndex) == chess::player_type::Human && s.type_of(whiteIndex) != chess::player_type::Human);
+            window.set_title_text(ng::string{ baseTitle + " - " + s.description(whiteIndex) + " vs " + s.description(blackIndex) });
+        };
+
+        start_new_game();
 
         auto board_changed = [&]()
         {
@@ -104,6 +120,15 @@ int main(int argc, char* argv[])
         board.changed(board_changed);
         board_changed();
 
+        newGame.Triggered([&]()
+        {
+            chess::gui::new_game_dialog newGameDialog{ window, newGameSettings };
+            if (newGameDialog.exec() == ng::dialog_result::Accepted)
+            {
+                newGameSettings = newGameDialog.settings();
+                start_new_game();
+            }
+        });
         undoMove.Triggered([&]() { board.undo(); });
         redoMove.Triggered([&]() { board.redo(); });
         play.Triggered([&]() { board.play(); });

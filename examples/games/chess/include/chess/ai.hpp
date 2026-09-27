@@ -46,7 +46,7 @@ namespace chess
     private:
         struct engine_client;
     public:
-        ai(chess::player aPlayer, std::chrono::milliseconds aMoveTime = std::chrono::milliseconds{ 3000 });
+        ai(chess::player aPlayer, std::chrono::milliseconds aMoveTime = std::chrono::milliseconds{ 3000 }, std::optional<std::int32_t> aMaxDepth = {});
         ~ai();
     public:
         player_type type() const override;
@@ -69,6 +69,7 @@ namespace chess
     private:
         chess::player const iPlayer;
         std::chrono::milliseconds const iMoveTime;
+        std::optional<std::int32_t> const iMaxDepth;
         mutable std::recursive_mutex iMutex;
         mailbox_position iPosition;
         std::string iSetupFen;

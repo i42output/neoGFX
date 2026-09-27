@@ -96,6 +96,8 @@ namespace chess::gui
         i_player& white_player() override;
         i_player const& black_player() const override;
         i_player& black_player() override;
+    public:
+        void set_flipped(bool aFlipped);
     private:
         void moved(chess::move const& aMove);
     private:

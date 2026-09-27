@@ -403,6 +403,12 @@ namespace chess::gui
 
     void board::new_game(i_player_factory& aPlayerFactory, player_type aWhitePlayer, player_type aBlackPlayer)
     {
+        // stop any previous players (e.g. an AI mid-search) from reporting moves into the new game
+        if (iWhitePlayer)
+            iWhitePlayer->finish();
+        if (iBlackPlayer)
+            iBlackPlayer->finish();
+
         setup(chess::setup_position<mailbox_rep>());
 
         iWhitePlayer = std::move(aPlayerFactory.create_player(aWhitePlayer, player::White));
@@ -644,6 +650,19 @@ namespace chess::gui
         if (!iInRedo)
             iUndoneMoves.clear();
         update();
+        // an AI to move plays automatically (required for CPU vs CPU); redo leaves resuming to the user
+        if (!iInRedo && current_player().type() == player_type::AI)
+            play();
+    }
+
+    void board::set_flipped(bool aFlipped)
+    {
+        if (iFlipped != aFlipped)
+        {
+            iFlipped = aFlipped;
+            iAnimations.clear();
+            update();
+        }
     }
 
     void board::animate_move(chess::move const& aMove)

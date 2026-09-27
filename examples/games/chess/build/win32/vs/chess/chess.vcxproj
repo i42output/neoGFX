@@ -177,6 +177,7 @@
     <ClInclude Include="..\..\..\..\include\chess\i_player.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\mailbox.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\move_validator.hpp" />
+    <ClInclude Include="..\..\..\..\include\chess\new_game_dialog.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\piece.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\player.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\position.hpp" />
@@ -198,6 +199,7 @@
     <ClCompile Include="..\..\..\..\src\main.cpp" />
     <ClCompile Include="..\..\..\..\src\mailbox.cpp" />
     <ClCompile Include="..\..\..\..\src\move_validator.cpp" />
+    <ClCompile Include="..\..\..\..\src\new_game_dialog.cpp" />
     <ClCompile Include="x64\Debug\GeneratedFiles\chess.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
