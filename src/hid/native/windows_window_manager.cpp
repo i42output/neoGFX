@@ -48,7 +48,14 @@ namespace neogfx
                     if (aIgnore && w.as_widget().is_descendent_of(*aIgnore))
                         continue;
                     if (w.effectively_visible() && w.is_descendent_of(ancestor) && w.non_client_rect().contains(aPosition - ancestor.position()))
+                    {
+                        // a nested window only counts if the surface manager agrees it is what is under the mouse
+                        // (something in its parent window, e.g. a splitter's separator, may be in front of it)
+                        if (!aIgnore && w.is_nested() && &service<i_surface_manager>().surface_at_position(
+                            ancestor.surface(), aPosition - ancestor.position()) != &w.surface())
+                            continue;
                         return &w;
+                    }
                 }
                 return &ancestor;
             }

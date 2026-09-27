@@ -124,6 +124,13 @@ namespace neogfx
                     rect const parentSurfaceRect = s->as_surface_window().as_window().parent().non_client_rect();
                     if (!parentSurfaceRect.contains(aPosition))
                         continue;
+                    // the nested window only gets the position if hit testing its parent window's widget tree
+                    // agrees: something in front of it there (e.g. a splitter's separator) must take precedence
+                    auto const& nestedWidget = s->as_surface_window().as_widget();
+                    auto const& parentRoot = nestedWidget.parent().root().as_widget();
+                    auto const& hitWidget = parentRoot.get_widget_at(aPosition - parentRoot.origin());
+                    if (&hitWidget != &nestedWidget && !hitWidget.is_descendent_of(nestedWidget))
+                        continue;
                 }
                 if (match == nullptr || match->is_owner_of(*s))
                     match = s;
