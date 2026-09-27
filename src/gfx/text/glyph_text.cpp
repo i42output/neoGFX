@@ -154,6 +154,28 @@ namespace neogfx
         return content().align_baselines(aBegin, aEnd, aJustCalculate);
     }
 
+    glyph_text& glyph_text::apply_transformation(mat33f const& aTransformation, bool aAboutGlyphCentres)
+    {
+        content().apply_transformation(aTransformation, aAboutGlyphCentres);
+        return *this;
+    }
+
+    void glyph_text::apply_transformation(iterator aBegin, iterator aEnd, mat33f const& aTransformation, bool aAboutGlyphCentres)
+    {
+        content().apply_transformation(aBegin, aEnd, aTransformation, aAboutGlyphCentres);
+    }
+
+    glyph_text& glyph_text::apply_padding(neogfx::padding const& aPadding)
+    {
+        content().apply_padding(aPadding);
+        return *this;
+    }
+
+    void glyph_text::apply_padding(iterator aBegin, iterator aEnd, neogfx::padding const& aPadding)
+    {
+        content().apply_padding(aBegin, aEnd, aPadding);
+    }
+
     i_vector<glyph_text::size_type> const& glyph_text::line_breaks() const
     {
         return content().line_breaks();

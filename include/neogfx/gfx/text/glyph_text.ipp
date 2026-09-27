@@ -398,6 +398,88 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
+    inline basic_glyph_text_content<Container, ConstIterator, Iterator>&
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::apply_transformation(mat33f const& aTransformation, bool aAboutGlyphCentres)
+    {
+        apply_transformation(begin(), end(), aTransformation, aAboutGlyphCentres);
+        return *this;
+    }
+
+    template <typename Container, typename ConstIterator, typename Iterator>
+    inline void basic_glyph_text_content<Container, ConstIterator, Iterator>::apply_transformation(iterator aBegin, iterator aEnd, mat33f const& aTransformation, bool aAboutGlyphCentres)
+    {
+        iExtents = invalid;
+        // cell vertices are positions (w = 1); shape vertices are offsets from cell[0] so only the linear part applies (w = 0);
+        // if aAboutGlyphCentres then each glyph's cell is transformed about the centre of that cell rather than the text origin
+        auto const transform = [&](vec2f& aVertex, float aW)
+        {
+            auto const result = aTransformation * vec3f{ aVertex.x, aVertex.y, aW };
+            aVertex = vec2f{ result.x, result.y };
+        };
+        for (auto& g : std::ranges::subrange(aBegin, aEnd))
+        {
+            vec2f const centre = aAboutGlyphCentres ? (g.cell[0] + g.cell[1] + g.cell[2] + g.cell[3]) / 4.0f : vec2f{};
+            for (auto& v : g.cell)
+            {
+                v -= centre;
+                transform(v, 1.0f);
+                v += centre;
+            }
+            for (auto& v : g.shape)
+                transform(v, 0.0f);
+            if (g.outlineShape)
+                for (auto& v : g.outlineShape.value())
+                    transform(v, 0.0f);
+            g.cellExtents = std::nullopt;
+        }
+    }
+
+    template <typename Container, typename ConstIterator, typename Iterator>
+    inline basic_glyph_text_content<Container, ConstIterator, Iterator>&
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::apply_padding(neogfx::padding const& aPadding)
+    {
+        apply_padding(begin(), end(), aPadding);
+        return *this;
+    }
+
+    template <typename Container, typename ConstIterator, typename Iterator>
+    inline void basic_glyph_text_content<Container, ConstIterator, Iterator>::apply_padding(iterator aBegin, iterator aEnd, neogfx::padding const& aPadding)
+    {
+        iExtents = invalid;
+        auto const left = static_cast<float>(aPadding.left);
+        auto const top = static_cast<float>(aPadding.top);
+        auto const right = static_cast<float>(aPadding.right);
+        auto const bottom = static_cast<float>(aPadding.bottom);
+        auto const unit = [](vec2f const& aVector)
+        {
+            auto const magnitude = aVector.magnitude();
+            return magnitude != 0.0f ? aVector / magnitude : vec2f{};
+        };
+        // padding is applied in each cell's own frame (edge 0->1 is the "top" edge, edge 0->3 is the "left" edge) so it remains
+        // correct after apply_transformation. Horizontal padding widens the cell and moves the glyph along, and glyphs following
+        // a padded glyph are shifted to make room; vertical padding grows the cell outwards so the glyph stays on its baseline.
+        vec2f shift = {};
+        for (auto& g : std::ranges::subrange(aBegin, aEnd))
+        {
+            g.cell += shift;
+            auto const u = unit(g.cell[1] - g.cell[0]);
+            auto const w = unit(g.cell[3] - g.cell[0]);
+            g.cell[0] -= w * top;
+            g.cell[1] += u * (left + right) - w * top;
+            g.cell[2] += u * (left + right) + w * bottom;
+            g.cell[3] += w * bottom;
+            auto const shapeShift = u * left + w * top;
+            g.shape += shapeShift;
+            if (g.outlineShape)
+                g.outlineShape.value() += shapeShift;
+            g.cellExtents = std::nullopt;
+            shift += u * (left + right);
+        }
+        for (auto& g : std::ranges::subrange(aEnd, end()))
+            g.cell += shift;
+    }
+
+    template <typename Container, typename ConstIterator, typename Iterator>
     inline vector<typename basic_glyph_text_content<Container, ConstIterator, Iterator>::size_type> const& 
     basic_glyph_text_content<Container, ConstIterator, Iterator>::line_breaks() const
     {

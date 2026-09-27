@@ -1514,6 +1514,8 @@ int main(int argc, char* argv[])
 
         auto t0 = neolib::chrono::fast_clock::now();
 
+        ng::font glyphTextTestFont{ "SnareDrum Two NBP", "Regular", 24.0 };
+
         window.pageDrawing.painting([&, t0](ng::i_graphics_context& aGc)
         {
             auto const t = static_cast<ng::scalar>(std::chrono::duration_cast<std::chrono::microseconds>(neolib::chrono::fast_clock::now() - t0).count());
@@ -1628,6 +1630,140 @@ int main(int argc, char* argv[])
             path.line_to(pathBox.left + pixel.cx, pathBox.top);
             path.set_position(ng::point{ 800.0, 800.0 });
             aGc.draw_path(path, ng::pen{ ng::color::White });
+
+            // glyph text transformation and padding tests (bottom half of page)
+            {
+                // shape once and clone per frame; transformations are applied absolutely to a fresh clone so nothing accumulates
+                thread_local std::optional<ng::glyph_text> glyphTextTestSource;
+                if (!glyphTextTestSource)
+                    glyphTextTestSource = aGc.to_glyph_text(std::string{ "Hello, World!" }, glyphTextTestFont);
+                auto const pageExtents = window.pageDrawing.extents();
+                auto const panelWidth = pageExtents.cx / 4.0;
+                auto const panelTop = pageExtents.cy / 2.0 + 100.0;
+                auto const panel_origin = [&](int aPanel) { return ng::point{ panelWidth * aPanel + 16.0, panelTop + 16.0 }; };
+                auto const seconds = static_cast<float>(t / 1000000.0);
+
+                // linear part about a centre point (mat33f is column-major: m[column][row])
+                auto const about = [](ng::mat33f aLinear, ng::vec2f const& aCentre)
+                {
+                    aLinear[2][0] = aCentre.x - (aLinear[0][0] * aCentre.x + aLinear[1][0] * aCentre.y);
+                    aLinear[2][1] = aCentre.y - (aLinear[0][1] * aCentre.x + aLinear[1][1] * aCentre.y);
+                    aLinear[2][2] = 1.0f;
+                    return aLinear;
+                };
+                auto const translation = [](ng::vec2f const& aOffset)
+                {
+                    return ng::mat33f{ { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { aOffset.x, aOffset.y, 1.0f } };
+                };
+                auto const rotation = [](float aAngle)
+                {
+                    auto const c = std::cos(aAngle);
+                    auto const s = std::sin(aAngle);
+                    return ng::mat33f{ { c, s, 0.0f }, { -s, c, 0.0f }, { 0.0f, 0.0f, 1.0f } };
+                };
+                auto const scaling = [](float aScale)
+                {
+                    return ng::mat33f{ { aScale, 0.0f, 0.0f }, { 0.0f, aScale, 0.0f }, { 0.0f, 0.0f, 1.0f } };
+                };
+                auto const range_centre = [](ng::glyph_text::const_iterator aBegin, ng::glyph_text::const_iterator aEnd)
+                {
+                    ng::vec2f minimum = aBegin->cell[0];
+                    ng::vec2f maximum = aBegin->cell[0];
+                    for (auto const& g : std::ranges::subrange(aBegin, aEnd))
+                        for (auto const& v : g.cell)
+                        {
+                            minimum = ng::vec2f{ std::min(minimum.x, v.x), std::min(minimum.y, v.y) };
+                            maximum = ng::vec2f{ std::max(maximum.x, v.x), std::max(maximum.y, v.y) };
+                        }
+                    return ng::vec2f{ (minimum.x + maximum.x) / 2.0f, (minimum.y + maximum.y) / 2.0f };
+                };
+                auto const sub_range = [](ng::glyph_text& aText, std::size_t aFirst, std::size_t aLast)
+                {
+                    aFirst = std::min(aFirst, aText.size());
+                    aLast = std::min(aLast, aText.size());
+                    return std::make_pair(std::next(aText.begin(), aFirst), std::next(aText.begin(), aLast));
+                };
+                auto const draw_cells = [&](ng::point const& aPosition, ng::glyph_text const& aText, ng::color const& aColor)
+                {
+                    for (auto const& g : aText)
+                        for (std::size_t v = 0; v < 4; ++v)
+                        {
+                            auto const& from = g.cell[v];
+                            auto const& to = g.cell[(v + 1) % 4];
+                            aGc.draw_line(
+                                aPosition + aGc.from_device_units(ng::point{ from.x, from.y }),
+                                aPosition + aGc.from_device_units(ng::point{ to.x, to.y }),
+                                ng::pen{ aColor, 1.0 });
+                        }
+                };
+                auto const draw_test = [&](ng::point const& aPosition, ng::glyph_text const& aText, ng::color const& aCellColor)
+                {
+                    draw_cells(aPosition, aText, aCellColor);
+                    aGc.draw_glyph_text(aPosition, aText, ng::text_format{ ng::color::White });
+                };
+
+                // translation: "World" bobs up and down (range overload)
+                {
+                    auto const origin = panel_origin(0);
+                    aGc.draw_text(origin, "Translation", glyphTextTestFont, ng::text_format{ ng::color::Yellow });
+                    auto text = glyphTextTestSource->clone();
+                    auto const [first, last] = sub_range(text, 7, 12);
+                    text.apply_transformation(first, last, translation(ng::vec2f{ 0.0f, 16.0f * std::sin(seconds * 3.0f) }));
+                    draw_test(origin + ng::point{ 0.0, 64.0 }, text, ng::color::Cyan);
+                }
+
+                // rotation: each glyph rotates about its own centre; then whole text rotates about its centre (whole text overload)
+                {
+                    auto const origin = panel_origin(1);
+                    aGc.draw_text(origin, "Rotation", glyphTextTestFont, ng::text_format{ ng::color::Yellow });
+                    auto perGlyph = glyphTextTestSource->clone();
+                    perGlyph.apply_transformation(rotation(seconds * 2.0f), true);
+                    draw_test(origin + ng::point{ 0.0, 48.0 }, perGlyph, ng::color::Cyan);
+                    auto text = glyphTextTestSource->clone();
+                    auto const centre = range_centre(text.cbegin(), text.cend());
+                    text.apply_transformation(about(rotation(seconds), centre));
+                    draw_test(origin + ng::point{ 0.0, 200.0 }, text, ng::color::Cyan);
+                }
+
+                // scale: "World" pulses about its own centre (range overload)
+                {
+                    auto const origin = panel_origin(2);
+                    aGc.draw_text(origin, "Scale", glyphTextTestFont, ng::text_format{ ng::color::Yellow });
+                    auto text = glyphTextTestSource->clone();
+                    auto const [first, last] = sub_range(text, 7, 12);
+                    auto const centre = range_centre(first, last);
+                    text.apply_transformation(first, last, about(scaling(1.25f + 0.75f * std::sin(seconds * 2.0f)), centre));
+                    draw_test(origin + ng::point{ 0.0, 64.0 }, text, ng::color::Cyan);
+                    // each glyph of "World" pulses about its own centre (range overload, per glyph)
+                    auto perGlyph = glyphTextTestSource->clone();
+                    auto const [perGlyphFirst, perGlyphLast] = sub_range(perGlyph, 7, 12);
+                    perGlyph.apply_transformation(perGlyphFirst, perGlyphLast, scaling(1.25f + 0.75f * std::sin(seconds * 2.0f)), true);
+                    draw_test(origin + ng::point{ 0.0, 160.0 }, perGlyph, ng::color::Cyan);
+                }
+
+                // padding: unpadded reference, padded range, padded whole text, and padding after rotation
+                {
+                    auto const origin = panel_origin(3);
+                    aGc.draw_text(origin, "Padding", glyphTextTestFont, ng::text_format{ ng::color::Yellow });
+                    ng::padding const padding{ 4.0, 6.0, 12.0, 6.0 };
+
+                    draw_test(origin + ng::point{ 0.0, 48.0 }, *glyphTextTestSource, ng::color::Cyan);
+
+                    auto paddedRange = glyphTextTestSource->clone();
+                    auto const [first, last] = sub_range(paddedRange, 7, 12);
+                    paddedRange.apply_padding(first, last, padding);
+                    draw_test(origin + ng::point{ 0.0, 112.0 }, paddedRange, ng::color::Magenta);
+
+                    auto paddedWhole = glyphTextTestSource->clone();
+                    paddedWhole.apply_padding(padding);
+                    draw_test(origin + ng::point{ 0.0, 176.0 }, paddedWhole, ng::color::Magenta);
+
+                    auto paddedRotated = glyphTextTestSource->clone();
+                    paddedRotated.apply_transformation(about(rotation(ng::to_rad(15.0f)), range_centre(paddedRotated.cbegin(), paddedRotated.cend())));
+                    paddedRotated.apply_padding(padding);
+                    draw_test(origin + ng::point{ 0.0, 272.0 }, paddedRotated, ng::color::Magenta);
+                }
+            }
         });
 
         window.buttonStyle1.clicked([&window]()

@@ -337,6 +337,10 @@ namespace neogfx
         virtual void set_extents(const neogfx::size& aExtents) = 0;
         virtual i_basic_glyph_text& align_baselines() = 0;
         virtual align_baselines_result align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate = false) = 0;
+        virtual i_basic_glyph_text& apply_transformation(mat33f const& aTransformation, bool aAboutGlyphCentres = false) = 0;
+        virtual void apply_transformation(iterator aBegin, iterator aEnd, mat33f const& aTransformation, bool aAboutGlyphCentres = false) = 0;
+        virtual i_basic_glyph_text& apply_padding(neogfx::padding const& aPadding) = 0;
+        virtual void apply_padding(iterator aBegin, iterator aEnd, neogfx::padding const& aPadding) = 0;
     public:
         virtual i_vector<size_type> const& line_breaks() const = 0;
         virtual i_vector<size_type>& line_breaks() = 0;
@@ -443,6 +447,10 @@ namespace neogfx
         void set_extents(const neogfx::size& aExtents) final;
         basic_glyph_text_content& align_baselines() final;
         align_baselines_result align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate = false) final;
+        basic_glyph_text_content& apply_transformation(mat33f const& aTransformation, bool aAboutGlyphCentres = false) final;
+        void apply_transformation(iterator aBegin, iterator aEnd, mat33f const& aTransformation, bool aAboutGlyphCentres = false) final;
+        basic_glyph_text_content& apply_padding(neogfx::padding const& aPadding) final;
+        void apply_padding(iterator aBegin, iterator aEnd, neogfx::padding const& aPadding) final;
     public:
         vector<size_type> const& line_breaks() const final;
         vector<size_type>& line_breaks() final;
@@ -535,6 +543,10 @@ namespace neogfx
         void set_extents(const neogfx::size& aExtents);
         glyph_text& align_baselines();
         align_baselines_result align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate = false);
+        glyph_text& apply_transformation(mat33f const& aTransformation, bool aAboutGlyphCentres = false);
+        void apply_transformation(iterator aBegin, iterator aEnd, mat33f const& aTransformation, bool aAboutGlyphCentres = false);
+        glyph_text& apply_padding(neogfx::padding const& aPadding);
+        void apply_padding(iterator aBegin, iterator aEnd, neogfx::padding const& aPadding);
     public:
         i_vector<size_type> const& line_breaks() const;
         i_vector<size_type>& line_breaks();
