@@ -24,6 +24,7 @@
 #include <neolib/core/scoped.hpp>
 
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
@@ -570,7 +571,13 @@ namespace neogfx
             auto fontStyleIndex = iStylePicker.presentation_model().to_item_model_index(iStylePicker.selection_model().current_index()).row();
             auto fontSize = iSelectedFont.size();
             try { fontSize = boost::lexical_cast<double>(iSizePicker.input_widget().text()); } catch (...) {}
-            fontSize = std::min(std::max(fontSize, 1.0), 1638.0);
+            static constexpr double kMaxFontSize = 1638.0; // texture atlas limit
+            if (fontSize > kMaxFontSize)
+            {
+                iSizePicker.input_widget().set_text(string{ boost::lexical_cast<std::string>(kMaxFontSize) });
+                service<i_basic_services>().system_beep();
+            }
+            fontSize = std::min(std::max(fontSize, 1.0), kMaxFontSize);
             iSelectedFont = neogfx::font{ 
                 fm.font_family(fontFamilyIndex), 
                 fm.font_style_name(fontFamilyIndex, fontStyleIndex), 

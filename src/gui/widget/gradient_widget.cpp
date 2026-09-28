@@ -526,6 +526,19 @@ namespace neogfx
         {
             double pos = gradient::normalized_position(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
             const double min = 0.0001;
+            // keep the stop strictly between its neighbours and within [0, 1]; if the neighbours
+            // are closer together than 2 * min (e.g. coincident stops at 0.0 or 1.0) the naive
+            // clamp inverts and can yield a position outside [0, 1] (issue #139)
+            auto const constrain = [min](double aPos, std::optional<double> const& aLeft, std::optional<double> const& aRight)
+            {
+                double const leftBound = aLeft.value_or(0.0);
+                double const rightBound = aRight.value_or(1.0);
+                double const lower = aLeft ? leftBound + min : leftBound;
+                double const upper = aRight ? rightBound - min : rightBound;
+                if (lower <= upper)
+                    return std::clamp(aPos, lower, upper);
+                return (leftBound + rightBound) / 2.0;
+            };
             if (iCurrentColorStop != std::nullopt)
             {
                 auto leftStop = *iCurrentColorStop;
@@ -534,10 +547,9 @@ namespace neogfx
                 auto rightStop = *iCurrentColorStop;
                 if (rightStop + 1 != iSelection.color_stops().end())
                     ++rightStop;
-                (**iCurrentColorStop).first() =
-                    std::min(std::max(pos,
-                        leftStop == *iCurrentColorStop ? 0.0 : leftStop->first() + min),
-                        rightStop == *iCurrentColorStop ? 1.0 : rightStop->first() - min);
+                (**iCurrentColorStop).first() = constrain(pos,
+                    leftStop == *iCurrentColorStop ? std::optional<double>{} : leftStop->first(),
+                    rightStop == *iCurrentColorStop ? std::optional<double>{} : rightStop->first());
                 update();
                 GradientChanged();
             }
@@ -549,10 +561,9 @@ namespace neogfx
                 auto rightStop = *iCurrentAlphaStop;
                 if (rightStop + 1 != iSelection.alpha_stops().end())
                     ++rightStop;
-                (**iCurrentAlphaStop).first() =
-                    std::min(std::max(pos,
-                        leftStop == *iCurrentAlphaStop ? 0.0 : leftStop->first() + min),
-                        rightStop == *iCurrentAlphaStop ? 1.0 : rightStop->first() - min);
+                (**iCurrentAlphaStop).first() = constrain(pos,
+                    leftStop == *iCurrentAlphaStop ? std::optional<double>{} : leftStop->first(),
+                    rightStop == *iCurrentAlphaStop ? std::optional<double>{} : rightStop->first());
                 update();
                 GradientChanged();
             }
