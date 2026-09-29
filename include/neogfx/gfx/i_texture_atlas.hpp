@@ -43,6 +43,7 @@ namespace neogfx
         virtual i_sub_texture& create_sub_texture(const i_image& aImage) = 0;
         virtual i_sub_texture& create_sub_texture(const i_image& aImage, const rect& aImagePart) = 0;
         virtual void destroy_sub_texture(i_sub_texture& aSubTexture) = 0;
+        virtual const size& page_size() const = 0;
         // helpers
     public:
         void set_bleed_guard(std::optional<dimension> const& aWidth)

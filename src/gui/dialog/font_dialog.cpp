@@ -571,17 +571,29 @@ namespace neogfx
             auto fontStyleIndex = iStylePicker.presentation_model().to_item_model_index(iStylePicker.selection_model().current_index()).row();
             auto fontSize = iSelectedFont.size();
             try { fontSize = boost::lexical_cast<double>(iSizePicker.input_widget().text()); } catch (...) {}
-            static constexpr double kMaxFontSize = 1638.0; // texture atlas limit
-            if (fontSize > kMaxFontSize)
-            {
-                iSizePicker.input_widget().set_text(string{ boost::lexical_cast<std::string>(kMaxFontSize) });
-                service<i_basic_services>().system_beep();
-            }
-            fontSize = std::min(std::max(fontSize, 1.0), kMaxFontSize);
+            fontSize = std::max(fontSize, 1.0);
             iSelectedFont = neogfx::font{ 
                 fm.font_family(fontFamilyIndex), 
                 fm.font_style_name(fontFamilyIndex, fontStyleIndex), 
                 fontSize };
+            // glyphs must fit in a single glyph atlas page (device pixels, so limit depends on DPI)
+            auto const& glyphAtlas = fm.glyph_atlas();
+            auto outlineWidth = 0.0;
+            if (iSelectedTextFormat.has_value() && iSelectedTextFormat.value().effect().has_value() &&
+                iSelectedTextFormat.value().effect().value().type() == text_effect_type::Outline)
+                outlineWidth = iSelectedTextFormat.value().effect().value().width();
+            auto const maxExtent = std::min(glyphAtlas.page_size().cx, glyphAtlas.page_size().cy) - (glyphAtlas.bleed_guard() + outlineWidth) * 2.0;
+            auto const extent = std::max(iSelectedFont.height(), iSelectedFont.max_advance());
+            if (extent > maxExtent)
+            {
+                fontSize = std::max(std::floor(fontSize * maxExtent / extent), 1.0);
+                iSelectedFont = neogfx::font{
+                    fm.font_family(fontFamilyIndex),
+                    fm.font_style_name(fontFamilyIndex, fontStyleIndex),
+                    fontSize };
+                iSizePicker.input_widget().set_text(string{ boost::lexical_cast<std::string>(fontSize) });
+                service<i_basic_services>().system_beep();
+            }
         }
         else
             iSelectedFont = iCurrentFont;

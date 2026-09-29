@@ -87,8 +87,8 @@ namespace neogfx
         i_sub_texture& create_sub_texture(const i_image& aImage) final;
         i_sub_texture& create_sub_texture(const i_image& aImage, const rect& aImagePart) final;
         void destroy_sub_texture(i_sub_texture& aSubTexture) final;
+        const size& page_size() const final;
     private:
-        const size& page_size() const;
         pages::iterator create_page(dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat);
         std::pair<pages::iterator, rect> allocate_space(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat);
     private:
