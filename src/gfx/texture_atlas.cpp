@@ -91,11 +91,7 @@ namespace neogfx
         auto iterEntry = iEntries.find(aSubTexture.atlas_id());
         if (iterEntry == iEntries.end() || &aSubTexture != &*iterEntry->second.texture)
             throw sub_texture_not_found();
-        auto rectEntry = iterEntry->second.texture->atlas_location();
-        auto space = iterEntry->second.page->second.used.find(rectEntry);
-        if (space != iterEntry->second.page->second.used.end())
-            iterEntry->second.page->second.used.erase(space);
-        iterEntry->second.page->second.freed.insert(rectEntry);
+        iterEntry->second.page->second.remove(iterEntry->second.texture->atlas_location().top_left());
         iEntries.erase(iterEntry);
     }
 

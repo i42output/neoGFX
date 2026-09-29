@@ -78,6 +78,7 @@ namespace neogfx
                 return iRect;
             }
             node* insert(const size& aElementSize);
+            bool remove(const point& aPosition, neogfx::rect& aResult);
         private:
             allocator_type& iAllocator;
             bool iInUse;
@@ -88,6 +89,7 @@ namespace neogfx
         rect_pack(const size& aDimensions);
     public:
         bool insert(const size& aElementSize, rect& aResult);
+        bool remove(const point& aPosition, rect& aResult);
     private:
         node::allocator_type iAllocator;
         node iRoot;

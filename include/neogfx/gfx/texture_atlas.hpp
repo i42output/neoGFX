@@ -50,12 +50,22 @@ namespace neogfx
             };
             rect_pack pack;
             std::set<rect, fragment_less_than> used;
-            std::set<rect, fragment_less_than> freed; // todo: use this when bin pack is full
             bool insert(const size& aSize, rect& aResult)
             {
                 if (pack.insert(aSize, aResult))
                 {
                     used.insert(aResult);
+                    return true;
+                }
+                else
+                    return false;
+            }
+            bool remove(const point& aPosition)
+            {
+                rect removed;
+                if (pack.remove(aPosition, removed))
+                {
+                    used.erase(removed);
                     return true;
                 }
                 else

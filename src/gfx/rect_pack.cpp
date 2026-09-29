@@ -72,6 +72,32 @@ namespace neogfx
         return iChildren[0]->insert(aElementSize);
     }
 
+    bool rect_pack::node::remove(const point& aPosition, neogfx::rect& aResult)
+    {
+        if (!iRect.contains(aPosition))
+            return false;
+        if (is_leaf())
+        {
+            if (!iInUse)
+                return false;
+            iInUse = false;
+            aResult = iRect;
+            return true;
+        }
+        if (!iChildren[0]->remove(aPosition, aResult) && !iChildren[1]->remove(aPosition, aResult))
+            return false;
+        if (iChildren[0]->is_leaf() && !iChildren[0]->iInUse && iChildren[1]->is_leaf() && !iChildren[1]->iInUse)
+        {
+            for (auto& child : iChildren)
+            {
+                iAllocator.destroy(child);
+                iAllocator.deallocate(child);
+                child = nullptr;
+            }
+        }
+        return true;
+    }
+
     rect_pack::rect_pack(const size& aDimensions) :
         iRoot{ rect{ point{}, aDimensions }, iAllocator }
     {
@@ -86,5 +112,10 @@ namespace neogfx
             return true;
         }
         return false;
+    }
+
+    bool rect_pack::remove(const point& aPosition, rect& aResult)
+    {
+        return iRoot.remove(aPosition, aResult);
     }
 }
