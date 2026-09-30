@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neolib/core/scoped.hpp>
+#include <neolib/core/string_utf.hpp>
 
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/i_basic_services.hpp>
@@ -173,6 +174,7 @@ namespace neogfx
         if (has_presentation_model() && presentation_model().attached())
             presentation_model().detach();
         iPresentationModelSink.clear();
+        iElidedCellText.clear();
         iPresentationModel = aPresentationModel;
         if (has_presentation_model())
         {
@@ -188,19 +190,19 @@ namespace neogfx
             selection_model().set_presentation_model(*aPresentationModel);
         if (has_presentation_model())
         {
-            iPresentationModelSink += presentation_model().item_model_changed([this](const i_item_model& aItemModel) { item_model_changed(aItemModel); });
-            iPresentationModelSink += presentation_model().item_added([this](item_presentation_model_index const& aItemIndex) { item_added(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_changed([this](item_presentation_model_index const& aItemIndex) { item_changed(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_removed([this](item_presentation_model_index const& aItemIndex) { item_removed(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_expanded([this](item_presentation_model_index const& aItemIndex) { tree_changed(); invalidate_item(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_collapsed([this](item_presentation_model_index const& aItemIndex) { tree_changed(); invalidate_item(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_model_changed([this](const i_item_model& aItemModel) { iElidedCellText.clear(); item_model_changed(aItemModel); });
+            iPresentationModelSink += presentation_model().item_added([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); item_added(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_changed([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); item_changed(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_removed([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); item_removed(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_expanded([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); tree_changed(); invalidate_item(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_collapsed([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); tree_changed(); invalidate_item(aItemIndex); });
             iPresentationModelSink += presentation_model().item_toggled([this](item_presentation_model_index const& aItemIndex) { update(cell_rect(aItemIndex, cell_part::Background)); });
             iPresentationModelSink += presentation_model().items_updating([this]() { /* todo: hourglass */ });
-            iPresentationModelSink += presentation_model().items_updated([this]() { items_updated(); });
+            iPresentationModelSink += presentation_model().items_updated([this]() { iElidedCellText.clear(); items_updated(); });
             iPresentationModelSink += presentation_model().items_sorting([this]() { items_sorting(); });
-            iPresentationModelSink += presentation_model().items_sorted([this]() { items_sorted(); });
+            iPresentationModelSink += presentation_model().items_sorted([this]() { iElidedCellText.clear(); items_sorted(); });
             iPresentationModelSink += presentation_model().items_filtering([this]() { items_filtering(); });
-            iPresentationModelSink += presentation_model().items_filtered([this]() { items_filtered(); });
+            iPresentationModelSink += presentation_model().items_filtered([this]() { iElidedCellText.clear(); items_filtered(); });
         }
         presentation_model_changed();
         update();
@@ -411,7 +413,13 @@ namespace neogfx
                     auto cellTextRect = cell_rect(itemIndex, aGc, cell_part::Text);
                     auto const& glyphText = presentation_model().cell_glyph_text(itemIndex);
                     if (!editing() || editing() != itemIndex)
-                        aGc.draw_glyph_text(cellTextRect.top_left(), glyphText, *textColor);
+                    {
+                        auto const availableWidth = cellTextRect.width();
+                        if (use_ellipsis() && availableWidth > 0.0 && aGc.glyph_text_extent(glyphText).cx > availableWidth)
+                            aGc.draw_glyph_text(cellTextRect.top_left(), elided_cell_glyph_text(itemIndex, aGc, availableWidth), *textColor);
+                        else
+                            aGc.draw_glyph_text(cellTextRect.top_left(), glyphText, *textColor);
+                    }
                 }
                 if (currentCell)
                 {
@@ -997,6 +1005,21 @@ namespace neogfx
         iReadOnly = aReadOnly;
     }
 
+    bool item_view::use_ellipsis() const
+    {
+        return iUseEllipsis;
+    }
+
+    void item_view::set_use_ellipsis(bool aUseEllipsis)
+    {
+        if (iUseEllipsis != aUseEllipsis)
+        {
+            iUseEllipsis = aUseEllipsis;
+            iElidedCellText.clear();
+            update();
+        }
+    }
+
     bool item_view::is_valid(item_presentation_model_index const& aItemIndex) const
     {
         return aItemIndex.row() < presentation_model().rows() && aItemIndex.column() < presentation_model().columns();
@@ -1283,8 +1306,7 @@ namespace neogfx
         layout_items();
         if (editing())
         {
-            auto editorRect = cell_rect(*editing(), cell_part::Text);
-            editorRect.inflate(presentation_model().cell_padding(*this));
+            auto const editorRect = cell_rect(*editing(), cell_part::Editor);
             editor().move(editorRect.position());
             editor().resize(editorRect.extents());
         }
@@ -1476,6 +1498,44 @@ namespace neogfx
                 if (selection_model().has_current_index())
                     make_visible(selection_model().current_index());
         });
+    }
+
+    neogfx::glyph_text const& item_view::elided_cell_glyph_text(item_presentation_model_index const& aItemIndex, i_graphics_context& aGc, dimension aAvailableWidth) const
+    {
+        // the elided text is cached here rather than in the cell's meta as the latter also determines the
+        // cell's extents and hence the column width; an entry is reused only for the same width and font
+        auto const& cellFont = presentation_model().cell_font(aItemIndex);
+        auto const& effectiveFont = (cellFont == std::nullopt ? presentation_model().default_font() : *cellFont);
+        auto existing = iElidedCellText.find(aItemIndex);
+        if (existing != iElidedCellText.end() && existing->second.availableWidth == aAvailableWidth && existing->second.font == effectiveFont)
+            return existing->second.text;
+
+        char32_t constexpr ELLIPSIS = U'\x2026';
+
+        auto const text = neolib::utf8_to_utf32(presentation_model().cell_to_string(aItemIndex).to_std_string());
+
+        // the most characters that fit with the ellipsis in tow
+        std::size_t characters = 0u;
+        std::size_t lo = 0u;
+        std::size_t hi = text.size();
+        while (lo <= hi)
+        {
+            auto const candidateLength = lo + (hi - lo) / 2u;
+            auto const candidate = aGc.to_glyph_text(text.substr(0u, candidateLength) + ELLIPSIS, effectiveFont);
+            if (aGc.glyph_text_extent(candidate).cx <= aAvailableWidth)
+            {
+                characters = candidateLength;
+                lo = candidateLength + 1u;
+            }
+            else if (candidateLength == 0u)
+                break;
+            else
+                hi = candidateLength - 1u;
+        }
+
+        auto& entry = iElidedCellText.insert_or_assign(aItemIndex, elided_cell_text{ aAvailableWidth, effectiveFont,
+            aGc.to_glyph_text(text.substr(0u, characters) + ELLIPSIS, effectiveFont) }).first->second;
+        return entry.text;
     }
 
     void item_view::invalidate_item(item_presentation_model_index const& aItemIndex)

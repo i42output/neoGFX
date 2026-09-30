@@ -21,6 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <unordered_map>
+
 #include <neogfx/core/easing.hpp>
 #include <neogfx/app/drag_drop.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
@@ -89,6 +91,8 @@ namespace neogfx
     public:
         bool read_only() const;
         void set_read_only(bool aReadOnly);
+        bool use_ellipsis() const;
+        void set_use_ellipsis(bool aUseEllipsis);
         bool is_valid(item_presentation_model_index const& aItemIndex) const;
         bool is_visible(item_presentation_model_index const& aItemIndex, bool aPartiallyVisible = false) const;
         bool make_visible(item_presentation_model_index const& aItemIndex);
@@ -182,6 +186,7 @@ namespace neogfx
         optional_item_presentation_model_index item_at(const point& aPosition, bool aIncludeEntireRow = true) const;
     private:
         void init();
+        neogfx::glyph_text const& elided_cell_glyph_text(item_presentation_model_index const& aItemIndex, i_graphics_context& aGc, dimension aAvailableWidth) const;
         void invalidate_item(item_presentation_model_index const& aItemIndex);
         void update_hover(const optional_point& aPosition);
         item_selection_operation to_selection_operation(key_modifier aKeyModifier) const;
@@ -194,6 +199,21 @@ namespace neogfx
         sink iSelectionModelSink;
         sink iDragDropSink;
         bool iReadOnly;
+        bool iUseEllipsis = true;
+        struct elided_cell_text
+        {
+            dimension availableWidth;
+            neogfx::font font;
+            neogfx::glyph_text text;
+        };
+        struct item_index_hash
+        {
+            std::size_t operator()(item_presentation_model_index const& aIndex) const
+            {
+                return std::hash<std::uint64_t>{}((static_cast<std::uint64_t>(aIndex.row()) << 32u) | aIndex.column());
+            }
+        };
+        mutable std::unordered_map<item_presentation_model_index, elided_cell_text, item_index_hash> iElidedCellText;
         ref_ptr<i_item_model> iModel;
         ref_ptr<i_item_presentation_model> iPresentationModel;
         ref_ptr<i_item_selection_model> iSelectionModel;
