@@ -33,6 +33,21 @@
 
 namespace neogfx
 {
+    namespace
+    {
+        // The EditableWhenFocused/EditableOnInputEvent trigger flags say when a cell's in-place editor is presented;
+        // Editable says whether that editor is writable (a read-only cell gets a read-only line edit for clipboard copy).
+        bool cell_edit_when_focused(i_item_presentation_model const& aModel, item_presentation_model_index const& aIndex)
+        {
+            return (aModel.cell_flags(aIndex) & item_cell_flags::EditableWhenFocused) == item_cell_flags::EditableWhenFocused;
+        }
+
+        bool cell_edit_on_input_event(i_item_presentation_model const& aModel, item_presentation_model_index const& aIndex)
+        {
+            return (aModel.cell_flags(aIndex) & item_cell_flags::EditableOnInputEvent) == item_cell_flags::EditableOnInputEvent;
+        }
+    }
+
     item_view::item_view(frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         base_type{ aScrollbarStyle, aFrameStyle }, iReadOnly{ false }, iUpdatingModels { false }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
     {
@@ -468,7 +483,7 @@ namespace neogfx
                     if (itemWasCurrent && itemIsCurrent)
                         iClickedItem = item;
                     if (aKeyModifier == key_modifier::None && !iClickedCheckBox && itemIsCurrent &&
-                        presentation_model().cell_editable_when_focused(*item))
+                        cell_edit_when_focused(presentation_model(), *item))
                         edit(*item);
                 }
                 else
@@ -548,8 +563,8 @@ namespace neogfx
                 bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
                 if (!actioned && itemIsCurrent && aKeyModifier == key_modifier::None)
                 {
-                    if (presentation_model().cell_editable_when_focused(*item) ||
-                        (itemWasCurrent && presentation_model().cell_editable_on_input_event(*item)))
+                    if (cell_edit_when_focused(presentation_model(), *item) ||
+                        (itemWasCurrent && cell_edit_on_input_event(presentation_model(), *item)))
                     {
                         if (edit(*item))
                             actioned = true;
@@ -571,7 +586,7 @@ namespace neogfx
                 CellClick.trigger(*item);
             bool doCheck = (item == iClickedItem && cell_rect(*item, cell_part::Text).contains(aPosition));
             iClickedItem = std::nullopt;
-            if (doCheck && (presentation_model().cell_editable_on_input_event(*item)))
+            if (doCheck && cell_edit_on_input_event(presentation_model(), *item))
                 edit(*item);
         }
         if (iClickedCheckBox != std::nullopt)
@@ -757,7 +772,8 @@ namespace neogfx
     bool item_view::text_input(i_string const& aText)
     {
         bool handled = base_type::text_input(aText);
-        if (editing() == std::nullopt && selection_model().has_current_index() && aText[0] != '\r' && aText[0] != '\n' && aText[0] != '\t')
+        if (editing() == std::nullopt && selection_model().has_current_index() && presentation_model().cell_editable(selection_model().current_index()) &&
+            aText[0] != '\r' && aText[0] != '\n' && aText[0] != '\t')
         {
             edit(selection_model().current_index());
             if (editing())
@@ -834,8 +850,12 @@ namespace neogfx
     {
         layout_items(true);
         update();
-        if (editing() && !presentation_model().cell_editable(*editing()))
-            end_edit(false);
+        if (editing())
+        {
+            bool const editorReadOnly = editor_has_text_edit() && editor_text_edit().read_only();
+            if (editorReadOnly == presentation_model().cell_editable(*editing()))
+                end_edit(false);
+        }
     }
 
     void item_view::item_added(const item_model_index&)
@@ -931,7 +951,7 @@ namespace neogfx
             {
                 if (aPreviousIndex != std::nullopt)
                 {
-                    if (editing() && presentation_model().cell_editable_when_focused(*aCurrentIndex) && editing() != aCurrentIndex && iSavedModelIndex == std::nullopt)
+                    if (editing() && cell_edit_when_focused(presentation_model(), *aCurrentIndex) && editing() != aCurrentIndex && iSavedModelIndex == std::nullopt)
                         edit(*aCurrentIndex);
                     else if (editing())
                         end_edit(true);
@@ -1020,15 +1040,16 @@ namespace neogfx
 
     bool item_view::edit(item_presentation_model_index const& aItemIndex)
     {
-        if (read_only() || editing() == aItemIndex || beginning_edit() || ending_edit() || !presentation_model().cell_editable(aItemIndex) )
+        if (read_only() || editing() == aItemIndex || beginning_edit() || ending_edit())
             return false;
+        bool const cellReadOnly = !presentation_model().cell_editable(aItemIndex);
         iClickedItem = std::nullopt;
         suppress_scrollbar_visibility_updates ssvu{ *this };
         neolib::scoped_flag sf{ iBeginningEdit };
         auto modelIndex = presentation_model().to_item_model_index(aItemIndex);
         end_edit(true);
         auto const& cellInfo = model().cell_info(modelIndex);
-        if (cellInfo.dataStep == neolib::none)
+        if (cellReadOnly || cellInfo.dataStep == neolib::none)
             iEditor = std::make_shared<item_editor<line_edit>>(*this);
         else
         {
@@ -1090,6 +1111,7 @@ namespace neogfx
         if (editor_has_text_edit())
         {
             auto& textEdit = editor_text_edit();
+            textEdit.set_read_only(cellReadOnly);
             if (presentation_model().cell_color(newIndex, color_role::Background) != optional_color{})
                 textEdit.set_background_color(presentation_model().cell_color(newIndex, color_role::Background));
             optional_color backgroundColor = presentation_model().cell_color(newIndex, color_role::Background);
