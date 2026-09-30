@@ -106,11 +106,11 @@ namespace neogfx
             {
                 return *iNext;
             }
-            bool operator==(const graphics_operation::operation* aTest) const
+            bool operator==(const value_type* aTest) const
             {
                 return iNext == aTest;
             }
-            bool operator!=(const graphics_operation::operation* aTest) const
+            bool operator!=(const value_type* aTest) const
             {
                 return !operator==(aTest);
             }
@@ -2394,6 +2394,8 @@ namespace neogfx
         auto& tMeshRenderers = tDrawGlyphArrays.meshRenderers;
         auto& tMeshDrawables = tDrawGlyphArrays.drawables;
 
+        draw_glyph const* firstGlyph = nullptr;
+
         auto draw = [&](draw_glyphs_stage aStage)
             {
                 auto passThroughCleanup = [&]() { rendering_engine().default_shader_program().texture_shader().set_pass_through(false); };
@@ -2404,11 +2406,81 @@ namespace neogfx
                     scu.emplace(passThroughCleanup);
                 }
 
-                for (std::size_t i = 0; i < tMeshFilters.size(); ++i)
-                    tMeshDrawables.emplace_back(tMeshOrigins[i], tMeshFilters[i], tMeshRenderers[i]);
                 optional_ecs_render_lock ignore;
-                if (!tMeshDrawables.empty())
-                    draw_meshes(ignore, as_vertex_provider<>(*this), 0, &*tMeshDrawables.begin(), &*tMeshDrawables.begin() + tMeshDrawables.size(), mat44::identity());
+                auto const meshCount = tMeshFilters.size();
+                bool const barrier = std::any_of(tMeshRenderers.begin(), tMeshRenderers.end(), [](game::mesh_renderer const& r) { return r.barrier; });
+                if (!barrier || meshCount <= 1u)
+                {
+                    for (std::size_t i = 0; i < meshCount; ++i)
+                        tMeshDrawables.emplace_back(tMeshOrigins[i], tMeshFilters[i], tMeshRenderers[i]);
+                    if (!tMeshDrawables.empty())
+                        draw_meshes(ignore, as_vertex_provider<>(*this), 0, &*tMeshDrawables.begin(), &*tMeshDrawables.begin() + tMeshDrawables.size(), mat44::identity());
+                }
+                else
+                {
+                    // Subpixel glyphs read back the render target so overlapping glyph quads cannot be drawn
+                    // by the same draw call. Find the smallest skip amount such that no two glyphs that are
+                    // a multiple of it apart overlap, then draw each skip pass (glyphs 0, n, 2n...; 1, n+1, 2n+1...)
+                    // as a single draw call bracketed by texture barriers rather than one draw call (and barrier)
+                    // per triangle.
+                    constexpr std::size_t MaxSkipAmount = 16u;
+                    thread_local std::vector<std::pair<vec2f, vec2f>> tBoxes;
+                    tBoxes.clear();
+                    for (std::size_t i = 0; i < meshCount; ++i)
+                    {
+                        auto const& mesh = (tMeshFilters[i].mesh != std::nullopt ? *tMeshFilters[i].mesh : *tMeshFilters[i].sharedMesh);
+                        auto const& origin = tMeshOrigins[i].to_vec3().as<float>();
+                        std::pair<vec2f, vec2f> box{ vec2f{ std::numeric_limits<float>::max(), std::numeric_limits<float>::max() },
+                            vec2f{ std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest() } };
+                        for (auto const& v : mesh.vertices)
+                        {
+                            auto const xyz = v + origin;
+                            box.first.x = std::min(box.first.x, xyz.x);
+                            box.first.y = std::min(box.first.y, xyz.y);
+                            box.second.x = std::max(box.second.x, xyz.x);
+                            box.second.y = std::max(box.second.y, xyz.y);
+                        }
+                        tBoxes.push_back(box);
+                    }
+                    auto const overlaps = [&](std::size_t a, std::size_t b)
+                    {
+                        auto const& lhs = tBoxes[a];
+                        auto const& rhs = tBoxes[b];
+                        return lhs.first.x < rhs.second.x && rhs.first.x < lhs.second.x &&
+                            lhs.first.y < rhs.second.y && rhs.first.y < lhs.second.y;
+                    };
+                    std::size_t skipAmount = 1u;
+                    for (std::size_t i = 0; i < meshCount && skipAmount < MaxSkipAmount; ++i)
+                        for (std::size_t j = i + skipAmount; j < std::min(meshCount, i + MaxSkipAmount); ++j)
+                            if (overlaps(i, j))
+                                skipAmount = j - i + 1u;
+                    if (skipAmount >= MaxSkipAmount)
+                        skipAmount = meshCount; // pathological overlap: one glyph per draw call
+
+                    auto const first = tMeshFilters.data();
+                    auto const last = first + meshCount;
+                    tMeshDrawables.reserve(meshCount);
+                    std::size_t passStart = 0u;
+                    std::size_t previous = 0u;
+                    auto draw_pass = [&]()
+                    {
+                        // draw_patch's use_shader_program clears the glyph shader on exit so re-apply it for subsequent passes
+                        if (passStart > 0u && firstGlyph != nullptr)
+                            rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, *firstGlyph->glyphText, *firstGlyph->glyphChar);
+                        if (tMeshDrawables.size() > passStart)
+                            draw_meshes(ignore, as_vertex_provider<>(*this), 0, tMeshDrawables.data() + passStart, tMeshDrawables.data() + tMeshDrawables.size(), mat44::identity());
+                        passStart = tMeshDrawables.size();
+                    };
+                    for (skip_iterator<game::mesh_filter> mf{ first, last, skipAmount }; mf != last; ++mf)
+                    {
+                        auto const i = static_cast<std::size_t>(&*mf - first);
+                        if (i < previous)
+                            draw_pass();
+                        tMeshDrawables.emplace_back(tMeshOrigins[i], tMeshFilters[i], tMeshRenderers[i]);
+                        previous = i;
+                    }
+                    draw_pass();
+                }
 
                 tMeshOrigins.clear();
                 tMeshFilters.clear();
@@ -2785,6 +2857,7 @@ namespace neogfx
                     if (updateGlyphShader)
                     {
                         updateGlyphShader = false;
+                        firstGlyph = &drawOp;
                         rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, glyphText, glyphChar);
                     }
 
@@ -3173,6 +3246,7 @@ namespace neogfx
         std::optional<std::pair<point, mat44f>> originTranslatedTransformation;
 
         std::optional<opengl_triangle_renderer> triangleRenderer;
+        bool triangleRendererBarrier = false;
 
         auto const logicalCoordinates = logical_coordinates();
 
@@ -3220,7 +3294,8 @@ namespace neogfx
                 std::prev(next)->vertexArrayIndexEnd == next->vertexArrayIndexStart &&
                 game::batchable(*item->material, *next->material) &&
                 sampling == calc_sampling(*next) &&
-                item->meshDrawable->renderer->depthTest == next->meshDrawable->renderer->depthTest)
+                item->meshDrawable->renderer->depthTest == next->meshDrawable->renderer->depthTest &&
+                item->meshDrawable->renderer->barrier == next->meshDrawable->renderer->barrier)
             {
                 faceCount += next->faces->size();
                 ++next;
@@ -3284,10 +3359,16 @@ namespace neogfx
                 if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
                     enable_sample_shading(1.0);
 
-                if (triangleRenderer == std::nullopt || !triangleRenderer->with_textures())
+                if (triangleRenderer == std::nullopt || !triangleRenderer->with_textures() || triangleRendererBarrier != batchRenderer.barrier)
+                {
                     triangleRenderer.emplace(*aPatch.provider, *this, transformation, with_textures, 0, batchRenderer.barrier);
+                    triangleRendererBarrier = batchRenderer.barrier;
+                }
 
-                triangleRenderer->draw(item->vertexArrayIndexStart, faceCount * 3);
+                // barrier batches are drawn a skip pass at a time (see draw_glyphs) so contain no overlapping
+                // triangles: one draw call bracketed by texture barriers suffices
+                triangleRenderer->draw(item->vertexArrayIndexStart, faceCount * 3,
+                    opengl_triangle_renderer::skip{ batchRenderer.barrier ? std::optional<std::size_t>{ faceCount } : std::nullopt });
             }
             else
             {
@@ -3295,8 +3376,11 @@ namespace neogfx
 
                 rendering_engine().default_shader_program().texture_shader().clear_texture();
 
-                if (triangleRenderer == std::nullopt || triangleRenderer->with_textures())
+                if (triangleRenderer == std::nullopt || triangleRenderer->with_textures() || triangleRendererBarrier != batchRenderer.barrier)
+                {
                     triangleRenderer.emplace(*aPatch.provider, *this, transformation, 0, batchRenderer.barrier);
+                    triangleRendererBarrier = batchRenderer.barrier;
+                }
 
                 triangleRenderer->draw(item->vertexArrayIndexStart, faceCount * 3);
             }
