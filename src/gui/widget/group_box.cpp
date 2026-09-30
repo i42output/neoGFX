@@ -135,7 +135,7 @@ namespace neogfx
     };
 
     group_box::box::box(group_box& aOwner) :
-        widget{ aOwner.layout() }, iOwner{ aOwner }
+        widget{ aOwner.iBoxLayout }, iOwner{ aOwner }
     {
         set_padding({});
     }
@@ -154,19 +154,19 @@ namespace neogfx
     }
 
     group_box::group_box(std::string const& aText) : 
-        widget(), iLayout{ *this }, iTitleLayout{ make_ref<group_box_title_layout>(*this) }, iTitle{ std::make_unique<neogfx::label>(title_layout(), aText)}, iBox{*this}
+        widget(), iLayout{ *this }, iTitleLayout{ make_ref<group_box_title_layout>(*this) }, iTitle{ std::make_unique<neogfx::label>(title_layout(), aText)}, iBoxLayout{ iLayout }, iBox{*this}
     {
         init();
     }
 
     group_box::group_box(i_widget& aParent, std::string const& aText) :
-        widget(aParent), iLayout{ *this }, iTitleLayout{ make_ref<group_box_title_layout>(*this) }, iTitle{ std::make_unique<neogfx::label>(title_layout(), aText) }, iBox{ *this }
+        widget(aParent), iLayout{ *this }, iTitleLayout{ make_ref<group_box_title_layout>(*this) }, iTitle{ std::make_unique<neogfx::label>(title_layout(), aText) }, iBoxLayout{ iLayout }, iBox{ *this }
     {
         init();
     }
 
     group_box::group_box(i_layout& aLayout, std::string const& aText) :
-        widget(aLayout), iLayout{ *this }, iTitleLayout{ make_ref<group_box_title_layout>(*this) }, iTitle{ std::make_unique<neogfx::label>(title_layout(), aText) }, iBox{ *this }
+        widget(aLayout), iLayout{ *this }, iTitleLayout{ make_ref<group_box_title_layout>(*this) }, iTitle{ std::make_unique<neogfx::label>(title_layout(), aText) }, iBoxLayout{ iLayout }, iBox{ *this }
     {
         init();
     }
@@ -293,6 +293,20 @@ namespace neogfx
         iBox.set_layout(iItemLayout);
     }
 
+    bool group_box::stretch_content_to_title_width() const
+    {
+        return iStretchContentToTitleWidth;
+    }
+
+    void group_box::set_stretch_content_to_title_width(bool aStretchContentToTitleWidth)
+    {
+        if (iStretchContentToTitleWidth != aStretchContentToTitleWidth)
+        {
+            iStretchContentToTitleWidth = aStretchContentToTitleWidth;
+            update_box_spacer();
+        }
+    }
+
     const i_layout& group_box::item_layout() const
     {
         return *iItemLayout;
@@ -393,6 +407,7 @@ namespace neogfx
         if (iBorderStyle != aBorderStyle)
         {
             iBorderStyle = aBorderStyle;
+            update_box_spacer();
             update_layout();
             update();
         }
@@ -486,11 +501,25 @@ namespace neogfx
     {
         set_padding(neogfx::padding{});
         iLayout.set_padding(neogfx::padding{});
+        iBoxLayout.set_padding(neogfx::padding{});
+        iBoxLayout.set_spacing(size{});
+        update_box_spacer();
         set_item_layout(make_ref<group_box_item_layout>(*this));
     }
 
     void group_box::update_widgets()
     {
         iBox.enable(!is_checkable() || check_box().is_checked());
+    }
+
+    void group_box::update_box_spacer()
+    {
+        // a spacer lets the content box be narrower than the title (issue #88)
+        bool const wantSpacer = border_style() == group_box_border_style::None && !stretch_content_to_title_width();
+        if (wantSpacer && !iBoxSpacer)
+            iBoxSpacer.emplace(iBoxLayout);
+        else if (!wantSpacer && iBoxSpacer)
+            iBoxSpacer.reset();
+        update_layout();
     }
 }

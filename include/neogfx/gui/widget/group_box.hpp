@@ -22,6 +22,8 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/gui/layout/vertical_layout.hpp>
+#include <neogfx/gui/layout/horizontal_layout.hpp>
+#include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/check_box.hpp>
 #include "widget.hpp"
@@ -88,6 +90,8 @@ namespace neogfx
         void set_item_layout(i_ref_ptr<i_layout> const& aItemLayout);
         const i_layout& item_layout() const;
         i_layout& item_layout();
+        bool stretch_content_to_title_width() const;
+        void set_stretch_content_to_title_width(bool aStretchContentToTitleWidth);
         template <typename LayoutT, typename... Args>
         LayoutT& with_item_layout(Args&&... args)
         {
@@ -120,11 +124,15 @@ namespace neogfx
     private:
         void init();
         void update_widgets();
+        void update_box_spacer();
     private:
         vertical_layout iLayout;
         ref_ptr<i_layout> iTitleLayout;
         std::variant<std::monostate, label_ptr, check_box_ptr> iTitle;
+        horizontal_layout iBoxLayout;
         box iBox;
+        std::optional<horizontal_spacer> iBoxSpacer;
+        bool iStretchContentToTitleWidth = false;
         ref_ptr<i_layout> iItemLayout;
         group_box_border_style iBorderStyle = group_box_border_style::None;
         dimension iBorderThickness = DEFAULT_BORDER_THICKNESS;
