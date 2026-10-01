@@ -504,85 +504,69 @@ namespace neogfx
     template <typename PushButtonInterface>
     inline bool basic_push_button<PushButtonInterface>::has_hover_color() const
     {
-        return iHoverColor.has_value();
+        return HoverColor.value().has_value();
     }
 
     template <typename PushButtonInterface>
     inline color basic_push_button<PushButtonInterface>::hover_color() const
     {
-        return iHoverColor.value_or(service<i_app>().current_style().palette().color(color_role::Hover));
+        return HoverColor.value().value_or(service<i_app>().current_style().palette().color(color_role::Hover));
     }
 
     template <typename PushButtonInterface>
     inline void basic_push_button<PushButtonInterface>::set_hover_color(const optional_color& aHoverColor)
     {
-        if (iHoverColor != aHoverColor)
-        {
-            iHoverColor = aHoverColor;
-            this->update();
-        }
+        HoverColor = aHoverColor;
     }
 
     template <typename PushButtonInterface>
     inline bool basic_push_button<PushButtonInterface>::has_border_color() const
     {
-        return iBorderColor.has_value();
+        return BorderColor.value().has_value();
     }
 
     template <typename PushButtonInterface>
     inline color basic_push_button<PushButtonInterface>::border_color() const
     {
         if (has_border_color())
-            return iBorderColor.value();
+            return BorderColor.value().value();
         return iStyleSheetBorderColor.value();
     }
 
     template <typename PushButtonInterface>
     inline void basic_push_button<PushButtonInterface>::set_border_color(const optional_color& aBorderColor)
     {
-        if (iBorderColor != aBorderColor)
-        {
-            iBorderColor = aBorderColor;
-            this->update();
-        }
+        BorderColor = aBorderColor;
     }
 
     template <typename PushButtonInterface>
     inline bool basic_push_button<PushButtonInterface>::has_outer_border_color() const
     {
-        return iOuterBorderColor.has_value();
+        return OuterBorderColor.value().has_value();
     }
 
     template <typename PushButtonInterface>
     inline color basic_push_button<PushButtonInterface>::outer_border_color() const
     {
-        return iOuterBorderColor.value_or(this->background_color().darker(0x10));
+        return OuterBorderColor.value().value_or(this->background_color().darker(0x10));
     }
 
     template <typename PushButtonInterface>
     inline void basic_push_button<PushButtonInterface>::set_outer_border_color(const optional_color& aOuterBorderColor)
     {
-        if (iOuterBorderColor != aOuterBorderColor)
-        {
-            iOuterBorderColor = aOuterBorderColor;
-            this->update();
-        }
+        OuterBorderColor = aOuterBorderColor;
     }
 
     template <typename PushButtonInterface>
     inline std::optional<border_radii> const& basic_push_button<PushButtonInterface>::border_radius() const
     {
-        return iBorderRadii;
+        return BorderRadius.value();
     }
 
     template <typename PushButtonInterface>
     inline void basic_push_button<PushButtonInterface>::set_border_radius(std::optional<border_radii> const& aBorderRadii)
     {
-        if (iBorderRadii != aBorderRadii)
-        {
-            iBorderRadii = aBorderRadii;
-            this->update();
-        }
+        BorderRadius = aBorderRadii;
     }
 
     template <typename PushButtonInterface>

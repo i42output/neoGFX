@@ -28,6 +28,7 @@ namespace neogfx
     class text_widget : public widget<i_text_widget>
     {
         meta_object(widget<i_text_widget>)
+        typedef text_widget property_context_type;
     public:
         define_event(TextChanged, text_changed)
         define_event(TextGeometryChanged, text_geometry_changed)
@@ -49,6 +50,8 @@ namespace neogfx
         void set_font(optional_font const& aFont) override;
     public:
         bool visible() const override;
+    public:
+        void property_changed(i_property& aProperty) override;
     public:
         i_string const& text() const override;
         void set_text(i_string const& aText) override;
@@ -89,12 +92,13 @@ namespace neogfx
         size_hint iSizeHint;
         mutable optional_size iSizeHintExtent;
         text_widget_type iType;
-        text_widget_flags iFlags;
-        neogfx::alignment iAlignment;
-        angle iRotation = 0.0;
         ref_ptr<i_text_widget const> iAlignmentTo;
-        optional_text_format iTextAppearance;
         widget_timer iAnimator;
         sink iSink;
+    public:
+        define_property(property_category::hard_geometry, text_widget_flags, Flags, flags, text_widget_flags::None)
+        define_property(property_category::hard_geometry, neogfx::alignment, Alignment, alignment, neogfx::alignment::Center | neogfx::alignment::VCenter)
+        define_property(property_category::hard_geometry, angle, Rotation, rotation, 0.0)
+        define_property(property_category::other_appearance, optional_text_format, TextFormat, text_format)
     };
-}
+}

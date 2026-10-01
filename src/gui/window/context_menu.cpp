@@ -21,6 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/event_processing_context.hpp>
+#include <neogfx/hid/i_window_manager.hpp>
+#include <neogfx/hid/i_surface_window.hpp>
+#include <neogfx/gui/window/i_native_window.hpp>
 #include <neogfx/gui/widget/menu.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
 
@@ -111,6 +114,14 @@ namespace neogfx
     {
         std::optional<exit_reason> exitReason;
         menu().set_modal(true);
+        // as on Windows, a context menu opened with the keyboard shows its mnemonics
+        auto& wm = service<i_window_manager>();
+        if (wm.window_activated())
+        {
+            auto const& nativeWindow = wm.active_window().surface().as_surface_window().native_window();
+            if (nativeWindow.has_current_event() && std::holds_alternative<keyboard_event>(nativeWindow.current_event()))
+                menu().show_mnemonics(true);
+        }
         menu().closed([&]()
             {
                 if (!service<i_context_menu>().context_menu_cancelling())

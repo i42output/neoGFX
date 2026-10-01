@@ -231,6 +231,25 @@ namespace neogfx
         if (!has_menu() || !menu().is_open())
             return false;
 
+        // Alt is left to the menu bar (if any) so that, as on Windows, pressing it on its own leaves the menu
+        if (aScanCode == ScanCode_LALT)
+            return false;
+
+        // as on Windows, using a menu with the keyboard shows its mnemonics
+        if (!menu().showing_mnemonics())
+        {
+            i_menu* rootMenu = &menu();
+            while (rootMenu->has_parent())
+                rootMenu = &rootMenu->parent();
+            rootMenu->show_mnemonics(true);
+            for (i_widget* w = this; w != nullptr;)
+            {
+                w->update();
+                auto const p = dynamic_cast<popup_menu*>(w);
+                w = (p != nullptr ? p->iParentWidget : nullptr);
+            }
+        }
+
         if ((style() & window_style::HorizontalMenuLayout) == window_style::HorizontalMenuLayout)
         {
             switch (aScanCode)
@@ -334,9 +353,12 @@ namespace neogfx
         return true;
     }
 
-    bool popup_menu::key_released(scan_code_e, key_code_e, key_modifier)
+    bool popup_menu::key_released(scan_code_e aScanCode, key_code_e, key_modifier)
     {
         if (!has_menu() || !menu().is_open())
+            return false;
+
+        if (aScanCode == ScanCode_LALT)
             return false;
 
         return true;

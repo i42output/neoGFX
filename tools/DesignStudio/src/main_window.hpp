@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/dock.hpp>
 #include <neogfx/gui/widget/dockable.hpp>
 #include <neogfx/gui/widget/table_view.hpp>
+#include <neogfx/gui/widget/push_button.hpp>
 #include <neogfx/core/style_sheet.hpp>
 #include <neogfx/gui/dialog/settings_dialog.hpp>
 #include <neogfx/app/file_dialog.hpp>
@@ -38,6 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "toolbox_model.hpp"
 #include "workflow_model.hpp"
 #include "object_model.hpp"
+#include "property_model.hpp"
 #include "DesignStudio.ui.hpp"
 
 namespace neogfx::DesignStudio
@@ -84,6 +86,7 @@ namespace neogfx::DesignStudio
         void select_all() override;
     private:
         void paint_workspace(ng::i_graphics_context& aGc);
+        void update_properties();
     private:
         project_manager& iProjectManager;
         ng::dock iLeftDock;
@@ -105,6 +108,14 @@ namespace neogfx::DesignStudio
         workflow_presentation_model iWorkflowPresentationModel;
         object_model iObjectModel;
         object_presentation_model iObjectPresentationModel;
+        property_model iPropertyModel;
+        property_presentation_model iPropertyPresentationModel;
+        weak_ref_ptr<i_element> iPropertyElement;
+        bool iUpdatingProperties = false;
+        bool iPropertiesNeedUpdate = false;
+        bool iPropertyDialogOpen = false;
+        std::unique_ptr<ng::push_button> iPropertyDialogButton; // "..." next to the in-place editor of a color or font property
+        std::optional<ng::widget_timer> iPropertiesUpdater;
         ng::sink iSink;
     };
 }

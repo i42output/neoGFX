@@ -26,11 +26,13 @@
 #include <neolib/core/i_optional.hpp>
 #include <neolib/core/i_string.hpp>
 #include <neolib/core/i_vector.hpp>
+#include <neolib/core/i_pair.hpp>
 #include <neolib/task/i_event.hpp>
 
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
+#include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/tools/DesignStudio/i_element_component.hpp>
 
 namespace neogfx::DesignStudio
@@ -41,6 +43,7 @@ namespace neogfx::DesignStudio
     {
     public:
         virtual void start_drag(cardinal aPart, point const& aPosition) = 0;
+        virtual void begin_text_edit() = 0;
         virtual void drag(point const& aPosition, bool aIgnoreConstraints) = 0;
         virtual void end_drag() = 0;
     };
@@ -81,10 +84,14 @@ namespace neogfx::DesignStudio
         typedef i_element abstract_type;
     public:
         typedef neolib::i_vector<i_ref_ptr<i_element>> i_children_t;
+        // .nrc attributes (name, RJSON value text) in document order; names beginning with '#' are 
+        // metadata: "#child" (position of next child element), "#fragment" (ui fragment name), "#ui" (position of ui block)
+        typedef neolib::i_vector<neolib::i_pair<neolib::i_string, neolib::i_string>> i_attributes_t;
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error{ "neogfx::DesignStudio::i_element::no_parent" } {} };
         struct no_layout_item : std::logic_error { no_layout_item() : std::logic_error{ "neogfx::DesignStudio::i_element::no_layout_item" } {} };
         struct no_caddy : std::logic_error { no_caddy() : std::logic_error{ "neogfx::DesignStudio::i_element::no_caddy" } {} };
+        struct no_child_layout : std::logic_error { no_child_layout() : std::logic_error{ "neogfx::DesignStudio::i_element::no_child_layout" } {} };
     public:
         virtual i_element_library const& library() const = 0;
         virtual i_project& project() const = 0;
@@ -103,6 +110,9 @@ namespace neogfx::DesignStudio
         virtual void add_child(i_element& aChild) = 0;
         virtual void remove_child(i_element& aChild) = 0;
     public:
+        virtual i_attributes_t const& attributes() const = 0;
+        virtual i_attributes_t& attributes() = 0;
+    public:
         virtual void create_default_children() = 0;
     public:
         virtual bool needs_caddy() const = 0;
@@ -112,6 +122,13 @@ namespace neogfx::DesignStudio
         virtual bool has_layout_item() const = 0;
         virtual void create_layout_item(i_widget& aParent) = 0;
         virtual i_layout_item& layout_item() const = 0;
+        virtual bool has_child_layout() const = 0;
+        virtual i_layout& child_layout(neolib::i_string const& aChildType) const = 0;
+        virtual void create_child_layout_item(i_element const& aChild, i_ref_ptr<i_layout_item>& aResult) = 0;
+        virtual void reveal() = 0;
+        virtual bool has_text() const = 0;
+        virtual i_widget& text_area() const = 0; // the widget displaying the element's text (the in-place text editor goes over it)
+        virtual void apply_attributes(bool aShowIds) = 0;
     public:
         virtual element_mode mode() const = 0;
         virtual void set_mode(element_mode aMode) = 0;
@@ -154,6 +171,10 @@ namespace neogfx::DesignStudio
         i_widget& widget() const
         {
             return layout_item().as_widget();
+        }
+        bool is_nested() const
+        {
+            return has_parent() && parent().has_layout_item();
         }
     };
 

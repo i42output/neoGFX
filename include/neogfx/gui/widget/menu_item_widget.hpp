@@ -34,6 +34,7 @@ namespace neogfx
     {
         meta_object(widget<i_menu_item_widget>)
         friend class popup_menu;
+        friend class menu_bar;
     public:
         menu_item_widget(i_menu& aMenu, i_menu_item& aMenuItem);
         menu_item_widget(i_widget& aParent, i_menu& aMenu, i_menu_item& aMenuItem);

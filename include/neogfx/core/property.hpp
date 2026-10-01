@@ -122,7 +122,7 @@ namespace neogfx
         }
         void sync(bool aIgnorePrevious = false) final
         {
-            iFrom = aIgnorePrevious ? iProperty.iValue : iProperty.iPreviousValue;
+            iFrom = aIgnorePrevious ? std::optional<value_type>{ iProperty.iValue } : iProperty.iPreviousValue;
             iTo = iProperty.iValue;
         }
     private:
@@ -222,6 +222,10 @@ namespace neogfx
         {
             return typeid(category_type);
         }
+        const std::type_info& context() const final
+        {
+            return typeid(context_type);
+        }
         bool optional() const final
         {
             return neolib::is_optional_v<T>;
@@ -231,12 +235,12 @@ namespace neogfx
             if constexpr (neolib::is_optional_v<T>)
             {
                 if (value() != std::nullopt)
-                    return *value();
+                    return to_variant(*value());
                 else
                     return neolib::none;
             }
             else
-                return value();
+                return to_variant(value());
         }
         void set_from_variant(const property_variant& aValue) final
         {
@@ -441,6 +445,15 @@ namespace neogfx
             throw no_calculator();
         }
     private:
+        template <typename V>
+        static property_variant to_variant(V const& aValue)
+        {
+            // neolib::any's constructor from a variant type is explicit so a variant value type (e.g. color_or_gradient) must be wrapped explicitly.
+            if constexpr (neolib::is_variant_v<V>)
+                return property_variant{ custom_type{ aValue } };
+            else
+                return aValue;
+        }
         value_type& mutable_value()
         {
             return const_cast<value_type&>(to_const(*this).value());
@@ -496,9 +509,9 @@ namespace neogfx
 
             bool discardChangedFromTo = false;
             if constexpr (!neolib::is_optional_v<T>)
-                discardChangedFromTo = event_consumed(PropertyChangedFromTo(property_variant{ *iPreviousValue }, get_as_variant()));
+                discardChangedFromTo = event_consumed(PropertyChangedFromTo(to_variant(*iPreviousValue), get_as_variant()));
             else
-                discardChangedFromTo = event_consumed(PropertyChangedFromTo(*iPreviousValue != std::nullopt ? property_variant{ **iPreviousValue } : property_variant{ neolib::none }, get_as_variant()));
+                discardChangedFromTo = event_consumed(PropertyChangedFromTo(*iPreviousValue != std::nullopt ? to_variant(**iPreviousValue) : property_variant{ neolib::none }, get_as_variant()));
             if (destroyed)
                 return;
 

@@ -43,6 +43,30 @@ namespace neogfx::DesignStudio
                         widgetCaddy->resize(idealSize);
                         widgetCaddy->move((iDragDropItem->source().drag_drop_tracking_position() + iDragDropItem->source().drag_drop_event_monitor().origin() - widgetCaddy->extents() / 2.0).ceil());
                         iDragDropItem->source().set_drag_drop_widget(widgetCaddy);
+                        // highlight the layout the dragged element would be dropped into
+                        i_widget* draggedCaddy = &*widgetCaddy;
+                        iDragSink = widgetCaddy->position_changed([this, &aProject, &aElement, draggedCaddy]()
+                        {
+                            i_element* container = nullptr;
+                            auto const dropPosition = design_rect(*draggedCaddy).center();
+                            bool const isRootWidget = aElement.has_layout_item() && aElement.layout_item().is_widget() &&
+                                aElement.layout_item().as_widget().is_root();
+                            if ((aElement.group() == element_group::Widget || aElement.group() == element_group::Layout) && !isRootWidget)
+                                container = find_drop_container(aProject.root(), aElement, dropPosition);
+                            if (container != nullptr)
+                            {
+                                try
+                                {
+                                    show_drop_highlight(*container, aElement.type(), iDropHighlight, dropPosition);
+                                }
+                                catch (...)
+                                {
+                                    hide_drop_highlight(iDropHighlight);
+                                }
+                            }
+                            else
+                                hide_drop_highlight(iDropHighlight);
+                        });
                     }
                 }
             });
@@ -56,13 +80,52 @@ namespace neogfx::DesignStudio
                 auto const& tool = std::get<ds::element_tool_t>(item);
                 auto& project = aProjectManager.active_project();
                 iSelectedElement = project.create_element(project.root(), tool.second, generate_id(tool.second));
+                iSelectedElement->attributes().push_back(neolib::pair<string, string>{ string{ "id" }, string{ iSelectedElement->id() } });
                 iSelectedElement->set_mode(element_mode::Drag);
             }
         });
         iSink += base_type::ItemDropped([&](i_drag_drop_item const& aItem, i_drag_drop_target& aTarget)
         {
+            iDragSink.clear();
+            hide_drop_highlight(iDropHighlight);
             ref_ptr<widget_caddy> widgetCaddy = aItem.source().drag_drop_widget();
-            if (widgetCaddy)
+            if (widgetCaddy && iSelectedElement && 
+                (iSelectedElement->group() == element_group::Widget || iSelectedElement->group() == element_group::Layout))
+            {
+                auto& project = aProjectManager.active_project();
+                auto const dropPosition = design_rect(*widgetCaddy).center();
+                bool const isRootWidget = iSelectedElement->has_layout_item() && iSelectedElement->layout_item().is_widget() &&
+                    iSelectedElement->layout_item().as_widget().is_root();
+                auto container = !isRootWidget ? find_drop_container(project.root(), *iSelectedElement, dropPosition) : nullptr;
+                if (container != nullptr || iSelectedElement->group() == element_group::Layout)
+                {
+                    auto dropped = iSelectedElement;
+                    iDragDropItem = nullptr;
+                    iSelectedElement = {};
+                    string const type{ dropped->type() };
+                    string const id{ dropped->id() };
+                    project.remove_element(*dropped);
+                    dropped = {};
+                    // layouts can only be dropped on a window/dialog (or other layout container); if no container then discard
+                    if (container != nullptr)
+                    {
+                        auto& newElement = project.create_element(*container, type, id);
+                        newElement.attributes().push_back(neolib::pair<string, string>{ string{ "id" }, id });
+                        add_to_container(project, newElement, dropPosition);
+                        newElement.select();
+                        if (newElement.has_text())
+                        {
+                            // initial text is the allocated id: edit it in place
+                            set_text_attribute(newElement, id.to_std_string());
+                            newElement.apply_attributes(show_ids());
+                            if (newElement.has_caddy())
+                                newElement.caddy().begin_text_edit();
+                        }
+                    }
+                    return;
+                }
+            }
+            if (widgetCaddy && iSelectedElement)
             {
                 auto widget = iSelectedElement->needs_caddy() ? ref_ptr<i_widget>{ widgetCaddy } : ref_ptr<i_widget>{ widgetCaddy->element().layout_item().as_widget() };
                 auto const position = aTarget.as_widget().to_client_coordinates(widget->to_window_coordinates(point{}));
@@ -74,12 +137,22 @@ namespace neogfx::DesignStudio
                 iSelectedElement->set_mode(element_mode::None);
                 if (iSelectedElement->group() == element_group::Workflow)
                     widget->bring_to_front();
+                if (iSelectedElement->has_text())
+                {
+                    // initial text is the allocated id: edit it in place
+                    set_text_attribute(*iSelectedElement, iSelectedElement->id().to_std_string());
+                    iSelectedElement->apply_attributes(show_ids());
+                    if (iSelectedElement->has_caddy())
+                        iSelectedElement->caddy().begin_text_edit();
+                }
             }
             iDragDropItem = nullptr;
             iSelectedElement = {};
         });
         iSink += base_type::DraggingItemCancelled([&](i_drag_drop_item const& aItem)
         {
+            iDragSink.clear();
+            hide_drop_highlight(iDropHighlight);
             if (iSelectedElement)
             {
                 auto& project = aProjectManager.active_project();
@@ -154,4 +227,4 @@ namespace neogfx::DesignStudio
         // todo: use configured naming convention
         return to_symbol_name(aToolName + std::to_string(++iIdCounters[aToolName]), naming_convention::LowerCamelCase, named_entity::LocalVariable);
     }
-}
+}

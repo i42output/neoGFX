@@ -49,6 +49,8 @@ namespace neogfx
         double opacity() const override;
     public:
         bool visible() const override;
+    public:
+        void show_mnemonics(bool aShow) override;
     protected:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
@@ -63,5 +65,6 @@ namespace neogfx
         sink iSink2;
         flow_layout iLayout;
         std::unique_ptr<popup_menu> iOpenSubMenu;
+        bool iAltPressedAlone = false;
     };
 }

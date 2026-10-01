@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/core/optional.hpp>
 #include <neolib/core/vector.hpp>
+#include <neolib/core/pair.hpp>
 #include <neolib/core/string.hpp>
 #include <neolib/task/event.hpp>
 
@@ -37,6 +38,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/progress_bar.hpp>
+#include <neogfx/gui/widget/group_box.hpp>
+#include <neogfx/gui/widget/tab_page.hpp>
+#include <neogfx/gui/widget/i_tab_page_container.hpp>
+#include <neogfx/gui/layout/vertical_layout.hpp>
+#include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/tools/DesignStudio/symbol.hpp>
 #include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
@@ -66,6 +72,14 @@ namespace neogfx::DesignStudio
             return element_group::Unknown;
     }
 
+    // tab pages are created by (and owned by) their tab page container rather than wrapped in a caddy
+    template <>
+    struct element_traits<tab_page>
+    {
+        typedef i_element base;
+        static constexpr bool needsCaddy = false;
+    };
+
     template <typename BaseType>
     class element_variant
     {
@@ -85,9 +99,11 @@ namespace neogfx::DesignStudio
         using typename i_element::no_parent;
         using typename i_element::no_layout_item;
         using typename i_element::no_caddy;
+        using typename i_element::no_child_layout;
     public:
         typedef maybe_abstract_t<base_type> abstract_type;
         typedef neolib::vector<ref_ptr<i_element>> children_t;
+        typedef neolib::vector<neolib::pair<string, string>> attributes_t;
     public:
         element(i_element_library const& aLibrary, i_project& aProject, i_string const& aType, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
@@ -204,6 +220,15 @@ namespace neogfx::DesignStudio
                 children().erase(existing);
         }
     public:
+        attributes_t const& attributes() const override
+        {
+            return iAttributes;
+        }
+        attributes_t& attributes() override
+        {
+            return iAttributes;
+        }
+    public:
         void create_default_children() override
         {
             DesignStudio::create_default_children<Type>(*this);
@@ -235,7 +260,21 @@ namespace neogfx::DesignStudio
         {
             if (!iLayoutItem)
             {
-                if constexpr (std::is_base_of_v<i_widget, Type>)
+                if constexpr (std::is_base_of_v<i_tab_page, Type>)
+                {
+                    if (has_parent() && parent().has_layout_item())
+                        parent().create_child_layout_item(*this, iLayoutItem);
+                    if (iLayoutItem)
+                    {
+                        // clicking the page's tab on the design surface makes the page the current element
+                        iSink = static_cast<Type&>(iLayoutItem->as_widget()).selected([this]()
+                        {
+                            if (!sRevealing)
+                                set_mode(element_mode::Edit);
+                        });
+                    }
+                }
+                else if constexpr (std::is_base_of_v<i_widget, Type>)
                 {
                     if constexpr (std::is_constructible_v<Type, i_element&>)
                         iLayoutItem = make_ref<Type>(*this);
@@ -269,6 +308,13 @@ namespace neogfx::DesignStudio
                     {
                         // todo: widget creation for the other widget types
                     }
+                    if (!iLayoutItem)
+                        return;
+                    if constexpr (std::is_base_of_v<i_tab_page_container, Type>)
+                    {
+                        // the element's widget ignores mouse events (the caddy handles them) but the tabs must remain clickable
+                        static_cast<Type&>(iLayoutItem->as_widget()).tab_bar().as_widget().set_consider_ancestors_for_mouse_events(false);
+                    }
                     if (std::is_same_v<Type, progress_bar>)
                     {
                         auto& progressBar = static_cast<progress_bar&>(iLayoutItem->as_widget());
@@ -286,6 +332,51 @@ namespace neogfx::DesignStudio
                     else
                         iLayoutItem = make_ref<Type>();
                 }
+                else if constexpr (std::is_same_v<Type, spacer>)
+                    iLayoutItem = make_ref<spacer>(static_cast<expansion_policy>(
+                        static_cast<std::uint32_t>(expansion_policy::ExpandHorizontally) | static_cast<std::uint32_t>(expansion_policy::ExpandVertically)));
+                else if constexpr (std::is_base_of_v<i_spacer, Type> && std::is_default_constructible_v<Type>)
+                    iLayoutItem = make_ref<Type>();
+            }
+        }
+        bool has_text() const override
+        {
+            // has visible text that can be edited in place
+            if constexpr (std::is_base_of_v<i_widget, Type> && !std::is_base_of_v<i_tab_page, Type>)
+                return requires(Type& aWidget, string const& aText) { aWidget.set_text(aText); };
+            else
+                return false;
+        }
+        i_widget& text_area() const override
+        {
+            if constexpr (std::is_base_of_v<i_widget, Type>)
+            {
+                auto& widget = static_cast<Type&>(layout_item().as_widget());
+                if constexpr (requires(Type& aWidget) { aWidget.label().text_widget(); })
+                    return widget.label().text_widget(); // e.g. buttons, group boxes
+                else if constexpr (requires(Type& aWidget) { aWidget.text_widget(); })
+                    return widget.text_widget(); // e.g. labels
+                else
+                    return widget;
+            }
+            else
+                return layout_item().as_widget();
+        }
+        void apply_attributes(bool aShowIds) override
+        {
+            // show the element's text (as in a running application) or, if requested, its id
+            if (!has_layout_item())
+                return;
+            if constexpr (std::is_base_of_v<i_widget, Type>)
+            {
+                auto& widget = static_cast<Type&>(layout_item().as_widget());
+                string const text{ aShowIds ? iId.to_std_string() : design_text() };
+                if constexpr (std::is_base_of_v<i_tab_page, Type>)
+                    widget.tab().set_text(text);
+                else if constexpr (requires(Type& aWidget, string const& aText) { aWidget.set_title_text(aText); })
+                    widget.set_title_text(text);
+                else if constexpr (requires(Type& aWidget, string const& aText) { aWidget.set_text(aText); })
+                    widget.set_text(text);
             }
         }
         i_layout_item& layout_item() const override
@@ -293,6 +384,83 @@ namespace neogfx::DesignStudio
             if (iLayoutItem != nullptr)
                 return *iLayoutItem;
             throw no_layout_item();
+        }
+        bool has_child_layout() const override
+        {
+            if (!has_layout_item())
+                return false;
+            if constexpr (std::is_base_of_v<i_layout, Type>)
+                return true;
+            else if constexpr (std::is_base_of_v<i_widget, Type> && std::is_base_of_v<i_standard_layout_container, Type>)
+                return true;
+            else if constexpr (std::is_base_of_v<group_box, Type>)
+                return true;
+            else if constexpr (std::is_base_of_v<i_tab_page, Type>)
+                return true;
+            else
+                return false;
+        }
+        i_layout& child_layout(neolib::i_string const& aChildType) const override
+        {
+            if (has_child_layout())
+            {
+                if constexpr (std::is_base_of_v<i_layout, Type>)
+                    return layout_item().as_layout();
+                else if constexpr (std::is_base_of_v<i_widget, Type> && std::is_base_of_v<i_standard_layout_container, Type>)
+                {
+                    i_standard_layout_container& container = static_cast<Type&>(layout_item().as_widget());
+                    if (aChildType.to_std_string_view() == "menu_bar" && container.has_layout(standard_layout::Menu))
+                        return container.menu_layout();
+                    else if (aChildType.to_std_string_view() == "toolbar" && container.has_layout(standard_layout::Toolbar))
+                        return container.toolbar_layout();
+                    else if (aChildType.to_std_string_view() == "status_bar" && container.has_layout(standard_layout::StatusBar))
+                        return container.status_bar_layout();
+                    return container.client_layout();
+                }
+                else if constexpr (std::is_base_of_v<group_box, Type>)
+                    return static_cast<Type&>(layout_item().as_widget()).item_layout();
+                else if constexpr (std::is_base_of_v<i_tab_page, Type>)
+                {
+                    auto& page = layout_item().as_widget();
+                    if (!page.has_layout())
+                        page.set_layout(ref_ptr<i_layout>{ make_ref<vertical_layout>() });
+                    return page.layout();
+                }
+            }
+            throw no_child_layout();
+        }
+        void create_child_layout_item(i_element const& aChild, i_ref_ptr<i_layout_item>& aResult) override
+        {
+            if constexpr (std::is_base_of_v<i_widget, Type> && std::is_base_of_v<i_tab_page_container, Type>)
+            {
+                if (has_layout_item())
+                {
+                    std::string const tabText = aChild.id().to_std_string(); // design view shows ids (see apply_attributes)
+                    auto& page = static_cast<Type&>(layout_item().as_widget()).add_tab_page(string{ tabText });
+                    // the container owns the page so the element's reference is non-owning
+                    aResult = ref_ptr<i_layout_item>{ ref_ptr<i_layout_item>{}, static_cast<i_layout_item*>(&page.as_widget()) };
+                    return;
+                }
+            }
+            throw no_child_layout();
+        }
+        void reveal() override
+        {
+            // make the element visible on the design surface (e.g. select the tab page it is on)
+            if constexpr (std::is_base_of_v<i_tab_page, Type>)
+            {
+                if (has_layout_item())
+                {
+                    auto& tab = static_cast<Type&>(layout_item().as_widget()).tab();
+                    if (!tab.is_selected())
+                    {
+                        neolib::scoped_flag sf{ sRevealing };
+                        tab.select();
+                    }
+                }
+            }
+            if (has_parent())
+                parent().reveal();
         }
     public:
         element_mode mode() const override
@@ -312,6 +480,8 @@ namespace neogfx::DesignStudio
                             aElement.set_mode(element_mode::None);
                     });
                 }
+                if (mode() == element_mode::Edit)
+                    reveal();
                 ModeChanged();
             }
         }
@@ -324,6 +494,8 @@ namespace neogfx::DesignStudio
             if (iSelected != aSelected)
             {
                 iSelected = aSelected;
+                if (iSelected)
+                    reveal();
                 SelectionChanged();
             }
             if (aDeselectRest)
@@ -336,6 +508,37 @@ namespace neogfx::DesignStudio
             }
         }
     private:
+        // value of the element's text attribute (or title/tab text) as plain text
+        std::string design_text() const
+        {
+            for (std::string_view const name : { "text", "title", "tab_text" })
+                for (auto const& attribute : iAttributes)
+                    if (attribute.first().to_std_string_view() == name)
+                    {
+                        auto const value = attribute.second().to_std_string_view();
+                        if (value.size() < 2u || value.front() != '"' || value.back() != '"')
+                            return std::string{ value };
+                        std::string result;
+                        for (std::size_t i = 1u; i + 1u < value.size(); ++i)
+                        {
+                            char ch = value[i];
+                            if (ch == '\\' && i + 2u < value.size())
+                            {
+                                ch = value[++i];
+                                if (ch == 'n')
+                                    ch = '\n';
+                                else if (ch == 't')
+                                    ch = '\t';
+                                else if (ch == 'r')
+                                    ch = '\r';
+                            }
+                            result += ch;
+                        }
+                        return result;
+                    }
+            return {};
+        }
+    private:
         const i_element_library& iLibrary;
         i_project& iProject;
         i_element* iParent;
@@ -343,6 +546,9 @@ namespace neogfx::DesignStudio
         string iType;
         string iId;
         children_t iChildren;
+        attributes_t iAttributes;
+        sink iSink;
+        inline static bool sRevealing = false;
         mutable ref_ptr<i_layout_item> iLayoutItem;
         ref_ptr<i_element_caddy> iCaddy;
         element_mode iMode = element_mode::None;

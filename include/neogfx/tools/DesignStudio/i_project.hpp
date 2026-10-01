@@ -33,6 +33,7 @@ namespace neogfx::DesignStudio
     public:
         declare_event(element_added, i_element&);
         declare_event(element_removed, i_element&);
+        declare_event(element_moved, i_element&);
     public:
         struct invalid_project_file : std::runtime_error { invalid_project_file(std::string const& aReason) : std::runtime_error{ "neogfx::DesignStudio::i_project::invalid_project_file: " + aReason } {} };
     public:
@@ -42,7 +43,10 @@ namespace neogfx::DesignStudio
     public:
         virtual void create(const i_string& aName, const i_string& aNamespace) = 0;
         virtual void open(const i_string& aPath) = 0;
+        virtual void save(const i_string& aPath) = 0;
     public:
+        virtual bool has_path() const = 0;
+        virtual const i_string& path() const = 0;
         virtual const i_string& name() const = 0;
         virtual const i_string& namespace_() const = 0;
     public:
@@ -51,5 +55,6 @@ namespace neogfx::DesignStudio
     public:
         virtual i_element& create_element(i_element& aParent, const i_string& aType, const i_string& aElementId = string{}) = 0;
         virtual void remove_element(i_element& aElement) = 0;
+        virtual void move_element(i_element& aElement, i_element& aNewParent, i_element const* aBefore = nullptr) = 0;
     };
-}
+}

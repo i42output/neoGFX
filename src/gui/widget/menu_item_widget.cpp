@@ -223,8 +223,10 @@ namespace neogfx
     {
         widget::mouse_left();
         update();
+        // as on Windows, a menu bar being used with the keyboard keeps its selection when the mouse leaves it
         if (menu().has_selected_item() && menu().selected_item() == (menu().find(menu_item())) &&
-            (menu_item().type() == menu_item_type::Action || (!menu_item().sub_menu().is_open() && !iSubMenuOpener)))
+            (menu_item().type() == menu_item_type::Action || (!menu_item().sub_menu().is_open() && !iSubMenuOpener)) &&
+            !(menu().type() == menu_type::MenuBar && menu().showing_mnemonics()))
             menu().clear_selection();
     }
 
@@ -259,7 +261,20 @@ namespace neogfx
 
     void menu_item_widget::mnemonic_execute()
     {
-        select_item(true);
+        // a mnemonic is keyboard use of the menu so, as on Windows, its mnemonics are shown from now on
+        i_menu* rootMenu = &menu();
+        while (rootMenu->has_parent())
+            rootMenu = &rootMenu->parent();
+        rootMenu->show_mnemonics(true);
+        if (menu_item().type() == menu_item_type::SubMenu)
+        {
+            auto& subMenu = menu_item().sub_menu();
+            select_item(true);
+            if (subMenu.is_open() && !subMenu.has_selected_item() && subMenu.has_available_items())
+                subMenu.select_item_at(subMenu.first_available_item(), false);
+        }
+        else
+            select_item(true); // may destroy this widget
     }
 
     i_widget& menu_item_widget::mnemonic_widget()

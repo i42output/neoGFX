@@ -18,6 +18,21 @@
                     checked: true
                 }
                 action: {
+                    id: actionShowLayoutIcons
+                    text: "Show Layout Icons"
+                    checkable: true
+                }
+                action: {
+                    id: actionPreview
+                    text: "Preview"
+                    checkable: true
+                }
+                action: {
+                    id: actionDisplayIds
+                    text: "Display IDs"
+                    checkable: true
+                }
+                action: {
                     id: actionShowStatusBar
                     text: "Status Bar"
                     checkable: true
@@ -72,6 +87,10 @@
                     }
                     menu: {
                         title: "&View"
+                        action: mainApp.actionShowLayoutIcons
+                        action: mainApp.actionPreview
+                        action: mainApp.actionDisplayIds
+                        action: separator
                         menu: {
                             title: "Toolbars"
                             action: mainApp.actionShowStandardToolbar

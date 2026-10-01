@@ -95,6 +95,8 @@ namespace neogfx
         void close() override;
         bool is_modal() const override;
         void set_modal(bool aModal) override;
+        bool showing_mnemonics() const override;
+        void show_mnemonics(bool aShow) override;
     public:
         using i_menu::ideal_insert_index;
     private:
@@ -110,5 +112,6 @@ namespace neogfx
         std::uint32_t iOpenCount;
         std::optional<item_index> iSelection;
         bool iModal;
+        bool iShowMnemonics = false;
     };
 }

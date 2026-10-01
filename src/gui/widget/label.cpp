@@ -27,217 +27,217 @@ namespace neogfx
 {
     label::label(label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{}, 
-        iAlignment{ aAlignment }, 
-        iPlacement{ aPlacement }, 
         iLayout{ *this }, 
         iText{ *this, string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, neogfx::texture{} },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(string const& aText, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{}, 
-        iAlignment{ aAlignment }, 
-        iPlacement{ aPlacement }, 
         iLayout{ *this }, 
         iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, neogfx::texture{} },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(const i_texture& aTexture, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{}, 
-        iAlignment{ aAlignment }, 
-        iPlacement{ aPlacement }, 
         iLayout{ *this }, 
         iText{ *this, string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, aTexture },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(const i_image& aImage, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{}, 
-        iAlignment{ aAlignment }, 
-        iPlacement{ aPlacement }, 
         iLayout{ *this }, 
         iText{ *this, string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, aImage },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(string const& aText, const i_texture& aTexture, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{},
-        iAlignment{ aAlignment },
-        iPlacement{ aPlacement },
         iLayout{ *this },
         iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, aTexture },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(string const& aText, const i_image& aImage, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{},
-        iAlignment{ aAlignment },
-        iPlacement{ aPlacement },
         iLayout{ *this },
         iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, aImage },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(i_widget& aParent, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aParent }, 
-        iAlignment{ aAlignment }, 
-        iPlacement{ aPlacement }, 
         iLayout{ *this }, 
         iText{ *this, string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, neogfx::texture{} },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(i_widget& aParent, string const& aText, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aParent }, 
-        iAlignment{ aAlignment }, 
-        iPlacement{ aPlacement }, 
         iLayout{ *this }, 
         iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, neogfx::texture{} },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(i_widget& aParent, const i_texture& aTexture, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aParent }, 
-        iAlignment{ aAlignment }, 
-        iPlacement{ aPlacement }, 
         iLayout{ *this }, 
         iText{ *this, string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, aTexture },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(i_widget& aParent, const i_image& aImage, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aParent }, 
-        iAlignment{ aAlignment }, 
-        iPlacement{ aPlacement }, 
         iLayout{ *this }, 
         iText{ *this, string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, aImage },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(i_widget& aParent, string const& aText, const i_texture& aTexture, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aParent },
-        iAlignment{ aAlignment },
-        iPlacement{ aPlacement },
         iLayout{ *this },
         iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, aTexture },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(i_widget& aParent, string const& aText, const i_image& aImage, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aParent },
-        iAlignment{ aAlignment },
-        iPlacement{ aPlacement },
         iLayout{ *this },
         iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, aImage },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(i_layout& aLayout, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aLayout }, 
-        iAlignment{ aAlignment }, 
-        iPlacement{ aPlacement }, 
         iLayout{ *this }, 
         iText{ *this, string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, neogfx::texture{} },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(i_layout& aLayout, string const& aText, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aLayout }, 
-        iAlignment{ aAlignment }, 
-        iPlacement{ aPlacement }, 
         iLayout{ *this }, 
         iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, neogfx::texture{} },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(i_layout& aLayout, const i_texture& aTexture, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aLayout }, 
-        iAlignment{ aAlignment }, 
-        iPlacement{ aPlacement }, 
         iLayout{ *this }, 
         iText{ *this, string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, aTexture },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(i_layout& aLayout, const i_image& aImage, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aLayout }, 
-        iAlignment{ aAlignment }, 
-        iPlacement{ aPlacement }, 
         iLayout{ *this }, 
         iText{ *this, string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, aImage },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(i_layout& aLayout, string const& aText, const i_texture& aTexture, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aLayout },
-        iAlignment{ aAlignment },
-        iPlacement{ aPlacement },
         iLayout{ *this },
         iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, aTexture },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
     label::label(i_layout& aLayout, string const& aText, const i_image& aImage, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aLayout },
-        iAlignment{ aAlignment },
-        iPlacement{ aPlacement },
         iLayout{ *this },
         iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ *this, aImage },
         iCenterSpacer{ nullptr }
     {
+        Alignment.assign(aAlignment, false);
+        Placement.assign(aPlacement, false);
         init();
     }
 
@@ -279,20 +279,26 @@ namespace neogfx
         image_widget().set_font(aFont);
     }
 
+    void label::property_changed(i_property& aProperty)
+    {
+        if (&aProperty == &Alignment)
+        {
+            layout().set_alignment(alignment());
+            text_widget().set_alignment(alignment());
+        }
+        else if (&aProperty == &Placement)
+            handle_placement_change();
+        widget::property_changed(aProperty);
+    }
+
     alignment label::alignment() const
     {
-        return iAlignment;
+        return Alignment;
     }
 
     void label::set_alignment(neogfx::alignment aAlignment)
     {
-        if (iAlignment != aAlignment)
-        {
-            iAlignment = aAlignment;
-            layout().set_alignment(alignment());
-            text_widget().set_alignment(alignment());
-            update_layout();
-        }
+        Alignment = aAlignment;
     }
 
     i_string const& label::text() const
@@ -327,15 +333,12 @@ namespace neogfx
 
     label_placement label::placement() const
     {
-        return iPlacement;
+        return Placement;
     }
 
     void label::set_placement(label_placement aPlacement)
     {
-        if (iPlacement == aPlacement)
-            return;
-        iPlacement = aPlacement;
-        handle_placement_change();
+        Placement = aPlacement;
     }
 
     const text_widget& label::text_widget() const
@@ -420,7 +423,7 @@ namespace neogfx
 
     label_placement label::effective_placement() const
     {
-        switch (iPlacement)
+        switch (Placement.value())
         {
         case label_placement::TextImageHorizontal:
             if (image().is_empty() || image_widget().hidden())
@@ -449,7 +452,7 @@ namespace neogfx
         default:
             break;
         }
-        return iPlacement;
+        return Placement;
     }
 
     void label::handle_placement_change()
@@ -652,4 +655,4 @@ namespace neogfx
             break;
         }
     }
-}
+}

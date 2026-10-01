@@ -376,6 +376,7 @@ namespace neogfx
         {
             if (has_selected_item())
                 clear_selection();
+            iShowMnemonics = false;
             Closed();
         }
     }
@@ -388,6 +389,17 @@ namespace neogfx
     void menu::set_modal(bool aModal)
     {
         iModal = aModal;
+    }
+
+    bool menu::showing_mnemonics() const
+    {
+        // as on Windows, mnemonics are shown if the menu, or the menu it belongs to, is being used with the keyboard
+        return iShowMnemonics || (iParent != nullptr && iParent->showing_mnemonics());
+    }
+
+    void menu::show_mnemonics(bool aShow)
+    {
+        iShowMnemonics = aShow;
     }
 
     menu::item_index menu::update_grouping_separators(item_index aItemIndex)

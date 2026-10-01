@@ -106,6 +106,8 @@ namespace neogfx
         virtual void close() = 0;
         virtual bool is_modal() const = 0;
         virtual void set_modal(bool aModal) = 0;
+        virtual bool showing_mnemonics() const = 0;
+        virtual void show_mnemonics(bool aShow) = 0;
     public:
         std::uint32_t ideal_insert_index(i_action const& aAction) const
         {

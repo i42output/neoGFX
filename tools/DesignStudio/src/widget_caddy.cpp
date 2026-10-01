@@ -18,7 +18,13 @@
 */
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
+#include <cmath>
+#include <numbers>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/app/settings.hpp>
+#include <neogfx/gui/window/i_window.hpp>
+#include <neogfx/gui/widget/line_edit.hpp>
+#include <neolib/task/event.hpp>
 #include <neogfx/gui/widget/widget.ipp>
 #include <neogfx/gui/window/context_menu.hpp>
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
@@ -31,6 +37,226 @@ namespace neogfx
 
 namespace neogfx::DesignStudio
 {
+    namespace
+    {
+        bool sPreviewMode = false;
+        neolib::event<> sPreviewModeChanged;
+        bool sDisplayIds = false;
+        neolib::event<> sDisplayIdsChanged;
+    }
+
+    bool display_ids()
+    {
+        return sDisplayIds;
+    }
+
+    void set_display_ids(bool aDisplayIds)
+    {
+        if (sDisplayIds != aDisplayIds)
+        {
+            sDisplayIds = aDisplayIds;
+            sDisplayIdsChanged();
+        }
+    }
+
+    neolib::i_event<> const& display_ids_changed()
+    {
+        return sDisplayIdsChanged;
+    }
+
+    bool show_ids()
+    {
+        return sDisplayIds && !sPreviewMode;
+    }
+
+    void set_text_attribute(i_element& aElement, std::string const& aText)
+    {
+        std::string quoted = "\"";
+        for (auto ch : aText)
+            switch (ch)
+            {
+            case '\"': quoted += "\\\""; break;
+            case '\\': quoted += "\\\\"; break;
+            case '\n': quoted += "\\n"; break;
+            case '\r': quoted += "\\r"; break;
+            case '\t': quoted += "\\t"; break;
+            default: quoted += ch; break;
+            }
+        quoted += "\"";
+        for (auto& attribute : aElement.attributes())
+            if (attribute.first().to_std_string_view() == "text")
+            {
+                attribute.second() = string{ quoted };
+                return;
+            }
+        aElement.attributes().push_back(neolib::pair<string, string>{ string{ "text" }, string{ quoted } });
+    }
+
+    namespace
+    {
+        bool is_design_element(i_element const& aElement)
+        {
+            return aElement.group() == element_group::Widget || aElement.group() == element_group::Layout;
+        }
+
+        std::size_t element_depth(i_element const& aElement)
+        {
+            std::size_t result = 0;
+            for (i_element const* e = &aElement; e->has_parent(); e = &e->parent())
+                ++result;
+            return result;
+        }
+
+        bool is_descendant_of(i_element const& aElement, i_element const& aAncestor)
+        {
+            for (i_element const* e = &aElement; e->has_parent(); e = &e->parent())
+                if (&e->parent() == &aAncestor)
+                    return true;
+            return false;
+        }
+
+        rect layout_design_rect(i_layout const& aLayout)
+        {
+            if (!aLayout.has_parent_widget())
+                return rect{};
+            return rect{ aLayout.position(), aLayout.extents() } + design_rect(aLayout.parent_widget()).top_left();
+        }
+
+        struct insertion_point
+        {
+            layout_item_index index;
+            i_widget const* next; // item to insert before (nullptr: append)
+            std::pair<point, point> line; // insertion marker (design coordinates)
+        };
+
+        // where an item dropped at aDropPosition (design coordinates) would be inserted; aExclude is the item being moved (if any)
+        insertion_point find_insertion_point(i_layout const& aLayout, point const& aDropPosition, i_widget const* aExclude = nullptr)
+        {
+            bool const horizontal = (aLayout.direction() == layout_direction::Horizontal);
+            std::vector<std::pair<layout_item_index, rect>> items;
+            for (layout_item_index i = 0; i < aLayout.count(); ++i)
+                if (aLayout.is_widget_at(i) && &aLayout.get_widget_at(i) != aExclude && !aLayout.get_widget_at(i).effectively_hidden())
+                    items.emplace_back(i, design_rect(aLayout.get_widget_at(i)));
+            std::size_t nextItem = items.size();
+            for (std::size_t k = 0; k < items.size(); ++k)
+                if (horizontal ? aDropPosition.x < items[k].second.center().x : aDropPosition.y < items[k].second.center().y)
+                {
+                    nextItem = k;
+                    break;
+                }
+            insertion_point result{ aLayout.count(), nullptr, {} };
+            if (nextItem < items.size())
+            {
+                result.index = items[nextItem].first;
+                result.next = &aLayout.get_widget_at(result.index);
+            }
+            auto const layoutRect = layout_design_rect(aLayout);
+            auto const spacing = aLayout.spacing();
+            if (horizontal)
+            {
+                scalar x = layoutRect.left();
+                if (!items.empty())
+                {
+                    if (nextItem == 0u)
+                        x = items.front().second.left() - spacing.cx / 2.0;
+                    else if (nextItem == items.size())
+                        x = items.back().second.right() + spacing.cx / 2.0;
+                    else
+                        x = (items[nextItem - 1u].second.right() + items[nextItem].second.left()) / 2.0;
+                }
+                x = std::clamp(x, layoutRect.left(), std::max(layoutRect.left(), layoutRect.right() - 1.0));
+                result.line = { point{ x, layoutRect.top() }, point{ x, layoutRect.bottom() } };
+            }
+            else
+            {
+                scalar y = layoutRect.top();
+                if (!items.empty())
+                {
+                    if (nextItem == 0u)
+                        y = items.front().second.top() - spacing.cy / 2.0;
+                    else if (nextItem == items.size())
+                        y = items.back().second.bottom() + spacing.cy / 2.0;
+                    else
+                        y = (items[nextItem - 1u].second.bottom() + items[nextItem].second.top()) / 2.0;
+                }
+                y = std::clamp(y, layoutRect.top(), std::max(layoutRect.top(), layoutRect.bottom() - 1.0));
+                result.line = { point{ layoutRect.left(), y }, point{ layoutRect.right(), y } };
+            }
+            return result;
+        }
+
+        // keep element order (which is the order saved to .nrc) in step with layout order
+        void sync_element_order(i_element& aElement, i_layout& aLayout)
+        {
+            if (!aElement.has_caddy() || !aElement.has_parent())
+                return;
+            auto const index = aLayout.find(aElement.caddy());
+            if (!index || *index + 1u >= aLayout.count() || !aLayout.is_widget_at(*index + 1u))
+                return;
+            i_widget const& nextWidget = aLayout.get_widget_at(*index + 1u);
+            auto& siblings = aElement.parent().children();
+            auto self = std::find_if(siblings.begin(), siblings.end(), [&](auto const& e) { return &*e == &aElement; });
+            if (self == siblings.end())
+                return;
+            ref_ptr<i_element> keep{ &aElement };
+            siblings.erase(self);
+            auto next = std::find_if(siblings.begin(), siblings.end(), [&](auto const& e)
+            {
+                return e->has_caddy() && static_cast<i_widget const*>(&e->caddy()) == &nextWidget;
+            });
+            siblings.insert(next, keep);
+        }
+
+        // grow top level caddy if its content no longer fits
+        void grow_top_level_caddy(i_element& aElement)
+        {
+            i_element* top = &aElement;
+            while (top->is_nested())
+                top = &top->parent();
+            if (top->has_caddy())
+            {
+                auto& topCaddy = top->caddy();
+                auto const minimumSize = topCaddy.minimum_size();
+                auto const currentSize = topCaddy.extents();
+                if (currentSize.cx < minimumSize.cx || currentSize.cy < minimumSize.cy)
+                    topCaddy.resize(size{ std::max(currentSize.cx, minimumSize.cx), std::max(currentSize.cy, minimumSize.cy) });
+            }
+        }
+
+        // place an in-place text editor (a child of aHost) over aTextArea: centred on it and at least the editor's minimum size
+        void position_text_editor(i_widget& aEditor, i_widget const& aHost, i_widget const& aTextArea)
+        {
+            auto const textRect = design_rect(aTextArea);
+            auto const minimumSize = aEditor.minimum_size();
+            size const editorSize{ std::max(textRect.cx, minimumSize.cx), std::max(textRect.cy, minimumSize.cy) };
+            aEditor.move(textRect.center() - point{ editorSize / 2.0 } - design_rect(aHost).top_left());
+            aEditor.resize(editorSize);
+        }
+
+        thread_local std::optional<std::pair<point, point>> tDropLine; // insertion marker (drop highlight coordinates)
+        thread_local std::optional<widget_timer> tDropHighlightAnimator; // repaints the drop highlight while its fill fades in and out
+        thread_local std::chrono::steady_clock::time_point tDropHighlightStart;
+    }
+
+    bool preview_mode()
+    {
+        return sPreviewMode;
+    }
+
+    void set_preview_mode(bool aPreview)
+    {
+        if (sPreviewMode != aPreview)
+        {
+            sPreviewMode = aPreview;
+            sPreviewModeChanged();
+        }
+    }
+
+    neolib::i_event<> const& preview_mode_changed()
+    {
+        return sPreviewModeChanged;
+    }
+
     widget_caddy::widget_caddy(i_project& aProject, i_element& aElement, i_widget& aParent, const point& aPosition) :
         widget{ aParent },
         iProject{ aProject },
@@ -38,21 +264,44 @@ namespace neogfx::DesignStudio
         iAnimator{ *this, [this](widget_timer& aAnimator) 
         {    
             aAnimator.again();
+            if (iEndTextEdit)
+                end_text_edit(*iEndTextEdit);
+            if (iTextEditor && iTextEditor->has_parent() && has_element() && has_item() && item().is_widget())
+                position_text_editor(*iTextEditor, iTextEditor->parent(), element().text_area()); // keep it over the text (it may not have been laid out yet)
             if (has_element() && (element().mode() != element_mode::None || element().is_selected() || entered()))
                 update(); 
         }, std::chrono::milliseconds{ 20 } }
     {
         set_minimum_size(size{ 96.0_dip, 32.0_dip });
-        element().set_caddy(*this);
         bring_to_front();
         move(aPosition);
         iSink = ChildAdded([&](i_widget& aChild)
         {
-            aChild.set_ignore_mouse_events(true);
+            // only the element's own widget ignores mouse events; nested element caddies must not
+            if (has_item() && item().is_widget() && &item().as_widget() == &aChild)
+            {
+                // the caddy, not the element's widget, handles moving/resizing (e.g. a window's title bar and borders)
+                aChild.set_ignore_mouse_events(true);
+                aChild.set_ignore_non_client_mouse_events(true);
+            }
         });
         iSink += ChildRemoved([&](i_widget& aChild)
         {
-            aChild.set_ignore_mouse_events(false);
+            if (has_item() && item().is_widget() && &item().as_widget() == &aChild)
+            {
+                aChild.set_ignore_mouse_events(false);
+                aChild.set_ignore_non_client_mouse_events(false);
+            }
+        });
+        ref_ptr<i_settings> settings{ aElement.library().application() };
+        iShowLayoutIcons = &settings->setting("environment.workspace.show_layout_icons"_s);
+        iSink += iShowLayoutIcons->changing([&]()
+        {
+            update();
+        });
+        iSink += iShowLayoutIcons->changed([&]()
+        {
+            update();
         });
         iSink += element().mode_changed([&]()
         {
@@ -65,16 +314,216 @@ namespace neogfx::DesignStudio
         iSink += iProject.element_removed([&](i_element& aElement)
         {
             if (&aElement == iElement)
-                parent().remove(*this);
+            {
+                if (has_parent_layout())
+                    parent_layout().remove(*this);
+                if (has_parent())
+                    parent().remove(*this);
+            }
         });
         iItem = aElement.has_layout_item() ? aElement.layout_item() : (aElement.create_layout_item(*this), aElement.layout_item());
+        // only register as the element's caddy once it has a layout item (layout_item() throws if the element type can't be created)
+        element().set_caddy(*this);
         if (item().is_widget())
         {
             auto& itemAsWidget = item().as_widget();
             add(itemAsWidget);
+            if (itemAsWidget.is_root())
+            {
+                // a window being designed (nested window) mustn't handle mouse events itself (e.g. move/resize via its 
+                // title bar/borders) so filter (consume) them and handle them as the caddy's
+                auto forward = [this](auto const& aEvent)
+                {
+                    auto const position = mouse_position();
+                    auto const modifiers = service<i_keyboard>().modifiers();
+                    switch (aEvent.type())
+                    {
+                    case mouse_event_type::ButtonClicked:
+                        if (!has_focus())
+                            set_focus();
+                        mouse_button_clicked(aEvent.mouse_button(), position, modifiers);
+                        break;
+                    case mouse_event_type::ButtonDoubleClicked:
+                        mouse_button_double_clicked(aEvent.mouse_button(), position, modifiers);
+                        break;
+                    case mouse_event_type::ButtonReleased:
+                        mouse_button_released(aEvent.mouse_button(), position);
+                        break;
+                    case mouse_event_type::Moved:
+                        mouse_moved(position, modifiers);
+                        break;
+                    default:
+                        break;
+                    }
+                };
+                iSink += itemAsWidget.mouse_event([this, forward](const neogfx::mouse_event& aEvent)
+                {
+                    auto& window = item().as_widget();
+                    if (preview_mode())
+                    {
+                        // previewing: the window's contents are live but its frame (title bar, borders etc.) still belongs 
+                        // to the caddy (so dragging it moves the caddy, not the nested window)
+                        auto const part = window.part(window.mouse_position()).part;
+                        bool const framePart = (part >= widget_part::TitleBar && part <= widget_part::SystemMenu);
+                        if (!framePart && !capturing())
+                            return;
+                    }
+                    window.mouse_event().accept();
+                    forward(aEvent);
+                });
+                iSink += itemAsWidget.non_client_mouse_event([this, forward](const neogfx::non_client_mouse_event& aEvent)
+                {
+                    item().as_widget().non_client_mouse_event().accept();
+                    forward(aEvent);
+                });
+                // title bar buttons (close etc.) mustn't work: title bar clicks go to (and are filtered by) the window
+                i_standard_layout_container& window = static_cast<i_window&>(itemAsWidget);
+                if (window.has_layout(standard_layout::TitleBar))
+                {
+                    try
+                    {
+                        window.title_bar().set_ignore_mouse_events(true);
+                    }
+                    catch (...) {}
+                }
+            }
         }
+        else if (item().is_layout())
+            set_layout(item().as_layout());
         else
             item().set_parent_widget(this);
+        if (nested())
+        {
+            // nested caddies live inside another element's widget/layout which ignores mouse events
+            set_ignore_mouse_events(false);
+            set_consider_ancestors_for_mouse_events(false);
+        }
+        iSink += preview_mode_changed()([this]()
+        {
+            apply_preview_mode();
+        });
+        iSink += display_ids_changed()([this]()
+        {
+            apply_preview_mode();
+        });
+        apply_preview_mode();
+    }
+
+    void widget_caddy::apply_preview_mode()
+    {
+        bool const preview = preview_mode();
+        if (preview && has_element())
+        {
+            element().set_mode(element_mode::None);
+            element().select(false, false);
+            iDragInfo = std::nullopt;
+            iDropTarget = nullptr;
+            hide_drop_highlight(iDropHighlight);
+        }
+        if (has_item() && item().is_widget())
+        {
+            // previewing: the element's widget handles mouse events as in a running application (the caddy ignores them)
+            auto& itemWidget = item().as_widget();
+            itemWidget.set_ignore_mouse_events(!preview);
+            itemWidget.set_consider_ancestors_for_mouse_events(!preview);
+            if (!itemWidget.is_root())
+                itemWidget.set_ignore_non_client_mouse_events(!preview);
+        }
+        if (has_element())
+        {
+            // text (as in a running application) or ids
+            element().apply_attributes(show_ids());
+            for (auto& child : element().children())
+                if (!child->needs_caddy())
+                    child->apply_attributes(show_ids()); // e.g. tab pages (which have no caddy of their own)
+        }
+        if (preview)
+            iEndTextEdit = false;
+        if (preview && has_focus())
+            release_focus();
+        update();
+    }
+
+    void widget_caddy::begin_text_edit()
+    {
+        if (preview_mode() || !has_element() || !has_item() || !item().is_widget() || !element().has_text())
+            return;
+        end_text_edit(false);
+        // in-place editor over the element's text; it is a child of the top level caddy (which is in Design Studio's own window 
+        // rather than in a window being designed) so it gets keyboard focus
+        i_element* top = &element();
+        while (top->is_nested())
+            top = &top->parent();
+        i_widget& host = top->has_caddy() ? static_cast<i_widget&>(top->caddy()) : static_cast<i_widget&>(*this);
+        auto editor = make_ref<line_edit>(host);
+        iTextEditor = ref_ptr<i_widget>{ editor };
+        string text;
+        for (auto const& attribute : element().attributes())
+            if (attribute.first().to_std_string_view() == "text")
+                text = attribute.second();
+        auto const quotedText = text.to_std_string();
+        std::string plainText = quotedText;
+        if (quotedText.size() >= 2u && quotedText.front() == '"' && quotedText.back() == '"')
+        {
+            plainText.clear();
+            for (std::size_t i = 1u; i + 1u < quotedText.size(); ++i)
+            {
+                char ch = quotedText[i];
+                if (ch == '\\' && i + 2u < quotedText.size())
+                {
+                    ch = quotedText[++i];
+                    if (ch == 'n')
+                        ch = '\n';
+                    else if (ch == 't')
+                        ch = '\t';
+                    else if (ch == 'r')
+                        ch = '\r';
+                }
+                plainText += ch;
+            }
+        }
+        editor->set_text(string{ plainText });
+        position_text_editor(*editor, host, element().text_area());
+        editor->bring_to_front();
+        editor->keyboard_event([this, &editorRef = *editor](const neogfx::keyboard_event& aEvent)
+        {
+            if (aEvent.type() != keyboard_event_type::KeyPressed)
+                return;
+            if (aEvent.scan_code() == ScanCode_RETURN || aEvent.scan_code() == ScanCode_KEYPAD_ENTER)
+            {
+                iEndTextEdit = true;
+                editorRef.keyboard_event().accept();
+            }
+            else if (aEvent.scan_code() == ScanCode_ESCAPE)
+            {
+                iEndTextEdit = false;
+                editorRef.keyboard_event().accept();
+            }
+        });
+        editor->focus_event([this](neogfx::focus_event aEvent, focus_reason)
+        {
+            if (aEvent == neogfx::focus_event::FocusLost && !iEndTextEdit)
+                iEndTextEdit = true;
+        });
+        editor->set_focus();
+        editor->select_all();
+    }
+
+    void widget_caddy::end_text_edit(bool aCommit)
+    {
+        iEndTextEdit = std::nullopt;
+        if (!iTextEditor)
+            return;
+        auto editor = iTextEditor;
+        iTextEditor = {};
+        if (aCommit && has_element())
+        {
+            set_text_attribute(element(), static_cast<line_edit&>(*editor).text().to_std_string());
+            element().apply_attributes(show_ids());
+            iProject.set_dirty();
+        }
+        if (editor->has_parent())
+            editor->parent().remove(*editor);
     }
     
     widget_caddy::~widget_caddy()
@@ -86,7 +535,11 @@ namespace neogfx::DesignStudio
             if (item().is_widget())
                 remove(item().as_widget());
             else
+            {
                 item().set_parent_widget(nullptr);
+                if (item().is_layout() && has_layout())
+                    set_layout(ref_ptr<i_layout>{});
+            }
         }
     }
 
@@ -110,6 +563,18 @@ namespace neogfx::DesignStudio
         return *iItem;
     }
 
+    bool widget_caddy::nested() const
+    {
+        return has_element() && element().is_nested();
+    }
+
+    neogfx::size_policy widget_caddy::size_policy() const
+    {
+        if (nested() && has_item())
+            return item().size_policy();
+        return widget::size_policy();
+    }
+
     size widget_caddy::minimum_size(optional_size const& aAvailableSpace) const
     {
         size result = item().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - internal_spacing().size() : aAvailableSpace);
@@ -122,6 +587,9 @@ namespace neogfx::DesignStudio
 
     neogfx::widget_type widget_caddy::widget_type() const
     {
+        // top level caddies float on the workspace; nested caddies are managed by their container's layout
+        if (nested())
+            return widget::widget_type();
         return widget::widget_type() | neogfx::widget_type::Floating;
     }
 
@@ -170,20 +638,59 @@ namespace neogfx::DesignStudio
     void widget_caddy::paint(i_graphics_context& aGc) const
     {
         widget::paint(aGc);
-        if (item().is_layout())
+        if ((item().is_layout() || item().is_spacer()) && !preview_mode())
         {
             auto const r = client_rect(false);
+            if (iShowLayoutIcons != nullptr && iShowLayoutIcons->value<bool>(true))
             {
-                scoped_opacity so{ aGc, aGc.opacity() * 0.5 };
+                scoped_opacity so{ aGc, aGc.opacity() * 0.25 };
                 scoped_scissor ss{ aGc, r };
-                size const iconSize{ std::min<scalar>(r.cx, std::min<scalar>(r.cy, 16.0_dip)), std::min<scalar>(r.cx, std::min<scalar>(r.cy, 16.0_dip)) };
+                size const iconSize{ std::min<scalar>(r.cx, std::min<scalar>(r.cy, 8.0_dip)), std::min<scalar>(r.cx, std::min<scalar>(r.cy, 8.0_dip)) };
+                // nested layouts/spacers (higher z order) draw their own icons so don't draw ours where they intersect
+                std::vector<rect> nestedRects;
+                for (auto const& child : element().children())
+                    if (child->has_caddy() && child->has_layout_item() && (child->layout_item().is_layout() || child->layout_item().is_spacer()) &&
+                        child->caddy().has_parent() && !child->caddy().effectively_hidden())
+                        nestedRects.push_back(to_client_coordinates(child->caddy().non_client_rect()));
                 for (std::int32_t y = 0; y < r.height() / iconSize.cy; ++y)
                 {
                     for (std::int32_t x = 0; x < r.width() / iconSize.cx; ++x)
                     {
                         if (y % 2 == 1 || x % 3 != y % 3)
                             continue;
-                        aGc.draw_texture(rect{ r.top_left() + point{ iconSize } / 4.0 + basic_point<std::int32_t>{ x, y }.as<scalar>() * iconSize, iconSize }, element().library().element_icon(element().type()));
+                        rect const iconRect{ r.top_left() + point{ iconSize } / 4.0 + basic_point<std::int32_t>{ x, y }.as<scalar>() * iconSize, iconSize };
+                        // clip the icon to the parts of it not covered by nested layouts/spacers
+                        std::vector<rect> pieces{ iconRect.intersection(r) };
+                        for (auto const& nestedRect : nestedRects)
+                        {
+                            std::vector<rect> remaining;
+                            for (auto const& piece : pieces)
+                            {
+                                auto const covered = piece.intersection(nestedRect);
+                                if (covered.empty())
+                                {
+                                    remaining.push_back(piece);
+                                    continue;
+                                }
+                                auto add = [&](scalar aLeft, scalar aTop, scalar aRight, scalar aBottom)
+                                {
+                                    if (aRight > aLeft && aBottom > aTop)
+                                        remaining.push_back(rect{ point{ aLeft, aTop }, size{ aRight - aLeft, aBottom - aTop } });
+                                };
+                                add(piece.left(), piece.top(), piece.right(), covered.top());
+                                add(piece.left(), covered.bottom(), piece.right(), piece.bottom());
+                                add(piece.left(), covered.top(), covered.left(), covered.bottom());
+                                add(covered.right(), covered.top(), piece.right(), covered.bottom());
+                            }
+                            pieces = std::move(remaining);
+                        }
+                        for (auto const& piece : pieces)
+                        {
+                            if (piece.empty())
+                                continue;
+                            scoped_scissor pieceScissor{ aGc, piece };
+                            aGc.draw_texture(iconRect, element().library().element_icon(element().type()));
+                        }
                     }
                 }
             }
@@ -194,12 +701,12 @@ namespace neogfx::DesignStudio
     void widget_caddy::paint_non_client_after(i_graphics_context& aGc) const
     {
         widget::paint_non_client_after(aGc);
-        if (opacity() == 1.0)
+        if (opacity() == 1.0 && !preview_mode())
         {
             auto draw_selected_rect = [&]()
             {
                 auto const cr = client_rect(false);
-                if (element().is_selected() && element().group() != element_group::Workflow)
+                if (element().is_selected() && element().group() != element_group::Workflow && !iTextEditor) // not while editing text so the element is seen as it is
                     aGc.fill_rect(cr, service<i_app>().current_style().palette().color(color_role::Selection).with_alpha(0.5));
                 aGc.draw_rect(cr, pen{ color::White.with_alpha(0.75), 2.0 });
                 aGc.draw_rect(cr, pen{ color::Black.with_alpha(0.75), 2.0, 
@@ -222,7 +729,7 @@ namespace neogfx::DesignStudio
             default:
                 if (element().is_selected() || entered())
                     draw_selected_rect();
-                if (entered())
+                if (entered() && !nested())
                     draw_resizer_rects();
                 break;
             case element_mode::Drag:
@@ -230,7 +737,8 @@ namespace neogfx::DesignStudio
                 break;
             case element_mode::Edit:
                 draw_selected_rect();
-                draw_resizer_rects();
+                if (!nested())
+                    draw_resizer_rects();
                 break;
             }
         }
@@ -238,7 +746,7 @@ namespace neogfx::DesignStudio
 
     focus_policy widget_caddy::focus_policy() const
     {
-        return neogfx::focus_policy::StrongFocus;
+        return preview_mode() ? neogfx::focus_policy::NoFocus : neogfx::focus_policy::StrongFocus;
     }
 
     void widget_caddy::focus_gained(focus_reason aFocusReason)
@@ -272,7 +780,7 @@ namespace neogfx::DesignStudio
 
     bool widget_caddy::ignore_mouse_events(bool aConsiderAncestors) const
     {
-        if (element().mode() == element_mode::Drag)
+        if (preview_mode() || element().mode() == element_mode::Drag)
             return true;
         return widget::ignore_mouse_events(aConsiderAncestors);
     }
@@ -298,6 +806,21 @@ namespace neogfx::DesignStudio
             }
             else if (clickLocation != cardinal::Center)
                 start_drag(*clickLocation, aPosition);
+        }
+    }
+
+    void widget_caddy::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
+    {
+        widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
+        // double clicking an element with visible text edits it in place
+        if (aButton == mouse_button::Left && !preview_mode() && has_element() && element().has_text())
+        {
+            auto const location = cardinal_at(aPosition, aKeyModifier);
+            if (!location || *location == cardinal::Center)
+            {
+                end_drag();
+                begin_text_edit();
+            }
         }
     }
 
@@ -365,6 +888,8 @@ namespace neogfx::DesignStudio
 
     mouse_cursor widget_caddy::mouse_cursor() const
     {
+        if (nested())
+            return widget::mouse_cursor();
         auto const cursorLocation = cardinal_at(mouse_position(), service<i_keyboard>().modifiers());
         if (cursorLocation.has_value())
             switch (cursorLocation.value())
@@ -396,8 +921,89 @@ namespace neogfx::DesignStudio
         iDragInfo.emplace(aPart, aPosition - cardinal_rect(aPart).center());
     }
 
+    bool widget_caddy::can_be_dropped() const
+    {
+        return has_element() && can_be_moved(element());
+    }
+
+    bool widget_caddy::capturing_drop() const
+    {
+        return iDropCandidate;
+    }
+
+    void widget_caddy::update_drop_target(point const& aPosition)
+    {
+        iDropPosition = to_window_coordinates(aPosition) + root().window_position();
+        iDropTarget = find_drop_container(iProject.root(), element(), iDropPosition);
+        if (iDropTarget != nullptr)
+        {
+            try
+            {
+                show_drop_highlight(*iDropTarget, element().type(), iDropHighlight, iDropPosition, this);
+                return;
+            }
+            catch (...)
+            {
+                iDropTarget = nullptr;
+            }
+        }
+        hide_drop_highlight(iDropHighlight);
+    }
+
+    void widget_caddy::move_to(i_element& aContainer, point const& aDropPosition)
+    {
+        auto& layout = aContainer.child_layout(element().type());
+        auto const insertion = find_insertion_point(layout, aDropPosition, this);
+        if (has_parent_layout() && &parent_layout() == &layout)
+        {
+            // already there?
+            auto const current = layout.find(*this);
+            i_widget const* after = (current && *current + 1u < layout.count() && layout.is_widget_at(*current + 1u)) ?
+                &layout.get_widget_at(*current + 1u) : nullptr;
+            if (insertion.next == after)
+                return;
+        }
+        i_element const* before = nullptr;
+        if (insertion.next != nullptr)
+            for (auto const& sibling : aContainer.children())
+                if (sibling->has_caddy() && static_cast<i_widget const*>(&sibling->caddy()) == insertion.next)
+                    before = &*sibling;
+        move_element_to_container(iProject, element(), aContainer, before);
+    }
+
+    void widget_caddy::move_to_canvas(point const& aDropPosition)
+    {
+        // only widgets can be top level (layouts must be within a window/dialog)
+        if (element().group() != element_group::Widget)
+            return;
+        i_element* top = &element();
+        while (top->is_nested())
+            top = &top->parent();
+        if (top == &element() || !top->has_caddy() || !top->caddy().has_parent())
+            return;
+        auto& workspace = top->caddy().parent();
+        if (!design_rect(workspace).contains(aDropPosition))
+            return;
+        move_element_to_canvas(iProject, element(), iProject.root(), workspace, aDropPosition);
+    }
+
     void widget_caddy::drag(point const& aPosition, bool aIgnoreConstraints)
     {
+        if (!iDragInfo)
+            return;
+        if (iDragInfo->part == cardinal::Center && capturing() && can_be_dropped())
+        {
+            // dragging an element onto a layout moves it there (on release)
+            auto const startPosition = cardinal_rect(iDragInfo->part).center() + iDragInfo->dragFrom;
+            if (iDragInfo->wasDragged || (aPosition - startPosition).to_vec2().magnitude() >= 4.0_dip)
+            {
+                iDragInfo->wasDragged = true;
+                iDropCandidate = true;
+                update_drop_target(aPosition);
+            }
+        }
+        if (nested())
+            return; // position and size of nested elements are managed by their container's layout
         auto const adjust = point{ aPosition - cardinal_rect(iDragInfo->part).center() } - iDragInfo->dragFrom;
         auto r = non_client_rect();
         switch (iDragInfo->part)
@@ -461,7 +1067,27 @@ namespace neogfx::DesignStudio
 
     void widget_caddy::end_drag()
     {
+        bool const wasDragged = iDragInfo && iDragInfo->wasDragged;
+        bool const droppable = wasDragged && capturing_drop() ;
         iDragInfo = std::nullopt;
+        auto const target = iDropTarget;
+        iDropTarget = nullptr;
+        hide_drop_highlight(iDropHighlight);
+        if (droppable && has_element())
+        {
+            try
+            {
+                if (target != nullptr)
+                    move_to(*target, iDropPosition);
+                else if (nested())
+                    move_to_canvas(iDropPosition); // dragged out of its layout onto empty canvas
+            }
+            catch (...)
+            {
+                // not droppable there
+            }
+        }
+        iDropCandidate = false;
     }
 
     bool widget_caddy::can_undo() const
@@ -496,6 +1122,8 @@ namespace neogfx::DesignStudio
 
     bool widget_caddy::can_delete_selected() const
     {
+        if (preview_mode())
+            return false;
         bool someSelected = false;
         iProject.root().visit([&](i_element& aElement)
         {
@@ -507,7 +1135,7 @@ namespace neogfx::DesignStudio
 
     bool widget_caddy::can_select_all() const
     {
-        return true;
+        return !preview_mode();
     }
 
     void widget_caddy::undo(i_clipboard& aClipboard)
@@ -631,5 +1259,222 @@ namespace neogfx::DesignStudio
         if (aForHitTest && aPart != cardinal::Center)
             result.inflate(result.extents() / 2.0);
         return result;
+    }
+
+    rect design_rect(i_widget const& aWidget)
+    {
+        return aWidget.non_client_rect() + aWidget.root().window_position();
+    }
+
+
+    i_element* find_drop_container(i_element& aRoot, i_element const& aDropped, point const& aDropPosition)
+    {
+        i_element* result = nullptr;
+        std::size_t resultDepth = 0;
+        aRoot.visit([&](i_element& aElement)
+        {
+            if (&aElement == &aDropped || !aElement.has_child_layout())
+                return;
+            // elements without a caddy (e.g. tab pages) are drop targets via their own widget
+            i_widget const* target = aElement.has_caddy() ? static_cast<i_widget const*>(&aElement.caddy()) :
+                aElement.has_widget() ? &aElement.widget() : nullptr;
+            if (target == nullptr || !target->has_parent() || target->effectively_hidden())
+                return;
+            if (is_descendant_of(aElement, aDropped))
+                return;
+            if (!design_rect(*target).contains(aDropPosition))
+                return;
+            auto const depth = element_depth(aElement);
+            if (result == nullptr || depth > resultDepth)
+            {
+                result = &aElement;
+                resultDepth = depth;
+            }
+        });
+        return result;
+    }
+
+    void add_to_container(i_project& aProject, i_element& aElement, optional_point const& aDropPosition)
+    {
+        auto& container = aElement.parent();
+        if (!aElement.needs_caddy())
+        {
+            // created by (and within) its container (e.g. a tab page)
+            if (container.has_widget())
+                aElement.create_layout_item(container.widget());
+            if (!aElement.has_layout_item())
+                throw i_element::no_layout_item();
+            aElement.apply_attributes(show_ids());
+            return;
+        }
+        auto& layout = container.child_layout(aElement.type());
+        i_widget& parentWidget = layout.has_parent_widget() ? layout.parent_widget() : static_cast<i_widget&>(container.caddy());
+        auto caddy = make_ref<widget_caddy>(aProject, aElement, parentWidget, point{});
+        auto const index = aDropPosition ? find_insertion_point(layout, *aDropPosition).index : layout.count();
+        layout.add_at(index, caddy);
+        sync_element_order(aElement, layout);
+        grow_top_level_caddy(aElement);
+    }
+
+    void show_drop_highlight(i_element& aContainer, i_string const& aChildType, ref_ptr<i_widget>& aHighlight, point const& aDropPosition, i_widget const* aExclude)
+    {
+        auto& layout = aContainer.child_layout(aChildType);
+        if (!layout.has_parent_widget())
+        {
+            hide_drop_highlight(aHighlight);
+            return;
+        }
+        auto& parentWidget = layout.parent_widget();
+        if (aHighlight && (!aHighlight->has_parent() || &aHighlight->parent() != &parentWidget))
+            hide_drop_highlight(aHighlight);
+        if (!aHighlight)
+        {
+            // a non-layout-managed child of the layout's widget (so it works inside nested windows too) that just paints the highlight
+            aHighlight = ref_ptr<i_widget>{ make_ref<widget<>>(parentWidget) };
+            aHighlight->set_ignore_mouse_events(true);
+            aHighlight->set_ignore_non_client_mouse_events(true);
+            i_widget* highlight = &*aHighlight;
+            aHighlight->painted([highlight](i_graphics_context& aGc)
+            {
+                // fill alpha fades 0.0 -> 0.5 -> 0.0 over two seconds, repeating
+                auto const elapsed = std::chrono::duration<double>(std::chrono::steady_clock::now() - tDropHighlightStart).count();
+                auto const alpha = 0.25 * (1.0 - std::cos(std::numbers::pi * elapsed));
+                aGc.fill_rect(rect{ point{}, highlight->extents() }, color::Yellow.with_alpha(alpha));
+                // insertion line flashes like a caret: black for half a second, white for half a second
+                if (tDropLine)
+                    aGc.draw_line(tDropLine->first, tDropLine->second, pen{ std::fmod(elapsed, 1.0) < 0.5 ? color::Black : color::White, 2.0_dip });
+            });
+            tDropHighlightStart = std::chrono::steady_clock::now();
+            tDropHighlightAnimator.emplace(*aHighlight, [highlight](widget_timer& aAnimator)
+            {
+                aAnimator.again();
+                highlight->update();
+            }, std::chrono::milliseconds{ 20 });
+        }
+        auto const insertion = find_insertion_point(layout, aDropPosition, aExclude);
+        auto const origin = design_rect(parentWidget).top_left() + layout.position();
+        tDropLine = std::make_pair(insertion.line.first - origin, insertion.line.second - origin);
+        aHighlight->move(layout.position());
+        aHighlight->resize(layout.extents());
+        aHighlight->bring_to_front();
+        aHighlight->update();
+    }
+
+    void hide_drop_highlight(ref_ptr<i_widget>& aHighlight)
+    {
+        tDropLine = std::nullopt;
+        tDropHighlightAnimator = std::nullopt;
+        if (aHighlight)
+        {
+            if (aHighlight->has_parent())
+                aHighlight->parent().remove(*aHighlight);
+            aHighlight = {};
+        }
+    }
+
+    bool can_be_moved(i_element const& aElement)
+    {
+        if (aElement.group() != element_group::Widget && aElement.group() != element_group::Layout)
+            return false;
+        if (!aElement.has_caddy() || !aElement.has_layout_item())
+            return false;
+        return !(aElement.layout_item().is_widget() && aElement.layout_item().as_widget().is_root()); // windows stay top level
+    }
+
+    void move_element_to_container(i_project& aProject, i_element& aElement, i_element& aContainer, i_element const* aBefore)
+    {
+        if (!can_be_moved(aElement) || &aElement == &aContainer || is_descendant_of(aContainer, aElement))
+            return;
+        auto& caddy = aElement.caddy();
+        auto& layout = aContainer.child_layout(aElement.type());
+        ref_ptr<i_widget> keep{ &caddy };
+        aProject.move_element(aElement, aContainer, aBefore);
+        if (caddy.has_parent_layout())
+            caddy.parent_layout().remove(caddy);
+        i_widget& parentWidget = layout.has_parent_widget() ? layout.parent_widget() : static_cast<i_widget&>(aContainer.caddy());
+        parentWidget.add(keep);
+        optional_layout_item_index index;
+        if (aBefore != nullptr && aBefore->has_caddy())
+            index = layout.find(aBefore->caddy());
+        layout.add_at(index ? *index : layout.count(), ref_ptr<i_layout_item>{ keep });
+        // now nested: managed by the container's layout and must receive mouse events itself
+        caddy.set_ignore_mouse_events(false);
+        caddy.set_consider_ancestors_for_mouse_events(false);
+        grow_top_level_caddy(aElement);
+    }
+
+    void move_element_to_canvas(i_project& aProject, i_element& aElement, i_element& aNewParent, i_widget& aWorkspace, point const& aDropPosition)
+    {
+        if (!can_be_moved(aElement) || aElement.group() != element_group::Widget)
+            return;
+        auto& caddy = aElement.caddy();
+        ref_ptr<i_widget> keep{ &caddy };
+        aProject.move_element(aElement, aNewParent);
+        if (caddy.has_parent_layout())
+            caddy.parent_layout().remove(caddy);
+        aWorkspace.add(keep);
+        // now top level: floats on the workspace
+        caddy.set_consider_ancestors_for_mouse_events(true);
+        auto const idealSize = caddy.transformed_ideal_size();
+        auto const minimumSize = caddy.minimum_size();
+        caddy.resize(size{ std::max(idealSize.cx, minimumSize.cx), std::max(idealSize.cy, minimumSize.cy) });
+        caddy.move(aDropPosition - design_rect(aWorkspace).top_left() - point{ caddy.extents() / 2.0 });
+        caddy.bring_to_front();
+    }
+
+    void create_caddies(i_project& aProject, i_widget& aWorkspace)
+    {
+        point position{ 32.0_dip, 32.0_dip };
+        std::function<void(i_element&)> create_nested = [&](i_element& aParent)
+        {
+            for (auto& child : aParent.children())
+                if (is_design_element(*child) && !child->has_caddy() && !child->has_layout_item())
+                {
+                    try
+                    {
+                        add_to_container(aProject, *child);
+                    }
+                    catch (...)
+                    {
+                        continue; // not representable on the design surface (it is still preserved in the project and saved)
+                    }
+                    create_nested(*child);
+                }
+        };
+        auto create_top_level = [&](i_element& aElement)
+        {
+            if (!is_design_element(aElement) || aElement.has_caddy())
+                return;
+            // widget(i_widget& aParent) adds itself to its parent with a non-owning reference so, as with a toolbox drop, create 
+            // the caddy on the root and then move it to the workspace passing an owning reference (otherwise the caddy (which 
+            // is also the window nest) is destroyed when 'caddy' goes out of scope)
+            auto caddy = make_ref<widget_caddy>(aProject, aElement, aWorkspace.root().as_widget(), point{});
+            aWorkspace.add(ref_ptr<i_widget>{ caddy });
+            caddy->move(position);
+            create_nested(aElement);
+            auto const idealSize = caddy->transformed_ideal_size();
+            auto const minimumSize = caddy->minimum_size();
+            caddy->resize(size{ std::max(idealSize.cx, minimumSize.cx), std::max(idealSize.cy, minimumSize.cy) });
+            position += point{ 32.0_dip, 32.0_dip };
+        };
+        for (auto& e : aProject.root().children())
+        {
+            if (e->group() == element_group::UserInterface)
+            {
+                for (auto& uiElement : e->children())
+                    create_top_level(*uiElement);
+            }
+            else
+                create_top_level(*e);
+        }
+    }
+
+    void remove_caddies(i_project& aProject)
+    {
+        aProject.root().visit([](i_element& aElement)
+        {
+            if (aElement.has_caddy() && !aElement.is_nested() && aElement.caddy().has_parent())
+                aElement.caddy().parent().remove(aElement.caddy());
+        });
     }
 }

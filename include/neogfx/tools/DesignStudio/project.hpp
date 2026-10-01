@@ -33,6 +33,7 @@ namespace neogfx::DesignStudio
     public:
         define_declared_event(ElementAdded, element_added, i_element&)
         define_declared_event(ElementRemoved, element_removed, i_element&)
+        define_declared_event(ElementMoved, element_moved, i_element&)
     public:
         typedef i_project abstract_type;
     public:
@@ -42,7 +43,10 @@ namespace neogfx::DesignStudio
     public:
         void create(const i_string& aName, const i_string& aNamespace) override;
         void open(const i_string& aPath) override;
+        void save(const i_string& aPath) override;
     public:
+        bool has_path() const override;
+        const i_string& path() const override;
         const i_string& name() const override;
         const i_string& namespace_() const override;
     public:
@@ -51,10 +55,12 @@ namespace neogfx::DesignStudio
     public:
         i_element& create_element(i_element& aParent, const i_string& aType, const i_string& aElementId = string{}) override;
         void remove_element(i_element& aElement) override;
+        void move_element(i_element& aElement, i_element& aNewParent, i_element const* aBefore = nullptr) override;
     private:
         i_project_manager& iManager;
         ref_ptr<i_element> iRoot;
         string iName;
         string iNamespace;
+        string iPath;
     };
-}
+}

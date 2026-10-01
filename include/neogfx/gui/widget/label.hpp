@@ -87,6 +87,7 @@ namespace neogfx
     class label : public widget<>
     {
         meta_object(widget<>)
+        typedef label property_context_type;
     public:
         struct no_center_spacer : std::logic_error { no_center_spacer() : std::logic_error("neogfx::label::no_center_spacer") {} };
         struct no_buddy : std::logic_error { no_buddy() : std::logic_error("neogfx::label::no_buddy") {} };
@@ -119,6 +120,8 @@ namespace neogfx
         void set_font_role(const optional_font_role& aFontRole) final;
         void set_font(optional_font const& aFont) final;
     public:
+        void property_changed(i_property& aProperty) override;
+    public:
         neogfx::alignment alignment() const;
         void set_alignment(neogfx::alignment aAlignment);
     public:
@@ -147,12 +150,13 @@ namespace neogfx
         void handle_placement_change();
     private:
         sink iSink;
-        neogfx::alignment iAlignment;
-        label_placement iPlacement;
         grid_layout iLayout;
         size_policy_of_parent<neogfx::text_widget, layout_item_category::Widget> iText;
         size_policy_of_parent<neogfx::image_widget, layout_item_category::Widget> iImage;
         i_spacer* iCenterSpacer;
         std::shared_ptr<i_widget> iBuddy;
+    public:
+        define_property(property_category::hard_geometry, neogfx::alignment, Alignment, alignment, neogfx::alignment::Left | neogfx::alignment::VCenter)
+        define_property(property_category::hard_geometry, label_placement, Placement, placement, label_placement::ImageTextHorizontal)
     };
 }

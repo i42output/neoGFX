@@ -25,44 +25,56 @@
 
 namespace neogfx
 {
-    image_widget::image_widget(const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal aPlacement) :
-        iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iDpiAutoScale{ false }
+    image_widget::image_widget(const i_texture& aTexture, neogfx::aspect_ratio aAspectRatio, cardinal aPlacement) :
+        iTexture{ aTexture }
     {
+        AspectRatio.assign(aAspectRatio, false);
+        Placement.assign(aPlacement, false);
         set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
     }
 
-    image_widget::image_widget(const i_image& aImage, aspect_ratio aAspectRatio, cardinal aPlacement) :
-        iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iDpiAutoScale{ false }
+    image_widget::image_widget(const i_image& aImage, neogfx::aspect_ratio aAspectRatio, cardinal aPlacement) :
+        iTexture{ aImage }
     {
+        AspectRatio.assign(aAspectRatio, false);
+        Placement.assign(aPlacement, false);
         set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
     }
 
-    image_widget::image_widget(i_widget& aParent, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal aPlacement) :
-        widget{ aParent }, iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iDpiAutoScale{ false }
+    image_widget::image_widget(i_widget& aParent, const i_texture& aTexture, neogfx::aspect_ratio aAspectRatio, cardinal aPlacement) :
+        widget{ aParent }, iTexture{ aTexture }
     {
+        AspectRatio.assign(aAspectRatio, false);
+        Placement.assign(aPlacement, false);
         set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
     }
 
-    image_widget::image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio, cardinal aPlacement) :
-        widget{ aParent }, iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iDpiAutoScale{ false }
+    image_widget::image_widget(i_widget& aParent, const i_image& aImage, neogfx::aspect_ratio aAspectRatio, cardinal aPlacement) :
+        widget{ aParent }, iTexture{ aImage }
     {
+        AspectRatio.assign(aAspectRatio, false);
+        Placement.assign(aPlacement, false);
         set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
     }
 
-    image_widget::image_widget(i_layout& aLayout, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal aPlacement) :
-        widget{ aLayout }, iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iDpiAutoScale{ false }
+    image_widget::image_widget(i_layout& aLayout, const i_texture& aTexture, neogfx::aspect_ratio aAspectRatio, cardinal aPlacement) :
+        widget{ aLayout }, iTexture{ aTexture }
     {
+        AspectRatio.assign(aAspectRatio, false);
+        Placement.assign(aPlacement, false);
         set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
     }
 
-    image_widget::image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio, cardinal aPlacement) :
-        widget{ aLayout }, iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iDpiAutoScale{ false }
+    image_widget::image_widget(i_layout& aLayout, const i_image& aImage, neogfx::aspect_ratio aAspectRatio, cardinal aPlacement) :
+        widget{ aLayout }, iTexture{ aImage }
     {
+        AspectRatio.assign(aAspectRatio, false);
+        Placement.assign(aPlacement, false);
         set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
     }
@@ -86,10 +98,10 @@ namespace neogfx
         if (has_minimum_size() || iTexture.is_empty() || size_policy() == size_constraint::DefaultMinimumExpanding)
             return widget::minimum_size(aAvailableSpace);
         size imageExtents = units_converter{ *this }.from_device_units(image_size() ? image_size().value() : iTexture.extents());
-        if (iRotation != 0.0)
-            imageExtents = scoped_transform::rotated_extents(imageExtents, iRotation);
+        if (Rotation.value() != 0.0)
+            imageExtents = scoped_transform::rotated_extents(imageExtents, Rotation.value());
         size result = imageExtents + internal_spacing().size();
-        if (iDpiAutoScale)
+        if (DpiAutoScale.value())
             result *= (dpi_scale_factor() / iTexture.dpi_scale_factor());
         return to_units(*this, scoped_units::current_units(), result);
     }
@@ -101,12 +113,19 @@ namespace neogfx
         if (service<i_debug>().layout_item() == this)
             aGc.flush();
         std::optional<scoped_transform> rotate;
-        if (iRotation != 0.0)
-            rotate.emplace(aGc, iRotation, client_rect().center());
-        aGc.draw_texture(placement_rect(), iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : iColor, 
-            effectively_disabled() ? shader_effect::Monochrome : iColor != none ? shader_effect::Colorize : shader_effect::None);
+        if (Rotation.value() != 0.0)
+            rotate.emplace(aGc, Rotation.value(), client_rect().center());
+        aGc.draw_texture(placement_rect(), iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : ImageColor.value(), 
+            effectively_disabled() ? shader_effect::Monochrome : ImageColor.value() != none ? shader_effect::Colorize : shader_effect::None);
         if (service<i_debug>().layout_item() == this)
             aGc.flush();
+    }
+
+    void image_widget::property_changed(i_property& aProperty)
+    {
+        if (&aProperty == &Rotation)
+            update();
+        widget::property_changed(aProperty);
     }
 
     const texture& image_widget::image() const
@@ -116,12 +135,12 @@ namespace neogfx
 
     const optional_size& image_widget::image_size() const
     {
-        return iImageSize;
+        return ImageSize;
     }
 
     const color_or_gradient& image_widget::image_color() const
     {
-        return iColor;
+        return ImageColor;
     }
 
     void image_widget::set_image(i_string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling)
@@ -151,10 +170,10 @@ namespace neogfx
 
     void image_widget::set_image_size(const i_optional<size>& aImageSize)
     {
-        if (iImageSize != aImageSize)
+        if (ImageSize.value() != aImageSize)
         {
             size const oldSize = minimum_size();
-            iImageSize = aImageSize;
+            ImageSize = optional_size{ aImageSize };
             if (oldSize != minimum_size())
             {
                 ImageGeometryChanged();
@@ -167,78 +186,72 @@ namespace neogfx
 
     void image_widget::set_image_color(const color_or_gradient& aImageColor)
     {
-        if (iColor != aImageColor)
-        {
-            iColor = aImageColor;
-            update();
-        }
+        ImageColor = aImageColor;
     }
 
-    void image_widget::set_aspect_ratio(aspect_ratio aAspectRatio)
+    neogfx::aspect_ratio image_widget::aspect_ratio() const
     {
-        if (iAspectRatio != aAspectRatio)
-        {
-            iAspectRatio = aAspectRatio;
-            update();
-        }
+        return AspectRatio;
+    }
+
+    void image_widget::set_aspect_ratio(neogfx::aspect_ratio aAspectRatio)
+    {
+        AspectRatio = aAspectRatio;
+    }
+
+    cardinal image_widget::placement() const
+    {
+        return Placement;
     }
 
     void image_widget::set_placement(cardinal aPlacement)
     {
-        if (iPlacement != aPlacement)
-        {
-            iPlacement = aPlacement;
-            update();
-        }
+        Placement = aPlacement;
     }
 
     angle image_widget::rotation() const
     {
-        return iRotation;
+        return Rotation;
     }
 
     void image_widget::set_rotation(angle aRotation)
     {
-        if (iRotation != aRotation)
-        {
-            iRotation = aRotation;
-            update_layout();
-            update();
-        }
+        Rotation = aRotation;
+    }
+
+    bool image_widget::dpi_auto_scale() const
+    {
+        return DpiAutoScale;
     }
 
     void image_widget::set_dpi_auto_scale(bool aDpiAutoScale)
     {
-        if (iDpiAutoScale != aDpiAutoScale)
-        {
-            iDpiAutoScale = aDpiAutoScale;
-            update();
-        }
+        DpiAutoScale = aDpiAutoScale;
     }
 
     rect image_widget::placement_rect() const
     {
         scoped_units su{ *this, units::Pixels };
         auto imageExtents = image_size() ? image_size().value() : iTexture.extents();
-        if (iDpiAutoScale)
+        if (DpiAutoScale.value())
             imageExtents *= (dpi_scale_factor() / iTexture.dpi_scale_factor());
         rect placementRect{ point{}, imageExtents };
         auto clientRect = client_rect();
-        if (iRotation != 0.0)
+        if (Rotation.value() != 0.0)
         {
-            auto const unrotated = scoped_transform::rotated_extents(clientRect.extents(), -iRotation);
+            auto const unrotated = scoped_transform::rotated_extents(clientRect.extents(), -Rotation.value());
             clientRect = rect{ point{
                 clientRect.center().x - unrotated.cx / 2.0,
                 clientRect.center().y - unrotated.cy / 2.0 }, unrotated };
         }
-        if (iAspectRatio == aspect_ratio::Stretch)
+        if (AspectRatio.value() == aspect_ratio::Stretch)
         {
             placementRect.cx = clientRect.width();
             placementRect.cy = clientRect.height();
         }
         else if (placementRect.height() >= placementRect.width())
         {
-            switch (iAspectRatio)
+            switch (AspectRatio.value())
             {
             case aspect_ratio::Ignore:
                 if (placementRect.width() > clientRect.width())
@@ -269,7 +282,7 @@ namespace neogfx
         }
         else
         {
-            switch (iAspectRatio)
+            switch (AspectRatio.value())
             {
             case aspect_ratio::Ignore:
                 if (placementRect.width() > clientRect.width())
@@ -298,7 +311,7 @@ namespace neogfx
                 break;
             }
         }
-        switch (iPlacement)
+        switch (Placement.value())
         {
         case cardinal::NorthWest:
             placementRect.position() = point{};
@@ -328,8 +341,8 @@ namespace neogfx
             placementRect.position() = point{ clientRect.width() - placementRect.width(), clientRect.height() - placementRect.height() };
             break;
         }
-        if (iRotation != 0.0)
+        if (Rotation.value() != 0.0)
             placementRect.position() += clientRect.position();
         return floor_rasterized(placementRect);
     }
-}
+}

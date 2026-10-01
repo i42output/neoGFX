@@ -64,33 +64,65 @@ namespace neogfx::DesignStudio
             else
                 item_model().clear();
         };
-        auto project_updated = [&, update_model](i_project& aProject)
+        // keep Object Explorer in step with the design surface: an element being edited (e.g. clicked) becomes the current 
+        // item (which scrolls it into view) and selected elements are selected rows
+        auto subscribe = [this](i_element& aElement)
+        {
+            auto find = [this](i_element& aElement) -> std::optional<item_model_index>
+            {
+                try
+                {
+                    auto const modelIndex = item_model().find_item(&aElement);
+                    expand_to(modelIndex);
+                    return modelIndex;
+                }
+                catch (...)
+                {
+                    return {}; // element not shown in Object Explorer
+                }
+            };
+            iSink2 += aElement.mode_changed([this, &aElement, find]()
+            {
+                if (aElement.mode() == element_mode::Edit)
+                {
+                    auto const modelIndex = find(aElement);
+                    if (modelIndex)
+                        selection_model().set_current_index(from_item_model_index(*modelIndex));
+                }
+            });
+            iSink2 += aElement.selection_changed([this, &aElement, find]()
+            {
+                auto const modelIndex = find(aElement);
+                if (!modelIndex)
+                    return;
+                auto const index = from_item_model_index(*modelIndex);
+                if (aElement.is_selected())
+                    selection_model().select(index, ng::item_selection_operation::SelectRow);
+                else
+                    selection_model().select(index, ng::item_selection_operation::DeselectRow);
+            });
+        };
+        auto project_updated = [&, update_model, subscribe](i_project& aProject)
         {
             update_model();
-            iSink2 = aProject.element_added([&, update_model](i_element& aElement) 
+            iSink2 = aProject.element_added([&, update_model, subscribe](i_element& aElement) 
             { 
                 // todo: something more granular
                 update_model(); 
-                iSink2 += aElement.mode_changed([&]()
-                {
-                    auto const index = from_item_model_index(item_model().find_item(&aElement));
-                    if (aElement.mode() == element_mode::Edit)
-                        selection_model().set_current_index(index);
-                });
-                iSink2 += aElement.selection_changed([&]()
-                {
-                    auto const index = from_item_model_index(item_model().find_item(&aElement));
-                    if (aElement.is_selected())
-                        selection_model().select(index, ng::item_selection_operation::SelectRow);
-                    else
-                        selection_model().select(index, ng::item_selection_operation::DeselectRow);
-                });
+                subscribe(aElement);
             }); 
             iSink2 += aProject.element_removed([update_model](i_element&) 
             { 
                 // todo: something more granular
                 update_model(); 
             }); 
+            iSink2 += aProject.element_moved([update_model](i_element&) 
+            { 
+                // todo: something more granular
+                update_model(); 
+            }); 
+            // elements already in the project (e.g. loaded from an .nrc file) 
+            aProject.root().visit([&](i_element& aElement) { subscribe(aElement); });
         };
 
         iSink += aProjectManager.project_added(project_updated);
@@ -120,5 +152,17 @@ namespace neogfx::DesignStudio
         }
         else
             return {};
+    }
+
+    ng::item_cell_flags object_presentation_model::cell_flags(ng::item_presentation_model_index const& aIndex) const
+    {
+        auto result = basic_item_presentation_model::cell_flags(aIndex);
+        auto const& e = *item_model().item(to_item_model_index(aIndex));
+        // widgets and layouts can be dragged to move them
+        bool const movable = (e.group() == element_group::Widget || e.group() == element_group::Layout) && e.has_caddy() &&
+            !(e.has_layout_item() && e.layout_item().is_widget() && e.layout_item().as_widget().is_root());
+        if (movable)
+            result |= ng::item_cell_flags::Draggable;
+        return result;
     }
 }

@@ -40,9 +40,10 @@ namespace neogfx::DesignStudio
     public:
         ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override;
         ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override;
+        ng::item_cell_flags cell_flags(ng::item_presentation_model_index const& aIndex) const override;
     private:
         item_selection_model iSelectionModel;
         sink iSink;
         sink iSink2;
     };
-}
+}

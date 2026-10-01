@@ -21,6 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/context_menu.hpp>
 #include <neogfx/tools/DesignStudio/i_node.hpp>
 #include "main_window.hpp"
+#include "widget_caddy.hpp"
+#include <neogfx/gui/dialog/color_dialog.hpp>
+#include <neogfx/gui/dialog/font_dialog.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -93,6 +96,17 @@ namespace neogfx::DesignStudio
         aApp.actionShowStandardToolbar.unchecked([&]() { standardToolbar.hide(); });
         aApp.actionShowStatusBar.checked([&]() { statusBar.show(); });
         aApp.actionShowStatusBar.unchecked([&]() { statusBar.hide(); });
+
+        auto& showLayoutIcons = aSettings.setting("environment.workspace.show_layout_icons"_s);
+        aApp.actionShowLayoutIcons.set_checked(showLayoutIcons.value<bool>(true));
+        aApp.actionShowLayoutIcons.checked([&showLayoutIcons]() { if (!showLayoutIcons.value<bool>(true)) showLayoutIcons.set_value(true); });
+        aApp.actionShowLayoutIcons.unchecked([&showLayoutIcons]() { if (showLayoutIcons.value<bool>(true)) showLayoutIcons.set_value(false); });
+        auto showLayoutIconsChanged = [&aApp, &showLayoutIcons]()
+        {
+            aApp.actionShowLayoutIcons.set_checked(showLayoutIcons.value<bool>(true));
+        };
+        showLayoutIcons.changing(showLayoutIconsChanged);
+        showLayoutIcons.changed(showLayoutIconsChanged);
 
         if (!workspaceSize.is_default())
             set_extents(workspaceSize.value<ng::size>());
@@ -229,7 +243,7 @@ namespace neogfx::DesignStudio
         iWorkspace.view_stack().enable_drag_drop_target();
         iWorkspace.view_stack().object_acceptable([&](const ng::i_drag_drop_object& aObject, ng::optional_point const& aDropPosition, ng::drop_operation& aOperation)
         {
-            aOperation = ng::drop_operation::Move;
+            aOperation = preview_mode() ? ng::drop_operation::None : ng::drop_operation::Move;
         });
         iWorkspace.view_stack().set_focus_policy(ng::focus_policy::ClickFocus);
 
@@ -273,12 +287,18 @@ namespace neogfx::DesignStudio
             {
                 auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*aCurrentIndex));
                 element.set_mode(element_mode::Edit);
+                iPropertyElement = weak_ref_ptr<i_element>{ element };
             }
-            else if (aPreviousIndex)
+            else 
             {
-                auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*aPreviousIndex));
-                element.set_mode(element_mode::None);
+                if (aPreviousIndex)
+                {
+                    auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*aPreviousIndex));
+                    element.set_mode(element_mode::None);
+                }
+                iPropertyElement = weak_ref_ptr<i_element>{};
             }
+            iPropertiesNeedUpdate = true;
         });
         iObjectPresentationModel.selection_model().selection_changed([&](const ng::item_selection& aCurrentSelection, const ng::item_selection& aPreviousSelection)
         {
@@ -298,6 +318,222 @@ namespace neogfx::DesignStudio
                     auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*row));
                     element.select(false, false);
                 }
+            }
+        });
+
+        iPropertyModel.set_column_name(0u, "Property"_t);
+        iPropertyModel.set_column_name(1u, "Value"_t);
+        iPropertyPresentationModel.set_item_model(iPropertyModel);
+        iPropertyPresentationModel.set_alternating_row_color(true);
+        auto& propertyTable = iProperties.docked_widget<ng::table_view>();
+        propertyTable.set_minimum_size(ng::size{ 128_dip, 128_dip });
+        propertyTable.set_presentation_model(iPropertyPresentationModel);
+        propertyTable.column_header().set_expand_last_column(true);
+        iSink += iPropertyModel.item_changed([&](item_model_index const& aIndex)
+        {
+            if (iUpdatingProperties || !iPropertyElement.valid() || !iProjectManager.project_active())
+                return;
+            auto& element = *iPropertyElement;
+            auto cell_text = [&](item_model_index const& aCellIndex)
+            {
+                auto const& cellData = iPropertyModel.cell_data(aCellIndex);
+                return std::holds_alternative<string>(cellData) ? std::get<string>(cellData) : string{};
+            };
+            auto const text = cell_text(aIndex);
+            auto const& item = iPropertyModel.item(aIndex);
+            if (std::holds_alternative<std::monostate>(item))
+                return; // class node
+            if (std::holds_alternative<i_property*>(item))
+            {
+                // object property
+                if (aIndex.column() != 1u)
+                    return;
+                auto& property = *std::get<i_property*>(item);
+                auto const value = property_value_from_string(property, text.to_std_string());
+                if (value)
+                    property.set_from_variant(*value);
+                iPropertiesNeedUpdate = true; // show the resulting value
+                return;
+            }
+            auto const attributeIndex = std::get<std::uint32_t>(item);
+            if (attributeIndex == property_presentation_model::new_property_row)
+            {
+                // new property: name entered in the trailing row
+                if (aIndex.column() != 0u || text.empty())
+                    return;
+                auto value = cell_text(aIndex.with_column(1u));
+                if (value.empty())
+                    value = "\"\"";
+                element.attributes().push_back(neolib::pair<string, string>{ text, value });
+                iPropertiesNeedUpdate = true;
+            }
+            else if (aIndex.column() == 1u && attributeIndex < element.attributes().size())
+                std::next(element.attributes().begin(), attributeIndex)->second() = text; // an empty value removes the property on save
+            else
+                return;
+            element.apply_attributes(show_ids());
+            iProjectManager.active_project().set_dirty();
+        });
+        // the property being edited in place (if any)
+        auto edited_property = [this, &propertyTable]() -> i_property*
+        {
+            if (!propertyTable.editing() || propertyTable.editing()->column() != 1u)
+                return nullptr;
+            auto const& item = iPropertyModel.item(iPropertyPresentationModel.to_item_model_index(*propertyTable.editing()));
+            return std::holds_alternative<i_property*>(item) ? std::get<i_property*>(item) : nullptr;
+        };
+        // "..." button: opens the color or font dialog for the property being edited; the result replaces the editor text and is committed
+        auto open_property_dialog = [this, &propertyTable, edited_property]()
+        {
+            auto property = edited_property();
+            if (property == nullptr || iPropertyDialogOpen)
+                return;
+            neolib::scoped_flag sf{ iPropertyDialogOpen }; // the button mustn't be destroyed while its click handler is running
+            std::string const text = propertyTable.editor_has_text_edit() ? propertyTable.editor_text_edit().text().to_std_string() : std::string{};
+            std::optional<std::string> newText;
+            switch (property_dialog_for(*property))
+            {
+            case property_dialog::Color:
+                {
+                    auto const current = property_parse(text, static_cast<ng::color const*>(nullptr));
+                    ng::color_dialog dialog{ *this, current && text != "(none)" && !text.empty() ? *current : ng::color::Black };
+                    if (dialog.exec() == ng::dialog_result::Accepted)
+                        newText = property_text(dialog.selected_color());
+                }
+                break;
+            case property_dialog::Font:
+                {
+                    auto const current = property_parse(text, static_cast<ng::font const*>(nullptr));
+                    ng::font_dialog dialog{ *this, current ? *current : ng::font{} };
+                    if (dialog.exec() == ng::dialog_result::Accepted)
+                        newText = property_text(dialog.selected_font());
+                }
+                break;
+            default:
+                break;
+            }
+            if (!newText)
+                return;
+            if (edited_property() == property && propertyTable.editor_has_text_edit())
+            {
+                propertyTable.editor_text_edit().set_text(*newText);
+                propertyTable.end_edit(true);
+            }
+            else if (auto const value = property_value_from_string(*property, *newText))
+            {
+                // the in-place edit ended while the dialog was open
+                property->set_from_variant(*value);
+                iPropertiesNeedUpdate = true;
+            }
+        };
+        iPropertiesUpdater.emplace(*this, [this, &propertyTable, edited_property, open_property_dialog](ng::widget_timer& aTimer)
+        {
+            aTimer.again();
+            if (iPropertiesNeedUpdate || (!iPropertyElement.valid() && iPropertyModel.rows() != 0u))
+            {
+                iPropertiesNeedUpdate = false;
+                update_properties();
+            }
+            // show the "..." button at the right of the in-place editor of a color or font property
+            if (iPropertyDialogOpen)
+                return;
+            auto property = edited_property();
+            if (property != nullptr && property_dialog_for(*property) != property_dialog::None)
+            {
+                if (!iPropertyDialogButton)
+                {
+                    iPropertyDialogButton = std::make_unique<ng::push_button>(propertyTable, ng::string{ "..." });
+                    iPropertyDialogButton->set_focus_policy(ng::focus_policy::NoFocus); // keep focus (and the edit) in the editor
+                    iPropertyDialogButton->Clicked(open_property_dialog);
+                }
+                auto const& editor = propertyTable.editor();
+                auto const buttonSize = editor.extents().cy;
+                iPropertyDialogButton->move(ng::point{ editor.position().x + editor.extents().cx - buttonSize, editor.position().y });
+                iPropertyDialogButton->resize(ng::size{ buttonSize, buttonSize });
+                iPropertyDialogButton->bring_to_front();
+            }
+            else
+                iPropertyDialogButton = nullptr;
+        }, std::chrono::milliseconds{ 20 });
+
+        // dragging within Object Explorer moves elements: onto a container (layout, window, group box, tab page) appends to it, 
+        // onto any other element inserts before it, onto the project/user interface makes a widget top level
+        objectTree.enable_drag_drop_source();
+        objectTree.enable_drag_drop_target();
+        struct object_drop
+        {
+            i_element* element = nullptr;
+            i_element* container = nullptr;
+            i_element const* before = nullptr;
+            bool toCanvas = false;
+        };
+        auto resolve_object_drop = [this, &objectTree](i_drag_drop_object const& aObject, optional_point const& aDropPosition) -> object_drop
+        {
+            object_drop result;
+            if (preview_mode() || !iProjectManager.project_active() || !aDropPosition || aObject.ddo_type() != i_drag_drop_item::otid())
+                return result;
+            auto const& item = static_cast<i_drag_drop_item const&>(aObject);
+            if (&item.presentation_model() != static_cast<i_item_presentation_model const*>(&iObjectPresentationModel))
+                return result;
+            auto& dragged = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(item.index()));
+            if (!can_be_moved(dragged))
+                return result;
+            auto const targetIndex = objectTree.item_at(*aDropPosition);
+            if (!targetIndex)
+                return result;
+            auto& target = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*targetIndex));
+            if (&target == &dragged)
+                return result;
+            for (i_element const* e = &target; e->has_parent(); e = &e->parent())
+                if (&e->parent() == &dragged)
+                    return result; // can't move into itself
+            if (target.group() == element_group::Project || target.group() == element_group::UserInterface)
+            {
+                if (dragged.group() == element_group::Widget && dragged.is_nested())
+                {
+                    result.element = &dragged;
+                    result.container = &target;
+                    result.toCanvas = true;
+                }
+                return result;
+            }
+            if (target.has_child_layout())
+            {
+                result.element = &dragged;
+                result.container = &target;
+            }
+            else if (target.has_parent() && target.parent().has_child_layout())
+            {
+                result.element = &dragged;
+                result.container = &target.parent();
+                result.before = &target;
+            }
+            return result;
+        };
+        objectTree.object_acceptable([resolve_object_drop](i_drag_drop_object const& aObject, optional_point const& aDropPosition, drop_operation& aOperation)
+        {
+            if (resolve_object_drop(aObject, aDropPosition).element != nullptr)
+                aOperation = drop_operation::Move;
+        });
+        objectTree.object_dropped([this, resolve_object_drop](i_drag_drop_object const& aObject, optional_point const& aDropPosition)
+        {
+            auto const drop = resolve_object_drop(aObject, aDropPosition);
+            if (drop.element == nullptr)
+                return;
+            auto& project = iProjectManager.active_project();
+            try
+            {
+                if (drop.toCanvas)
+                {
+                    auto& workspace = iWorkspace.view_stack();
+                    move_element_to_canvas(project, *drop.element, *drop.container, workspace, design_rect(workspace).top_left() + point{ 128.0_dip, 128.0_dip });
+                }
+                else
+                    move_element_to_container(project, *drop.element, *drop.container, drop.before);
+            }
+            catch (...)
+            {
+                // not droppable there
             }
         });
 
@@ -354,7 +590,7 @@ namespace neogfx::DesignStudio
 
         iWorkspace.view_stack().Mouse([&](ng::mouse_event const& aEvent)
         {
-            if (!iProjectManager.project_active())
+            if (!iProjectManager.project_active() || preview_mode())
                 return;
             auto const eventPos = aEvent.position() - iWorkspace.view_stack().origin();
             switch (aEvent.type())
@@ -429,6 +665,21 @@ namespace neogfx::DesignStudio
             toolboxTree.selection_model().clear_selection();
         });
 
+        // preview (off by default): widgets behave as in a running application; no editing
+        aApp.actionPreview.set_checked(preview_mode());
+        aApp.actionPreview.checked([&]() { set_preview_mode(true); });
+        aApp.actionPreview.unchecked([&]() { set_preview_mode(false); });
+        // display ids (off by default): the editor shows element ids rather than their text (never in preview)
+        aApp.actionDisplayIds.set_checked(display_ids());
+        aApp.actionDisplayIds.checked([&]() { set_display_ids(true); });
+        aApp.actionDisplayIds.unchecked([&]() { set_display_ids(false); });
+        iSink += preview_mode_changed()([&]()
+        {
+            toolboxTree.enable_drag_drop_source(!preview_mode());
+            objectTree.enable_drag_drop_source(!preview_mode());
+            iWorkspace.view_stack().update();
+        });
+
         iWorkspace.view_stack().Keyboard([&](const ng::keyboard_event& aEvent)
         {
             if (aEvent.type() == ng::keyboard_event_type::KeyPressed && aEvent.scan_code() == ScanCode_ESCAPE && iProjectManager.project_active())
@@ -445,11 +696,50 @@ namespace neogfx::DesignStudio
 
         update_ui();
 
-        iSink += aProjectManager.ProjectAdded([update_ui](i_project&) { update_ui(); });
+        iSink += aProjectManager.ProjectAdded([&, update_ui](i_project& aProject) 
+        { 
+            iSink += aProject.modified([update_ui]() { update_ui(); });
+            update_ui(); 
+        });
         iSink += aProjectManager.ProjectRemoved([update_ui](i_project&) { update_ui(); });
         iSink += aProjectManager.ProjectActivated([update_ui](i_project&) { update_ui(); });
 
-        iSink += aApp.actionFileClose.triggered([&]() { if (aProjectManager.project_active()) aProjectManager.close_project(aProjectManager.active_project()); });
+        iSink += aApp.actionFileClose.triggered([&]() 
+        { 
+            if (aProjectManager.project_active())
+            {
+                remove_caddies(aProjectManager.active_project());
+                aProjectManager.close_project(aProjectManager.active_project());
+            }
+        });
+
+        iSink += aApp.actionFileSave.triggered([&, update_ui]()
+        {
+            if (!aProjectManager.project_active())
+                return;
+            auto& project = aProjectManager.active_project();
+            std::string path;
+            if (project.has_path())
+                path = project.path().to_std_string();
+            else
+            {
+                auto file = ng::save_file_dialog(mainWindow, ng::file_dialog_spec{ "Save Project", project.name().to_std_string() + ".nrc", { "*.nrc" }, "Project Files" });
+                if (!file)
+                    return;
+                path = *file;
+                if (std::filesystem::path{ path }.extension().empty())
+                    path += ".nrc";
+            }
+            try
+            {
+                project.save(ng::string{ path });
+            }
+            catch (std::exception const& e)
+            {
+                ng::service<ng::i_surface_manager>().display_error_message("Save Project"_t, ng::string{ e.what() });
+            }
+            update_ui();
+        });
 
         aApp.action_file_open().triggered([&]()
         {
@@ -460,7 +750,10 @@ namespace neogfx::DesignStudio
                 {
                     std::filesystem::path const filePath{ file };
                     if (filePath.extension() == ".nrc")
-                        aProjectManager.open_project(file);
+                    {
+                        auto& project = aProjectManager.open_project(file);
+                        create_caddies(project, iWorkspace.view_stack());
+                    }
                     else if (aProjectManager.project_active())
                         aProjectManager.active_project().create_element(aProjectManager.active_project().root(), "file"_s, ng::string{ file });
                     else
@@ -498,7 +791,10 @@ namespace neogfx::DesignStudio
     void main_window_ex::close()
     {
         if (iProjectManager.project_active())
+        {
+            remove_caddies(iProjectManager.active_project());
             iProjectManager.close_project(iProjectManager.active_project());
+        }
         main_window::close();
     }
 
@@ -566,7 +862,7 @@ namespace neogfx::DesignStudio
 
     bool main_window_ex::can_delete_selected() const
     {
-        if (!iProjectManager.project_active())
+        if (!iProjectManager.project_active() || preview_mode())
             return false;
         bool someSelected = false;
         iProjectManager.active_project().root().visit([&](i_element& aElement)
@@ -579,7 +875,7 @@ namespace neogfx::DesignStudio
 
     bool main_window_ex::can_select_all() const
     {
-        if (!iProjectManager.project_active())
+        if (!iProjectManager.project_active() || preview_mode())
             return false;
         return !iProjectManager.active_project().root().children().empty();
     }
@@ -636,6 +932,114 @@ namespace neogfx::DesignStudio
             if (aElement.has_layout_item())
                 aElement.select(true, false);
         });
+    }
+
+    void main_window_ex::update_properties()
+    {
+        neolib::scoped_flag sf{ iUpdatingProperties };
+        iPropertyModel.clear();
+        if (!iPropertyElement.valid())
+            return;
+        auto& element = *iPropertyElement;
+        // .nrc attributes (saved to the project file)
+        auto attributesNode = iPropertyModel.insert_item(iPropertyModel.send(), property_model_item{}, string{ element.type().to_std_string() + " (.nrc)" });
+        std::uint32_t attributeIndex = 0u;
+        for (auto const& attribute : element.attributes())
+        {
+            // skip metadata ('#' prefix) and removed (empty) properties
+            if (!attribute.first().empty() && attribute.first().to_std_string_view()[0] != '#' && !attribute.second().empty())
+            {
+                auto row = iPropertyModel.append_item(attributesNode, property_model_item{ attributeIndex }, string{ attribute.first() });
+                iPropertyModel.insert_cell_data(row, 1u, string{ attribute.second() });
+            }
+            ++attributeIndex;
+        }
+        // trailing row for adding a new attribute (name then value)
+        iPropertyModel.append_item(attributesNode, property_model_item{ property_presentation_model::new_property_row }, string{});
+        // object properties grouped by class: derived classes first, base classes last
+        if (!element.has_layout_item())
+            return;
+        auto& owner = element.layout_item();
+        std::map<std::string, std::vector<i_property*>> classes;
+        for (auto const& entry : std::as_const(owner.properties()).property_map())
+            classes[property_class_name(*entry.second())].push_back(entry.second());
+        auto unqualified = [](std::string const& aName, std::string const& aSeparator)
+        {
+            auto const pos = aName.rfind(aSeparator);
+            return pos == std::string::npos ? aName : aName.substr(pos + aSeparator.size());
+        };
+        std::vector<std::string> hierarchy; // class_names(): most derived first, e.g. "push_button:button:widget:layout_item:..."
+        {
+            std::istringstream names{ class_names(owner) };
+            std::string name;
+            while (std::getline(names, name, ':'))
+                if (!name.empty())
+                    hierarchy.push_back(unqualified(name, "--"));
+        }
+        auto rank = [&](std::string const& aClass)
+        {
+            auto const name = unqualified(aClass, "::");
+            auto const existing = std::find(hierarchy.begin(), hierarchy.end(), name);
+            return static_cast<std::size_t>(std::distance(hierarchy.begin(), existing));
+        };
+        std::vector<std::pair<std::size_t, std::string>> orderedClasses;
+        for (auto const& c : classes)
+            orderedClasses.emplace_back(rank(c.first), c.first);
+        std::sort(orderedClasses.begin(), orderedClasses.end());
+        // e.g. "neogfx::layout_item" -> "Layout Item"
+        auto display_name = [&](std::string const& aName)
+        {
+            std::string displayName;
+            for (auto const& word : neolib::tokens(unqualified(aName, "::"), "_"s))
+            {
+                if (word.empty())
+                    continue;
+                if (!displayName.empty())
+                    displayName += ' ';
+                displayName += static_cast<char>(std::toupper(static_cast<unsigned char>(word[0])));
+                displayName += word.substr(1);
+            }
+            return displayName;
+        };
+        // property categories in declaration order (see property_category); any others follow
+        static std::vector<std::type_index> const categoryOrder =
+        {
+            typeid(property_category::soft_geometry),
+            typeid(property_category::hard_geometry),
+            typeid(property_category::font),
+            typeid(property_category::color),
+            typeid(property_category::other_appearance),
+            typeid(property_category::interaction),
+            typeid(property_category::other)
+        };
+        auto category_rank = [&](std::type_index const& aCategory)
+        {
+            return static_cast<std::size_t>(std::distance(categoryOrder.begin(), std::find(categoryOrder.begin(), categoryOrder.end(), aCategory)));
+        };
+        for (auto const& c : orderedClasses)
+        {
+            auto classNode = iPropertyModel.insert_item(iPropertyModel.send(), property_model_item{}, string{ display_name(c.second) });
+            std::map<std::pair<std::size_t, std::string>, std::vector<i_property*>> categories;
+            for (auto property : classes[c.second])
+            {
+                std::type_index const category{ property->category() };
+                categories[{ category_rank(category), property_class_name(property->category()) }].push_back(property);
+            }
+            for (auto& category : categories)
+            {
+                auto categoryNode = iPropertyModel.append_item(classNode, property_model_item{}, string{ display_name(category.first.second) });
+                auto& properties = category.second;
+                std::sort(properties.begin(), properties.end(), [](i_property const* lhs, i_property const* rhs) 
+                { 
+                    return lhs->name().to_std_string_view() < rhs->name().to_std_string_view(); 
+                });
+                for (auto property : properties)
+                {
+                    auto row = iPropertyModel.append_item(categoryNode, property_model_item{ property }, string{ property->name() });
+                    iPropertyModel.insert_cell_data(row, 1u, string{ property_value_to_string(*property) });
+                }
+            }
+        }
     }
 
     void main_window_ex::paint_workspace(ng::i_graphics_context& aGc)

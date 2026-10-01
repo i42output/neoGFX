@@ -26,11 +26,13 @@
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/text_widget.hpp>
+#include <neogfx/gui/widget/i_menu.hpp>
+#include <neogfx/gui/widget/i_menu_item_widget.hpp>
 
 namespace neogfx
 {
     text_widget::text_widget(string const& aText, text_widget_type aType, text_widget_flags aFlags) :
-        widget{}, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment { neogfx::alignment::Center | neogfx::alignment::VCenter },
+        widget{}, iText{ aText }, iType{ aType },
         iAnimator{ *this, [this](widget_timer&)
         {
             iAnimator.again();
@@ -38,11 +40,12 @@ namespace neogfx
                 update();
         }, std::chrono::milliseconds{ 16 } }
     {
+        Flags.assign(aFlags, false);
         init();
     }
 
     text_widget::text_widget(i_widget& aParent, string const& aText, text_widget_type aType, text_widget_flags aFlags) :
-        widget{ aParent }, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Center | neogfx::alignment::VCenter },
+        widget{ aParent }, iText{ aText }, iType{ aType },
         iAnimator{ *this, [this](widget_timer&)
         {
             iAnimator.again();
@@ -50,11 +53,12 @@ namespace neogfx
                 update();
         }, std::chrono::milliseconds{ 16 } }
     {
+        Flags.assign(aFlags, false);
         init();
     }
 
     text_widget::text_widget(i_layout& aLayout, string const& aText, text_widget_type aType, text_widget_flags aFlags) :
-        widget{ aLayout }, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Center | neogfx::alignment::VCenter },
+        widget{ aLayout }, iText{ aText }, iType{ aType },
         iAnimator{ *this, [this](widget_timer&)
         {
             iAnimator.again();
@@ -62,6 +66,7 @@ namespace neogfx
                 update();
         }, std::chrono::milliseconds{ 16 } }
     {
+        Flags.assign(aFlags, false);
         init();
     }
 
@@ -97,14 +102,14 @@ namespace neogfx
         else
         {
             size extent = text_extent().max(size_hint_extent());
-            if (iRotation != 0.0)
+            if (Rotation.value() != 0.0)
                 // rotated, the measured height becomes our width; that height is measured from the
                 // glyph run, so it varies with the string, and quantising it to whole lines keeps
                 // widgets holding different text the same width and therefore aligned with one another
                 extent.cy = quantized_text_height(extent.cy);
             extent = units_converter{ *this }.to_device_units(extent);
-            if (iRotation != 0.0)
-                extent = scoped_transform::rotated_extents(extent, iRotation);
+            if (Rotation.value() != 0.0)
+                extent = scoped_transform::rotated_extents(extent, Rotation.value());
             size result = extent + units_converter{ *this }.to_device_units(internal_spacing().size());
             if (has_maximum_size())
             {
@@ -143,10 +148,13 @@ namespace neogfx
             service<debug::logger>() << neolib::logger::severity::Debug << "text_widget::paint(...)" << std::endl;
 #endif // NEOGFX_DEBUG
 
-        // popup menus never become the active window but accept their items' mnemonics without Alt, so always show them there
-        bool const inPopupMenu = has_root() &&
-            (root().style() & (window_style::Popup | window_style::Menu)) == (window_style::Popup | window_style::Menu);
-        scoped_mnemonics sm{ aGc, inPopupMenu || (service<i_keyboard>().is_key_pressed(ScanCode_LALT) && has_root() && root().is_active()) };
+        // as on Windows, mnemonics are shown while Alt is held, and in menus that are being used with the keyboard
+        bool const altHeld = service<i_keyboard>().is_key_pressed(ScanCode_LALT) && has_root() && root().is_active();
+        auto const menuItemWidget = (has_parent() && parent().object_type() == object_type::MenuItem) ? 
+            dynamic_cast<i_menu_item_widget const*>(&parent()) : nullptr;
+        bool const showMnemonics = (menuItemWidget != nullptr ?
+            menuItemWidget->menu().showing_mnemonics() || (menuItemWidget->menu().type() == menu_type::MenuBar && altHeld) : altHeld);
+        scoped_mnemonics sm{ aGc, showMnemonics };
 
         size textSize = text_extent();
         auto const clientRect = client_rect(false);
@@ -154,9 +162,9 @@ namespace neogfx
         // maps onto the client rect under the rotation, and is then rotated about its centre
         auto const textRect = [&]() -> rect
             {
-                if (iRotation == 0.0)
+                if (Rotation.value() == 0.0)
                     return clientRect;
-                auto const unrotated = scoped_transform::rotated_extents(clientRect.extents(), -iRotation);
+                auto const unrotated = scoped_transform::rotated_extents(clientRect.extents(), -Rotation.value());
                 return rect{ point{
                     clientRect.center().x - unrotated.cx / 2.0,
                     clientRect.center().y - unrotated.cy / 2.0 }, unrotated };
@@ -164,10 +172,10 @@ namespace neogfx
         // rotated, the vertical axis is the one across the widget, and aligning on this string's
         // measured extent would put text of differing heights in differing places; quantising to
         // whole lines removes the dependence on the glyphs while still counting the lines
-        auto const alignExtent = (iRotation != 0.0 ? quantized_text_height(textSize.cy) : textSize.cy);
+        auto const alignExtent = (Rotation.value() != 0.0 ? quantized_text_height(textSize.cy) : textSize.cy);
 
         point textPosition;
-        switch (iAlignment & neogfx::alignment::Horizontal)
+        switch (Alignment.value() & neogfx::alignment::Horizontal)
         {
         case neogfx::alignment::Left:
         case neogfx::alignment::Justify:
@@ -182,7 +190,7 @@ namespace neogfx
         default:
             break;
         }
-        switch (iAlignment & neogfx::alignment::Vertical)
+        switch (Alignment.value() & neogfx::alignment::Vertical)
         {
         case neogfx::alignment::Top:
             textPosition.y = textRect.top();
@@ -216,13 +224,13 @@ namespace neogfx
                 rect{ textPosition, textSize } + aGc.origin());
 
         std::optional<scoped_transform> rotate;
-        if (iRotation != 0.0)
+        if (Rotation.value() != 0.0)
         {
             // a quarter turn maps whole pixels to whole pixels only if the pivot's components share
             // a fractional part, so pin both the pivot and the text to the pixel grid; otherwise the
             // text lands half a pixel out, by differing amounts depending on the widget's extents
             textPosition = point{ std::round(textPosition.x), std::round(textPosition.y) };
-            rotate.emplace(aGc, iRotation,
+            rotate.emplace(aGc, Rotation.value(),
                 point{ std::round(clientRect.center().x), std::round(clientRect.center().y) });
         }
 
@@ -317,9 +325,18 @@ namespace neogfx
 
     bool text_widget::visible() const
     {
-        if (iText.empty() && (iFlags & text_widget_flags::HideOnEmpty) == text_widget_flags::HideOnEmpty)
+        if (iText.empty() && (Flags.value() & text_widget_flags::HideOnEmpty) == text_widget_flags::HideOnEmpty)
             return false;
         return widget::visible();
+    }
+
+    void text_widget::property_changed(i_property& aProperty)
+    {
+        if (&aProperty == &Flags || &aProperty == &Rotation || &aProperty == &TextFormat)
+            reset_cache();
+        if (&aProperty == &Rotation)
+            update();
+        widget::property_changed(aProperty);
     }
 
     i_string const& text_widget::text() const
@@ -368,32 +385,22 @@ namespace neogfx
 
     text_widget_flags text_widget::flags() const
     {
-        return iFlags;
+        return Flags;
     }
     
     void text_widget::set_flags(text_widget_flags aFlags)
     {
-        if (iFlags != aFlags)
-        {
-            iFlags = aFlags;
-            reset_cache();
-            update_layout();
-        }
+        Flags = aFlags;
     }
 
     neogfx::alignment text_widget::alignment() const
     {
-        return iAlignment;
+        return Alignment;
     }
 
     void text_widget::set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout)
     {
-        if (iAlignment != aAlignment)
-        {
-            iAlignment = aAlignment;
-            if (aUpdateLayout)
-                update_layout();
-        }
+        Alignment.assign(aAlignment, aUpdateLayout);
     }
 
     bool text_widget::is_aligning_to() const
@@ -436,18 +443,12 @@ namespace neogfx
 
     angle text_widget::rotation() const
     {
-        return iRotation;
+        return Rotation;
     }
 
     void text_widget::set_rotation(angle aRotation)
     {
-        if (iRotation != aRotation)
-        {
-            iRotation = aRotation;
-            reset_cache();
-            update_layout();
-            update();
-        }
+        Rotation = aRotation;
     }
 
     bool text_widget::has_text_color() const
@@ -458,7 +459,7 @@ namespace neogfx
     color text_widget::text_color() const
     {
         if (has_text_color())
-            return static_variant_cast<color>(iTextAppearance->ink());
+            return static_variant_cast<color>(TextFormat.value()->ink());
         return service<i_app>().current_style().palette().default_text_color_for_widget(*this);
     }
 
@@ -472,24 +473,19 @@ namespace neogfx
 
     bool text_widget::has_text_format() const
     {
-        return iTextAppearance != std::nullopt;
+        return TextFormat.value() != std::nullopt;
     }
 
     text_format text_widget::text_format() const
     {
         if (has_text_format())
-            return *iTextAppearance;
+            return *TextFormat.value();
         return neogfx::text_format{ text_color() };
     }
 
     void text_widget::set_text_format(const optional_text_format& aTextAppearance)
     {
-        if (iTextAppearance != aTextAppearance)
-        {
-            iTextAppearance = aTextAppearance;
-            reset_cache();
-            update();
-        }
+        TextFormat = aTextAppearance;
     }
 
     dimension text_widget::quantized_text_height(dimension aHeight) const
@@ -595,11 +591,11 @@ namespace neogfx
             if (multi_line())
             {
                 if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
-                    iGlyphText = gc.to_multiline_glyph_text(iText, font(), widget::minimum_size().cx - internal_spacing().size().cx, iAlignment & neogfx::alignment::Horizontal);
+                    iGlyphText = gc.to_multiline_glyph_text(iText, font(), widget::minimum_size().cx - internal_spacing().size().cx, Alignment.value() & neogfx::alignment::Horizontal);
                 else if (widget::has_maximum_size() && widget::maximum_size().cx != size::max_dimension())
-                    iGlyphText = gc.to_multiline_glyph_text(iText, font(), widget::maximum_size().cx - internal_spacing().size().cx, iAlignment & neogfx::alignment::Horizontal);
+                    iGlyphText = gc.to_multiline_glyph_text(iText, font(), widget::maximum_size().cx - internal_spacing().size().cx, Alignment.value() & neogfx::alignment::Horizontal);
                 else
-                    iGlyphText = gc.to_multiline_glyph_text(iText, font(), 0.0, iAlignment & neogfx::alignment::Horizontal);
+                    iGlyphText = gc.to_multiline_glyph_text(iText, font(), 0.0, Alignment.value() & neogfx::alignment::Horizontal);
             }
             else
             {
@@ -663,4 +659,4 @@ namespace neogfx
         iGlyphText = std::monostate{};
         iCacheTexture = std::nullopt;
     }
-}
+}

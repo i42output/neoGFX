@@ -27,6 +27,11 @@
 #include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/context_menu.hpp>
 
+namespace neolib
+{
+    class i_setting;
+}
+
 namespace neogfx
 {
     extern template class widget<DesignStudio::i_element_caddy>;
@@ -52,6 +57,9 @@ namespace neogfx::DesignStudio
         bool has_item() const;
         i_layout_item& item() const;
     public:
+        bool nested() const;
+    public:
+        neogfx::size_policy size_policy() const override;
         size minimum_size(optional_size const& aAvailableSpace = {}) const override;
     protected:
         neogfx::widget_type widget_type() const override;
@@ -73,11 +81,22 @@ namespace neogfx::DesignStudio
     protected:
         bool ignore_mouse_events(bool aConsiderAncestors = true) const override;
         void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
+        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
         void mouse_button_released(mouse_button aButton, const point& aPosition) override;
         void mouse_moved(const point& aPosition, key_modifier aKeyModifier) override;
         void mouse_entered(const point& aPosition) override;
         void mouse_left() override;
         neogfx::mouse_cursor mouse_cursor() const override;
+    private:
+        void apply_preview_mode();
+        void end_text_edit(bool aCommit);
+        bool can_be_dropped() const;
+        bool capturing_drop() const;
+        void update_drop_target(point const& aPosition);
+        void move_to(i_element& aContainer, point const& aDropPosition);
+        void move_to_canvas(point const& aDropPosition);
+    public:
+        void begin_text_edit() override;
     protected:
         void start_drag(cardinal aPart, point const& aPosition) override;
         void drag(point const& aPosition, bool aIgnoreConstraints) override;
@@ -108,5 +127,35 @@ namespace neogfx::DesignStudio
         weak_ref_ptr<i_layout_item> iItem;
         widget_timer iAnimator;
         std::optional<drag_info> iDragInfo;
+        neolib::i_setting* iShowLayoutIcons = nullptr;
+        i_element* iDropTarget = nullptr;
+        point iDropPosition;
+        ref_ptr<i_widget> iDropHighlight;
+        bool iDropCandidate = false;
+        ref_ptr<i_widget> iTextEditor;
+        std::optional<bool> iEndTextEdit; // end in-place text edit (true: commit) at next opportunity
     };
+
+    // preview mode: widgets behave as in a running application (no editing)
+    bool preview_mode();
+    void set_preview_mode(bool aPreview);
+    neolib::i_event<> const& preview_mode_changed();
+    // display ids rather than text in the editor (never in preview mode)
+    bool display_ids();
+    void set_display_ids(bool aDisplayIds);
+    neolib::i_event<> const& display_ids_changed();
+    bool show_ids();
+    void set_text_attribute(i_element& aElement, std::string const& aText);
+
+    // design surface helpers
+    rect design_rect(i_widget const& aWidget);
+    i_element* find_drop_container(i_element& aRoot, i_element const& aDropped, point const& aDropPosition);
+    void add_to_container(i_project& aProject, i_element& aElement, optional_point const& aDropPosition = {});
+    void create_caddies(i_project& aProject, i_widget& aWorkspace);
+    void show_drop_highlight(i_element& aContainer, i_string const& aChildType, ref_ptr<i_widget>& aHighlight, point const& aDropPosition, i_widget const* aExclude = nullptr);
+    void hide_drop_highlight(ref_ptr<i_widget>& aHighlight);
+    bool can_be_moved(i_element const& aElement);
+    void move_element_to_container(i_project& aProject, i_element& aElement, i_element& aContainer, i_element const* aBefore = nullptr);
+    void move_element_to_canvas(i_project& aProject, i_element& aElement, i_element& aNewParent, i_widget& aWorkspace, point const& aDropPosition);
+    void remove_caddies(i_project& aProject);
 }

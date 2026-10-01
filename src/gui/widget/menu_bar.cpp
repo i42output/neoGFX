@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 
+#include <boost/locale.hpp>
+
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gui/widget/menu_bar.hpp>
 #include <neogfx/gui/widget/menu_item_widget.hpp>
@@ -94,8 +96,19 @@ namespace neogfx
         return result;
     }
 
+    void menu_bar::show_mnemonics(bool aShow)
+    {
+        if (showing_mnemonics() == aShow)
+            return;
+        menu::show_mnemonics(aShow);
+        update();
+    }
+
     bool menu_bar::key_pressed(scan_code_e aScanCode, key_code_e, key_modifier)
     {
+        iAltPressedAlone = (aScanCode == ScanCode_LALT);
+        if (aScanCode != ScanCode_LALT)
+            show_mnemonics(true);
         switch (aScanCode)
         {
         case ScanCode_LEFT:
@@ -145,13 +158,34 @@ namespace neogfx
         return true;
     }
 
-    bool menu_bar::key_released(scan_code_e, key_code_e, key_modifier)
+    bool menu_bar::key_released(scan_code_e aScanCode, key_code_e, key_modifier)
     {
+        // as on Windows, pressing Alt on its own leaves the menu
+        if (aScanCode == ScanCode_LALT && iAltPressedAlone)
+        {
+            iAltPressedAlone = false;
+            close_sub_menu(false);
+            clear_selection();
+        }
         return true;
     }
 
-    bool menu_bar::text_input(i_string const&)
+    bool menu_bar::text_input(i_string const& aText)
     {
+        // as on Windows, when the menu bar is being used with the keyboard an item's mnemonic selects it without Alt
+        static boost::locale::generator gen;
+        static std::locale loc = gen("en_US.UTF-8");
+        auto const input = boost::locale::to_lower(aText.to_std_string(), loc);
+        for (item_index i = 0; i < menu::count(); ++i)
+        {
+            auto& itemWidget = layout().get_widget_at<menu_item_widget>(i);
+            auto const m = itemWidget.mnemonic();
+            if (!m.empty() && item_at(i).available() && boost::locale::to_lower(m.as_std_string(), loc) == input)
+            {
+                itemWidget.mnemonic_execute();
+                return true;
+            }
+        }
         service<i_basic_services>().system_beep();
         return true;
     }
@@ -203,6 +237,7 @@ namespace neogfx
             if (service<i_keyboard>().is_keyboard_grabbed_by(*this))
                 service<i_keyboard>().ungrab_keyboard(*this);
             close_sub_menu(false);
+            show_mnemonics(false);
             update();
         });
         iSink += OpenSubMenu([this](i_menu& aSubMenu)
@@ -222,6 +257,22 @@ namespace neogfx
                 close_sub_menu();
                 iOpenSubMenu.reset();
             });
+        });
+        // as on Windows, pressing Alt on its own enters the menu, selecting its first item and showing mnemonics
+        iSink += service<i_keyboard>().key_pressed([this](scan_code_e aScanCode, key_code_e, key_modifier)
+        {
+            iAltPressedAlone = (aScanCode == ScanCode_LALT);
+        });
+        iSink += service<i_keyboard>().key_released([this](scan_code_e aScanCode, key_code_e, key_modifier)
+        {
+            bool const altPressedAlone = iAltPressedAlone;
+            iAltPressedAlone = false;
+            if (aScanCode != ScanCode_LALT || !altPressedAlone || !visible() || !root().is_active() || 
+                service<i_keyboard>().is_keyboard_grabbed_by(*this) || !has_available_items())
+                return;
+            service<i_keyboard>().grab_keyboard(*this);
+            show_mnemonics(true);
+            select_item_at(first_available_item(), false);
         });
         if (widget::parent().is_root())
         {

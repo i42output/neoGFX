@@ -33,6 +33,7 @@ namespace neogfx
     class basic_push_button : public button<PushButtonInterface>
     {
         meta_object(button<PushButtonInterface>)
+        typedef basic_push_button property_context_type;
     public:
         static const std::uint32_t kMaxAnimationFrame = 10;
     public:
@@ -106,19 +107,20 @@ namespace neogfx
         widget_timer iAnimator;
         std::uint32_t iAnimationFrame;
         push_button_style iStyle;
-        optional_color iBorderColor;
-        optional_color iOuterBorderColor;
-        optional_color iHoverColor;
         define_style_sheet_value(iStyleSheetFaceColor, color, "background-color", this->base_color())
         define_style_sheet_value(iStyleSheetBorderColor, color, "border-color", effective_border_color())
-        std::optional<border_radii> iBorderRadii;
         mutable std::optional<std::pair<neogfx::font, size>> iStandardButtonWidth;
         mutable std::optional<dimension> iPenWidth;
         sink iSink;
         sink iSink2;
+    public:
+        define_property(property_category::color, optional_color, BorderColor, border_color)
+        define_property(property_category::color, optional_color, OuterBorderColor, outer_border_color)
+        define_property(property_category::color, optional_color, HoverColor, hover_color)
+        define_property(property_category::other_appearance, std::optional<border_radii>, BorderRadius, border_radius)
     };
 
     extern template class basic_push_button<i_push_button>;
 
     typedef basic_push_button<i_push_button> push_button;
-}
+}

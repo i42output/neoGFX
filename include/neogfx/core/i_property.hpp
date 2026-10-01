@@ -137,6 +137,7 @@ namespace neogfx
         virtual const i_string& name() const = 0;
         virtual const std::type_info& type() const = 0;
         virtual const std::type_info& category() const = 0;
+        virtual const std::type_info& context() const = 0; ///< the class declaring the property
         virtual bool optional() const = 0;
         virtual property_variant get_as_variant() const = 0;
         virtual void set_from_variant(const property_variant& aValue) = 0;
