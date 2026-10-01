@@ -82,10 +82,12 @@ namespace neogfx::DesignStudio
                 iSelectedElement = project.create_element(project.root(), tool.second, generate_id(tool.second));
                 iSelectedElement->attributes().push_back(neolib::pair<string, string>{ string{ "id" }, string{ iSelectedElement->id() } });
                 iSelectedElement->set_mode(element_mode::Drag);
+                set_design_drag_active(true);
             }
         });
         iSink += base_type::ItemDropped([&](i_drag_drop_item const& aItem, i_drag_drop_target& aTarget)
         {
+            struct end_design_drag { ~end_design_drag() { set_design_drag_active(false); } } endDesignDrag; // after the drop (so its insertion point is where the user saw it)
             iDragSink.clear();
             hide_drop_highlight(iDropHighlight);
             ref_ptr<widget_caddy> widgetCaddy = aItem.source().drag_drop_widget();
@@ -120,6 +122,8 @@ namespace neogfx::DesignStudio
                             newElement.apply_attributes(show_ids());
                             if (newElement.has_caddy())
                                 newElement.caddy().begin_text_edit();
+                            else if (newElement.has_parent() && newElement.parent().has_caddy())
+                                newElement.parent().caddy().begin_text_edit(newElement); // e.g. a tab page
                         }
                     }
                     return;
@@ -151,6 +155,7 @@ namespace neogfx::DesignStudio
         });
         iSink += base_type::DraggingItemCancelled([&](i_drag_drop_item const& aItem)
         {
+            set_design_drag_active(false);
             iDragSink.clear();
             hide_drop_highlight(iDropHighlight);
             if (iSelectedElement)

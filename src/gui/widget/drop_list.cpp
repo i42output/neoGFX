@@ -791,7 +791,7 @@ namespace neogfx
                 input_widget().set_spacing(presentation_model().cell_spacing(*this));
                 input_widget().set_image(image);
                 if (aCurrentIndex != std::nullopt)
-                    input_widget().set_image_size(presentation_model().cell_image_size(*aCurrentIndex));
+                    input_widget().set_image_size(iInputImageSize != std::nullopt ? iInputImageSize : presentation_model().cell_image_size(*aCurrentIndex));
                 input_widget().set_text(text);
             }
         });
@@ -1018,6 +1018,22 @@ namespace neogfx
         return !input_widget().text().empty();
     }
 
+    optional_size const& drop_list::input_image_size() const
+    {
+        return iInputImageSize;
+    }
+
+    void drop_list::set_input_image_size(optional_size const& aImageSize)
+    {
+        if (iInputImageSize == aImageSize)
+            return;
+        iInputImageSize = aImageSize;
+        if (iInputImageSize != std::nullopt)
+            input_widget().set_image_size(iInputImageSize);
+        else if (selection_model().has_current_index())
+            input_widget().set_image_size(presentation_model().cell_image_size(selection_model().current_index()));
+    }
+
     const i_drop_list_input_widget& drop_list::input_widget() const
     {
         return *iInputWidget;
@@ -1225,7 +1241,7 @@ namespace neogfx
             input_widget().set_spacing(presentation_model().cell_spacing(*this));
             input_widget().set_image(image);
             if (selection_model().has_current_index())
-                input_widget().set_image_size(presentation_model().cell_image_size(selection_model().current_index()));
+                input_widget().set_image_size(iInputImageSize != std::nullopt ? iInputImageSize : presentation_model().cell_image_size(selection_model().current_index()));
             if (changed)
                 input_widget().set_text(text);
         }

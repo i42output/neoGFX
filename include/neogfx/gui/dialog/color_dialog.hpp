@@ -21,6 +21,10 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <string>
+#include <vector>
+#include <optional>
+
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
@@ -54,6 +58,15 @@ namespace neogfx
             ChannelAlpha
         };
         typedef std::array<optional_color, 24> custom_color_list;
+        struct swatch
+        {
+            std::string name;
+            std::vector<color> colors;
+            bool predefined = false;
+            std::string path; ///< *.csw file (user swatches only)
+        };
+        typedef std::vector<swatch> swatch_list;
+        static constexpr std::size_t MaxSwatchColors = 144;
     private:
         typedef std::variant<std::monostate, color, hsv_color> representations;
         typedef std::optional<custom_color_list::iterator> optional_custom_color_list_iterator;
@@ -61,18 +74,22 @@ namespace neogfx
         {
             typedef framed_widget<> base_type;
         public:
-            color_box(color_dialog& aOwner, const optional_color& aColor, const optional_custom_color_list_iterator& aCustomColor = optional_custom_color_list_iterator());
+            color_box(color_dialog& aOwner, const optional_color& aColor, const optional_custom_color_list_iterator& aCustomColor = optional_custom_color_list_iterator(), const std::optional<std::size_t>& aSwatchSlot = std::nullopt);
         public:
             virtual size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const;
             virtual size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const;
         public:
+            void paint_non_client(i_graphics_context& aGc) const override;
             virtual void paint(i_graphics_context& aGc) const;
         public:
             virtual void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier);
         private:
+            bool unused_swatch_slot() const;
+        private:
             color_dialog& iOwner;
             optional_color iColor;
             optional_custom_color_list_iterator iCustomColor;
+            std::optional<std::size_t> iSwatchSlot;
         };
         class x_picker : public framed_widget<>
         {
@@ -161,6 +178,46 @@ namespace neogfx
             optional_point iCursorPosition;
             widget_timer iAnimationTimer;
         };
+        class wheel_picker : public framed_widget<>
+        {
+            typedef framed_widget<> base_type;
+        private:
+            static constexpr std::uint32_t TEXTURE_SIZE = 512;
+            static scalar constexpr CURSOR_RADIUS = 4.0;
+            static scalar constexpr CURSOR_THICKNESS = 1.5;
+            enum class drag_e
+            {
+                None,
+                Ring,
+                Triangle
+            };
+        public:
+            wheel_picker(color_dialog& aOwner);
+        public:
+            void paint(i_graphics_context& aGc) const override;
+        public:
+            void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
+            void mouse_button_released(mouse_button aButton, const point& aPosition) override;
+            void mouse_moved(const point& aPosition, key_modifier aKeyModifier) override;
+        public:
+            neogfx::mouse_cursor mouse_cursor() const override;
+        private:
+            rect wheel_rect() const;
+            point to_wheel(const point& aPosition) const;
+            point from_wheel(const point& aWheelPosition) const;
+            void select(const point& aPosition);
+            void update_texture(bool aForce = false);
+            std::array<point, 2> cursor_positions() const;
+            void animate();
+        private:
+            color_dialog& iOwner;
+            sink iSink;
+            std::vector<avec4u8> iPixels;
+            texture iTexture;
+            std::optional<std::pair<scalar, color>> iTextureState;
+            drag_e iDragging;
+            widget_timer iAnimationTimer;
+        };
         class color_selection : public framed_widget<>
         {
             typedef framed_widget<> base_type;
@@ -185,6 +242,7 @@ namespace neogfx
         void select_color(const color& aColor);
         const custom_color_list& custom_colors() const;
         void set_custom_colors(const custom_color_list& aCustomColors);
+        const swatch_list& swatches() const;
     protected:
         void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
     private:
@@ -202,6 +260,20 @@ namespace neogfx
         custom_color_list::iterator current_custom_color() const;
         void set_current_custom_color(custom_color_list::iterator aCustomColor);
         void update_widgets(const i_widget& aUpdatingWidget);
+        void update_picker_mode();
+        static std::string& previous_swatch();
+        static std::string swatch_folder();
+        static bool load_swatch(std::string const& aPath, swatch& aSwatch);
+        static bool save_swatch(swatch const& aSwatch);
+        void init_swatches();
+        std::size_t add_swatch(swatch&& aSwatch);
+        void update_swatch_selector();
+        void update_swatch_buttons();
+        void set_current_swatch(std::size_t aSwatch);
+        bool current_swatch_editable() const;
+        optional_color swatch_color(std::size_t aSlot) const;
+        std::optional<std::size_t> current_swatch_color() const;
+        void set_current_swatch_color(std::optional<std::size_t> const& aSlot);
     private:
         sink iSink;
         channel_e iCurrentChannel;
@@ -209,6 +281,9 @@ namespace neogfx
         mutable representations iSelectedColor;
         custom_color_list iCustomColors;
         custom_color_list::iterator iCurrentCustomColor;
+        swatch_list iSwatches;
+        std::size_t iCurrentSwatch = 0;
+        std::optional<std::size_t> iCurrentSwatchColor;
         bool iUpdatingWidgets;
         bool iScreenPickerActive;
         vertical_layout iLayout;
@@ -219,16 +294,26 @@ namespace neogfx
         horizontal_layout iRightBottomLayout;
         color_selection iColorSelection;
         push_button iScreenPicker;
+        push_button iPickerMode;
         horizontal_spacer iSpacer0;
         grid_layout iChannelLayout;
-        group_box iBasicColorsGroup;
-        grid_layout iBasicColorsGrid;
+        group_box iSwatchesGroup;
+        horizontal_layout iSwatchToolbar;
+        drop_list iSwatchSelector;
+        push_button iNewSwatch;
+        push_button iImportSwatch;
+        push_button iDeleteSwatch;
+        grid_layout iSwatchGrid;
+        horizontal_layout iSwatchEditLayout;
+        push_button iAddToSwatch;
+        push_button iRemoveFromSwatch;
         vertical_spacer iSpacer;
         group_box iCustomColorsGroup;
         grid_layout iCustomColorsGrid;
         horizontal_spacer iSpacer2;
         yz_picker iYZPicker;
         x_picker iXPicker;
+        wheel_picker iWheelPicker;
         horizontal_layout iModelLayout;
         horizontal_spacer iSpacer3;
         std::optional<color_space> iColorSpace;

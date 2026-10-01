@@ -123,4 +123,4 @@ namespace neogfx
     extern template class basic_push_button<i_push_button>;
 
     typedef basic_push_button<i_push_button> push_button;
-}
+}

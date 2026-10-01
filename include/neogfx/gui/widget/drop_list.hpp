@@ -286,6 +286,8 @@ namespace neogfx
         bool has_input() const;
         const i_drop_list_input_widget& input_widget() const;
         i_drop_list_input_widget& input_widget();
+        optional_size const& input_image_size() const;
+        void set_input_image_size(optional_size const& aImageSize); ///< Overrides presentation model cell image size for the input widget (button/editor).
     public:
         bool changing_text() const;
         bool handling_text_change() const;
@@ -323,5 +325,6 @@ namespace neogfx
         bool iHandlingTextChange;
         bool iAcceptingSelection;
         bool iCancellingSelection;
+        optional_size iInputImageSize;
     };
 }

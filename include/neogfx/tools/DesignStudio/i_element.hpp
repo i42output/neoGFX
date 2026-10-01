@@ -33,17 +33,20 @@
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
+#include <neogfx/core/alignment.hpp>
 #include <neogfx/tools/DesignStudio/i_element_component.hpp>
 
 namespace neogfx::DesignStudio
 {
     class i_project;
+    class i_element;
 
     class i_element_caddy : public i_widget
     {
     public:
         virtual void start_drag(cardinal aPart, point const& aPosition) = 0;
         virtual void begin_text_edit() = 0;
+        virtual void begin_text_edit(i_element& aElement) = 0; // this caddy's element or a child of it without a caddy of its own (e.g. a tab page)
         virtual void drag(point const& aPosition, bool aIgnoreConstraints) = 0;
         virtual void end_drag() = 0;
     };
@@ -127,7 +130,9 @@ namespace neogfx::DesignStudio
         virtual void create_child_layout_item(i_element const& aChild, i_ref_ptr<i_layout_item>& aResult) = 0;
         virtual void reveal() = 0;
         virtual bool has_text() const = 0;
+        virtual i_string const& text_attribute() const = 0; // the .nrc attribute holding the element's text: "text", "title" (windows) or "tab_text" (tab pages)
         virtual i_widget& text_area() const = 0; // the widget displaying the element's text (the in-place text editor goes over it)
+        virtual neogfx::alignment text_alignment() const = 0; // the alignment of the text in text_area() (so the in-place text editor matches it)
         virtual void apply_attributes(bool aShowIds) = 0;
     public:
         virtual element_mode mode() const = 0;

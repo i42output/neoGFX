@@ -43,6 +43,27 @@ namespace neogfx::DesignStudio
         neolib::event<> sPreviewModeChanged;
         bool sDisplayIds = false;
         neolib::event<> sDisplayIdsChanged;
+        bool sDesignDragActive = false;
+        neolib::event<> sDesignDragActiveChanged;
+    }
+
+    bool design_drag_active()
+    {
+        return sDesignDragActive;
+    }
+
+    void set_design_drag_active(bool aActive)
+    {
+        if (sDesignDragActive != aActive)
+        {
+            sDesignDragActive = aActive;
+            sDesignDragActiveChanged();
+        }
+    }
+
+    neolib::i_event<> const& design_drag_active_changed()
+    {
+        return sDesignDragActiveChanged;
     }
 
     bool display_ids()
@@ -84,12 +105,12 @@ namespace neogfx::DesignStudio
             }
         quoted += "\"";
         for (auto& attribute : aElement.attributes())
-            if (attribute.first().to_std_string_view() == "text")
+            if (attribute.first().to_std_string_view() == aElement.text_attribute().to_std_string_view())
             {
                 attribute.second() = string{ quoted };
                 return;
             }
-        aElement.attributes().push_back(neolib::pair<string, string>{ string{ "text" }, string{ quoted } });
+        aElement.attributes().push_back(neolib::pair<string, string>{ string{ aElement.text_attribute() }, string{ quoted } });
     }
 
     namespace
@@ -223,13 +244,14 @@ namespace neogfx::DesignStudio
             }
         }
 
-        // place an in-place text editor (a child of aHost) over aTextArea: centred on it and at least the editor's minimum size
+        // place an in-place text editor (a child of aHost) exactly over aTextArea (its text widget is kept showing the edited text so
+        // it is the right size, including its lines); a little wider for the cursor
         void position_text_editor(i_widget& aEditor, i_widget const& aHost, i_widget const& aTextArea)
         {
             auto const textRect = design_rect(aTextArea);
-            auto const minimumSize = aEditor.minimum_size();
-            size const editorSize{ std::max(textRect.cx, minimumSize.cx), std::max(textRect.cy, minimumSize.cy) };
-            aEditor.move(textRect.center() - point{ editorSize / 2.0 } - design_rect(aHost).top_left());
+            scalar const cursorRoom = 2.0_dip;
+            size const editorSize{ textRect.cx + cursorRoom, textRect.cy };
+            aEditor.move(point{ textRect.x, textRect.center().y - editorSize.cy / 2.0 } - design_rect(aHost).top_left());
             aEditor.resize(editorSize);
         }
 
@@ -266,8 +288,8 @@ namespace neogfx::DesignStudio
             aAnimator.again();
             if (iEndTextEdit)
                 end_text_edit(*iEndTextEdit);
-            if (iTextEditor && iTextEditor->has_parent() && has_element() && has_item() && item().is_widget())
-                position_text_editor(*iTextEditor, iTextEditor->parent(), element().text_area()); // keep it over the text (it may not have been laid out yet)
+            if (iTextEditor && iTextEditor->has_parent() && iTextElement != nullptr && iTextElement->has_layout_item())
+                position_text_editor(*iTextEditor, iTextEditor->parent(), iTextElement->text_area()); // keep it over the text (it may not have been laid out yet)
             if (has_element() && (element().mode() != element_mode::None || element().is_selected() || entered()))
                 update(); 
         }, std::chrono::milliseconds{ 20 } }
@@ -406,6 +428,39 @@ namespace neogfx::DesignStudio
         {
             apply_preview_mode();
         });
+        iSink += design_drag_active_changed()([this]()
+        {
+            // layouts only have editor padding, spacing, guidelines and icons while dragging (to show where things can be dropped)
+            if (has_item() && (nested() || item().is_layout() || item().is_spacer()))
+            {
+                update_layout();
+                update();
+            }
+            else if (has_item() && !nested())
+            {
+                // a top level element grows (centred on its centre) while dragging if its content (with editor padding/spacing) no 
+                // longer fits and shrinks back afterwards (but not below what its content then needs, e.g. after something was dropped in it)
+                auto const centre = position() + point{ extents() / 2.0 };
+                size newSize;
+                if (design_drag_active())
+                {
+                    iPreDragSize = extents();
+                    newSize = extents().max(minimum_size());
+                }
+                else if (iPreDragSize)
+                {
+                    newSize = iPreDragSize->max(minimum_size());
+                    iPreDragSize = std::nullopt;
+                }
+                else
+                    return;
+                if (newSize != extents())
+                {
+                    move(centre - point{ newSize / 2.0 });
+                    resize(newSize);
+                }
+            }
+        });
         apply_preview_mode();
     }
 
@@ -446,20 +501,34 @@ namespace neogfx::DesignStudio
 
     void widget_caddy::begin_text_edit()
     {
-        if (preview_mode() || !has_element() || !has_item() || !item().is_widget() || !element().has_text())
+        if (has_element())
+            begin_text_edit(element());
+    }
+
+    void widget_caddy::begin_text_edit(i_element& aElement)
+    {
+        if (preview_mode() || !aElement.has_layout_item() || !aElement.layout_item().is_widget() || !aElement.has_text())
             return;
         end_text_edit(false);
-        // in-place editor over the element's text; it is a child of the top level caddy (which is in Design Studio's own window 
-        // rather than in a window being designed) so it gets keyboard focus
-        i_element* top = &element();
-        while (top->is_nested())
-            top = &top->parent();
-        i_widget& host = top->has_caddy() ? static_cast<i_widget&>(top->caddy()) : static_cast<i_widget&>(*this);
-        auto editor = make_ref<line_edit>(host);
+        iTextElement = &aElement;
+        // in-place editor in place of the element's text widget: frameless and in the same font so the element still looks as it is;
+        // it is a sibling of the text widget (so it is in the same window, e.g. a title bar of a window being designed)
+        auto& textArea = aElement.text_area();
+        i_widget& host = textArea.has_parent() && &textArea != &aElement.layout_item().as_widget() ? textArea.parent() : static_cast<i_widget&>(*this);
+        auto editor = make_ref<text_edit>(host, text_edit_caps::MultiLine, frame_style::NoFrame); // multi-line: Shift+Return inserts a new line
+        editor->set_consider_ancestors_for_mouse_events(false); // the element's widgets ignore mouse events (the caddy handles them)
+        editor->set_font(textArea.font());
+        editor->set_padding(neogfx::padding{}); // so its text is where the text widget's text is
+        editor->set_alignment(aElement.text_alignment()); // e.g. a button's text is centred within its text widget
+        // Return (and Escape) must reach the editor's keyboard event handler below rather than be left for the window
+        editor->set_focus_policy(editor->focus_policy() | neogfx::focus_policy::ConsumeReturnKey | neogfx::focus_policy::ConsumeEscapeKey);
+        // hide the text being edited (without affecting layout) so only the editor's text is seen
+        iTextAreaOpacity = textArea.opacity();
+        textArea.set_opacity(0.0);
         iTextEditor = ref_ptr<i_widget>{ editor };
         string text;
-        for (auto const& attribute : element().attributes())
-            if (attribute.first().to_std_string_view() == "text")
+        for (auto const& attribute : aElement.attributes())
+            if (attribute.first().to_std_string_view() == aElement.text_attribute().to_std_string_view())
                 text = attribute.second();
         auto const quotedText = text.to_std_string();
         std::string plainText = quotedText;
@@ -483,13 +552,22 @@ namespace neogfx::DesignStudio
             }
         }
         editor->set_text(string{ plainText });
-        position_text_editor(*editor, host, element().text_area());
+        position_text_editor(*editor, host, textArea);
         editor->bring_to_front();
         editor->keyboard_event([this, &editorRef = *editor](const neogfx::keyboard_event& aEvent)
         {
+            // Return commits; Shift+Return is left to the editor (a new line)
+            bool const shift = (service<i_keyboard>().modifiers() & key_modifier::SHIFT) != key_modifier::None;
+            if (aEvent.type() == keyboard_event_type::TextInput)
+            {
+                auto const text = aEvent.text();
+                if (!shift && (text.to_std_string() == "\r" || text.to_std_string() == "\n"))
+                    editorRef.keyboard_event().accept(); // not a new line
+                return;
+            }
             if (aEvent.type() != keyboard_event_type::KeyPressed)
                 return;
-            if (aEvent.scan_code() == ScanCode_RETURN || aEvent.scan_code() == ScanCode_KEYPAD_ENTER)
+            if ((aEvent.scan_code() == ScanCode_RETURN || aEvent.scan_code() == ScanCode_KEYPAD_ENTER) && !shift)
             {
                 iEndTextEdit = true;
                 editorRef.keyboard_event().accept();
@@ -500,11 +578,38 @@ namespace neogfx::DesignStudio
                 editorRef.keyboard_event().accept();
             }
         });
+        editor->TextChanged([this, &editorRef = *editor]()
+        {
+            // keep the element's (transparent) text widget showing the text being edited so the element and its layout follow it;
+            // the element's text attribute itself only changes when the edit is committed
+            if (iTextElement == nullptr || !iTextElement->has_layout_item())
+                return;
+            auto& textElement = *iTextElement;
+            auto& attributes = textElement.attributes();
+            auto existing = std::find_if(attributes.begin(), attributes.end(), [&](auto const& attribute) { return attribute.first().to_std_string_view() == textElement.text_attribute().to_std_string_view(); });
+            std::optional<string> const previous = existing != attributes.end() ? std::optional<string>{ existing->second() } : std::nullopt;
+            set_text_attribute(textElement, editorRef.text().to_std_string());
+            textElement.apply_attributes(false);
+            for (auto attribute = attributes.begin(); attribute != attributes.end(); ++attribute)
+                if (attribute->first().to_std_string_view() == textElement.text_attribute().to_std_string_view())
+                {
+                    if (previous)
+                        attribute->second() = *previous;
+                    else
+                        attributes.erase(attribute);
+                    break;
+                }
+        });
         editor->focus_event([this](neogfx::focus_event aEvent, focus_reason)
         {
             if (aEvent == neogfx::focus_event::FocusLost && !iEndTextEdit)
                 iEndTextEdit = true;
         });
+        // a window being designed is a nested window which is only activated when it gains focus but the caddy filters its mouse events 
+        // so it never does; it must be active for its focused widget (the editor) to get keyboard input and show a cursor
+        auto& editorRoot = editor->root();
+        if (editorRoot.is_nested() && !editorRoot.is_active())
+            editorRoot.activate();
         editor->set_focus();
         editor->select_all();
     }
@@ -516,18 +621,29 @@ namespace neogfx::DesignStudio
             return;
         auto editor = iTextEditor;
         iTextEditor = {};
-        if (aCommit && has_element())
+        auto textElement = iTextElement;
+        iTextElement = nullptr;
+        if (textElement != nullptr && textElement->has_layout_item())
         {
-            set_text_attribute(element(), static_cast<line_edit&>(*editor).text().to_std_string());
-            element().apply_attributes(show_ids());
-            iProject.set_dirty();
+            if (iTextAreaOpacity)
+                textElement->text_area().set_opacity(*iTextAreaOpacity);
+            if (aCommit)
+            {
+                set_text_attribute(*textElement, static_cast<text_edit&>(*editor).text().to_std_string());
+                iProject.set_dirty();
+            }
+            textElement->apply_attributes(show_ids()); // committed text, or undo the text shown while editing
         }
+        iTextAreaOpacity = std::nullopt;
         if (editor->has_parent())
             editor->parent().remove(*editor);
     }
     
     widget_caddy::~widget_caddy()
     {
+        if (iTextEditor && iTextEditor->has_parent())
+            iTextEditor->parent().remove(*iTextEditor); // the in-place editor may be a child of one of the element's widgets
+        end_rubber_band();
         if (service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
             service<i_clipboard>().deactivate(*this);
         if (has_item())
@@ -595,6 +711,10 @@ namespace neogfx::DesignStudio
 
     neogfx::padding widget_caddy::padding() const
     {
+        // a layout's own padding and spacing (as specified in its properties) are all it has except while dragging when it gets editor 
+        // padding and spacing too (the latter being the padding of the caddies of the items within it)
+        if (has_item() && (nested() || item().is_layout() || item().is_spacer()) && !design_drag_active())
+            return neogfx::padding{};
         return neogfx::padding{ 4.0_dip };
     }
 
@@ -638,7 +758,7 @@ namespace neogfx::DesignStudio
     void widget_caddy::paint(i_graphics_context& aGc) const
     {
         widget::paint(aGc);
-        if ((item().is_layout() || item().is_spacer()) && !preview_mode())
+        if ((item().is_layout() || item().is_spacer()) && !preview_mode() && design_drag_active())
         {
             auto const r = client_rect(false);
             if (iShowLayoutIcons != nullptr && iShowLayoutIcons->value<bool>(true))
@@ -794,8 +914,24 @@ namespace neogfx::DesignStudio
             auto clickLocation = cardinal_at(aPosition, aKeyModifier);
             if (!clickLocation)
                 clickLocation = cardinal::Center;
+            if (clickLocation == cardinal::Center && (aKeyModifier & key_modifier::SHIFT) != key_modifier::None && !preview_mode())
+            {
+                // shift+click+move: rubber band select (as on the empty canvas)
+                end_rubber_band();
+                element().root().select(false, true);
+                element().root().visit([&](i_element& aElement) { aElement.set_mode(element_mode::None); });
+                iRubberBandAnchor = design_position(aPosition);
+                update_rubber_band(*iRubberBandAnchor);
+                return;
+            }
             if (clickLocation == cardinal::Center)
+            {
                 element().select(toggleSelect ? !element().is_selected() : true, !toggleSelect && element().root().selected_child_count() <= 1);
+                // the clicked element is the current one (Object Explorer selects and scrolls to it, Properties shows it); this doesn't 
+                // rely on the caddy gaining focus as that doesn't happen for caddies in a window being designed (which is never active)
+                if (element().is_selected())
+                    element().set_mode(element_mode::Edit);
+            }
             if (element().is_selected() && clickLocation == cardinal::Center)
             {
                 element().root().visit([&](i_element& aElement)
@@ -828,6 +964,11 @@ namespace neogfx::DesignStudio
     {
         bool const wasCapturing = capturing();
         widget::mouse_button_released(aButton, aPosition);
+        if (aButton == mouse_button::Left && iRubberBandAnchor)
+        {
+            end_rubber_band();
+            return;
+        }
         if (aButton == mouse_button::Left && wasCapturing)
         {
             if (iDragInfo && !iDragInfo->wasDragged && iDragInfo->part == cardinal::Center)
@@ -855,6 +996,11 @@ namespace neogfx::DesignStudio
     void widget_caddy::mouse_moved(const point& aPosition, key_modifier aKeyModifier)
     {
         widget::mouse_moved(aPosition, aKeyModifier);
+        if (iRubberBandAnchor)
+        {
+            update_rubber_band(design_position(aPosition));
+            return;
+        }
         if (capturing() && iDragInfo)
         {
             bool const ignoreConstraints = ((aKeyModifier & key_modifier::SHIFT) != key_modifier::None);
@@ -868,6 +1014,55 @@ namespace neogfx::DesignStudio
             }
             else
                 drag(aPosition, ignoreConstraints);
+        }
+    }
+
+    point widget_caddy::design_position(point const& aPosition) const
+    {
+        return to_window_coordinates(aPosition) + root().window_position();
+    }
+
+    void widget_caddy::update_rubber_band(point const& aDesignPosition)
+    {
+        if (!iRubberBandAnchor)
+            return;
+        rect const band{ iRubberBandAnchor->min(aDesignPosition), iRubberBandAnchor->max(aDesignPosition) };
+        // the overlay is in the window the elements are in (a window being designed is a nested window which is drawn above its caddy)
+        i_widget& host = has_item() && item().is_widget() && item().as_widget().is_root() ? item().as_widget() : root().as_widget();
+        if (!iRubberBand)
+        {
+            iRubberBand = ref_ptr<i_widget>{ make_ref<widget<>>(host) };
+            iRubberBand->set_ignore_mouse_events(true);
+            iRubberBand->set_ignore_non_client_mouse_events(true);
+            i_widget* rubberBand = &*iRubberBand;
+            iRubberBand->painted([rubberBand](i_graphics_context& aGc)
+            {
+                auto const& palette = service<i_app>().current_style().palette();
+                aGc.draw_rect(rect{ point{}, rubberBand->extents() }, palette.color(color_role::Selection), palette.color(color_role::Selection).with_alpha(0.25));
+            });
+        }
+        iRubberBand->move(host.to_client_coordinates(band.top_left() - host.root().window_position()));
+        iRubberBand->resize(band.extents());
+        iRubberBand->bring_to_front();
+        iRubberBand->update();
+        // select the elements whose centres are within the band
+        element().root().visit([&](i_element& aElement)
+        {
+            if (!aElement.has_caddy() || &aElement == &element().root() || aElement.caddy().effectively_hidden() ||
+                (aElement.group() != element_group::Widget && aElement.group() != element_group::Layout))
+                return;
+            aElement.select(band.contains(design_rect(aElement.caddy()).center()), false);
+        });
+    }
+
+    void widget_caddy::end_rubber_band()
+    {
+        iRubberBandAnchor = std::nullopt;
+        if (iRubberBand)
+        {
+            if (iRubberBand->has_parent())
+                iRubberBand->parent().remove(*iRubberBand);
+            iRubberBand = {};
         }
     }
 
@@ -999,6 +1194,7 @@ namespace neogfx::DesignStudio
             {
                 iDragInfo->wasDragged = true;
                 iDropCandidate = true;
+                set_design_drag_active(true);
                 update_drop_target(aPosition);
             }
         }
@@ -1088,6 +1284,7 @@ namespace neogfx::DesignStudio
             }
         }
         iDropCandidate = false;
+        set_design_drag_active(false);
     }
 
     bool widget_caddy::can_undo() const

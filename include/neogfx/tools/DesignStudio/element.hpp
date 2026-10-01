@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 
 #include <algorithm>
+#include <concepts>
 
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/core/optional.hpp>
@@ -40,6 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/progress_bar.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
 #include <neogfx/gui/widget/tab_page.hpp>
+#include <neogfx/gui/widget/tab_button.hpp>
 #include <neogfx/gui/widget/i_tab_page_container.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
@@ -272,6 +274,12 @@ namespace neogfx::DesignStudio
                             if (!sRevealing)
                                 set_mode(element_mode::Edit);
                         });
+                        // double clicking the page's tab edits its text in place (tab pages have no caddy of their own so the container's is used)
+                        iSink += static_cast<tab_button&>(static_cast<Type&>(iLayoutItem->as_widget()).tab()).DoubleClicked([this]()
+                        {
+                            if (has_parent() && parent().has_caddy())
+                                parent().caddy().begin_text_edit(*this);
+                        });
                     }
                 }
                 else if constexpr (std::is_base_of_v<i_widget, Type>)
@@ -342,25 +350,87 @@ namespace neogfx::DesignStudio
         bool has_text() const override
         {
             // has visible text that can be edited in place
-            if constexpr (std::is_base_of_v<i_widget, Type> && !std::is_base_of_v<i_tab_page, Type>)
-                return requires(Type& aWidget, string const& aText) { aWidget.set_text(aText); };
+            if constexpr (std::is_base_of_v<i_tab_page, Type>)
+                return true; // its tab's text
+            else if constexpr (std::is_base_of_v<i_widget, Type>)
+                return requires(Type& aWidget, string const& aText) { aWidget.set_title_text(aText); } || 
+                    requires(Type& aWidget, string const& aText) { aWidget.set_text(aText); };
             else
                 return false;
         }
+        i_string const& text_attribute() const override
+        {
+            static string const sTabText{ "tab_text" };
+            static string const sTitle{ "title" };
+            static string const sText{ "text" };
+            if constexpr (std::is_base_of_v<i_tab_page, Type>)
+                return sTabText;
+            else if constexpr (requires(Type& aWidget, string const& aText) { aWidget.set_title_text(aText); })
+                return sTitle;
+            else
+                return sText;
+        }
         i_widget& text_area() const override
         {
-            if constexpr (std::is_base_of_v<i_widget, Type>)
+            if constexpr (std::is_base_of_v<i_tab_page, Type>)
+                return static_cast<tab_button&>(static_cast<Type&>(layout_item().as_widget()).tab()).label().text_widget(); // tab pages have tab_button tabs
+            else if constexpr (std::is_base_of_v<i_widget, Type>)
             {
                 auto& widget = static_cast<Type&>(layout_item().as_widget());
-                if constexpr (requires(Type& aWidget) { aWidget.label().text_widget(); })
+                if constexpr (requires(Type& aWidget) { aWidget.input_box(); })
+                    return widget.input_box(); // text fields: their text is the input box's
+                else if constexpr (requires(Type& aWidget) { aWidget.label().text_widget(); })
                     return widget.label().text_widget(); // e.g. buttons, group boxes
                 else if constexpr (requires(Type& aWidget) { aWidget.text_widget(); })
                     return widget.text_widget(); // e.g. labels
+                else if constexpr (requires(Type& aWidget) { aWidget.title_bar().title_widget(); })
+                {
+                    try
+                    {
+                        return widget.title_bar().title_widget(); // windows: their title
+                    }
+                    catch (std::logic_error const&)
+                    {
+                        return widget; // no title bar
+                    }
+                }
                 else
                     return widget;
             }
             else
                 return layout_item().as_widget();
+        }
+        neogfx::alignment text_alignment() const override
+        {
+            if constexpr (std::is_base_of_v<i_tab_page, Type>)
+                return static_cast<tab_button&>(static_cast<Type&>(layout_item().as_widget()).tab()).label().text_widget().alignment();
+            else if constexpr (std::is_base_of_v<i_widget, Type>)
+            {
+                auto& widget = static_cast<Type&>(layout_item().as_widget());
+                if constexpr (requires(Type& aWidget) { aWidget.input_box(); })
+                    return widget.input_box().alignment();
+                else if constexpr (requires(Type& aWidget) { aWidget.label().text_widget(); })
+                    return widget.label().text_widget().alignment();
+                else if constexpr (requires(Type& aWidget) { aWidget.text_widget(); })
+                    return widget.text_widget().alignment();
+                else if constexpr (requires(Type& aWidget) { aWidget.title_bar().title_widget(); })
+                {
+                    try
+                    {
+                        return widget.title_bar().title_widget().alignment();
+                    }
+                    catch (std::logic_error const&)
+                    {
+                        return neogfx::alignment::Left | neogfx::alignment::VCenter;
+                    }
+                }
+                else if constexpr (requires(Type& aWidget) { { aWidget.alignment() } -> std::convertible_to<neogfx::alignment>; })
+                    return widget.alignment(); // e.g. text widgets
+                else
+                    return neogfx::alignment::Left | neogfx::alignment::VCenter;
+            }
+            else
+                return neogfx::alignment::Left | neogfx::alignment::VCenter;
         }
         void apply_attributes(bool aShowIds) override
         {

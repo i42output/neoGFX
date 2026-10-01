@@ -90,6 +90,9 @@ namespace neogfx::DesignStudio
     private:
         void apply_preview_mode();
         void end_text_edit(bool aCommit);
+        point design_position(point const& aPosition) const; // a position in this caddy as a design (canvas) position
+        void update_rubber_band(point const& aDesignPosition);
+        void end_rubber_band();
         bool can_be_dropped() const;
         bool capturing_drop() const;
         void update_drop_target(point const& aPosition);
@@ -97,6 +100,7 @@ namespace neogfx::DesignStudio
         void move_to_canvas(point const& aDropPosition);
     public:
         void begin_text_edit() override;
+        void begin_text_edit(i_element& aElement) override;
     protected:
         void start_drag(cardinal aPart, point const& aPosition) override;
         void drag(point const& aPosition, bool aIgnoreConstraints) override;
@@ -134,6 +138,11 @@ namespace neogfx::DesignStudio
         bool iDropCandidate = false;
         ref_ptr<i_widget> iTextEditor;
         std::optional<bool> iEndTextEdit; // end in-place text edit (true: commit) at next opportunity
+        i_element* iTextElement = nullptr; // the element whose text is being edited in place (this caddy's or a child's without a caddy, e.g. a tab page)
+        std::optional<point> iRubberBandAnchor; // shift+click+move within a design selects the elements within the rubber band (design position)
+        ref_ptr<i_widget> iRubberBand; // overlay showing it (in the window the elements are in)
+        std::optional<size> iPreDragSize; // a top level caddy's size before a design drag (during which it may grow)
+        std::optional<double> iTextAreaOpacity; // the opacity of the element's text widget, hidden (made transparent) while its text is edited in place
     };
 
     // preview mode: widgets behave as in a running application (no editing)
@@ -145,6 +154,10 @@ namespace neogfx::DesignStudio
     void set_display_ids(bool aDisplayIds);
     neolib::i_event<> const& display_ids_changed();
     bool show_ids();
+    // a design drag/drop (from the toolbox or of elements on the canvas) is in progress: layouts show editor padding, guidelines and icons
+    bool design_drag_active();
+    void set_design_drag_active(bool aActive);
+    neolib::i_event<> const& design_drag_active_changed();
     void set_text_attribute(i_element& aElement, std::string const& aText);
 
     // design surface helpers
