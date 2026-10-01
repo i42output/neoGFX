@@ -155,4 +155,18 @@ namespace neogfx
             throw bad_button_index();
         iButtons.insert(iButtons.begin() + aButtonIndex, std::make_unique<toolbar_button>(layout(), iSeparator));
     }
-}
+
+    void toolbar::remove_button_at(button_index aButtonIndex)
+    {
+        if (aButtonIndex >= iButtons.size())
+            throw bad_button_index();
+        iButtons.erase(iButtons.begin() + aButtonIndex);
+        update_layout();
+    }
+
+    void toolbar::remove_all_buttons()
+    {
+        iButtons.clear();
+        update_layout();
+    }
+}

@@ -598,6 +598,16 @@ namespace neogfx::DesignStudio
             case mouse_event_type::ButtonClicked:
                 if (aEvent.is_left_button())
                 {
+                    // only a click on the empty canvas starts a rubber band (not one on an element, which its caddy handles)
+                    auto const designPos = iWorkspace.view_stack().to_window_coordinates(eventPos) + iWorkspace.view_stack().root().window_position();
+                    bool onElement = false;
+                    iProjectManager.active_project().root().visit([&](i_element& aElement)
+                    {
+                        if (!onElement && aElement.has_caddy() && !aElement.caddy().effectively_hidden() && design_rect(aElement.caddy()).contains(designPos))
+                            onElement = true;
+                    });
+                    if (onElement)
+                        break;
                     iProjectManager.active_project().root().select(false, true);
                     iProjectManager.active_project().root().visit([&](i_element& aElement) { aElement.set_mode(element_mode::None); });
                     tMouseSelectorAnchor = eventPos;
@@ -609,17 +619,15 @@ namespace neogfx::DesignStudio
                 if (tMouseSelectorAnchor)
                 {
                     tMouseSelectorMousePos = eventPos;
+                    // (positions compared as design positions so that elements in a window being designed (a nested window) are where they appear)
+                    auto& viewStack = iWorkspace.view_stack();
+                    auto const origin = viewStack.to_window_coordinates(point{}) + viewStack.root().window_position();
+                    rect const band{ tMouseSelectorAnchor->min(*tMouseSelectorMousePos) + origin, tMouseSelectorAnchor->max(*tMouseSelectorMousePos) + origin };
                     iProjectManager.active_project().root().visit([&](i_element& aElement)
                     {
-                        if (aElement.has_layout_item() && (aElement.layout_item().is_widget() || aElement.layout_item().has_parent_widget()))
-                        {
-                            auto& elementWidget = aElement.layout_item().is_widget() ? aElement.layout_item().as_widget() : aElement.layout_item().parent_widget();
-                            if (rect{ tMouseSelectorAnchor->min(*tMouseSelectorMousePos), tMouseSelectorAnchor->max(*tMouseSelectorMousePos) }.contains(
-                                iWorkspace.view_stack().to_client_coordinates(elementWidget.to_window_coordinates(elementWidget.client_rect())).center()))
-                                aElement.select(true, false);
-                            else
-                                aElement.select(false, false);
-                        }
+                        if (aElement.has_caddy() && !aElement.caddy().effectively_hidden() &&
+                            (aElement.group() == element_group::Widget || aElement.group() == element_group::Layout))
+                            aElement.select(band.contains(design_rect(aElement.caddy()).center()), false);
                     });
                     iWorkspace.view_stack().update();
                 }
@@ -689,6 +697,7 @@ namespace neogfx::DesignStudio
         auto update_ui = [&]()
         {
             aApp.actionFileClose.enable(aProjectManager.project_active());
+            aApp.actionFileAddNrc.enable(aProjectManager.project_active());
             aApp.actionFileSave.enable(aProjectManager.project_active() && aProjectManager.active_project().dirty());
             iLeftDock.show(aProjectManager.project_active());
             iRightDock.show(aProjectManager.project_active());
@@ -719,16 +728,19 @@ namespace neogfx::DesignStudio
                 return;
             auto& project = aProjectManager.active_project();
             std::string path;
-            if (project.has_path())
+            // a project of more than one .nrc file is saved as a project file (.dsproj) listing them
+            bool const multipleFiles = project.file_count() > 1u;
+            if (project.has_path() && (!multipleFiles || std::filesystem::path{ project.path().to_std_string() }.extension() == ".dsproj"))
                 path = project.path().to_std_string();
             else
             {
-                auto file = ng::save_file_dialog(mainWindow, ng::file_dialog_spec{ "Save Project", project.name().to_std_string() + ".nrc", { "*.nrc" }, "Project Files" });
+                auto const extension = multipleFiles ? std::string{ ".dsproj" } : std::string{ ".nrc" };
+                auto file = ng::save_file_dialog(mainWindow, ng::file_dialog_spec{ "Save Project", project.name().to_std_string() + extension, { "*" + extension }, "Project Files" });
                 if (!file)
                     return;
                 path = *file;
                 if (std::filesystem::path{ path }.extension().empty())
-                    path += ".nrc";
+                    path += extension;
             }
             try
             {
@@ -743,16 +755,32 @@ namespace neogfx::DesignStudio
 
         aApp.action_file_open().triggered([&]()
         {
-            auto files = ng::open_file_dialog(mainWindow, ng::file_dialog_spec{ "Open Project", {}, { "*.nrc" }, "Project Files" });
+            auto files = ng::open_file_dialog(mainWindow, ng::file_dialog_spec{ "Open Project", {}, { "*.dsproj", "*.nrc" }, "Project Files" });
             if (files)
             {
+                // .nrc files opened together form one project (the first being its primary file); a project file (.dsproj) lists them
+                i_project* nrcProject = nullptr;
                 for (auto const& file : files.value())
                 {
                     std::filesystem::path const filePath{ file };
-                    if (filePath.extension() == ".nrc")
+                    if (filePath.extension() == ".dsproj")
                     {
                         auto& project = aProjectManager.open_project(file);
                         create_caddies(project, iWorkspace.view_stack());
+                    }
+                    else if (filePath.extension() == ".nrc")
+                    {
+                        try
+                        {
+                            if (nrcProject == nullptr)
+                                nrcProject = &aProjectManager.open_project(file);
+                            else
+                                nrcProject->add_file(ng::string{ file });
+                        }
+                        catch (std::exception const& e)
+                        {
+                            ng::service<ng::i_surface_manager>().display_error_message("Open Project"_t, ng::string{ e.what() });
+                        }
                     }
                     else if (aProjectManager.project_active())
                         aProjectManager.active_project().create_element(aProjectManager.active_project().root(), "file"_s, ng::string{ file });
@@ -765,7 +793,35 @@ namespace neogfx::DesignStudio
                         aApp.action_file_new().triggered()();
                     }
                 }
+                // (caddies once all of its files are loaded so resources from any of them are available)
+                if (nrcProject != nullptr)
+                    create_caddies(*nrcProject, iWorkspace.view_stack());
             }
+        });
+
+        // adding .nrc files to the open project (e.g. one with resources it uses)
+        aApp.actionFileAddNrc.triggered([&]()
+        {
+            if (!aProjectManager.project_active())
+                return;
+            auto files = ng::open_file_dialog(mainWindow, ng::file_dialog_spec{ "Add .nrc File to Project", {}, { "*.nrc" }, "Resource Files" });
+            if (!files)
+                return;
+            auto& project = aProjectManager.active_project();
+            for (auto const& file : files.value())
+            {
+                try
+                {
+                    project.add_file(ng::string{ file });
+                }
+                catch (std::exception const& e)
+                {
+                    ng::service<ng::i_surface_manager>().display_error_message("Add .nrc File to Project"_t, ng::string{ e.what() });
+                }
+            }
+            create_caddies(project, iWorkspace.view_stack()); // (only for elements that don't already have one)
+            // elements already shown may use resources from the added files so apply their attributes again
+            project.root().visit([](i_element& aElement) { aElement.apply_attributes(show_ids()); });
         });
 
         aApp.action_file_new().triggered([&]()

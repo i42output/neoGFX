@@ -86,6 +86,7 @@ namespace neogfx::DesignStudio
         void mouse_moved(const point& aPosition, key_modifier aKeyModifier) override;
         void mouse_entered(const point& aPosition) override;
         void mouse_left() override;
+        bool hovered() const; // the mouse is over this caddy (rather than entered() which a window being designed can leave stale)
         neogfx::mouse_cursor mouse_cursor() const override;
     private:
         void apply_preview_mode();

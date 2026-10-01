@@ -136,6 +136,28 @@ namespace neogfx::DesignStudio
             return false;
         }
 
+        // the caddy the mouse is over (a window being designed can be left believing the mouse is still over one of its widgets, 
+        // as the caddy handles its mouse events, so its own record of the entered widget can't be relied on)
+        thread_local widget_caddy* tHoveredCaddy = nullptr;
+        // while a mouse button is held down on a caddy the hovered caddy stays the clicked one: a click can make the window being designed 
+        // active which can then (from its out of date record of where the mouse is) tell an unrelated caddy that the mouse has entered it
+        thread_local widget_caddy* tClickedCaddy = nullptr;
+
+        void set_hovered_caddy(widget_caddy* aCaddy)
+        {
+            if (tClickedCaddy != nullptr && aCaddy != tClickedCaddy)
+                return;
+            if (tHoveredCaddy != aCaddy)
+            {
+                auto* const previous = tHoveredCaddy;
+                tHoveredCaddy = aCaddy;
+                if (previous != nullptr)
+                    previous->update();
+                if (aCaddy != nullptr)
+                    aCaddy->update();
+            }
+        }
+
         rect layout_design_rect(i_layout const& aLayout)
         {
             if (!aLayout.has_parent_widget())
@@ -245,14 +267,12 @@ namespace neogfx::DesignStudio
         }
 
         // place an in-place text editor (a child of aHost) exactly over aTextArea (its text widget is kept showing the edited text so
-        // it is the right size, including its lines); a little wider for the cursor
+        // it is the right size, including its lines)
         void position_text_editor(i_widget& aEditor, i_widget const& aHost, i_widget const& aTextArea)
         {
             auto const textRect = design_rect(aTextArea);
-            scalar const cursorRoom = 2.0_dip;
-            size const editorSize{ textRect.cx + cursorRoom, textRect.cy };
-            aEditor.move(point{ textRect.x, textRect.center().y - editorSize.cy / 2.0 } - design_rect(aHost).top_left());
-            aEditor.resize(editorSize);
+            aEditor.move(textRect.top_left() - design_rect(aHost).top_left());
+            aEditor.resize(textRect.extents());
         }
 
         thread_local std::optional<std::pair<point, point>> tDropLine; // insertion marker (drop highlight coordinates)
@@ -290,7 +310,7 @@ namespace neogfx::DesignStudio
                 end_text_edit(*iEndTextEdit);
             if (iTextEditor && iTextEditor->has_parent() && iTextElement != nullptr && iTextElement->has_layout_item())
                 position_text_editor(*iTextEditor, iTextEditor->parent(), iTextElement->text_area()); // keep it over the text (it may not have been laid out yet)
-            if (has_element() && (element().mode() != element_mode::None || element().is_selected() || entered()))
+            if (has_element() && (element().mode() != element_mode::None || element().is_selected() || hovered()))
                 update(); 
         }, std::chrono::milliseconds{ 20 } }
     {
@@ -641,6 +661,10 @@ namespace neogfx::DesignStudio
     
     widget_caddy::~widget_caddy()
     {
+        if (tHoveredCaddy == this)
+            tHoveredCaddy = nullptr;
+        if (tClickedCaddy == this)
+            tClickedCaddy = nullptr;
         if (iTextEditor && iTextEditor->has_parent())
             iTextEditor->parent().remove(*iTextEditor); // the in-place editor may be a child of one of the element's widgets
         end_rubber_band();
@@ -693,6 +717,8 @@ namespace neogfx::DesignStudio
 
     size widget_caddy::minimum_size(optional_size const& aAvailableSpace) const
     {
+        if (!has_item())
+            return widget::minimum_size(aAvailableSpace);
         size result = item().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - internal_spacing().size() : aAvailableSpace);
         if (result.cx != 0.0)
             result.cx += internal_spacing().size().cx;
@@ -721,7 +747,7 @@ namespace neogfx::DesignStudio
     void widget_caddy::layout_items(bool aDefer)
     {
         widget::layout_items(aDefer);
-        if (item().is_widget())
+        if (has_item() && item().is_widget())
         {
             item().as_widget().move(client_rect(false).top_left());
             item().as_widget().resize(client_rect(false).extents());
@@ -758,7 +784,7 @@ namespace neogfx::DesignStudio
     void widget_caddy::paint(i_graphics_context& aGc) const
     {
         widget::paint(aGc);
-        if ((item().is_layout() || item().is_spacer()) && !preview_mode() && design_drag_active())
+        if (has_item() && has_element() && (item().is_layout() || item().is_spacer()) && !preview_mode() && design_drag_active())
         {
             auto const r = client_rect(false);
             if (iShowLayoutIcons != nullptr && iShowLayoutIcons->value<bool>(true))
@@ -847,9 +873,9 @@ namespace neogfx::DesignStudio
             {
             case element_mode::None:
             default:
-                if (element().is_selected() || entered())
+                if (element().is_selected() || hovered())
                     draw_selected_rect();
-                if (entered() && !nested())
+                if (hovered() && !nested())
                     draw_resizer_rects();
                 break;
             case element_mode::Drag:
@@ -872,7 +898,11 @@ namespace neogfx::DesignStudio
     void widget_caddy::focus_gained(focus_reason aFocusReason)
     {
         widget::focus_gained(aFocusReason);
-        element().set_mode(element_mode::Edit);
+        // gaining focus only makes the element the current one if it is selected: a caddy can be given focus on the way to a click 
+        // being handled (e.g. the caddy of the window being designed when one of its widgets is clicked) and it mustn't briefly 
+        // show as the current element; clicking an element (mouse_button_clicked) makes it current
+        if (element().is_selected() || element().group() == element_group::Workflow)
+            element().set_mode(element_mode::Edit);
         service<i_clipboard>().activate(*this);
         if (element().group() == element_group::Workflow)
             bring_to_front();
@@ -908,6 +938,9 @@ namespace neogfx::DesignStudio
     void widget_caddy::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
         widget::mouse_button_clicked(aButton, aPosition, aKeyModifier);
+        tClickedCaddy = nullptr;
+        set_hovered_caddy(this);
+        tClickedCaddy = this;
         if (aButton == mouse_button::Left)
         {
             bool const toggleSelect = ((aKeyModifier & key_modifier::CTRL) != key_modifier::None);
@@ -964,6 +997,7 @@ namespace neogfx::DesignStudio
     {
         bool const wasCapturing = capturing();
         widget::mouse_button_released(aButton, aPosition);
+        tClickedCaddy = nullptr;
         if (aButton == mouse_button::Left && iRubberBandAnchor)
         {
             end_rubber_band();
@@ -979,11 +1013,15 @@ namespace neogfx::DesignStudio
                     element().widget().set_focus();
                 }
             }
+            // ending a drag can move elements (changing the element tree) so don't do it while visiting the tree
+            std::vector<ref_ptr<i_element_caddy>> dragged;
             iElement->root().visit([&](i_element& aElement)
             {
                 if (aElement.is_selected() && aElement.has_caddy())
-                    aElement.caddy().end_drag();
+                    dragged.emplace_back(&aElement.caddy()); // (an owning reference: keeps it alive while it is moved)
             });
+            for (auto& caddy : dragged)
+                caddy->end_drag();
         }
         else if (aButton == mouse_button::Right)
         {
@@ -996,6 +1034,9 @@ namespace neogfx::DesignStudio
     void widget_caddy::mouse_moved(const point& aPosition, key_modifier aKeyModifier)
     {
         widget::mouse_moved(aPosition, aKeyModifier);
+        if (tClickedCaddy != nullptr && !tClickedCaddy->capturing())
+            tClickedCaddy = nullptr; // (the button was released elsewhere)
+        set_hovered_caddy(this);
         if (iRubberBandAnchor)
         {
             update_rubber_band(design_position(aPosition));
@@ -1068,12 +1109,22 @@ namespace neogfx::DesignStudio
 
     void widget_caddy::mouse_entered(const point& aPosition)
     {
+        set_hovered_caddy(this);
         update();
     }
 
     void widget_caddy::mouse_left()
     {
+        // leaving this caddy also leaves any caddy within it (e.g. one in a window being designed that missed its own mouse left)
+        if (tHoveredCaddy == this || (tHoveredCaddy != nullptr && has_element() && tHoveredCaddy->has_element() && 
+            is_descendant_of(tHoveredCaddy->element(), element())))
+            set_hovered_caddy(nullptr);
         update();
+    }
+
+    bool widget_caddy::hovered() const
+    {
+        return tHoveredCaddy == this;
     }
 
 // For some reason Visual Studio 2026 C++ optimiser fucks up in widget_caddy::mouse_cursor() (access violation)...
@@ -1625,7 +1676,7 @@ namespace neogfx::DesignStudio
         std::function<void(i_element&)> create_nested = [&](i_element& aParent)
         {
             for (auto& child : aParent.children())
-                if (is_design_element(*child) && !child->has_caddy() && !child->has_layout_item())
+                if ((is_design_element(*child) || child->type().to_std_string_view() == "menu_bar") && !child->has_caddy() && !child->has_layout_item())
                 {
                     try
                     {

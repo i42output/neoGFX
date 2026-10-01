@@ -79,6 +79,8 @@ namespace neogfx
         virtual i_action& insert_action(button_index aButtonIndex, i_action& aAction);
         virtual i_action& insert_action(button_index aButtonIndex, i_ref_ptr<i_action> const& aAction);
         virtual void insert_separator(button_index aButtonIndex);
+        virtual void remove_button_at(button_index aButtonIndex);
+        virtual void remove_all_buttons();
     private:
         toolbar_style iStyle;
         std::unique_ptr<i_layout> iLayout;
@@ -86,4 +88,4 @@ namespace neogfx
         action iSeparator;
         optional_size iButtonImageExtents;
     };
-}
+}

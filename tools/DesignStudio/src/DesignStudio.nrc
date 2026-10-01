@@ -18,6 +18,10 @@
                     checked: true
                 }
                 action: {
+                    id: actionFileAddNrc
+                    text: "Add .nrc File to Project..."
+                }
+                action: {
                     id: actionShowLayoutIcons
                     text: "Show Layout Icons"
                     checkable: true
@@ -66,6 +70,7 @@
                         title: "&File"
                         action: mainApp.actionFileNew
                         action: mainApp.actionFileOpen
+                        action: mainApp.actionFileAddNrc
                         action: separator
                         action: mainApp.actionFileClose
                         action: separator

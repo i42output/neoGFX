@@ -20,6 +20,9 @@
 #pragma once
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
+#include <filesystem>
+#include <vector>
+#include <string>
 #include <neogfx/gui/mvc/model.hpp>
 #include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
@@ -44,6 +47,8 @@ namespace neogfx::DesignStudio
         void create(const i_string& aName, const i_string& aNamespace) override;
         void open(const i_string& aPath) override;
         void save(const i_string& aPath) override;
+        void add_file(const i_string& aPath) override;
+        std::uint32_t file_count() const override;
     public:
         bool has_path() const override;
         const i_string& path() const override;
@@ -57,7 +62,19 @@ namespace neogfx::DesignStudio
         void remove_element(i_element& aElement) override;
         void move_element(i_element& aElement, i_element& aNewParent, i_element const* aBefore = nullptr) override;
     private:
+        struct nrc_file
+        {
+            std::filesystem::path path;
+            std::vector<neolib::pair<string, string>> attributes; // top level items other than ui (in order; "#ui": where ui goes)
+            std::string saved; // contents when last loaded/saved (unchanged files aren't rewritten)
+        };
+    private:
+        void load_nrc(std::filesystem::path const& aPath);
+        std::size_t file_of(i_element const& aTopLevelElement) const;
+        std::string generate_nrc(std::size_t aFile) const;
+    private:
         i_project_manager& iManager;
+        std::vector<nrc_file> iFiles;
         ref_ptr<i_element> iRoot;
         string iName;
         string iNamespace;

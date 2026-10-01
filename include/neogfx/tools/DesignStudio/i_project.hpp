@@ -44,6 +44,8 @@ namespace neogfx::DesignStudio
         virtual void create(const i_string& aName, const i_string& aNamespace) = 0;
         virtual void open(const i_string& aPath) = 0;
         virtual void save(const i_string& aPath) = 0;
+        virtual void add_file(const i_string& aPath) = 0; // add an .nrc file to the project (which is then saved as a project file (.dsproj) listing them)
+        virtual std::uint32_t file_count() const = 0; // the number of .nrc files in the project
     public:
         virtual bool has_path() const = 0;
         virtual const i_string& path() const = 0;

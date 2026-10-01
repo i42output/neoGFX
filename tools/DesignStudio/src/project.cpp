@@ -25,9 +25,13 @@
 #include <charconv>
 #include <cstdio>
 #include <cctype>
+#include <iterator>
+#include <iostream>
+#include <vector>
 #include <boost/lexical_cast.hpp>
 
 #include <neolib/file/json.hpp>
+#include <neogfx/app/i_resource_manager.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
 #include <neogfx/tools/DesignStudio/i_project_manager.hpp>
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
@@ -241,15 +245,96 @@ namespace neogfx::DesignStudio
 
     void project::open(const i_string& aPath)
     {
-        std::filesystem::path const inputFileName{ aPath.to_std_string() };
+        // a project is either a single .nrc file or a project file (.dsproj) listing the .nrc files it consists of
+        std::filesystem::path const projectFileName{ std::filesystem::absolute(std::filesystem::path{ aPath.to_std_string() }) };
+        iFiles.clear();
+        iPath = aPath;
+        iName = projectFileName.stem().string();
+        iRoot = manager().library("project"_s).create_element(*this, "project", projectFileName.stem().string());
+        manager().library("user_interface"_s).create_element(*iRoot, "user_interface", "User Interface"_t);
+        if (projectFileName.extension() == ".dsproj")
+        {
+            neolib::fjson const input{ projectFileName.string() };
+            if (!input.has_root() || !input.root().as<neolib::fjson_object>().has("nrc"))
+                throw invalid_project_file("no .nrc files");
+            for (auto const& nrcFile : input.root().as<neolib::fjson_object>().at("nrc"))
+                load_nrc(projectFileName.parent_path() / std::string{ nrcFile.text().begin(), nrcFile.text().end() });
+        }
+        else
+            load_nrc(projectFileName);
+        for (auto& file : iFiles)
+            file.saved = generate_nrc(static_cast<std::size_t>(std::distance(&iFiles[0], &file)));
+        set_clean();
+    }
+
+    void project::add_file(const i_string& aPath)
+    {
+        if (!iRoot)
+            throw invalid_project_file("no project");
+        std::filesystem::path const fileName{ std::filesystem::absolute(std::filesystem::path{ aPath.to_std_string() }) };
+        for (auto const& file : iFiles)
+            if (std::filesystem::equivalent(file.path, fileName))
+                return; // already in the project
+        load_nrc(fileName);
+        iFiles.back().saved = generate_nrc(iFiles.size() - 1u);
+        set_dirty(); // (the project file needs to list it)
+    }
+
+    std::uint32_t project::file_count() const
+    {
+        return static_cast<std::uint32_t>(iFiles.size());
+    }
+
+    void project::load_nrc(std::filesystem::path const& aPath)
+    {
+        std::filesystem::path const inputFileName{ std::filesystem::absolute(aPath).lexically_normal() };
         neolib::fjson const input{ inputFileName.string() };
         if (!input.has_root())
-            throw invalid_project_file("bad root node");
-        iPath = aPath;
-        iName = inputFileName.stem().string();
-        iNamespace = input.root().as<neolib::fjson_object>().has("namespace") ? input.root().as<neolib::fjson_object>().at("namespace").text() : "";
-        iRoot = manager().library("project"_s).create_element(*this, "project", inputFileName.stem().string());
-        auto userInterface = manager().library("user_interface"_s).create_element(*iRoot, "user_interface", "User Interface"_t);
+            throw invalid_project_file("bad root node: " + inputFileName.string());
+        iFiles.emplace_back();
+        auto& file = iFiles.back();
+        file.path = inputFileName;
+        if (iFiles.size() == 1u)
+            iNamespace = input.root().as<neolib::fjson_object>().has("namespace") ? input.root().as<neolib::fjson_object>().at("namespace").text() : "";
+        i_element* userInterface = nullptr;
+        for (auto& e : iRoot->children())
+            if (e->group() == element_group::UserInterface)
+                userInterface = &*e;
+        if (userInterface == nullptr)
+            userInterface = &*manager().library("user_interface"_s).create_element(*iRoot, "user_interface", "User Interface"_t);
+        // resources (e.g. images) are registered as nrc would embed them (":/<namespace>[/<resource namespace>]/<file>", files relative to
+        // the .nrc file) so that elements using them can show them
+        auto load_resources = [&](neolib::fjson_value const& aResource)
+        {
+            auto const& resource = aResource.as<neolib::fjson_object>();
+            auto text = [](auto const& aText) { return std::string{ aText.begin(), aText.end() }; };
+            std::string prefix = input.root().as<neolib::fjson_object>().has("namespace") ? text(input.root().as<neolib::fjson_object>().at("namespace").text()) : std::string{};
+            if (resource.has("namespace"))
+                prefix += "/" + text(resource.at("namespace").text());
+            for (auto pos = prefix.find("::"); pos != std::string::npos; pos = prefix.find("::"))
+                prefix.replace(pos, 2u, "/");
+            auto load_file = [&](std::string const& aFile)
+            {
+                auto const filePath = std::filesystem::absolute(inputFileName).parent_path() / aFile;
+                auto const uri = ":/" + (!prefix.empty() ? prefix + "/" : std::string{}) + aFile;
+                std::ifstream file{ filePath, std::ios::in | std::ios::binary };
+                if (!file)
+                {
+                    std::cerr << "DesignStudio: cannot read resource file '" << filePath.string() << "' (" << uri << ")" << std::endl;
+                    return; // (still preserved in the project)
+                }
+                std::vector<char> data{ std::istreambuf_iterator<char>{ file }, std::istreambuf_iterator<char>{} };
+                service<i_resource_manager>().add_resource(uri, data.data(), data.size());
+            };
+            for (auto const& resourceItem : aResource)
+            {
+                if (resourceItem.name() == "file")
+                    load_file(text(resourceItem.text()));
+                else if (resourceItem.name() == "files")
+                    for (auto const& fileItem : resourceItem)
+                        load_file(text(fileItem.text()));
+            }
+        };
         std::map<std::string, std::uint32_t> counters;
         // create an element for an .nrc object node; returns nullptr if the node isn't a known element type
         auto create_node_element = [&](i_element& aParent, neolib::fjson_value const& aNode) -> i_element*
@@ -257,6 +342,8 @@ namespace neogfx::DesignStudio
             try
             {
                 std::string const type{ aNode.name().begin(), aNode.name().end() };
+                if (!type.empty() && type[0] == '.')
+                    return nullptr; // (a member of its parent (e.g. a label's .text_widget), not an element: kept as an attribute)
                 std::string const id = aNode.as<neolib::fjson_object>().has("id") ? 
                     std::string{ aNode.as<neolib::fjson_object>().at("id").text().begin(), aNode.as<neolib::fjson_object>().at("id").text().end() } :
                     type + boost::lexical_cast<std::string>(++counters[type]);
@@ -289,7 +376,7 @@ namespace neogfx::DesignStudio
         {
             if (item.name() == "ui" && item.type() == neolib::json_type::Object)
             {
-                iRoot->attributes().push_back(attribute_t{ string{ "#ui" }, string{} });
+                file.attributes.push_back(attribute_t{ string{ "#ui" }, string{} });
                 for (auto const& fragment : item)
                 {
                     if (fragment.type() != neolib::json_type::Object)
@@ -302,18 +389,33 @@ namespace neogfx::DesignStudio
                         if (newElement != nullptr)
                         {
                             newElement->attributes().push_back(attribute_t{ string{ "#fragment" }, string{ fragment.name() } });
+                            newElement->attributes().push_back(attribute_t{ string{ "#file" }, string{ file.path.string() } });
                             add_node(*newElement, node);
                         }
                     }
                 }
             }
             else
-                iRoot->attributes().push_back(attribute_t{ string{ name_to_rjson(item) }, string{ value_to_rjson(item) } });
+            {
+                if (item.name() == "resource" && item.type() == neolib::json_type::Object)
+                    load_resources(item);
+                file.attributes.push_back(attribute_t{ string{ name_to_rjson(item) }, string{ value_to_rjson(item) } });
+            }
         }
-        set_clean();
     }
 
-    void project::save(const i_string& aPath)
+    std::size_t project::file_of(i_element const& aTopLevelElement) const
+    {
+        // the .nrc file a top level element is in (elements added in Design Studio are in the first (primary) file)
+        for (auto const& attribute : aTopLevelElement.attributes())
+            if (attribute.first().to_std_string_view() == "#file")
+                for (std::size_t i = 0u; i < iFiles.size(); ++i)
+                    if (iFiles[i].path.string() == attribute.second().to_std_string())
+                        return i;
+        return 0u;
+    }
+
+    std::string project::generate_nrc(std::size_t aFile) const
     {
         std::ostringstream output;
         output << "{\n";
@@ -324,11 +426,12 @@ namespace neogfx::DesignStudio
                 output << "\n";
             first = false;
         };
+        auto const& file = iFiles[aFile];
         bool hasNamespace = false;
-        for (auto const& attribute : root().attributes())
+        for (auto const& attribute : file.attributes)
             if (attribute.first().to_std_string_view() == "namespace")
                 hasNamespace = true;
-        if (!hasNamespace && !namespace_().empty())
+        if (!hasNamespace && aFile == 0u && !namespace_().empty())
         {
             separate();
             output << indent(1u) << "namespace: " << quoted(namespace_().to_std_string_view()) << "\n";
@@ -339,7 +442,7 @@ namespace neogfx::DesignStudio
             output << indent(1u) << "ui: {\n";
             auto emit_fragment = [&](i_element const& aElement)
             {
-                if (!is_saved_to_nrc(aElement))
+                if (!is_saved_to_nrc(aElement) || file_of(aElement) != aFile)
                     return;
                 output << indent(2u) << fragment_name(aElement) << ": {\n";
                 emit_element(output, aElement, 3u);
@@ -358,7 +461,7 @@ namespace neogfx::DesignStudio
             output << indent(1u) << "}\n";
         };
         bool uiEmitted = false;
-        for (auto const& attribute : root().attributes())
+        for (auto const& attribute : file.attributes)
         {
             if (attribute.first().to_std_string_view() == "#ui")
             {
@@ -374,15 +477,58 @@ namespace neogfx::DesignStudio
         if (!uiEmitted)
             emit_ui();
         output << "}\n";
-        std::ofstream file{ std::filesystem::path{ aPath.to_std_string() }, std::ios::out | std::ios::trunc | std::ios::binary };
-        if (!file)
-            throw std::runtime_error{ "neogfx::DesignStudio::project::save: unable to open file for writing: " + aPath.to_std_string() };
-        file << output.str();
-        file.close();
-        if (!file)
-            throw std::runtime_error{ "neogfx::DesignStudio::project::save: error writing file: " + aPath.to_std_string() };
+        return output.str();
+    }
+
+    void project::save(const i_string& aPath)
+    {
+        auto write = [](std::filesystem::path const& aFilePath, std::string const& aContents)
+        {
+            std::ofstream file{ aFilePath, std::ios::out | std::ios::trunc | std::ios::binary };
+            if (!file)
+                throw std::runtime_error{ "neogfx::DesignStudio::project::save: unable to open file for writing: " + aFilePath.string() };
+            file << aContents;
+            file.close();
+            if (!file)
+                throw std::runtime_error{ "neogfx::DesignStudio::project::save: error writing file: " + aFilePath.string() };
+        };
+        std::filesystem::path const projectFileName{ std::filesystem::absolute(std::filesystem::path{ aPath.to_std_string() }) };
+        bool const isProjectFile = (projectFileName.extension() == ".dsproj");
+        if (iFiles.empty())
+        {
+            // a new project: its (primary) .nrc file is the one given or one beside the project file
+            iFiles.emplace_back();
+            iFiles.back().path = isProjectFile ? projectFileName.parent_path() / (projectFileName.stem().string() + ".nrc") : projectFileName;
+            iFiles.back().attributes.push_back(attribute_t{ string{ "#ui" }, string{} });
+        }
+        else if (!isProjectFile)
+            iFiles[0].path = projectFileName; // (saving the primary .nrc file as)
+        // .nrc files (only those that have changed so their formatting is otherwise untouched)
+        for (std::size_t i = 0u; i < iFiles.size(); ++i)
+        {
+            auto const contents = generate_nrc(i);
+            if (contents != iFiles[i].saved || !std::filesystem::exists(iFiles[i].path))
+            {
+                write(iFiles[i].path, contents);
+                iFiles[i].saved = contents;
+            }
+        }
+        // project file listing them (paths relative to it)
+        if (isProjectFile)
+        {
+            std::ostringstream output;
+            output << "{\n" << indent(1u) << "nrc: [\n";
+            for (auto const& file : iFiles)
+            {
+                std::error_code ec;
+                auto relative = std::filesystem::relative(file.path, projectFileName.parent_path(), ec);
+                output << indent(2u) << quoted((ec || relative.empty() ? file.path : relative).generic_string()) << "\n";
+            }
+            output << indent(1u) << "]\n" << "}\n";
+            write(projectFileName, output.str());
+        }
         iPath = aPath;
-        iName = std::filesystem::path{ aPath.to_std_string() }.stem().string();
+        iName = projectFileName.stem().string();
         set_clean();
     }
 

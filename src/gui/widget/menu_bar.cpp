@@ -214,9 +214,10 @@ namespace neogfx
             if (layout().is_widget_at(aItemIndex))
             {
                 i_widget& w = layout().get_widget_at(aItemIndex);
-                w.parent().remove(w);
+                w.parent().remove(w); // (also removes it from its parent's layout, i.e. this layout)
             }
-            layout().remove_at(aItemIndex);
+            else
+                layout().remove_at(aItemIndex);
         });
         iSink += ItemSelected([this](i_menu_item& aMenuItem)
         {
