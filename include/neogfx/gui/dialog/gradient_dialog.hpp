@@ -21,12 +21,17 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <string>
+#include <vector>
+#include <optional>
+
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/gui/widget/gradient_widget.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
 #include <neogfx/gui/widget/slider.hpp>
+#include <neogfx/gui/widget/drop_list.hpp>
 
 namespace neogfx
 {
@@ -34,6 +39,16 @@ namespace neogfx
     {
         meta_object(dialog)
         class preview_box;
+        class swatch_box;
+    public:
+        struct swatch
+        {
+            std::string name;
+            std::vector<neogfx::gradient> gradients;
+            bool predefined = false;
+            std::string path; ///< *.gsw file (user swatches only)
+        };
+        static constexpr std::size_t MaxSwatchGradients = 16;
     public:
         gradient_dialog(i_widget& aParent, const neogfx::gradient& aCurrentGradient);
         ~gradient_dialog();
@@ -46,6 +61,17 @@ namespace neogfx
     private:
         void init();
         void update_widgets();
+        static std::string swatch_folder();
+        static bool load_swatch(std::string const& aPath, swatch& aSwatch);
+        static bool save_swatch(swatch const& aSwatch);
+        void init_swatches();
+        std::size_t add_swatch(swatch&& aSwatch);
+        void update_swatch_selector();
+        void update_swatch_buttons();
+        void set_current_swatch(std::size_t aSwatch);
+        bool current_swatch_editable() const;
+        neogfx::gradient const* swatch_gradient(std::size_t aSlot) const;
+        void set_current_swatch_gradient(std::optional<std::size_t> const& aSlot);
     private:
         vertical_layout iLayout;
         horizontal_layout iLayout2;
@@ -111,9 +137,22 @@ namespace neogfx
         vertical_spacer iSpacer3;
         group_box iPreviewGroupBox;
         std::shared_ptr<i_widget> iPreview;
+        group_box iSwatchGroupBox;
+        horizontal_layout iSwatchToolbar;
+        drop_list iSwatchSelector;
+        push_button iNewSwatch;
+        push_button iImportSwatch;
+        push_button iDeleteSwatch;
+        grid_layout iSwatchGrid;
+        horizontal_layout iSwatchEditLayout;
+        push_button iAddToSwatch;
+        push_button iRemoveFromSwatch;
         vertical_spacer iSpacer4;
         bool iUpdatingWidgets;
         bool iIgnoreHueSliderChange;
         std::vector<std::pair<std::size_t, double>> iHueSelection;
+        std::vector<swatch> iSwatches;
+        std::size_t iCurrentSwatch = 0;
+        std::optional<std::size_t> iCurrentSwatchGradient;
     };
 }

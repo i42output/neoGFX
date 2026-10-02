@@ -19,7 +19,12 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <neogfx/gui/dialog/gradient_dialog.hpp>
 #include <neolib/core/string_utils.hpp>
@@ -27,6 +32,7 @@
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/app/file_dialog.hpp>
+#include <neogfx/app/i_app.hpp>
 
 namespace neogfx
 {
@@ -114,6 +120,158 @@ namespace neogfx
                     ++i;
             }
             return gradient{ aGradient, colorStops, alphaStops };
+        }
+
+        struct gradient_definition
+        {
+            std::vector<std::pair<scalar, std::uint32_t>> colorStops;
+            std::vector<std::pair<scalar, std::uint32_t>> alphaStops;
+        };
+
+        struct gradient_swatch
+        {
+            std::string name;
+            std::vector<gradient_definition> gradients;
+        };
+
+        constexpr std::uint32_t kSwatchRows = 2u;
+        constexpr std::uint32_t kSwatchColumns = 8u;
+
+        color rgb_color(std::uint32_t aRgb)
+        {
+            return color{ static_cast<std::int32_t>((aRgb >> 16) & 0xFF), static_cast<std::int32_t>((aRgb >> 8) & 0xFF), static_cast<std::int32_t>(aRgb & 0xFF) };
+        }
+
+        // swatch gradients are stored (and rendered) diagonally at 45 degrees; only their stops are used when selected
+        gradient to_swatch_gradient(gradient::abstract_color_stop_list const& aColorStops, gradient::abstract_alpha_stop_list const& aAlphaStops)
+        {
+            gradient const result = (aAlphaStops.empty() ?
+                gradient{ aColorStops, gradient_direction::Diagonal } :
+                gradient{ aColorStops, aAlphaStops, gradient_direction::Diagonal });
+            return gradient{ *result.with_orientation(to_rad(45.0)) };
+        }
+
+        gradient to_gradient(gradient_definition const& aDefinition)
+        {
+            gradient::color_stop_list colorStops;
+            for (auto const& stop : aDefinition.colorStops)
+                colorStops.emplace_back(stop.first, rgb_color(stop.second));
+            gradient::alpha_stop_list alphaStops;
+            for (auto const& stop : aDefinition.alphaStops)
+                alphaStops.emplace_back(stop.first, static_cast<color::component>(stop.second));
+            return to_swatch_gradient(colorStops, alphaStops);
+        }
+
+        // evenly spaced color stops
+        gradient_definition even(std::initializer_list<std::uint32_t> aColors)
+        {
+            gradient_definition result;
+            std::size_t index = 0;
+            for (auto const& c : aColors)
+                result.colorStops.emplace_back(aColors.size() > 1 ? index++ / static_cast<scalar>(aColors.size() - 1) : 0.0, c);
+            return result;
+        }
+
+        // shiny metal: light, highlight, (sharp edge) shadow, mid, light
+        gradient_definition metal(std::uint32_t aLight, std::uint32_t aHighlight, std::uint32_t aShadow, std::uint32_t aMid, std::uint32_t aReflection)
+        {
+            return gradient_definition{ { { 0.0, aLight }, { 0.45, aHighlight }, { 0.5, aShadow }, { 0.85, aMid }, { 1.0, aReflection } } };
+        }
+
+        // single color fading to transparent
+        gradient_definition fade(std::uint32_t aColor, std::initializer_list<std::pair<scalar, std::uint32_t>> aAlphaStops)
+        {
+            return gradient_definition{ { { 0.0, aColor }, { 1.0, aColor } }, aAlphaStops };
+        }
+
+        std::vector<gradient_swatch> const& gradient_swatches()
+        {
+            static std::vector<gradient_swatch> const sSwatches
+            {
+                { "Shiny Metals", {
+                    metal(0xE6C35C, 0xFFF4C2, 0x9C7A16, 0xD4AF37, 0xF5D77A), // gold
+                    metal(0xD8D8D8, 0xFFFFFF, 0x8C8C8C, 0xBDBDBD, 0xE6E6E6), // silver
+                    metal(0xC0C6CC, 0xFFFFFF, 0x4A5058, 0x9AA3AC, 0xEEF2F5), // chrome
+                    metal(0xE5E4E2, 0xFFFFFF, 0xA0A09C, 0xCFCFCB, 0xF2F2F0), // platinum
+                    metal(0xE8B4A0, 0xFFE3D8, 0x9E6A5A, 0xD49A86, 0xF2C8B8), // rose gold
+                    metal(0xC9A94B, 0xF7E59A, 0x7D6420, 0xB5913A, 0xE0C66A), // brass
+                    metal(0xC08A4A, 0xF2C78D, 0x6B4421, 0xA8723A, 0xD9A066), // bronze
+                    metal(0xD27D46, 0xFFC09A, 0x7A3B1A, 0xB8693A, 0xE8996A), // copper
+                    metal(0xA9A9A3, 0xE6E6E0, 0x5F605C, 0x8E8F8A, 0xC3C4BE), // titanium
+                    metal(0x6E7F99, 0xC9D6EA, 0x2E3A4D, 0x55657E, 0x93A4BF), // blued steel
+                    metal(0x5A6068, 0xA7AFB8, 0x22262B, 0x474D55, 0x7A828C), // gunmetal
+                    metal(0x3A3D42, 0x9A9FA6, 0x0E0F11, 0x2A2C30, 0x5E6268)  // black chrome
+                } },
+                { "Sky", {
+                    even({ 0x2C3E7A, 0x8E6FB5, 0xF2A97F, 0xFFD9A8 }), // dawn
+                    even({ 0x6FA8DC, 0xA9D0F5, 0xE3F1FF }), // morning
+                    even({ 0x1E6FD9, 0x5AA9F0, 0xBFE3FF }), // midday
+                    even({ 0x3B7DD8, 0x8DB8E8, 0xF3E2B8 }), // afternoon
+                    even({ 0x2B1A4A, 0x8A2E5C, 0xE8553A, 0xFFB547 }), // sunset
+                    even({ 0x1B1F3B, 0x53366B, 0xC06C84, 0xF8B195 }), // dusk
+                    even({ 0x0B1026, 0x2B2F77, 0x6E5BA8 }), // twilight
+                    even({ 0x02030A, 0x0B1A3A, 0x1E2F5C }), // night
+                    even({ 0x8A939C, 0xB9C0C7, 0xDDE1E5 }), // overcast
+                    even({ 0x1F262E, 0x3D4752, 0x6B7782 })  // storm
+                } },
+                { "Nature", {
+                    even({ 0x0B3D1F, 0x1E6B34, 0x4C9A4A }), // forest
+                    even({ 0x7CC242, 0x4E9A2A, 0x2E6B1A }), // grass
+                    even({ 0x4A5D23, 0x6B7F3A, 0x9AAE5A }), // moss
+                    even({ 0x7FDBFF, 0x00A6D6, 0x0077BE, 0x004A80 }), // ocean
+                    even({ 0x0A4D68, 0x05294A, 0x020B1C }), // deep sea
+                    even({ 0x9BE8D8, 0x3CC8C8, 0x1B8FA6 }), // lagoon
+                    even({ 0xFF7F50, 0xFF6F61, 0xE2525C }), // coral
+                    even({ 0xF5E1B0, 0xE0C080, 0xC19A5B }), // sand
+                    even({ 0xEDC9AF, 0xD2996B, 0xA0522D }), // desert
+                    even({ 0x8B5A2B, 0x5C3A1E, 0x3B2414 }), // earth
+                    even({ 0xFFE08A, 0xE8862A, 0xB23A1E, 0x6B1E12 }), // autumn
+                    even({ 0xFFF5C0, 0xFFB000, 0xFF4500, 0x8B0000, 0x2B0000 }), // lava
+                    even({ 0xFFFFFF, 0xDDF3FF, 0xA9DCF5, 0x6FB7DE }), // ice
+                    even({ 0xFFFFFF, 0xEEF4F8, 0xD7E3EC })  // snow
+                } },
+                { "Spectrum", {
+                    even({ 0xFF0000, 0xFF7F00, 0xFFFF00, 0x00FF00, 0x0000FF, 0x4B0082, 0x8B00FF }), // rainbow
+                    even({ 0xFF0000, 0xFFFF00, 0x00FF00, 0x00FFFF, 0x0000FF, 0xFF00FF, 0xFF0000 }), // hue wheel
+                    even({ 0xFFB3BA, 0xFFDFBA, 0xFFFFBA, 0xBAFFC9, 0xBAE1FF, 0xD7BAFF }), // pastel
+                    even({ 0xFF00FF, 0x00FFFF, 0x39FF14, 0xFFFF00 }), // neon
+                    even({ 0xFFFF00, 0xFF8000, 0xFF0000 }), // warm
+                    even({ 0x00FF80, 0x00FFFF, 0x0080FF, 0x0000FF }), // cool
+                    even({ 0xFF0080, 0xFF8C00, 0x40E0D0 }), // tropical
+                    even({ 0x8E2DE2, 0x4A00E0, 0x00C9FF })  // ultraviolet
+                } },
+                { "Scientific", {
+                    even({ 0x440154, 0x3B528B, 0x21908C, 0x5DC963, 0xFDE725 }), // viridis
+                    even({ 0x000004, 0x3B0F70, 0x8C2981, 0xDE4968, 0xFE9F6D, 0xFCFDBF }), // magma
+                    even({ 0x000004, 0x420A68, 0x932667, 0xDD513A, 0xFCA50A, 0xFCFFA4 }), // inferno
+                    even({ 0x0D0887, 0x6A00A8, 0xB12A90, 0xE16462, 0xFCA636, 0xF0F921 }), // plasma
+                    even({ 0x00204D, 0x414D6B, 0x7C7B78, 0xBCAF6F, 0xFFEA46 }), // cividis
+                    even({ 0x30123B, 0x4662D7, 0x36AAF9, 0x1AE4B6, 0x72FE5E, 0xC8EF34, 0xFABA39, 0xF66B19, 0xCA2A04, 0x7A0403 }), // turbo
+                    even({ 0x00008F, 0x0000FF, 0x00FFFF, 0xFFFF00, 0xFF0000, 0x800000 }), // jet
+                    even({ 0x000000, 0xFF0000, 0xFFFF00, 0xFFFFFF }), // heat
+                    even({ 0x3B4CC0, 0xDDDDDD, 0xB40426 }), // cool-warm (diverging)
+                    even({ 0x000000, 0xFFFFFF })  // greyscale
+                } },
+                { "Monochrome & Fades", {
+                    even({ 0xFFFFFF, 0x000000 }), // white to black
+                    even({ 0x000000, 0xFFFFFF }), // black to white
+                    even({ 0x4A4A4A, 0x2B2B2B, 0x141414 }), // charcoal
+                    even({ 0xF5F5F5, 0xD9D9D9, 0xB0B0B0 }), // fog
+                    fade(0x000000, { { 0.0, 0xFF }, { 1.0, 0x00 } }), // black fade
+                    fade(0xFFFFFF, { { 0.0, 0xFF }, { 1.0, 0x00 } }), // white fade
+                    fade(0x000000, { { 0.0, 0x00 }, { 0.5, 0xFF }, { 1.0, 0x00 } }), // black band
+                    fade(0xFFFFFF, { { 0.0, 0x00 }, { 0.5, 0xFF }, { 1.0, 0x00 } }), // white band
+                    fade(0x000000, { { 0.0, 0x00 }, { 1.0, 0xC0 } }), // shadow (bottom)
+                    fade(0xFFFFFF, { { 0.0, 0xC0 }, { 0.5, 0x00 }, { 1.0, 0x00 } })  // gloss (top)
+                } }
+            };
+            return sSwatches;
+        }
+
+        std::string& previous_gradient_swatch()
+        {
+            static std::string sPreviousSwatch;
+            return sPreviousSwatch;
         }
     }
 
@@ -205,6 +363,58 @@ namespace neogfx
         bool iTracking;
     };
 
+    class gradient_dialog::swatch_box : public framed_widget<>
+    {
+        typedef framed_widget<> base_type;
+    public:
+        swatch_box(gradient_dialog& aOwner, std::size_t aSlot) :
+            base_type{ frame_style::SolidFrame }, iOwner{ aOwner }, iSlot{ aSlot }
+        {
+            set_padding(neogfx::padding{});
+            set_fixed_size(size{ 48.0_dip, 32.0_dip });
+        }
+    public:
+        void paint_non_client(i_graphics_context& aGc) const override
+        {
+            if (iOwner.swatch_gradient(iSlot) != nullptr)
+                base_type::paint_non_client(aGc); // no frame for unused slots
+        }
+        void paint(i_graphics_context& aGc) const override
+        {
+            auto const swatchGradient = iOwner.swatch_gradient(iSlot);
+            if (swatchGradient == nullptr)
+                return;
+            base_type::paint(aGc);
+            auto const cr = client_rect(false);
+            draw_alpha_background(aGc, cr, 4.0_dip);
+            aGc.fill_rect(cr, *swatchGradient);
+            if (iOwner.current_swatch_editable() && iOwner.iCurrentSwatchGradient == iSlot)
+            {
+                auto const radius = cr.height() * 0.25;
+                aGc.fill_circle(cr.center(), radius, color::White);
+                aGc.fill_circle(cr.center(), radius - 1.0_dip, color::Black);
+            }
+        }
+        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override
+        {
+            base_type::mouse_button_clicked(aButton, aPosition, aKeyModifier);
+            auto const swatchGradient = iOwner.swatch_gradient(iSlot);
+            if (swatchGradient == nullptr)
+                return;
+            if (aButton == mouse_button::Left)
+            {
+                // take the swatch's color and alpha stops, keep the current gradient's other settings
+                iOwner.set_gradient(neogfx::gradient{ iOwner.gradient(), swatchGradient->color_stops(), swatchGradient->alpha_stops() });
+                iOwner.set_current_swatch_gradient(iSlot);
+            }
+            else if (aButton == mouse_button::Right)
+                iOwner.set_current_swatch_gradient(iSlot);
+        }
+    private:
+        gradient_dialog& iOwner;
+        std::size_t iSlot;
+    };
+
     gradient_dialog::gradient_dialog(i_widget& aParent, const neogfx::gradient& aCurrentGradient) :
         dialog(aParent, "Select Gradient"_t, window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close),
         iLayout{ client_layout() }, iLayout2{ iLayout }, iLayout3{ iLayout2 }, iLayout4{ iLayout2 },
@@ -268,6 +478,16 @@ namespace neogfx
         iSpacer3{ iLayout3 },
         iPreviewGroupBox{ iLayout4, "Preview"_t },
         iPreview{ new preview_box{*this} },
+        iSwatchGroupBox{ iLayout4, "Swatches"_t },
+        iSwatchToolbar{ iSwatchGroupBox.item_layout() },
+        iSwatchSelector{ iSwatchToolbar },
+        iNewSwatch{ iSwatchToolbar, "New..."_t },
+        iImportSwatch{ iSwatchToolbar, "Import..."_t },
+        iDeleteSwatch{ iSwatchToolbar, "Delete"_t },
+        iSwatchGrid{ iSwatchGroupBox.item_layout() },
+        iSwatchEditLayout{ iSwatchGroupBox.item_layout() },
+        iAddToSwatch{ iSwatchEditLayout, "Add to Swatch"_t },
+        iRemoveFromSwatch{ iSwatchEditLayout, "Remove from Swatch"_t },
         iSpacer4{ iLayout4 },
         iUpdatingWidgets{ false },
         iIgnoreHueSliderChange{ false }
@@ -590,6 +810,100 @@ namespace neogfx
         iPreview->set_padding(neogfx::padding{});
         iPreview->set_fixed_size(size{ std::ceil(256.0_dip * 16.0 / 9.0), 256.0_dip });
 
+        iSwatchGrid.set_dimensions(kSwatchRows, kSwatchColumns);
+        for (std::size_t swatchSlot = 0; swatchSlot < kSwatchRows * kSwatchColumns; ++swatchSlot)
+            iSwatchGrid.add(make_ref<swatch_box>(*this, swatchSlot));
+        init_swatches();
+        iSwatchSelector.SelectionChanged([this](const optional_item_model_index& aIndex)
+        {
+            if (aIndex != std::nullopt && aIndex->row() < iSwatches.size())
+                set_current_swatch(aIndex->row());
+        });
+        iNewSwatch.clicked([this]()
+        {
+            auto const newPath = save_file_dialog(*this, file_dialog_spec{ "New Gradient Swatch", swatch_folder() + "/New Swatch.gsw", { "*.gsw" }, "Gradient Swatch Files" });
+            if (newPath == std::nullopt)
+                return;
+            std::filesystem::path path{ *newPath };
+            if (path.extension() != ".gsw")
+                path += ".gsw";
+            swatch newSwatch{ path.stem().string(), {}, false, path.string() };
+            if (!save_swatch(newSwatch))
+            {
+                message_box::error(*this, "New Gradient Swatch", "Failed to save swatch");
+                return;
+            }
+            add_swatch(std::move(newSwatch));
+        });
+        iImportSwatch.clicked([this]()
+        {
+            auto const imports = open_file_dialog(*this, file_dialog_spec{ "Import Gradient Swatches", swatch_folder() + "/", { "*.gsw" }, "Gradient Swatch Files" }, true);
+            if (imports == std::nullopt)
+                return;
+            bool failed = false;
+            for (auto const& path : *imports)
+            {
+                swatch importedSwatch;
+                if (load_swatch(path, importedSwatch))
+                    add_swatch(std::move(importedSwatch));
+                else
+                    failed = true;
+            }
+            if (failed)
+                message_box::error(*this, "Import Gradient Swatches", "Failed to import swatch(es)");
+        });
+        iDeleteSwatch.clicked([this]()
+        {
+            if (!current_swatch_editable())
+                return;
+            auto const& existing = iSwatches[iCurrentSwatch];
+            if (message_box::question(*this, "Delete Gradient Swatch", string{ "Delete swatch '" + existing.name + "'?" }) != standard_button::Yes)
+                return;
+            std::error_code ec;
+            std::filesystem::remove(std::filesystem::path{ existing.path }, ec);
+            iSwatches.erase(std::next(iSwatches.begin(), iCurrentSwatch));
+            if (iCurrentSwatch > 0)
+                --iCurrentSwatch;
+            iCurrentSwatchGradient = std::nullopt;
+            previous_gradient_swatch() = iSwatches[iCurrentSwatch].name;
+            update_swatch_selector();
+            update_swatch_buttons();
+            update();
+        });
+        iAddToSwatch.clicked([this]()
+        {
+            if (!current_swatch_editable())
+                return;
+            auto& existing = iSwatches[iCurrentSwatch];
+            if (existing.gradients.size() >= MaxSwatchGradients)
+                return;
+            existing.gradients.push_back(to_swatch_gradient(gradient().color_stops(), gradient().alpha_stops()));
+            iCurrentSwatchGradient = existing.gradients.size() - 1;
+            if (!save_swatch(existing))
+                message_box::error(*this, "Add to Swatch", "Failed to save swatch");
+            update_swatch_selector();
+            update_swatch_buttons();
+            update();
+        });
+        iRemoveFromSwatch.clicked([this]()
+        {
+            if (!current_swatch_editable() || iCurrentSwatchGradient == std::nullopt)
+                return;
+            auto& existing = iSwatches[iCurrentSwatch];
+            if (*iCurrentSwatchGradient >= existing.gradients.size())
+                return;
+            existing.gradients.erase(std::next(existing.gradients.begin(), *iCurrentSwatchGradient));
+            if (existing.gradients.empty())
+                iCurrentSwatchGradient = std::nullopt;
+            else if (*iCurrentSwatchGradient >= existing.gradients.size())
+                iCurrentSwatchGradient = existing.gradients.size() - 1;
+            if (!save_swatch(existing))
+                message_box::error(*this, "Remove from Swatch", "Failed to save swatch");
+            update_swatch_selector();
+            update_swatch_buttons();
+            update();
+        });
+
         button_box().add_button(standard_button::Ok);
         button_box().add_button(standard_button::Cancel);
         
@@ -598,6 +912,214 @@ namespace neogfx
         update_layout();
         center_on_parent();
         set_ready_to_render(true);
+    }
+
+    std::string gradient_dialog::swatch_folder()
+    {
+        return service<i_app>().info().settings_folder().to_std_string();
+    }
+
+    // *.gsw format: one gradient per line: "pos:#RRGGBB ..." optionally followed by " | pos:alpha ..."
+    bool gradient_dialog::load_swatch(std::string const& aPath, swatch& aSwatch)
+    {
+        std::ifstream input{ std::filesystem::path{ aPath } };
+        if (!input)
+            return false;
+        aSwatch = swatch{ std::filesystem::path{ aPath }.stem().string(), {}, false, aPath };
+        std::string line;
+        while (std::getline(input, line))
+        {
+            boost::algorithm::trim(line);
+            if (line.empty() || line[0] == ';')
+                continue;
+            if (line.rfind("name=", 0) == 0)
+            {
+                auto name = line.substr(5);
+                boost::algorithm::trim(name);
+                if (!name.empty())
+                    aSwatch.name = name;
+                continue;
+            }
+            if (aSwatch.gradients.size() >= MaxSwatchGradients)
+                break;
+            neogfx::gradient::color_stop_list colorStops;
+            neogfx::gradient::alpha_stop_list alphaStops;
+            try
+            {
+                std::istringstream tokens{ line };
+                std::string token;
+                bool alpha = false;
+                while (tokens >> token)
+                {
+                    if (token == "|")
+                    {
+                        alpha = true;
+                        continue;
+                    }
+                    auto const separator = token.find(':');
+                    if (separator == std::string::npos)
+                        continue;
+                    auto const pos = std::clamp(std::stod(token.substr(0, separator)), 0.0, 1.0);
+                    auto const value = token.substr(separator + 1);
+                    if (!alpha)
+                        colorStops.emplace_back(pos, color{ value });
+                    else
+                        alphaStops.emplace_back(pos, static_cast<color::component>(std::clamp(std::stoi(value), 0, 0xFF)));
+                }
+            }
+            catch (...)
+            {
+                continue; // skip unrecognized entry
+            }
+            if (colorStops.empty())
+                continue;
+            if (colorStops.size() == 1)
+                colorStops.emplace_back(1.0, colorStops[0].second());
+            aSwatch.gradients.push_back(to_swatch_gradient(colorStops, alphaStops));
+        }
+        return true;
+    }
+
+    bool gradient_dialog::save_swatch(swatch const& aSwatch)
+    {
+        if (aSwatch.predefined || aSwatch.path.empty())
+            return false;
+        std::ofstream output{ std::filesystem::path{ aSwatch.path }, std::ios::trunc };
+        if (!output)
+            return false;
+        output << "; neoGFX gradient swatch" << std::endl;
+        output << "name=" << aSwatch.name << std::endl;
+        for (auto const& swatchGradient : aSwatch.gradients)
+        {
+            bool first = true;
+            for (auto const& stop : swatchGradient.color_stops())
+            {
+                output << (first ? "" : " ") << stop.first() << ":" << color{ stop.second() }.with_alpha(static_cast<color::component>(0xFF)).to_hex_string();
+                first = false;
+            }
+            if (!swatchGradient.alpha_stops().empty())
+            {
+                output << " |";
+                for (auto const& stop : swatchGradient.alpha_stops())
+                    output << " " << stop.first() << ":" << static_cast<std::uint32_t>(stop.second());
+            }
+            output << std::endl;
+        }
+        return static_cast<bool>(output);
+    }
+
+    void gradient_dialog::init_swatches()
+    {
+        iSwatches.clear();
+        for (auto const& definition : gradient_swatches())
+        {
+            swatch predefinedSwatch{ definition.name, {}, true };
+            for (auto const& gradientDefinition : definition.gradients)
+                predefinedSwatch.gradients.push_back(to_gradient(gradientDefinition));
+            iSwatches.push_back(std::move(predefinedSwatch));
+        }
+        std::vector<swatch> userSwatches;
+        try
+        {
+            std::filesystem::path const folder{ swatch_folder() };
+            if (std::filesystem::is_directory(folder))
+                for (auto const& file : std::filesystem::directory_iterator{ folder })
+                    if (file.is_regular_file() && file.path().extension() == ".gsw")
+                    {
+                        swatch userSwatch;
+                        if (load_swatch(file.path().string(), userSwatch))
+                            userSwatches.push_back(std::move(userSwatch));
+                    }
+        }
+        catch (...)
+        {
+            // swatch library unavailable; predefined swatches only
+        }
+        std::sort(userSwatches.begin(), userSwatches.end(), [](swatch const& lhs, swatch const& rhs) { return lhs.name < rhs.name; });
+        for (auto& userSwatch : userSwatches)
+            iSwatches.push_back(std::move(userSwatch));
+        iCurrentSwatch = 0;
+        for (std::size_t swatchIndex = 0; swatchIndex < iSwatches.size(); ++swatchIndex)
+            if (iSwatches[swatchIndex].name == previous_gradient_swatch())
+            {
+                iCurrentSwatch = swatchIndex;
+                break;
+            }
+        iCurrentSwatchGradient = std::nullopt;
+        update_swatch_selector();
+        update_swatch_buttons();
+    }
+
+    std::size_t gradient_dialog::add_swatch(swatch&& aSwatch)
+    {
+        auto existing = std::find_if(iSwatches.begin(), iSwatches.end(), [&](swatch const& s)
+        {
+            return !s.predefined && std::filesystem::path{ s.path }.lexically_normal() == std::filesystem::path{ aSwatch.path }.lexically_normal();
+        });
+        if (existing != iSwatches.end())
+            *existing = std::move(aSwatch);
+        else
+            existing = iSwatches.insert(iSwatches.end(), std::move(aSwatch));
+        iCurrentSwatch = static_cast<std::size_t>(std::distance(iSwatches.begin(), existing));
+        iCurrentSwatchGradient = std::nullopt;
+        previous_gradient_swatch() = iSwatches[iCurrentSwatch].name;
+        update_swatch_selector();
+        update_swatch_buttons();
+        update();
+        return iCurrentSwatch;
+    }
+
+    void gradient_dialog::update_swatch_selector()
+    {
+        iSwatchSelector.selection_model().clear_current_index();
+        iSwatchSelector.model().clear();
+        for (std::uint32_t swatchIndex = 0; swatchIndex < iSwatches.size(); ++swatchIndex)
+            iSwatchSelector.model().insert_item(item_model_index{ swatchIndex }, string{ iSwatches[swatchIndex].name });
+        if (iCurrentSwatch < iSwatches.size())
+        {
+            iSwatchSelector.selection_model().set_current_index(iSwatchSelector.presentation_model().from_item_model_index(item_model_index{ static_cast<std::uint32_t>(iCurrentSwatch) }));
+            iSwatchSelector.accept_selection();
+        }
+    }
+
+    void gradient_dialog::update_swatch_buttons()
+    {
+        bool const editable = current_swatch_editable();
+        iDeleteSwatch.enable(editable);
+        iAddToSwatch.enable(editable && iSwatches[iCurrentSwatch].gradients.size() < MaxSwatchGradients);
+        iRemoveFromSwatch.enable(editable && iCurrentSwatchGradient != std::nullopt && *iCurrentSwatchGradient < iSwatches[iCurrentSwatch].gradients.size());
+    }
+
+    void gradient_dialog::set_current_swatch(std::size_t aSwatch)
+    {
+        if (iCurrentSwatch == aSwatch || aSwatch >= iSwatches.size())
+            return;
+        iCurrentSwatch = aSwatch;
+        iCurrentSwatchGradient = std::nullopt;
+        previous_gradient_swatch() = iSwatches[iCurrentSwatch].name;
+        update_swatch_buttons();
+        update();
+    }
+
+    bool gradient_dialog::current_swatch_editable() const
+    {
+        return iCurrentSwatch < iSwatches.size() && !iSwatches[iCurrentSwatch].predefined;
+    }
+
+    neogfx::gradient const* gradient_dialog::swatch_gradient(std::size_t aSlot) const
+    {
+        if (iCurrentSwatch < iSwatches.size() && aSlot < iSwatches[iCurrentSwatch].gradients.size())
+            return &iSwatches[iCurrentSwatch].gradients[aSlot];
+        return nullptr;
+    }
+
+    void gradient_dialog::set_current_swatch_gradient(std::optional<std::size_t> const& aSlot)
+    {
+        if (iCurrentSwatchGradient == aSlot)
+            return;
+        iCurrentSwatchGradient = aSlot;
+        update_swatch_buttons();
+        update();
     }
 
     void gradient_dialog::update_widgets()
