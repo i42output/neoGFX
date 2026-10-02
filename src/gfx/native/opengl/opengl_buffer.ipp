@@ -24,24 +24,25 @@
 namespace neogfx
 {
     template <typename T>
-    inline opengl_buffer<T>::opengl_buffer(bool aCacheable, size_type aCapacity)
-        : iCacheable{ aCacheable }
+    inline opengl_buffer<T>::opengl_buffer(bool aCacheable, size_type aCapacity, bool aDeviceLocal)
+        : iCacheable{ aCacheable }, iDeviceLocal{ aDeviceLocal }
     {
         if (aCapacity != 0)
         {
             glCheck(glCreateBuffers(1, &iBufferName));
             glCheck(glNamedBufferStorage(iBufferName, aCapacity * sizeof(value_type), nullptr, 
-                GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT));
+                !iDeviceLocal ? GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT : GL_DYNAMIC_STORAGE_BIT));
 
             iCapacity = aCapacity;
 
-            map();
+            if (!iDeviceLocal)
+                map();
         }
     }
 
     template <typename T>
-    inline opengl_buffer<T>::opengl_buffer(opengl_buffer_owner& aOwner, bool aCacheable, size_type aCapacity) :
-        opengl_buffer{ aCacheable, aCapacity }
+    inline opengl_buffer<T>::opengl_buffer(opengl_buffer_owner& aOwner, bool aCacheable, size_type aCapacity, bool aDeviceLocal) :
+        opengl_buffer{ aCacheable, aCapacity, aDeviceLocal }
     {
         iOwner = &aOwner;
     }
@@ -203,6 +204,8 @@ namespace neogfx
     template <typename T>
     inline typename opengl_buffer<T>::const_pointer opengl_buffer<T>::map() const
     {
+        if (iDeviceLocal)
+            throw std::logic_error("neogfx::opengl_buffer<T>::map: device local buffer cannot be mapped");
         if (iMemory == nullptr)
             glCheck(iMemory = static_cast<value_type*>(glMapNamedBufferRange(handle(), 0, capacity() * sizeof(value_type), 
                 GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_FLUSH_EXPLICIT_BIT)));
@@ -218,12 +221,30 @@ namespace neogfx
     template <typename T>
     inline void opengl_buffer<T>::flush(size_type aOffset, size_type aElements)
     {
+        if (iDeviceLocal || aElements == 0)
+            return; // n.b. a device local buffer is written directly (see write()) and a buffer never written may not be mapped
         if (mapped())
         {
             glCheck(glFlushMappedNamedBufferRange(handle(), aOffset * sizeof(value_type), aElements * sizeof(value_type)));
         }
         else
             throw std::logic_error("neogfx::opengl_buffer<T>::flush: buffer not mapped!");
+    }
+
+    template <typename T>
+    inline void opengl_buffer<T>::write(size_type aOffset, const_pointer aData, size_type aElements)
+    {
+        if (aElements == 0)
+            return;
+        if (aOffset + aElements > size())
+            throw std::logic_error("neogfx::opengl_buffer<T>::write: out of range");
+        if (iDeviceLocal)
+            glCheck(glNamedBufferSubData(handle(), aOffset * sizeof(value_type), aElements * sizeof(value_type), aData))
+        else
+        {
+            std::copy(aData, aData + aElements, map() + aOffset);
+            flush(aOffset, aElements);
+        }
     }
 
     template <typename T>
@@ -257,7 +278,13 @@ namespace neogfx
     inline void opengl_buffer<T>::need(size_type aExtra)
     {
         if (aExtra > room())
-            grow(std::max<size_type>(static_cast<size_type>((capacity() + aExtra) * 1.5), 16384u));
+        {
+            if (!iDeviceLocal)
+                grow(std::max<size_type>(static_cast<size_type>((capacity() + aExtra) * 1.5), 16384u));
+            else
+                // no slack the first time (use reserve() to size a device local buffer up front)
+                grow(std::max<size_type>(size() + aExtra, capacity() + capacity() / 2u));
+        }
     }
 
     template <typename T>
@@ -339,7 +366,7 @@ namespace neogfx
         unmap();
 
         {
-            opengl_buffer<T> temp{ iCacheable, aCapacity };
+            opengl_buffer<T> temp{ iCacheable, aCapacity, iDeviceLocal };
             if (!empty())
                 glCheck(glCopyNamedBufferSubData(iBufferName, temp.iBufferName,
                     0, 0, size() * sizeof(value_type)));

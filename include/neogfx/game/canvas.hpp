@@ -58,6 +58,9 @@ namespace neogfx::game
         void hide_layer(scene_layer aLayer);
     public:
         void cull_faces(face_culling aCulling);
+        // a transformation applied on the GPU to entity vertices (relative to the canvas origin) when drawn; may be projective
+        optional_mat44 const& entity_transformation() const;
+        void set_entity_transformation(optional_mat44 const& aTransformation);
     public:
         neogfx::logical_coordinate_system logical_coordinate_system() const override;
     public:
@@ -69,6 +72,7 @@ namespace neogfx::game
         std::shared_ptr<game::i_ecs> iEcs;
         std::vector<bool> iLayers;
         std::optional<face_culling> iFaceCulling;
+        optional_mat44 iEntityTransformation;
         sink iSink;
         std::optional<widget_timer> iUpdater;
         bool iEcsPaused;

@@ -187,6 +187,7 @@ namespace neogfx
         void draw_path(ssbo_range const& aPathVertices, path_shape aPathShape, rect const& aBoundingRect, pen const& aPen, brush const& aFill = brush{}) final;
         void draw_shape(game::mesh const& aShape, vec3 const& aPosition, pen const& aPen, brush const& aFill = brush{}) final;
         void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer = 0) final;
+        void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer, mat44 const& aTransformation) final;
         void draw_focus_rect(rect const& aRect) final;
         // text
     public:

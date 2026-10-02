@@ -275,6 +275,8 @@ namespace neogfx
         virtual void draw_path(ssbo_range const& aPathVertices, path_shape aPathShape, rect const& aBoundingRect, pen const& aPen, brush const& aFill = brush{}) = 0;
         virtual void draw_shape(game::mesh const& aShape, vec3 const& aPosition, pen const& aPen, brush const& aFill = brush{}) = 0;
         virtual void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer = 0) = 0;
+        // aTransformation is applied on the GPU to entity vertices relative to the origin; it may be projective
+        virtual void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer, mat44 const& aTransformation) = 0;
         virtual void draw_focus_rect(rect const& aRect) = 0;
         // text
     public:

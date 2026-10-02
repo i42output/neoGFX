@@ -6,6 +6,10 @@
 #include <neogfx/gui/widget/group_box.hpp>
 #include <neogfx/gui/widget/splitter.hpp>
 #include <neogfx/gui/widget/text_widget.hpp>
+#include <neogfx/gfx/scene_graph.hpp>
+#include <neogfx/game/scene_graph_canvas.hpp>
+#include <neogfx/support/file/gfx/gltf.hpp>
+#include <neogfx/app/i_resource_manager.hpp>
 
 void signal_handler(int signal)
 {
@@ -1457,6 +1461,176 @@ int main(int argc, char* argv[])
                         ecs.system<ng::game::collision_detector_2d>().pause();
                 });
                 gameCreated = true;
+            }
+        });
+
+        // Scene Graph: an orrery as a 2D and as a 3D glTF compatible scene graph
+        struct orrery
+        {
+            ng::scene_graph::index sun = ng::scene_graph::invalid_index;
+            ng::scene_graph::index planetOrbit = ng::scene_graph::invalid_index;
+            ng::scene_graph::index planet = ng::scene_graph::invalid_index;
+            ng::scene_graph::index moonOrbit = ng::scene_graph::invalid_index;
+            ng::scene_graph::index moon = ng::scene_graph::invalid_index;
+        };
+        auto const logoImage = ng::service<ng::i_resource_manager>().load_resource(std::string{ ":/test/resources/neoGFX.png" });
+        auto sceneGraph2D = std::make_shared<ng::scene_graph_2d>();
+        orrery orrery2D;
+        {
+            auto& g = *sceneGraph2D;
+            auto const backgroundMesh = g.add_rectangle(ng::size{ 18.0, 18.0 }, ng::color::DarkSlateGray, "background");
+            auto const sunMesh = g.add_regular_polygon(1.5, 12u, ng::color::Gold, "sun");
+            auto const planetMesh = g.add_rectangle(ng::size{ 1.6, 1.6 }, ng::color::White, "planet");
+            g.set_base_color_texture(planetMesh, g.add_texture(g.add_image(logoImage->cdata(), logoImage->size(), "image/png", "neoGFX logo")));
+            auto const moonMesh = g.add_regular_polygon(0.4, 3u, ng::color::LightGray, "moon");
+            auto const root = g.add_node("root", ng::vec2{});
+            g.add_node("background", ng::vec2{}, 0.0, ng::vec2{ 1.0, 1.0 }, root, backgroundMesh, -1.0);
+            orrery2D.sun = g.add_node("sun", ng::vec2{}, 0.0, ng::vec2{ 1.0, 1.0 }, root, sunMesh, 0.0);
+            orrery2D.planetOrbit = g.add_node("planet orbit", ng::vec2{}, 0.0, ng::vec2{ 1.0, 1.0 }, root);
+            orrery2D.planet = g.add_node("planet", ng::vec2{ 5.0, 0.0 }, 0.0, ng::vec2{ 1.0, 1.0 }, orrery2D.planetOrbit, planetMesh, 0.1);
+            orrery2D.moonOrbit = g.add_node("moon orbit", ng::vec2{}, 0.0, ng::vec2{ 1.0, 1.0 }, orrery2D.planet);
+            orrery2D.moon = g.add_node("moon", ng::vec2{ 1.5, 0.0 }, 0.0, ng::vec2{ 1.0, 1.0 }, orrery2D.moonOrbit, moonMesh, 0.1);
+            auto const camera = g.add_node("camera", ng::vec2{});
+            ng::scene_graph::camera orthographicCamera{ ng::scene_graph::orthographic_camera{ 10.0, 10.0, 100.0, 0.0 } };
+            g.node(camera).set_camera(g.add(orthographicCamera));
+            g.add_scene("orrery", { root, camera });
+        }
+        auto sceneGraph3D = std::make_shared<ng::scene_graph_3d>();
+        orrery orrery3D;
+        {
+            auto& g = *sceneGraph3D;
+            auto const groundMesh = g.add_box(ng::vec3{ 16.0, 0.2, 16.0 }, ng::color::DarkSlateGray, "ground");
+            auto const sunMesh = g.add_box(ng::vec3{ 2.0, 2.0, 2.0 }, ng::color::White, "sun");
+            g.set_base_color_texture(sunMesh, g.add_texture(g.add_image(logoImage->cdata(), logoImage->size(), "image/png", "neoGFX logo")));
+            auto const planetMesh = g.add_box(ng::vec3{ 1.0, 1.0, 1.0 }, 
+                { ng::color::Red, ng::color::Green, ng::color::Blue, ng::color::Yellow, ng::color::Cyan, ng::color::Magenta }, "planet");
+            auto const moonMesh = g.add_box(ng::vec3{ 0.4, 0.4, 0.4 }, ng::color::LightGray, "moon");
+            auto const root = g.add_node("root", ng::vec3{});
+            g.add_node("ground", ng::vec3{ 0.0, -2.0, 0.0 }, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, root, groundMesh);
+            orrery3D.sun = g.add_node("sun", ng::vec3{}, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, root, sunMesh);
+            orrery3D.planetOrbit = g.add_node("planet orbit", ng::vec3{}, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, root);
+            orrery3D.planet = g.add_node("planet", ng::vec3{ 5.0, 0.0, 0.0 }, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, orrery3D.planetOrbit, planetMesh);
+            orrery3D.moonOrbit = g.add_node("moon orbit", ng::vec3{}, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, orrery3D.planet);
+            orrery3D.moon = g.add_node("moon", ng::vec3{ 1.5, 0.0, 0.0 }, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, orrery3D.moonOrbit, moonMesh);
+            ng::vec3 const eye{ 0.0, 7.0, 14.0 };
+            auto const camera = g.add_node("camera", eye, ng::scene_graph_3d::look_at(eye, ng::vec3{}));
+            g.node(camera).set_camera(g.add_perspective_camera(ng::to_rad(45.0), 0.1, 100.0, "camera"));
+            g.add_scene("orrery", { root, camera });
+        }
+
+        ng::scene_graph_canvas* sceneGraphCanvas = nullptr;
+        std::optional<ng::widget_timer> sceneGraphAnimator;
+        auto const sceneGraphStart = std::chrono::steady_clock::now();
+        auto animate_orrery = [&]()
+        {
+            if (!sceneGraphCanvas || !window.checkSceneGraphAnimate.is_checked())
+                return;
+            double const t = std::chrono::duration<double>(std::chrono::steady_clock::now() - sceneGraphStart).count();
+            if (&sceneGraphCanvas->graph() == sceneGraph2D.get())
+            {
+                auto& g = *sceneGraph2D;
+                g.set_transform(orrery2D.sun, ng::vec2{}, t * 0.5);
+                g.set_transform(orrery2D.planetOrbit, ng::vec2{}, t * 0.8);
+                g.set_transform(orrery2D.planet, ng::vec2{ 5.0, 0.0 }, t * 2.0);
+                g.set_transform(orrery2D.moonOrbit, ng::vec2{}, t * 3.0);
+                g.set_transform(orrery2D.moon, ng::vec2{ 1.5, 0.0 }, -t * 4.0);
+            }
+            else if (&sceneGraphCanvas->graph() == sceneGraph3D.get())
+            {
+                auto& g = *sceneGraph3D;
+                ng::vec3 const yAxis{ 0.0, 1.0, 0.0 };
+                g.set_transform(orrery3D.sun, ng::vec3{}, ng::scene_graph_3d::axis_angle(yAxis, t * 0.5));
+                g.set_transform(orrery3D.planetOrbit, ng::vec3{}, ng::scene_graph_3d::axis_angle(yAxis, t * 0.8));
+                g.set_transform(orrery3D.planet, ng::vec3{ 5.0, 0.0, 0.0 }, ng::scene_graph_3d::multiply(
+                    ng::scene_graph_3d::axis_angle(yAxis, t * 2.0), ng::scene_graph_3d::axis_angle(ng::vec3{ 1.0, 0.0, 0.0 }, t)));
+                g.set_transform(orrery3D.moonOrbit, ng::vec3{}, ng::scene_graph_3d::axis_angle(ng::vec3{ 0.0, 1.0, 0.3 }, t * 3.0));
+                g.set_transform(orrery3D.moon, ng::vec3{ 1.5, 0.0, 0.0 });
+            }
+            else
+                return; // a loaded scene graph: nothing to animate (so no need to repaint)
+            sceneGraphCanvas->update();
+        };
+        window.pageSceneGraph.VisibilityChanged([&]()
+        {
+            if (window.pageSceneGraph.visible() && !sceneGraphCanvas)
+            {
+                sceneGraphCanvas = &window.layoutSceneGraph.add(ng::make_ref<ng::scene_graph_canvas>());
+                sceneGraphCanvas->set_background_color(ng::color::Black);
+                sceneGraphCanvas->set_graph(sceneGraph3D);
+                window.radioSceneGraph3D.check();
+                window.checkSceneGraphAnimate.check();
+                window.checkSceneGraphLighting.check();
+                sceneGraphAnimator.emplace(window.pageSceneGraph, [&](ng::widget_timer& aTimer)
+                {
+                    aTimer.again();
+                    if (window.pageSceneGraph.visible())
+                        animate_orrery();
+                }, std::chrono::milliseconds{ 16 });
+            }
+        });
+        window.radioSceneGraph2D.Checked([&]()
+        {
+            if (sceneGraphCanvas)
+                sceneGraphCanvas->set_graph(sceneGraph2D);
+        });
+        window.radioSceneGraph3D.Checked([&]()
+        {
+            if (sceneGraphCanvas)
+                sceneGraphCanvas->set_graph(sceneGraph3D);
+        });
+        window.checkSceneGraphAnimate.Toggled([&]()
+        {
+            if (sceneGraphCanvas)
+                sceneGraphCanvas->set_animation_paused(!window.checkSceneGraphAnimate.is_checked());
+        });
+        window.checkSceneGraphLighting.Toggled([&]()
+        {
+            if (sceneGraphCanvas)
+                sceneGraphCanvas->set_lighting(window.checkSceneGraphLighting.is_checked());
+        });
+        window.buttonSceneGraphSave.Clicked([&]()
+        {
+            if (!sceneGraphCanvas || !sceneGraphCanvas->has_graph())
+                return;
+            auto const path = ng::save_file_dialog(window, ng::file_dialog_spec{ "Save Scene Graph", {}, { "*.gltf", "*.glb" }, "glTF Files" });
+            if (!path)
+                return;
+            try
+            {
+                ng::file::gltf::write(sceneGraphCanvas->graph(), *path);
+            }
+            catch (std::exception const& e)
+            {
+                ng::message_box::error(window, "Save Scene Graph", ng::string{ e.what() });
+            }
+        });
+        window.buttonSceneGraphLoad.Clicked([&]()
+        {
+            if (!sceneGraphCanvas)
+                return;
+            auto const paths = ng::open_file_dialog(window, ng::file_dialog_spec{ "Load Scene Graph", {}, { "*.gltf", "*.glb" }, "glTF Files" });
+            if (!paths || paths->empty())
+                return;
+            try
+            {
+                ng::file::gltf loaded{ (*paths)[0] };
+                sceneGraphCanvas->set_graph(loaded.shared_model());
+                if (loaded.model().animation_count() > 0u)
+                {
+                    sceneGraphCanvas->play_animation(0u);
+                    sceneGraphCanvas->set_animation_paused(!window.checkSceneGraphAnimate.is_checked());
+                }
+                if (!loaded.warnings().empty())
+                {
+                    std::string warnings;
+                    for (auto const& w : loaded.warnings())
+                        warnings += w + "\n";
+                    ng::message_box::warning(window, "Load Scene Graph", ng::string{ "Some content was not loaded." }, ng::string{ warnings });
+                }
+            }
+            catch (std::exception const& e)
+            {
+                ng::message_box::error(window, "Load Scene Graph", ng::string{ e.what() });
             }
         });
 

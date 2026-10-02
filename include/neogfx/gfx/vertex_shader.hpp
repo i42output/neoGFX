@@ -83,17 +83,21 @@ namespace neogfx
         void set_projection_matrix(const optional_mat44& aProjectionMatrix) final;
         void set_transformation_matrix(const optional_mat44& aTransformationMatrix) final;
         void set_opacity(scalar aOpacity) final;
+        void set_model_table_base(std::uint32_t aBase) final;
     public:
+        bool supports(vertex_buffer_type aBufferType) const override;
         void prepare_uniforms(const i_rendering_context& aContext, i_shader_program& aProgram) override;
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     private:
         optional_mat44 iProjectionMatrix;
         optional_mat44 iTransformationMatrix;
         scalar iOpacity;
+        std::uint32_t iModelTableBase;
     private:
         cache_uniform(uProjectionMatrix)
         cache_uniform(uTransformationMatrix)
         cache_uniform(uOpacity)
+        cache_uniform(uModelTableBase)
         optional_logical_coordinates iLogicalCoordinates;
         optional_vec2 iOffset;
     };

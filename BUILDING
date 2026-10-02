@@ -3,6 +3,7 @@ The "neoGFX" C++ app/game engine and development platform is dependent on the fo
 * Boost (currently assumed to be in /usr/local)
 * OpenSSL (currently assumed to be in /usr/local)
 * zlib (currently assumed to be in /usr/local)
+* libjpeg-turbo (currently assumed to be in /usr/local; static library jpeg-static.lib, used by all configurations)
 * Freetype (set environment variable "DevDirFreetype" to point to directory root of library)
 * Glew (set environment variable "DevDirGlew" to point to directory root of library)
 * Harfbuzz (set environment variable "DevDirHarfBuzz" to point to directory root of library)

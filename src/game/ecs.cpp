@@ -19,6 +19,9 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <mutex>
+#include <unordered_map>
+
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/simple_physics.hpp>
@@ -26,21 +29,51 @@
 #include <neogfx/game/animator.hpp>
 #include <neogfx/game/time.hpp>
 #include <neogfx/game/mesh_render_cache.hpp>
+#include <neogfx/game/model_transformation.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 
 namespace neogfx
 {
     namespace game
     {
+        namespace
+        {
+            std::mutex& vertex_providers_mutex()
+            {
+                static std::mutex sMutex;
+                return sMutex;
+            }
+
+            std::unordered_map<i_ecs const*, i_vertex_provider*>& vertex_providers()
+            {
+                static std::unordered_map<i_ecs const*, i_vertex_provider*> sVertexProviders;
+                return sVertexProviders;
+            }
+        }
+
+        i_vertex_provider* cacheable_vertex_provider(i_ecs const& aEcs)
+        {
+            std::scoped_lock lock{ vertex_providers_mutex() };
+            auto existing = vertex_providers().find(&aEcs);
+            return existing != vertex_providers().end() ? existing->second : nullptr;
+        }
+
+        // n.b. only entities with a model_transformation component use the cache (see opengl_rendering_context::draw_entities)
         ecs::ecs(ecs_flags aCreationFlags) : 
             base_type{ aCreationFlags },
-            iCacheable{ false }
+            iCacheable{ true }
         {
             service<i_rendering_engine>().allocate_vertex_buffer(*this, vertex_buffer_type::DefaultECS);
+            std::scoped_lock lock{ vertex_providers_mutex() };
+            vertex_providers()[this] = this;
         }
 
         ecs::~ecs()
         {
+            {
+                std::scoped_lock lock{ vertex_providers_mutex() };
+                vertex_providers().erase(this);
+            }
             service<i_rendering_engine>().deallocate_vertex_buffer(*this);
         }
 
@@ -68,7 +101,8 @@ namespace neogfx
 
         void ecs::destroy_entity(entity_id aEntityId, bool aNotify)
         {
-            if (cacheable())
+            // n.b. only entities with a model_transformation component have cached vertices
+            if (cacheable() && component_registered<model_transformation>())
             {
                 scoped_component_data_lock<mesh_render_cache> lock{ *this };
                 if (component<mesh_render_cache>().has_entity_record(aEntityId) && service<i_rendering_engine>().vertex_buffer_allocated(*this))

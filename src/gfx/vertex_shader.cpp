@@ -26,7 +26,7 @@
 namespace neogfx
 {
     standard_vertex_shader::standard_vertex_shader(std::string const& aName) :
-        vertex_shader{ aName }, iOpacity{ 1.0 }
+        vertex_shader{ aName }, iOpacity{ 1.0 }, iModelTableBase{ 0u }
     {
         auto& coord = add_attribute<vec3f>("VertexPosition"_s, 0u);
         auto& color = add_attribute<vec4f>("VertexColor"_s, 1u);
@@ -38,6 +38,10 @@ namespace neogfx
         auto& function5 = add_attribute<vec4f>("VertexFunction5"_s, 8u);
         auto& function6 = add_attribute<vec4f>("VertexFunction6"_s, 9u);
         add_attribute<vec3f>("VertexDebug"_s, 10u);
+        add_attribute<float>("VertexModel"_s, 11u);
+        add_attribute<vec4f>("VertexJoints"_s, 12u);
+        add_attribute<vec4f>("VertexWeights"_s, 13u);
+        uModelTableBase = iModelTableBase;
         add_out_variable<vec3f>("Coord"_s, 0u).link(coord);
         add_out_variable<vec4f>("Color"_s, 1u).link(color);
         add_out_variable<vec4f>("Function0"_s, 3u, true).link(function0);
@@ -65,6 +69,20 @@ namespace neogfx
             iTransformationMatrix = aTransformationMatrix;
             uTransformationMatrix.uniform().mutable_value();
         }
+    }
+
+    void standard_vertex_shader::set_model_table_base(std::uint32_t aBase)
+    {
+        if (iModelTableBase != aBase)
+        {
+            iModelTableBase = aBase;
+            uModelTableBase.uniform().mutable_value();
+        }
+    }
+
+    bool standard_vertex_shader::supports(vertex_buffer_type aBufferType) const
+    {
+        return (aBufferType & (vertex_buffer_type::Model | vertex_buffer_type::Joints | vertex_buffer_type::Weights)) != vertex_buffer_type::Invalid;
     }
 
     void standard_vertex_shader::set_opacity(scalar aOpacity)
@@ -110,12 +128,21 @@ namespace neogfx
                 uTransformationMatrix = mat44f::identity();
             else
                 uTransformationMatrix = iTransformationMatrix->as<float>();
-            uTransformationMatrix.uniform().mutable_value().get<mat44f>()[3][0] += static_cast<float>(offset.x);
-            uTransformationMatrix.uniform().mutable_value().get<mat44f>()[3][1] += static_cast<float>(offset.y);
+            // the offset is a translation applied after the transformation; n.b. this is the same as adding it to the
+            // translation column when the transformation is affine (bottom row 0, 0, 0, 1) but also correct if it is projective
+            auto& transformation = uTransformationMatrix.uniform().mutable_value().get<mat44f>();
+            for (std::uint32_t column = 0u; column < 4u; ++column)
+            {
+                transformation[column][0] += static_cast<float>(offset.x) * transformation[column][3];
+                transformation[column][1] += static_cast<float>(offset.y) * transformation[column][3];
+            }
         }
 
         if (uOpacity.uniform().is_dirty())
             uOpacity = static_cast<float>(iOpacity);
+
+        if (uModelTableBase.uniform().is_dirty())
+            uModelTableBase = iModelTableBase;
     }
 
     void standard_vertex_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const

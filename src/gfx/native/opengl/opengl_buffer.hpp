@@ -35,6 +35,9 @@ namespace neogfx
         virtual void buffer_grown() = 0;
     };
 
+    // By default a buffer is persistently mapped and written through the mapping (suited to data rewritten every
+    // frame). A device local buffer (e.g. cached scene meshes, mostly unchanged from frame to frame) lives in GPU
+    // memory and is written with write(): it cannot be mapped.
     template <typename T>
     class opengl_buffer
     {
@@ -55,8 +58,8 @@ namespace neogfx
         using free_block = std::pair<size_type, size_type>;
         using free_blocks = std::vector<free_block>;
     public:
-        opengl_buffer(bool aCacheable, size_type aCapacity);
-        opengl_buffer(opengl_buffer_owner& aOwner, bool aCacheable, size_type aCapacity = 0u);
+        opengl_buffer(bool aCacheable, size_type aCapacity, bool aDeviceLocal = false);
+        opengl_buffer(opengl_buffer_owner& aOwner, bool aCacheable, size_type aCapacity = 0u, bool aDeviceLocal = false);
         ~opengl_buffer();
     public:
         size_type capacity() const;
@@ -94,6 +97,7 @@ namespace neogfx
         pointer map();
         void flush(size_type aOffset, size_type aElements);
         void unmap();
+        void write(size_type aOffset, const_pointer aData, size_type aElements);
     public:
         size_type room() const;
         bool room_for(size_type aExtra) const;
@@ -113,6 +117,7 @@ namespace neogfx
         mutable pointer iMemory = nullptr;
         opengl_buffer_owner* iOwner = nullptr;
         bool iCacheable;
+        bool iDeviceLocal;
         std::array<std::array<std::array<free_blocks, 32u>, kRingBufferSize>, static_cast<std::size_t>(render_target_type::COUNT)> iBlocksToFree;
         std::array<free_blocks, 32u> iFreeBlocks;
     };

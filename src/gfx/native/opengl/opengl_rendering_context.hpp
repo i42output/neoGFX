@@ -30,6 +30,7 @@
 #include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/mesh_render_cache.hpp>
+#include <neogfx/game/model_transformation.hpp>
 #include "opengl.hpp"
 #include "opengl_error.hpp"
 #include "opengl_vertex.hpp"
@@ -164,6 +165,8 @@ namespace neogfx
             optional_mat44f transformation;
             game::entity_id entity;
             bool debug = false;
+            // GPU model transformation (cached, model space vertices)
+            game::model_transformation const* model = nullptr;
             mesh_drawable(
                 point const& origin,
                 game::mesh_filter const& meshFilter,
@@ -372,6 +375,7 @@ namespace neogfx
         void draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
         void draw_meshes(optional_ecs_render_lock& aLock, i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);
         void draw_patch(patch_drawable& aPatch, const mat44& aTransformation);
+        void draw_scene_meshes(i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);
         void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = {}, shader_effect aShaderEffect = shader_effect::None);
     public:
         neogfx::subpixel_format subpixel_format() const final;

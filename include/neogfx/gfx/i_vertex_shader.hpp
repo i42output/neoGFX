@@ -53,5 +53,7 @@ namespace neogfx
         virtual void set_projection_matrix(const optional_mat44& aProjectionMatrix) = 0;
         virtual void set_transformation_matrix(const optional_mat44& aProjectionMatrix) = 0;
         virtual void set_opacity(scalar aOpacity) = 0;
+        // the start of the current frame's model table (see game::model_transformation)
+        virtual void set_model_table_base(std::uint32_t aBase) = 0;
     };
 }

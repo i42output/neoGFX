@@ -28,6 +28,12 @@
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/app/resource_manager.hpp>
 
+// included last as libjpeg's headers define macros (e.g. LOCAL, GLOBAL, FAR)
+#include <cstdio>
+#include <csetjmp>
+#include <limits>
+#include <jpeglib.h>
+
 namespace neogfx
 {
     image::image(dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
@@ -364,6 +370,8 @@ namespace neogfx
                     const std::uint8_t* magic = static_cast<const std::uint8_t*>(resource().data());
                     if (magic[0] == 0x89 && magic[1] == 'P' && magic[2] == 'N' && magic[3] == 'G')
                         return PngImage;
+                    if (magic[0] == 0xFF && magic[1] == 0xD8 && magic[2] == 0xFF)
+                        return JpegImage;
                 }
             }
         }
@@ -378,6 +386,8 @@ namespace neogfx
         {
         case PngImage:
             return load_png();
+        case JpegImage:
+            return load_jpeg();
         default:
             throw unknown_image_format();
         }
@@ -412,4 +422,74 @@ namespace neogfx
         }
     }
 
+    namespace
+    {
+        struct jpeg_error_handler
+        {
+            jpeg_error_mgr base;
+            std::jmp_buf jump;
+            char message[JMSG_LENGTH_MAX];
+        };
+
+        void jpeg_error_exit(j_common_ptr aInfo)
+        {
+            auto& handler = *reinterpret_cast<jpeg_error_handler*>(aInfo->err);
+            (*aInfo->err->format_message)(aInfo, handler.message);
+            std::longjmp(handler.jump, 1);
+        }
+
+        void jpeg_output_message(j_common_ptr)
+        {
+            // warnings (e.g. a truncated file) are not written to stderr
+        }
+    }
+
+    bool image::load_jpeg()
+    {
+        // libjpeg reports errors by calling error_exit which must not return so it longjmps back here: no automatic
+        // objects with non-trivial destructors may be alive in this function between setjmp and longjmp.
+        jpeg_decompress_struct info = {};
+        jpeg_error_handler error = {};
+        info.err = jpeg_std_error(&error.base);
+        error.base.error_exit = jpeg_error_exit;
+        error.base.output_message = jpeg_output_message;
+        if (setjmp(error.jump) != 0)
+        {
+            jpeg_destroy_decompress(&info);
+            iError = error.message;
+            return false;
+        }
+        jpeg_create_decompress(&info);
+        if (resource().size() > std::numeric_limits<unsigned long>::max())
+        {
+            jpeg_destroy_decompress(&info);
+            iError = "JPEG image too large";
+            return false;
+        }
+        jpeg_mem_src(&info, static_cast<const unsigned char*>(resource().data()), static_cast<unsigned long>(resource().size()));
+        jpeg_read_header(&info, TRUE);
+        info.out_color_space = JCS_EXT_RGBA; // libjpeg-turbo extension (grayscale and YCbCr/RGB sources; not CMYK)
+        jpeg_start_decompress(&info);
+        std::size_t const stride = static_cast<std::size_t>(info.output_width) * 4u;
+        JSAMPLE* pixels = nullptr;
+        try
+        {
+            iData.resize(stride * info.output_height);
+            pixels = static_cast<JSAMPLE*>(data());
+        }
+        catch (...)
+        {
+            jpeg_destroy_decompress(&info);
+            throw;
+        }
+        while (info.output_scanline < info.output_height)
+        {
+            JSAMPROW row = pixels + stride * info.output_scanline;
+            jpeg_read_scanlines(&info, &row, 1);
+        }
+        jpeg_finish_decompress(&info);
+        iSize = neogfx::size(info.output_width, info.output_height);
+        jpeg_destroy_decompress(&info);
+        return true;
+    }
 }

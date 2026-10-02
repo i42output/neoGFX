@@ -23,6 +23,8 @@
 
 #include <vector>
 #include <bit>
+#include <optional>
+#include <unordered_map>
 
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
@@ -54,6 +56,8 @@ namespace neogfx
     struct opengl_attrib_data_type<float> { static constexpr GLenum type = GL_FLOAT; };
     template <>
     struct opengl_attrib_data_type<std::uint8_t> { static constexpr GLenum type = GL_UNSIGNED_BYTE; };
+    template <>
+    struct opengl_attrib_data_type<std::uint16_t> { static constexpr GLenum type = GL_UNSIGNED_SHORT; };
 
     template <typename Vertex, typename Attrib>
     class opengl_vertex_attrib_array
@@ -120,6 +124,68 @@ namespace neogfx
         };
     };
 
+    // Compact vertex of a scene mesh (an entity with a game::model_transformation component): cached once in model
+    // space, drawn indexed and transformed (and skinned) on the GPU.
+    struct scene_vertex
+    {
+        vec3f xyz;
+        avec4u8 rgba;       // normalized
+        vec2f st;
+        vec1f model;        // entity id (indexes the model table)
+        avec4u16 joints;    // skin joint indices
+        vec4f weights;      // skin joint weights (all zero if not skinned)
+        struct offset
+        {
+            static constexpr std::size_t xyz = 0u;
+            static constexpr std::size_t rgba = xyz + sizeof(decltype(scene_vertex::xyz));
+            static constexpr std::size_t st = rgba + sizeof(decltype(scene_vertex::rgba));
+            static constexpr std::size_t model = st + sizeof(decltype(scene_vertex::st));
+            static constexpr std::size_t joints = model + sizeof(decltype(scene_vertex::model));
+            static constexpr std::size_t weights = joints + sizeof(decltype(scene_vertex::joints));
+        };
+    };
+
+    // The scene meshes of a vertex provider: device local vertex and index buffers.
+    class opengl_scene_buffer : private opengl_buffer_owner
+    {
+    public:
+        struct mesh_range
+        {
+            std::uint32_t vertexStart;
+            std::uint32_t vertexEnd;
+            std::uint32_t indexStart;
+            std::uint32_t indexEnd;
+        };
+    public:
+        opengl_scene_buffer();
+        ~opengl_scene_buffer();
+        opengl_scene_buffer(opengl_scene_buffer const&) = delete;
+        opengl_scene_buffer& operator=(opengl_scene_buffer const&) = delete;
+    public:
+        // make room for meshes about to be allocated (so that a model's first upload allocates exactly what it needs)
+        void reserve(std::size_t aExtraVertices, std::size_t aExtraIndices);
+        mesh_range allocate(std::uint32_t aVertexCount, std::uint32_t aIndexCount);
+        std::optional<mesh_range> find(std::uint32_t aVertexStart, std::uint32_t aVertexEnd) const;
+        // the mesh's indices are absolute (i.e. include its vertexStart)
+        void write(mesh_range const& aMesh, scene_vertex const* aVertices, std::uint32_t const* aIndices);
+        bool reclaim(std::uint32_t aVertexStart, std::uint32_t aVertexEnd);
+        void reclaim();
+        void draw(i_rendering_context& aContext, i_shader_program& aShaderProgram, optional_mat44 const& aTransformation, std::uint32_t aIndexStart, std::uint32_t aIndexCount);
+    private:
+        void buffer_grown() final;
+    private:
+        opengl_buffer<scene_vertex> iVertices;
+        opengl_buffer<std::uint32_t> iIndices;
+        std::unordered_map<std::uint32_t, mesh_range> iMeshes;
+        std::optional<opengl_vertex_array> iVao;
+        std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::xyz)>> iPositionAttribArray;
+        std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::rgba)>> iColorAttribArray;
+        std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::st)>> iTextureCoordAttribArray;
+        std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::model)>> iModelAttribArray;
+        std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::joints)>> iJointsAttribArray;
+        std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::weights)>> iWeightsAttribArray;
+    };
+
     template <typename V = standard_vertex>
     class opengl_vertex_buffer : public vertex_buffer, private opengl_buffer_owner
     {
@@ -144,6 +210,8 @@ namespace neogfx
         void flush(std::size_t aOffset, std::size_t aCount);
         vertex_array& vertices();
         std::size_t capacity() const;
+        // scene meshes (see opengl_rendering_context::draw_scene_meshes)
+        opengl_scene_buffer& scene_buffer();
     private:
         void buffer_grown() override;
         void update_attrib_arrays();
@@ -162,6 +230,7 @@ namespace neogfx
         std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::abcd2)>> iVertexFunction5AttribArray;
         std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::efgh2)>> iVertexFunction6AttribArray;
         std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::debug)>> iVertexDebugAttribArray;
+        std::optional<opengl_scene_buffer> iSceneBuffer;
     };
 
     class use_shader_program

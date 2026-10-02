@@ -191,6 +191,9 @@ namespace neogfx
     template <typename V>
     inline void opengl_vertex_buffer<V>::reclaim(std::size_t aStartIndex, std::size_t aEndIndex)
     {
+        // n.b. a scene mesh's cached range is the range of its vertices in the scene buffer
+        if (iSceneBuffer && iSceneBuffer->reclaim(static_cast<std::uint32_t>(aStartIndex), static_cast<std::uint32_t>(aEndIndex)))
+            return;
         vertices().reclaim(aStartIndex, aEndIndex);
     }
 
@@ -198,6 +201,8 @@ namespace neogfx
     inline void opengl_vertex_buffer<V>::reclaim()
     {
         vertices().reclaim();
+        if (iSceneBuffer)
+            iSceneBuffer->reclaim();
     }
 
     template <typename V>
@@ -228,6 +233,14 @@ namespace neogfx
     inline std::size_t opengl_vertex_buffer<V>::capacity() const
     {
         return iBuffer.capacity();
+    }
+
+    template <typename V>
+    inline opengl_scene_buffer& opengl_vertex_buffer<V>::scene_buffer()
+    {
+        if (!iSceneBuffer)
+            iSceneBuffer.emplace();
+        return *iSceneBuffer;
     }
 
     template <typename V>

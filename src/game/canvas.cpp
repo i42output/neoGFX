@@ -180,6 +180,16 @@ namespace neogfx::game
     {
         iFaceCulling = aCulling;
     }
+
+    optional_mat44 const& canvas::entity_transformation() const
+    {
+        return iEntityTransformation;
+    }
+
+    void canvas::set_entity_transformation(optional_mat44 const& aTransformation)
+    {
+        iEntityTransformation = aTransformation;
+    }
         
     logical_coordinate_system canvas::logical_coordinate_system() const
     {
@@ -248,7 +258,10 @@ namespace neogfx::game
                     scoped_component_data_lock<mesh_renderer> lgMeshRenderer{ ecs() };
                     aGc.clear_depth_buffer();
                     RenderingEntities(aGc, 0);
-                    aGc.draw_entities(ecs());
+                    if (iEntityTransformation)
+                        aGc.draw_entities(ecs(), 0, *iEntityTransformation);
+                    else
+                        aGc.draw_entities(ecs());
                     EntitiesRendered(aGc, 0);
                 }
             });
@@ -267,7 +280,10 @@ namespace neogfx::game
                             continue;
                         aGc.clear_depth_buffer();
                         RenderingEntities(aGc, layer);
-                        aGc.draw_entities(ecs(), layer);
+                        if (iEntityTransformation)
+                            aGc.draw_entities(ecs(), layer, *iEntityTransformation);
+                        else
+                            aGc.draw_entities(ecs(), layer);
                         EntitiesRendered(aGc, layer);
                     }
                 }

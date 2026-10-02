@@ -48,6 +48,8 @@ namespace neogfx
         i_stipple_shader& stipple_shader() final;
         const i_shape_shader& shape_shader() const final;
         i_shape_shader& shape_shader() final;
+        i_ssbo& model_matrices() final;
+        i_ssbo& model_table() final;
     private:
         ref_ptr<i_fragment_shader> iDefaultShader;
         ref_ptr<i_gradient_shader> iGradientShader;
@@ -56,5 +58,7 @@ namespace neogfx
         ref_ptr<i_glyph_shader> iGlyphShader;
         ref_ptr<i_stipple_shader> iStippleShader;
         ref_ptr<i_shape_shader> iShapeShader;
+        ref_ptr<i_ssbo> iModelMatrices;
+        ref_ptr<i_ssbo> iModelTable;
     };
 }

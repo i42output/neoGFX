@@ -39,6 +39,21 @@ namespace neogfx
         iGlyphShader = static_cast<i_glyph_shader&>(add_shader<standard_glyph_shader>());
         iShapeShader = static_cast<i_shape_shader&>(add_shader<standard_shape_shader>());
         iStippleShader = static_cast<i_stipple_shader&>(add_shader<standard_stipple_shader>());
+        iModelMatrices = static_cast<i_shader_program&>(*this).create_ssbo<mat4f>("bModelMatrices"_s);
+        iModelTable = static_cast<i_shader_program&>(*this).create_ssbo<std::uint32_t>("bModelTable"_s);
+        // ensure the SSBOs are mapped (see standard_shape_shader)
+        iModelMatrices->alloc(1);
+        iModelTable->alloc(1);
+    }
+
+    i_ssbo& standard_shader_program::model_matrices()
+    {
+        return *iModelMatrices;
+    }
+
+    i_ssbo& standard_shader_program::model_table()
+    {
+        return *iModelTable;
     }
 
     shader_program_type standard_shader_program::type() const

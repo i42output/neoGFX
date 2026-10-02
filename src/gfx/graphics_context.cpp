@@ -629,16 +629,36 @@ namespace neogfx
 
     void graphics_context::draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer)
     {
+        draw_entities(aEcs, aLayer, mat44::identity());
+    }
+
+    void graphics_context::draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer, mat44 const& aTransformation)
+    {
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
+        mat44 transformation{
+            { toDeviceUnits.x, 0.0, 0.0, 0.0 },
+            { 0.0, toDeviceUnits.y, 0.0, 0.0 },
+            { 0.0, 0.0, 1.0, 0.0 },
+            { 0.0, 0.0, 0.0, 1.0 } };
+        if (aTransformation != mat44::identity())
+        {
+            // entity vertices reach the shader with the (device) origin already added so conjugate by it
+            auto const origin = iOrigin.value_or(point{});
+            auto translation = [](scalar x, scalar y)
+                {
+                    return mat44{
+                        { 1.0, 0.0, 0.0, 0.0 },
+                        { 0.0, 1.0, 0.0, 0.0 },
+                        { 0.0, 0.0, 1.0, 0.0 },
+                        { x, y, 0.0, 1.0 } };
+                };
+            transformation = transformation * translation(origin.x, origin.y) * aTransformation * translation(-origin.x, -origin.y);
+        }
         rendering_context().enqueue(
             graphics_operation::draw_entities{
                 &aEcs,
                 aLayer,
-                mat44{
-                    { toDeviceUnits.x, 0.0, 0.0, 0.0 },
-                    { 0.0, toDeviceUnits.y, 0.0, 0.0 },
-                    { 0.0, 0.0, 1.0, 0.0 },
-                    { 0.0, 0.0, 0.0, 1.0 } }
+                transformation
             });
     }
 

@@ -380,3 +380,4 @@ neogfx_widget.tlog
 /build/win32/vs/neogfx_widget/x64/Tools/neogfx_widget.vcxproj.FileListAbsolute.txt
 /build/win32/vs/neogfx_widget/x64/Tools/*.recipe
 /Claude outputs
+libjpeg-turbo-build

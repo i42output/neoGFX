@@ -55,5 +55,9 @@ namespace neogfx
         virtual i_stipple_shader& stipple_shader() = 0;
         virtual const i_shape_shader& shape_shader() const = 0;
         virtual i_shape_shader& shape_shader() = 0;
+        // GPU model transformation (see game::model_transformation): per frame model (and skin joint)
+        // matrices and the table mapping entity ids to their first matrix
+        virtual i_ssbo& model_matrices() = 0;
+        virtual i_ssbo& model_table() = 0;
     };
 }

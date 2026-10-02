@@ -50,6 +50,10 @@ namespace neogfx
             bool iCacheable;
         };
 
+        // the (cacheable) vertex provider of an ECS that is a game::ecs (else nullptr); entities with a
+        // model_transformation component are drawn from its vertex buffer
+        i_vertex_provider* cacheable_vertex_provider(i_ecs const& aEcs);
+
         template <typename... Systems>
         std::shared_ptr<ecs> make_ecs(ecs_flags aCreationFlags = ecs_flags::Default)
         {

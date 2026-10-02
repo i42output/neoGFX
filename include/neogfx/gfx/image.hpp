@@ -39,7 +39,8 @@ namespace neogfx
         enum image_type_e
         {
             UnknownImage,
-            PngImage
+            PngImage,
+            JpegImage
         };
     public:
         typedef neolib::vector<std::uint8_t> data_type;
@@ -96,6 +97,7 @@ namespace neogfx
         image_type_e recognize() const;
         bool load();
         bool load_png();
+        bool load_jpeg();
     private:
         ref_ptr<i_resource> iResource;
         string iUri;

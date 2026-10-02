@@ -315,6 +315,7 @@
     <ClInclude Include="..\..\..\..\include\neogfx\game\mesh.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\game\i_system.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\game\mesh_filter.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\model_transformation.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\game\mesh_renderer.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\game\mesh_render_cache.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\game\outline.hpp" />
@@ -328,6 +329,7 @@
     <ClInclude Include="..\..\..\..\include\neogfx\game\rectangle.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\game\sprite.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\game\canvas.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\game\scene_graph_canvas.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\game\standard_archetypes.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\game\system.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\game\text_mesh.hpp" />
@@ -356,6 +358,7 @@
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_rendering_engine.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_render_target.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_scene_graph.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\scene_graph.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_shader.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_shader_array.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_shader_program.hpp" />
@@ -558,6 +561,7 @@
     <ClCompile Include="..\..\..\..\src\game\simple_physics.cpp" />
     <ClCompile Include="..\..\..\..\src\game\rectangle.cpp" />
     <ClCompile Include="..\..\..\..\src\game\canvas.cpp" />
+    <ClCompile Include="..\..\..\..\src\game\scene_graph_canvas.cpp" />
     <ClCompile Include="..\..\..\..\src\game\text_mesh.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\color.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\fragment_shader.cpp" />
@@ -567,6 +571,8 @@
     <ClCompile Include="..\..\..\..\src\gfx\hsl_color.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\hsv_color.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\image.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\gltf.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\scene_graph.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\native\native_texture.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_buffer.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_error.cpp" />

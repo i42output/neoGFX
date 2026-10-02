@@ -34,6 +34,7 @@
 #include <neogfx/game/text_mesh.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
 #include <neogfx/game/animator.hpp>
+#include <neogfx/game/ecs.hpp>
 #include <neogfx/hid/i_native_surface.hpp>
 #include "../i_native_texture.hpp"
 #include "../../text/native/i_native_font_face.hpp"
@@ -2207,16 +2208,29 @@ namespace neogfx
         neolib::scoped_object stepTime{ iStepTime, tStepTime };
 
         thread_local std::vector<std::vector<mesh_drawable>> tMeshDrawables;
+        // entities with a model_transformation component: cached vertices, transformed on the GPU
+        thread_local std::vector<std::vector<mesh_drawable>> tModelDrawables;
+        thread_local std::optional<std::uint32_t> tModelTableBase;
         thread_local game::scene_layer tMaxLayer = 0;
         thread_local optional_ecs_render_lock tLock;
+        thread_local std::optional<game::scoped_component_data_lock<game::model_transformation>> tModelLock;
 
-        if (tMeshDrawables.size() <= aLayer)
-            tMeshDrawables.resize(aLayer + 1);
+        auto ensure_layers = [&](game::scene_layer aLayers)
+        {
+            if (tMeshDrawables.size() <= static_cast<std::size_t>(aLayers))
+                tMeshDrawables.resize(aLayers + 1);
+            if (tModelDrawables.size() <= static_cast<std::size_t>(aLayers))
+                tModelDrawables.resize(aLayers + 1);
+        };
+        ensure_layers(aLayer);
 
         if (aLayer == 0)
         {
             for (auto& d : tMeshDrawables)
                 d.clear();
+            for (auto& d : tModelDrawables)
+                d.clear();
+            tModelTableBase = std::nullopt;
             tLock.emplace(aEcs);
 
             if (aEcs.system_instantiated<game::animator>() && aEcs.system<game::animator>().can_apply())
@@ -2228,6 +2242,16 @@ namespace neogfx
             auto const& meshRenderers = aEcs.component<game::mesh_renderer>();
             auto const& meshFilters = aEcs.component<game::mesh_filter>();
             auto const& cache = aEcs.component<game::mesh_render_cache>();
+            game::component<game::model_transformation> const* models = nullptr;
+            if (aEcs.component_registered<game::model_transformation>() && game::cacheable_vertex_provider(aEcs) != nullptr)
+            {
+                tModelLock.emplace(aEcs);
+                models = &aEcs.component<game::model_transformation>();
+            }
+            thread_local std::vector<std::pair<game::entity_id, std::uint32_t>> tModelEntries;
+            thread_local std::vector<mat44f> tModelMatrices;
+            tModelEntries.clear();
+            tModelMatrices.clear();
             for (auto entity : meshRenderers.entities())
             {
 #if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
@@ -2243,27 +2267,50 @@ namespace neogfx
                 for (auto const& patch : meshRenderer.patches)
                     if (patch->layer.has_value())
                         tMaxLayer = std::max(tMaxLayer, patch->layer.value());
-                if (tMeshDrawables.size() <= tMaxLayer)
-                    tMeshDrawables.resize(tMaxLayer + 1);
+                ensure_layers(tMaxLayer);
+                // n.b. the model id is passed to the GPU as a float vertex attribute
+                auto const model = (models != nullptr && entity <= 0xFFFFFFu && models->has_entity_record_no_lock(entity)) ?
+                    &models->entity_record_no_lock(entity) : nullptr;
+                auto& drawables = (model != nullptr ? tModelDrawables : tMeshDrawables);
                 auto animationFilter = animatedMeshFilters.has_entity_record_no_lock(entity) ?
                     &animatedMeshFilters.entity_record_no_lock(entity) : nullptr;
                 auto const& meshFilter = meshFilters.has_entity_record_no_lock(entity) ?
                     meshFilters.entity_record_no_lock(entity) :
                     game::current_animation_frame(animatedMeshFilters.entity_record_no_lock(entity));
                 if (animationFilter)
-                    tMeshDrawables[meshRenderer.layer].emplace_back(origin(), meshFilter, *animationFilter, meshRenderer, optional_mat44f{}, entity);
+                    drawables[meshRenderer.layer].emplace_back(origin(), meshFilter, *animationFilter, meshRenderer, optional_mat44f{}, entity);
                 else
-                    tMeshDrawables[meshRenderer.layer].emplace_back(origin(), meshFilter, meshRenderer, optional_mat44f{}, entity);
+                    drawables[meshRenderer.layer].emplace_back(origin(), meshFilter, meshRenderer, optional_mat44f{}, entity);
+                drawables[meshRenderer.layer].back().model = model;
                 for (auto const& patch : meshRenderer.patches)
                     if (patch->layer.has_value() && patch->layer.value() != meshRenderer.layer &&
-                        (tMeshDrawables[patch->layer.value()].empty() || tMeshDrawables[patch->layer.value()].back().entity != entity))
+                        (drawables[patch->layer.value()].empty() || drawables[patch->layer.value()].back().entity != entity))
                     {
                         if (animationFilter)
-                            tMeshDrawables[patch->layer.value()].emplace_back(origin(), meshFilter, *animationFilter, meshRenderer, optional_mat44f{}, entity);
+                            drawables[patch->layer.value()].emplace_back(origin(), meshFilter, *animationFilter, meshRenderer, optional_mat44f{}, entity);
                         else
-                            tMeshDrawables[patch->layer.value()].emplace_back(origin(), meshFilter, meshRenderer, optional_mat44f{}, entity);
+                            drawables[patch->layer.value()].emplace_back(origin(), meshFilter, meshRenderer, optional_mat44f{}, entity);
+                        drawables[patch->layer.value()].back().model = model;
                     }
-                if (!game::is_render_cache_clean_no_lock(cache, entity))
+                if (model != nullptr)
+                {
+                    // transformed on the GPU every frame: the cached vertices are model space (no origin)
+                    auto const& rigidBodyTransformation = (rigidBodies.has_entity_record_no_lock(entity) ?
+                        to_transformation_matrix(rigidBodies.entity_record_no_lock(entity)) : mat44f::identity());
+                    auto const& meshFilterTransformation = (meshFilter.transformation ?
+                        *meshFilter.transformation : mat44f::identity());
+                    auto const& animationMeshFilterTransformation = (animatedMeshFilters.has_entity_record_no_lock(entity) ?
+                        to_transformation_matrix(animatedMeshFilters.entity_record_no_lock(entity)) : mat44f::identity());
+                    auto originTranslation = mat44f::identity();
+                    auto const entityOrigin = origin().to_vec3().as<float>();
+                    originTranslation[3][0] = entityOrigin.x;
+                    originTranslation[3][1] = entityOrigin.y;
+                    originTranslation[3][2] = entityOrigin.z;
+                    tModelEntries.emplace_back(entity, static_cast<std::uint32_t>(tModelMatrices.size()));
+                    tModelMatrices.push_back(originTranslation * rigidBodyTransformation * meshFilterTransformation * animationMeshFilterTransformation * model->matrix);
+                    tModelMatrices.insert(tModelMatrices.end(), model->joints.begin(), model->joints.end());
+                }
+                else if (!game::is_render_cache_clean_no_lock(cache, entity))
                 {
                     auto const& rigidBodyTransformation = (rigidBodies.has_entity_record_no_lock(entity) ?
                         to_transformation_matrix(rigidBodies.entity_record_no_lock(entity)) : mat44f::identity());
@@ -2272,14 +2319,28 @@ namespace neogfx
                     auto const& animationMeshFilterTransformation = (animatedMeshFilters.has_entity_record_no_lock(entity) ?
                         to_transformation_matrix(animatedMeshFilters.entity_record_no_lock(entity)) : mat44f::identity());
                     auto const& transformation = rigidBodyTransformation * meshFilterTransformation * animationMeshFilterTransformation;
-                    tMeshDrawables[meshRenderer.layer].back().transformation = transformation;
+                    drawables[meshRenderer.layer].back().transformation = transformation;
                     for (auto const& patch : meshRenderer.patches)
                         if (patch->layer.has_value() && patch->layer.value() != meshRenderer.layer &&
-                            !tMeshDrawables[patch->layer.value()].back().transformation.has_value())
-                            tMeshDrawables[patch->layer.value()].back().transformation = transformation;
+                            !drawables[patch->layer.value()].back().transformation.has_value())
+                            drawables[patch->layer.value()].back().transformation = transformation;
                 }
                 if (info.debug)
-                    tMeshDrawables[meshRenderer.layer].back().debug = true;
+                    drawables[meshRenderer.layer].back().debug = true;
+            }
+            if (!tModelEntries.empty())
+            {
+                // this frame's model matrices and the table mapping entity id to first matrix
+                auto& program = rendering_engine().default_shader_program();
+                game::entity_id maxEntity = game::null_entity;
+                for (auto const& entry : tModelEntries)
+                    maxEntity = std::max(maxEntity, entry.first);
+                scoped_lock_ssbo<mat4f> matrices{ program.model_matrices(), static_cast<std::uint32_t>(tModelMatrices.size()) };
+                std::copy(tModelMatrices.begin(), tModelMatrices.end(), matrices.data());
+                scoped_lock_ssbo<std::uint32_t> table{ program.model_table(), static_cast<std::uint32_t>(maxEntity + 1u) };
+                for (auto const& entry : tModelEntries)
+                    table.data()[entry.first] = matrices.range().first + entry.second;
+                tModelTableBase = table.range().first;
             }
         }
         if (!tMeshDrawables[aLayer].empty())
@@ -2287,11 +2348,21 @@ namespace neogfx
             draw_meshes(tLock, as_vertex_provider<>(*this), aLayer,
                 &*tMeshDrawables[aLayer].begin(), &*tMeshDrawables[aLayer].begin() + tMeshDrawables[aLayer].size(), aTransformation);
         }
+        if (tModelTableBase && !tModelDrawables[aLayer].empty())
+        {
+            rendering_engine().default_shader_program().standard_vertex_shader().set_model_table_base(*tModelTableBase);
+            draw_scene_meshes(*game::cacheable_vertex_provider(aEcs), aLayer,
+                tModelDrawables[aLayer].data(), tModelDrawables[aLayer].data() + tModelDrawables[aLayer].size(), aTransformation);
+        }
         if (aLayer >= tMaxLayer)
         {
             tMaxLayer = 0;
             for (auto& d : tMeshDrawables)
                 d.clear();
+            for (auto& d : tModelDrawables)
+                d.clear();
+            tModelTableBase = std::nullopt;
+            tModelLock.reset();
             tLock.reset();
         }
     }
@@ -3235,6 +3306,219 @@ namespace neogfx
         }
 
         draw_patch(tPatchDrawable, aTransformation);
+    }
+
+    void opengl_rendering_context::draw_scene_meshes(i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)
+    {
+        // scene meshes (entities with a model_transformation component): each mesh's vertices are cached once, in model
+        // space, in a compact format (scene_vertex) with an index buffer; the model (or skin joint) matrices are
+        // applied on the GPU (see draw_entities)
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
+        auto& program = rendering_engine().default_shader_program();
+        auto& vertexBuffer = static_cast<opengl_vertex_buffer<>&>(service<i_rendering_engine>().vertex_buffer(aVertexProvider));
+        auto& sceneBuffer = vertexBuffer.scene_buffer();
+        auto& cache = aVertexProvider.cache();
+
+        auto const& mesh_of = [](mesh_drawable const& aDrawable) -> game::mesh const&
+            {
+                return aDrawable.meshFilter->mesh != std::nullopt ? *aDrawable.meshFilter->mesh : *aDrawable.meshFilter->sharedMesh;
+            };
+
+        // reserve the space needed by meshes not yet cached so a model's first upload allocates exactly what it needs
+        std::size_t newVertices = 0u;
+        std::size_t newIndices = 0u;
+        for (auto md = aFirst; md != aLast; ++md)
+        {
+            if (!md->renderer->render || md->renderer->layer != aLayer)
+                continue;
+            if (cache.has_entity_record_no_lock(md->entity) && cache.entity_record_no_lock(md->entity).state != game::cache_state::Invalid)
+                continue;
+            newVertices += mesh_of(*md).vertices.size();
+            newIndices += mesh_of(*md).faces.size() * 3u;
+        }
+        if (newVertices != 0u)
+            sceneBuffer.reserve(newVertices, newIndices);
+
+        // the context transform is expressed relative to the context origin (cf. opengl_triangle_renderer::set_transformation)
+        optional_mat44 transformation = aTransformation;
+        if (transform())
+        {
+            auto const translation = [](scalar x, scalar y)
+                {
+                    return mat44{
+                        { 1.0, 0.0, 0.0, 0.0 },
+                        { 0.0, 1.0, 0.0, 0.0 },
+                        { 0.0, 0.0, 1.0, 0.0 },
+                        { x, y, 0.0, 1.0 } };
+                };
+            auto const contextOrigin = origin();
+            transformation = translation(contextOrigin.x, contextOrigin.y) * *transform() * translation(-contextOrigin.x, -contextOrigin.y) * aTransformation;
+        }
+
+        bool const depthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
+        i_texture const* previousTexture = nullptr;
+        thread_local std::vector<scene_vertex> tVertices;
+        thread_local std::vector<std::uint32_t> tIndices;
+
+        for (auto md = aFirst; md != aLast; ++md)
+        {
+            auto& meshDrawable = *md;
+            auto& meshRenderer = *meshDrawable.renderer;
+            if (!meshRenderer.render || meshRenderer.layer != aLayer)
+                continue;
+            auto const& mesh = mesh_of(meshDrawable);
+            if (mesh.faces.empty() || mesh.vertices.empty())
+                continue;
+            auto const& material = meshRenderer.material;
+            bool const textured = patch_drawable::has_texture(meshRenderer, material);
+
+            auto& meshRenderCache = cache.entity_record_no_lock(meshDrawable.entity, true);
+            auto const vertexCount = static_cast<std::uint32_t>(mesh.vertices.size());
+            auto const indexCount = static_cast<std::uint32_t>(mesh.faces.size() * 3u);
+            std::optional<opengl_scene_buffer::mesh_range> range;
+            if (meshRenderCache.state != game::cache_state::Invalid)
+                range = sceneBuffer.find(meshRenderCache.meshVertexArrayIndices[0], meshRenderCache.meshVertexArrayIndices[1]);
+            if (meshRenderCache.state != game::cache_state::Clean || range == std::nullopt)
+            {
+                if (range && (range->vertexEnd - range->vertexStart != vertexCount || range->indexEnd - range->indexStart != indexCount))
+                {
+                    sceneBuffer.reclaim(range->vertexStart, range->vertexEnd);
+                    range = std::nullopt;
+                }
+                if (range == std::nullopt)
+                    range = sceneBuffer.allocate(vertexCount, indexCount);
+
+                uv_calculator const* uvCalculator = nullptr;
+                if (textured && mesh.uv.size() == mesh.vertices.size())
+                {
+                    auto const& materialTexture = patch_drawable::texture(meshRenderer, material);
+                    uvCalculator = &service<i_texture_manager>().find_texture(materialTexture.id.cookie())->uv_calculator(materialTexture.subTexture);
+                }
+                optional_mat44f itemTransformation;
+                if (meshDrawable.animationFilter)
+                    itemTransformation = (*meshDrawable.animationFilter)(iStepTime, game::mesh_filter_patch);
+                if (meshDrawable.transformation)
+                    itemTransformation = itemTransformation ? *meshDrawable.transformation * *itemTransformation : *meshDrawable.transformation;
+                auto const& model = meshDrawable.model;
+                bool const skinned = model != nullptr && !model->joints.empty() &&
+                    model->vertexJoints.size() == mesh.vertices.size() && model->vertexWeights.size() == mesh.vertices.size();
+                vec4f const rgbaf = (material.color ? material.color->rgba : vec4f{ 1.0f, 1.0f, 1.0f, 1.0f });
+                auto const to_u8 = [](float c) { return static_cast<std::uint8_t>(std::clamp(c, 0.0f, 1.0f) * 255.0f + 0.5f); };
+                avec4u8 const rgba{ to_u8(rgbaf[0]), to_u8(rgbaf[1]), to_u8(rgbaf[2]), to_u8(rgbaf[3]) };
+                auto const modelId = vec1f{ static_cast<float>(meshDrawable.entity) };
+
+                tVertices.resize(vertexCount);
+                for (std::uint32_t vertexIndex = 0u; vertexIndex < vertexCount; ++vertexIndex)
+                {
+                    auto const& v = mesh.vertices[vertexIndex];
+                    auto& vertex = tVertices[vertexIndex];
+                    vertex.xyz = (itemTransformation ? *itemTransformation * v : v);
+                    vertex.rgba = rgba;
+                    vertex.st = (uvCalculator ? (*uvCalculator)(mesh.uv[vertexIndex]) : vec2f{});
+                    vertex.model = modelId;
+                    if (skinned)
+                    {
+                        auto const& joints = model->vertexJoints[vertexIndex];
+                        vertex.joints = avec4u16{ 
+                            static_cast<std::uint16_t>(joints[0]), static_cast<std::uint16_t>(joints[1]),
+                            static_cast<std::uint16_t>(joints[2]), static_cast<std::uint16_t>(joints[3]) };
+                        vertex.weights = model->vertexWeights[vertexIndex];
+                    }
+                    else
+                    {
+                        vertex.joints = avec4u16{};
+                        vertex.weights = vec4f{};
+                    }
+                }
+                tIndices.clear();
+                tIndices.reserve(indexCount);
+                for (auto const& face : mesh.faces)
+                    for (auto faceVertexIndex : face)
+                        tIndices.push_back(range->vertexStart + static_cast<std::uint32_t>(faceVertexIndex));
+                sceneBuffer.write(*range, tVertices.data(), tIndices.data());
+
+                meshRenderCache.meshVertexArrayIndices = vec2u32{ range->vertexStart, range->vertexEnd };
+                if (meshDrawable.animationFilter == nullptr || !meshDrawable.animationFilter->any_active_tweens())
+                    meshRenderCache.state = game::cache_state::Clean;
+                else
+                    meshRenderCache.state = game::cache_state::Dirty;
+            }
+
+            if (depthTestEnabled)
+            {
+                if (!meshRenderer.depthTest)
+                    glCheck(glDisable(GL_DEPTH_TEST))
+                else
+                    glCheck(glEnable(GL_DEPTH_TEST))
+            }
+
+            if (material.gradient)
+                apply_gradients(program.gradient_shader(), service<i_gradient_manager>().find_gradient(material.gradient->id.cookie()));
+            else if (gradient_set())
+                apply_gradients(program.gradient_shader());
+            else
+                program.gradient_shader().clear_gradient();
+
+            if (meshRenderer.filter)
+            {
+                auto const& filter = *meshRenderer.filter;
+                program.filter_shader().set_filter(filter.type, filter.pass, filter.arg1, filter.arg2, filter.arg3, filter.arg4);
+            }
+            else
+                program.filter_shader().clear_filter();
+
+            if (textured)
+            {
+                auto const& materialTexture = patch_drawable::texture(meshRenderer, material);
+                auto const& texture = *service<i_texture_manager>().find_texture(materialTexture.id.cookie());
+                auto sampling = (materialTexture.sampling != std::nullopt ? *materialTexture.sampling : texture.sampling());
+                if (sampling == texture_sampling::Scaled)
+                    sampling = texture_sampling::Normal;
+                if (previousTexture != &texture)
+                {
+                    if (previousTexture != nullptr)
+                        previousTexture->unbind();
+                    texture.bind(sampling != texture_sampling::Multisample ? static_cast<std::uint32_t>(reserved_texture_unit::Tex) : static_cast<std::uint32_t>(reserved_texture_unit::TexMS));
+                    previousTexture = &texture;
+                }
+                if (sampling != texture_sampling::Multisample)
+                {
+                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ?
+                        GL_LINEAR :
+                        GL_NEAREST));
+                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling == texture_sampling::NormalMipmap ?
+                        GL_LINEAR_MIPMAP_LINEAR :
+                        sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ?
+                        GL_LINEAR :
+                        GL_NEAREST));
+                }
+                program.texture_shader().set_texture(texture);
+                program.texture_shader().set_effect(material.shaderEffect != std::nullopt ? *material.shaderEffect : shader_effect::None);
+                program.texture_shader().set_effect_gain(material.shaderEffectGain != std::nullopt ? *material.shaderEffectGain : vec4{ 1.0, 1.0, 1.0, 1.0 });
+                if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
+                    enable_sample_shading(1.0);
+            }
+            else
+            {
+                if (previousTexture != nullptr)
+                    previousTexture->unbind();
+                previousTexture = nullptr;
+                program.texture_shader().clear_texture();
+            }
+
+            sceneBuffer.draw(*this, program, transformation, range->indexStart, range->indexEnd - range->indexStart);
+
+            disable_sample_shading();
+        }
+
+        if (previousTexture != nullptr)
+            previousTexture->unbind();
+
+        if (depthTestEnabled)
+            glCheck(glEnable(GL_DEPTH_TEST))
     }
 
     void opengl_rendering_context::draw_patch(patch_drawable& aPatch, const mat44& aTransformation)
