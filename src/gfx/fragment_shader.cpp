@@ -22,6 +22,7 @@
 #include <neogfx/gfx/fragment_shader.hpp>
 #include "standard-gradient.frag.hpp"
 #include "standard-texture.frag.hpp"
+#include "standard-pbr.frag.hpp"
 #include "standard-filter.frag.hpp"
 #include "standard-glyph.frag.hpp"
 #include "standard-stipple.frag.hpp"
@@ -203,6 +204,79 @@ namespace neogfx
     void standard_texture_shader::set_pass_through(bool aPassThrough)
     {
         uTexturePassThrough = aPassThrough;
+    }
+
+    standard_pbr_shader::standard_pbr_shader(std::string const& aName) :
+        standard_fragment_shader<i_pbr_shader>{ aName }
+    {
+        disable();
+        add_in_variable<vec3f>("WorldNormal"_s, 10u);
+        set_uniform("uPbrTexture0"_s, sampler2D{ static_cast<std::uint32_t>(reserved_texture_unit::Pbr0) });
+        set_uniform("uPbrTexture1"_s, sampler2D{ static_cast<std::uint32_t>(reserved_texture_unit::Pbr1) });
+        set_uniform("uPbrTexture2"_s, sampler2D{ static_cast<std::uint32_t>(reserved_texture_unit::Pbr2) });
+        set_uniform("uPbrTexture3"_s, sampler2D{ static_cast<std::uint32_t>(reserved_texture_unit::Pbr3) });
+        set_uniform("uPbrBaseTexture"_s, sampler2D{ static_cast<std::uint32_t>(reserved_texture_unit::Tex) });
+        uPbrEnabled = false;
+        uPbrLightDirection = vec3f{ 0.0f, 1.0f, 0.0f };
+        uPbrViewPosition = vec3f{};
+        uPbrFactors = vec4f{ 1.0f, 1.0f, 1.0f, 1.0f };
+        uPbrEmissive = vec3f{};
+        uPbrAlphaCutoff = -1.0f;
+        uPbrDoubleSided = false;
+        uPbrTextureSources = vec4i32{ pbr_shader_material::NoTexture, pbr_shader_material::NoTexture, pbr_shader_material::NoTexture, pbr_shader_material::NoTexture };
+        uPbrTextureTransform0 = vec4f{ 1.0f, 1.0f, 0.0f, 0.0f };
+        uPbrTextureTransform1 = vec4f{ 1.0f, 1.0f, 0.0f, 0.0f };
+        uPbrTextureTransform2 = vec4f{ 1.0f, 1.0f, 0.0f, 0.0f };
+        uPbrTextureTransform3 = vec4f{ 1.0f, 1.0f, 0.0f, 0.0f };
+    }
+
+    void standard_pbr_shader::generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const
+    {
+        standard_fragment_shader<i_pbr_shader>::generate_code(aProgram, aLanguage, aOutput);
+        if (aLanguage == shader_language::Glsl)
+            aOutput += string{ glsl::StandardPbrFragmentShader };
+        else
+            throw unsupported_shader_language();
+    }
+
+    std::optional<vec3> const& standard_pbr_shader::pbr_light() const
+    {
+        return iLight;
+    }
+
+    vec3 const& standard_pbr_shader::pbr_camera() const
+    {
+        return iCamera;
+    }
+
+    void standard_pbr_shader::set_pbr_light(std::optional<vec3> const& aDirection, vec3 const& aCameraPosition)
+    {
+        iLight = (aDirection && aDirection->magnitude() > 0.0) ? std::optional<vec3>{ aDirection->normalized() } : std::nullopt;
+        iCamera = aCameraPosition;
+    }
+
+    void standard_pbr_shader::clear_pbr()
+    {
+        // n.b. stays disabled (not compiled) until first used
+        if (enabled())
+            uPbrEnabled = false;
+    }
+
+    void standard_pbr_shader::set_pbr(pbr_shader_material const& aMaterial)
+    {
+        enable();
+        uPbrEnabled = true;
+        uPbrLightDirection = (iLight ? *iLight : vec3{ 0.0, 1.0, 0.0 }).as<float>();
+        uPbrViewPosition = aMaterial.viewPosition.as<float>();
+        uPbrFactors = vec4{ aMaterial.metallic, aMaterial.roughness, aMaterial.normalScale, aMaterial.occlusionStrength }.as<float>();
+        uPbrEmissive = aMaterial.emissive.as<float>();
+        uPbrAlphaCutoff = aMaterial.alphaCutoff ? static_cast<float>(*aMaterial.alphaCutoff) : -1.0f;
+        uPbrDoubleSided = aMaterial.doubleSided;
+        uPbrTextureSources = aMaterial.textureSources;
+        uPbrTextureTransform0 = aMaterial.textureTransforms[0].as<float>();
+        uPbrTextureTransform1 = aMaterial.textureTransforms[1].as<float>();
+        uPbrTextureTransform2 = aMaterial.textureTransforms[2].as<float>();
+        uPbrTextureTransform3 = aMaterial.textureTransforms[3].as<float>();
     }
 
     standard_filter_shader::standard_filter_shader(std::string const& aName) :

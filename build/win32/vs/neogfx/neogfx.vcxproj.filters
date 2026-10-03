@@ -946,6 +946,9 @@
     <ClInclude Include="x64\Release\GeneratedFiles\standard-gradient.frag.hpp">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-pbr.frag.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
     <ClInclude Include="x64\Release\GeneratedFiles\standard-shape.frag.hpp">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -981,6 +984,7 @@
     <CustomBuild Include="..\..\..\..\src\gfx\native\standard-gradient.frag" />
     <CustomBuild Include="..\..\..\..\src\gfx\native\standard-shape.frag" />
     <CustomBuild Include="..\..\..\..\src\gfx\native\standard-stipple.frag" />
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-pbr.frag" />
     <CustomBuild Include="..\..\..\..\src\gfx\native\standard-texture.frag" />
     <CustomBuild Include="..\..\..\..\src\gfx\native\standard.frag" />
     <CustomBuild Include="..\..\..\..\src\icons.nrc">

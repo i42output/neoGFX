@@ -47,6 +47,8 @@ namespace neogfx
         virtual i_gradient_shader& gradient_shader() = 0;
         virtual const i_texture_shader& texture_shader() const = 0;
         virtual i_texture_shader& texture_shader() = 0;
+        virtual const i_pbr_shader& pbr_shader() const = 0;
+        virtual i_pbr_shader& pbr_shader() = 0;
         virtual const i_filter_shader& filter_shader() const = 0;
         virtual i_filter_shader& filter_shader() = 0;
         virtual const i_glyph_shader& glyph_shader() const = 0;

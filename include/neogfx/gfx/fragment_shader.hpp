@@ -174,6 +174,36 @@ namespace neogfx
         texture iDummyTextureMS;
     };
 
+    class standard_pbr_shader : public standard_fragment_shader<i_pbr_shader>
+    {
+    public:
+        standard_pbr_shader(std::string const& aName = "standard_pbr_shader");
+    public:
+        void generate_code(i_shader_program const& aProgram, shader_language aLanguage, i_string& aOutput) const override;
+    public:
+        std::optional<vec3> const& pbr_light() const final;
+        vec3 const& pbr_camera() const final;
+        void set_pbr_light(std::optional<vec3> const& aDirection, vec3 const& aCameraPosition) final;
+        void clear_pbr() final;
+        void set_pbr(pbr_shader_material const& aMaterial) final;
+    private:
+        std::optional<vec3> iLight;
+        vec3 iCamera;
+    private:
+        cache_uniform(uPbrEnabled)
+        cache_uniform(uPbrLightDirection)
+        cache_uniform(uPbrViewPosition)
+        cache_uniform(uPbrFactors)
+        cache_uniform(uPbrEmissive)
+        cache_uniform(uPbrAlphaCutoff)
+        cache_uniform(uPbrDoubleSided)
+        cache_uniform(uPbrTextureSources)
+        cache_uniform(uPbrTextureTransform0)
+        cache_uniform(uPbrTextureTransform1)
+        cache_uniform(uPbrTextureTransform2)
+        cache_uniform(uPbrTextureTransform3)
+    };
+
     class standard_filter_shader : public standard_fragment_shader<i_filter_shader>
     {
     public:

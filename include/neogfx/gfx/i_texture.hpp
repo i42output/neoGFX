@@ -80,8 +80,12 @@ namespace neogfx
         FilterKernel    = 5,
         Reserved1       = 6,
         RenderTarget    = 7,
+        Pbr0            = 8,    // physically based shading textures (see i_pbr_shader)
+        Pbr1            = 9,
+        Pbr2            = 10,
+        Pbr3            = 11,
 
-        RESERVED_LAST   = RenderTarget
+        RESERVED_LAST   = Pbr3
     };
 
     class i_sub_texture;

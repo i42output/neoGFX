@@ -3360,6 +3360,9 @@ namespace neogfx
 
         bool const depthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
         i_texture const* previousTexture = nullptr;
+        // physically based shading (see i_pbr_shader): the textures bound to reserved_texture_unit::Pbr0 to Pbr3
+        auto& pbrShader = program.pbr_shader();
+        std::array<i_texture const*, 4> pbrTextures = {};
         thread_local std::vector<scene_vertex> tVertices;
         thread_local std::vector<std::uint32_t> tIndices;
 
@@ -3440,7 +3443,9 @@ namespace neogfx
                     auto& vertex = tVertices[vertexIndex];
                     vertex.xyz = (itemTransformation ? *itemTransformation * v : v);
                     vertex.rgba = rgba;
-                    vertex.st = (uvCalculator ? (*uvCalculator)(mesh.uv[vertexIndex]) : vec2f{});
+                    // n.b. untextured meshes keep their texture coordinates for any physically based shading textures
+                    vertex.st = (uvCalculator ? (*uvCalculator)(mesh.uv[vertexIndex]) :
+                        mesh.uv.size() == mesh.vertices.size() ? mesh.uv[vertexIndex] : vec2f{});
                     vertex.model = modelId;
                     vertex.normal = normals[vertexIndex];
                     if (skinned)
@@ -3533,10 +3538,107 @@ namespace neogfx
                 program.texture_shader().clear_texture();
             }
 
+            if (pbrShader.pbr_light())
+            {
+                // the vertices' texture coordinates are those of the base colour texture (if any): each PBR texture's are
+                // an affine transformation of them (as each texture has its own storage extents)
+                auto const affine = [](uv_calculator const& aCalculator) -> std::pair<vec2, vec2>
+                    {
+                        auto const offset = aCalculator(vec2f{ 0.0f, 0.0f }).as<scalar>();
+                        auto const scale = aCalculator(vec2f{ 1.0f, 1.0f }).as<scalar>() - offset;
+                        return { scale, offset };
+                    };
+                i_texture const* baseTexture = nullptr;
+                std::pair<vec2, vec2> baseUv = { vec2{ 1.0, 1.0 }, vec2{} };
+                if (textured && mesh.uv.size() == mesh.vertices.size())
+                {
+                    auto const& materialTexture = patch_drawable::texture(meshRenderer, material);
+                    baseTexture = &*service<i_texture_manager>().find_texture(materialTexture.id.cookie());
+                    baseUv = affine(baseTexture->uv_calculator(materialTexture.subTexture));
+                }
+                pbr_shader_material pbr;
+                pbr.viewPosition = pbrShader.pbr_camera() + origin().to_vec3();
+                std::array<i_texture const*, 4> meshPbrTextures = {};
+                if (material.pbr)
+                {
+                    auto const& pbrMaterial = *material.pbr;
+                    pbr.metallic = pbrMaterial.metallic;
+                    pbr.roughness = pbrMaterial.roughness;
+                    pbr.normalScale = pbrMaterial.normalScale;
+                    pbr.occlusionStrength = pbrMaterial.occlusionStrength;
+                    pbr.emissive = pbrMaterial.emissive;
+                    pbr.alphaCutoff = pbrMaterial.alphaCutoff;
+                    pbr.doubleSided = pbrMaterial.doubleSided;
+                    std::optional<game::texture> const* const sources[] = {
+                        &pbrMaterial.metallicRoughnessTexture, &pbrMaterial.normalTexture, &pbrMaterial.occlusionTexture, &pbrMaterial.emissiveTexture };
+                    for (std::size_t source = 0u; source < 4u; ++source)
+                    {
+                        if (!*sources[source] || mesh.uv.size() != mesh.vertices.size())
+                            continue;
+                        auto const& sourceTexture = **sources[source];
+                        auto const& texture = *service<i_texture_manager>().find_texture(sourceTexture.id.cookie());
+                        if (&texture == baseTexture)
+                        {
+                            pbr.textureSources[static_cast<std::uint32_t>(source)] = pbr_shader_material::BaseColorTexture;
+                            continue;
+                        }
+                        // n.b. a texture used more than once (e.g. occlusion packed with metallic-roughness) is bound once
+                        auto unit = static_cast<std::size_t>(std::distance(meshPbrTextures.begin(),
+                            std::find(meshPbrTextures.begin(), meshPbrTextures.end(), &texture)));
+                        if (unit == meshPbrTextures.size())
+                            unit = static_cast<std::size_t>(std::distance(meshPbrTextures.begin(),
+                                std::find(meshPbrTextures.begin(), meshPbrTextures.end(), nullptr)));
+                        meshPbrTextures[unit] = &texture;
+                        pbr.textureSources[static_cast<std::uint32_t>(source)] = static_cast<std::int32_t>(unit);
+                        auto const uv = affine(texture.uv_calculator(sourceTexture.subTexture));
+                        vec2 const scale{ uv.first.x / baseUv.first.x, uv.first.y / baseUv.first.y };
+                        vec2 const offset{ uv.second.x - baseUv.second.x * scale.x, uv.second.y - baseUv.second.y * scale.y };
+                        pbr.textureTransforms[source] = vec4{ scale.x, scale.y, offset.x, offset.y };
+                    }
+                }
+                // n.b. a texture is only bound to one unit at a time: binding it elsewhere takes it from the unit it was bound to
+                // (as the base colour texture binding above may have done)
+                for (auto& bound : pbrTextures)
+                    if (bound != nullptr && bound == previousTexture)
+                        bound = nullptr;
+                for (std::size_t unit = 0u; unit < meshPbrTextures.size(); ++unit)
+                {
+                    auto const* texture = meshPbrTextures[unit];
+                    if (texture == nullptr)
+                        continue;
+                    for (auto& bound : pbrTextures)
+                        if (&bound != &pbrTextures[unit] && bound == texture)
+                            bound = nullptr;
+                    if (pbrTextures[unit] != nullptr && pbrTextures[unit] != texture)
+                        pbrTextures[unit]->unbind();
+                    texture->bind(static_cast<std::uint32_t>(reserved_texture_unit::Pbr0) + static_cast<std::uint32_t>(unit));
+                    pbrTextures[unit] = texture;
+                    auto const sampling = texture->sampling();
+                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ?
+                        GL_LINEAR :
+                        GL_NEAREST));
+                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling == texture_sampling::NormalMipmap ?
+                        GL_LINEAR_MIPMAP_LINEAR :
+                        sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ?
+                        GL_LINEAR :
+                        GL_NEAREST));
+                }
+                // the base colour texture's sampling state (above) assumes its unit is active
+                glCheck(glActiveTexture(GL_TEXTURE0 + static_cast<GLenum>(reserved_texture_unit::Tex)));
+                pbrShader.set_pbr(pbr);
+            }
+            else
+                pbrShader.clear_pbr();
+
             sceneBuffer.draw(*this, program, transformation, range->indexStart, range->indexEnd - range->indexStart);
 
             disable_sample_shading();
         }
+
+        pbrShader.clear_pbr();
+        for (auto const* texture : pbrTextures)
+            if (texture != nullptr)
+                texture->unbind();
 
         if (previousTexture != nullptr)
             previousTexture->unbind();

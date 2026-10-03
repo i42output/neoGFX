@@ -108,4 +108,43 @@ namespace neogfx
         virtual void set_shape(shader_shape aShape) = 0;
         virtual i_ssbo& shape_vertices() = 0;
     };
+
+    // the uniforms of a model transformed mesh (see game::model_transformation) drawn with physically based shading
+    // (glTF metallic-roughness); colour factors are linear
+    struct pbr_shader_material
+    {
+        // texture sources
+        static constexpr std::int32_t NoTexture = -1;           // 0 to 3: reserved_texture_unit::Pbr0 to Pbr3
+        static constexpr std::int32_t BaseColorTexture = 4;     // the texture bound to reserved_texture_unit::Tex
+
+        vec3 viewPosition;      // the camera's position in the same space as the transformed vertices
+        scalar metallic = 1.0;
+        scalar roughness = 1.0;
+        scalar normalScale = 1.0;
+        scalar occlusionStrength = 1.0;
+        vec3 emissive;
+        std::optional<scalar> alphaCutoff;
+        bool doubleSided = false;
+        // the textures (metallic-roughness, normal, occlusion and emissive) ...
+        vec4i32 textureSources = vec4i32{ NoTexture, NoTexture, NoTexture, NoTexture };
+        // ... and their coordinates: scale (xy) and offset (zw) applied to the vertices' (base colour) texture coordinates
+        std::array<vec4, 4> textureTransforms = { vec4{ 1.0, 1.0, 0.0, 0.0 }, vec4{ 1.0, 1.0, 0.0, 0.0 }, vec4{ 1.0, 1.0, 0.0, 0.0 }, vec4{ 1.0, 1.0, 0.0, 0.0 } };
+    };
+
+    // physically based shading (glTF metallic-roughness BRDF) of model transformed meshes lit by a directional light and a
+    // sky/ground hemisphere; the base colour is the colour arriving from the shaders before it (vertex colour and base colour
+    // texture). Enabled by the first set_pbr(), so programs that never use it don't compile it.
+    class i_pbr_shader : public i_fragment_shader
+    {
+    public:
+        typedef i_pbr_shader abstract_type;
+    public:
+        // the light (world space direction towards it) and camera position (world space); std::nullopt for no physically based shading
+        virtual std::optional<vec3> const& pbr_light() const = 0;
+        virtual vec3 const& pbr_camera() const = 0;
+        virtual void set_pbr_light(std::optional<vec3> const& aDirection, vec3 const& aCameraPosition) = 0;
+        // per mesh
+        virtual void clear_pbr() = 0;
+        virtual void set_pbr(pbr_shader_material const& aMaterial) = 0;
+    };
 }

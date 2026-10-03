@@ -24,6 +24,7 @@
 
 #include <neogfx/gfx/i_scene_graph.hpp>
 #include <neogfx/gfx/scene_graph.hpp>
+#include <neogfx/gfx/i_vertex_shader.hpp>
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/texture.hpp>
@@ -37,8 +38,9 @@ namespace neogfx::game
     // 2D: drawn with an affine view transformation (scene origin at the centre of the canvas,
     //     y up); z translation is drawing order.
     // 3D: drawn through the scene's camera (or a default camera framing the scene), depth tested
-    //     and back face culled (unless any material is double sided); lit (per vertex, on the GPU, by their
-    //     normals) by a fixed directional light.
+    //     and back face culled (unless any material is double sided); lit (on the GPU, by their normals) by a
+    //     fixed directional light: per vertex (the default) or physically based (per pixel, glTF metallic-roughness
+    //     with metallic-roughness, normal, occlusion and emissive textures; see set_lighting_model).
     // The view (and 3D projection) is applied on the GPU (canvas::set_entity_transformation) so moving
     // the camera does not change entity vertices: they only change when a node's world transformation does.
     // Base colour textures (PNG or JPEG; from buffer views, data URIs or files) are drawn using TEXCOORD_0/1.
@@ -79,6 +81,9 @@ namespace neogfx::game
         void set_view_scale(std::optional<scalar> const& aScale);
         bool lighting() const;
         void set_lighting(bool aLighting);
+        // scene_lighting::PerVertex (the default) or scene_lighting::PhysicallyBased (scene_lighting::None is the same as set_lighting(false))
+        scene_lighting lighting_model() const;
+        void set_lighting_model(scene_lighting aLightingModel);
         bool mouse_camera_control() const;
         void set_mouse_camera_control(bool aEnable);
         // discard any mouse camera changes
@@ -129,6 +134,7 @@ namespace neogfx::game
         neogfx::scene_graph::index iCameraNode;
         std::optional<scalar> iViewScale;
         bool iLighting;
+        scene_lighting iLightingModel;
         std::vector<primitive_entity> iEntities;
         std::optional<std::pair<vec3, vec3>> iBounds;
         std::map<std::pair<neogfx::scene_graph::index, texture_sampling>, std::optional<game::texture>> iTextures;

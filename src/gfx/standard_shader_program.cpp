@@ -35,6 +35,8 @@ namespace neogfx
         iDefaultShader = static_cast<i_fragment_shader&>(add_shader<standard_fragment_shader<>>());
         iGradientShader = static_cast<i_gradient_shader&>(add_shader<standard_gradient_shader>());
         iTextureShader = static_cast<i_texture_shader&>(add_shader<standard_texture_shader>());
+        // n.b. after the texture shader: it shades the base colour (see i_pbr_shader)
+        iPbrShader = static_cast<i_pbr_shader&>(add_shader<standard_pbr_shader>());
         iFilterShader = static_cast<i_filter_shader&>(add_shader<standard_filter_shader>());
         iGlyphShader = static_cast<i_glyph_shader&>(add_shader<standard_glyph_shader>());
         iShapeShader = static_cast<i_shape_shader&>(add_shader<standard_shape_shader>());
@@ -93,6 +95,16 @@ namespace neogfx
     i_texture_shader& standard_shader_program::texture_shader()
     {
         return *iTextureShader;
+    }
+
+    const i_pbr_shader& standard_shader_program::pbr_shader() const
+    {
+        return *iPbrShader;
+    }
+
+    i_pbr_shader& standard_shader_program::pbr_shader()
+    {
+        return *iPbrShader;
     }
 
     const i_filter_shader& standard_shader_program::filter_shader() const

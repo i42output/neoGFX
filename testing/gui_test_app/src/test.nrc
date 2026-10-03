@@ -1117,6 +1117,10 @@
                                     id: checkSceneGraphLighting
                                     text: "Lighting"
                                 }
+                                check_box: {
+                                    id: checkSceneGraphPbr
+                                    text: "PBR"
+                                }
                                 push_button: {
                                     id: buttonSceneGraphSave
                                     text: "Save glTF..."

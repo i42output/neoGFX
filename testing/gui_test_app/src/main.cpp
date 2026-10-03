@@ -1541,7 +1541,10 @@ int main(int argc, char* argv[])
             { "Duck", ng::vec3{ -5.5, -1.9 - 0.1 * 1.5, 5.5 }, 1.5 },
             { "CesiumMan", ng::vec3{ 5.5, -1.9, 5.5 }, 1.5 },
             { "BoxAnimated", ng::vec3{ -5.5, -1.9 + 0.5, -5.5 }, 1.0 },
-            { "BoxTextured", ng::vec3{ 5.5, -1.9 + 0.75, -5.5 }, 1.5 } };
+            { "BoxTextured", ng::vec3{ 5.5, -1.9 + 0.75, -5.5 }, 1.5 },
+            // all of the glTF metallic-roughness textures (base colour, metallic-roughness, normal, occlusion and emissive): see
+            // the PBR check box (scene_graph_canvas::set_lighting_model); low enough at the front not to meet the moon
+            { "DamagedHelmet", ng::vec3{ 0.0, -1.9 + 0.9 * 0.7, 7.4 }, 0.7 } };
         std::vector<std::unique_ptr<neolib::http>> sampleDownloads;
         std::map<std::string, std::string> sampleStatus;
         auto show_sample_status = [&]()
@@ -1668,6 +1671,12 @@ int main(int argc, char* argv[])
         {
             if (sceneGraphCanvas)
                 sceneGraphCanvas->set_lighting(window.checkSceneGraphLighting.is_checked());
+        });
+        window.checkSceneGraphPbr.Toggled([&]()
+        {
+            if (sceneGraphCanvas)
+                sceneGraphCanvas->set_lighting_model(window.checkSceneGraphPbr.is_checked() ?
+                    ng::scene_lighting::PhysicallyBased : ng::scene_lighting::PerVertex);
         });
         window.buttonSceneGraphSave.Clicked([&]()
         {

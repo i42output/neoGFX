@@ -26,7 +26,7 @@
 namespace neogfx
 {
     standard_vertex_shader::standard_vertex_shader(std::string const& aName) :
-        vertex_shader{ aName }, iOpacity{ 1.0 }, iModelTableBase{ 0u }
+        vertex_shader{ aName }, iOpacity{ 1.0 }, iModelTableBase{ 0u }, iSceneLighting{ scene_lighting::None }
     {
         auto& coord = add_attribute<vec3f>("VertexPosition"_s, 0u);
         auto& color = add_attribute<vec4f>("VertexColor"_s, 1u);
@@ -41,7 +41,7 @@ namespace neogfx
         add_attribute<float>("VertexModel"_s, 11u);
         add_attribute<vec4f>("VertexJoints"_s, 12u);
         add_attribute<vec4f>("VertexWeights"_s, 13u);
-        add_attribute<vec3f>("VertexNormal"_s, 14u);
+        auto& normal = add_attribute<vec3f>("VertexNormal"_s, 14u);
         uModelTableBase = iModelTableBase;
         uSceneLight = vec4f{};
         add_out_variable<vec3f>("Coord"_s, 0u).link(coord);
@@ -53,6 +53,8 @@ namespace neogfx
         add_out_variable<vec4f>("Function4"_s, 7u, true).link(function4);
         add_out_variable<vec4f>("Function5"_s, 8u, true).link(function5);
         add_out_variable<vec4f>("Function6"_s, 9u, true).link(function6);
+        // world space normal of model transformed vertices (for per pixel lighting; see i_pbr_shader)
+        add_out_variable<vec3f>("WorldNormal"_s, 10u).link(normal);
     }
 
     void standard_vertex_shader::set_projection_matrix(const optional_mat44& aProjectionMatrix)
@@ -82,11 +84,12 @@ namespace neogfx
         }
     }
 
-    void standard_vertex_shader::set_scene_light(std::optional<vec3> const& aDirection)
+    void standard_vertex_shader::set_scene_light(std::optional<vec3> const& aDirection, scene_lighting aLighting)
     {
-        if (iSceneLight != aDirection)
+        if (iSceneLight != aDirection || iSceneLighting != aLighting)
         {
             iSceneLight = aDirection;
+            iSceneLighting = aLighting;
             uSceneLight.uniform().mutable_value();
         }
     }
@@ -157,11 +160,11 @@ namespace neogfx
 
         if (uSceneLight.uniform().is_dirty())
         {
-            // xyz: direction towards the light (normalized), w: 1 if lit
-            if (iSceneLight && iSceneLight->magnitude() > 0.0)
+            // xyz: direction towards the light (normalized), w: the lighting (scene_lighting; 0 if unlit)
+            if (iSceneLight && iSceneLight->magnitude() > 0.0 && iSceneLighting != scene_lighting::None)
             {
                 auto const direction = iSceneLight->normalized().as<float>();
-                uSceneLight = vec4f{ direction.x, direction.y, direction.z, 1.0f };
+                uSceneLight = vec4f{ direction.x, direction.y, direction.z, static_cast<float>(iSceneLighting) };
             }
             else
                 uSceneLight = vec4f{};

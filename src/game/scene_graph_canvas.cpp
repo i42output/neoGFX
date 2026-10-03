@@ -54,6 +54,12 @@ namespace neogfx::game
             return sArchetype;
         }
 
+        // the fixed directional light: world space, towards the light
+        vec3 scene_light()
+        {
+            return vec3{ -0.4, 0.8, 0.45 }.normalized();
+        }
+
         mat44 translation_matrix(vec3 const& aTranslation)
         {
             auto result = mat44::identity();
@@ -143,6 +149,7 @@ namespace neogfx::game
         iScene{ sg::invalid_index },
         iCameraNode{ sg::invalid_index },
         iLighting{ true },
+        iLightingModel{ scene_lighting::PerVertex },
         iMouseCameraControl{ true },
         iDragPan{ false },
         iLastCameraWorld{ mat44::identity() },
@@ -158,6 +165,7 @@ namespace neogfx::game
         iScene{ sg::invalid_index },
         iCameraNode{ sg::invalid_index },
         iLighting{ true },
+        iLightingModel{ scene_lighting::PerVertex },
         iMouseCameraControl{ true },
         iDragPan{ false },
         iLastCameraWorld{ mat44::identity() },
@@ -173,6 +181,7 @@ namespace neogfx::game
         iScene{ sg::invalid_index },
         iCameraNode{ sg::invalid_index },
         iLighting{ true },
+        iLightingModel{ scene_lighting::PerVertex },
         iMouseCameraControl{ true },
         iDragPan{ false },
         iLastCameraWorld{ mat44::identity() },
@@ -333,6 +342,21 @@ namespace neogfx::game
         update();
     }
 
+    scene_lighting scene_graph_canvas::lighting_model() const
+    {
+        return iLightingModel;
+    }
+
+    void scene_graph_canvas::set_lighting_model(scene_lighting aLightingModel)
+    {
+        bool const texturesChanged = (iLightingModel == scene_lighting::PhysicallyBased) != (aLightingModel == scene_lighting::PhysicallyBased);
+        iLightingModel = aLightingModel;
+        if (texturesChanged)
+            rebuild(); // physically based shading's textures are only loaded if it is used
+        else
+            update();
+    }
+
     void scene_graph_canvas::init()
     {
         ecs().component<mesh_filter>();
@@ -427,6 +451,37 @@ namespace neogfx::game
                 std::optional<game::texture> texture;
                 if (textureImage != sg::invalid_index && localMesh.uv.size() == localMesh.vertices.size())
                     texture = load_texture(textureImage, sampling);
+                // the rest of the material, for physically based shading (its textures, which use the base colour texture's
+                // coordinates, are only loaded if it is used); n.b. no material: the glTF default material
+                game::pbr_material pbr;
+                if (primitive.has_material() && primitive.material() < g.material_count())
+                {
+                    auto const& material = g.material(primitive.material());
+                    pbr.metallic = material.pbr_metallic_roughness().metallic_factor();
+                    pbr.roughness = material.pbr_metallic_roughness().roughness_factor();
+                    pbr.normalScale = material.normal_texture().scale();
+                    pbr.occlusionStrength = material.occlusion_texture().strength();
+                    pbr.emissive = material.emissive_factor();
+                    if (material.alpha_mode() == sg::alpha_mode::Mask)
+                        pbr.alphaCutoff = material.alpha_cutoff();
+                    pbr.doubleSided = material.double_sided();
+                    auto const pbr_texture = [&](sg::i_texture_reference const& aReference) -> std::optional<game::texture>
+                    {
+                        if (iLightingModel != scene_lighting::PhysicallyBased || !aReference.has_texture() || aReference.texture() >= g.texture_count() ||
+                            !g.texture(aReference.texture()).has_source() || localMesh.uv.size() != localMesh.vertices.size())
+                            return std::nullopt;
+                        auto const& textureInfo = g.texture(aReference.texture());
+                        auto textureSampling = texture_sampling::NormalMipmap;
+                        if (textureInfo.has_sampler() && textureInfo.sampler() < g.sampler_count() &&
+                            g.sampler(textureInfo.sampler()).mag_filter() == sg::mag_filter::NEAREST)
+                            textureSampling = texture_sampling::Nearest;
+                        return load_texture(textureInfo.source(), textureSampling);
+                    };
+                    pbr.metallicRoughnessTexture = pbr_texture(material.pbr_metallic_roughness().metallic_roughness_texture());
+                    pbr.normalTexture = pbr_texture(material.normal_texture());
+                    pbr.occlusionTexture = pbr_texture(material.occlusion_texture());
+                    pbr.emissiveTexture = pbr_texture(material.emissive_texture());
+                }
                 newEntity.node = n;
                 newEntity.color = sg::base_color(g, primitive);
                 newEntity.doubleSided = twoD || (primitive.has_material() && primitive.material() < g.material_count() &&
@@ -484,7 +539,7 @@ namespace neogfx::game
                 }
                 newEntity.entity = ecs().create_entity(scene_graph_primitive_archetype(ecs()),
                     mesh_filter{ {}, std::move(localMesh), {} },
-                    mesh_renderer{ material{ to_ecs_component(newEntity.color), {}, {}, texture } },
+                    mesh_renderer{ material{ to_ecs_component(newEntity.color), {}, {}, texture, {}, {}, false, pbr } },
                     std::move(modelTransformation));
                 iEntities.push_back(std::move(newEntity));
             }
@@ -524,10 +579,13 @@ namespace neogfx::game
             auto& renderers = ecs().component<mesh_renderer>();
             auto& cache = ecs().component<mesh_render_cache>();
             auto& models = ecs().component<model_transformation>();
-            vec3 const light = vec3{ -0.4, 0.8, 0.45 }.normalized(); // world space, towards the light
-            bool const lit = iLighting && !twoD;
+            vec3 const light = scene_light();
+            bool const lit = iLighting && !twoD && iLightingModel != scene_lighting::None;
             service<i_rendering_engine>().default_shader_program().standard_vertex_shader().set_scene_light(
-                lit ? std::optional<vec3>{ light } : std::nullopt);
+                lit ? std::optional<vec3>{ light } : std::nullopt, lit ? iLightingModel : scene_lighting::None);
+            // n.b. the camera position is set when the camera is known (below)
+            if (!lit || iLightingModel != scene_lighting::PhysicallyBased)
+                service<i_rendering_engine>().default_shader_program().pbr_shader().set_pbr_light(std::nullopt, vec3{});
             thread_local std::map<sg::index, std::vector<mat44f>> tJointMatrices;
             tJointMatrices.clear();
             for (auto& e : iEntities)
@@ -636,6 +694,9 @@ namespace neogfx::game
                     iOrbit->distance + (iOrbit->target - centre).magnitude() + radius * 4.0);
         }
         iLastCameraWorld = cameraWorld;
+        if (iLighting && iLightingModel == scene_lighting::PhysicallyBased)
+            service<i_rendering_engine>().default_shader_program().pbr_shader().set_pbr_light(
+                scene_light(), vec3{ cameraWorld[3][0], cameraWorld[3][1], cameraWorld[3][2] });
         // NDC to canvas coordinates (y up, nearer is greater z): affine, so it composes with the projection
         // ahead of the GPU's perspective divide
         scalar const depthScale = 0.45 * std::max(width, height);

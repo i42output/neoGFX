@@ -30,6 +30,14 @@ namespace neogfx
 {
     class i_rendering_context;
 
+    // how model transformed vertices (see game::model_transformation) are lit
+    enum class scene_lighting : std::uint32_t
+    {
+        None            = 0,
+        PerVertex       = 1,    // ambient plus diffuse, per vertex
+        PhysicallyBased = 2     // per pixel, glTF metallic-roughness (see i_pbr_shader)
+    };
+
     class i_vertex_shader : public i_shader
     {
     public:
@@ -56,7 +64,8 @@ namespace neogfx
         // the start of the current frame's model table (see game::model_transformation)
         virtual void set_model_table_base(std::uint32_t aBase) = 0;
         // a directional light (world space direction towards the light) lighting model transformed vertices
-        // (see game::model_transformation) by their normals; std::nullopt for none (unlit)
-        virtual void set_scene_light(std::optional<vec3> const& aDirection) = 0;
+        // (see game::model_transformation) by their normals; std::nullopt (or scene_lighting::None) for none (unlit).
+        // n.b. for scene_lighting::PhysicallyBased the shading is done by the PBR fragment shader (i_pbr_shader)
+        virtual void set_scene_light(std::optional<vec3> const& aDirection, scene_lighting aLighting = scene_lighting::PerVertex) = 0;
     };
 }

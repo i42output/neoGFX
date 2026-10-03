@@ -40,6 +40,8 @@ namespace neogfx
         i_gradient_shader& gradient_shader() final;
         const i_texture_shader& texture_shader() const final;
         i_texture_shader& texture_shader() final;
+        const i_pbr_shader& pbr_shader() const final;
+        i_pbr_shader& pbr_shader() final;
         const i_filter_shader& filter_shader() const final;
         i_filter_shader& filter_shader() final;
         const i_glyph_shader& glyph_shader() const final;
@@ -54,6 +56,7 @@ namespace neogfx
         ref_ptr<i_fragment_shader> iDefaultShader;
         ref_ptr<i_gradient_shader> iGradientShader;
         ref_ptr<i_texture_shader> iTextureShader;
+        ref_ptr<i_pbr_shader> iPbrShader;
         ref_ptr<i_filter_shader> iFilterShader;
         ref_ptr<i_glyph_shader> iGlyphShader;
         ref_ptr<i_stipple_shader> iStippleShader;
