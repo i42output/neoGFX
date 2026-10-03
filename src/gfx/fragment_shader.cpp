@@ -536,12 +536,17 @@ namespace neogfx
         set_uniform("uPbrTexture2"_s, sampler2D{ static_cast<std::uint32_t>(reserved_texture_unit::Pbr2) });
         set_uniform("uPbrTexture3"_s, sampler2D{ static_cast<std::uint32_t>(reserved_texture_unit::Pbr3) });
         set_uniform("uPbrBaseTexture"_s, sampler2D{ static_cast<std::uint32_t>(reserved_texture_unit::Tex) });
-        set_uniform("uPbrEnvironment"_s, sampler2D{ static_cast<std::uint32_t>(reserved_texture_unit::PbrEnvironment) });
+        // n.b. a texture_sampling::Data texture: a rectangle texture
+        set_uniform("uPbrEnvironment"_s, sampler2DRect{ static_cast<std::uint32_t>(reserved_texture_unit::PbrEnvironment) });
+        set_uniform("uPbrShadowAtlas"_s, sampler2D{ static_cast<std::uint32_t>(reserved_texture_unit::PbrShadow) });
         uPbrEnabled = false;
         uPbrLightDirection = vec3f{ 0.0f, 1.0f, 0.0f };
         uPbrViewPosition = vec3f{};
-        uPbrPointLight = vec4f{};
-        uPbrPointLightRadiance = vec4f{};
+        uPbrLightBase = 0u;
+        uPbrLightCount = 0u;
+        uPbrShadowMatrixBase = 0u;
+        uPbrDirectionalShadow = -1;
+        uPbrDirectionalShadowTexel = 0.0f;
         uPbrFactors = vec4f{ 1.0f, 1.0f, 1.0f, 1.0f };
         uPbrEmissive = vec3f{};
         uPbrAlphaCutoff = -1.0f;
@@ -580,33 +585,27 @@ namespace neogfx
         iCamera = aCameraPosition;
     }
 
-    void standard_pbr_shader::set_pbr_point_light(std::optional<vec3> const& aPosition, vec3 const& aRadiance, scalar aRange)
+    void standard_pbr_shader::set_pbr_light_buffer(std::uint32_t aBase, std::uint32_t aCount)
     {
-        vec4 const radiance{ aRadiance.x, aRadiance.y, aRadiance.z, aRange };
-        if (iPointLight != aPosition || iPointLightRadiance != radiance)
-        {
-            iPointLight = aPosition;
-            iPointLightRadiance = radiance;
-            iPointLightOrigin = std::nullopt;
-        }
+        uPbrLightBase = aBase;
+        uPbrLightCount = aCount;
     }
 
-    void standard_pbr_shader::prepare_uniforms(const i_rendering_context& aContext, i_shader_program& aProgram)
+    std::optional<std::pair<vec3, scalar>> const& standard_pbr_shader::pbr_shadows() const
     {
-        standard_fragment_shader<i_pbr_shader>::prepare_uniforms(aContext, aProgram);
-        // the point light is in the same space as the model transformed vertices, which includes the context origin (see draw_entities)
-        if (iPointLightOrigin == std::nullopt || *iPointLightOrigin != aContext.origin())
-        {
-            iPointLightOrigin = aContext.origin();
-            if (iPointLight)
-            {
-                auto const position = (*iPointLight + iPointLightOrigin->to_vec3()).as<float>();
-                uPbrPointLight = vec4f{ position.x, position.y, position.z, 1.0f };
-                uPbrPointLightRadiance = iPointLightRadiance.as<float>();
-            }
-            else
-                uPbrPointLight = vec4f{};
-        }
+        return iShadows;
+    }
+
+    void standard_pbr_shader::set_pbr_shadows(std::optional<std::pair<vec3, scalar>> const& aSceneBounds)
+    {
+        iShadows = aSceneBounds;
+    }
+
+    void standard_pbr_shader::set_pbr_shadow_buffer(std::uint32_t aMatrixBase, std::int32_t aDirectionalView, scalar aDirectionalTexelSize)
+    {
+        uPbrShadowMatrixBase = aMatrixBase;
+        uPbrDirectionalShadow = aDirectionalView;
+        uPbrDirectionalShadowTexel = static_cast<float>(aDirectionalTexelSize);
     }
 
     void standard_pbr_shader::clear_pbr()

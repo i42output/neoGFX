@@ -10,6 +10,10 @@
 #define PBR_ENVIRONMENT_SPECULAR_BANDS 6.0
 #define PBR_ENVIRONMENT_IRRADIANCE_BAND 6.0
 #define PBR_ENVIRONMENT_BRDF_BAND 7.0
+// the shadow map atlas (see opengl_rendering_context::draw_scene_meshes): view 0 (the directional light's) is the bottom left
+// quarter; views 1 to 48 (six cube faces for each of up to eight point lights) are 512 square tiles in the other quarters
+#define PBR_SHADOW_ATLAS_SIZE 4096.0
+#define PBR_SHADOW_BIAS 0.0005
 
 vec4 pbr_texture(int source, vec2 texCoord)
 {
@@ -59,11 +63,13 @@ vec3 pbr_tone_map(vec3 color)
     return mix(color, vec3(newPeak), g);
 }
 
+// n.b. the environment texture is a rectangle texture (texel coordinates, clamped)
 vec3 pbr_environment_band(float band, vec3 direction)
 {
     vec2 uv = vec2(atan(direction.z, direction.x) / (2.0 * PI) + 0.5, 0.5 - asin(clamp(direction.y, -1.0, 1.0)) / PI);
+    float column = clamp(uv.x * PBR_ENVIRONMENT_WIDTH, 0.5, PBR_ENVIRONMENT_WIDTH - 0.5);
     float row = clamp(uv.y * PBR_ENVIRONMENT_BAND_HEIGHT, 0.5, PBR_ENVIRONMENT_BAND_HEIGHT - 0.5);
-    return texture(uPbrEnvironment, vec2(uv.x, (band * PBR_ENVIRONMENT_BAND_HEIGHT + row) / (PBR_ENVIRONMENT_BAND_HEIGHT * PBR_ENVIRONMENT_BANDS))).rgb;
+    return texture(uPbrEnvironment, vec2(column, band * PBR_ENVIRONMENT_BAND_HEIGHT + row)).rgb;
 }
 
 vec3 pbr_environment_specular(vec3 direction, float roughness)
@@ -76,9 +82,40 @@ vec3 pbr_environment_specular(vec3 direction, float roughness)
 
 vec2 pbr_environment_brdf(float nDotV, float roughness)
 {
-    float u = clamp(nDotV, 0.5 / PBR_ENVIRONMENT_WIDTH, 1.0 - 0.5 / PBR_ENVIRONMENT_WIDTH);
+    float column = clamp(nDotV * PBR_ENVIRONMENT_WIDTH, 0.5, PBR_ENVIRONMENT_WIDTH - 0.5);
     float row = clamp(roughness * PBR_ENVIRONMENT_BAND_HEIGHT, 0.5, PBR_ENVIRONMENT_BAND_HEIGHT - 0.5);
-    return texture(uPbrEnvironment, vec2(u, (PBR_ENVIRONMENT_BRDF_BAND * PBR_ENVIRONMENT_BAND_HEIGHT + row) / (PBR_ENVIRONMENT_BAND_HEIGHT * PBR_ENVIRONMENT_BANDS))).rg;
+    return texture(uPbrEnvironment, vec2(column, PBR_ENVIRONMENT_BRDF_BAND * PBR_ENVIRONMENT_BAND_HEIGHT + row)).rg;
+}
+
+vec4 pbr_shadow_tile(int view)
+{
+    if (view == 0)
+        return vec4(0.0, 0.0, 0.5, 0.5);
+    int face = view - 1;
+    int quadrant = 1 + face / 16;
+    int local = face % 16;
+    return vec4(float(quadrant % 2) * 0.5 + float(local % 4) * 0.125, float(quadrant / 2) * 0.5 + float(local / 4) * 0.125, 0.125, 0.125);
+}
+
+// the fraction of a shadow view's light reaching a position (3x3 percentage closer filtering)
+float pbr_shadow(int view, vec3 position)
+{
+    vec4 p = bShadowMatrices[uPbrShadowMatrixBase + uint(view)] * vec4(position, 1.0);
+    if (p.w <= 0.0)
+        return 1.0;
+    p.xyz /= p.w;
+    if (p.x < 0.0 || p.x > 1.0 || p.y < 0.0 || p.y > 1.0 || p.z > 1.0)
+        return 1.0;
+    vec4 tile = pbr_shadow_tile(view);
+    float texel = 1.0 / PBR_SHADOW_ATLAS_SIZE;
+    vec2 lo = tile.xy + vec2(texel * 0.5);
+    vec2 hi = tile.xy + tile.zw - vec2(texel * 0.5);
+    vec2 uv = tile.xy + p.xy * tile.zw;
+    float lit = 0.0;
+    for (int y = -1; y <= 1; ++y)
+        for (int x = -1; x <= 1; ++x)
+            lit += p.z - PBR_SHADOW_BIAS <= textureLod(uPbrShadowAtlas, clamp(uv + vec2(x, y) * texel, lo, hi), 0.0).r ? 1.0 : 0.0;
+    return lit / 9.0;
 }
 
 // a light arriving from direction l: Lambert diffuse plus GGX specular (height correlated Smith visibility)
@@ -137,6 +174,8 @@ void standard_pbr_shader(inout vec4 color, inout vec4 function0, inout vec4 func
     }
     if (uPbrDoubleSided && dot(n, v) < 0.0)
         n = -n;
+    // the surface's own (not normal mapped) normal, for offsetting shadow map lookups
+    vec3 surfaceNormal = n;
     if (uPbrTextureSources.y != -1)
     {
         // normal mapping: the tangent frame from the screen space derivatives of position and texture coordinates
@@ -160,20 +199,37 @@ void standard_pbr_shader(inout vec4 color, inout vec4 function0, inout vec4 func
     float alpha2 = alpha * alpha;
     float nDotV = max(dot(n, v), 1e-4);
 
-    // the directional light and any point light
-    vec3 direct = pbr_direct(n, v, uPbrLightDirection, PBR_LIGHT_RADIANCE, f0, diffuseColor, alpha2, nDotV);
-    if (uPbrPointLight.w > 0.0)
+    // the directional light (shadowed if it casts shadows; the lookup is offset along the normal by about a shadow map texel)
+    float directionalLight = 1.0;
+    if (uPbrDirectionalShadow >= 0)
+        directionalLight = pbr_shadow(uPbrDirectionalShadow, Coord + surfaceNormal * (uPbrDirectionalShadowTexel * 1.5));
+    vec3 direct = directionalLight * pbr_direct(n, v, uPbrLightDirection, PBR_LIGHT_RADIANCE, f0, diffuseColor, alpha2, nDotV);
+    // the point lights (see i_standard_shader_program::scene_lights); those casting shadows have six (cube face) shadow views
+    for (uint i = 0u; i < uPbrLightCount; ++i)
     {
-        vec3 toLight = uPbrPointLight.xyz - Coord;
+        vec4 lightPosition = bLights[uPbrLightBase + i * 2u];
+        vec4 lightRadiance = bLights[uPbrLightBase + i * 2u + 1u];
+        vec3 toLight = lightPosition.xyz - Coord;
         float distance2 = max(dot(toLight, toLight), 1e-4);
         float window = 1.0;
-        if (uPbrPointLightRadiance.w > 0.0)
+        if (lightRadiance.w > 0.0)
         {
-            float ratio = distance2 / (uPbrPointLightRadiance.w * uPbrPointLightRadiance.w);
+            float ratio = distance2 / (lightRadiance.w * lightRadiance.w);
             window = clamp(1.0 - ratio * ratio, 0.0, 1.0);
             window *= window;
         }
-        direct += pbr_direct(n, v, toLight * inversesqrt(distance2), uPbrPointLightRadiance.rgb * window / distance2, f0, diffuseColor, alpha2, nDotV);
+        if (window <= 0.0)
+            continue;
+        if (lightPosition.w >= 0.0)
+        {
+            // a cube face is 90 degrees across 512 texels: a texel is about distance / 256
+            vec3 position = Coord + surfaceNormal * (sqrt(distance2) / 256.0 * 1.5);
+            vec3 fromLight = position - lightPosition.xyz;
+            vec3 a = abs(fromLight);
+            int face = a.x >= a.y && a.x >= a.z ? (fromLight.x >= 0.0 ? 0 : 1) : a.y >= a.z ? (fromLight.y >= 0.0 ? 2 : 3) : (fromLight.z >= 0.0 ? 4 : 5);
+            window *= pbr_shadow(int(lightPosition.w + 0.5) + face, position);
+        }
+        direct += pbr_direct(n, v, toLight * inversesqrt(distance2), lightRadiance.rgb * window / distance2, f0, diffuseColor, alpha2, nDotV);
     }
 
     // image based lighting: diffuse irradiance by the normal, prefiltered specular by the reflection (split sum)

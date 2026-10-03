@@ -147,9 +147,16 @@ namespace neogfx
         virtual std::optional<vec3> const& pbr_light() const = 0;
         virtual vec3 const& pbr_camera() const = 0;
         virtual void set_pbr_light(std::optional<vec3> const& aDirection, vec3 const& aCameraPosition) = 0;
-        // a point light (world space position) as well: radiance (colour times intensity; the directional light's is 2.8) falls
-        // off with the square of the distance and, if a range is given, smoothly to zero at that range; std::nullopt for none
-        virtual void set_pbr_point_light(std::optional<vec3> const& aPosition, vec3 const& aRadiance = vec3{ 1.0, 1.0, 1.0 }, scalar aRange = 0.0) = 0;
+        // the point lights (see i_standard_vertex_shader::scene_point_lights) as the renderer put them in
+        // i_standard_shader_program::scene_lights(): the first element (two per light) and count
+        virtual void set_pbr_light_buffer(std::uint32_t aBase, std::uint32_t aCount) = 0;
+        // shadows (shadow mapping) cast from the directional light and the point lights that cast them; the scene's bounds
+        // (world space centre and radius, which the directional light's shadow map covers) or std::nullopt for no shadows
+        virtual std::optional<std::pair<vec3, scalar>> const& pbr_shadows() const = 0;
+        virtual void set_pbr_shadows(std::optional<std::pair<vec3, scalar>> const& aSceneBounds) = 0;
+        // the renderer's shadow maps: the first view matrix in i_standard_shader_program::shadow_matrices(), the directional
+        // light's view (-1 for none) and the size of its shadow map texels; the atlas is bound to reserved_texture_unit::PbrShadow
+        virtual void set_pbr_shadow_buffer(std::uint32_t aMatrixBase, std::int32_t aDirectionalView, scalar aDirectionalTexelSize) = 0;
         // per mesh
         virtual void clear_pbr() = 0;
         virtual void set_pbr(pbr_shader_material const& aMaterial) = 0;

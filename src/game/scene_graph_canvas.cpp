@@ -357,15 +357,26 @@ namespace neogfx::game
             update();
     }
 
-    void scene_graph_canvas::set_point_light(sg::index aNode, vec3 const& aRadiance, scalar aRange)
+    void scene_graph_canvas::add_point_light(sg::index aNode, vec3 const& aRadiance, scalar aRange, bool aCastsShadows, scalar aSize)
     {
-        iPointLight = point_light{ aNode, aRadiance, aRange };
+        iPointLights.push_back(point_light{ aNode, aRadiance, aRange, aCastsShadows, aSize });
         update();
     }
 
-    void scene_graph_canvas::clear_point_light()
+    void scene_graph_canvas::clear_point_lights()
     {
-        iPointLight = std::nullopt;
+        iPointLights.clear();
+        update();
+    }
+
+    bool scene_graph_canvas::shadows() const
+    {
+        return iShadows;
+    }
+
+    void scene_graph_canvas::set_shadows(bool aShadows)
+    {
+        iShadows = aShadows;
         update();
     }
 
@@ -632,16 +643,23 @@ namespace neogfx::game
             // n.b. the camera position is set when the camera is known (below)
             if (!lit || iLightingModel != scene_lighting::PhysicallyBased)
                 service<i_rendering_engine>().default_shader_program().pbr_shader().set_pbr_light(std::nullopt, vec3{});
-            // the point light: at its node's (world) position
-            std::optional<vec3> pointLight;
-            if (lit && iPointLight && iPointLight->node < world.size() && world[iPointLight->node])
-                pointLight = vec3{ (*world[iPointLight->node])[3][0], (*world[iPointLight->node])[3][1], (*world[iPointLight->node])[3][2] };
-            vec3 const pointLightRadiance = iPointLight ? iPointLight->radiance : vec3{};
-            scalar const pointLightRange = iPointLight ? iPointLight->range : 0.0;
-            service<i_rendering_engine>().default_shader_program().standard_vertex_shader().set_scene_point_light(
-                pointLight, pointLightRadiance, pointLightRange);
-            service<i_rendering_engine>().default_shader_program().pbr_shader().set_pbr_point_light(
-                pointLight, pointLightRadiance, pointLightRange);
+            // the point lights: at their nodes' (world) positions
+            thread_local std::vector<scene_point_light> tPointLights;
+            tPointLights.clear();
+            if (lit)
+                for (auto const& pointLight : iPointLights)
+                    if (pointLight.node < world.size() && world[pointLight.node])
+                    {
+                        auto const& nodeWorld = *world[pointLight.node];
+                        tPointLights.push_back(scene_point_light{ vec3{ nodeWorld[3][0], nodeWorld[3][1], nodeWorld[3][2] },
+                            pointLight.radiance, pointLight.range, pointLight.castsShadows, pointLight.size });
+                    }
+            service<i_rendering_engine>().default_shader_program().standard_vertex_shader().set_scene_point_lights(tPointLights);
+            // shadows: the directional light's covers the scene's bounds (as built, with room for animation)
+            std::optional<std::pair<vec3, scalar>> shadowBounds;
+            if (lit && iShadows && iLightingModel == scene_lighting::PhysicallyBased && iBounds)
+                shadowBounds.emplace((iBounds->first + iBounds->second) / 2.0, (iBounds->second - iBounds->first).magnitude() / 2.0 * 1.1);
+            service<i_rendering_engine>().default_shader_program().pbr_shader().set_pbr_shadows(shadowBounds);
             thread_local std::map<sg::index, std::vector<mat44f>> tJointMatrices;
             tJointMatrices.clear();
             for (auto& e : iEntities)

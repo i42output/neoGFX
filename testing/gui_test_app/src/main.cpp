@@ -1483,6 +1483,7 @@ int main(int argc, char* argv[])
             ng::scene_graph::index planet = ng::scene_graph::invalid_index;
             ng::scene_graph::index moonOrbit = ng::scene_graph::invalid_index;
             ng::scene_graph::index moon = ng::scene_graph::invalid_index;
+            ng::scene_graph::index lantern = ng::scene_graph::invalid_index; // 3D only
         };
         auto const logoImage = ng::service<ng::i_resource_manager>().load_resource(std::string{ ":/test/resources/neoGFX.png" });
         auto sceneGraph2D = std::make_shared<ng::scene_graph_2d>();
@@ -1527,6 +1528,10 @@ int main(int argc, char* argv[])
             orrery3D.planet = g.add_node("planet", ng::vec3{ 5.0, 0.0, 0.0 }, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, orrery3D.planetOrbit, planetMesh);
             orrery3D.moonOrbit = g.add_node("moon orbit", ng::vec3{}, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, orrery3D.planet);
             orrery3D.moon = g.add_node("moon", ng::vec3{ 1.5, 0.0, 0.0 }, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, orrery3D.moonOrbit, moonMesh);
+            // a second (cool) lamp circling above the sun
+            auto const lanternMesh = g.add_box(ng::vec3{ 0.3, 0.3, 0.3 }, ng::color::AliceBlue, "lantern");
+            g.material(g.mesh(lanternMesh).primitive(0u).material()).set_emissive_factor(ng::vec3{ 0.55, 0.75, 1.0 });
+            orrery3D.lantern = g.add_node("lantern", ng::vec3{ 3.0, 2.5, 0.0 }, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, root, lanternMesh);
             ng::vec3 const eye{ 0.0, 8.0, 17.0 };
             auto const camera = g.add_node("camera", eye, ng::scene_graph_3d::look_at(eye, ng::vec3{}));
             g.node(camera).set_camera(g.add_perspective_camera(ng::to_rad(45.0), 0.1, 100.0, "camera"));
@@ -1614,14 +1619,18 @@ int main(int argc, char* argv[])
         };
 
         ng::scene_graph_canvas* sceneGraphCanvas = nullptr;
-        // the 3D orrery's moon lights the scene (a warm point light, about ten times the directional light's radiance
-        // at a distance of two)
+        // the 3D orrery's moon and lantern light the scene (warm and cool point lights, casting shadows; their own meshes, within
+        // the given sizes, don't)
         auto orrery_lamp = [&]()
         {
-            if (sceneGraphCanvas && sceneGraphCanvas->has_graph() && &sceneGraphCanvas->graph() == sceneGraph3D.get())
-                sceneGraphCanvas->set_point_light(orrery3D.moon, ng::vec3{ 1.0, 0.85, 0.6 } * 25.0);
-            else if (sceneGraphCanvas)
-                sceneGraphCanvas->clear_point_light();
+            if (!sceneGraphCanvas)
+                return;
+            sceneGraphCanvas->clear_point_lights();
+            if (sceneGraphCanvas->has_graph() && &sceneGraphCanvas->graph() == sceneGraph3D.get())
+            {
+                sceneGraphCanvas->add_point_light(orrery3D.moon, ng::vec3{ 1.0, 0.85, 0.6 } * 25.0, 0.0, true, 0.35);
+                sceneGraphCanvas->add_point_light(orrery3D.lantern, ng::vec3{ 0.55, 0.75, 1.0 } * 15.0, 0.0, true, 0.27);
+            }
         };
         std::optional<ng::widget_timer> sceneGraphAnimator;
         auto const sceneGraphStart = std::chrono::steady_clock::now();
@@ -1649,6 +1658,7 @@ int main(int argc, char* argv[])
                     ng::scene_graph_3d::axis_angle(yAxis, t * 2.0), ng::scene_graph_3d::axis_angle(ng::vec3{ 1.0, 0.0, 0.0 }, t)));
                 g.set_transform(orrery3D.moonOrbit, ng::vec3{}, ng::scene_graph_3d::axis_angle(ng::vec3{ 0.0, 1.0, 0.3 }, t * 3.0));
                 g.set_transform(orrery3D.moon, ng::vec3{ 1.5, 0.0, 0.0 });
+                g.set_transform(orrery3D.lantern, ng::vec3{ 3.0 * std::cos(-t * 0.7), 2.5, 3.0 * std::sin(-t * 0.7) });
                 for (auto& player : sampleAnimations)
                     player.apply(player.duration() > 0.0 ? std::fmod(t, player.duration()) : 0.0);
                 for (auto spinner : sampleSpinners)
@@ -1669,6 +1679,8 @@ int main(int argc, char* argv[])
                 window.radioSceneGraph3D.check();
                 window.checkSceneGraphAnimate.check();
                 window.checkSceneGraphLighting.check();
+                window.checkSceneGraphShadows.check();
+                sceneGraphCanvas->set_shadows(true);
                 // the orrery is posed as each frame is rendered; the timer just requests frames
                 sceneGraphCanvas->Animating([&]() { animate_orrery(); });
                 sceneGraphAnimator.emplace(window.pageSceneGraph, [&](ng::widget_timer& aTimer)
@@ -1701,6 +1713,11 @@ int main(int argc, char* argv[])
         {
             if (sceneGraphCanvas)
                 sceneGraphCanvas->set_lighting(window.checkSceneGraphLighting.is_checked());
+        });
+        window.checkSceneGraphShadows.Toggled([&]()
+        {
+            if (sceneGraphCanvas)
+                sceneGraphCanvas->set_shadows(window.checkSceneGraphShadows.is_checked());
         });
         window.checkSceneGraphPbr.Toggled([&]()
         {

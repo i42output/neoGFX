@@ -38,6 +38,20 @@ namespace neogfx
         PhysicallyBased = 2     // per pixel, glTF metallic-roughness (see i_pbr_shader)
     };
 
+    // a point light lighting model transformed vertices (see i_standard_vertex_shader::set_scene_point_lights): radiance (colour
+    // times intensity; the directional light's is 2.8) falls off with the square of the distance and, if a range is given, smoothly
+    // to zero at that range; shadows (by shadow mapping) are cast with physically based shading
+    struct scene_point_light
+    {
+        vec3 position;      // world space
+        vec3 radiance;
+        scalar range = 0.0;
+        bool castsShadows = false;
+        scalar size = 0.0;  // the radius of what emits it (e.g. a lamp's mesh), which casts no shadow from it
+
+        bool operator==(scene_point_light const&) const = default;
+    };
+
     class i_vertex_shader : public i_shader
     {
     public:
@@ -67,9 +81,11 @@ namespace neogfx
         // (see game::model_transformation) by their normals; std::nullopt (or scene_lighting::None) for none (unlit).
         // n.b. for scene_lighting::PhysicallyBased the shading is done by the PBR fragment shader (i_pbr_shader)
         virtual void set_scene_light(std::optional<vec3> const& aDirection, scene_lighting aLighting = scene_lighting::PerVertex) = 0;
-        // a point light (world space position) also lighting model transformed vertices (with scene_lighting::PerVertex):
-        // radiance (colour times intensity, on the same scale as i_pbr_shader's) falls off with the square of the distance
-        // and, if a range is given, smoothly to zero at that range; std::nullopt for none
-        virtual void set_scene_point_light(std::optional<vec3> const& aPosition, vec3 const& aRadiance = vec3{ 1.0, 1.0, 1.0 }, scalar aRange = 0.0) = 0;
+        // point lights also lighting model transformed vertices (by both scene_lighting::PerVertex and PhysicallyBased); the
+        // renderer puts them (in the space of the transformed vertices) in i_standard_shader_program::scene_lights() when drawing
+        virtual std::vector<scene_point_light> const& scene_point_lights() const = 0;
+        virtual void set_scene_point_lights(std::vector<scene_point_light> const& aLights) = 0;
+        // where the renderer put them: the first element (two per light) and count
+        virtual void set_scene_light_buffer(std::uint32_t aBase, std::uint32_t aCount) = 0;
     };
 }

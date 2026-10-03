@@ -375,7 +375,10 @@ namespace neogfx
         void draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation);
         void draw_meshes(optional_ecs_render_lock& aLock, i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);
         void draw_patch(patch_drawable& aPatch, const mat44& aTransformation);
-        void draw_scene_meshes(i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation);
+        void draw_scene_meshes(i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation, std::uint32_t aModelTableBase);
+        // the scene meshes' point lights (see i_standard_shader_program::scene_lights) and shadow maps (see i_pbr_shader::set_pbr_shadows)
+        void draw_scene_lights_and_shadows(i_standard_shader_program& aProgram, opengl_scene_buffer& aSceneBuffer,
+            std::vector<std::optional<opengl_scene_buffer::mesh_range>> const& aMeshes, std::uint32_t aModelTableBase);
         void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = {}, shader_effect aShaderEffect = shader_effect::None);
     public:
         neogfx::subpixel_format subpixel_format() const final;

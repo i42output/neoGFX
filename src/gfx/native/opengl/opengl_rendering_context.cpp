@@ -2352,7 +2352,7 @@ namespace neogfx
         {
             rendering_engine().default_shader_program().standard_vertex_shader().set_model_table_base(*tModelTableBase);
             draw_scene_meshes(*game::cacheable_vertex_provider(aEcs), aLayer,
-                tModelDrawables[aLayer].data(), tModelDrawables[aLayer].data() + tModelDrawables[aLayer].size(), aTransformation);
+                tModelDrawables[aLayer].data(), tModelDrawables[aLayer].data() + tModelDrawables[aLayer].size(), aTransformation, *tModelTableBase);
         }
         if (aLayer >= tMaxLayer)
         {
@@ -3308,7 +3308,186 @@ namespace neogfx
         draw_patch(tPatchDrawable, aTransformation);
     }
 
-    void opengl_rendering_context::draw_scene_meshes(i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)
+    namespace scene_shadows
+    {
+        // the shadow map atlas (see standard-pbr.frag): view 0 (the directional light's) is the bottom left quarter; views 1 to 48
+        // (six cube faces for each of up to eight point lights) are 512 square tiles in the other quarters
+        constexpr GLsizei AtlasSize = 4096;
+        constexpr GLsizei DirectionalSize = 2048;
+        constexpr GLsizei FaceSize = 512;
+        constexpr std::uint32_t MaxShadowCastingPointLights = 8u;
+
+        inline std::array<GLint, 4> tile(std::uint32_t aView)
+        {
+            if (aView == 0u)
+                return { 0, 0, DirectionalSize, DirectionalSize };
+            auto const face = aView - 1u;
+            auto const quadrant = 1u + face / 16u;
+            auto const local = face % 16u;
+            return {
+                static_cast<GLint>((quadrant % 2u) * DirectionalSize + (local % 4u) * FaceSize),
+                static_cast<GLint>((quadrant / 2u) * DirectionalSize + (local / 4u) * FaceSize),
+                FaceSize, FaceSize };
+        }
+
+        // column major (m[column][row]), OpenGL clip space
+        inline mat44 look_at(vec3 const& aEye, vec3 const& aTarget, vec3 const& aUp)
+        {
+            auto const f = (aTarget - aEye).normalized();
+            auto const side = f.cross(aUp).normalized();
+            auto const up = side.cross(f);
+            mat44 result = mat44::identity();
+            result[0][0] = side.x; result[1][0] = side.y; result[2][0] = side.z;
+            result[0][1] = up.x; result[1][1] = up.y; result[2][1] = up.z;
+            result[0][2] = -f.x; result[1][2] = -f.y; result[2][2] = -f.z;
+            result[3][0] = -side.dot(aEye);
+            result[3][1] = -up.dot(aEye);
+            result[3][2] = f.dot(aEye);
+            return result;
+        }
+
+        inline mat44 perspective(scalar aYfov, scalar aNear, scalar aFar)
+        {
+            scalar const f = 1.0 / std::tan(aYfov / 2.0);
+            mat44 result{};
+            result[0][0] = f;
+            result[1][1] = f;
+            result[2][2] = (aFar + aNear) / (aNear - aFar);
+            result[2][3] = -1.0;
+            result[3][2] = 2.0 * aFar * aNear / (aNear - aFar);
+            return result;
+        }
+
+        inline mat44 orthographic(scalar aHalfExtent, scalar aNear, scalar aFar)
+        {
+            mat44 result = mat44::identity();
+            result[0][0] = 1.0 / aHalfExtent;
+            result[1][1] = 1.0 / aHalfExtent;
+            result[2][2] = -2.0 / (aFar - aNear);
+            result[3][2] = -(aFar + aNear) / (aFar - aNear);
+            return result;
+        }
+
+        // clip space to [0, 1] (shadow map lookup)
+        inline mat44 bias()
+        {
+            mat44 result = mat44::identity();
+            result[0][0] = 0.5; result[1][1] = 0.5; result[2][2] = 0.5;
+            result[3][0] = 0.5; result[3][1] = 0.5; result[3][2] = 0.5;
+            return result;
+        }
+
+        // the depth only program, FBO and atlas (created when first needed; n.b. one GL context)
+        struct resources
+        {
+            bool failed = false;
+            GLuint program = 0;
+            GLint viewProjection = -1;
+            GLint modelTableBase = -1;
+            GLuint framebuffer = 0;
+            GLuint atlas = 0;
+        };
+
+        inline GLuint compile(GLenum aType, std::string const& aSource)
+        {
+            GLuint const shader = glCreateShader(aType);
+            char const* source = aSource.c_str();
+            glShaderSource(shader, 1, &source, nullptr);
+            glCompileShader(shader);
+            GLint ok = GL_FALSE;
+            glGetShaderiv(shader, GL_COMPILE_STATUS, &ok);
+            if (ok != GL_TRUE)
+            {
+                GLchar log[1024] = {};
+                glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
+                service<debug::logger>() << neolib::logger::severity::Debug << "neogfx: shadow map shader: " << log << std::endl;
+                glDeleteShader(shader);
+                return 0;
+            }
+            return shader;
+        }
+
+        inline resources& get(i_standard_shader_program& aProgram)
+        {
+            static resources sResources;
+            if (sResources.program != 0 || sResources.failed)
+                return sResources;
+            sResources.failed = true;
+            // n.b. the same model transformation (and skinning) as standard.vert
+            std::string vertexSource =
+                "#version 460 core\n"
+                "layout (location = 0) in vec3 VertexPosition;\n"
+                "layout (location = 11) in float VertexModel;\n"
+                "layout (location = 12) in vec4 VertexJoints;\n"
+                "layout (location = 13) in vec4 VertexWeights;\n"
+                "layout(std430, binding = %MATRICES%) buffer SSBO_bModelMatrices { mat4 bModelMatrices[]; };\n"
+                "layout(std430, binding = %TABLE%) buffer SSBO_bModelTable { uint bModelTable[]; };\n"
+                "uniform mat4 uViewProjection;\n"
+                "uniform uint uModelTableBase;\n"
+                "void main()\n"
+                "{\n"
+                "    vec4 position = vec4(VertexPosition, 1.0);\n"
+                "    if (VertexModel > 0.0)\n"
+                "    {\n"
+                "        uint first = bModelTable[uModelTableBase + uint(VertexModel + 0.5)];\n"
+                "        if (any(greaterThan(VertexWeights, vec4(0.0))))\n"
+                "        {\n"
+                "            vec4 skinned = vec4(0.0);\n"
+                "            for (int i = 0; i < 4; ++i)\n"
+                "                if (VertexWeights[i] > 0.0)\n"
+                "                    skinned += VertexWeights[i] * (bModelMatrices[first + 1u + uint(VertexJoints[i] + 0.5)] * position);\n"
+                "            position = skinned;\n"
+                "        }\n"
+                "        position = bModelMatrices[first] * position;\n"
+                "    }\n"
+                "    gl_Position = uViewProjection * vec4(position.xyz / position.w, 1.0);\n"
+                "}\n";
+            auto const replace = [&](std::string const& aWhat, std::string const& aWith)
+                {
+                    vertexSource.replace(vertexSource.find(aWhat), aWhat.size(), aWith);
+                };
+            replace("%MATRICES%", std::to_string(static_cast<std::uint32_t>(aProgram.model_matrices().id())));
+            replace("%TABLE%", std::to_string(static_cast<std::uint32_t>(aProgram.model_table().id())));
+            std::string const fragmentSource = "#version 460 core\nvoid main() {}\n";
+            GLuint const vertexShader = compile(GL_VERTEX_SHADER, vertexSource);
+            GLuint const fragmentShader = compile(GL_FRAGMENT_SHADER, fragmentSource);
+            if (vertexShader == 0 || fragmentShader == 0)
+                return sResources;
+            GLuint const program = glCreateProgram();
+            glAttachShader(program, vertexShader);
+            glAttachShader(program, fragmentShader);
+            glLinkProgram(program);
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
+            GLint ok = GL_FALSE;
+            glGetProgramiv(program, GL_LINK_STATUS, &ok);
+            if (ok != GL_TRUE)
+            {
+                glDeleteProgram(program);
+                return sResources;
+            }
+            sResources.program = program;
+            sResources.viewProjection = glGetUniformLocation(program, "uViewProjection");
+            sResources.modelTableBase = glGetUniformLocation(program, "uModelTableBase");
+            glCheck(glCreateTextures(GL_TEXTURE_2D, 1, &sResources.atlas));
+            glCheck(glTextureStorage2D(sResources.atlas, 1, GL_DEPTH_COMPONENT32F, AtlasSize, AtlasSize));
+            glCheck(glTextureParameteri(sResources.atlas, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+            glCheck(glTextureParameteri(sResources.atlas, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+            glCheck(glTextureParameteri(sResources.atlas, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+            glCheck(glTextureParameteri(sResources.atlas, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+            glCheck(glTextureParameteri(sResources.atlas, GL_TEXTURE_COMPARE_MODE, GL_NONE));
+            glCheck(glCreateFramebuffers(1, &sResources.framebuffer));
+            glCheck(glNamedFramebufferTexture(sResources.framebuffer, GL_DEPTH_ATTACHMENT, sResources.atlas, 0));
+            glCheck(glNamedFramebufferDrawBuffer(sResources.framebuffer, GL_NONE));
+            glCheck(glNamedFramebufferReadBuffer(sResources.framebuffer, GL_NONE));
+            if (glCheckNamedFramebufferStatus(sResources.framebuffer, GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+                return sResources;
+            sResources.failed = false;
+            return sResources;
+        }
+    }
+
+    void opengl_rendering_context::draw_scene_meshes(i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation, std::uint32_t aModelTableBase)
     {
         // scene meshes (entities with a model_transformation component): each mesh's vertices are cached once, in model
         // space, in a compact format (scene_vertex) with an index buffer; the model (or skin joint) matrices are
@@ -3367,6 +3546,9 @@ namespace neogfx
         thread_local std::vector<scene_vertex> tVertices;
         thread_local std::vector<std::uint32_t> tIndices;
 
+        // the meshes' vertices and indices (uploaded if not cached), then any shadow maps, then the meshes drawn
+        thread_local std::vector<std::optional<opengl_scene_buffer::mesh_range>> tRanges;
+        tRanges.assign(static_cast<std::size_t>(aLast - aFirst), std::nullopt);
         for (auto md = aFirst; md != aLast; ++md)
         {
             auto& meshDrawable = *md;
@@ -3476,6 +3658,21 @@ namespace neogfx
                 else
                     meshRenderCache.state = game::cache_state::Dirty;
             }
+            tRanges[static_cast<std::size_t>(md - aFirst)] = range;
+        }
+
+        draw_scene_lights_and_shadows(program, sceneBuffer, tRanges, aModelTableBase);
+
+        for (auto md = aFirst; md != aLast; ++md)
+        {
+            auto const& range = tRanges[static_cast<std::size_t>(md - aFirst)];
+            if (range == std::nullopt)
+                continue;
+            auto& meshDrawable = *md;
+            auto& meshRenderer = *meshDrawable.renderer;
+            auto const& mesh = mesh_of(meshDrawable);
+            auto const& material = meshRenderer.material;
+            bool const textured = patch_drawable::has_texture(meshRenderer, material);
 
             if (depthTestEnabled)
             {
@@ -3627,13 +3824,14 @@ namespace neogfx
                 }
                 if (pbrEnvironment == nullptr)
                 {
-                    // image based lighting: an equirectangular texture, bilinear, repeating horizontally
+                    // image based lighting: an equirectangular (texture_sampling::Data, so rectangle) texture, bilinear
                     pbrEnvironment = &pbrShader.environment();
                     pbrEnvironment->bind(static_cast<std::uint32_t>(reserved_texture_unit::PbrEnvironment));
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+                    auto const environmentHandle = static_cast<GLuint>(pbrEnvironment->native_handle());
+                    glCheck(glTextureParameteri(environmentHandle, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+                    glCheck(glTextureParameteri(environmentHandle, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+                    glCheck(glTextureParameteri(environmentHandle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+                    glCheck(glTextureParameteri(environmentHandle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
                 }
                 // the base colour texture's sampling state (above) assumes its unit is active
                 glCheck(glActiveTexture(GL_TEXTURE0 + static_cast<GLenum>(reserved_texture_unit::Tex)));
@@ -3653,12 +3851,159 @@ namespace neogfx
                 texture->unbind();
         if (pbrEnvironment != nullptr)
             pbrEnvironment->unbind();
+        glCheck(glBindTextureUnit(static_cast<GLuint>(reserved_texture_unit::PbrShadow), 0));
 
         if (previousTexture != nullptr)
             previousTexture->unbind();
 
         if (depthTestEnabled)
             glCheck(glEnable(GL_DEPTH_TEST))
+    }
+
+    void opengl_rendering_context::draw_scene_lights_and_shadows(i_standard_shader_program& aProgram, opengl_scene_buffer& aSceneBuffer,
+        std::vector<std::optional<opengl_scene_buffer::mesh_range>> const& aMeshes, std::uint32_t aModelTableBase)
+    {
+        // the point lights and shadow views are in the space of the model transformed vertices, which includes the context
+        // origin (see draw_entities)
+        auto& vertexShader = aProgram.standard_vertex_shader();
+        auto& pbrShader = aProgram.pbr_shader();
+        auto const& pointLights = vertexShader.scene_point_lights();
+        vec3 const originOffset = origin().to_vec3();
+        bool const shadows = pbrShader.pbr_light().has_value() && pbrShader.pbr_shadows().has_value() && !scene_shadows::get(aProgram).failed;
+
+        // shadow views: 0 the directional light's, then six (cube faces) for each point light casting shadows
+        thread_local std::vector<mat44> tViews;
+        tViews.clear();
+        std::int32_t directionalView = -1;
+        scalar directionalTexel = 0.0;
+        vec3 sceneCentre;
+        scalar sceneRadius = 1.0;
+        if (shadows)
+        {
+            sceneCentre = pbrShader.pbr_shadows()->first + originOffset;
+            sceneRadius = std::max(pbrShader.pbr_shadows()->second, 1e-3);
+            auto const towardsLight = *pbrShader.pbr_light();
+            auto const eye = sceneCentre + towardsLight * (sceneRadius * 2.0);
+            auto const up = std::abs(towardsLight.y) < 0.99 ? vec3{ 0.0, 1.0, 0.0 } : vec3{ 0.0, 0.0, 1.0 };
+            tViews.push_back(scene_shadows::orthographic(sceneRadius, sceneRadius * 0.5, sceneRadius * 3.5) *
+                scene_shadows::look_at(eye, sceneCentre, up));
+            directionalView = 0;
+            directionalTexel = 2.0 * sceneRadius / static_cast<scalar>(scene_shadows::DirectionalSize);
+        }
+
+        if (!pointLights.empty())
+        {
+            scoped_lock_ssbo<vec4f> lights{ aProgram.scene_lights(), static_cast<std::uint32_t>(pointLights.size() * 2u) };
+            std::uint32_t shadowCasters = 0u;
+            for (std::size_t lightIndex = 0u; lightIndex < pointLights.size(); ++lightIndex)
+            {
+                auto const& light = pointLights[lightIndex];
+                auto const position = light.position + originOffset;
+                float firstView = -1.0f;
+                if (shadows && light.castsShadows && shadowCasters < scene_shadows::MaxShadowCastingPointLights)
+                {
+                    firstView = static_cast<float>(1u + shadowCasters * 6u);
+                    ++shadowCasters;
+                    tViews.resize(1u + shadowCasters * 6u);
+                    // n.b. what emits the light (inside its size) is in front of the near plane so casts no shadow
+                    scalar const zNear = std::max({ light.size * 1.25, sceneRadius * 0.002, 0.01 });
+                    scalar const zFar = light.range > 0.0 ? light.range : ((position - sceneCentre).magnitude() + sceneRadius) * 1.05;
+                    auto const projection = scene_shadows::perspective(to_rad(90.0), zNear, std::max(zFar, zNear * 2.0));
+                    static vec3 const directions[] = { { 1.0, 0.0, 0.0 }, { -1.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0 }, { 0.0, -1.0, 0.0 }, { 0.0, 0.0, 1.0 }, { 0.0, 0.0, -1.0 } };
+                    static vec3 const ups[] = { { 0.0, 1.0, 0.0 }, { 0.0, 1.0, 0.0 }, { 0.0, 0.0, 1.0 }, { 0.0, 0.0, 1.0 }, { 0.0, 1.0, 0.0 }, { 0.0, 1.0, 0.0 } };
+                    for (std::uint32_t face = 0u; face < 6u; ++face)
+                        tViews[static_cast<std::size_t>(firstView) + face] = projection * scene_shadows::look_at(position, position + directions[face], ups[face]);
+                }
+                lights.data()[lightIndex * 2u] = vec4{ position.x, position.y, position.z, firstView }.as<float>();
+                lights.data()[lightIndex * 2u + 1u] = vec4{ light.radiance.x, light.radiance.y, light.radiance.z, light.range }.as<float>();
+            }
+            vertexShader.set_scene_light_buffer(lights.range().first, static_cast<std::uint32_t>(pointLights.size()));
+            pbrShader.set_pbr_light_buffer(lights.range().first, static_cast<std::uint32_t>(pointLights.size()));
+        }
+        else
+        {
+            vertexShader.set_scene_light_buffer(0u, 0u);
+            pbrShader.set_pbr_light_buffer(0u, 0u);
+        }
+
+        auto& resources = scene_shadows::get(aProgram);
+        if (tViews.empty())
+        {
+            pbrShader.set_pbr_shadow_buffer(0u, -1, 0.0);
+            return;
+        }
+
+        // the shadow maps: depth only, drawn with their own program into the atlas (n.b. GL state saved and restored)
+        GLint previousDrawFramebuffer = 0;
+        GLint previousReadFramebuffer = 0;
+        GLint previousViewport[4] = {};
+        GLint previousScissor[4] = {};
+        GLint previousDepthFunc = GL_LESS;
+        GLboolean previousDepthMask = GL_TRUE;
+        glCheck(glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &previousDrawFramebuffer));
+        glCheck(glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &previousReadFramebuffer));
+        glCheck(glGetIntegerv(GL_VIEWPORT, previousViewport));
+        glCheck(glGetIntegerv(GL_SCISSOR_BOX, previousScissor));
+        glCheck(glGetIntegerv(GL_DEPTH_FUNC, &previousDepthFunc));
+        glCheck(glGetBooleanv(GL_DEPTH_WRITEMASK, &previousDepthMask));
+        bool const previousDepthTest = glIsEnabled(GL_DEPTH_TEST);
+        bool const previousScissorTest = glIsEnabled(GL_SCISSOR_TEST);
+        bool const previousCullFace = glIsEnabled(GL_CULL_FACE);
+        bool const previousBlend = glIsEnabled(GL_BLEND);
+        bool const previousPolygonOffset = glIsEnabled(GL_POLYGON_OFFSET_FILL);
+
+        glCheck(glBindFramebuffer(GL_FRAMEBUFFER, resources.framebuffer));
+        glCheck(glUseProgram(resources.program));
+        glCheck(glUniform1ui(resources.modelTableBase, aModelTableBase));
+        glCheck(glEnable(GL_DEPTH_TEST));
+        glCheck(glDepthFunc(GL_LESS));
+        glCheck(glDepthMask(GL_TRUE));
+        glCheck(glDisable(GL_CULL_FACE));
+        glCheck(glDisable(GL_BLEND));
+        glCheck(glEnable(GL_SCISSOR_TEST));
+        // slope scaled depth bias against shadow acne
+        glCheck(glEnable(GL_POLYGON_OFFSET_FILL));
+        glCheck(glPolygonOffset(1.5f, 2.0f));
+        for (std::uint32_t view = 0u; view < tViews.size(); ++view)
+        {
+            if (view == 0u && directionalView != 0)
+                continue;
+            auto const tile = scene_shadows::tile(view);
+            glCheck(glViewport(tile[0], tile[1], tile[2], tile[3]));
+            glCheck(glScissor(tile[0], tile[1], tile[2], tile[3]));
+            glCheck(glClear(GL_DEPTH_BUFFER_BIT));
+            auto const viewProjection = tViews[view].as<float>();
+            glCheck(glUniformMatrix4fv(resources.viewProjection, 1, GL_FALSE, &viewProjection[0][0]));
+            for (auto const& mesh : aMeshes)
+                if (mesh)
+                    aSceneBuffer.draw_depth(mesh->indexStart, mesh->indexEnd - mesh->indexStart);
+        }
+
+        glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, static_cast<GLuint>(previousDrawFramebuffer)));
+        glCheck(glBindFramebuffer(GL_READ_FRAMEBUFFER, static_cast<GLuint>(previousReadFramebuffer)));
+        glCheck(glViewport(previousViewport[0], previousViewport[1], previousViewport[2], previousViewport[3]));
+        glCheck(glScissor(previousScissor[0], previousScissor[1], previousScissor[2], previousScissor[3]));
+        glCheck(glDepthFunc(static_cast<GLenum>(previousDepthFunc)));
+        glCheck(glDepthMask(previousDepthMask));
+        if (!previousDepthTest)
+            glCheck(glDisable(GL_DEPTH_TEST));
+        if (!previousScissorTest)
+            glCheck(glDisable(GL_SCISSOR_TEST));
+        if (previousCullFace)
+            glCheck(glEnable(GL_CULL_FACE));
+        if (previousBlend)
+            glCheck(glEnable(GL_BLEND));
+        if (!previousPolygonOffset)
+            glCheck(glDisable(GL_POLYGON_OFFSET_FILL));
+        // n.b. the standard program still considers itself active
+        glCheck(glUseProgram(static_cast<GLuint>(reinterpret_cast<std::intptr_t>(aProgram.handle()))));
+
+        scoped_lock_ssbo<mat4f> matrices{ aProgram.shadow_matrices(), static_cast<std::uint32_t>(tViews.size()) };
+        auto const bias = scene_shadows::bias();
+        for (std::size_t view = 0u; view < tViews.size(); ++view)
+            matrices.data()[view] = (bias * tViews[view]).as<float>();
+        pbrShader.set_pbr_shadow_buffer(matrices.range().first, directionalView, directionalTexel);
+        glCheck(glBindTextureUnit(static_cast<GLuint>(reserved_texture_unit::PbrShadow), resources.atlas));
     }
 
     void opengl_rendering_context::draw_patch(patch_drawable& aPatch, const mat44& aTransformation)

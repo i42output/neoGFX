@@ -85,7 +85,9 @@ namespace neogfx
         void set_opacity(scalar aOpacity) final;
         void set_model_table_base(std::uint32_t aBase) final;
         void set_scene_light(std::optional<vec3> const& aDirection, scene_lighting aLighting = scene_lighting::PerVertex) final;
-        void set_scene_point_light(std::optional<vec3> const& aPosition, vec3 const& aRadiance = vec3{ 1.0, 1.0, 1.0 }, scalar aRange = 0.0) final;
+        std::vector<scene_point_light> const& scene_point_lights() const final;
+        void set_scene_point_lights(std::vector<scene_point_light> const& aLights) final;
+        void set_scene_light_buffer(std::uint32_t aBase, std::uint32_t aCount) final;
     public:
         bool supports(vertex_buffer_type aBufferType) const override;
         void prepare_uniforms(const i_rendering_context& aContext, i_shader_program& aProgram) override;
@@ -97,17 +99,15 @@ namespace neogfx
         std::uint32_t iModelTableBase;
         std::optional<vec3> iSceneLight;
         scene_lighting iSceneLighting;
-        std::optional<vec3> iScenePointLight;
-        vec4 iScenePointLightRadiance;
-        std::optional<point> iScenePointLightOrigin;
+        std::vector<scene_point_light> iScenePointLights;
     private:
         cache_uniform(uProjectionMatrix)
         cache_uniform(uTransformationMatrix)
         cache_uniform(uOpacity)
         cache_uniform(uModelTableBase)
         cache_uniform(uSceneLight)
-        cache_uniform(uScenePointLight)
-        cache_uniform(uScenePointLightRadiance)
+        cache_uniform(uSceneLightBase)
+        cache_uniform(uSceneLightCount)
         optional_logical_coordinates iLogicalCoordinates;
         optional_vec2 iOffset;
     };

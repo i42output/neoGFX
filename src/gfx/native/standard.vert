@@ -36,19 +36,22 @@ void standard_vertex_shader(inout vec3 coord, inout vec4 color, inout vec3 world
             if (uSceneLight.w < 1.5)
             {
                 vec3 light = vec3(0.35 + 0.65 * max(dot(worldNormal, uSceneLight.xyz), 0.0));
-                // a point light: radiance on the PBR scale (on which the directional light's is 2.8)
-                if (uScenePointLight.w > 0.0)
+                // point lights (see i_standard_shader_program::scene_lights): radiance on the PBR scale (on which the
+                // directional light's is 2.8)
+                for (uint i = 0u; i < uSceneLightCount; ++i)
                 {
-                    vec3 toLight = uScenePointLight.xyz - coord;
+                    vec4 lightPosition = bLights[uSceneLightBase + i * 2u];
+                    vec4 lightRadiance = bLights[uSceneLightBase + i * 2u + 1u];
+                    vec3 toLight = lightPosition.xyz - coord;
                     float distance2 = max(dot(toLight, toLight), 1e-4);
                     float window = 1.0;
-                    if (uScenePointLightRadiance.w > 0.0)
+                    if (lightRadiance.w > 0.0)
                     {
-                        float ratio = distance2 / (uScenePointLightRadiance.w * uScenePointLightRadiance.w);
+                        float ratio = distance2 / (lightRadiance.w * lightRadiance.w);
                         window = clamp(1.0 - ratio * ratio, 0.0, 1.0);
                         window *= window;
                     }
-                    light += (0.65 / 2.8) * uScenePointLightRadiance.rgb * max(dot(worldNormal, toLight * inversesqrt(distance2)), 0.0) * window / distance2;
+                    light += (0.65 / 2.8) * lightRadiance.rgb * max(dot(worldNormal, toLight * inversesqrt(distance2)), 0.0) * window / distance2;
                 }
                 color.rgb *= light;
             }

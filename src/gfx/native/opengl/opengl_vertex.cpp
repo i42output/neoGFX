@@ -105,6 +105,29 @@ namespace neogfx
         iIndices.reclaim();
     }
 
+    void opengl_scene_buffer::draw_depth(std::uint32_t aIndexStart, std::uint32_t aIndexCount)
+    {
+        if (aIndexCount == 0u)
+            return;
+        if (iVao == std::nullopt)
+            iVao.emplace();
+        else
+            iVao->bind();
+        // n.b. the standard program's attribute locations (see standard_vertex_shader), so the attributes it set up are unchanged
+        glCheck(glBindBuffer(GL_ARRAY_BUFFER, iVertices.handle()));
+        glCheck(glEnableVertexAttribArray(0u));
+        glCheck(glVertexAttribPointer(0u, 3, GL_FLOAT, GL_FALSE, sizeof(scene_vertex), reinterpret_cast<const void*>(scene_vertex::offset::xyz)));
+        glCheck(glEnableVertexAttribArray(11u));
+        glCheck(glVertexAttribPointer(11u, 1, GL_FLOAT, GL_FALSE, sizeof(scene_vertex), reinterpret_cast<const void*>(scene_vertex::offset::model)));
+        glCheck(glEnableVertexAttribArray(12u));
+        glCheck(glVertexAttribPointer(12u, 4, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(scene_vertex), reinterpret_cast<const void*>(scene_vertex::offset::joints)));
+        glCheck(glEnableVertexAttribArray(13u));
+        glCheck(glVertexAttribPointer(13u, 4, GL_FLOAT, GL_FALSE, sizeof(scene_vertex), reinterpret_cast<const void*>(scene_vertex::offset::weights)));
+        glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iIndices.handle()));
+        glCheck(glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(aIndexCount), GL_UNSIGNED_INT,
+            reinterpret_cast<const void*>(static_cast<std::uintptr_t>(aIndexStart) * sizeof(std::uint32_t))));
+    }
+
     void opengl_scene_buffer::draw(i_rendering_context& aContext, i_shader_program& aShaderProgram, optional_mat44 const& aTransformation, std::uint32_t aIndexStart, std::uint32_t aIndexCount)
     {
         if (aIndexCount == 0u)

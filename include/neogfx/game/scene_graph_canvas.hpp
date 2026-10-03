@@ -85,11 +85,15 @@ namespace neogfx::game
         // scene_lighting::PerVertex (the default) or scene_lighting::PhysicallyBased (scene_lighting::None is the same as set_lighting(false))
         scene_lighting lighting_model() const;
         void set_lighting_model(scene_lighting aLightingModel);
-        // a point light (3D, lit) at a node's position, e.g. one with an emissive mesh: radiance (colour times intensity; the
+        // point lights (3D, lit) at nodes' positions, e.g. ones with emissive meshes: radiance (colour times intensity; the
         // fixed directional light's is 2.8) falls off with the square of the distance and, if a range is given, smoothly to
-        // zero at that range. N.B. no shadows: it lights every surface facing it.
-        void set_point_light(neogfx::scene_graph::index aNode, vec3 const& aRadiance, scalar aRange = 0.0);
-        void clear_point_light();
+        // zero at that range. Shadows are cast (if enabled, physically based shading only) by up to eight of them; aSize is the
+        // radius of what emits the light (e.g. the node's own emissive mesh), which casts no shadow from it.
+        void add_point_light(neogfx::scene_graph::index aNode, vec3 const& aRadiance, scalar aRange = 0.0, bool aCastsShadows = true, scalar aSize = 0.0);
+        void clear_point_lights();
+        // shadows (shadow mapping; physically based shading only) cast by the directional light and the point lights
+        bool shadows() const;
+        void set_shadows(bool aShadows);
         bool mouse_camera_control() const;
         void set_mouse_camera_control(bool aEnable);
         // discard any mouse camera changes
@@ -119,6 +123,8 @@ namespace neogfx::game
             neogfx::scene_graph::index node;
             vec3 radiance;
             scalar range;
+            bool castsShadows;
+            scalar size;
         };
         struct primitive_entity
         {
@@ -147,7 +153,8 @@ namespace neogfx::game
         std::optional<scalar> iViewScale;
         bool iLighting;
         scene_lighting iLightingModel;
-        std::optional<point_light> iPointLight;
+        std::vector<point_light> iPointLights;
+        bool iShadows = false;
         std::vector<primitive_entity> iEntities;
         std::optional<std::pair<vec3, vec3>> iBounds;
         std::map<std::pair<neogfx::scene_graph::index, texture_sampling>, std::optional<game::texture>> iTextures;

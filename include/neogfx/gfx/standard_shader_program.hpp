@@ -52,6 +52,8 @@ namespace neogfx
         i_shape_shader& shape_shader() final;
         i_ssbo& model_matrices() final;
         i_ssbo& model_table() final;
+        i_ssbo& scene_lights() final;
+        i_ssbo& shadow_matrices() final;
     private:
         ref_ptr<i_fragment_shader> iDefaultShader;
         ref_ptr<i_gradient_shader> iGradientShader;
@@ -63,5 +65,7 @@ namespace neogfx
         ref_ptr<i_shape_shader> iShapeShader;
         ref_ptr<i_ssbo> iModelMatrices;
         ref_ptr<i_ssbo> iModelTable;
+        ref_ptr<i_ssbo> iSceneLights;
+        ref_ptr<i_ssbo> iShadowMatrices;
     };
 }

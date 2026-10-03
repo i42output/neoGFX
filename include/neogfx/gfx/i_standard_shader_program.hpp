@@ -61,5 +61,9 @@ namespace neogfx
         // matrices and the table mapping entity ids to their first matrix
         virtual i_ssbo& model_matrices() = 0;
         virtual i_ssbo& model_table() = 0;
+        // per frame point lights (two elements each: position and first shadow view (-1 if none); radiance and range; see
+        // i_standard_vertex_shader::scene_point_lights) and shadow map view matrices (see i_pbr_shader::set_pbr_shadows)
+        virtual i_ssbo& scene_lights() = 0;
+        virtual i_ssbo& shadow_matrices() = 0;
     };
 }

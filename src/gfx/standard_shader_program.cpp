@@ -43,9 +43,13 @@ namespace neogfx
         iStippleShader = static_cast<i_stipple_shader&>(add_shader<standard_stipple_shader>());
         iModelMatrices = static_cast<i_shader_program&>(*this).create_ssbo<mat4f>("bModelMatrices"_s);
         iModelTable = static_cast<i_shader_program&>(*this).create_ssbo<std::uint32_t>("bModelTable"_s);
+        iSceneLights = static_cast<i_shader_program&>(*this).create_ssbo<vec4f>("bLights"_s);
+        iShadowMatrices = static_cast<i_shader_program&>(*this).create_ssbo<mat4f>("bShadowMatrices"_s);
         // ensure the SSBOs are mapped (see standard_shape_shader)
         iModelMatrices->alloc(1);
         iModelTable->alloc(1);
+        iSceneLights->alloc(1);
+        iShadowMatrices->alloc(1);
     }
 
     i_ssbo& standard_shader_program::model_matrices()
@@ -56,6 +60,16 @@ namespace neogfx
     i_ssbo& standard_shader_program::model_table()
     {
         return *iModelTable;
+    }
+
+    i_ssbo& standard_shader_program::scene_lights()
+    {
+        return *iSceneLights;
+    }
+
+    i_ssbo& standard_shader_program::shadow_matrices()
+    {
+        return *iShadowMatrices;
     }
 
     shader_program_type standard_shader_program::type() const

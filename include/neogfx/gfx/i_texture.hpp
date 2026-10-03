@@ -85,8 +85,9 @@ namespace neogfx
         Pbr2            = 10,
         Pbr3            = 11,
         PbrEnvironment  = 12,   // image based lighting (see i_pbr_shader::environment)
+        PbrShadow       = 13,   // the shadow map atlas (see i_pbr_shader::set_pbr_shadows)
 
-        RESERVED_LAST   = PbrEnvironment
+        RESERVED_LAST   = PbrShadow
     };
 
     class i_sub_texture;
