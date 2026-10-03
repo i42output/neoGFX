@@ -56,7 +56,7 @@ Nested windows                  | 90      |
 MDI                             | 0       |
 Tabs                            | 100     |
 Toolbars                        | 90      |     Drop-down button support
-Layout Managers                 | 95      |     Need to fully support size policies
+Layout Managers                 | 100     |
 Label                           | 100     |     
 Button                          | 100     |     
 Table View                      | 95      |     Selection; cell widget
@@ -75,18 +75,18 @@ Status Bar                      | 100     |
 Progress Bar                    | 95      |
 Docks							| 75      |
 Font Picker                     | 99      |     Monospace filter
-Colour Gradient Selector        | 95      |     Swatch library
+Colour Gradient Selector        | 100     |
 Colour Picker                   | 100     |     
 Date/Time                       | 0       |
 File Browsers (Native)          | 99      |
 Drag and drop                   | 75      |
 UI/Resource Description (RJSON) | 40      |
-tool: neoGFX Design Studio      | 10      |
+tool: neoGFX Design Studio      | 40      |
 i18n                            | 70      |
 l10n                            | 0       |     UK English, US English, French, German, Chinese
 HID: Game Controllers           | 80      |     Calibration/settings UI; DirectInput button mapping
 Multi-monitor					| 50      |     DPI changes when changing or dragging between monitors
-Scene Graph						| 0		  |		
+Scene Graph						| 90      |		
 Skins                           | 40      |
 
 
