@@ -1030,9 +1030,11 @@ int main(int argc, char* argv[])
             auto& splitter = window.layoutTextWidgetCutoffs.emplace<ng::splitter>();
             auto& testPane = splitter.layout().emplace<ng::group_box>(std::string{ "Drag the splitter" });
             testPane.set_size_policy(ng::size_constraint::Expanding);
+            testPane.set_stretch_content_to_title_width(true);
             auto& testLayout = testPane.item_layout();
             auto& sparePane = splitter.layout().emplace<ng::group_box>(std::string{ "Spare room" });
             sparePane.set_size_policy(ng::size_constraint::Expanding);
+            sparePane.set_stretch_content_to_title_width(true);
 
             {
                 auto& caption = testLayout.emplace<ng::text_widget>(
@@ -1513,8 +1515,6 @@ int main(int argc, char* argv[])
         {
             auto& g = *sceneGraph3D;
             auto const groundMesh = g.add_box(ng::vec3{ 16.0, 0.2, 16.0 }, ng::color::DarkSlateGray, "ground");
-            auto const sunMesh = g.add_box(ng::vec3{ 2.0, 2.0, 2.0 }, ng::color::White, "sun");
-            g.set_base_color_texture(sunMesh, g.add_texture(g.add_image(logoImage->cdata(), logoImage->size(), "image/png", "neoGFX logo")));
             auto const planetMesh = g.add_box(ng::vec3{ 1.0, 1.0, 1.0 }, 
                 { ng::color::Red, ng::color::Green, ng::color::Blue, ng::color::Yellow, ng::color::Cyan, ng::color::Magenta }, "planet");
             auto const moonMesh = g.add_box(ng::vec3{ 0.4, 0.4, 0.4 }, ng::color::LightGray, "moon");
@@ -1523,7 +1523,14 @@ int main(int argc, char* argv[])
             auto const root = g.add_node("root", ng::vec3{});
             orreryRoot3D = root;
             g.add_node("ground", ng::vec3{ 0.0, -2.0, 0.0 }, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, root, groundMesh);
-            orrery3D.sun = g.add_node("sun", ng::vec3{}, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, root, sunMesh);
+            // the sun: the neoGFX logo extruded into a solid (resources/neoGFX.glb, an embedded resource; chrome "neo", red "GFX")
+            orrery3D.sun = g.add_node("sun", ng::vec3{}, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, root);
+            {
+                auto const logoModel = ng::service<ng::i_resource_manager>().load_resource(std::string{ ":/test/resources/neoGFX.glb" });
+                std::istringstream logoInput{ std::string{ static_cast<char const*>(logoModel->cdata()), logoModel->size() } };
+                ng::file::gltf logo{ logoInput };
+                g.append(logo.model(), orrery3D.sun);
+            }
             orrery3D.planetOrbit = g.add_node("planet orbit", ng::vec3{}, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, root);
             orrery3D.planet = g.add_node("planet", ng::vec3{ 5.0, 0.0, 0.0 }, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, orrery3D.planetOrbit, planetMesh);
             orrery3D.moonOrbit = g.add_node("moon orbit", ng::vec3{}, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, orrery3D.planet);
@@ -1667,6 +1674,25 @@ int main(int argc, char* argv[])
             else
                 return; // a loaded scene graph: nothing to animate here (its own glTF animation is played by the canvas)
         };
+        // the loaded environment (kept for the background texture)
+        ng::size_u32 environmentExtents;
+        std::vector<float> environmentPixels;
+        auto update_scene_background = [&]()
+        {
+            auto& pbrShader = ng::service<ng::i_rendering_engine>().default_shader_program().pbr_shader();
+            bool const ownTexture = window.checkSceneGraphBackgroundTexture.is_checked();
+            if (ownTexture && !environmentPixels.empty())
+            {
+                if (pbrShader.background_texture() == nullptr)
+                    pbrShader.set_background_texture(environmentExtents, environmentPixels.data());
+            }
+            else
+                pbrShader.clear_background_texture();
+            if (sceneGraphCanvas)
+                sceneGraphCanvas->set_environment_background(window.checkSceneGraphBackground.is_checked() ?
+                    std::optional<ng::pbr_background_source>{ ownTexture ? ng::pbr_background_source::Texture : ng::pbr_background_source::Prefiltered } :
+                    std::nullopt, window.sliderSceneGraphBackgroundBlur.value());
+        };
         window.pageSceneGraph.VisibilityChanged([&]()
         {
             if (window.pageSceneGraph.visible() && !sceneGraphCanvas)
@@ -1681,6 +1707,9 @@ int main(int argc, char* argv[])
                 window.checkSceneGraphLighting.check();
                 window.checkSceneGraphShadows.check();
                 sceneGraphCanvas->set_shadows(true);
+                window.checkSceneGraphBackground.check();
+                window.checkSceneGraphBackgroundTexture.check();
+                update_scene_background();
                 // the orrery is posed as each frame is rendered; the timer just requests frames
                 sceneGraphCanvas->Animating([&]() { animate_orrery(); });
                 sceneGraphAnimator.emplace(window.pageSceneGraph, [&](ng::widget_timer& aTimer)
@@ -1719,6 +1748,9 @@ int main(int argc, char* argv[])
             if (sceneGraphCanvas)
                 sceneGraphCanvas->set_shadows(window.checkSceneGraphShadows.is_checked());
         });
+        window.checkSceneGraphBackground.Toggled([&]() { update_scene_background(); });
+        window.checkSceneGraphBackgroundTexture.Toggled([&]() { update_scene_background(); });
+        window.sliderSceneGraphBackgroundBlur.ValueChanged([&]() { update_scene_background(); });
         window.checkSceneGraphPbr.Toggled([&]()
         {
             if (sceneGraphCanvas)
@@ -1824,7 +1856,12 @@ int main(int argc, char* argv[])
                 std::vector<float> pixels;
                 load_radiance_hdr((*paths)[0], extents, pixels);
                 // n.b. shared by all PBR drawing (the default shader program's)
-                ng::service<ng::i_rendering_engine>().default_shader_program().pbr_shader().set_environment(extents, pixels.data());
+                auto& pbrShader = ng::service<ng::i_rendering_engine>().default_shader_program().pbr_shader();
+                pbrShader.set_environment(extents, pixels.data());
+                environmentExtents = extents;
+                environmentPixels = std::move(pixels);
+                pbrShader.clear_background_texture();
+                update_scene_background();
                 window.checkSceneGraphPbr.check();
                 if (sceneGraphCanvas)
                     sceneGraphCanvas->update();

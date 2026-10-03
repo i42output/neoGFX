@@ -25,6 +25,7 @@
 #include <neogfx/gfx/i_scene_graph.hpp>
 #include <neogfx/gfx/scene_graph.hpp>
 #include <neogfx/gfx/i_vertex_shader.hpp>
+#include <neogfx/gfx/i_fragment_shader.hpp>
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/texture.hpp>
@@ -94,6 +95,12 @@ namespace neogfx::game
         // shadows (shadow mapping; physically based shading only) cast by the directional light and the point lights
         bool shadows() const;
         void set_shadows(bool aShadows);
+        // the environment (see i_pbr_shader::set_environment) drawn as the background (3D, in place of the background colour):
+        // from the prefiltered environment texture or the background texture (see i_pbr_shader::set_background_texture), blurred
+        // from 0 (sharp) to 1; std::nullopt (the default) for none
+        std::optional<pbr_background_source> const& environment_background() const;
+        scalar environment_background_blur() const;
+        void set_environment_background(std::optional<pbr_background_source> const& aSource, scalar aBlur = 0.0);
         bool mouse_camera_control() const;
         void set_mouse_camera_control(bool aEnable);
         // discard any mouse camera changes
@@ -155,6 +162,8 @@ namespace neogfx::game
         scene_lighting iLightingModel;
         std::vector<point_light> iPointLights;
         bool iShadows = false;
+        std::optional<pbr_background_source> iEnvironmentBackground;
+        scalar iEnvironmentBackgroundBlur = 0.0;
         std::vector<primitive_entity> iEntities;
         std::optional<std::pair<vec3, vec3>> iBounds;
         std::map<std::pair<neogfx::scene_graph::index, texture_sampling>, std::optional<game::texture>> iTextures;

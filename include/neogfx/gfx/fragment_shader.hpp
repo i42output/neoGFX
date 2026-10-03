@@ -162,6 +162,7 @@ namespace neogfx
         void set_effect(shader_effect aEffect) final;
         void set_effect_gain(vec4 const& aGain) final;
         void set_pass_through(bool aPassThrough) final;
+        void set_wrap(vec4 const& aTransform, texture_wrap aWrapS, texture_wrap aWrapT) final;
     private:
         cache_uniform(uTextureEnabled)
         cache_uniform(uTextureDataFormat)
@@ -169,6 +170,8 @@ namespace neogfx
         cache_uniform(uTextureExtents)
         cache_uniform(uTextureEffect)
         cache_uniform(uTexturePassThrough)
+        cache_uniform(uTextureWrap)
+        cache_uniform(uTextureWrapTransform)
         cache_uniform(uEffectGain)
         texture iDummyTexture;
         texture iDummyTextureMS;
@@ -193,12 +196,20 @@ namespace neogfx
         void set_environment(size_u32 const& aExtents, float const* aRgbaPixels, scalar aIntensity = 1.0) final;
         void clear_environment() final;
         i_texture const& environment() const final;
+        scalar environment_intensity() const final;
+        std::optional<pbr_background> const& background() const final;
+        void set_background(std::optional<pbr_background> const& aBackground) final;
+        void set_background_texture(size_u32 const& aExtents, float const* aRgbaPixels) final;
+        void clear_background_texture() final;
+        i_texture const* background_texture() const final;
     private:
         std::optional<vec3> iLight;
         vec3 iCamera;
         std::optional<std::pair<vec3, scalar>> iShadows;
         mutable std::optional<texture> iEnvironment;
         scalar iEnvironmentIntensity = 1.0;
+        std::optional<pbr_background> iBackground;
+        std::optional<texture> iBackgroundTexture;
     private:
         cache_uniform(uPbrEnabled)
         cache_uniform(uPbrLightDirection)
@@ -213,6 +224,8 @@ namespace neogfx
         cache_uniform(uPbrAlphaCutoff)
         cache_uniform(uPbrDoubleSided)
         cache_uniform(uPbrBaseColorTextured)
+        cache_uniform(uPbrBaseTextureTransform)
+        cache_uniform(uPbrTextureWrap)
         cache_uniform(uPbrEnvironmentIntensity)
         cache_uniform(uPbrTextureSources)
         cache_uniform(uPbrTextureTransform0)

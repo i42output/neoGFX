@@ -4,6 +4,7 @@
     resource: {
         files: [
             resources/neoGFX.png
+            resources/neoGFX.glb
             resources/channel.png
             resources/channel_32.png
             resources/channel_128.png
@@ -1136,6 +1137,24 @@
                                 push_button: {
                                     id: buttonSceneGraphEnvironment
                                     text: "Load Environment..."
+                                }
+                                check_box: {
+                                    id: checkSceneGraphBackground
+                                    text: "Background"
+                                }
+                                check_box: {
+                                    id: checkSceneGraphBackgroundTexture
+                                    text: "Own texture"
+                                }
+                                label: {
+                                    text: "Blur"
+                                }
+                                double_slider: {
+                                    id: sliderSceneGraphBackgroundBlur
+                                    minimum: 0.0
+                                    maximum: 1.0
+                                    step: 0.01
+                                    value: 0.0
                                 }
                                 label: {
                                     text: "Drag: orbit (3D) / pan (2D); right drag: pan; wheel: zoom; double click: reset view"

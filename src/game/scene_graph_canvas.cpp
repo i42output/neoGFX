@@ -380,6 +380,23 @@ namespace neogfx::game
         update();
     }
 
+    std::optional<pbr_background_source> const& scene_graph_canvas::environment_background() const
+    {
+        return iEnvironmentBackground;
+    }
+
+    scalar scene_graph_canvas::environment_background_blur() const
+    {
+        return iEnvironmentBackgroundBlur;
+    }
+
+    void scene_graph_canvas::set_environment_background(std::optional<pbr_background_source> const& aSource, scalar aBlur)
+    {
+        iEnvironmentBackground = aSource;
+        iEnvironmentBackgroundBlur = std::clamp(aBlur, 0.0, 1.0);
+        update();
+    }
+
     void scene_graph_canvas::init()
     {
         ecs().component<mesh_filter>();
@@ -471,29 +488,6 @@ namespace neogfx::game
                 {
                     continue; // malformed primitive: skip it
                 }
-                // n.b. textures aren't repeated (glTF's default wrapping) so texture coordinates confined to one whole tile other
-                // than the first (e.g. 1 to 2, as some exporters write) are moved into the first
-                if (!localMesh.uv.empty())
-                {
-                    vec2f minimum = localMesh.uv[0];
-                    vec2f maximum = localMesh.uv[0];
-                    for (auto const& uv : localMesh.uv)
-                    {
-                        minimum = minimum.min(uv);
-                        maximum = maximum.max(uv);
-                    }
-                    constexpr float tolerance = 1e-4f;
-                    vec2f offset;
-                    for (std::uint32_t axis = 0u; axis < 2u; ++axis)
-                    {
-                        float const tile = std::floor(minimum[axis] + tolerance);
-                        if (tile != 0.0f && maximum[axis] - tile <= 1.0f + tolerance)
-                            offset[axis] = -tile;
-                    }
-                    if (offset != vec2f{})
-                        for (auto& uv : localMesh.uv)
-                            uv += offset;
-                }
                 std::optional<game::texture> texture;
                 if (textureImage != sg::invalid_index && localMesh.uv.size() == localMesh.vertices.size())
                     texture = load_texture(textureImage, sampling);
@@ -511,6 +505,33 @@ namespace neogfx::game
                     if (material.alpha_mode() == sg::alpha_mode::Mask)
                         pbr.alphaCutoff = material.alpha_cutoff();
                     pbr.doubleSided = material.double_sided();
+                    // the textures' wrapping: that of the base colour texture's sampler (else the first other texture's)
+                    auto const to_texture_wrap = [](sg::wrapping_mode aMode)
+                    {
+                        switch (aMode)
+                        {
+                        case sg::wrapping_mode::CLAMP_TO_EDGE:
+                            return texture_wrap::ClampToEdge;
+                        case sg::wrapping_mode::MIRRORED_REPEAT:
+                            return texture_wrap::MirroredRepeat;
+                        case sg::wrapping_mode::REPEAT:
+                        default:
+                            return texture_wrap::Repeat;
+                        }
+                    };
+                    for (auto const* reference : std::initializer_list<sg::i_texture_reference const*>{
+                        &material.pbr_metallic_roughness().base_color_texture(), &material.pbr_metallic_roughness().metallic_roughness_texture(),
+                        &material.normal_texture(), &material.occlusion_texture(), &material.emissive_texture() })
+                        if (reference->has_texture() && reference->texture() < g.texture_count())
+                        {
+                            auto const& textureInfo = g.texture(reference->texture());
+                            if (textureInfo.has_sampler() && textureInfo.sampler() < g.sampler_count())
+                            {
+                                pbr.wrapS = to_texture_wrap(g.sampler(textureInfo.sampler()).wrap_S());
+                                pbr.wrapT = to_texture_wrap(g.sampler(textureInfo.sampler()).wrap_T());
+                            }
+                            break;
+                        }
                     auto const pbr_texture = [&](sg::i_texture_reference const& aReference) -> std::optional<game::texture>
                     {
                         if (iLightingModel != scene_lighting::PhysicallyBased || !aReference.has_texture() || aReference.texture() >= g.texture_count() ||
@@ -660,6 +681,8 @@ namespace neogfx::game
             if (lit && iShadows && iLightingModel == scene_lighting::PhysicallyBased && iBounds)
                 shadowBounds.emplace((iBounds->first + iBounds->second) / 2.0, (iBounds->second - iBounds->first).magnitude() / 2.0 * 1.1);
             service<i_rendering_engine>().default_shader_program().pbr_shader().set_pbr_shadows(shadowBounds);
+            // n.b. the camera is set when known (below)
+            service<i_rendering_engine>().default_shader_program().pbr_shader().set_background(std::nullopt);
             thread_local std::map<sg::index, std::vector<mat44f>> tJointMatrices;
             tJointMatrices.clear();
             for (auto& e : iEntities)
@@ -768,6 +791,9 @@ namespace neogfx::game
                     iOrbit->distance + (iOrbit->target - centre).magnitude() + radius * 4.0);
         }
         iLastCameraWorld = cameraWorld;
+        if (iEnvironmentBackground)
+            service<i_rendering_engine>().default_shader_program().pbr_shader().set_background(
+                pbr_background{ *iEnvironmentBackground, iEnvironmentBackgroundBlur, inverse(projection * inverse(cameraWorld)) });
         if (iLighting && iLightingModel == scene_lighting::PhysicallyBased)
             service<i_rendering_engine>().default_shader_program().pbr_shader().set_pbr_light(
                 scene_light(), vec3{ cameraWorld[3][0], cameraWorld[3][1], cameraWorld[3][2] });

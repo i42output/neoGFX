@@ -90,6 +90,14 @@ namespace neogfx
         RESERVED_LAST   = PbrShadow
     };
 
+    // how texture coordinates outside 0 to 1 are wrapped (glTF sampler wrapS/wrapT; see i_texture_shader::set_wrap)
+    enum class texture_wrap : std::uint32_t
+    {
+        ClampToEdge     = 0,
+        Repeat          = 1,
+        MirroredRepeat  = 2
+    };
+
     class i_sub_texture;
     class i_image;
 

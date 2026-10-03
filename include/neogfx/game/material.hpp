@@ -50,6 +50,9 @@ namespace neogfx::game
         std::optional<texture> normalTexture;
         std::optional<texture> occlusionTexture;
         std::optional<texture> emissiveTexture;
+        // how all of the textures (including the base colour texture) wrap
+        texture_wrap wrapS = texture_wrap::Repeat;
+        texture_wrap wrapT = texture_wrap::Repeat;
 
         auto operator<=>(pbr_material const&) const = default;
 
@@ -67,7 +70,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 11;
+                return 13;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -89,6 +92,9 @@ namespace neogfx::game
                 case 9:
                 case 10:
                     return component_data_field_type::ComponentData | component_data_field_type::Optional;
+                case 11:
+                case 12:
+                    return component_data_field_type::Enum | component_data_field_type::Uint32;
                 default:
                     throw invalid_field_index();
                 }
@@ -110,6 +116,9 @@ namespace neogfx::game
                 case 9:
                 case 10:
                     return texture::meta::id();
+                case 11:
+                case 12:
+                    return neolib::uuid{};
                 default:
                     throw invalid_field_index();
                 }
@@ -128,7 +137,9 @@ namespace neogfx::game
                     "Metallic Roughness Texture",
                     "Normal Texture",
                     "Occlusion Texture",
-                    "Emissive Texture"
+                    "Emissive Texture",
+                    "Wrap S",
+                    "Wrap T"
                 };
                 return sFieldNames[aFieldIndex];
             }

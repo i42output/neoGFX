@@ -117,6 +117,10 @@ namespace neogfx
         glCheck(glBindBuffer(GL_ARRAY_BUFFER, iVertices.handle()));
         glCheck(glEnableVertexAttribArray(0u));
         glCheck(glVertexAttribPointer(0u, 3, GL_FLOAT, GL_FALSE, sizeof(scene_vertex), reinterpret_cast<const void*>(scene_vertex::offset::xyz)));
+        glCheck(glEnableVertexAttribArray(1u));
+        glCheck(glVertexAttribPointer(1u, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(scene_vertex), reinterpret_cast<const void*>(scene_vertex::offset::rgba)));
+        glCheck(glEnableVertexAttribArray(2u));
+        glCheck(glVertexAttribPointer(2u, 2, GL_FLOAT, GL_FALSE, sizeof(scene_vertex), reinterpret_cast<const void*>(scene_vertex::offset::st)));
         glCheck(glEnableVertexAttribArray(11u));
         glCheck(glVertexAttribPointer(11u, 1, GL_FLOAT, GL_FALSE, sizeof(scene_vertex), reinterpret_cast<const void*>(scene_vertex::offset::model)));
         glCheck(glEnableVertexAttribArray(12u));

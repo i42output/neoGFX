@@ -28,6 +28,35 @@ vec4 texel_at(vec2 texCoord)
 {
     return texel_at(texCoord, gl_SampleID);
 }
+// texture coordinates wrapped (0 clamp to edge, 1 repeat, 2 mirrored repeat)
+float wrap_texture_coordinate(float c, int mode)
+{
+    if (mode == 1)
+        return fract(c);
+    if (mode == 2)
+    {
+        float m = mod(c, 2.0);
+        return m > 1.0 ? 2.0 - m : m;
+    }
+    return clamp(c, 0.0, 1.0);
+}
+vec4 wrapped_texel_at(vec2 texCoord)
+{
+    vec2 wrapped = vec2(wrap_texture_coordinate(texCoord.x, uTextureWrap.x), wrap_texture_coordinate(texCoord.y, uTextureWrap.y));
+    // n.b. derivatives of the unwrapped coordinates (no seams where they wrap)
+    vec2 unwrapped = texCoord * uTextureWrapTransform.xy;
+    vec4 texel = textureGrad(tex, wrapped * uTextureWrapTransform.xy + uTextureWrapTransform.zw, dFdx(unwrapped), dFdy(unwrapped));
+    switch(uTextureDataFormat)
+    {
+    case 3: // Red
+        texel = vec4(1.0, 1.0, 1.0, texel.r);
+        break;
+    case 4: // SubPixel
+        texel = vec4(1.0, 1.0, 1.0, (texel.r + texel.g + texel.b) / 3.0);
+        break;
+    }
+    return texel;
+}
 vec4 combined_texel_at(vec2 texCoord)
 {
     vec4 sum = vec4(0.0, 0.0, 0.0, 0.0);
@@ -41,7 +70,7 @@ void standard_texture_shader(inout vec4 color, inout vec4 function0, inout vec4 
 {
     if (uTextureEnabled && !uTexturePassThrough)
     {
-        vec4 texel = texel_at(TexCoord);
+        vec4 texel = uTextureWrap.z != 0 ? wrapped_texel_at(TexCoord) : texel_at(TexCoord);
         switch(uTextureEffect)
         {
         case SHADER_EFFECT_None:

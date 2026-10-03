@@ -157,6 +157,8 @@ namespace neogfx
         uTextureEffect = shader_effect::None;
         uTexturePassThrough = false;
         uEffectGain = gain{}.as<float>();
+        uTextureWrap = vec4i32{ 0, 0, 0, 0 };
+        uTextureWrapTransform = vec4f{ 1.0f, 1.0f, 0.0f, 0.0f };
     }
 
     bool standard_texture_shader::supports(vertex_buffer_type aBufferType) const
@@ -184,6 +186,7 @@ namespace neogfx
         uTextureMultisample = texture_sampling::Normal;
         uTextureExtents = vec2f{};
         uEffectGain = gain{}.as<float>();
+        uTextureWrap = vec4i32{ 0, 0, 0, 0 };
     }
 
     void standard_texture_shader::set_texture(i_texture const& aTexture)
@@ -193,6 +196,7 @@ namespace neogfx
         uTextureDataFormat = aTexture.data_format();
         uTextureMultisample = aTexture.sampling();
         uTextureExtents = aTexture.storage_extents().to_vec2().as<float>();
+        uTextureWrap = vec4i32{ 0, 0, 0, 0 };
     }
 
     void standard_texture_shader::set_effect(shader_effect aEffect)
@@ -208,6 +212,13 @@ namespace neogfx
     void standard_texture_shader::set_pass_through(bool aPassThrough)
     {
         uTexturePassThrough = aPassThrough;
+    }
+
+    void standard_texture_shader::set_wrap(vec4 const& aTransform, texture_wrap aWrapS, texture_wrap aWrapT)
+    {
+        // x: wrap s, y: wrap t, z: 1 if wrapped
+        uTextureWrap = vec4i32{ static_cast<std::int32_t>(aWrapS), static_cast<std::int32_t>(aWrapT), 1, 0 };
+        uTextureWrapTransform = aTransform.as<float>();
     }
 
     namespace pbr_environment
@@ -524,6 +535,79 @@ namespace neogfx
                 aTexture.emplace(extents, 1.0, texture_sampling::Data, texture_data_format::RGBA, texture_data_type::Float);
             aTexture->set_pixels(rect{ point{}, extents }, data.data());
         }
+
+        // the background texture (see i_pbr_shader::set_background_texture and opengl_rendering_context::draw_scene_background):
+        // RGBE texels; the panorama (at most MaxBackgroundWidth wide, at least 16 x 8 and an even height) at the top, then below
+        // it, side by side, versions of it halved while wider than 8 and taller than 4 (so the texture is half as tall again)
+        constexpr std::uint32_t MaxBackgroundWidth = 4096u;
+
+        inline void upload_background(std::optional<texture>& aTexture, panorama aSource)
+        {
+            while (aSource.width > MaxBackgroundWidth)
+                aSource = aSource.half();
+            while (aSource.width < 16u || aSource.height < 8u || aSource.height % 2u != 0u)
+            {
+                // too small (doubled) or an odd height (last row repeated)
+                bool const twice = aSource.width < 16u || aSource.height < 8u;
+                panorama larger;
+                larger.width = twice ? aSource.width * 2u : aSource.width;
+                larger.height = twice ? aSource.height * 2u : aSource.height + 1u;
+                larger.pixels.resize(static_cast<std::size_t>(larger.width) * larger.height);
+                for (std::uint32_t y = 0u; y < larger.height; ++y)
+                    for (std::uint32_t x = 0u; x < larger.width; ++x)
+                        larger.pixels[static_cast<std::size_t>(y) * larger.width + x] = twice ?
+                            aSource.at(static_cast<std::int32_t>(x / 2u), static_cast<std::int32_t>(y / 2u)) :
+                            aSource.at(static_cast<std::int32_t>(x), static_cast<std::int32_t>(y));
+                aSource = std::move(larger);
+            }
+            std::vector<panorama> levels;
+            for (panorama const* level = &aSource; level->width > 8u && level->height > 4u; level = &levels.back())
+                levels.push_back(level->half());
+            std::uint32_t const width = aSource.width;
+            std::uint32_t const height = aSource.height + aSource.height / 2u;
+            std::vector<std::uint8_t> data(static_cast<std::size_t>(width) * height * 4u, 0u);
+            auto const put = [&](panorama const& aLevel, std::uint32_t aX, std::uint32_t aY)
+                {
+                    for (std::uint32_t y = 0u; y < aLevel.height; ++y)
+                        for (std::uint32_t x = 0u; x < aLevel.width; ++x)
+                        {
+                            auto const& c = aLevel.pixels[static_cast<std::size_t>(y) * aLevel.width + x];
+                            auto* p = &data[((static_cast<std::size_t>(aY) + y) * width + aX + x) * 4u];
+                            float const m = std::max({ c.r, c.g, c.b });
+                            if (!(m > 1e-32f))
+                                continue;
+                            int exponent = 0;
+                            float const scale = std::frexp(m, &exponent) * 256.0f / m;
+                            p[0] = static_cast<std::uint8_t>(std::min(c.r * scale, 255.0f));
+                            p[1] = static_cast<std::uint8_t>(std::min(c.g * scale, 255.0f));
+                            p[2] = static_cast<std::uint8_t>(std::min(c.b * scale, 255.0f));
+                            p[3] = static_cast<std::uint8_t>(std::clamp(exponent + 128, 0, 255));
+                        }
+                };
+            put(aSource, 0u, 0u);
+            std::uint32_t x = 0u;
+            for (auto const& level : levels)
+            {
+                put(level, x, aSource.height);
+                x += level.width;
+            }
+            size const extents{ static_cast<scalar>(width), static_cast<scalar>(height) };
+            aTexture = std::nullopt;
+            aTexture.emplace(extents, 1.0, texture_sampling::Data, texture_data_format::RGBA, texture_data_type::UnsignedByte);
+            aTexture->set_pixels(rect{ point{}, extents }, data.data());
+        }
+
+        inline panorama to_panorama(size_u32 const& aExtents, float const* aRgbaPixels)
+        {
+            auto const finite = [](float c) { return std::isfinite(c) ? std::max(c, 0.0f) : 0.0f; };
+            panorama result;
+            result.width = aExtents.cx;
+            result.height = aExtents.cy;
+            result.pixels.resize(static_cast<std::size_t>(result.width) * result.height);
+            for (std::size_t i = 0u; i < result.pixels.size(); ++i)
+                result.pixels[i] = rgb{ finite(aRgbaPixels[i * 4u]), finite(aRgbaPixels[i * 4u + 1u]), finite(aRgbaPixels[i * 4u + 2u]) };
+            return result;
+        }
     }
 
     standard_pbr_shader::standard_pbr_shader(std::string const& aName) :
@@ -552,6 +636,8 @@ namespace neogfx
         uPbrAlphaCutoff = -1.0f;
         uPbrDoubleSided = false;
         uPbrBaseColorTextured = false;
+        uPbrBaseTextureTransform = vec4f{ 1.0f, 1.0f, 0.0f, 0.0f };
+        uPbrTextureWrap = vec4i32{ 1, 1, 0, 0 };
         uPbrEnvironmentIntensity = 1.0f;
         uPbrTextureSources = vec4i32{ pbr_shader_material::NoTexture, pbr_shader_material::NoTexture, pbr_shader_material::NoTexture, pbr_shader_material::NoTexture };
         uPbrTextureTransform0 = vec4f{ 1.0f, 1.0f, 0.0f, 0.0f };
@@ -626,6 +712,8 @@ namespace neogfx
         uPbrAlphaCutoff = aMaterial.alphaCutoff ? static_cast<float>(*aMaterial.alphaCutoff) : -1.0f;
         uPbrDoubleSided = aMaterial.doubleSided;
         uPbrBaseColorTextured = aMaterial.baseColorTextured;
+        uPbrBaseTextureTransform = aMaterial.baseColorTransform.as<float>();
+        uPbrTextureWrap = vec4i32{ static_cast<std::int32_t>(aMaterial.wrapS), static_cast<std::int32_t>(aMaterial.wrapT), 0, 0 };
         uPbrEnvironmentIntensity = static_cast<float>(iEnvironmentIntensity);
         uPbrTextureSources = aMaterial.textureSources;
         uPbrTextureTransform0 = aMaterial.textureTransforms[0].as<float>();
@@ -641,15 +729,7 @@ namespace neogfx
             clear_environment();
             return;
         }
-        auto const finite = [](float c) { return std::isfinite(c) ? std::max(c, 0.0f) : 0.0f; };
-        pbr_environment::panorama source;
-        source.width = aExtents.cx;
-        source.height = aExtents.cy;
-        source.pixels.resize(static_cast<std::size_t>(source.width) * source.height);
-        for (std::size_t i = 0u; i < source.pixels.size(); ++i)
-            source.pixels[i] = pbr_environment::rgb{
-                finite(aRgbaPixels[i * 4u]), finite(aRgbaPixels[i * 4u + 1u]), finite(aRgbaPixels[i * 4u + 2u]) };
-        pbr_environment::upload(iEnvironment, source);
+        pbr_environment::upload(iEnvironment, pbr_environment::to_panorama(aExtents, aRgbaPixels));
         iEnvironmentIntensity = aIntensity;
     }
 
@@ -665,6 +745,41 @@ namespace neogfx
         if (!iEnvironment)
             pbr_environment::upload(iEnvironment, pbr_environment::default_panorama());
         return *iEnvironment;
+    }
+
+    scalar standard_pbr_shader::environment_intensity() const
+    {
+        return iEnvironmentIntensity;
+    }
+
+    std::optional<pbr_background> const& standard_pbr_shader::background() const
+    {
+        return iBackground;
+    }
+
+    void standard_pbr_shader::set_background(std::optional<pbr_background> const& aBackground)
+    {
+        iBackground = aBackground;
+    }
+
+    void standard_pbr_shader::set_background_texture(size_u32 const& aExtents, float const* aRgbaPixels)
+    {
+        if (aExtents.cx == 0u || aExtents.cy == 0u || aRgbaPixels == nullptr)
+        {
+            clear_background_texture();
+            return;
+        }
+        pbr_environment::upload_background(iBackgroundTexture, pbr_environment::to_panorama(aExtents, aRgbaPixels));
+    }
+
+    void standard_pbr_shader::clear_background_texture()
+    {
+        iBackgroundTexture = std::nullopt;
+    }
+
+    i_texture const* standard_pbr_shader::background_texture() const
+    {
+        return iBackgroundTexture ? &*iBackgroundTexture : nullptr;
     }
 
     standard_filter_shader::standard_filter_shader(std::string const& aName) :

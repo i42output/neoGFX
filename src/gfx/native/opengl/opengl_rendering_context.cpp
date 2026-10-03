@@ -3308,6 +3308,25 @@ namespace neogfx
         draw_patch(tPatchDrawable, aTransformation);
     }
 
+    namespace scene_textures
+    {
+        // a texture's transformation (scale xy, offset zw) from wrapped (0 to 1) texture coordinates to its own: inset by half a
+        // texel so that bilinear filtering doesn't reach outside the image where coordinates wrap
+        inline vec4 wrap_transform(i_texture const& aTexture, optional_aabb_2df const& aPart)
+        {
+            auto const& calculator = aTexture.uv_calculator(aPart);
+            auto const offset = calculator(vec2f{ 0.0f, 0.0f }).as<scalar>();
+            auto const scale = calculator(vec2f{ 1.0f, 1.0f }).as<scalar>() - offset;
+            auto const storage = aTexture.storage_extents();
+            vec2 const halfTexel{
+                scale.x != 0.0 ? 0.5 / std::abs(scale.x * storage.cx) : 0.0,
+                scale.y != 0.0 ? 0.5 / std::abs(scale.y * storage.cy) : 0.0 };
+            return vec4{
+                scale.x * (1.0 - 2.0 * halfTexel.x), scale.y * (1.0 - 2.0 * halfTexel.y),
+                offset.x + scale.x * halfTexel.x, offset.y + scale.y * halfTexel.y };
+        }
+    }
+
     namespace scene_shadows
     {
         // the shadow map atlas (see standard-pbr.frag): view 0 (the directional light's) is the bottom left quarter; views 1 to 48
@@ -3384,6 +3403,11 @@ namespace neogfx
             GLuint program = 0;
             GLint viewProjection = -1;
             GLint modelTableBase = -1;
+            GLint baseTexture = -1;
+            GLint alphaTest = -1;
+            GLint alphaCutoff = -1;
+            GLint textureTransform = -1;
+            GLint textureWrap = -1;
             GLuint framebuffer = 0;
             GLuint atlas = 0;
         };
@@ -3417,6 +3441,8 @@ namespace neogfx
             std::string vertexSource =
                 "#version 460 core\n"
                 "layout (location = 0) in vec3 VertexPosition;\n"
+                "layout (location = 1) in vec4 VertexColor;\n"
+                "layout (location = 2) in vec2 VertexTextureCoord;\n"
                 "layout (location = 11) in float VertexModel;\n"
                 "layout (location = 12) in vec4 VertexJoints;\n"
                 "layout (location = 13) in vec4 VertexWeights;\n"
@@ -3424,8 +3450,12 @@ namespace neogfx
                 "layout(std430, binding = %TABLE%) buffer SSBO_bModelTable { uint bModelTable[]; };\n"
                 "uniform mat4 uViewProjection;\n"
                 "uniform uint uModelTableBase;\n"
+                "out vec2 TexCoord;\n"
+                "out float Alpha;\n"
                 "void main()\n"
                 "{\n"
+                "    TexCoord = VertexTextureCoord;\n"
+                "    Alpha = VertexColor.a;\n"
                 "    vec4 position = vec4(VertexPosition, 1.0);\n"
                 "    if (VertexModel > 0.0)\n"
                 "    {\n"
@@ -3448,7 +3478,37 @@ namespace neogfx
                 };
             replace("%MATRICES%", std::to_string(static_cast<std::uint32_t>(aProgram.model_matrices().id())));
             replace("%TABLE%", std::to_string(static_cast<std::uint32_t>(aProgram.model_table().id())));
-            std::string const fragmentSource = "#version 460 core\nvoid main() {}\n";
+            // alpha tested (glTF alpha mode MASK) meshes' base colour alpha (wrapped as in standard-pbr.frag)
+            std::string const fragmentSource =
+                "#version 460 core\n"
+                "in vec2 TexCoord;\n"
+                "in float Alpha;\n"
+                "uniform sampler2D uBaseTexture;\n"
+                "uniform int uAlphaTest;\n"
+                "uniform float uAlphaCutoff;\n"
+                "uniform vec4 uTextureTransform;\n"
+                "uniform ivec2 uTextureWrap;\n"
+                "float wrap(float c, int mode)\n"
+                "{\n"
+                "    if (mode == 1)\n"
+                "        return fract(c);\n"
+                "    if (mode == 2)\n"
+                "    {\n"
+                "        float m = mod(c, 2.0);\n"
+                "        return m > 1.0 ? 2.0 - m : m;\n"
+                "    }\n"
+                "    return clamp(c, 0.0, 1.0);\n"
+                "}\n"
+                "void main()\n"
+                "{\n"
+                "    if (uAlphaTest != 0)\n"
+                "    {\n"
+                "        vec2 coord = vec2(wrap(TexCoord.x, uTextureWrap.x), wrap(TexCoord.y, uTextureWrap.y)) * uTextureTransform.xy + uTextureTransform.zw;\n"
+                "        vec2 unwrapped = TexCoord * uTextureTransform.xy;\n"
+                "        if (Alpha * textureGrad(uBaseTexture, coord, dFdx(unwrapped), dFdy(unwrapped)).a < uAlphaCutoff)\n"
+                "            discard;\n"
+                "    }\n"
+                "}\n";
             GLuint const vertexShader = compile(GL_VERTEX_SHADER, vertexSource);
             GLuint const fragmentShader = compile(GL_FRAGMENT_SHADER, fragmentSource);
             if (vertexShader == 0 || fragmentShader == 0)
@@ -3469,6 +3529,11 @@ namespace neogfx
             sResources.program = program;
             sResources.viewProjection = glGetUniformLocation(program, "uViewProjection");
             sResources.modelTableBase = glGetUniformLocation(program, "uModelTableBase");
+            sResources.baseTexture = glGetUniformLocation(program, "uBaseTexture");
+            sResources.alphaTest = glGetUniformLocation(program, "uAlphaTest");
+            sResources.alphaCutoff = glGetUniformLocation(program, "uAlphaCutoff");
+            sResources.textureTransform = glGetUniformLocation(program, "uTextureTransform");
+            sResources.textureWrap = glGetUniformLocation(program, "uTextureWrap");
             glCheck(glCreateTextures(GL_TEXTURE_2D, 1, &sResources.atlas));
             glCheck(glTextureStorage2D(sResources.atlas, 1, GL_DEPTH_COMPONENT32F, AtlasSize, AtlasSize));
             glCheck(glTextureParameteri(sResources.atlas, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
@@ -3482,6 +3547,204 @@ namespace neogfx
             glCheck(glNamedFramebufferReadBuffer(sResources.framebuffer, GL_NONE));
             if (glCheckNamedFramebufferStatus(sResources.framebuffer, GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
                 return sResources;
+            sResources.failed = false;
+            return sResources;
+        }
+    }
+
+    namespace scene_background
+    {
+        // the background program: a quad covering the camera's view (its NDC square), each fragment the environment in the
+        // direction it views (equirectangular: u = atan2(z, x) / 2pi + 0.5, v = 0.5 - asin(y) / pi), tone mapped and sRGB
+        // encoded as standard-pbr.frag does; from the prefiltered environment texture (see pbr_environment in
+        // fragment_shader.cpp: bands 0 to 5 prefiltered for roughness 0 to 1) or the background texture (RGBE texels: the
+        // panorama at the top, versions of it halved repeatedly side by side below it; n.b. all filtering is done here (texel
+        // fetches) so that it wraps horizontally)
+        struct resources
+        {
+            bool failed = false;
+            GLuint program = 0;
+            GLuint vertexArray = 0;
+            GLint ndcToClip = -1;
+            GLint clipToWorld = -1;
+            GLint source = -1;
+            GLint blur = -1;
+            GLint intensity = -1;
+            GLint backgroundExtents = -1;
+        };
+
+        inline resources& get()
+        {
+            static resources sResources;
+            if (sResources.program != 0 || sResources.failed)
+                return sResources;
+            sResources.failed = true;
+            std::string const vertexSource =
+                "#version 460 core\n"
+                "uniform mat4 uNdcToClip;\n"
+                "out vec2 Ndc;\n"
+                "void main()\n"
+                "{\n"
+                "    Ndc = vec2(float((gl_VertexID & 1) * 2 - 1), float((gl_VertexID >> 1) * 2 - 1));\n"
+                "    vec4 position = uNdcToClip * vec4(Ndc, 0.0, 1.0);\n"
+                "    gl_Position = vec4(position.xy, 0.0, position.w);\n"
+                "}\n";
+            std::string const fragmentSource =
+                "#version 460 core\n"
+                "in vec2 Ndc;\n"
+                "layout (location = 0) out vec4 FragColor;\n"
+                "uniform mat4 uClipToWorld;\n"
+                "uniform sampler2DRect uEnvironment;\n"
+                "uniform sampler2DRect uBackground;\n"
+                "uniform int uSource;\n"
+                "uniform float uBlur;\n"
+                "uniform float uIntensity;\n"
+                "uniform ivec2 uBackgroundExtents;\n"
+                "const float PI = 3.14159265358979;\n"
+                "vec3 environment_texel(int band, ivec2 t)\n"
+                "{\n"
+                "    return texelFetch(uEnvironment, ivec2(((t.x % 256) + 256) % 256, band * 128 + clamp(t.y, 0, 127))).rgb;\n"
+                "}\n"
+                "vec3 environment_band(int band, vec2 uv)\n"
+                "{\n"
+                "    vec2 p = uv * vec2(256.0, 128.0) - 0.5;\n"
+                "    ivec2 i = ivec2(floor(p));\n"
+                "    vec2 f = p - vec2(i);\n"
+                "    return mix(mix(environment_texel(band, i), environment_texel(band, i + ivec2(1, 0)), f.x),\n"
+                "        mix(environment_texel(band, i + ivec2(0, 1)), environment_texel(band, i + ivec2(1, 1)), f.x), f.y);\n"
+                "}\n"
+                "int background_top_level()\n"
+                "{\n"
+                "    int level = 0;\n"
+                "    for (ivec2 e = uBackgroundExtents; e.x > 8 && e.y > 4; e /= 2)\n"
+                "        ++level;\n"
+                "    return level;\n"
+                "}\n"
+                "ivec4 background_level(int level)\n"
+                "{\n"
+                "    if (level == 0)\n"
+                "        return ivec4(0, 0, uBackgroundExtents);\n"
+                "    int x = 0;\n"
+                "    for (int i = 1; i < level; ++i)\n"
+                "        x += uBackgroundExtents.x >> i;\n"
+                "    return ivec4(x, uBackgroundExtents.y, uBackgroundExtents.x >> level, uBackgroundExtents.y >> level);\n"
+                "}\n"
+                "vec3 background_texel(ivec4 level, ivec2 t)\n"
+                "{\n"
+                "    vec4 rgbe = floor(texelFetch(uBackground, level.xy + ivec2(((t.x % level.z) + level.z) % level.z, clamp(t.y, 0, level.w - 1))) * 255.0 + 0.5);\n"
+                "    return rgbe.a > 0.0 ? (rgbe.rgb + 0.5) * exp2(rgbe.a - 136.0) : vec3(0.0);\n"
+                "}\n"
+                "vec3 background_bilinear(int level, vec2 uv)\n"
+                "{\n"
+                "    ivec4 l = background_level(level);\n"
+                "    vec2 p = uv * vec2(l.zw) - 0.5;\n"
+                "    ivec2 i = ivec2(floor(p));\n"
+                "    vec2 f = p - vec2(i);\n"
+                "    return mix(mix(background_texel(l, i), background_texel(l, i + ivec2(1, 0)), f.x),\n"
+                "        mix(background_texel(l, i + ivec2(0, 1)), background_texel(l, i + ivec2(1, 1)), f.x), f.y);\n"
+                "}\n"
+                "vec4 bspline(float t)\n"
+                "{\n"
+                "    float s = 1.0 - t;\n"
+                "    return vec4(s * s * s, 4.0 - 6.0 * t * t + 3.0 * t * t * t, 4.0 - 6.0 * s * s + 3.0 * s * s * s, t * t * t) / 6.0;\n"
+                "}\n"
+                "// cubic B-spline: smooth where the halved versions are magnified\n"
+                "vec3 background_bicubic(int level, vec2 uv)\n"
+                "{\n"
+                "    ivec4 l = background_level(level);\n"
+                "    vec2 p = uv * vec2(l.zw) - 0.5;\n"
+                "    ivec2 i = ivec2(floor(p));\n"
+                "    vec2 f = p - vec2(i);\n"
+                "    vec4 wx = bspline(f.x);\n"
+                "    vec4 wy = bspline(f.y);\n"
+                "    vec3 result = vec3(0.0);\n"
+                "    for (int y = 0; y < 4; ++y)\n"
+                "    {\n"
+                "        vec3 row = vec3(0.0);\n"
+                "        for (int x = 0; x < 4; ++x)\n"
+                "            row += wx[x] * background_texel(l, i + ivec2(x - 1, y - 1));\n"
+                "        result += wy[y] * row;\n"
+                "    }\n"
+                "    return result;\n"
+                "}\n"
+                "vec3 from_linear(vec3 c)\n"
+                "{\n"
+                "    c = clamp(c, 0.0, 1.0);\n"
+                "    return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), c));\n"
+                "}\n"
+                "vec3 tone_map(vec3 color)\n"
+                "{\n"
+                "    const float startCompression = 0.8 - 0.04;\n"
+                "    const float desaturation = 0.15;\n"
+                "    float x = min(color.r, min(color.g, color.b));\n"
+                "    float offset = x < 0.08 ? x - 6.25 * x * x : 0.04;\n"
+                "    color -= offset;\n"
+                "    float peak = max(color.r, max(color.g, color.b));\n"
+                "    if (peak < startCompression)\n"
+                "        return color;\n"
+                "    const float d = 1.0 - startCompression;\n"
+                "    float newPeak = 1.0 - d * d / (peak + d - startCompression);\n"
+                "    color *= newPeak / peak;\n"
+                "    float g = 1.0 - 1.0 / (desaturation * (peak - newPeak) + 1.0);\n"
+                "    return mix(color, vec3(newPeak), g);\n"
+                "}\n"
+                "void main()\n"
+                "{\n"
+                "    vec4 nearPoint = uClipToWorld * vec4(Ndc, -1.0, 1.0);\n"
+                "    vec4 farPoint = uClipToWorld * vec4(Ndc, 1.0, 1.0);\n"
+                "    vec3 direction = normalize(farPoint.xyz * nearPoint.w - nearPoint.xyz * farPoint.w);\n"
+                "    vec2 uv = vec2(atan(direction.z, direction.x) / (2.0 * PI) + 0.5, 0.5 - asin(clamp(direction.y, -1.0, 1.0)) / PI);\n"
+                "    // the angle (radians) a fragment covers\n"
+                "    float footprint = max(length(dFdx(direction)), length(dFdy(direction)));\n"
+                "    float blur = clamp(uBlur, 0.0, 1.0);\n"
+                "    vec3 radiance;\n"
+                "    if (uSource == 1)\n"
+                "    {\n"
+                "        // the level whose texels match the blur (about the width of a GGX lobe of roughness blur) or the footprint\n"
+                "        float texelsPerRadian = float(uBackgroundExtents.x) / (2.0 * PI);\n"
+                "        float level = log2(max(max(footprint, 2.0 * blur * blur) * texelsPerRadian, 1.0));\n"
+                "        level = min(level, float(background_top_level()));\n"
+                "        int level0 = int(floor(level));\n"
+                "        float t = level - float(level0);\n"
+                "        radiance = level0 == 0 ? background_bilinear(0, uv) : background_bicubic(level0, uv);\n"
+                "        if (t > 0.0)\n"
+                "            radiance = mix(radiance, background_bicubic(level0 + 1, uv), t);\n"
+                "    }\n"
+                "    else\n"
+                "    {\n"
+                "        float band = blur * 5.0;\n"
+                "        int band0 = min(int(floor(band)), 4);\n"
+                "        radiance = mix(environment_band(band0, uv), environment_band(band0 + 1, uv), band - float(band0));\n"
+                "    }\n"
+                "    FragColor = vec4(from_linear(tone_map(radiance * uIntensity)), 1.0);\n"
+                "}\n";
+            GLuint const vertexShader = scene_shadows::compile(GL_VERTEX_SHADER, vertexSource);
+            GLuint const fragmentShader = scene_shadows::compile(GL_FRAGMENT_SHADER, fragmentSource);
+            if (vertexShader == 0 || fragmentShader == 0)
+                return sResources;
+            GLuint const program = glCreateProgram();
+            glAttachShader(program, vertexShader);
+            glAttachShader(program, fragmentShader);
+            glLinkProgram(program);
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
+            GLint ok = GL_FALSE;
+            glGetProgramiv(program, GL_LINK_STATUS, &ok);
+            if (ok != GL_TRUE)
+            {
+                glDeleteProgram(program);
+                return sResources;
+            }
+            sResources.program = program;
+            sResources.ndcToClip = glGetUniformLocation(program, "uNdcToClip");
+            sResources.clipToWorld = glGetUniformLocation(program, "uClipToWorld");
+            sResources.source = glGetUniformLocation(program, "uSource");
+            sResources.blur = glGetUniformLocation(program, "uBlur");
+            sResources.intensity = glGetUniformLocation(program, "uIntensity");
+            sResources.backgroundExtents = glGetUniformLocation(program, "uBackgroundExtents");
+            glCheck(glProgramUniform1i(program, glGetUniformLocation(program, "uEnvironment"), static_cast<GLint>(reserved_texture_unit::PbrEnvironment)));
+            glCheck(glProgramUniform1i(program, glGetUniformLocation(program, "uBackground"), static_cast<GLint>(reserved_texture_unit::Pbr0)));
+            glCheck(glCreateVertexArrays(1, &sResources.vertexArray));
             sResources.failed = false;
             return sResources;
         }
@@ -3505,7 +3768,6 @@ namespace neogfx
             {
                 return aDrawable.meshFilter->mesh != std::nullopt ? *aDrawable.meshFilter->mesh : *aDrawable.meshFilter->sharedMesh;
             };
-
         // reserve the space needed by meshes not yet cached so a model's first upload allocates exactly what it needs
         std::size_t newVertices = 0u;
         std::size_t newIndices = 0u;
@@ -3626,8 +3888,9 @@ namespace neogfx
                     auto& vertex = tVertices[vertexIndex];
                     vertex.xyz = (itemTransformation ? *itemTransformation * v : v);
                     vertex.rgba = rgba;
-                    // n.b. untextured meshes keep their texture coordinates for any physically based shading textures
-                    vertex.st = (uvCalculator ? (*uvCalculator)(mesh.uv[vertexIndex]) :
+                    // n.b. meshes with glTF (PBR) materials keep their own texture coordinates, which are wrapped and transformed
+                    // to each texture's when drawn (see i_texture_shader::set_wrap); as do untextured meshes
+                    vertex.st = (uvCalculator && !material.pbr ? (*uvCalculator)(mesh.uv[vertexIndex]) :
                         mesh.uv.size() == mesh.vertices.size() ? mesh.uv[vertexIndex] : vec2f{});
                     vertex.model = modelId;
                     vertex.normal = normals[vertexIndex];
@@ -3661,7 +3924,9 @@ namespace neogfx
             tRanges[static_cast<std::size_t>(md - aFirst)] = range;
         }
 
-        draw_scene_lights_and_shadows(program, sceneBuffer, tRanges, aModelTableBase);
+        if (pbrShader.background())
+            draw_scene_background(program, transformation);
+        draw_scene_lights_and_shadows(program, sceneBuffer, aFirst, tRanges, aModelTableBase);
 
         for (auto md = aFirst; md != aLast; ++md)
         {
@@ -3723,6 +3988,8 @@ namespace neogfx
                         GL_NEAREST));
                 }
                 program.texture_shader().set_texture(texture);
+                if (material.pbr)
+                    program.texture_shader().set_wrap(scene_textures::wrap_transform(texture, materialTexture.subTexture), material.pbr->wrapS, material.pbr->wrapT);
                 program.texture_shader().set_effect(material.shaderEffect != std::nullopt ? *material.shaderEffect : shader_effect::None);
                 program.texture_shader().set_effect_gain(material.shaderEffectGain != std::nullopt ? *material.shaderEffectGain : vec4{ 1.0, 1.0, 1.0, 1.0 });
                 if (texture.sampling() == texture_sampling::Multisample && render_target().target_texture().sampling() == texture_sampling::Multisample)
@@ -3738,25 +4005,29 @@ namespace neogfx
 
             if (pbrShader.pbr_light())
             {
-                // the vertices' texture coordinates are those of the base colour texture (if any): each PBR texture's are
-                // an affine transformation of them (as each texture has its own storage extents)
-                auto const affine = [](uv_calculator const& aCalculator) -> std::pair<vec2, vec2>
-                    {
-                        auto const offset = aCalculator(vec2f{ 0.0f, 0.0f }).as<scalar>();
-                        auto const scale = aCalculator(vec2f{ 1.0f, 1.0f }).as<scalar>() - offset;
-                        return { scale, offset };
-                    };
+                // the textures' coordinates: glTF (PBR) materials' are the meshes' own, wrapped and transformed to each texture's;
+                // otherwise the base colour texture's (and wrapping isn't needed)
+                pbr_shader_material pbr;
+                pbr.viewPosition = pbrShader.pbr_camera() + origin().to_vec3();
                 i_texture const* baseTexture = nullptr;
-                std::pair<vec2, vec2> baseUv = { vec2{ 1.0, 1.0 }, vec2{} };
                 if (textured && mesh.uv.size() == mesh.vertices.size())
                 {
                     auto const& materialTexture = patch_drawable::texture(meshRenderer, material);
                     baseTexture = &*service<i_texture_manager>().find_texture(materialTexture.id.cookie());
-                    baseUv = affine(baseTexture->uv_calculator(materialTexture.subTexture));
+                    if (material.pbr)
+                        pbr.baseColorTransform = scene_textures::wrap_transform(*baseTexture, materialTexture.subTexture);
                 }
-                pbr_shader_material pbr;
-                pbr.viewPosition = pbrShader.pbr_camera() + origin().to_vec3();
                 pbr.baseColorTextured = (baseTexture != nullptr);
+                if (material.pbr)
+                {
+                    pbr.wrapS = material.pbr->wrapS;
+                    pbr.wrapT = material.pbr->wrapT;
+                }
+                else
+                {
+                    pbr.wrapS = texture_wrap::ClampToEdge;
+                    pbr.wrapT = texture_wrap::ClampToEdge;
+                }
                 std::array<i_texture const*, 4> meshPbrTextures = {};
                 if (material.pbr)
                 {
@@ -3779,6 +4050,7 @@ namespace neogfx
                         if (&texture == baseTexture)
                         {
                             pbr.textureSources[static_cast<std::uint32_t>(source)] = pbr_shader_material::BaseColorTexture;
+                            pbr.textureTransforms[source] = pbr.baseColorTransform;
                             continue;
                         }
                         // n.b. a texture used more than once (e.g. occlusion packed with metallic-roughness) is bound once
@@ -3789,10 +4061,7 @@ namespace neogfx
                                 std::find(meshPbrTextures.begin(), meshPbrTextures.end(), nullptr)));
                         meshPbrTextures[unit] = &texture;
                         pbr.textureSources[static_cast<std::uint32_t>(source)] = static_cast<std::int32_t>(unit);
-                        auto const uv = affine(texture.uv_calculator(sourceTexture.subTexture));
-                        vec2 const scale{ uv.first.x / baseUv.first.x, uv.first.y / baseUv.first.y };
-                        vec2 const offset{ uv.second.x - baseUv.second.x * scale.x, uv.second.y - baseUv.second.y * scale.y };
-                        pbr.textureTransforms[source] = vec4{ scale.x, scale.y, offset.x, offset.y };
+                        pbr.textureTransforms[source] = scene_textures::wrap_transform(texture, sourceTexture.subTexture);
                     }
                 }
                 // n.b. a texture is only bound to one unit at a time: binding it elsewhere takes it from the unit it was bound to
@@ -3861,7 +4130,7 @@ namespace neogfx
     }
 
     void opengl_rendering_context::draw_scene_lights_and_shadows(i_standard_shader_program& aProgram, opengl_scene_buffer& aSceneBuffer,
-        std::vector<std::optional<opengl_scene_buffer::mesh_range>> const& aMeshes, std::uint32_t aModelTableBase)
+        mesh_drawable const* aDrawables, std::vector<std::optional<opengl_scene_buffer::mesh_range>> const& aMeshes, std::uint32_t aModelTableBase)
     {
         // the point lights and shadow views are in the space of the model transformed vertices, which includes the context
         // origin (see draw_entities)
@@ -3955,6 +4224,25 @@ namespace neogfx
         glCheck(glBindFramebuffer(GL_FRAMEBUFFER, resources.framebuffer));
         glCheck(glUseProgram(resources.program));
         glCheck(glUniform1ui(resources.modelTableBase, aModelTableBase));
+        // alpha tested meshes' base colour textures are bound to reserved_texture_unit::Pbr0 (unbound by the time it is used)
+        glCheck(glUniform1i(resources.baseTexture, static_cast<GLint>(reserved_texture_unit::Pbr0)));
+        // the meshes' alpha testing (glTF alpha mode MASK, with a base colour texture)
+        thread_local std::vector<std::optional<std::tuple<GLuint, vec4f, float, texture_wrap, texture_wrap>>> tAlphaTests;
+        tAlphaTests.assign(aMeshes.size(), std::nullopt);
+        for (std::size_t meshIndex = 0u; meshIndex < aMeshes.size(); ++meshIndex)
+        {
+            if (!aMeshes[meshIndex])
+                continue;
+            auto const& meshRenderer = *aDrawables[meshIndex].renderer;
+            auto const& material = meshRenderer.material;
+            if (!material.pbr || !material.pbr->alphaCutoff || !patch_drawable::has_texture(meshRenderer, material))
+                continue;
+            auto const& materialTexture = patch_drawable::texture(meshRenderer, material);
+            auto const& texture = *service<i_texture_manager>().find_texture(materialTexture.id.cookie());
+            tAlphaTests[meshIndex].emplace(static_cast<GLuint>(texture.native_handle()),
+                scene_textures::wrap_transform(texture, materialTexture.subTexture).as<float>(),
+                static_cast<float>(*material.pbr->alphaCutoff), material.pbr->wrapS, material.pbr->wrapT);
+        }
         glCheck(glEnable(GL_DEPTH_TEST));
         glCheck(glDepthFunc(GL_LESS));
         glCheck(glDepthMask(GL_TRUE));
@@ -3974,9 +4262,23 @@ namespace neogfx
             glCheck(glClear(GL_DEPTH_BUFFER_BIT));
             auto const viewProjection = tViews[view].as<float>();
             glCheck(glUniformMatrix4fv(resources.viewProjection, 1, GL_FALSE, viewProjection.data()));
-            for (auto const& mesh : aMeshes)
-                if (mesh)
-                    aSceneBuffer.draw_depth(mesh->indexStart, mesh->indexEnd - mesh->indexStart);
+            for (std::size_t meshIndex = 0u; meshIndex < aMeshes.size(); ++meshIndex)
+            {
+                auto const& mesh = aMeshes[meshIndex];
+                if (!mesh)
+                    continue;
+                auto const& alphaTest = tAlphaTests[meshIndex];
+                glCheck(glUniform1i(resources.alphaTest, alphaTest ? 1 : 0));
+                if (alphaTest)
+                {
+                    auto const& [texture, transform, cutoff, wrapS, wrapT] = *alphaTest;
+                    glCheck(glBindTextureUnit(static_cast<GLuint>(reserved_texture_unit::Pbr0), texture));
+                    glCheck(glUniform4f(resources.textureTransform, transform.x, transform.y, transform.z, transform.w));
+                    glCheck(glUniform1f(resources.alphaCutoff, cutoff));
+                    glCheck(glUniform2i(resources.textureWrap, static_cast<GLint>(wrapS), static_cast<GLint>(wrapT)));
+                }
+                aSceneBuffer.draw_depth(mesh->indexStart, mesh->indexEnd - mesh->indexStart);
+            }
         }
 
         glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, static_cast<GLuint>(previousDrawFramebuffer)));
@@ -3995,6 +4297,7 @@ namespace neogfx
             glCheck(glEnable(GL_BLEND));
         if (!previousPolygonOffset)
             glCheck(glDisable(GL_POLYGON_OFFSET_FILL));
+        glCheck(glBindTextureUnit(static_cast<GLuint>(reserved_texture_unit::Pbr0), 0));
         // n.b. the standard program still considers itself active
         glCheck(glUseProgram(static_cast<GLuint>(reinterpret_cast<std::intptr_t>(aProgram.handle()))));
 
@@ -4004,6 +4307,89 @@ namespace neogfx
             matrices.data()[view] = (bias * tViews[view]).as<float>();
         pbrShader.set_pbr_shadow_buffer(matrices.range().first, directionalView, directionalTexel);
         glCheck(glBindTextureUnit(static_cast<GLuint>(reserved_texture_unit::PbrShadow), resources.atlas));
+    }
+
+    void opengl_rendering_context::draw_scene_background(i_standard_shader_program& aProgram, optional_mat44 const& aTransformation)
+    {
+        auto& pbrShader = aProgram.pbr_shader();
+        auto const background = *pbrShader.background();
+        // n.b. drawn once (the first layer drawn)
+        pbrShader.set_background(std::nullopt);
+        auto& resources = scene_background::get();
+        if (resources.failed)
+            return;
+
+        // the camera's NDC square (at NDC depth 0; it maps to the canvas) to clip space: as standard.vert transforms the scene
+        // meshes' vertices, which have the context origin added (see draw_entities; the transformation is conjugated by it, see
+        // graphics_context::draw_entities): the transformation, then the context offset, then the projection of the logical
+        // coordinates
+        auto const translation = [](scalar x, scalar y, scalar z)
+            {
+                mat44 result = mat44::identity();
+                result[3][0] = x;
+                result[3][1] = y;
+                result[3][2] = z;
+                return result;
+            };
+        auto const logicalCoordinates = logical_coordinates();
+        scalar const left = logicalCoordinates.bottomLeft.x;
+        scalar const right = logicalCoordinates.topRight.x;
+        scalar const bottom = logicalCoordinates.bottomLeft.y;
+        scalar const top = logicalCoordinates.topRight.y;
+        mat44 projection = mat44::identity();
+        projection[0][0] = 2.0 / (right - left);
+        projection[1][1] = 2.0 / (top - bottom);
+        projection[3][0] = -(right + left) / (right - left);
+        projection[3][1] = -(top + bottom) / (top - bottom);
+        auto const contextOrigin = origin().to_vec3();
+        mat44 const ndcToClip = projection * translation(offset().x, offset().y, 0.0) *
+            (aTransformation ? *aTransformation : mat44::identity()) * translation(contextOrigin.x, contextOrigin.y, contextOrigin.z) *
+            background.clipToWorld;
+
+        i_texture const* backgroundTexture = (background.source == pbr_background_source::Texture ? pbrShader.background_texture() : nullptr);
+        GLint previousVertexArray = 0;
+        glCheck(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &previousVertexArray));
+        GLboolean previousDepthMask = GL_TRUE;
+        glCheck(glGetBooleanv(GL_DEPTH_WRITEMASK, &previousDepthMask));
+        bool const previousDepthTest = glIsEnabled(GL_DEPTH_TEST);
+        bool const previousCullFace = glIsEnabled(GL_CULL_FACE);
+        bool const previousBlend = glIsEnabled(GL_BLEND);
+
+        glCheck(glUseProgram(resources.program));
+        auto const ndcToClipf = ndcToClip.as<float>();
+        auto const clipToWorldf = background.clipToWorld.as<float>();
+        glCheck(glUniformMatrix4fv(resources.ndcToClip, 1, GL_FALSE, ndcToClipf.data()));
+        glCheck(glUniformMatrix4fv(resources.clipToWorld, 1, GL_FALSE, clipToWorldf.data()));
+        glCheck(glUniform1i(resources.source, backgroundTexture != nullptr ? 1 : 0));
+        glCheck(glUniform1f(resources.blur, static_cast<float>(background.blur)));
+        glCheck(glUniform1f(resources.intensity, static_cast<float>(pbrShader.environment_intensity())));
+        if (backgroundTexture != nullptr)
+        {
+            // the panorama's extents: the texture is half as tall again (see i_pbr_shader::set_background_texture)
+            auto const extents = backgroundTexture->storage_extents();
+            glCheck(glUniform2i(resources.backgroundExtents, static_cast<GLint>(extents.cx), static_cast<GLint>(extents.cy * 2.0 / 3.0 + 0.5)));
+            glCheck(glBindTextureUnit(static_cast<GLuint>(reserved_texture_unit::Pbr0), static_cast<GLuint>(backgroundTexture->native_handle())));
+        }
+        else
+            glCheck(glBindTextureUnit(static_cast<GLuint>(reserved_texture_unit::PbrEnvironment), static_cast<GLuint>(pbrShader.environment().native_handle())));
+        glCheck(glDisable(GL_DEPTH_TEST));
+        glCheck(glDepthMask(GL_FALSE));
+        glCheck(glDisable(GL_CULL_FACE));
+        glCheck(glDisable(GL_BLEND));
+        glCheck(glBindVertexArray(resources.vertexArray));
+        glCheck(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+
+        glCheck(glBindVertexArray(static_cast<GLuint>(previousVertexArray)));
+        glCheck(glBindTextureUnit(static_cast<GLuint>(backgroundTexture != nullptr ? reserved_texture_unit::Pbr0 : reserved_texture_unit::PbrEnvironment), 0));
+        glCheck(glDepthMask(previousDepthMask));
+        if (previousDepthTest)
+            glCheck(glEnable(GL_DEPTH_TEST));
+        if (previousCullFace)
+            glCheck(glEnable(GL_CULL_FACE));
+        if (previousBlend)
+            glCheck(glEnable(GL_BLEND));
+        // n.b. the standard program still considers itself active
+        glCheck(glUseProgram(static_cast<GLuint>(reinterpret_cast<std::intptr_t>(aProgram.handle()))));
     }
 
     void opengl_rendering_context::draw_patch(patch_drawable& aPatch, const mat44& aTransformation)

@@ -15,20 +15,38 @@
 #define PBR_SHADOW_ATLAS_SIZE 4096.0
 #define PBR_SHADOW_BIAS 0.0005
 
-vec4 pbr_texture(int source, vec2 texCoord)
+// the vertices' texture coordinates (TexCoord) are glTF's (v flipped): wrapped (uPbrTextureWrap: 0 clamp to edge, 1 repeat,
+// 2 mirrored repeat) then transformed (scale xy, offset zw) to each texture's
+float pbr_wrap(float c, int mode)
 {
+    if (mode == 1)
+        return fract(c);
+    if (mode == 2)
+    {
+        float m = mod(c, 2.0);
+        return m > 1.0 ? 2.0 - m : m;
+    }
+    return clamp(c, 0.0, 1.0);
+}
+
+vec4 pbr_texture(int source, vec4 transform)
+{
+    vec2 coord = vec2(pbr_wrap(TexCoord.x, uPbrTextureWrap.x), pbr_wrap(TexCoord.y, uPbrTextureWrap.y)) * transform.xy + transform.zw;
+    // n.b. derivatives of the unwrapped coordinates (no seams where they wrap)
+    vec2 dx = dFdx(TexCoord * transform.xy);
+    vec2 dy = dFdy(TexCoord * transform.xy);
     switch(source)
     {
     case 0:
-        return texture(uPbrTexture0, texCoord);
+        return textureGrad(uPbrTexture0, coord, dx, dy);
     case 1:
-        return texture(uPbrTexture1, texCoord);
+        return textureGrad(uPbrTexture1, coord, dx, dy);
     case 2:
-        return texture(uPbrTexture2, texCoord);
+        return textureGrad(uPbrTexture2, coord, dx, dy);
     case 3:
-        return texture(uPbrTexture3, texCoord);
+        return textureGrad(uPbrTexture3, coord, dx, dy);
     default:
-        return texture(uPbrBaseTexture, texCoord);
+        return textureGrad(uPbrBaseTexture, coord, dx, dy);
     }
 }
 
@@ -142,12 +160,13 @@ void standard_pbr_shader(inout vec4 color, inout vec4 function0, inout vec4 func
     // n.b. all texture sampling (and derivatives) before any discard
     vec3 baseColor = pbr_to_linear(Color.rgb);
     if (uPbrBaseColorTextured)
-        baseColor *= pbr_to_linear(texture(uPbrBaseTexture, TexCoord).rgb);
+        baseColor *= pbr_to_linear(pbr_texture(4, uPbrBaseTextureTransform).rgb);
+    // the normal map's (unwrapped, for the tangent frame) coordinates
     vec2 texCoord1 = TexCoord * uPbrTextureTransform1.xy + uPbrTextureTransform1.zw;
-    vec4 metallicRoughnessTexel = uPbrTextureSources.x != -1 ? pbr_texture(uPbrTextureSources.x, TexCoord * uPbrTextureTransform0.xy + uPbrTextureTransform0.zw) : vec4(1.0);
-    vec4 normalTexel = uPbrTextureSources.y != -1 ? pbr_texture(uPbrTextureSources.y, texCoord1) : vec4(0.5, 0.5, 1.0, 1.0);
-    vec4 occlusionTexel = uPbrTextureSources.z != -1 ? pbr_texture(uPbrTextureSources.z, TexCoord * uPbrTextureTransform2.xy + uPbrTextureTransform2.zw) : vec4(1.0);
-    vec4 emissiveTexel = uPbrTextureSources.w != -1 ? pbr_texture(uPbrTextureSources.w, TexCoord * uPbrTextureTransform3.xy + uPbrTextureTransform3.zw) : vec4(1.0);
+    vec4 metallicRoughnessTexel = uPbrTextureSources.x != -1 ? pbr_texture(uPbrTextureSources.x, uPbrTextureTransform0) : vec4(1.0);
+    vec4 normalTexel = uPbrTextureSources.y != -1 ? pbr_texture(uPbrTextureSources.y, uPbrTextureTransform1) : vec4(0.5, 0.5, 1.0, 1.0);
+    vec4 occlusionTexel = uPbrTextureSources.z != -1 ? pbr_texture(uPbrTextureSources.z, uPbrTextureTransform2) : vec4(1.0);
+    vec4 emissiveTexel = uPbrTextureSources.w != -1 ? pbr_texture(uPbrTextureSources.w, uPbrTextureTransform3) : vec4(1.0);
     vec3 dp1 = dFdx(Coord);
     vec3 dp2 = dFdy(Coord);
     vec2 duv1 = dFdx(texCoord1);

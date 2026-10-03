@@ -66,6 +66,9 @@ namespace neogfx
         virtual void set_effect(shader_effect aEffect) = 0;
         virtual void set_effect_gain(vec4 const& aGain) = 0;
         virtual void set_pass_through(bool aPassThrough) = 0;
+        // texture coordinates wrapped (in 0 to 1) and then transformed (scale xy, offset zw) to the texture's (e.g. by its
+        // uv_calculator); until the next set_texture() or clear_texture()
+        virtual void set_wrap(vec4 const& aTransform, texture_wrap aWrapS, texture_wrap aWrapT) = 0;
     };
 
     class i_filter_shader : public i_fragment_shader
@@ -128,10 +131,32 @@ namespace neogfx
         // whether the base colour texture (reserved_texture_unit::Tex) is sampled (as sRGB) for the base colour, along with
         // the vertex colour (the sRGB base colour factor)
         bool baseColorTextured = false;
+        // the vertices' texture coordinates (glTF's) are wrapped and then transformed (scale xy, offset zw) to each texture's
+        texture_wrap wrapS = texture_wrap::Repeat;
+        texture_wrap wrapT = texture_wrap::Repeat;
+        vec4 baseColorTransform = vec4{ 1.0, 1.0, 0.0, 0.0 };
         // the textures (metallic-roughness, normal, occlusion and emissive) ...
         vec4i32 textureSources = vec4i32{ NoTexture, NoTexture, NoTexture, NoTexture };
-        // ... and their coordinates: scale (xy) and offset (zw) applied to the vertices' (base colour) texture coordinates
+        // ... and their coordinates' transforms
         std::array<vec4, 4> textureTransforms = { vec4{ 1.0, 1.0, 0.0, 0.0 }, vec4{ 1.0, 1.0, 0.0, 0.0 }, vec4{ 1.0, 1.0, 0.0, 0.0 }, vec4{ 1.0, 1.0, 0.0, 0.0 } };
+    };
+
+    // the environment drawn as a scene's background (behind its meshes): sampled from the prefiltered environment texture
+    // (low resolution, 256 x 128) or from the background texture (see i_pbr_shader::set_background_texture; if there is none, the
+    // prefiltered environment texture is used)
+    enum class pbr_background_source : std::uint32_t
+    {
+        Prefiltered,
+        Texture
+    };
+
+    struct pbr_background
+    {
+        pbr_background_source source = pbr_background_source::Prefiltered;
+        // 0 (sharp) to 1 (as blurred as the reflections of the roughest material)
+        scalar blur = 0.0;
+        // the camera: clip space (NDC) to world space (inverse view projection)
+        mat44 clipToWorld = mat44::identity();
     };
 
     // physically based shading (glTF metallic-roughness BRDF) of model transformed meshes lit by a directional light and image
@@ -168,5 +193,18 @@ namespace neogfx
         // the prefiltered environment texture (to be bound to reserved_texture_unit::PbrEnvironment, linearly filtered and
         // repeating horizontally)
         virtual i_texture const& environment() const = 0;
+        virtual scalar environment_intensity() const = 0;
+        // the background: drawn (by the renderer, then reset to std::nullopt) before the meshes; set each frame by the scene's
+        // owner (e.g. game::scene_graph_canvas)
+        virtual std::optional<pbr_background> const& background() const = 0;
+        virtual void set_background(std::optional<pbr_background> const& aBackground) = 0;
+        // the background's own texture (optional: it costs memory; without it backgrounds use the prefiltered environment):
+        // an equirectangular panorama as for set_environment (scaled by the environment's intensity), at up to 4096 x 2048
+        // (larger is halved), plus versions of it halved repeatedly (for blur). The texture is a texture_sampling::Data
+        // (rectangle) RGBA texture of RGBE (shared exponent) texels: the panorama at the top, the halved versions side by side
+        // below it.
+        virtual void set_background_texture(size_u32 const& aExtents, float const* aRgbaPixels) = 0;
+        virtual void clear_background_texture() = 0;
+        virtual i_texture const* background_texture() const = 0;
     };
 }

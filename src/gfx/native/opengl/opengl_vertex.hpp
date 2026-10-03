@@ -173,7 +173,8 @@ namespace neogfx
         bool reclaim(std::uint32_t aVertexStart, std::uint32_t aVertexEnd);
         void reclaim();
         void draw(i_rendering_context& aContext, i_shader_program& aShaderProgram, optional_mat44 const& aTransformation, std::uint32_t aIndexStart, std::uint32_t aIndexCount);
-        // with the current (depth only) program, which takes position (location 0), model (11), joints (12) and weights (13)
+        // with the current (depth only) program, which takes position (location 0), colour (1), texture coordinates (2), model (11),
+        // joints (12) and weights (13)
         void draw_depth(std::uint32_t aIndexStart, std::uint32_t aIndexCount);
     private:
         void buffer_grown() final;
