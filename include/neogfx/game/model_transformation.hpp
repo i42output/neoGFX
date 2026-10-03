@@ -37,14 +37,16 @@ namespace neogfx::game
     //     position = origin * rigid_body * mesh_filter::transformation * matrix * skinned(vertex)
     //     skinned(vertex) = sum(vertexWeights[v][i] * joints[vertexJoints[v][i]] * vertex) (or vertex if not skinned)
     //
-    // vertexJoints/vertexWeights are indexed as the mesh's vertices; changing them (or the mesh, or the
-    // material) requires the entity's render cache to be made dirty as usual.
+    // vertexJoints/vertexWeights/vertexNormals are indexed as the mesh's vertices; changing them (or the mesh,
+    // or the material) requires the entity's render cache to be made dirty as usual. vertexNormals (model space,
+    // for lighting) are calculated from the mesh's faces if not supplied.
     struct model_transformation
     {
         mat44f matrix = mat44f::identity();
         std::vector<mat44f> joints;
         std::vector<vec4f> vertexJoints;
         std::vector<vec4f> vertexWeights;
+        std::vector<vec3f> vertexNormals;
 
         struct meta : i_component_data::meta
         {
@@ -60,7 +62,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 4;
+                return 5;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -73,6 +75,8 @@ namespace neogfx::game
                 case 2:
                 case 3:
                     return component_data_field_type::Vec4f | component_data_field_type::Array;
+                case 4:
+                    return component_data_field_type::Vec3f | component_data_field_type::Array;
                 default:
                     throw invalid_field_index();
                 }
@@ -84,7 +88,8 @@ namespace neogfx::game
                     "Matrix",
                     "Joints",
                     "Vertex Joints",
-                    "Vertex Weights"
+                    "Vertex Weights",
+                    "Vertex Normals"
                 };
                 return sFieldNames[aFieldIndex];
             }

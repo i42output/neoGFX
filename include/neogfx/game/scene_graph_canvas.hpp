@@ -37,8 +37,8 @@ namespace neogfx::game
     // 2D: drawn with an affine view transformation (scene origin at the centre of the canvas,
     //     y up); z translation is drawing order.
     // 3D: drawn through the scene's camera (or a default camera framing the scene), depth tested
-    //     and back face culled (unless any material is double sided); primitives are flat shaded by
-    //     a fixed directional light.
+    //     and back face culled (unless any material is double sided); lit (per vertex, on the GPU, by their
+    //     normals) by a fixed directional light.
     // The view (and 3D projection) is applied on the GPU (canvas::set_entity_transformation) so moving
     // the camera does not change entity vertices: they only change when a node's world transformation does.
     // Base colour textures (PNG or JPEG; from buffer views, data URIs or files) are drawn using TEXCOORD_0/1.
@@ -47,8 +47,12 @@ namespace neogfx::game
     //     3D: left drag orbits, right drag (or shift + left drag) pans, wheel dollies
     //     2D: drag pans, wheel zooms
     //     double click resets to the scene's own camera/view
+    // Animation: change node transformations in an Animating handler (it is triggered as each frame is rendered, so
+    // animation sampled from a clock there matches the frame shown) and call update() regularly to request frames.
     class scene_graph_canvas : public canvas
     {
+    public:
+        define_event(Animating, animating)
     public:
         scene_graph_canvas();
         scene_graph_canvas(i_widget& aParent);
@@ -105,12 +109,7 @@ namespace neogfx::game
             neogfx::scene_graph::index node;
             neogfx::color color;
             bool doubleSided;
-            vec3 localNormal;
-            bool flat;
             neogfx::scene_graph::index skin = neogfx::scene_graph::invalid_index;
-            // the world transformation and lighting the entity's colour was last calculated with
-            std::optional<mat44f> transformation;
-            std::optional<bool> lighting;
         };
     private:
         void init();

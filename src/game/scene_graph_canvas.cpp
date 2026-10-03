@@ -22,6 +22,8 @@
 #include <functional>
 
 #include <neogfx/app/i_resource_manager.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/gfx/i_standard_shader_program.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gfx/scene_graph.hpp>
 #include <neogfx/game/scene_graph_canvas.hpp>
@@ -134,14 +136,6 @@ namespace neogfx::game
             result[3][2] = (aZfar + aZnear) / (aZnear - aZfar);
             return result;
         }
-
-        vec3 transform_direction(mat44 const& aMatrix, vec3 const& aDirection)
-        {
-            return vec3{
-                aMatrix[0][0] * aDirection.x + aMatrix[1][0] * aDirection.y + aMatrix[2][0] * aDirection.z,
-                aMatrix[0][1] * aDirection.x + aMatrix[1][1] * aDirection.y + aMatrix[2][1] * aDirection.z,
-                aMatrix[0][2] * aDirection.x + aMatrix[1][2] * aDirection.y + aMatrix[2][2] * aDirection.z };
-        }
     }
 
     scene_graph_canvas::scene_graph_canvas() :
@@ -203,12 +197,14 @@ namespace neogfx::game
         iAnimationPlayer.emplace(graph(), aAnimation);
         iAnimationTime = 0.0;
         iAnimationClock = std::chrono::steady_clock::now();
+        // the timer only requests frames: the animation is advanced when they are rendered
         iAnimationTimer.emplace(*this, [this](widget_timer& aTimer)
             {
                 aTimer.again();
-                advance_animation();
-            }, std::chrono::milliseconds{ 16 });
-        advance_animation();
+                if (!iAnimationPaused)
+                    update();
+            }, std::chrono::milliseconds{ 8 });
+        update();
     }
 
     void scene_graph_canvas::stop_animation()
@@ -246,7 +242,6 @@ namespace neogfx::game
         iAnimationTime += elapsed;
         auto const duration = iAnimationPlayer->duration();
         iAnimationPlayer->apply(duration > 0.0 ? std::fmod(iAnimationTime, duration) : 0.0);
-        update();
     }
 
     bool scene_graph_canvas::has_graph() const
@@ -346,7 +341,12 @@ namespace neogfx::game
         iSink += RenderingEntities([this](i_graphics_context&, std::int32_t aLayer)
         {
             if (aLayer == 0)
+            {
+                // animation is sampled now, as the frame is rendered, rather than when a timer happened to fire
+                Animating();
+                advance_animation();
                 update_entities();
+            }
         });
     }
 
@@ -431,22 +431,7 @@ namespace neogfx::game
                 newEntity.color = sg::base_color(g, primitive);
                 newEntity.doubleSided = twoD || (primitive.has_material() && primitive.material() < g.material_count() &&
                     g.material(primitive.material()).double_sided());
-                // area weighted normal; flat if the faces broadly agree
-                vec3 normalSum;
-                scalar areaSum = 0.0;
-                auto const& vertices = localMesh.vertices;
-                for (auto const& f : localMesh.faces)
-                {
-                    auto const& v0 = vertices[static_cast<std::size_t>(f[0u])].as<scalar>();
-                    auto const& v1 = vertices[static_cast<std::size_t>(f[1u])].as<scalar>();
-                    auto const& v2 = vertices[static_cast<std::size_t>(f[2u])].as<scalar>();
-                    auto const cross = (v1 - v0).cross(v2 - v0);
-                    normalSum += cross;
-                    areaSum += cross.magnitude();
-                }
-                newEntity.flat = areaSum > 0.0 && normalSum.magnitude() / areaSum > 0.9;
-                newEntity.localNormal = normalSum.magnitude() > 0.0 ? normalSum.normalized() : vec3{ 0.0, 0.0, 1.0 };
-                for (auto const& v : vertices)
+                for (auto const& v : localMesh.vertices)
                 {
                     auto const wv = *world[n] * v.as<scalar>();
                     if (!iBounds)
@@ -456,6 +441,26 @@ namespace neogfx::game
                 }
                 // vertices are cached in model space and transformed (and skinned) on the GPU
                 model_transformation modelTransformation{ world[n]->as<float>() };
+                // the primitive's own normals for lighting (if it has none they are calculated from its faces when drawn)
+                if (primitive.attributes().has_attribute(sg::vertex_attribute::NORMAL))
+                {
+                    try
+                    {
+                        std::uint32_t components = 0u;
+                        auto const normals = sg::read_accessor(g, primitive.attributes().attribute(sg::vertex_attribute::NORMAL), components);
+                        if (components == 3u && normals.size() == localMesh.vertices.size() * 3u)
+                        {
+                            modelTransformation.vertexNormals.reserve(localMesh.vertices.size());
+                            for (std::size_t v = 0u; v < localMesh.vertices.size(); ++v)
+                                modelTransformation.vertexNormals.push_back(vec3f{ 
+                                    static_cast<float>(normals[v * 3u]), static_cast<float>(normals[v * 3u + 1u]), static_cast<float>(normals[v * 3u + 2u]) });
+                        }
+                    }
+                    catch (std::exception const&)
+                    {
+                        modelTransformation.vertexNormals.clear();
+                    }
+                }
                 if (g.node(n).has_skin() && g.node(n).skin() < g.skin_count())
                 {
                     try
@@ -464,7 +469,6 @@ namespace neogfx::game
                             modelTransformation.vertexJoints.size() == localMesh.vertices.size())
                         {
                             newEntity.skin = g.node(n).skin();
-                            newEntity.flat = false;
                         }
                         else
                         {
@@ -513,8 +517,8 @@ namespace neogfx::game
         scalar const height = std::max(extents.cy, 1.0);
         auto const cameraNode = find_camera_node(world);
 
-        // entity vertices are cached in model space: the model (or skin joint) matrices, view and projection are
-        // applied on the GPU so the vertices only change when an entity's material colour (lighting) does
+        // entity vertices are cached in model space: the model (or skin joint) matrices, view, projection and
+        // lighting are applied on the GPU so the vertices don't change as the scene animates or the camera moves
         {
             scoped_component_data_lock<mesh_renderer, mesh_render_cache, model_transformation> lock{ ecs() };
             auto& renderers = ecs().component<mesh_renderer>();
@@ -522,6 +526,8 @@ namespace neogfx::game
             auto& models = ecs().component<model_transformation>();
             vec3 const light = vec3{ -0.4, 0.8, 0.45 }.normalized(); // world space, towards the light
             bool const lit = iLighting && !twoD;
+            service<i_rendering_engine>().default_shader_program().standard_vertex_shader().set_scene_light(
+                lit ? std::optional<vec3>{ light } : std::nullopt);
             thread_local std::map<sg::index, std::vector<mat44f>> tJointMatrices;
             tJointMatrices.clear();
             for (auto& e : iEntities)
@@ -551,27 +557,6 @@ namespace neogfx::game
                 }
                 else
                     model.matrix = transformation;
-                bool const relight = (e.lighting != lit) || (lit && e.flat && e.transformation != transformation);
-                e.transformation = transformation;
-                e.lighting = lit;
-                if (!relight)
-                    continue;
-                auto color = e.color;
-                if (lit && e.flat)
-                {
-                    auto normal = transform_direction(*world[e.node], e.localNormal);
-                    if (normal.magnitude() > 0.0)
-                        normal = normal.normalized();
-                    auto const facing = normal.dot(light);
-                    scalar const intensity = 0.35 + 0.65 * std::max(e.doubleSided ? std::abs(facing) : facing, 0.0);
-                    color = neogfx::color{
-                        static_cast<scalar>(color.red<scalar>() * intensity),
-                        static_cast<scalar>(color.green<scalar>() * intensity),
-                        static_cast<scalar>(color.blue<scalar>() * intensity),
-                        color.alpha<scalar>() };
-                }
-                renderer.material.color = to_ecs_component(color);
-                set_render_cache_dirty_no_lock(cache, e.entity);
             }
         }
 

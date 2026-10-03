@@ -1,4 +1,9 @@
-﻿#include <boost/lexical_cast.hpp>
+﻿#ifdef _WIN32
+// n.b. as neolib's win32.hpp defines it but before anything includes Windows.h: otherwise Windows.h includes WinSock.h,
+// which Boost.Asio (used by neolib::http) cannot be used with
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <boost/lexical_cast.hpp>
 #include <neolib/chrono/fast_clock.hpp>
 
 #include "test.hpp"
@@ -10,6 +15,9 @@
 #include <neogfx/game/scene_graph_canvas.hpp>
 #include <neogfx/support/file/gfx/gltf.hpp>
 #include <neogfx/app/i_resource_manager.hpp>
+#include <neolib/io/http.hpp>
+#include <sstream>
+#include <map>
 
 void signal_handler(int signal)
 {
@@ -1497,6 +1505,7 @@ int main(int argc, char* argv[])
         }
         auto sceneGraph3D = std::make_shared<ng::scene_graph_3d>();
         orrery orrery3D;
+        ng::scene_graph::index orreryRoot3D = ng::scene_graph::invalid_index;
         {
             auto& g = *sceneGraph3D;
             auto const groundMesh = g.add_box(ng::vec3{ 16.0, 0.2, 16.0 }, ng::color::DarkSlateGray, "ground");
@@ -1506,17 +1515,84 @@ int main(int argc, char* argv[])
                 { ng::color::Red, ng::color::Green, ng::color::Blue, ng::color::Yellow, ng::color::Cyan, ng::color::Magenta }, "planet");
             auto const moonMesh = g.add_box(ng::vec3{ 0.4, 0.4, 0.4 }, ng::color::LightGray, "moon");
             auto const root = g.add_node("root", ng::vec3{});
+            orreryRoot3D = root;
             g.add_node("ground", ng::vec3{ 0.0, -2.0, 0.0 }, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, root, groundMesh);
             orrery3D.sun = g.add_node("sun", ng::vec3{}, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, root, sunMesh);
             orrery3D.planetOrbit = g.add_node("planet orbit", ng::vec3{}, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, root);
             orrery3D.planet = g.add_node("planet", ng::vec3{ 5.0, 0.0, 0.0 }, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, orrery3D.planetOrbit, planetMesh);
             orrery3D.moonOrbit = g.add_node("moon orbit", ng::vec3{}, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, orrery3D.planet);
             orrery3D.moon = g.add_node("moon", ng::vec3{ 1.5, 0.0, 0.0 }, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, orrery3D.moonOrbit, moonMesh);
-            ng::vec3 const eye{ 0.0, 7.0, 14.0 };
+            ng::vec3 const eye{ 0.0, 8.0, 17.0 };
             auto const camera = g.add_node("camera", eye, ng::scene_graph_3d::look_at(eye, ng::vec3{}));
             g.node(camera).set_camera(g.add_perspective_camera(ng::to_rad(45.0), 0.1, 100.0, "camera"));
             g.add_scene("orrery", { root, camera });
         }
+
+        // glTF sample models (Khronos glTF Sample Assets; not distributed with neoGFX, see each model's LICENSE.md there)
+        // downloaded when the Scene Graph tab is first shown and appended around the 3D orrery as a test of
+        // scene_graph_model::append: each on its own node, standing on the ground
+        struct sample_model
+        {
+            char const* name;
+            ng::vec3 position;
+            ng::scalar scale;
+        };
+        std::vector<sample_model> const sampleModels{
+            { "Duck", ng::vec3{ -5.5, -1.9 - 0.1 * 1.5, 5.5 }, 1.5 },
+            { "CesiumMan", ng::vec3{ 5.5, -1.9, 5.5 }, 1.5 },
+            { "BoxAnimated", ng::vec3{ -5.5, -1.9 + 0.5, -5.5 }, 1.0 },
+            { "BoxTextured", ng::vec3{ 5.5, -1.9 + 0.75, -5.5 }, 1.5 } };
+        std::vector<std::unique_ptr<neolib::http>> sampleDownloads;
+        std::map<std::string, std::string> sampleStatus;
+        auto show_sample_status = [&]()
+        {
+            std::string text = "Sample models:";
+            for (auto const& sample : sampleModels)
+                text += std::string{ " " } + sample.name + " (" + sampleStatus[sample.name] + ")";
+            window.labelSceneGraphStatus.set_text(ng::string{ text });
+        };
+        // the appended sample models' own animations (e.g. Cesium Man walking), played as the orrery is animated
+        std::vector<ng::scene_graph::animation_player> sampleAnimations;
+        auto download_sample_models = [&]()
+        {
+            for (auto const& sample : sampleModels)
+            {
+                auto& download = *sampleDownloads.emplace_back(std::make_unique<neolib::http>(app.thread()));
+                sampleStatus[sample.name] = "downloading";
+                download.Completed([&sceneGraph3D, &orreryRoot3D, &sampleAnimations, &sampleStatus, &show_sample_status, &download, sample]()
+                {
+                    try
+                    {
+                        std::istringstream input{ std::string{ download.body().begin(), download.body().end() } };
+                        ng::file::gltf model{ input };
+                        auto& g = *sceneGraph3D;
+                        auto const holder = g.add_node(std::string{ sample.name }, sample.position, ng::vec4{ 0.0, 0.0, 0.0, 1.0 },
+                            ng::vec3{ sample.scale, sample.scale, sample.scale }, orreryRoot3D);
+                        auto const firstAnimation = g.animation_count();
+                        g.append(model.model(), holder);
+                        for (auto animation = firstAnimation; animation < g.animation_count(); ++animation)
+                            sampleAnimations.emplace_back(g, animation);
+                        sampleStatus[sample.name] = "loaded, " + std::to_string(download.body().size()) + " bytes";
+                    }
+                    catch (std::exception const& e)
+                    {
+                        sampleStatus[sample.name] = std::string{ "load failed: " } + e.what();
+                        ng::service<ng::debug::logger>() << "Failed to load sample model " << sample.name << ": " << e.what() << std::endl;
+                    }
+                    show_sample_status();
+                });
+                download.Failure([&sampleStatus, &show_sample_status, &download, sample]()
+                {
+                    sampleStatus[sample.name] = download.status_code() != 0 ?
+                        "download failed: " + download.response_status() : std::string{ "download failed: no response" };
+                    ng::service<ng::debug::logger>() << "Failed to download sample model " << sample.name << " (" << download.response_status() << ")" << std::endl;
+                    show_sample_status();
+                });
+                download.request(std::string{ "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/" } +
+                    sample.name + "/glTF-Binary/" + sample.name + ".glb");
+            }
+            show_sample_status();
+        };
 
         ng::scene_graph_canvas* sceneGraphCanvas = nullptr;
         std::optional<ng::widget_timer> sceneGraphAnimator;
@@ -1545,10 +1621,11 @@ int main(int argc, char* argv[])
                     ng::scene_graph_3d::axis_angle(yAxis, t * 2.0), ng::scene_graph_3d::axis_angle(ng::vec3{ 1.0, 0.0, 0.0 }, t)));
                 g.set_transform(orrery3D.moonOrbit, ng::vec3{}, ng::scene_graph_3d::axis_angle(ng::vec3{ 0.0, 1.0, 0.3 }, t * 3.0));
                 g.set_transform(orrery3D.moon, ng::vec3{ 1.5, 0.0, 0.0 });
+                for (auto& player : sampleAnimations)
+                    player.apply(player.duration() > 0.0 ? std::fmod(t, player.duration()) : 0.0);
             }
             else
-                return; // a loaded scene graph: nothing to animate (so no need to repaint)
-            sceneGraphCanvas->update();
+                return; // a loaded scene graph: nothing to animate here (its own glTF animation is played by the canvas)
         };
         window.pageSceneGraph.VisibilityChanged([&]()
         {
@@ -1557,15 +1634,19 @@ int main(int argc, char* argv[])
                 sceneGraphCanvas = &window.layoutSceneGraph.add(ng::make_ref<ng::scene_graph_canvas>());
                 sceneGraphCanvas->set_background_color(ng::color::Black);
                 sceneGraphCanvas->set_graph(sceneGraph3D);
+                download_sample_models();
                 window.radioSceneGraph3D.check();
                 window.checkSceneGraphAnimate.check();
                 window.checkSceneGraphLighting.check();
+                // the orrery is posed as each frame is rendered; the timer just requests frames
+                sceneGraphCanvas->Animating([&]() { animate_orrery(); });
                 sceneGraphAnimator.emplace(window.pageSceneGraph, [&](ng::widget_timer& aTimer)
                 {
                     aTimer.again();
-                    if (window.pageSceneGraph.visible())
-                        animate_orrery();
-                }, std::chrono::milliseconds{ 16 });
+                    if (window.pageSceneGraph.visible() && window.checkSceneGraphAnimate.is_checked() && sceneGraphCanvas->has_graph() &&
+                        (&sceneGraphCanvas->graph() == sceneGraph2D.get() || &sceneGraphCanvas->graph() == sceneGraph3D.get()))
+                        sceneGraphCanvas->update();
+                }, std::chrono::milliseconds{ 8 });
             }
         });
         window.radioSceneGraph2D.Checked([&]()

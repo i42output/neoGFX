@@ -41,7 +41,9 @@ namespace neogfx
         add_attribute<float>("VertexModel"_s, 11u);
         add_attribute<vec4f>("VertexJoints"_s, 12u);
         add_attribute<vec4f>("VertexWeights"_s, 13u);
+        add_attribute<vec3f>("VertexNormal"_s, 14u);
         uModelTableBase = iModelTableBase;
+        uSceneLight = vec4f{};
         add_out_variable<vec3f>("Coord"_s, 0u).link(coord);
         add_out_variable<vec4f>("Color"_s, 1u).link(color);
         add_out_variable<vec4f>("Function0"_s, 3u, true).link(function0);
@@ -80,9 +82,18 @@ namespace neogfx
         }
     }
 
+    void standard_vertex_shader::set_scene_light(std::optional<vec3> const& aDirection)
+    {
+        if (iSceneLight != aDirection)
+        {
+            iSceneLight = aDirection;
+            uSceneLight.uniform().mutable_value();
+        }
+    }
+
     bool standard_vertex_shader::supports(vertex_buffer_type aBufferType) const
     {
-        return (aBufferType & (vertex_buffer_type::Model | vertex_buffer_type::Joints | vertex_buffer_type::Weights)) != vertex_buffer_type::Invalid;
+        return (aBufferType & (vertex_buffer_type::Model | vertex_buffer_type::Joints | vertex_buffer_type::Weights | vertex_buffer_type::Normal)) != vertex_buffer_type::Invalid;
     }
 
     void standard_vertex_shader::set_opacity(scalar aOpacity)
@@ -143,6 +154,18 @@ namespace neogfx
 
         if (uModelTableBase.uniform().is_dirty())
             uModelTableBase = iModelTableBase;
+
+        if (uSceneLight.uniform().is_dirty())
+        {
+            // xyz: direction towards the light (normalized), w: 1 if lit
+            if (iSceneLight && iSceneLight->magnitude() > 0.0)
+            {
+                auto const direction = iSceneLight->normalized().as<float>();
+                uSceneLight = vec4f{ direction.x, direction.y, direction.z, 1.0f };
+            }
+            else
+                uSceneLight = vec4f{};
+        }
     }
 
     void standard_vertex_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const

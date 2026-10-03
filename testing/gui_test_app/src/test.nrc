@@ -1128,6 +1128,9 @@
                                 label: {
                                     text: "Drag: orbit (3D) / pan (2D); right drag: pan; wheel: zoom; double click: reset view"
                                 }
+                                label: {
+                                    id: labelSceneGraphStatus
+                                }
                                 spacer: {}
                             }
                             vertical_layout: {

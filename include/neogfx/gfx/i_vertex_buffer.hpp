@@ -45,6 +45,7 @@ namespace neogfx
         Model       = 0x00000400,
         Joints      = 0x00000800,
         Weights     = 0x00001000,
+        Normal      = 0x00002000,
         // todo
         Custom1     = 0x00010000,
         Custom2     = 0x00020000,
@@ -52,8 +53,8 @@ namespace neogfx
         Custom4     = 0x00080000,
         Persist     = 0x10000000,
         Debug       = 0x80000000,
-        Default     = Vertices | UV | Color | Function0 | Function1 | Function2 | Function3 | Function4 | Function5 | Function6 | Model | Joints | Weights | Debug,
-        DefaultECS  = Vertices | UV | Color | Function0 | Function1 | Function2 | Function3 | Function4 | Function5 | Function6 | Model | Joints | Weights | Persist | Debug
+        Default     = Vertices | UV | Color | Function0 | Function1 | Function2 | Function3 | Function4 | Function5 | Function6 | Model | Joints | Weights | Normal | Debug,
+        DefaultECS  = Vertices | UV | Color | Function0 | Function1 | Function2 | Function3 | Function4 | Function5 | Function6 | Model | Joints | Weights | Normal | Persist | Debug
     };
 
     inline std::string const& standard_vertex_attribute_name(vertex_buffer_type aType)
@@ -123,6 +124,11 @@ namespace neogfx
         case vertex_buffer_type::Weights:
         {
             static const std::string sName = "VertexWeights";
+            return sName;
+        }
+        case vertex_buffer_type::Normal:
+        {
+            static const std::string sName = "VertexNormal";
             return sName;
         }
         case vertex_buffer_type::Debug:

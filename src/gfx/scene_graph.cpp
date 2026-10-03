@@ -641,6 +641,193 @@ namespace neogfx::scene_graph
         changed();
     }
 
+    std::vector<index> scene_graph_model::append(scene_graph_model const& aOther, index aParent)
+    {
+        if (&aOther == this)
+        {
+            scene_graph_model const copy{ *this };
+            return append(copy, aParent);
+        }
+        if (aParent != invalid_index && aParent >= iNodes.size())
+            throw bad_index();
+
+        auto const offset = [](index aIndex, std::size_t aBase) -> index
+            {
+                return aIndex != invalid_index ? static_cast<index>(aIndex + aBase) : invalid_index;
+            };
+
+        // buffers: appended to the shared binary buffer (buffer 0)
+        std::vector<std::size_t> bufferOffsets;
+        for (auto const& otherBuffer : aOther.iBuffers)
+            bufferOffsets.push_back(!otherBuffer.bytes().empty() ? append_data(otherBuffer.bytes().data(), otherBuffer.bytes().size(), 8u) : 0u);
+
+        auto const bufferViewBase = iBufferViews.size();
+        auto const accessorBase = iAccessors.size();
+        auto const imageBase = iImages.size();
+        auto const samplerBase = iSamplers.size();
+        auto const textureBase = iTextures.size();
+        auto const materialBase = iMaterials.size();
+        auto const meshBase = iMeshes.size();
+        auto const cameraBase = iCameras.size();
+        auto const skinBase = iSkins.size();
+        auto const nodeBase = iNodes.size();
+
+        for (auto view : aOther.iBufferViews)
+        {
+            if (view.buffer() < bufferOffsets.size())
+            {
+                view.set_byte_offset(view.byte_offset() + bufferOffsets[view.buffer()]);
+                view.set_buffer(0u);
+            }
+            else
+                view.set_buffer(invalid_index);
+            add(view);
+        }
+        for (auto newAccessor : aOther.iAccessors)
+        {
+            newAccessor.set_buffer_view(offset(newAccessor.buffer_view(), bufferViewBase));
+            if (newAccessor.has_sparse())
+            {
+                auto sparse = newAccessor.sparse();
+                sparse.set_indices(offset(sparse.indices_buffer_view(), bufferViewBase), sparse.indices_byte_offset(), sparse.indices_component_type());
+                sparse.set_values(offset(sparse.values_buffer_view(), bufferViewBase), sparse.values_byte_offset());
+                newAccessor.set_sparse(sparse);
+            }
+            add(newAccessor);
+        }
+        for (index otherImage = 0u; otherImage < aOther.iImages.size(); ++otherImage)
+        {
+            auto newImage = aOther.iImages[otherImage];
+            if (newImage.has_buffer_view())
+                newImage.set_buffer_view(offset(newImage.buffer_view(), bufferViewBase));
+            else
+            {
+                // an external file or data URI: embedded so it doesn't depend on the other graph's base directory
+                std::vector<std::byte> encoded;
+                if (image_data(aOther, otherImage, encoded) && !encoded.empty())
+                {
+                    if (!newImage.mime_type().has_value())
+                    {
+                        auto const magic = reinterpret_cast<std::uint8_t const*>(encoded.data());
+                        if (encoded.size() >= 3u && magic[0] == 0xFFu && magic[1] == 0xD8u && magic[2] == 0xFFu)
+                            newImage.set_mime_type("image/jpeg");
+                        else
+                            newImage.set_mime_type("image/png");
+                    }
+                    newImage.set_uri({});
+                    newImage.set_buffer_view(add_buffer_view(encoded.data(), encoded.size()));
+                }
+            }
+            add(newImage);
+        }
+        for (auto const& otherSampler : aOther.iSamplers)
+            add(otherSampler);
+        for (auto newTexture : aOther.iTextures)
+        {
+            newTexture.set_sampler(offset(newTexture.sampler(), samplerBase));
+            newTexture.set_source(offset(newTexture.source(), imageBase));
+            add(newTexture);
+        }
+        for (auto newMaterial : aOther.iMaterials)
+        {
+            auto const remap = [&](auto& aReference)
+                {
+                    if (aReference.has_texture())
+                        aReference.set_texture(offset(aReference.texture(), textureBase), aReference.tex_coord());
+                };
+            remap(newMaterial.pbr_metallic_roughness().base_color_texture());
+            remap(newMaterial.pbr_metallic_roughness().metallic_roughness_texture());
+            remap(newMaterial.normal_texture());
+            remap(newMaterial.occlusion_texture());
+            remap(newMaterial.emissive_texture());
+            add(newMaterial);
+        }
+        for (auto newMesh : aOther.iMeshes)
+        {
+            auto const remap = [&](scene_graph::attributes& aAttributes)
+                {
+                    for (std::size_t a = 0u; a < static_cast<std::size_t>(vertex_attribute::COUNT); ++a)
+                    {
+                        auto const attribute = static_cast<vertex_attribute>(a);
+                        if (aAttributes.has_attribute(attribute))
+                            aAttributes.set_attribute(attribute, offset(aAttributes.attribute(attribute), accessorBase));
+                    }
+                };
+            for (auto& primitive : newMesh.primitives())
+            {
+                primitive.set_indices(offset(primitive.indices(), accessorBase));
+                primitive.set_material(offset(primitive.material(), materialBase));
+                remap(primitive.attributes());
+                for (auto& target : primitive.morph_targets())
+                    remap(target);
+            }
+            add(newMesh);
+        }
+        for (auto const& otherCamera : aOther.iCameras)
+            add(otherCamera);
+        for (auto newSkin : aOther.iSkins)
+        {
+            newSkin.set_inverse_bind_matrices(offset(newSkin.inverse_bind_matrices(), accessorBase));
+            newSkin.set_skeleton(offset(newSkin.skeleton(), nodeBase));
+            for (auto& joint : newSkin.joints())
+                joint = offset(joint, nodeBase);
+            add(newSkin);
+        }
+        for (auto newNode : aOther.iNodes)
+        {
+            newNode.set_mesh(offset(newNode.mesh(), meshBase));
+            newNode.set_camera(offset(newNode.camera(), cameraBase));
+            newNode.set_skin(offset(newNode.skin(), skinBase));
+            for (auto& child : newNode.children())
+                child = offset(child, nodeBase);
+            add(newNode);
+        }
+        for (auto newAnimation : aOther.iAnimations)
+        {
+            // n.b. a channel's sampler index is local to its animation
+            for (auto& sampler : newAnimation.samplers())
+                sampler = animation_sampler{ offset(sampler.input(), accessorBase), offset(sampler.output(), accessorBase), sampler.interpolation() };
+            for (auto& channel : newAnimation.channels())
+                channel = animation_channel{ channel.sampler(), offset(channel.target_node(), nodeBase), channel.target_path() };
+            add(newAnimation);
+        }
+
+        // the other graph's root nodes: those of its active scene, else those that are no node's child
+        std::vector<index> roots;
+        auto const otherScene = aOther.active_scene();
+        if (otherScene != invalid_index)
+        {
+            for (auto root : aOther.iScenes[otherScene].nodes())
+                roots.push_back(offset(root, nodeBase));
+        }
+        else
+        {
+            std::vector<bool> isChild(aOther.iNodes.size(), false);
+            for (auto const& otherNode : aOther.iNodes)
+                for (auto child : otherNode.children())
+                    if (child < isChild.size())
+                        isChild[child] = true;
+            for (index n = 0u; n < isChild.size(); ++n)
+                if (!isChild[n])
+                    roots.push_back(offset(n, nodeBase));
+        }
+        if (aParent != invalid_index)
+        {
+            for (auto root : roots)
+                add_child(aParent, root);
+        }
+        else if (active_scene() != invalid_index)
+        {
+            auto& target = scene(active_scene());
+            for (auto root : roots)
+                target.nodes().push_back(root);
+        }
+        else
+            add_scene("scene", roots);
+        changed();
+        return roots;
+    }
+
     void scene_graph_model::changed()
     {
         ++iRevision;

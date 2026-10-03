@@ -659,6 +659,13 @@ namespace neogfx
             index add_node(std::optional<std::string> const& aName, i_node::trs_transform const& aTransform = {}, index aParent = invalid_index, index aMesh = invalid_index);
             index add_scene(std::optional<std::string> const& aName, std::vector<index> const& aRootNodes = {});
             void add_child(index aParent, index aChild);
+            // Copies another graph into this one: its buffers (merged into the shared binary buffer), buffer views,
+            // accessors, images (external image files are embedded), samplers, textures, materials, meshes, cameras,
+            // skins, nodes and animations, with the indices they refer to each other by offset. The root nodes of
+            // aOther's active scene are made children of aParent or, if aParent is invalid, root nodes of this graph's
+            // active scene (created if there is none). aOther's scenes are not copied and this graph's dimension and
+            // default scene are unchanged. Returns the copied root nodes (e.g. to position them with set_trs()).
+            std::vector<index> append(scene_graph_model const& aOther, index aParent = invalid_index);
         private:
             void changed();
             template <typename T>

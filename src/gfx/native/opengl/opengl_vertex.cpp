@@ -131,6 +131,9 @@ namespace neogfx
         if (aShaderProgram.supports(vertex_buffer_type::Weights))
             iWeightsAttribArray.emplace(false, sizeof(scene_vertex), scene_vertex::offset::weights, aShaderProgram,
                 standard_vertex_attribute_name(vertex_buffer_type::Weights));
+        if (aShaderProgram.supports(vertex_buffer_type::Normal))
+            iNormalAttribArray.emplace(false, sizeof(scene_vertex), scene_vertex::offset::normal, aShaderProgram,
+                standard_vertex_attribute_name(vertex_buffer_type::Normal));
         iPositionAttribArray->update(iVertices);
         iColorAttribArray->update(iVertices);
         if (iTextureCoordAttribArray)
@@ -141,6 +144,8 @@ namespace neogfx
             iJointsAttribArray->update(iVertices);
         if (iWeightsAttribArray)
             iWeightsAttribArray->update(iVertices);
+        if (iNormalAttribArray)
+            iNormalAttribArray->update(iVertices);
         // the element array buffer binding is vertex array object state (and the buffer changes if it grows)
         glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iIndices.handle()));
         if (aShaderProgram.type() == shader_program_type::Standard)

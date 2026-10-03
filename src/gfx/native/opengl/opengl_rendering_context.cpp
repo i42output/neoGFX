@@ -3409,6 +3409,29 @@ namespace neogfx
                 auto const to_u8 = [](float c) { return static_cast<std::uint8_t>(std::clamp(c, 0.0f, 1.0f) * 255.0f + 0.5f); };
                 avec4u8 const rgba{ to_u8(rgbaf[0]), to_u8(rgbaf[1]), to_u8(rgbaf[2]), to_u8(rgbaf[3]) };
                 auto const modelId = vec1f{ static_cast<float>(meshDrawable.entity) };
+                // model space normals (for lighting): those supplied, else area weighted from the faces
+                thread_local std::vector<vec3f> tNormals;
+                vec3f const* normals = nullptr;
+                if (model != nullptr && model->vertexNormals.size() == mesh.vertices.size())
+                    normals = model->vertexNormals.data();
+                else
+                {
+                    tNormals.assign(vertexCount, vec3f{});
+                    for (auto const& face : mesh.faces)
+                    {
+                        auto const i0 = static_cast<std::size_t>(face[0u]);
+                        auto const i1 = static_cast<std::size_t>(face[1u]);
+                        auto const i2 = static_cast<std::size_t>(face[2u]);
+                        auto const faceNormal = (mesh.vertices[i1] - mesh.vertices[i0]).cross(mesh.vertices[i2] - mesh.vertices[i0]);
+                        tNormals[i0] += faceNormal;
+                        tNormals[i1] += faceNormal;
+                        tNormals[i2] += faceNormal;
+                    }
+                    for (auto& normal : tNormals)
+                        if (normal.magnitude() > 0.0f)
+                            normal = normal.normalized();
+                    normals = tNormals.data();
+                }
 
                 tVertices.resize(vertexCount);
                 for (std::uint32_t vertexIndex = 0u; vertexIndex < vertexCount; ++vertexIndex)
@@ -3419,6 +3442,7 @@ namespace neogfx
                     vertex.rgba = rgba;
                     vertex.st = (uvCalculator ? (*uvCalculator)(mesh.uv[vertexIndex]) : vec2f{});
                     vertex.model = modelId;
+                    vertex.normal = normals[vertexIndex];
                     if (skinned)
                     {
                         auto const& joints = model->vertexJoints[vertexIndex];

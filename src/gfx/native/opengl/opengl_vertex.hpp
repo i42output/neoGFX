@@ -134,6 +134,7 @@ namespace neogfx
         vec1f model;        // entity id (indexes the model table)
         avec4u16 joints;    // skin joint indices
         vec4f weights;      // skin joint weights (all zero if not skinned)
+        vec3f normal;       // for lighting (see i_standard_vertex_shader::set_scene_light)
         struct offset
         {
             static constexpr std::size_t xyz = 0u;
@@ -142,6 +143,7 @@ namespace neogfx
             static constexpr std::size_t model = st + sizeof(decltype(scene_vertex::st));
             static constexpr std::size_t joints = model + sizeof(decltype(scene_vertex::model));
             static constexpr std::size_t weights = joints + sizeof(decltype(scene_vertex::joints));
+            static constexpr std::size_t normal = weights + sizeof(decltype(scene_vertex::weights));
         };
     };
 
@@ -184,6 +186,7 @@ namespace neogfx
         std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::model)>> iModelAttribArray;
         std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::joints)>> iJointsAttribArray;
         std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::weights)>> iWeightsAttribArray;
+        std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::normal)>> iNormalAttribArray;
     };
 
     template <typename V = standard_vertex>
