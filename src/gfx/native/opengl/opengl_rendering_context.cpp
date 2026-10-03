@@ -3973,7 +3973,7 @@ namespace neogfx
             glCheck(glScissor(tile[0], tile[1], tile[2], tile[3]));
             glCheck(glClear(GL_DEPTH_BUFFER_BIT));
             auto const viewProjection = tViews[view].as<float>();
-            glCheck(glUniformMatrix4fv(resources.viewProjection, 1, GL_FALSE, &viewProjection[0][0]));
+            glCheck(glUniformMatrix4fv(resources.viewProjection, 1, GL_FALSE, viewProjection.data()));
             for (auto const& mesh : aMeshes)
                 if (mesh)
                     aSceneBuffer.draw_depth(mesh->indexStart, mesh->indexEnd - mesh->indexStart);
