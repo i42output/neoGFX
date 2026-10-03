@@ -16,7 +16,10 @@
 #include <neogfx/support/file/gfx/gltf.hpp>
 #include <neogfx/app/i_resource_manager.hpp>
 #include <neolib/io/http.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/gfx/i_standard_shader_program.hpp>
 #include <sstream>
+#include <fstream>
 #include <map>
 
 void signal_handler(int signal)
@@ -1692,6 +1695,99 @@ int main(int argc, char* argv[])
             catch (std::exception const& e)
             {
                 ng::message_box::error(window, "Save Scene Graph", ng::string{ e.what() });
+            }
+        });
+        // Radiance RGBE (.hdr) panorama loading (for scene graph PBR environments): linear RGBA floats, row 0 at the top
+        auto load_radiance_hdr = [](std::string const& aPath, ng::size_u32& aExtents, std::vector<float>& aPixels)
+        {
+            std::ifstream input{ aPath, std::ios::binary };
+            if (!input)
+                throw std::runtime_error{ "cannot open file" };
+            std::string line;
+            if (!std::getline(input, line) || line.rfind("#?", 0) != 0)
+                throw std::runtime_error{ "not a Radiance HDR file" };
+            while (std::getline(input, line) && !line.empty())
+                if (line.rfind("FORMAT=", 0) == 0 && line != "FORMAT=32-bit_rle_rgbe")
+                    throw std::runtime_error{ "unsupported format: " + line };
+            std::string yAxis, xAxis;
+            std::uint32_t height = 0u, width = 0u;
+            if (!std::getline(input, line) || !(std::istringstream{ line } >> yAxis >> height >> xAxis >> width) ||
+                yAxis != "-Y" || xAxis != "+X" || width == 0u || height == 0u)
+                throw std::runtime_error{ "unsupported resolution: " + line };
+            aExtents = ng::size_u32{ width, height };
+            aPixels.resize(static_cast<std::size_t>(width) * height * 4u);
+            std::vector<std::uint8_t> scanline(static_cast<std::size_t>(width) * 4u);
+            auto const get = [&]() -> std::uint8_t
+            {
+                auto const c = input.get();
+                if (c == std::char_traits<char>::eof())
+                    throw std::runtime_error{ "truncated file" };
+                return static_cast<std::uint8_t>(c);
+            };
+            for (std::uint32_t y = 0u; y < height; ++y)
+            {
+                std::uint8_t header[4] = { get(), get(), get(), get() };
+                if (width >= 8u && width < 32768u && header[0] == 2u && header[1] == 2u && ((header[2] << 8u) | header[3]) == width)
+                {
+                    // run length encoded: each component in turn
+                    for (std::uint32_t component = 0u; component < 4u; ++component)
+                        for (std::uint32_t x = 0u; x < width;)
+                        {
+                            std::uint32_t count = get();
+                            bool const run = count > 128u;
+                            if (run)
+                                count -= 128u;
+                            if (count == 0u || x + count > width)
+                                throw std::runtime_error{ "bad scanline" };
+                            if (run)
+                            {
+                                auto const value = get();
+                                for (; count != 0u; --count)
+                                    scanline[(x++) * 4u + component] = value;
+                            }
+                            else
+                                for (; count != 0u; --count)
+                                    scanline[(x++) * 4u + component] = get();
+                        }
+                }
+                else
+                {
+                    // flat
+                    std::copy(std::begin(header), std::end(header), scanline.begin());
+                    for (std::size_t i = 4u; i < scanline.size(); ++i)
+                        scanline[i] = get();
+                }
+                for (std::uint32_t x = 0u; x < width; ++x)
+                {
+                    auto const* rgbe = &scanline[x * 4u];
+                    float const scale = rgbe[3] != 0u ? std::ldexp(1.0f, static_cast<int>(rgbe[3]) - (128 + 8)) : 0.0f;
+                    auto* pixel = &aPixels[(static_cast<std::size_t>(y) * width + x) * 4u];
+                    pixel[0] = (static_cast<float>(rgbe[0]) + 0.5f) * scale;
+                    pixel[1] = (static_cast<float>(rgbe[1]) + 0.5f) * scale;
+                    pixel[2] = (static_cast<float>(rgbe[2]) + 0.5f) * scale;
+                    pixel[3] = 1.0f;
+                }
+            }
+        };
+        window.buttonSceneGraphEnvironment.Clicked([&]()
+        {
+            auto const paths = ng::open_file_dialog(window, ng::file_dialog_spec{ "Load Environment", {}, { "*.hdr" }, "Radiance HDR Files" });
+            if (!paths || paths->empty())
+                return;
+            try
+            {
+                ng::size_u32 extents;
+                std::vector<float> pixels;
+                load_radiance_hdr((*paths)[0], extents, pixels);
+                // n.b. shared by all PBR drawing (the default shader program's)
+                ng::service<ng::i_rendering_engine>().default_shader_program().pbr_shader().set_environment(extents, pixels.data());
+                window.checkSceneGraphPbr.check();
+                if (sceneGraphCanvas)
+                    sceneGraphCanvas->update();
+            }
+            catch (std::exception const& e)
+            {
+                ng::message_box::error(window, "Load Environment", ng::string{ e.what() });
             }
         });
         window.buttonSceneGraphLoad.Clicked([&]()

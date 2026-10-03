@@ -1,10 +1,15 @@
 // physically based shading (glTF metallic-roughness BRDF) of model transformed meshes: Coord is the vertex's world
-// position, WorldNormal its world normal; lit by a directional light (uPbrLightDirection: towards the light) and a
-// sky/ground hemisphere
+// position, WorldNormal its world normal; lit by a directional light (uPbrLightDirection: towards the light) and image
+// based lighting (uPbrEnvironment); linear throughout: sRGB inputs are decoded and the result tone mapped and sRGB encoded
 #define PBR_LIGHT_RADIANCE vec3(2.8)
-#define PBR_SKY_RADIANCE vec3(0.30, 0.32, 0.36)
-#define PBR_GROUND_RADIANCE vec3(0.12, 0.11, 0.10)
-#define PBR_GAMMA 2.2
+// the environment texture (see standard_pbr_shader): equirectangular bands one above the other; 0 to 5 the environment
+// prefiltered for roughness 0 to 1, 6 the irradiance (divided by pi), 7 the split sum BRDF (by n.v and roughness)
+#define PBR_ENVIRONMENT_WIDTH 256.0
+#define PBR_ENVIRONMENT_BAND_HEIGHT 128.0
+#define PBR_ENVIRONMENT_BANDS 8.0
+#define PBR_ENVIRONMENT_SPECULAR_BANDS 6.0
+#define PBR_ENVIRONMENT_IRRADIANCE_BAND 6.0
+#define PBR_ENVIRONMENT_BRDF_BAND 7.0
 
 vec4 pbr_texture(int source, vec2 texCoord)
 {
@@ -23,14 +28,17 @@ vec4 pbr_texture(int source, vec2 texCoord)
     }
 }
 
+// the sRGB transfer functions
 vec3 pbr_to_linear(vec3 c)
 {
-    return pow(max(c, vec3(0.0)), vec3(PBR_GAMMA));
+    c = clamp(c, 0.0, 1.0);
+    return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), c));
 }
 
 vec3 pbr_from_linear(vec3 c)
 {
-    return pow(max(c, vec3(0.0)), vec3(1.0 / PBR_GAMMA));
+    c = clamp(c, 0.0, 1.0);
+    return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), c));
 }
 
 // Khronos PBR Neutral tone mapping
@@ -51,9 +59,26 @@ vec3 pbr_tone_map(vec3 color)
     return mix(color, vec3(newPeak), g);
 }
 
-vec3 pbr_hemisphere(vec3 direction)
+vec3 pbr_environment_band(float band, vec3 direction)
 {
-    return mix(PBR_GROUND_RADIANCE, PBR_SKY_RADIANCE, clamp(direction.y * 0.5 + 0.5, 0.0, 1.0));
+    vec2 uv = vec2(atan(direction.z, direction.x) / (2.0 * PI) + 0.5, 0.5 - asin(clamp(direction.y, -1.0, 1.0)) / PI);
+    float row = clamp(uv.y * PBR_ENVIRONMENT_BAND_HEIGHT, 0.5, PBR_ENVIRONMENT_BAND_HEIGHT - 0.5);
+    return texture(uPbrEnvironment, vec2(uv.x, (band * PBR_ENVIRONMENT_BAND_HEIGHT + row) / (PBR_ENVIRONMENT_BAND_HEIGHT * PBR_ENVIRONMENT_BANDS))).rgb;
+}
+
+vec3 pbr_environment_specular(vec3 direction, float roughness)
+{
+    float level = roughness * (PBR_ENVIRONMENT_SPECULAR_BANDS - 1.0);
+    float level0 = floor(level);
+    float level1 = min(level0 + 1.0, PBR_ENVIRONMENT_SPECULAR_BANDS - 1.0);
+    return mix(pbr_environment_band(level0, direction), pbr_environment_band(level1, direction), level - level0);
+}
+
+vec2 pbr_environment_brdf(float nDotV, float roughness)
+{
+    float u = clamp(nDotV, 0.5 / PBR_ENVIRONMENT_WIDTH, 1.0 - 0.5 / PBR_ENVIRONMENT_WIDTH);
+    float row = clamp(roughness * PBR_ENVIRONMENT_BAND_HEIGHT, 0.5, PBR_ENVIRONMENT_BAND_HEIGHT - 0.5);
+    return texture(uPbrEnvironment, vec2(u, (PBR_ENVIRONMENT_BRDF_BAND * PBR_ENVIRONMENT_BAND_HEIGHT + row) / (PBR_ENVIRONMENT_BAND_HEIGHT * PBR_ENVIRONMENT_BANDS))).rg;
 }
 
 void standard_pbr_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
@@ -61,10 +86,11 @@ void standard_pbr_shader(inout vec4 color, inout vec4 function0, inout vec4 func
     if (!uPbrEnabled)
         return;
 
-    // the base colour (vertex colour multiplied by any base colour texture) is sRGB encoded
-    vec3 baseColor = pbr_to_linear(color.rgb);
-
+    // the base colour: the vertex colour (the base colour factor) and any base colour texture, both sRGB encoded
     // n.b. all texture sampling (and derivatives) before any discard
+    vec3 baseColor = pbr_to_linear(Color.rgb);
+    if (uPbrBaseColorTextured)
+        baseColor *= pbr_to_linear(texture(uPbrBaseTexture, TexCoord).rgb);
     vec2 texCoord1 = TexCoord * uPbrTextureTransform1.xy + uPbrTextureTransform1.zw;
     vec4 metallicRoughnessTexel = uPbrTextureSources.x != -1 ? pbr_texture(uPbrTextureSources.x, TexCoord * uPbrTextureTransform0.xy + uPbrTextureTransform0.zw) : vec4(1.0);
     vec4 normalTexel = uPbrTextureSources.y != -1 ? pbr_texture(uPbrTextureSources.y, texCoord1) : vec4(0.5, 0.5, 1.0, 1.0);
@@ -132,13 +158,10 @@ void standard_pbr_shader(inout vec4 color, inout vec4 function0, inout vec4 func
     float visibility = visibilityDenominator > 0.0 ? 0.5 / visibilityDenominator : 0.0;
     vec3 direct = ((vec3(1.0) - fresnel) * diffuseColor / PI + fresnel * distribution * visibility) * PBR_LIGHT_RADIANCE * nDotL;
 
-    // ambient: the hemisphere (diffuse by the normal, specular by the reflection) with an analytic environment BRDF
-    const vec4 c0 = vec4(-1.0, -0.0275, -0.572, 0.022);
-    const vec4 c1 = vec4(1.0, 0.0425, 1.04, -0.04);
-    vec4 r = roughness * c0 + c1;
-    float a004 = min(r.x * r.x, exp2(-9.28 * nDotV)) * r.x + r.y;
-    vec2 environmentBrdf = vec2(-1.04, 1.04) * a004 + r.zw;
-    vec3 ambient = (diffuseColor * pbr_hemisphere(n) + (f0 * environmentBrdf.x + environmentBrdf.y) * pbr_hemisphere(reflect(-v, n))) * occlusion;
+    // image based lighting: diffuse irradiance by the normal, prefiltered specular by the reflection (split sum)
+    vec2 environmentBrdf = pbr_environment_brdf(nDotV, roughness);
+    vec3 ambient = (diffuseColor * pbr_environment_band(PBR_ENVIRONMENT_IRRADIANCE_BAND, n) +
+        pbr_environment_specular(reflect(-v, n), roughness) * (f0 * environmentBrdf.x + environmentBrdf.y)) * occlusion * uPbrEnvironmentIntensity;
 
     color.rgb = pbr_from_linear(pbr_tone_map(direct + ambient + emissive));
 }

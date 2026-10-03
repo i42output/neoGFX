@@ -84,8 +84,9 @@ namespace neogfx
         Pbr1            = 9,
         Pbr2            = 10,
         Pbr3            = 11,
+        PbrEnvironment  = 12,   // image based lighting (see i_pbr_shader::environment)
 
-        RESERVED_LAST   = Pbr3
+        RESERVED_LAST   = PbrEnvironment
     };
 
     class i_sub_texture;

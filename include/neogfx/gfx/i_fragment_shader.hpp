@@ -125,15 +125,19 @@ namespace neogfx
         vec3 emissive;
         std::optional<scalar> alphaCutoff;
         bool doubleSided = false;
+        // whether the base colour texture (reserved_texture_unit::Tex) is sampled (as sRGB) for the base colour, along with
+        // the vertex colour (the sRGB base colour factor)
+        bool baseColorTextured = false;
         // the textures (metallic-roughness, normal, occlusion and emissive) ...
         vec4i32 textureSources = vec4i32{ NoTexture, NoTexture, NoTexture, NoTexture };
         // ... and their coordinates: scale (xy) and offset (zw) applied to the vertices' (base colour) texture coordinates
         std::array<vec4, 4> textureTransforms = { vec4{ 1.0, 1.0, 0.0, 0.0 }, vec4{ 1.0, 1.0, 0.0, 0.0 }, vec4{ 1.0, 1.0, 0.0, 0.0 }, vec4{ 1.0, 1.0, 0.0, 0.0 } };
     };
 
-    // physically based shading (glTF metallic-roughness BRDF) of model transformed meshes lit by a directional light and a
-    // sky/ground hemisphere; the base colour is the colour arriving from the shaders before it (vertex colour and base colour
-    // texture). Enabled by the first set_pbr(), so programs that never use it don't compile it.
+    // physically based shading (glTF metallic-roughness BRDF) of model transformed meshes lit by a directional light and image
+    // based lighting (an environment: prefiltered specular, irradiance and the split sum BRDF); linear throughout (sRGB
+    // colours and textures are decoded; the result is tone mapped and sRGB encoded). Enabled by the first set_pbr(), so
+    // programs that never use it don't compile it.
     class i_pbr_shader : public i_fragment_shader
     {
     public:
@@ -146,5 +150,13 @@ namespace neogfx
         // per mesh
         virtual void clear_pbr() = 0;
         virtual void set_pbr(pbr_shader_material const& aMaterial) = 0;
+        // image based lighting: an equirectangular panorama of linear RGB(A) floats (row 0 at the top, +y up; u = atan2(z, x) / 2pi + 0.5,
+        // as is usual for HDR environment maps), scaled by an intensity; the default (or clear_environment()) is a plain sky above a
+        // ground. N.B. prefiltering happens here (on the CPU, about a second for a large panorama).
+        virtual void set_environment(size_u32 const& aExtents, float const* aRgbaPixels, scalar aIntensity = 1.0) = 0;
+        virtual void clear_environment() = 0;
+        // the prefiltered environment texture (to be bound to reserved_texture_unit::PbrEnvironment, linearly filtered and
+        // repeating horizontally)
+        virtual i_texture const& environment() const = 0;
     };
 }

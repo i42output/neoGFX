@@ -40,7 +40,8 @@ namespace neogfx::game
     // 3D: drawn through the scene's camera (or a default camera framing the scene), depth tested
     //     and back face culled (unless any material is double sided); lit (on the GPU, by their normals) by a
     //     fixed directional light: per vertex (the default) or physically based (per pixel, glTF metallic-roughness
-    //     with metallic-roughness, normal, occlusion and emissive textures; see set_lighting_model).
+    //     with metallic-roughness, normal, occlusion and emissive textures, plus image based lighting from the
+    //     environment of the PBR shader, i_pbr_shader::set_environment; see set_lighting_model).
     // The view (and 3D projection) is applied on the GPU (canvas::set_entity_transformation) so moving
     // the camera does not change entity vertices: they only change when a node's world transformation does.
     // Base colour textures (PNG or JPEG; from buffer views, data URIs or files) are drawn using TEXCOORD_0/1.

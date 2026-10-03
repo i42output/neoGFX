@@ -1129,6 +1129,10 @@
                                     id: buttonSceneGraphLoad
                                     text: "Load glTF..."
                                 }
+                                push_button: {
+                                    id: buttonSceneGraphEnvironment
+                                    text: "Load Environment..."
+                                }
                                 label: {
                                     text: "Drag: orbit (3D) / pan (2D); right drag: pan; wheel: zoom; double click: reset view"
                                 }

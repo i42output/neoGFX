@@ -3363,6 +3363,7 @@ namespace neogfx
         // physically based shading (see i_pbr_shader): the textures bound to reserved_texture_unit::Pbr0 to Pbr3
         auto& pbrShader = program.pbr_shader();
         std::array<i_texture const*, 4> pbrTextures = {};
+        i_texture const* pbrEnvironment = nullptr;
         thread_local std::vector<scene_vertex> tVertices;
         thread_local std::vector<std::uint32_t> tIndices;
 
@@ -3558,6 +3559,7 @@ namespace neogfx
                 }
                 pbr_shader_material pbr;
                 pbr.viewPosition = pbrShader.pbr_camera() + origin().to_vec3();
+                pbr.baseColorTextured = (baseTexture != nullptr);
                 std::array<i_texture const*, 4> meshPbrTextures = {};
                 if (material.pbr)
                 {
@@ -3623,6 +3625,16 @@ namespace neogfx
                         GL_LINEAR :
                         GL_NEAREST));
                 }
+                if (pbrEnvironment == nullptr)
+                {
+                    // image based lighting: an equirectangular texture, bilinear, repeating horizontally
+                    pbrEnvironment = &pbrShader.environment();
+                    pbrEnvironment->bind(static_cast<std::uint32_t>(reserved_texture_unit::PbrEnvironment));
+                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+                }
                 // the base colour texture's sampling state (above) assumes its unit is active
                 glCheck(glActiveTexture(GL_TEXTURE0 + static_cast<GLenum>(reserved_texture_unit::Tex)));
                 pbrShader.set_pbr(pbr);
@@ -3639,6 +3651,8 @@ namespace neogfx
         for (auto const* texture : pbrTextures)
             if (texture != nullptr)
                 texture->unbind();
+        if (pbrEnvironment != nullptr)
+            pbrEnvironment->unbind();
 
         if (previousTexture != nullptr)
             previousTexture->unbind();
