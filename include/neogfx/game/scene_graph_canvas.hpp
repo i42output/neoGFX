@@ -85,6 +85,11 @@ namespace neogfx::game
         // scene_lighting::PerVertex (the default) or scene_lighting::PhysicallyBased (scene_lighting::None is the same as set_lighting(false))
         scene_lighting lighting_model() const;
         void set_lighting_model(scene_lighting aLightingModel);
+        // a point light (3D, lit) at a node's position, e.g. one with an emissive mesh: radiance (colour times intensity; the
+        // fixed directional light's is 2.8) falls off with the square of the distance and, if a range is given, smoothly to
+        // zero at that range. N.B. no shadows: it lights every surface facing it.
+        void set_point_light(neogfx::scene_graph::index aNode, vec3 const& aRadiance, scalar aRange = 0.0);
+        void clear_point_light();
         bool mouse_camera_control() const;
         void set_mouse_camera_control(bool aEnable);
         // discard any mouse camera changes
@@ -108,6 +113,12 @@ namespace neogfx::game
             scalar yaw;
             scalar pitch;
             scalar distance;
+        };
+        struct point_light
+        {
+            neogfx::scene_graph::index node;
+            vec3 radiance;
+            scalar range;
         };
         struct primitive_entity
         {
@@ -136,6 +147,7 @@ namespace neogfx::game
         std::optional<scalar> iViewScale;
         bool iLighting;
         scene_lighting iLightingModel;
+        std::optional<point_light> iPointLight;
         std::vector<primitive_entity> iEntities;
         std::optional<std::pair<vec3, vec3>> iBounds;
         std::map<std::pair<neogfx::scene_graph::index, texture_sampling>, std::optional<game::texture>> iTextures;

@@ -44,6 +44,8 @@ namespace neogfx
         auto& normal = add_attribute<vec3f>("VertexNormal"_s, 14u);
         uModelTableBase = iModelTableBase;
         uSceneLight = vec4f{};
+        uScenePointLight = vec4f{};
+        uScenePointLightRadiance = vec4f{};
         add_out_variable<vec3f>("Coord"_s, 0u).link(coord);
         add_out_variable<vec4f>("Color"_s, 1u).link(color);
         add_out_variable<vec4f>("Function0"_s, 3u, true).link(function0);
@@ -91,6 +93,17 @@ namespace neogfx
             iSceneLight = aDirection;
             iSceneLighting = aLighting;
             uSceneLight.uniform().mutable_value();
+        }
+    }
+
+    void standard_vertex_shader::set_scene_point_light(std::optional<vec3> const& aPosition, vec3 const& aRadiance, scalar aRange)
+    {
+        vec4 const radiance{ aRadiance.x, aRadiance.y, aRadiance.z, aRange };
+        if (iScenePointLight != aPosition || iScenePointLightRadiance != radiance)
+        {
+            iScenePointLight = aPosition;
+            iScenePointLightRadiance = radiance;
+            uScenePointLight.uniform().mutable_value();
         }
     }
 
@@ -168,6 +181,21 @@ namespace neogfx
             }
             else
                 uSceneLight = vec4f{};
+        }
+
+        // the point light is in the same space as the model transformed vertices, which includes the context origin (see draw_entities)
+        if (uScenePointLight.uniform().is_dirty() || iScenePointLightOrigin == std::nullopt || *iScenePointLightOrigin != aContext.origin())
+        {
+            iScenePointLightOrigin = aContext.origin();
+            // xyz: position, w: 1 if lit; radiance: rgb and range (0 for none)
+            if (iScenePointLight)
+            {
+                auto const position = (*iScenePointLight + iScenePointLightOrigin->to_vec3()).as<float>();
+                uScenePointLight = vec4f{ position.x, position.y, position.z, 1.0f };
+                uScenePointLightRadiance = iScenePointLightRadiance.as<float>();
+            }
+            else
+                uScenePointLight = vec4f{};
         }
     }
 

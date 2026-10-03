@@ -81,6 +81,21 @@ vec2 pbr_environment_brdf(float nDotV, float roughness)
     return texture(uPbrEnvironment, vec2(u, (PBR_ENVIRONMENT_BRDF_BAND * PBR_ENVIRONMENT_BAND_HEIGHT + row) / (PBR_ENVIRONMENT_BAND_HEIGHT * PBR_ENVIRONMENT_BANDS))).rg;
 }
 
+// a light arriving from direction l: Lambert diffuse plus GGX specular (height correlated Smith visibility)
+vec3 pbr_direct(vec3 n, vec3 v, vec3 l, vec3 radiance, vec3 f0, vec3 diffuseColor, float alpha2, float nDotV)
+{
+    vec3 h = normalize(l + v);
+    float nDotL = max(dot(n, l), 0.0);
+    float nDotH = max(dot(n, h), 0.0);
+    float vDotH = max(dot(v, h), 0.0);
+    vec3 fresnel = f0 + (vec3(1.0) - f0) * pow(1.0 - vDotH, 5.0);
+    float dDenominator = nDotH * nDotH * (alpha2 - 1.0) + 1.0;
+    float distribution = alpha2 / (PI * dDenominator * dDenominator);
+    float visibilityDenominator = nDotL * sqrt(nDotV * nDotV * (1.0 - alpha2) + alpha2) + nDotV * sqrt(nDotL * nDotL * (1.0 - alpha2) + alpha2);
+    float visibility = visibilityDenominator > 0.0 ? 0.5 / visibilityDenominator : 0.0;
+    return ((vec3(1.0) - fresnel) * diffuseColor / PI + fresnel * distribution * visibility) * radiance * nDotL;
+}
+
 void standard_pbr_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
 {
     if (!uPbrEnabled)
@@ -145,18 +160,21 @@ void standard_pbr_shader(inout vec4 color, inout vec4 function0, inout vec4 func
     float alpha2 = alpha * alpha;
     float nDotV = max(dot(n, v), 1e-4);
 
-    // the directional light: Lambert diffuse plus GGX specular (height correlated Smith visibility)
-    vec3 l = uPbrLightDirection;
-    vec3 h = normalize(l + v);
-    float nDotL = max(dot(n, l), 0.0);
-    float nDotH = max(dot(n, h), 0.0);
-    float vDotH = max(dot(v, h), 0.0);
-    vec3 fresnel = f0 + (vec3(1.0) - f0) * pow(1.0 - vDotH, 5.0);
-    float dDenominator = nDotH * nDotH * (alpha2 - 1.0) + 1.0;
-    float distribution = alpha2 / (PI * dDenominator * dDenominator);
-    float visibilityDenominator = nDotL * sqrt(nDotV * nDotV * (1.0 - alpha2) + alpha2) + nDotV * sqrt(nDotL * nDotL * (1.0 - alpha2) + alpha2);
-    float visibility = visibilityDenominator > 0.0 ? 0.5 / visibilityDenominator : 0.0;
-    vec3 direct = ((vec3(1.0) - fresnel) * diffuseColor / PI + fresnel * distribution * visibility) * PBR_LIGHT_RADIANCE * nDotL;
+    // the directional light and any point light
+    vec3 direct = pbr_direct(n, v, uPbrLightDirection, PBR_LIGHT_RADIANCE, f0, diffuseColor, alpha2, nDotV);
+    if (uPbrPointLight.w > 0.0)
+    {
+        vec3 toLight = uPbrPointLight.xyz - Coord;
+        float distance2 = max(dot(toLight, toLight), 1e-4);
+        float window = 1.0;
+        if (uPbrPointLightRadiance.w > 0.0)
+        {
+            float ratio = distance2 / (uPbrPointLightRadiance.w * uPbrPointLightRadiance.w);
+            window = clamp(1.0 - ratio * ratio, 0.0, 1.0);
+            window *= window;
+        }
+        direct += pbr_direct(n, v, toLight * inversesqrt(distance2), uPbrPointLightRadiance.rgb * window / distance2, f0, diffuseColor, alpha2, nDotV);
+    }
 
     // image based lighting: diffuse irradiance by the normal, prefiltered specular by the reflection (split sum)
     vec2 environmentBrdf = pbr_environment_brdf(nDotV, roughness);

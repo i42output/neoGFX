@@ -1517,6 +1517,8 @@ int main(int argc, char* argv[])
             auto const planetMesh = g.add_box(ng::vec3{ 1.0, 1.0, 1.0 }, 
                 { ng::color::Red, ng::color::Green, ng::color::Blue, ng::color::Yellow, ng::color::Cyan, ng::color::Magenta }, "planet");
             auto const moonMesh = g.add_box(ng::vec3{ 0.4, 0.4, 0.4 }, ng::color::LightGray, "moon");
+            // the moon is a lamp: emissive, and the canvas's point light (see orrery_lamp)
+            g.material(g.mesh(moonMesh).primitive(0u).material()).set_emissive_factor(ng::vec3{ 1.0, 0.85, 0.55 });
             auto const root = g.add_node("root", ng::vec3{});
             orreryRoot3D = root;
             g.add_node("ground", ng::vec3{ 0.0, -2.0, 0.0 }, ng::vec4{ 0.0, 0.0, 0.0, 1.0 }, ng::vec3{ 1.0, 1.0, 1.0 }, root, groundMesh);
@@ -1539,6 +1541,7 @@ int main(int argc, char* argv[])
             char const* name;
             ng::vec3 position;
             ng::scalar scale;
+            bool spin = false; // rotates about the y axis (like the sun) as the orrery is animated
         };
         std::vector<sample_model> const sampleModels{
             { "Duck", ng::vec3{ -5.5, -1.9 - 0.1 * 1.5, 5.5 }, 1.5 },
@@ -1546,8 +1549,10 @@ int main(int argc, char* argv[])
             { "BoxAnimated", ng::vec3{ -5.5, -1.9 + 0.5, -5.5 }, 1.0 },
             { "BoxTextured", ng::vec3{ 5.5, -1.9 + 0.75, -5.5 }, 1.5 },
             // all of the glTF metallic-roughness textures (base colour, metallic-roughness, normal, occlusion and emissive): see
-            // the PBR check box (scene_graph_canvas::set_lighting_model); low enough at the front not to meet the moon
-            { "DamagedHelmet", ng::vec3{ 0.0, -1.9 + 0.9 * 0.7, 7.4 }, 0.7 } };
+            // the PBR check box (scene_graph_canvas::set_lighting_model); spinning, hovering at the front: at this scale it is
+            // 2.5 tall and 1.66 in radius about y, so it stays above the moon (which can reach 6.85 from the sun horizontally
+            // and 1.85 up) and below the default camera's line of sight to the sun
+            { "DamagedHelmet", ng::vec3{ 0.0, 2.2, 8.7 }, 1.4, true } };
         std::vector<std::unique_ptr<neolib::http>> sampleDownloads;
         std::map<std::string, std::string> sampleStatus;
         auto show_sample_status = [&]()
@@ -1559,21 +1564,29 @@ int main(int argc, char* argv[])
         };
         // the appended sample models' own animations (e.g. Cesium Man walking), played as the orrery is animated
         std::vector<ng::scene_graph::animation_player> sampleAnimations;
+        // the nodes of the spinning sample models
+        std::vector<ng::scene_graph::index> sampleSpinners;
         auto download_sample_models = [&]()
         {
             for (auto const& sample : sampleModels)
             {
                 auto& download = *sampleDownloads.emplace_back(std::make_unique<neolib::http>(app.thread()));
                 sampleStatus[sample.name] = "downloading";
-                download.Completed([&sceneGraph3D, &orreryRoot3D, &sampleAnimations, &sampleStatus, &show_sample_status, &download, sample]()
+                download.Completed([&sceneGraph3D, &orreryRoot3D, &sampleAnimations, &sampleSpinners, &sampleStatus, &show_sample_status, &download, sample]()
                 {
                     try
                     {
                         std::istringstream input{ std::string{ download.body().begin(), download.body().end() } };
                         ng::file::gltf model{ input };
                         auto& g = *sceneGraph3D;
-                        auto const holder = g.add_node(std::string{ sample.name }, sample.position, ng::vec4{ 0.0, 0.0, 0.0, 1.0 },
+                        auto holder = g.add_node(std::string{ sample.name }, sample.position, ng::vec4{ 0.0, 0.0, 0.0, 1.0 },
                             ng::vec3{ sample.scale, sample.scale, sample.scale }, orreryRoot3D);
+                        if (sample.spin)
+                        {
+                            holder = g.add_node(std::string{ sample.name } + " spin", ng::vec3{}, ng::vec4{ 0.0, 0.0, 0.0, 1.0 },
+                                ng::vec3{ 1.0, 1.0, 1.0 }, holder);
+                            sampleSpinners.push_back(holder);
+                        }
                         auto const firstAnimation = g.animation_count();
                         g.append(model.model(), holder);
                         for (auto animation = firstAnimation; animation < g.animation_count(); ++animation)
@@ -1601,6 +1614,15 @@ int main(int argc, char* argv[])
         };
 
         ng::scene_graph_canvas* sceneGraphCanvas = nullptr;
+        // the 3D orrery's moon lights the scene (a warm point light, about ten times the directional light's radiance
+        // at a distance of two)
+        auto orrery_lamp = [&]()
+        {
+            if (sceneGraphCanvas && sceneGraphCanvas->has_graph() && &sceneGraphCanvas->graph() == sceneGraph3D.get())
+                sceneGraphCanvas->set_point_light(orrery3D.moon, ng::vec3{ 1.0, 0.85, 0.6 } * 25.0);
+            else if (sceneGraphCanvas)
+                sceneGraphCanvas->clear_point_light();
+        };
         std::optional<ng::widget_timer> sceneGraphAnimator;
         auto const sceneGraphStart = std::chrono::steady_clock::now();
         auto animate_orrery = [&]()
@@ -1629,6 +1651,8 @@ int main(int argc, char* argv[])
                 g.set_transform(orrery3D.moon, ng::vec3{ 1.5, 0.0, 0.0 });
                 for (auto& player : sampleAnimations)
                     player.apply(player.duration() > 0.0 ? std::fmod(t, player.duration()) : 0.0);
+                for (auto spinner : sampleSpinners)
+                    g.set_transform(spinner, ng::vec3{}, ng::scene_graph_3d::axis_angle(yAxis, t * 0.6));
             }
             else
                 return; // a loaded scene graph: nothing to animate here (its own glTF animation is played by the canvas)
@@ -1640,6 +1664,7 @@ int main(int argc, char* argv[])
                 sceneGraphCanvas = &window.layoutSceneGraph.add(ng::make_ref<ng::scene_graph_canvas>());
                 sceneGraphCanvas->set_background_color(ng::color::Black);
                 sceneGraphCanvas->set_graph(sceneGraph3D);
+                orrery_lamp();
                 download_sample_models();
                 window.radioSceneGraph3D.check();
                 window.checkSceneGraphAnimate.check();
@@ -1659,11 +1684,13 @@ int main(int argc, char* argv[])
         {
             if (sceneGraphCanvas)
                 sceneGraphCanvas->set_graph(sceneGraph2D);
+            orrery_lamp();
         });
         window.radioSceneGraph3D.Checked([&]()
         {
             if (sceneGraphCanvas)
                 sceneGraphCanvas->set_graph(sceneGraph3D);
+            orrery_lamp();
         });
         window.checkSceneGraphAnimate.Toggled([&]()
         {
@@ -1801,6 +1828,7 @@ int main(int argc, char* argv[])
             {
                 ng::file::gltf loaded{ (*paths)[0] };
                 sceneGraphCanvas->set_graph(loaded.shared_model());
+                orrery_lamp();
                 if (loaded.model().animation_count() > 0u)
                 {
                     sceneGraphCanvas->play_animation(0u);

@@ -67,5 +67,9 @@ namespace neogfx
         // (see game::model_transformation) by their normals; std::nullopt (or scene_lighting::None) for none (unlit).
         // n.b. for scene_lighting::PhysicallyBased the shading is done by the PBR fragment shader (i_pbr_shader)
         virtual void set_scene_light(std::optional<vec3> const& aDirection, scene_lighting aLighting = scene_lighting::PerVertex) = 0;
+        // a point light (world space position) also lighting model transformed vertices (with scene_lighting::PerVertex):
+        // radiance (colour times intensity, on the same scale as i_pbr_shader's) falls off with the square of the distance
+        // and, if a range is given, smoothly to zero at that range; std::nullopt for none
+        virtual void set_scene_point_light(std::optional<vec3> const& aPosition, vec3 const& aRadiance = vec3{ 1.0, 1.0, 1.0 }, scalar aRange = 0.0) = 0;
     };
 }

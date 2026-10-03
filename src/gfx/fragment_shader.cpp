@@ -221,6 +221,9 @@ namespace neogfx
         constexpr std::uint32_t IrradianceBand = 6u;
         constexpr std::uint32_t BrdfBand = 7u;
         constexpr std::uint32_t Bands = 8u;
+        // importance samples per texel (n.b. namespace scope: MSVC warns (C4189) of constexpr locals used only in lambdas)
+        constexpr std::uint32_t SpecularSamples = 64u;
+        constexpr std::uint32_t BrdfSamples = 128u;
         constexpr float Pi = 3.14159265358979f;
 
         struct rgb { float r = 0.0f; float g = 0.0f; float b = 0.0f; };
@@ -360,7 +363,6 @@ namespace neogfx
             static std::vector<rgb> const sLut = []()
             {
                 std::vector<rgb> result(static_cast<std::size_t>(Width) * BandHeight);
-                constexpr std::uint32_t BrdfSamples = 128u;
                 parallel_rows(BandHeight, [&](std::uint32_t y)
                     {
                         float const roughness = (static_cast<float>(y) + 0.5f) / static_cast<float>(BandHeight);
@@ -427,7 +429,6 @@ namespace neogfx
                 };
 
             // specular: GGX prefiltered (n = v = r), filtered importance sampling
-            constexpr std::uint32_t SpecularSamples = 64u;
             parallel_rows(BandHeight * SpecularBands, [&](std::uint32_t aRow)
                 {
                     std::uint32_t const band = aRow / BandHeight;
@@ -539,6 +540,8 @@ namespace neogfx
         uPbrEnabled = false;
         uPbrLightDirection = vec3f{ 0.0f, 1.0f, 0.0f };
         uPbrViewPosition = vec3f{};
+        uPbrPointLight = vec4f{};
+        uPbrPointLightRadiance = vec4f{};
         uPbrFactors = vec4f{ 1.0f, 1.0f, 1.0f, 1.0f };
         uPbrEmissive = vec3f{};
         uPbrAlphaCutoff = -1.0f;
@@ -575,6 +578,35 @@ namespace neogfx
     {
         iLight = (aDirection && aDirection->magnitude() > 0.0) ? std::optional<vec3>{ aDirection->normalized() } : std::nullopt;
         iCamera = aCameraPosition;
+    }
+
+    void standard_pbr_shader::set_pbr_point_light(std::optional<vec3> const& aPosition, vec3 const& aRadiance, scalar aRange)
+    {
+        vec4 const radiance{ aRadiance.x, aRadiance.y, aRadiance.z, aRange };
+        if (iPointLight != aPosition || iPointLightRadiance != radiance)
+        {
+            iPointLight = aPosition;
+            iPointLightRadiance = radiance;
+            iPointLightOrigin = std::nullopt;
+        }
+    }
+
+    void standard_pbr_shader::prepare_uniforms(const i_rendering_context& aContext, i_shader_program& aProgram)
+    {
+        standard_fragment_shader<i_pbr_shader>::prepare_uniforms(aContext, aProgram);
+        // the point light is in the same space as the model transformed vertices, which includes the context origin (see draw_entities)
+        if (iPointLightOrigin == std::nullopt || *iPointLightOrigin != aContext.origin())
+        {
+            iPointLightOrigin = aContext.origin();
+            if (iPointLight)
+            {
+                auto const position = (*iPointLight + iPointLightOrigin->to_vec3()).as<float>();
+                uPbrPointLight = vec4f{ position.x, position.y, position.z, 1.0f };
+                uPbrPointLightRadiance = iPointLightRadiance.as<float>();
+            }
+            else
+                uPbrPointLight = vec4f{};
+        }
     }
 
     void standard_pbr_shader::clear_pbr()

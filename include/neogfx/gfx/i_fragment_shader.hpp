@@ -147,6 +147,9 @@ namespace neogfx
         virtual std::optional<vec3> const& pbr_light() const = 0;
         virtual vec3 const& pbr_camera() const = 0;
         virtual void set_pbr_light(std::optional<vec3> const& aDirection, vec3 const& aCameraPosition) = 0;
+        // a point light (world space position) as well: radiance (colour times intensity; the directional light's is 2.8) falls
+        // off with the square of the distance and, if a range is given, smoothly to zero at that range; std::nullopt for none
+        virtual void set_pbr_point_light(std::optional<vec3> const& aPosition, vec3 const& aRadiance = vec3{ 1.0, 1.0, 1.0 }, scalar aRange = 0.0) = 0;
         // per mesh
         virtual void clear_pbr() = 0;
         virtual void set_pbr(pbr_shader_material const& aMaterial) = 0;

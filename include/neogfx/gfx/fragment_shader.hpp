@@ -184,6 +184,8 @@ namespace neogfx
         std::optional<vec3> const& pbr_light() const final;
         vec3 const& pbr_camera() const final;
         void set_pbr_light(std::optional<vec3> const& aDirection, vec3 const& aCameraPosition) final;
+        void set_pbr_point_light(std::optional<vec3> const& aPosition, vec3 const& aRadiance = vec3{ 1.0, 1.0, 1.0 }, scalar aRange = 0.0) final;
+        void prepare_uniforms(const i_rendering_context& aContext, i_shader_program& aProgram) override;
         void clear_pbr() final;
         void set_pbr(pbr_shader_material const& aMaterial) final;
         void set_environment(size_u32 const& aExtents, float const* aRgbaPixels, scalar aIntensity = 1.0) final;
@@ -192,12 +194,17 @@ namespace neogfx
     private:
         std::optional<vec3> iLight;
         vec3 iCamera;
+        std::optional<vec3> iPointLight;
+        vec4 iPointLightRadiance;
+        std::optional<point> iPointLightOrigin;
         mutable std::optional<texture> iEnvironment;
         scalar iEnvironmentIntensity = 1.0;
     private:
         cache_uniform(uPbrEnabled)
         cache_uniform(uPbrLightDirection)
         cache_uniform(uPbrViewPosition)
+        cache_uniform(uPbrPointLight)
+        cache_uniform(uPbrPointLightRadiance)
         cache_uniform(uPbrFactors)
         cache_uniform(uPbrEmissive)
         cache_uniform(uPbrAlphaCutoff)

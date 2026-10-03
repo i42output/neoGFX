@@ -34,7 +34,24 @@ void standard_vertex_shader(inout vec3 coord, inout vec4 color, inout vec3 world
             mat3 cofactor = mat3(cross(m[1], m[2]), cross(m[2], m[0]), cross(m[0], m[1]));
             worldNormal = normalize(cofactor * normal) * sign(dot(m[0], cross(m[1], m[2])));
             if (uSceneLight.w < 1.5)
-                color.rgb *= 0.35 + 0.65 * max(dot(worldNormal, uSceneLight.xyz), 0.0);
+            {
+                vec3 light = vec3(0.35 + 0.65 * max(dot(worldNormal, uSceneLight.xyz), 0.0));
+                // a point light: radiance on the PBR scale (on which the directional light's is 2.8)
+                if (uScenePointLight.w > 0.0)
+                {
+                    vec3 toLight = uScenePointLight.xyz - coord;
+                    float distance2 = max(dot(toLight, toLight), 1e-4);
+                    float window = 1.0;
+                    if (uScenePointLightRadiance.w > 0.0)
+                    {
+                        float ratio = distance2 / (uScenePointLightRadiance.w * uScenePointLightRadiance.w);
+                        window = clamp(1.0 - ratio * ratio, 0.0, 1.0);
+                        window *= window;
+                    }
+                    light += (0.65 / 2.8) * uScenePointLightRadiance.rgb * max(dot(worldNormal, toLight * inversesqrt(distance2)), 0.0) * window / distance2;
+                }
+                color.rgb *= light;
+            }
         }
     }
     // n.b. w is kept so that a projective transformation matrix gets its perspective divide; for the

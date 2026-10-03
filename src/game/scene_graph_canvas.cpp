@@ -357,6 +357,18 @@ namespace neogfx::game
             update();
     }
 
+    void scene_graph_canvas::set_point_light(sg::index aNode, vec3 const& aRadiance, scalar aRange)
+    {
+        iPointLight = point_light{ aNode, aRadiance, aRange };
+        update();
+    }
+
+    void scene_graph_canvas::clear_point_light()
+    {
+        iPointLight = std::nullopt;
+        update();
+    }
+
     void scene_graph_canvas::init()
     {
         ecs().component<mesh_filter>();
@@ -448,6 +460,29 @@ namespace neogfx::game
                 {
                     continue; // malformed primitive: skip it
                 }
+                // n.b. textures aren't repeated (glTF's default wrapping) so texture coordinates confined to one whole tile other
+                // than the first (e.g. 1 to 2, as some exporters write) are moved into the first
+                if (!localMesh.uv.empty())
+                {
+                    vec2f minimum = localMesh.uv[0];
+                    vec2f maximum = localMesh.uv[0];
+                    for (auto const& uv : localMesh.uv)
+                    {
+                        minimum = minimum.min(uv);
+                        maximum = maximum.max(uv);
+                    }
+                    constexpr float tolerance = 1e-4f;
+                    vec2f offset;
+                    for (std::uint32_t axis = 0u; axis < 2u; ++axis)
+                    {
+                        float const tile = std::floor(minimum[axis] + tolerance);
+                        if (tile != 0.0f && maximum[axis] - tile <= 1.0f + tolerance)
+                            offset[axis] = -tile;
+                    }
+                    if (offset != vec2f{})
+                        for (auto& uv : localMesh.uv)
+                            uv += offset;
+                }
                 std::optional<game::texture> texture;
                 if (textureImage != sg::invalid_index && localMesh.uv.size() == localMesh.vertices.size())
                     texture = load_texture(textureImage, sampling);
@@ -515,6 +550,17 @@ namespace neogfx::game
                     {
                         modelTransformation.vertexNormals.clear();
                     }
+                }
+                // emissive primitives lit per vertex: unlit (zero normals) with the emission added to the base colour (physically
+                // based shading adds the emission itself)
+                if (iLightingModel != scene_lighting::PhysicallyBased && pbr.emissive != vec3{})
+                {
+                    auto const base = newEntity.color.to_linear();
+                    newEntity.color = neogfx::color::from_linear(linear_color{ vec4{
+                        std::min(base.red<scalar>() + pbr.emissive.x, 1.0),
+                        std::min(base.green<scalar>() + pbr.emissive.y, 1.0),
+                        std::min(base.blue<scalar>() + pbr.emissive.z, 1.0), 1.0 } }).with_alpha(newEntity.color.alpha());
+                    modelTransformation.vertexNormals.assign(localMesh.vertices.size(), vec3f{});
                 }
                 if (g.node(n).has_skin() && g.node(n).skin() < g.skin_count())
                 {
@@ -586,6 +632,16 @@ namespace neogfx::game
             // n.b. the camera position is set when the camera is known (below)
             if (!lit || iLightingModel != scene_lighting::PhysicallyBased)
                 service<i_rendering_engine>().default_shader_program().pbr_shader().set_pbr_light(std::nullopt, vec3{});
+            // the point light: at its node's (world) position
+            std::optional<vec3> pointLight;
+            if (lit && iPointLight && iPointLight->node < world.size() && world[iPointLight->node])
+                pointLight = vec3{ (*world[iPointLight->node])[3][0], (*world[iPointLight->node])[3][1], (*world[iPointLight->node])[3][2] };
+            vec3 const pointLightRadiance = iPointLight ? iPointLight->radiance : vec3{};
+            scalar const pointLightRange = iPointLight ? iPointLight->range : 0.0;
+            service<i_rendering_engine>().default_shader_program().standard_vertex_shader().set_scene_point_light(
+                pointLight, pointLightRadiance, pointLightRange);
+            service<i_rendering_engine>().default_shader_program().pbr_shader().set_pbr_point_light(
+                pointLight, pointLightRadiance, pointLightRange);
             thread_local std::map<sg::index, std::vector<mat44f>> tJointMatrices;
             tJointMatrices.clear();
             for (auto& e : iEntities)
