@@ -868,6 +868,7 @@ namespace neogfx
             vkCheck(vkAllocateMemory(iDevice, &allocateInfo, nullptr, &result.memory));
         }
         vkCheck(vkBindBufferMemory(iDevice, result.buffer, result.memory, 0u));
+        result.hostCached = (iMemoryProperties.memoryTypes[allocateInfo.memoryTypeIndex].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT) != 0u;
         if (aMapped)
             vkCheck(vkMapMemory(iDevice, result.memory, 0u, VK_WHOLE_SIZE, 0u, &result.mapping));
         return result;
@@ -1173,7 +1174,7 @@ namespace neogfx
         if (lastUse <= iCompleted)
             return false; // n.b. the GPU is done with it: rewritten in place
         // replaced: by a spare the GPU is done with, else by new storage (cf. OpenGL buffer orphaning)
-        vulkan_buffer::spare const retiring{ buffer->buffer, buffer->memory, buffer->mapping, lastUse };
+        vulkan_buffer::spare const retiring{ buffer->buffer, buffer->memory, buffer->mapping, buffer->hostCached, lastUse };
         auto reusable = std::find_if(buffer->spares.begin(), buffer->spares.end(),
             [&](vulkan_buffer::spare const& s) { return s.retired <= iCompleted; });
         if (reusable != buffer->spares.end())
@@ -1181,6 +1182,7 @@ namespace neogfx
             buffer->buffer = reusable->buffer;
             buffer->memory = reusable->memory;
             buffer->mapping = reusable->mapping;
+            buffer->hostCached = reusable->hostCached;
             *reusable = retiring;
         }
         else
@@ -1189,6 +1191,7 @@ namespace neogfx
             buffer->buffer = fresh.buffer;
             buffer->memory = fresh.memory;
             buffer->mapping = fresh.mapping;
+            buffer->hostCached = fresh.hostCached;
             buffer->spares.push_back(retiring);
         }
         ++iStatistics.discards;
@@ -1217,7 +1220,9 @@ namespace neogfx
         auto* destination = buffer_of(aDestination);
         if (aSize == 0u)
             return;
-        if (source->mapping != nullptr && destination->mapping != nullptr)
+        ++iStatistics.bufferCopies;
+        iStatistics.bufferCopyBytes += aSize;
+        if (source->mapping != nullptr && destination->mapping != nullptr && source->hostCached)
         {
             // n.b. what was written through the source's mapping (the draws already recorded keep using the source buffer)
             std::memcpy(destination->mapping, source->mapping, aSize);
@@ -1227,6 +1232,13 @@ namespace neogfx
         memory_barrier();
         VkBufferCopy const region{ 0u, 0u, aSize };
         vkCmdCopyBuffer(command_buffer(), source->buffer, destination->buffer, 1u, &region);
+        if (source->mapping != nullptr && destination->mapping != nullptr)
+        {
+            // n.b. copied by the GPU (reading memory that is not host cached, e.g. device local, is very slow for the CPU) and
+            // waited for: the destination is written through its mapping next (e.g. a buffer that has grown; see native_buffer)
+            memory_barrier();
+            execute();
+        }
     }
 
     gpu_vertex_array vulkan_graphics_backend::create_vertex_array()
@@ -2576,6 +2588,7 @@ namespace neogfx
             perFrame(iStatistics.uploads) << " uploads (" << perFrame(iStatistics.uploadBytes) / 1024.0 << " KiB), " <<
             perFrame(iStatistics.transientBytes) / 1024.0 << " KiB transient; " <<
             perFrame(iStatistics.discards) << " buffer discards, " <<
+            iStatistics.bufferCopies << " buffer copies (" << static_cast<double>(iStatistics.bufferCopyBytes) / 1024.0 << " KiB), " <<
             iStatistics.allocations << " allocations (" << std::chrono::duration<double, std::milli>{ iStatistics.allocationTime }.count() << " ms); " <<
             "longest frame " << std::chrono::duration<double, std::milli>{ iStatistics.longestFrame }.count() << " ms (" <<
             std::chrono::duration<double, std::milli>{ iStatistics.longestFrameBackend }.count() << " ms in backend), " <<

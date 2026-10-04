@@ -56,6 +56,7 @@ namespace neogfx
             VkBuffer buffer = VK_NULL_HANDLE;
             VkDeviceMemory memory = VK_NULL_HANDLE;
             void* mapping = nullptr;
+            bool hostCached = false;
             std::uint64_t retired = 0u;
         };
 
@@ -65,6 +66,8 @@ namespace neogfx
         void* mapping = nullptr;
         bool deviceLocal = false;
         bool coherent = true;
+        // n.b. reading mapped memory that is not host cached (e.g. device local) is very slow
+        bool hostCached = false;
         VkBufferUsageFlags usage = 0u;
         std::vector<spare> spares;
     };
@@ -434,6 +437,8 @@ namespace neogfx
             std::uint64_t swapchainsCreated = 0u;
             std::uint64_t discards = 0u;
             std::uint64_t allocations = 0u;
+            std::uint64_t bufferCopies = 0u;
+            std::uint64_t bufferCopyBytes = 0u;
             std::chrono::steady_clock::duration allocationTime = {};
             // the longest frame (present to present), the time of it spent waiting, presenting and allocating in the
             // backend, and the frames longer than LongFrame
