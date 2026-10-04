@@ -186,6 +186,9 @@ namespace neogfx
         iSize = 0;
         iBlocksToFree = {};
         iFreeBlocks = {};
+        // n.b. the GPU may still be reading what was written (see i_graphics_backend::discard_buffer)
+        if (iBufferName != no_gpu_buffer && !iDeviceLocal && graphics_backend().discard_buffer(iBufferName))
+            iMemory = nullptr;
     }
 
     template <typename T>
@@ -310,14 +313,9 @@ namespace neogfx
     inline std::array<typename native_buffer<T>::free_blocks, 32u>& native_buffer<T>::blocks_to_free()
     {
         if (!iCacheable)
-            return iBlocksToFree[0u][0u];
+            return iBlocksToFree[0u];
         else
-        {
-            auto const activeTarget = service<i_rendering_engine>().active_target();
-            auto const activeTargetType = activeTarget ? activeTarget->target_type() : render_target_type::Surface;
-            auto const ringBufferIndex = service<i_rendering_engine>().target_activation_counter(activeTargetType) % kRingBufferSize;
-            return iBlocksToFree[static_cast<std::size_t>(activeTargetType)][ringBufferIndex];
-        }
+            return iBlocksToFree[native_frame() % kRingBufferSize];
     }
 
     template <typename T>

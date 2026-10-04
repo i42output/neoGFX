@@ -565,6 +565,12 @@ namespace neogfx
         glCheck(glUnmapNamedBuffer(static_cast<GLuint>(aBuffer)));
     }
 
+    bool opengl_graphics_backend::discard_buffer(gpu_buffer)
+    {
+        // n.b. unchanged: a persistently mapped buffer is not orphaned
+        return false;
+    }
+
     void opengl_graphics_backend::write_buffer(gpu_buffer aBuffer, std::size_t aOffset, void const* aData, std::size_t aSize)
     {
         glCheck(glNamedBufferSubData(static_cast<GLuint>(aBuffer), aOffset, aSize, aData));

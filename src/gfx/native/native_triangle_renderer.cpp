@@ -171,7 +171,7 @@ namespace neogfx
     void native_triangle_renderer::draw_and_execute()
     {
         draw();
-        graphics_backend().execute();
+        // n.b. the vertices drawn may still be being read by the GPU (see native_buffer::clear)
         vertices().clear();
         iStart = 0;
     }
@@ -272,4 +272,4 @@ namespace neogfx
     {
         return iVertexBuffer.vertices();
     }
-}
+}

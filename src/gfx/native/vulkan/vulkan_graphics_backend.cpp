@@ -823,6 +823,7 @@ namespace neogfx
         vulkan_buffer result;
         result.size = std::max<VkDeviceSize>(aSize, 4u);
         result.deviceLocal = !aMapped;
+        result.usage = aUsage;
         VkBufferCreateInfo bufferInfo{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
         bufferInfo.size = result.size;
         bufferInfo.usage = aUsage;
@@ -953,6 +954,7 @@ namespace neogfx
         vkCheck(vkQueueSubmit2(iQueue, 1u, &submitInfo, f.fence));
         ++iStatistics.submits;
         f.inFlight = true;
+        f.serial = ++iSubmitted;
         // n.b. not waited for: the next frame is recorded while the GPU executes this one (see command_buffer and
         // wait_for_frames); the uniform blocks uploaded are in this frame's transient memory
         iUploadedUniformBlocks.clear();
@@ -975,6 +977,14 @@ namespace neogfx
         }
     }
 
+    void vulkan_graphics_backend::poll_frames()
+    {
+        // the frames in flight that the GPU has completed (n.b. without waiting)
+        for (std::uint32_t index = 0u; index < FramesInFlight; ++index)
+            if (iFrames[index].inFlight && vkGetFenceStatus(iDevice, iFrames[index].fence) == VK_SUCCESS)
+                retire_frame(index);
+    }
+
     void vulkan_graphics_backend::retire_frame(std::uint32_t aFrame)
     {
         // the GPU is done with everything recorded for the frame
@@ -984,6 +994,7 @@ namespace neogfx
             vkCheck(vkResetFences(iDevice, 1u, &f.fence));
             vkCheck(vkResetCommandPool(iDevice, f.commandPool, 0u));
             f.inFlight = false;
+            iCompleted = std::max(iCompleted, f.serial);
         }
 
         auto deferred = std::move(f.deferred);
@@ -1104,7 +1115,15 @@ namespace neogfx
         if (alive())
         {
             auto toFree = *buffer;
-            defer([this, toFree]() mutable { free_buffer(toFree); });
+            defer([this, toFree]() mutable
+            {
+                for (auto const& s : toFree.spares)
+                {
+                    vulkan_buffer spare{ s.buffer, s.memory, toFree.size, s.mapping };
+                    free_buffer(spare);
+                }
+                free_buffer(toFree);
+            });
         }
         delete buffer;
     }
@@ -1126,6 +1145,39 @@ namespace neogfx
     void vulkan_graphics_backend::unmap_buffer(gpu_buffer)
     {
         // nothing to do: mapped buffers stay mapped
+    }
+
+    bool vulkan_graphics_backend::discard_buffer(gpu_buffer aBuffer)
+    {
+        auto* buffer = buffer_of(aBuffer);
+        if (buffer == nullptr || buffer->mapping == nullptr || !alive())
+            return false;
+        // the last submission that may read the buffer: the one being recorded (if any) else the last submitted
+        poll_frames();
+        auto const lastUse = iSubmitted + (iRecording ? 1u : 0u);
+        if (lastUse <= iCompleted)
+            return false; // n.b. the GPU is done with it: rewritten in place
+        // replaced: by a spare the GPU is done with, else by new storage (cf. OpenGL buffer orphaning)
+        vulkan_buffer::spare const retiring{ buffer->buffer, buffer->memory, buffer->mapping, lastUse };
+        auto reusable = std::find_if(buffer->spares.begin(), buffer->spares.end(),
+            [&](vulkan_buffer::spare const& s) { return s.retired <= iCompleted; });
+        if (reusable != buffer->spares.end())
+        {
+            buffer->buffer = reusable->buffer;
+            buffer->memory = reusable->memory;
+            buffer->mapping = reusable->mapping;
+            *reusable = retiring;
+        }
+        else
+        {
+            auto const fresh = allocate_buffer(buffer->size, buffer->usage, true);
+            buffer->buffer = fresh.buffer;
+            buffer->memory = fresh.memory;
+            buffer->mapping = fresh.mapping;
+            buffer->spares.push_back(retiring);
+        }
+        ++iStatistics.discards;
+        return true;
     }
 
     void vulkan_graphics_backend::write_buffer(gpu_buffer aBuffer, std::size_t aOffset, void const* aData, std::size_t aSize)
@@ -2492,6 +2544,7 @@ namespace neogfx
             perFrame(iStatistics.descriptorPushes) << " descriptor pushes, " <<
             perFrame(iStatistics.uploads) << " uploads (" << perFrame(iStatistics.uploadBytes) / 1024.0 << " KiB), " <<
             perFrame(iStatistics.transientBytes) / 1024.0 << " KiB transient; " <<
+            perFrame(iStatistics.discards) << " buffer discards; " <<
             iStatistics.pipelinesCreated << " pipelines created, " <<
             iStatistics.swapchainsCreated << " swapchains created" << std::endl;
         auto const enabled = iStatistics.enabled;

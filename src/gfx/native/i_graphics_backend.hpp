@@ -145,6 +145,9 @@ namespace neogfx
         virtual void* map_buffer(gpu_buffer aBuffer, std::size_t aSize) = 0;
         virtual void flush_buffer(gpu_buffer aBuffer, std::size_t aOffset, std::size_t aSize) = 0;
         virtual void unmap_buffer(gpu_buffer aBuffer) = 0;
+        // a mapped buffer's contents are no longer wanted (see native_buffer::clear): returns true if the buffer now has
+        // different storage (so is to be mapped again) because the GPU may still be reading the old (cf. buffer orphaning)
+        virtual bool discard_buffer(gpu_buffer aBuffer) = 0;
         virtual void write_buffer(gpu_buffer aBuffer, std::size_t aOffset, void const* aData, std::size_t aSize) = 0;
         virtual void copy_buffer(gpu_buffer aSource, gpu_buffer aDestination, std::size_t aSize) = 0;
         // vertex arrays (see native_vertex_array): vertex attributes and the index buffer apply to the bound vertex array
@@ -209,4 +212,7 @@ namespace neogfx
 
     // the rendering engine's backend
     i_graphics_backend& graphics_backend();
+    // the frame being rendered: counted when the non-cacheable vertex buffers are cleared (see
+    // native_renderer::clear_non_cacheable_vertex_buffers); blocks reclaimed in a buffer are reused frames later (see native_buffer)
+    std::uint64_t native_frame();
 }

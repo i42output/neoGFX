@@ -118,7 +118,8 @@ namespace neogfx
         native_buffer_owner* iOwner = nullptr;
         bool iCacheable;
         bool iDeviceLocal;
-        std::array<std::array<std::array<free_blocks, 32u>, kRingBufferSize>, static_cast<std::size_t>(render_target_type::COUNT)> iBlocksToFree;
+        // n.b. by frame (see native_frame): reclaimed blocks are reused kRingBufferSize frames later, when the GPU is done with them
+        std::array<std::array<free_blocks, 32u>, kRingBufferSize> iBlocksToFree;
         std::array<free_blocks, 32u> iFreeBlocks;
     };
 }

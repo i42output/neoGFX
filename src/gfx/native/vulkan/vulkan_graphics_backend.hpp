@@ -37,9 +37,11 @@ namespace neogfx
 {
     // A Vulkan 1.3 implementation of the graphics API calls made by the shared native code (see i_graphics_backend). The
     // calls' OpenGL semantics are kept: state set is current until changed and the work is ordered as the calls are made.
-    // To do so the work is recorded into one command buffer (dynamic rendering, begun when first needed and ended when
-    // something that cannot be done while rendering is needed: a copy, a barrier, a change of target) which is submitted,
-    // and waited for, when the host needs it done (see execute()) and when a surface is presented. Images are kept in the
+    // To do so the work is recorded into a frame's command buffer (dynamic rendering, begun when first needed and ended when
+    // something that cannot be done while rendering is needed: a copy, a barrier, a change of target) which is submitted
+    // when a surface is presented, and waited for only when the host needs it done (see execute()); the next frame is
+    // recorded meanwhile (see FramesInFlight) and a mapped buffer whose contents are discarded while the GPU may still be
+    // reading them gets new storage (see discard_buffer). Images are kept in the
     // general layout (only a swapchain's images change layout) and a memory barrier precedes each rendering and each copy.
     // n.b. so that images are row for row as they are with OpenGL (render to texture then sample, glyph render output
     // reads, read backs and the shadow map bias all depend on it) viewports and scissor rectangles are used as given
@@ -48,12 +50,23 @@ namespace neogfx
 
     struct vulkan_buffer
     {
+        // storage replaced by discard_buffer, reused once the GPU is done with it (the frame retired is at least retired)
+        struct spare
+        {
+            VkBuffer buffer = VK_NULL_HANDLE;
+            VkDeviceMemory memory = VK_NULL_HANDLE;
+            void* mapping = nullptr;
+            std::uint64_t retired = 0u;
+        };
+
         VkBuffer buffer = VK_NULL_HANDLE;
         VkDeviceMemory memory = VK_NULL_HANDLE;
         VkDeviceSize size = 0u;
         void* mapping = nullptr;
         bool deviceLocal = false;
         bool coherent = true;
+        VkBufferUsageFlags usage = 0u;
+        std::vector<spare> spares;
     };
 
     struct vulkan_sampler_state
@@ -223,6 +236,7 @@ namespace neogfx
         void* map_buffer(gpu_buffer aBuffer, std::size_t aSize) final;
         void flush_buffer(gpu_buffer aBuffer, std::size_t aOffset, std::size_t aSize) final;
         void unmap_buffer(gpu_buffer aBuffer) final;
+        bool discard_buffer(gpu_buffer aBuffer) final;
         void write_buffer(gpu_buffer aBuffer, std::size_t aOffset, void const* aData, std::size_t aSize) final;
         void copy_buffer(gpu_buffer aSource, gpu_buffer aDestination, std::size_t aSize) final;
     public:
@@ -376,6 +390,7 @@ namespace neogfx
         VkCommandBuffer command_buffer();
         void submit(VkSemaphore aWait = VK_NULL_HANDLE, VkSemaphore aSignal = VK_NULL_HANDLE);
         void wait_for_frames();
+        void poll_frames();
         void retire_frame(std::uint32_t aFrame);
         void begin_rendering();
         void end_rendering();
@@ -417,6 +432,7 @@ namespace neogfx
             std::uint64_t uploadBytes = 0u;
             std::uint64_t transientBytes = 0u;
             std::uint64_t swapchainsCreated = 0u;
+            std::uint64_t discards = 0u;
         };
         VkInstance iInstance = VK_NULL_HANDLE;
         VkDebugUtilsMessengerEXT iDebugMessenger = VK_NULL_HANDLE;
@@ -435,12 +451,16 @@ namespace neogfx
             VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
             VkFence fence = VK_NULL_HANDLE;
             bool inFlight = false;
+            std::uint64_t serial = 0u;
             std::vector<std::function<void()>> deferred;
             std::vector<transient_chunk> transient;
             std::size_t transientChunk = 0u;
         };
         std::array<frame, FramesInFlight> iFrames;
         std::uint32_t iFrame = 0u;
+        // submissions: the last submitted and the last the GPU is known to have completed
+        std::uint64_t iSubmitted = 0u;
+        std::uint64_t iCompleted = 0u;
         VkCommandBuffer iCommandBuffer = VK_NULL_HANDLE;
         bool iRecording = false;
         std::map<std::pair<vulkan_sampler_state, std::uint32_t>, VkSampler> iSamplers;

@@ -54,6 +54,7 @@ namespace neogfx
         void* map_buffer(gpu_buffer aBuffer, std::size_t aSize) final;
         void flush_buffer(gpu_buffer aBuffer, std::size_t aOffset, std::size_t aSize) final;
         void unmap_buffer(gpu_buffer aBuffer) final;
+        bool discard_buffer(gpu_buffer aBuffer) final;
         void write_buffer(gpu_buffer aBuffer, std::size_t aOffset, void const* aData, std::size_t aSize) final;
         void copy_buffer(gpu_buffer aSource, gpu_buffer aDestination, std::size_t aSize) final;
     public:

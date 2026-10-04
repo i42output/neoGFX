@@ -166,10 +166,12 @@ namespace neogfx
         i_ping_pong_buffer& create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, size& aPreviousExtents, texture_sampling aSampling);
     public:
         i_graphics_backend& backend() const;
+        std::uint64_t frame() const;
     private:
         neogfx::renderer iRenderer;
         std::unique_ptr<i_graphics_backend> iBackend;
         mutable std::unique_ptr<neogfx::texture_manager> iTextureManager;
+        std::uint64_t iFrame = 0u;
         mutable std::optional<neogfx::font_manager> iFontManager;
         mutable shader_program_list iShaderPrograms;
         bool iLimitFrameRate;
@@ -185,4 +187,4 @@ namespace neogfx
         mutable std::optional<ping_pong_buffers_t> iPingPongBuffer2s;
         ref_ptr<i_standard_shader_program> iDefaultShaderProgram;
     };
-}
+}

@@ -66,6 +66,11 @@ namespace neogfx
         return static_cast<native_renderer&>(service<i_rendering_engine>()).backend();
     }
 
+    std::uint64_t native_frame()
+    {
+        return static_cast<native_renderer&>(service<i_rendering_engine>()).frame();
+    }
+
     frame_counter::frame_counter(std::chrono::milliseconds const& aDuration) : iTimer{ service<i_async_task>(), [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
@@ -288,8 +293,9 @@ namespace neogfx
 
     void native_renderer::clear_non_cacheable_vertex_buffers()
     {
-        // the vertices (and SSBO data) about to be reused may still be being read by the GPU
-        backend().execute();
+        // n.b. a new frame: the non-cacheable vertex buffers' storage, if the GPU may still be reading it, is replaced (see
+        // native_buffer::clear) and the blocks reclaimed are those reclaimed frames ago (see native_buffer::blocks_to_free)
+        ++iFrame;
         for (auto& vb : iVertexBuffers)
         {
             auto& buffer = vb.second;
@@ -467,4 +473,9 @@ namespace neogfx
     {
         return *iBackend;
     }
-}
+
+    std::uint64_t native_renderer::frame() const
+    {
+        return iFrame;
+    }
+}

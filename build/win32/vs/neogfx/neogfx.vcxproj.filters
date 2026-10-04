@@ -159,7 +159,6 @@
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_bitstream.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_bitstream.ipp" />
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_clip.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -457,7 +456,6 @@
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\graphics_context.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_graphics_context.ipp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\graphics_operations.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -671,14 +669,12 @@
     <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\view_container.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\view_container.ipp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\cursor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\default_skin.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\framed_widget.ipp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\framed_widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1014,6 +1010,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\audio\3rdparty\miniaudio\miniaudio.h">
       <Filter>Header Files\3rdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\view_container.ipp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_bitstream.ipp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\framed_widget.ipp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_graphics_context.ipp">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1432,12 +1440,22 @@
     <None Include="..\..\..\..\include\neogfx\gfx\shader_program.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\..\include\neogfx\gfx\text\glyph_text.ipp" />
-    <None Include="..\..\..\..\include\neogfx\gui\widget\slider.ipp" />
-    <None Include="..\..\..\..\src\resources\emoticon.json" />
+    <None Include="..\..\..\..\src\resources\emoticon.json">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\..\..\include\neogfx\gfx\text\glyph_text.ipp">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\..\..\include\neogfx\gui\widget\slider.ipp">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\..\..\src\resources\gamecontrollerdb.txt" />
-    <Text Include="..\..\..\..\src\resources\language-subtag-registry.txt" />
+    <Text Include="..\..\..\..\src\resources\gamecontrollerdb.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="..\..\..\..\src\resources\language-subtag-registry.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
