@@ -46,6 +46,18 @@
     <Filter Include="Source Files\native\vulkan">
       <UniqueIdentifier>{fcc6c7c9-3006-4e91-bb23-586962955cb6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\native">
+      <UniqueIdentifier>{db001726-9f22-4ff4-9a46-560ed05afb83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\native\opengl">
+      <UniqueIdentifier>{8d41a3c4-9d13-4181-bcda-5f3be67029db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\native\vulkan">
+      <UniqueIdentifier>{8ddc9707-0886-45ba-9036-5b8bfd4dda60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\native\windows">
+      <UniqueIdentifier>{c5d78d74-b9c5-4b2c-bfc6-90325b486009}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Header Files\mvc">
       <UniqueIdentifier>{ab403c25-f024-4051-9fd0-2fc94e9fff0e}</UniqueIdentifier>
     </Filter>
@@ -800,21 +812,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\app\native\windows_accessibility.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\app\native\i_native_clipboard.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\app\native\windows_basic_services.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\app\native\windows_com.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\app\native\windows_drag_drop.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\audio\3rdparty\miniaudio\miniaudio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\gfx\native\i_graphics_backend.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\i_native_texture.hpp">
@@ -824,52 +839,76 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_buffer.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_buffer.ipp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_buffer.ipp">
+      <Filter>Header Files\native\opengl</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_error.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_graphics_backend.hpp">
+      <Filter>Header Files\native\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_vertex.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_renderer.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_rendering_context.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_shader_program.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_shader_program.ipp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_shader_program.ipp">
+      <Filter>Header Files\native\opengl</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_surface.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_texture.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_texture_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_triangle_renderer.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_vertex.ipp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_vertex.ipp">
+      <Filter>Header Files\native\opengl</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_error.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_glsl.hpp">
+      <Filter>Header Files\native\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_graphics_backend.hpp">
+      <Filter>Header Files\native\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_shader_program.hpp">
+      <Filter>Header Files\native\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_shader_program.ipp">
+      <Filter>Header Files\native\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_surface.hpp">
+      <Filter>Header Files\native\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_texture.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\windows_renderer.hpp">
       <Filter>Header Files</Filter>
@@ -899,31 +938,31 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gui\window\native\windows_window.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\hid\native\windows_directinput_controller.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\hid\native\windows_display.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\hid\native\windows_game_controllers.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\hid\native\windows_hid_devices.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\hid\native\windows_keyboard.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\hid\native\windows_mouse.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\hid\native\windows_window_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\hid\native\windows_xinput_controller.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="x64\Release\GeneratedFiles\shader.glsl.hpp">
       <Filter>Generated Files</Filter>
@@ -1020,16 +1059,16 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\native\windows_accessibility.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\native\windows_basic_services.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\native\windows_drag_drop.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\native\windows_services.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\palette.cpp">
       <Filter>Source Files</Filter>
@@ -1146,43 +1185,58 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_buffer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_error.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_graphics_backend.cpp">
+      <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_vertex.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_renderer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_rendering_context.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_shader_program.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_surface.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_texture.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_texture_manager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_triangle_renderer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_error.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_glsl.cpp">
+      <Filter>Source Files\native\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_graphics_backend.cpp">
+      <Filter>Source Files\native\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_shader_program.cpp">
+      <Filter>Source Files\native\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_surface.cpp">
+      <Filter>Source Files\native\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_texture.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\windows_renderer.cpp">
       <Filter>Source Files</Filter>
@@ -1254,7 +1308,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gui\window\native\windows_window.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\display.cpp">
       <Filter>Source Files</Filter>
@@ -1275,28 +1329,28 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\native\windows_directinput_controller.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\native\windows_display.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\native\windows_game_controllers.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\native\windows_hid_devices.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\native\windows_keyboard.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\native\windows_mouse.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\native\windows_window_manager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\native\windows_xinput_controller.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\nest.cpp">
       <Filter>Source Files</Filter>
