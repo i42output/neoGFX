@@ -43,7 +43,7 @@ v1.20   | WID + 12 months | macOS support
 
 
 # Implementation Progress
-<img width="1920" height="1664" alt="image" src="https://github.com/user-attachments/assets/c572a68d-8e45-4c31-86cc-34e78fb7ad1d" />
+![](http://neogfx.org/temp/3d.png?id=1)
 ![](http://neogfx.org/temp/select_font.png?id=2)
 ![](http://neogfx.org/temp/gradient2.png?id=1)
 ![](http://neogfx.org/temp/video_poker.png?id=1)
