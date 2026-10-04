@@ -25,6 +25,7 @@
 #include <bit>
 
 #include <neogfx/gfx/i_rendering_engine.hpp>
+#include "../i_graphics_backend.hpp"
 #include "opengl.hpp"
 
 namespace neogfx
@@ -91,7 +92,7 @@ namespace neogfx
         void pop_back();
         void clear();
     public:
-        GLuint handle() const;
+        gpu_buffer handle() const;
         bool mapped() const;
         const_pointer map() const;
         pointer map();
@@ -111,7 +112,7 @@ namespace neogfx
         std::optional<std::pair<free_blocks*, free_blocks::iterator>> find_free_block(size_type aCount);
         void grow(size_type aCapacity);
     private:
-        GLuint iBufferName = 0;
+        gpu_buffer iBufferName = no_gpu_buffer;
         size_type iCapacity = 0;
         size_type iSize = 0;
         mutable pointer iMemory = nullptr;

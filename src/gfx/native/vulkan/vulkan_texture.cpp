@@ -1,26 +1,30 @@
 // vulkan_texture.cpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2023 Leigh Johnston.  All Rights Reserved.
-  
+  Copyright (c) 2023, 2026 Leigh Johnston.  All Rights Reserved.
+
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
 
+#include <cmath>
+#include <cstring>
+
 #include <neogfx/gfx/i_texture_manager.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
+#include "../opengl/opengl_rendering_context.hpp"
 #include "vulkan_error.hpp"
 #include "vulkan_texture.hpp"
 
@@ -28,34 +32,86 @@ namespace neogfx
 {
     namespace
     {
-        inline std::tuple<vk::Format> to_vk_enums(texture_data_format aDataFormat, texture_data_type aDataType)
+        struct vk_texture_format
+        {
+            VkFormat format;
+            std::uint32_t texelSize;
+        };
+
+        // n.b. as opengl_texture (to_gl_enums): the internal format (BGRA and subpixel data are stored as RGBA)
+        inline vk_texture_format to_vk_format(texture_data_format aDataFormat, texture_data_type aDataType)
         {
             switch (aDataFormat)
             {
             case texture_data_format::RGBA:
+            case texture_data_format::BGRA:
             case texture_data_format::SubPixel:
                 switch (aDataType)
                 {
                 case texture_data_type::UnsignedByte:
-                    return std::make_tuple(vk::Format::eR8G8B8A8Uint);
+                    return { VK_FORMAT_R8G8B8A8_UNORM, 4u };
                 case texture_data_type::Float:
-                    return std::make_tuple(vk::Format::eR32G32B32A32Sfloat);
+                    return { VK_FORMAT_R32G32B32A32_SFLOAT, 16u };
                 default:
-                    throw std::logic_error("neogfx::to_vk_enums: bad data type");
+                    throw std::logic_error("neogfx::to_vk_format: bad data type");
                 }
             case texture_data_format::Red:
                 switch (aDataType)
                 {
                 case texture_data_type::UnsignedByte:
-                    return std::make_tuple(vk::Format::eR8Uint);
+                    return { VK_FORMAT_R8_UNORM, 1u };
                 case texture_data_type::Float:
-                    return std::make_tuple(vk::Format::eR32Sfloat);
+                    return { VK_FORMAT_R32_SFLOAT, 4u };
                 default:
-                    throw std::logic_error("neogfx::to_vk_enums: bad data type");
+                    throw std::logic_error("neogfx::to_vk_format: bad data type");
                 }
             default:
-                throw std::logic_error("neogfx::to_vk_enums: bad data format");
+                throw std::logic_error("neogfx::to_vk_format: bad data format");
             }
+        }
+
+        inline std::uint32_t component_count(texture_data_format aDataFormat)
+        {
+            return aDataFormat == texture_data_format::Red ? 1u : 4u;
+        }
+
+        inline vulkan_sampler_state sampler_state(texture_sampling aSampling)
+        {
+            // n.b. as opengl_texture: clamped to a transparent border
+            switch (aSampling)
+            {
+            case texture_sampling::Normal:
+            default:
+                return { true, true, false, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER };
+            case texture_sampling::NormalMipmap:
+                return { true, true, true, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER };
+            case texture_sampling::Nearest:
+            case texture_sampling::Scaled:
+            case texture_sampling::Data:
+                return { false, false, false, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER };
+            }
+        }
+
+        constexpr std::int32_t MaxBleedGuardWidth_i32 = static_cast<std::int32_t>(MaxBleedGuardWidth);
+
+        inline std::int32_t align_up(std::int32_t aValue, std::int32_t aAlignment)
+        {
+            return (aValue + aAlignment - 1) / aAlignment * aAlignment;
+        }
+
+        inline std::int32_t next_power_of_two(std::int32_t aValue, std::int32_t aMinimum)
+        {
+            auto result = aMinimum;
+            while (result < aValue)
+                result *= 2;
+            return result;
+        }
+
+        inline std::uint32_t mip_levels(texture_sampling aSampling, size_u32 const& aExtents)
+        {
+            if (aSampling != texture_sampling::NormalMipmap)
+                return 1u;
+            return static_cast<std::uint32_t>(std::floor(std::log2(std::max(aExtents.cx, aExtents.cy)))) + 1u;
         }
     }
 
@@ -70,86 +126,26 @@ namespace neogfx
         iSampling{ aSampling },
         iDataFormat{ aDataFormat },
         iSize{ aExtents },
-        iStorageSize{ [this, aSampling]() -> size_u32
-            {
-                switch (aSampling)
-                {
-                case texture_sampling::Data:
-                    return decltype(iStorageSize){ iSize };
-                case texture_sampling::NormalMipmap:
-                    return decltype(iStorageSize){ size{ std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0) } };
-                default:
-                    return decltype(iStorageSize){ ((iSize.cx + 2 - 1) / 16 + 1) * 16, ((iSize.cy + 2 - 1) / 16 + 1) * 16 };
-                }
-            }() },
+        iStorageSize{ aSampling == texture_sampling::Data ?
+            iSize :
+            aSampling == texture_sampling::NormalMipmap ?
+                size_i32{
+                    next_power_of_two(static_cast<std::int32_t>(iSize.cx) + MaxBleedGuardWidth_i32 * 2, 16),
+                    next_power_of_two(static_cast<std::int32_t>(iSize.cy) + MaxBleedGuardWidth_i32 * 2, 16) }.as<u32>() :
+                size_i32{
+                    align_up(static_cast<std::int32_t>(iSize.cx) + MaxBleedGuardWidth_i32 * 2, 16),
+                    align_up(static_cast<std::int32_t>(iSize.cy) + MaxBleedGuardWidth_i32 * 2, 16) }.as<u32>() },
         iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame }
     {
-        try
-        {
-            TODO;
-            switch(sampling())
-            {
-            case texture_sampling::Normal:
-                TODO;
-                break;
-            case texture_sampling::NormalMipmap:
-                TODO;
-                break;
-            case texture_sampling::Nearest:
-            case texture_sampling::Scaled:
-                TODO;
-                break;
-            case texture_sampling::Data:
-                TODO;
-                break;
-            }
-            if (sampling() != texture_sampling::Multisample)
-            {
-                thread_local std::vector<value_type> data;
-                data.clear();
-                data.resize(iStorageSize.cx * 4 * iStorageSize.cy);
-                if (aColor != std::nullopt)
-                {
-                    if constexpr (std::is_same_v<value_type, avec4u8>)
-                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
-                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
-                                data[y * iStorageSize.cx + x + 0] = 
-                                    value_type{
-                                        aColor->red(),
-                                        aColor->green(),
-                                        aColor->blue(),
-                                        aColor->alpha()
-                                    };
-                    else if constexpr (std::is_same_v<value_type, std::array<float, 4>>)
-                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
-                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
-                                data[y * iStorageSize.cx + x + 0] = 
-                                    value_type{
-                                        aColor->red<float>(),
-                                        aColor->green<float>(),
-                                        aColor->blue<float>(),
-                                        aColor->alpha<float>()
-                                    };
-                }
-                TODO;
-                if (sampling() == texture_sampling::NormalMipmap)
-                {
-                    TODO;
-                }
-            }
-            else
-            {
-                if (aColor != std::nullopt)
-                    throw multisample_texture_initialization_unsupported();
-                TODO;
-            }
-            TODO;
-        }
-        catch (...)
-        {
-            TODO;
-            throw;
-        }
+        bool const multisample = (sampling() == texture_sampling::Multisample);
+        if (aColor && multisample)
+            throw std::logic_error("neogfx::vulkan_texture: clear colour unsupported for multisample sampling");
+        auto const format = to_vk_format(iDataFormat, kDataType);
+        iImage = backend().create_image(iStorageSize.cx, iStorageSize.cy, format.format, format.texelSize,
+            multisample ? backend().sample_count(samples()) : VK_SAMPLE_COUNT_1_BIT, mip_levels(sampling(), iStorageSize));
+        iImage->sampler = sampler_state(sampling());
+        if (aColor)
+            backend().clear_image(*iImage, { aColor->red<float>(), aColor->green<float>(), aColor->blue<float>(), aColor->alpha<float>() });
     }
 
     template <typename T>
@@ -163,101 +159,96 @@ namespace neogfx
         iSampling{ aImage.sampling() },
         iDataFormat{ aDataFormat },
         iSize{ aImagePart.extents() },
-        iStorageSize{ [this, &aImage]() -> size_u32
-            {
-                switch (aImage.sampling())
-                {
-                case texture_sampling::Data:
-                    return decltype(iStorageSize){ iSize };
-                case texture_sampling::NormalMipmap:
-                    return decltype(iStorageSize){ size{ std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0) } };
-                default:
-                    return decltype(iStorageSize){ ((iSize.cx + 2 - 1) / 16 + 1) * 16, ((iSize.cy + 2 - 1) / 16 + 1) * 16 };
-                }
-            }() },
+        iStorageSize{ aImage.sampling() == texture_sampling::Data ?
+            iSize :
+            aImage.sampling() == texture_sampling::NormalMipmap ?
+                size_i32{
+                    next_power_of_two(static_cast<std::int32_t>(iSize.cx) + MaxBleedGuardWidth_i32 * 2, 16),
+                    next_power_of_two(static_cast<std::int32_t>(iSize.cy) + MaxBleedGuardWidth_i32 * 2, 16) }.as<u32>() :
+                size_i32{
+                    align_up(static_cast<std::int32_t>(iSize.cx) + MaxBleedGuardWidth_i32 * 2, 16),
+                    align_up(static_cast<std::int32_t>(iSize.cy) + MaxBleedGuardWidth_i32 * 2, 16) }.as<u32>() },
         iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGame }
     {
-        try
+        if constexpr (!std::is_same_v<value_type, avec4u8> && !std::is_same_v<value_type, std::array<float, 4>>)
+            throw unsupported_color_format();
+        else
         {
-            TODO;
-            switch(sampling())
-            {
-            case texture_sampling::Normal:
-                TODO;
-                break;
-            case texture_sampling::NormalMipmap:
-                TODO;
-                break;
-            case texture_sampling::Nearest:
-                TODO;
-                break;
-            case texture_sampling::Data:
-                TODO;
-                break;
-            case texture_sampling::Multisample:
+            constexpr bool normalize = std::is_same_v<value_type, std::array<float, 4>>;
+
+            if (sampling() == texture_sampling::Multisample)
                 throw multisample_texture_initialization_unsupported();
-                break;
-            }
-            switch (aImage.color_format())
+            if (aImage.color_format() != color_format::RGBA8)
+                throw unsupported_color_format();
+
+            size_u32 const imageExtents = aImage.extents();
+            point_u32 const partOrigin = aImagePart.position();
+            size_u32 const partExtents{ iSize };
+            auto const bleedGuard = static_cast<std::uint32_t>(bleed_guard());
+
+            if (partOrigin.x + partExtents.cx > imageExtents.cx || partOrigin.y + partExtents.cy > imageExtents.cy)
+                throw std::logic_error("neogfx::vulkan_texture: image part out of range");
+            if (bleedGuard * 2 + partExtents.cx > iStorageSize.cx || bleedGuard * 2 + partExtents.cy > iStorageSize.cy)
+                throw std::logic_error("neogfx::vulkan_texture: bleed guard exceeds storage size");
+
+            thread_local std::vector<value_type> data;
+            // one element per texel; value_type already holds all four components
+            data.assign(static_cast<std::size_t>(iStorageSize.cx) * iStorageSize.cy, value_type{});
+
+            // n.b. BGRA data is stored as RGBA (cf. glTexImage2D with format GL_BGRA)
+            bool const bgra = (iDataFormat == texture_data_format::BGRA);
+            auto const* const imageData = static_cast<std::uint8_t const*>(aImage.cpixels());
+            for (std::uint32_t y = 0; y < partExtents.cy; ++y)
             {
-            case color_format::RGBA8:
+                auto const* const srcRow = imageData +
+                    (static_cast<std::size_t>(partOrigin.y + y) * imageExtents.cx + partOrigin.x) * 4;
+                // vertical flip, inset by the bleed guard on both axes
+                auto* const dstRow = data.data() +
+                    static_cast<std::size_t>(bleedGuard + partExtents.cy - 1 - y) * iStorageSize.cx + bleedGuard;
+                bool const discardBackgroundMatte = aImage.discard_background_matte();
+                for (std::uint32_t x = 0; x < partExtents.cx; ++x)
                 {
-                    size_u32 const imageExtents = aImage.extents();
-                    point_u32 const imagePartOrigin = aImagePart.position();
-                    size_u32 const imagePartExtents = aImagePart.extents();
-                    thread_local std::vector<value_type> data;
-                    data.clear();
-                    data.resize(iStorageSize.cx * 4 * iStorageSize.cy);
-                    if constexpr (std::is_same_v<value_type, avec4u8>)
+                    auto const alpha = srcRow[x * 4 + 3];
+                    for (std::size_t c = 0; c < 4; ++c)
                     {
-                        const std::uint8_t* imageData = static_cast<const std::uint8_t*>(aImage.cpixels());
-                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
-                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
-                                for (std::size_t c = 0; c < 4; ++c)
-                                    data[(iSize.cy + 1 - y) * iStorageSize.cx + x][c] = imageData[(y + imagePartOrigin.y - 1) * imageExtents.cx * 4 + (imagePartOrigin.x + x - 1) * 4 + c];
-                    }
-                    else if constexpr (std::is_same_v<value_type, std::array<float, 4>>)
-                    {
-                        const std::uint8_t* imageData = static_cast<const std::uint8_t*>(aImage.cpixels());
-                        for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
-                            for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
-                                for (std::size_t c = 0; c < 4; ++c)
-                                    data[(iSize.cy + 1 - y) * iStorageSize.cx + x][c] = imageData[(y + imagePartOrigin.y - 1) * imageExtents.cx * 4 + (imagePartOrigin.x + x - 1) * 4 + c] / 255.0f;
-                    }
-                    TODO;
-                    if (sampling() == texture_sampling::NormalMipmap)
-                    {
-                        TODO;
+                        auto const dstC = (bgra && c != 3u ? 2u - c : c);
+                        if (alpha != 0u || !discardBackgroundMatte)
+                        {
+                            auto const component = srcRow[x * 4 + c];
+                            if constexpr (normalize)
+                                dstRow[x][dstC] = component / 255.0f;
+                            else
+                                dstRow[x][dstC] = component;
+                        }
+                        else
+                            dstRow[x][dstC] = 0;
                     }
                 }
-                break;
-            default:
-                throw unsupported_color_format();
-                break;
             }
-            TODO;
-        }
-        catch (...)
-        {
-            TODO;
-            throw;
+
+            auto const format = to_vk_format(iDataFormat, kDataType);
+            iImage = backend().create_image(iStorageSize.cx, iStorageSize.cy, format.format, format.texelSize,
+                VK_SAMPLE_COUNT_1_BIT, mip_levels(sampling(), iStorageSize));
+            iImage->sampler = sampler_state(sampling());
+            backend().upload_image(*iImage, 0u, 0u, iStorageSize.cx, iStorageSize.cy, data.data(), static_cast<std::size_t>(iStorageSize.cx) * sizeof(value_type));
         }
     }
 
     template <typename T>
     vulkan_texture<T>::~vulkan_texture()
     {
-        try
-        {
-            TODO;
+        unbind();
 
-            TargetDestroying.trigger();
-
-            service<i_rendering_engine>().remove_target(*this);
-        }
-        catch (...)
+        if (vulkan_graphics_backend::instance() != nullptr)
         {
+            backend().release_render_target(iImage.get());
+            backend().destroy_image(iDepthStencil);
+            backend().destroy_image(iImage);
         }
+
+        TargetDestroying.trigger();
+
+        service<i_rendering_engine>().remove_target(*this);
     }
 
     template <typename T>
@@ -287,7 +278,7 @@ namespace neogfx
     template <typename T>
     bool vulkan_texture<T>::is_render_target() const
     {
-        TODO;
+        return iDepthStencil != nullptr;
     }
 
     template <typename T>
@@ -396,36 +387,108 @@ namespace neogfx
         }
         else
             iBleedGuard.reset();
+
+        iUvCalculator.reset();
     }
 
     template <typename T>
     uv_calculator const& vulkan_texture<T>::uv_calculator(optional_aabb_2df const& aPart) const
     {
-        TODO;
+        if (iUvCalculator)
+        {
+            if (aPart)
+                iUvCalculator->offsetOrPart = *aPart;
+            else if (std::holds_alternative<aabb_2df>(iUvCalculator->offsetOrPart))
+                iUvCalculator->offsetOrPart = to_game_rect(viewport(), extents().cy).bottom_left().to_vec2().as<float>();
+            return *iUvCalculator;
+        }
+
+        auto const& logicalRect = to_game_rect(viewport(), extents().cy);
+
+        std::variant<vec2f, aabb_2df> offsetOrPart;
+        if (aPart)
+            offsetOrPart = *aPart;
+        else
+            offsetOrPart = logicalRect.bottom_left().to_vec2().as<float>();
+
+        std::optional<float> yFlip;
+
+        iUvCalculator.emplace(
+            logicalRect.extents().to_vec2().as<float>(),
+            offsetOrPart,
+            1.0f / storage_extents().to_vec2().as<float>(),
+            yFlip);
+
+        return *iUvCalculator;
     }
 
     template <typename T>
     void vulkan_texture<T>::set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aStride, std::uint32_t aPackAlignment)
     {
-        set_pixels(aRect, aPixelData, data_format(), aStride, aPackAlignment);
+        set_pixels(aRect, aPixelData, iDataFormat, aStride, aPackAlignment);
     }
 
     template <typename T>
     void vulkan_texture<T>::set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aStride, std::uint32_t aPackAlignment)
     {
-        auto const adjustedRect = aRect + (sampling() != texture_sampling::Data ? point{ 1.0, 1.0 } : point{ 0.0, 0.0 });
-        if (sampling() != texture_sampling::Multisample)
-        {
-            TODO;
-        }
-        else
+        if (sampling() == texture_sampling::Multisample)
             throw unsupported_sampling_type_for_function();
+        auto const adjustedRect = aRect + (sampling() != texture_sampling::Data ? point{ bleed_guard(), bleed_guard() } : point{ 0.0, 0.0 });
+        auto const x = static_cast<std::uint32_t>(adjustedRect.x);
+        auto const y = static_cast<std::uint32_t>(adjustedRect.y);
+        auto const width = static_cast<std::uint32_t>(adjustedRect.cx);
+        auto const height = static_cast<std::uint32_t>(adjustedRect.cy);
+        // the data as glTextureSubImage2D reads it (GL_UNPACK_ROW_LENGTH and GL_UNPACK_ALIGNMENT): its format's components of
+        // this texture's data type
+        std::size_t const componentSize = (kDataType == texture_data_type::Float ? sizeof(float) : sizeof(std::uint8_t));
+        std::size_t const sourceComponents = component_count(aDataFormat);
+        std::size_t const sourceTexelSize = sourceComponents * componentSize;
+        std::size_t const rowLength = (aStride != 0u ? aStride : width);
+        std::size_t const alignment = std::max<std::size_t>(aPackAlignment, 1u);
+        std::size_t const rowPitch = (rowLength * sourceTexelSize + alignment - 1u) / alignment * alignment;
+        std::size_t const imageComponents = component_count(iDataFormat);
+        if (sourceComponents == imageComponents && aDataFormat != texture_data_format::BGRA)
+            backend().upload_image(*iImage, x, y, width, height, aPixelData, rowPitch);
+        else
+        {
+            // converted to this texture's components (n.b. as OpenGL: BGRA swizzled; red expanded to (r, 0, 0, 1); red of RGBA)
+            thread_local std::vector<std::uint8_t> converted;
+            std::size_t const imageTexelSize = imageComponents * componentSize;
+            converted.assign(static_cast<std::size_t>(width) * height * imageTexelSize, 0u);
+            auto const* source = static_cast<std::uint8_t const*>(aPixelData);
+            for (std::uint32_t row = 0u; row < height; ++row)
+                for (std::uint32_t column = 0u; column < width; ++column)
+                {
+                    auto const* s = source + row * rowPitch + column * sourceTexelSize;
+                    auto* d = converted.data() + (static_cast<std::size_t>(row) * width + column) * imageTexelSize;
+                    for (std::size_t c = 0u; c < imageComponents; ++c)
+                    {
+                        std::size_t sourceComponent = c;
+                        if (aDataFormat == texture_data_format::BGRA && c != 3u)
+                            sourceComponent = 2u - c;
+                        if (sourceComponent < sourceComponents)
+                            std::memcpy(d + c * componentSize, s + sourceComponent * componentSize, componentSize);
+                        else if (c == 3u)
+                        {
+                            if (componentSize == sizeof(float))
+                            {
+                                float const one = 1.0f;
+                                std::memcpy(d + c * componentSize, &one, sizeof(one));
+                            }
+                            else
+                                d[c] = 0xFFu;
+                        }
+                    }
+                }
+            backend().upload_image(*iImage, x, y, width, height, converted.data(), static_cast<std::size_t>(width) * imageTexelSize);
+        }
+        iPixelData.clear();
     }
 
     template <typename T>
     void vulkan_texture<T>::set_pixels(const i_image& aImage)
     {
-        set_pixels(rect{ point{}, aImage.extents() }, aImage.cpixels());
+        set_pixels(aImage, rect{ point{}, aImage.extents() });
     }
 
     template <typename T>
@@ -434,28 +497,44 @@ namespace neogfx
         size_u32 const imageExtents = aImage.extents();
         point_u32 const imagePartOrigin = aImagePart.position();
         size_u32 const imagePartExtents = aImagePart.extents();
+        bool const discardBackgroundMatte = aImage.discard_background_matte();
         switch (aImage.color_format())
         {
         case color_format::RGBA8:
             {
-                const std::uint8_t* imageData = static_cast<const std::uint8_t*>(aImage.cpixels());
+                if (imagePartOrigin.x + imagePartExtents.cx > imageExtents.cx ||
+                    imagePartOrigin.y + imagePartExtents.cy > imageExtents.cy)
+                    throw std::logic_error("neogfx::vulkan_texture::set_pixels: image part out of range");
+
+                auto const* const imageData = static_cast<std::uint8_t const*>(aImage.cpixels());
                 thread_local std::vector<std::uint8_t> data;
-                data.clear();
-                data.resize(imagePartExtents.cx * 4 * imagePartExtents.cy);
+                data.assign(static_cast<std::size_t>(imagePartExtents.cx) * imagePartExtents.cy * 4, 0u);
+
                 for (std::size_t y = 0; y < imagePartExtents.cy; ++y)
+                {
+                    auto const* const srcRow = imageData +
+                        ((y + imagePartOrigin.y) * static_cast<std::size_t>(imageExtents.cx) + imagePartOrigin.x) * 4;
+                    auto* const dstRow = data.data() +
+                        (imagePartExtents.cy - 1 - y) * static_cast<std::size_t>(imagePartExtents.cx) * 4;
                     for (std::size_t x = 0; x < imagePartExtents.cx; ++x)
-                        for (std::size_t c = 0; c < 4; ++c)
-                            data[(imagePartExtents.cy - 1 - y) * imagePartExtents.cx * 4 + x * 4 + c] = imageData[(y + imagePartOrigin.y) * imageExtents.cx * 4 + (x + imagePartOrigin.x) * 4 + c];
+                    {
+                        if (srcRow[x * 4 + 3] != 0u || !discardBackgroundMatte)
+                            std::copy_n(&srcRow[x * 4], 4, &dstRow[x * 4]);
+                    }
+                }
                 set_pixels(rect{ point{}, imagePartExtents }, &data[0]);
             }
             break;
+        default:
+            throw std::logic_error("neogfx::vulkan_texture::set_pixels: unsupported color format");
         }
     }
 
     template <typename T>
     void vulkan_texture<T>::set_pixels(const color& aColor)
     {
-        TODO;
+        backend().clear_image(*iImage, { aColor.red<float>(), aColor.green<float>(), aColor.blue<float>(), aColor.alpha<float>() });
+        iPixelData.clear();
     }
 
     template <typename T>
@@ -482,13 +561,13 @@ namespace neogfx
     template <typename T>
     void* vulkan_texture<T>::handle() const
     {
-        return static_cast<VkImage>(iImage);
+        return iImage.get();
     }
 
     template <typename T>
     bool vulkan_texture<T>::is_resident() const
     {
-        TODO;
+        return true;
     }
 
     template <typename T>
@@ -524,25 +603,84 @@ namespace neogfx
     template <typename T>
     std::unique_ptr<i_rendering_context> vulkan_texture<T>::create_rendering_context(blending_mode aBlendingMode) const
     {
-        TODO;
+        // n.b. the rendering context shared by the native backends (see i_graphics_backend)
+        return std::unique_ptr<i_rendering_context>(new opengl_rendering_context{ *this, aBlendingMode });
     }
 
     template <typename T>
     void vulkan_texture<T>::bind() const
     {
-        TODO;
+        if (iBoundTextureUnit.has_value())
+        {
+            bind(iBoundTextureUnit.value());
+            return;
+        }
+        for (auto const& binding : vulkan_texture_bindings().unbound)
+            if (static_cast<reserved_texture_unit>(binding.first()) > reserved_texture_unit::RESERVED_LAST)
+            {
+                bind(binding.first());
+                return;
+            }
+        throw std::logic_error("neogfx::vulkan_texture::bind: texture bindings pool exhausted");
     }
 
     template <typename T>
     void vulkan_texture<T>::bind(std::uint32_t aTextureUnit) const
     {
-        TODO;
+        if (iBoundTextureUnit.has_value())
+        {
+            if (iBoundTextureUnit.value() == aTextureUnit)
+            {
+                auto existingPoolEntry = vulkan_texture_bindings().bound.find(iBoundTextureUnit.value());
+                if (existingPoolEntry != vulkan_texture_bindings().bound.end())
+                {
+                    if (existingPoolEntry->second() == this)
+                    {
+                        do_bind(aTextureUnit);
+                        return;
+                    }
+                    existingPoolEntry->second()->unbind();
+                }
+            }
+            else
+                unbind();
+        }
+        auto const previousTexture = do_bind(aTextureUnit);
+        iBoundTextureUnit = aTextureUnit;
+        iPreviouslyBoundTexture = previousTexture;
+        auto existingPoolEntry = vulkan_texture_bindings().unbound.find(iBoundTextureUnit.value());
+        if (existingPoolEntry != vulkan_texture_bindings().unbound.end())
+            vulkan_texture_bindings().unbound.erase(existingPoolEntry);
+        vulkan_texture_bindings().bound.emplace(iBoundTextureUnit.value(), this);
+    }
+
+    template <typename T>
+    vulkan_image const* vulkan_texture<T>::do_bind(std::uint32_t aTextureUnit) const
+    {
+        auto const previousTexture = backend().bound_texture(aTextureUnit);
+        backend().bind_texture(aTextureUnit, iImage.get());
+        return previousTexture;
     }
 
     template <typename T>
     void vulkan_texture<T>::unbind() const
     {
-        TODO;
+        if (!iBoundTextureUnit.has_value())
+            return;
+        do_unbind();
+    }
+
+    template <typename T>
+    void vulkan_texture<T>::do_unbind() const
+    {
+        if (vulkan_graphics_backend::instance() != nullptr)
+            backend().bind_texture(iBoundTextureUnit.value(), iPreviouslyBoundTexture);
+        auto existingPoolEntry = vulkan_texture_bindings().bound.find(iBoundTextureUnit.value());
+        if (existingPoolEntry != vulkan_texture_bindings().bound.end() && existingPoolEntry->second() == this)
+            vulkan_texture_bindings().bound.erase(existingPoolEntry);
+        vulkan_texture_bindings().unbound.emplace(iBoundTextureUnit.value(), nullptr);
+        iBoundTextureUnit = std::nullopt;
+        iPreviouslyBoundTexture = nullptr;
     }
 
     template <typename T>
@@ -554,7 +692,7 @@ namespace neogfx
     template <typename T>
     i_texture& vulkan_texture<T>::native_texture() const
     {
-        return const_cast<vulkan_texture<T>&>(*this); // todo: not happy with this cast
+        return const_cast<vulkan_texture<T>&>(*this);
     }
 
     template <typename T>
@@ -609,42 +747,66 @@ namespace neogfx
     void vulkan_texture<T>::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const
     {
         iLogicalCoordinateSystem = aSystem;
+        if (aSystem != neogfx::logical_coordinate_system::Specified)
+            iLogicalCoordinates.reset();
+
+        iUvCalculator.reset();
     }
 
     template <typename T>
     logical_coordinates vulkan_texture<T>::logical_coordinates() const
     {
-        if (iLogicalCoordinates != std::nullopt)
-            return *iLogicalCoordinates;
-        neogfx::logical_coordinates result;
+        if (iLogicalCoordinates.has_value())
+            return iLogicalCoordinates.value();
+
         switch (iLogicalCoordinateSystem)
         {
-        case neogfx::logical_coordinate_system::Specified:
-            throw logical_coordinates_not_specified();
-            break;
         case neogfx::logical_coordinate_system::AutomaticGui:
-            result.bottomLeft = vec2{ 0.0, extents().cy };
-            result.topRight = vec2{ extents().cx, 0.0 };
-            break;
+            return neogfx::logical_coordinates{
+                viewport().bottom_left().as<scalar>().to_vec2(),
+                viewport().top_right().as<scalar>().to_vec2() };
         case neogfx::logical_coordinate_system::AutomaticGame:
-            result.bottomLeft = vec2{ 0.0, 0.0 };
-            result.topRight = vec2{ extents().cx, extents().cy };
-            break;
+            return neogfx::logical_coordinates{
+                to_game_rect(viewport(), target_extents().cy).bottom_left().as<scalar>().to_vec2(),
+                to_game_rect(viewport(), target_extents().cy).top_right().as<scalar>().to_vec2() };
         }
-        return result;
+        throw logical_coordinates_not_specified();
     }
 
     template <typename T>
     void vulkan_texture<T>::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const
     {
         iLogicalCoordinates = aCoordinates;
+
+        iUvCalculator.reset();
+    }
+
+    template <typename T>
+    void vulkan_texture<T>::set_default_viewport() const
+    {
+        native_texture::set_default_viewport();
+
+        iUvCalculator.reset();
+    }
+
+    template <typename T>
+    void vulkan_texture<T>::set_viewport(const neogfx::viewport& aViewport) const
+    {
+        native_texture::set_viewport(aViewport);
+
+        iUvCalculator.reset();
     }
 
     template <typename T>
     viewport vulkan_texture<T>::apply_viewport() const
     {
-        TODO;
-        return {};
+        auto const currentViewport = backend().viewport();
+        auto previousViewport = to_gui_rect(game_rect{ currentViewport.position(), currentViewport.extents() }, extents().cy);
+
+        auto const ourViewport = to_game_rect(viewport(), extents().cy).as<std::int32_t>();
+        backend().set_viewport(ourViewport.x, ourViewport.y, ourViewport.cx, ourViewport.cy);
+
+        return neogfx::viewport{ previousViewport };
     }
 
     template <typename T>
@@ -656,9 +818,25 @@ namespace neogfx
             TargetActivating();
             service<i_rendering_engine>().activate_context(*this);
         }
-        TODO;
+
+        backend().texture_barrier();
+
+        if (iDepthStencil == nullptr)
+        {
+            // n.b. as opengl_texture's frame buffer creation
+            backend().enable_multisample(true);
+            backend().enable_blending(true);
+            backend().enable_depth_test(false);
+            backend().set_depth_compare(VK_COMPARE_OP_LESS_OR_EQUAL);
+            iDepthStencil = backend().create_depth_stencil_image(iImage->width, iImage->height, iImage->samples);
+        }
+
+        backend().set_render_target(iImage.get(), iDepthStencil.get());
+
         apply_viewport();
-        TODO;
+
+        iPixelData.clear();
+
         if (!alreadyActive)
             TargetActivated();
     }
@@ -675,8 +853,16 @@ namespace neogfx
         if (target_active())
         {
             TargetDeactivating();
+
+            backend().release_render_target(iImage.get());
+
             service<i_rendering_engine>().deactivate_context();
+
+            if (!target_in_use())
+                unbind();
+
             TargetDeactivated();
+
             return;
         }
         throw not_active();
@@ -697,8 +883,7 @@ namespace neogfx
     template <typename T>
     void vulkan_texture<T>::target_release() const
     {
-        if (--iTargetUseCount)
-            unbind();
+        --iTargetUseCount;
     }
 
     template <typename T>
@@ -712,13 +897,50 @@ namespace neogfx
     {
         if (sampling() != neogfx::texture_sampling::Multisample)
         {
-            scoped_render_target srt{ *this };
-            avec4u8 pixel;
-            TODO;
-            return color{ pixel[0], pixel[1], pixel[2], pixel[3] };
+            if (aPosition.x < 0.0 || aPosition.y < 0.0 || aPosition.x >= extents().cx || aPosition.y >= extents().cy)
+                return color{};
+            if (kDataType != texture_data_type::UnsignedByte)
+                throw std::logic_error("neogfx::vulkan_texture::read_pixel: data type not yet implemented");
+            value_type pixel;
+            basic_point<std::int32_t> pos{ aPosition };
+            pos += basic_point<std::int32_t>{ static_cast<std::int32_t>(bleed_guard()) };
+            if (aCreateCache)
+            {
+                if (iPixelData.empty())
+                {
+                    iPixelData.resize(static_cast<std::size_t>(storage_extents().cx) * static_cast<std::size_t>(storage_extents().cy));
+                    backend().read_image(*iImage, 0u, 0u, iImage->width, iImage->height, iPixelData.data());
+                }
+                pixel = iPixelData[static_cast<std::size_t>(pos.y * storage_extents().cx + pos.x)];
+            }
+            else
+            {
+                // n.b. as opengl_texture (glGetTextureSubImage at the position given)
+                backend().read_image(*iImage, static_cast<std::uint32_t>(aPosition.x), static_cast<std::uint32_t>(aPosition.y), 1u, 1u, &pixel);
+            }
+            if constexpr (std::is_same_v<value_type, avec4u8> || std::is_same_v<value_type, std::array<float, 4>>)
+            {
+                // n.b. as opengl_texture: the texel read in the data format (BGRA data is stored as RGBA)
+                switch (data_format())
+                {
+                case texture_data_format::RGBA:
+                default:
+                    return color{ pixel[2], pixel[1], pixel[0], pixel[3] };
+                case texture_data_format::BGRA:
+                    return color{ pixel[2], pixel[1], pixel[0], pixel[3] };
+                }
+            }
+            else
+                return color{ pixel, pixel, pixel, pixel };
         }
         else
             throw std::logic_error("neogfx::vulkan_texture::read_pixel: not yet implemented for multisample render targets");
+    }
+
+    template <typename T>
+    vulkan_graphics_backend& vulkan_texture<T>::backend() const
+    {
+        return *vulkan_graphics_backend::instance();
     }
 
     template class vulkan_texture<std::uint8_t>;

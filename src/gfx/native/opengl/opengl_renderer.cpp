@@ -38,6 +38,8 @@
 #include "opengl_renderer.hpp"
 #include "opengl_surface.hpp"
 #include "opengl_shader_program.hpp"
+#include "opengl_graphics_backend.hpp"
+#include "../vulkan/vulkan_graphics_backend.hpp"
 #include "../i_native_texture.hpp"
 
 #include <neogfx/gfx/vertex_shader.hpp>
@@ -45,6 +47,25 @@
 
 namespace neogfx
 {
+    namespace
+    {
+        std::unique_ptr<i_graphics_backend> create_graphics_backend(neogfx::renderer aRenderer)
+        {
+            switch (aRenderer)
+            {
+            case neogfx::renderer::Vulkan:
+                return std::make_unique<vulkan_graphics_backend>();
+            default:
+                return std::make_unique<opengl_graphics_backend>(aRenderer);
+            }
+        }
+    }
+
+    i_graphics_backend& graphics_backend()
+    {
+        return static_cast<opengl_renderer&>(service<i_rendering_engine>()).backend();
+    }
+
     frame_counter::frame_counter(std::chrono::milliseconds const& aDuration) : iTimer{ service<i_async_task>(), [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
@@ -76,6 +97,7 @@ namespace neogfx
 
     opengl_renderer::opengl_renderer(neogfx::renderer aRenderer) :
         iRenderer{ aRenderer },
+        iBackend{ create_graphics_backend(aRenderer) },
         iLimitFrameRate{ true },
         iFrameRateLimit{ 60u },
         iStencilBasedInvalidation{ false },
@@ -103,12 +125,9 @@ namespace neogfx
 
     void opengl_renderer::initialize()
     {
-        service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL vendor: " << reinterpret_cast<const char*>(glGetString(GL_VENDOR)) << std::endl;
-        service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL renderer: " << reinterpret_cast<const char*>(glGetString(GL_RENDERER)) << std::endl;
-        service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL version: " << reinterpret_cast<const char*>(glGetString(GL_VERSION)) << std::endl;
-        service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL shading language version: " << reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)) << std::endl;
+        backend().initialize();
 
-        iDefaultShaderProgram = add_shader_program(neolib::make_ref<opengl_standard_shader_program>().as<i_shader_program>()).as<i_standard_shader_program>();
+        iDefaultShaderProgram = add_shader_program(backend().create_standard_shader_program()).as<i_standard_shader_program>();
     }
 
     void opengl_renderer::cleanup()
@@ -118,9 +137,10 @@ namespace neogfx
         iFontManager = std::nullopt;
         iPingPongBuffer1s = std::nullopt;
         iPingPongBuffer2s = std::nullopt;
-        iTextureManager = std::nullopt;
+        iTextureManager = nullptr;
         iShaderPrograms.clear();
         iDefaultShaderProgram.reset();
+        backend().cleanup();
     }
 
     const opengl_renderer::shader_program_list& opengl_renderer::shader_programs() const
@@ -175,54 +195,22 @@ namespace neogfx
 
     opengl_renderer::handle opengl_renderer::create_shader_program_object()
     {
-        GLuint programHandle = 0;;
-        glCheck(programHandle = glCreateProgram());
-        if (0 == programHandle)
-             throw failed_to_create_shader_program("Failed to create shader program object");
-        return to_opaque_handle(programHandle);
+        return backend().create_shader_program_object();
     }
 
     void opengl_renderer::destroy_shader_program_object(handle aShaderProgramObject)
     {
-        glCheck(glDeleteProgram(to_gl_handle<GLuint>(aShaderProgramObject)));
+        backend().destroy_shader_program_object(aShaderProgramObject);
     }
 
     opengl_renderer::handle opengl_renderer::create_shader_object(shader_type aShaderType)
     {
-        GLenum shaderType;
-        switch (aShaderType)
-        {
-        case shader_type::Compute:
-            shaderType = GL_COMPUTE_SHADER;
-            break;
-        case shader_type::Vertex:
-            shaderType = GL_VERTEX_SHADER;
-            break;
-        case shader_type::TessellationControl:
-            shaderType = GL_TESS_CONTROL_SHADER;
-            break;
-        case shader_type::TessellationEvaluation:
-            shaderType = GL_TESS_EVALUATION_SHADER;
-            break;
-        case shader_type::Geometry:
-            shaderType = GL_GEOMETRY_SHADER;
-            break;
-        case shader_type::Fragment:
-            shaderType = GL_FRAGMENT_SHADER;
-            break;
-        default:
-            throw std::logic_error("neogfx: invalid shader type");
-        }
-        GLuint shaderHandle = 0;
-        glCheck(shaderHandle = glCreateShader(shaderType));
-        if (0 == shaderHandle)
-            throw failed_to_create_shader();
-        return to_opaque_handle(shaderHandle);
+        return backend().create_shader_object(aShaderType);
     }
 
     void opengl_renderer::destroy_shader_object(handle aShaderObject)
     {
-        glCheck(glDeleteShader(to_gl_handle<GLuint>(aShaderObject)));
+        backend().destroy_shader_object(aShaderObject);
     }
       
     i_font_manager& opengl_renderer::font_manager()
@@ -234,8 +222,8 @@ namespace neogfx
 
     i_texture_manager& opengl_renderer::texture_manager()
     {
-        if (iTextureManager == std::nullopt)
-            iTextureManager.emplace();
+        if (iTextureManager == nullptr)
+            iTextureManager = backend().create_texture_manager();
         return *iTextureManager;
     }
 
@@ -300,6 +288,8 @@ namespace neogfx
 
     void opengl_renderer::clear_non_cacheable_vertex_buffers()
     {
+        // the vertices (and SSBO data) about to be reused may still be being read by the GPU
+        backend().execute();
         for (auto& vb : iVertexBuffers)
         {
             auto& buffer = vb.second;
@@ -471,5 +461,10 @@ namespace neogfx
         auto& pingPongBuffer = newBuffer->second;
         pingPongBuffer.use();
         return pingPongBuffer;
+    }
+
+    i_graphics_backend& opengl_renderer::backend() const
+    {
+        return *iBackend;
     }
 }

@@ -171,6 +171,7 @@ namespace neogfx
     void opengl_triangle_renderer::draw_and_execute()
     {
         draw();
+        graphics_backend().execute();
         vertices().clear();
         iStart = 0;
     }
@@ -206,21 +207,21 @@ namespace neogfx
 
         if (!iUseBarrier)
         {
-            glCheck(glDrawArrays(GL_TRIANGLES, iStart, static_cast<GLsizei>(aCount)));
+            graphics_backend().draw_arrays(gpu_primitive::Triangles, static_cast<std::size_t>(iStart), aCount);
             iStart += static_cast<GLint>(aCount);
         }
         else
         {
-            glCheck(glTextureBarrier());
+            graphics_backend().texture_barrier();
             auto const pvc = primitive_vertex_count();
             auto chunk = pvc * skipCount;
             while (aCount > 0)
             {
                 auto amount = std::min(chunk, aCount);
-                glCheck(glDrawArrays(GL_TRIANGLES, iStart, static_cast<GLsizei>(amount)));
+                graphics_backend().draw_arrays(gpu_primitive::Triangles, static_cast<std::size_t>(iStart), amount);
                 iStart += static_cast<GLint>(amount);
                 aCount -= amount;
-                glCheck(glTextureBarrier());
+                graphics_backend().texture_barrier();
             }
         }
     }

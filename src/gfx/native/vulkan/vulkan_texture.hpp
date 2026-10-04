@@ -1,18 +1,18 @@
 // vulkan_texture.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2023 Leigh Johnston.  All Rights Reserved.
-  
+  Copyright (c) 2023, 2026 Leigh Johnston.  All Rights Reserved.
+
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -25,11 +25,25 @@
 #include <neogfx/gfx/i_image.hpp>
 #include <neogfx/gfx/shader_array.hpp>
 #include "vulkan.hpp"
+#include "vulkan_graphics_backend.hpp"
 #include "../native_texture.hpp"
 
 namespace neogfx
 {
     class i_texture_manager;
+
+    // n.b. as opengl_texture (see texture_binding_pool)
+    struct vulkan_texture_binding_pool
+    {
+        neolib::unordered_flat_map<std::uint32_t, i_texture const *> unbound = { { 20u, nullptr }, { 21u, nullptr }, { 22u, nullptr }, { 23u, nullptr }, { 24u, nullptr }, { 25u, nullptr }, { 26u, nullptr }, { 27u, nullptr }, { 28u, nullptr }, { 29u, nullptr } };
+        neolib::unordered_flat_map<std::uint32_t, i_texture const *> bound;
+    };
+
+    inline vulkan_texture_binding_pool& vulkan_texture_bindings()
+    {
+        static vulkan_texture_binding_pool sPool;
+        return sPool;
+    }
 
     template <typename T>
     class vulkan_texture : public native_texture
@@ -106,6 +120,8 @@ namespace neogfx
         neogfx::logical_coordinates logical_coordinates() const final;
         void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const final;
     public:
+        void set_default_viewport() const final;
+        void set_viewport(const neogfx::viewport& aViewport) const final;
         neogfx::viewport apply_viewport() const final;
     public:
         bool target_active() const final;
@@ -118,6 +134,10 @@ namespace neogfx
         neogfx::color_space color_space() const final;
         color read_pixel(const point& aPosition, bool aCreateCache = true) const final;
     private:
+        vulkan_graphics_backend& backend() const;
+        vulkan_image const* do_bind(std::uint32_t aTextureUnit) const;
+        void do_unbind() const;
+    private:
         i_texture_manager& iManager;
         texture_id iId;
         string iUri;
@@ -129,12 +149,14 @@ namespace neogfx
         size_u32 iSize;
         size_u32 iStorageSize;
         std::optional<dimension> iBleedGuard;
+        std::unique_ptr<vulkan_image> iImage;
+        mutable std::unique_ptr<vulkan_image> iDepthStencil;
         mutable neogfx::logical_coordinate_system iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
-        vk::Image iImage;
-        vk::ImageView iImageView;
-        vk::Sampler iSampler;
-        vk::DeviceMemory iDeviceMemory;
+        mutable std::optional<neogfx::uv_calculator> iUvCalculator;
+        mutable std::optional<std::uint32_t> iBoundTextureUnit;
+        mutable vulkan_image const* iPreviouslyBoundTexture = nullptr;
+        mutable std::vector<T> iPixelData;
         mutable std::uint32_t iTargetUseCount = 0u;
     };
 }

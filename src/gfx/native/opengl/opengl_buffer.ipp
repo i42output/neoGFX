@@ -29,9 +29,7 @@ namespace neogfx
     {
         if (aCapacity != 0)
         {
-            glCheck(glCreateBuffers(1, &iBufferName));
-            glCheck(glNamedBufferStorage(iBufferName, aCapacity * sizeof(value_type), nullptr, 
-                !iDeviceLocal ? GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT : GL_DYNAMIC_STORAGE_BIT));
+            iBufferName = graphics_backend().create_buffer(aCapacity * sizeof(value_type), iDeviceLocal);
 
             iCapacity = aCapacity;
 
@@ -50,7 +48,8 @@ namespace neogfx
     template <typename T>
     inline opengl_buffer<T>::~opengl_buffer()
     {
-        glCheck(glDeleteBuffers(1, &iBufferName));
+        if (iBufferName != no_gpu_buffer)
+            graphics_backend().destroy_buffer(iBufferName);
     }
 
     template <typename T>
@@ -190,7 +189,7 @@ namespace neogfx
     }
 
     template <typename T>
-    inline GLuint opengl_buffer<T>::handle() const
+    inline gpu_buffer opengl_buffer<T>::handle() const
     {
         return iBufferName;
     }
@@ -207,8 +206,7 @@ namespace neogfx
         if (iDeviceLocal)
             throw std::logic_error("neogfx::opengl_buffer<T>::map: device local buffer cannot be mapped");
         if (iMemory == nullptr)
-            glCheck(iMemory = static_cast<value_type*>(glMapNamedBufferRange(handle(), 0, capacity() * sizeof(value_type), 
-                GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_FLUSH_EXPLICIT_BIT)));
+            iMemory = static_cast<value_type*>(graphics_backend().map_buffer(handle(), capacity() * sizeof(value_type)));
         return iMemory;
     }
 
@@ -225,7 +223,7 @@ namespace neogfx
             return; // n.b. a device local buffer is written directly (see write()) and a buffer never written may not be mapped
         if (mapped())
         {
-            glCheck(glFlushMappedNamedBufferRange(handle(), aOffset * sizeof(value_type), aElements * sizeof(value_type)));
+            graphics_backend().flush_buffer(handle(), aOffset * sizeof(value_type), aElements * sizeof(value_type));
         }
         else
             throw std::logic_error("neogfx::opengl_buffer<T>::flush: buffer not mapped!");
@@ -239,7 +237,7 @@ namespace neogfx
         if (aOffset + aElements > size())
             throw std::logic_error("neogfx::opengl_buffer<T>::write: out of range");
         if (iDeviceLocal)
-            glCheck(glNamedBufferSubData(handle(), aOffset * sizeof(value_type), aElements * sizeof(value_type), aData))
+            graphics_backend().write_buffer(handle(), aOffset * sizeof(value_type), aData, aElements * sizeof(value_type));
         else
         {
             std::copy(aData, aData + aElements, map() + aOffset);
@@ -253,7 +251,7 @@ namespace neogfx
         if (iMemory != nullptr)
         {
             flush(0, size());
-            glCheck(glUnmapNamedBuffer(handle()));
+            graphics_backend().unmap_buffer(handle());
             iMemory = nullptr;
         }
     }
@@ -368,8 +366,7 @@ namespace neogfx
         {
             opengl_buffer<T> temp{ iCacheable, aCapacity, iDeviceLocal };
             if (!empty())
-                glCheck(glCopyNamedBufferSubData(iBufferName, temp.iBufferName,
-                    0, 0, size() * sizeof(value_type)));
+                graphics_backend().copy_buffer(iBufferName, temp.iBufferName, size() * sizeof(value_type));
             std::swap(iBufferName, temp.iBufferName);
             std::swap(iCapacity, temp.iCapacity);
             std::swap(iMemory, temp.iMemory);

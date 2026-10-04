@@ -31,6 +31,7 @@
 #include <neogfx/gfx/i_rendering_context.hpp>
 #include <neogfx/gfx/i_shader_program.hpp>
 #include <neogfx/gfx/vertex_buffer.hpp>
+#include "../i_graphics_backend.hpp"
 #include "opengl_buffer.hpp"
 #include "opengl.hpp"
 
@@ -44,8 +45,8 @@ namespace neogfx
     public:
         void bind();
     private:
-        GLint iPreviousVertexArrayBindingHandle;
-        GLuint iHandle;
+        gpu_vertex_array iPreviousVertexArrayBindingHandle;
+        gpu_vertex_array iHandle;
     };
 
     template <typename T>
@@ -151,13 +152,7 @@ namespace neogfx
     class opengl_scene_buffer : private opengl_buffer_owner
     {
     public:
-        struct mesh_range
-        {
-            std::uint32_t vertexStart;
-            std::uint32_t vertexEnd;
-            std::uint32_t indexStart;
-            std::uint32_t indexEnd;
-        };
+        using mesh_range = gpu_mesh_range;
     public:
         opengl_scene_buffer();
         ~opengl_scene_buffer();
@@ -176,6 +171,9 @@ namespace neogfx
         // with the current (depth only) program, which takes position (location 0), colour (1), texture coordinates (2), model (11),
         // joints (12) and weights (13)
         void draw_depth(std::uint32_t aIndexStart, std::uint32_t aIndexCount);
+        // the vertex and index buffers (see scene_vertex)
+        gpu_buffer vertex_buffer() const;
+        gpu_buffer index_buffer() const;
     private:
         void buffer_grown() final;
     private:

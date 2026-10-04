@@ -34,6 +34,8 @@
 #include "../../gui/window/native/virtual_window.hpp"
 #include "../../gui/window/native/virtual_surface.hpp"
 #include "opengl/opengl_surface.hpp"
+#include "vulkan/vulkan_graphics_backend.hpp"
+#include "vulkan/vulkan_surface.hpp"
 #include "windows_renderer.hpp"
 
 #ifndef NDEBUG
@@ -232,12 +234,12 @@ namespace neogfx
             {
                 switch (aRenderer)
                 {
-                case neogfx::renderer::Vulkan:
                 case neogfx::renderer::Software:
                 case neogfx::renderer::DirectX: // ANGLE
                     throw unsupported_renderer();
                     break;
                 case neogfx::renderer::OpenGL:
+                case neogfx::renderer::Vulkan:
                     break;
                 default:
                     break;
@@ -266,10 +268,13 @@ namespace neogfx
                 wc.lpszMenuName = NULL;
                 wc.lpszClassName = sWindowClassName.c_str();
                 ::RegisterClass(&wc);
-                init_opengl();
-                auto dow = allocate_offscreen_window(nullptr);
-                iDefaultOffscreenWindow = dow;
-                iContext = create_opengl_context(static_cast<HDC>(dow->device_handle()));
+                if (!vulkan())
+                {
+                    init_opengl();
+                    auto dow = allocate_offscreen_window(nullptr);
+                    iDefaultOffscreenWindow = dow;
+                    iContext = create_opengl_context(static_cast<HDC>(dow->device_handle()));
+                }
                 opengl_renderer::initialize();
                 iInitialized = true;
             }
@@ -302,7 +307,10 @@ namespace neogfx
         {
             if (!iVsyncEnabled)
             {
-                wglSwapIntervalEXT(1);
+                if (vulkan())
+                    static_cast<vulkan_graphics_backend&>(backend()).set_vsync(true);
+                else
+                    wglSwapIntervalEXT(1);
                 iVsyncEnabled = true;
             }
         }
@@ -311,13 +319,18 @@ namespace neogfx
         {
             if (iVsyncEnabled)
             {
-                wglSwapIntervalEXT(0);
+                if (vulkan())
+                    static_cast<vulkan_graphics_backend&>(backend()).set_vsync(false);
+                else
+                    wglSwapIntervalEXT(0);
                 iVsyncEnabled = false;
             }
         }
 
         pixel_format_t renderer::set_pixel_format(const i_render_target& aTarget)
         {
+            if (vulkan())
+                return 0;
             return set_pixel_format(aTarget.target_device_handle());
         }
 
@@ -372,6 +385,8 @@ namespace neogfx
 
         renderer::handle renderer::create_context(const i_render_target& aTarget)
         {
+            if (vulkan())
+                return nullptr;
             if (aTarget.target_type() == render_target_type::Surface)
             {
                 aTarget.pixel_format();
@@ -409,18 +424,12 @@ namespace neogfx
 
         viewport renderer::viewport() const
         {
-            GLint viewport[4];
-            glGetIntegerv(GL_VIEWPORT, viewport);
-            return rect{ point_i32{ viewport[0], viewport[1] }.as<scalar>(), size_i32{ viewport[2], viewport[3] }.as<scalar>() };
+            return backend().viewport();
         }
 
         std::optional<rect> renderer::scissor() const
         {
-            if (!glIsEnabled(GL_SCISSOR_TEST))
-                return std::nullopt;
-            GLint scissor[4];
-            glGetIntegerv(GL_SCISSOR_BOX, scissor);
-            return rect{ point_i32{ scissor[0], scissor[1] }.as<scalar>(), size_i32{ scissor[2], scissor[3] }.as<scalar>() };
+            return backend().scissor();
         }
 
         void renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, i_string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult)
@@ -429,8 +438,7 @@ namespace neogfx
             if ((aWindow.style() & window_style::Nested) != window_style::Nested)
             {
                 aResult = make_ref<window>(*this, aSurfaceManager, aWindow, aVideoMode, aWindowTitle, aStyle);
-                auto newSurface = make_ref<opengl_surface>(*this, aWindow);
-                aResult->attach(*newSurface);
+                attach_surface(aWindow, *aResult);
             }
             else
                 throw virtual_surface_must_have_parent();
@@ -442,8 +450,7 @@ namespace neogfx
             if ((aWindow.style() & window_style::Nested) != window_style::Nested)
             {
                 aResult = make_ref<window>(*this, aSurfaceManager, aWindow, aDimensions, aWindowTitle, aStyle);
-                auto newSurface = make_ref<opengl_surface>(*this, aWindow);
-                aResult->attach(*newSurface);
+                attach_surface(aWindow, *aResult);
             }
             else
                 throw virtual_surface_must_have_parent();
@@ -455,8 +462,7 @@ namespace neogfx
             if ((aWindow.style() & window_style::Nested) != window_style::Nested)
             {
                 aResult = make_ref<window>(*this, aSurfaceManager, aWindow, aPosition, aDimensions, aWindowTitle, aStyle);
-                auto newSurface = make_ref<opengl_surface>(*this, aWindow);
-                aResult->attach(*newSurface);
+                attach_surface(aWindow, *aResult);
             }
             else
                 throw virtual_surface_must_have_parent();
@@ -471,8 +477,7 @@ namespace neogfx
                 if ((aWindow.style() & window_style::Nested) != window_style::Nested)
                 {
                     aResult = make_ref<window>(*this, aSurfaceManager, aWindow, *parent, aVideoMode, aWindowTitle, aStyle);
-                    auto newSurface = make_ref<opengl_surface>(*this, aWindow);
-                    aResult->attach(*newSurface);
+                    attach_surface(aWindow, *aResult);
                 }
                 else
                     throw virtual_surface_cannot_be_fullscreen();
@@ -490,8 +495,7 @@ namespace neogfx
                 if ((aWindow.style() & window_style::Nested) != window_style::Nested)
                 {
                     aResult = make_ref<window>(*this, aSurfaceManager, aWindow, *parent, aDimensions, aWindowTitle, aStyle);
-                    auto newSurface = make_ref<opengl_surface>(*this, aWindow);
-                    aResult->attach(*newSurface);
+                    attach_surface(aWindow, *aResult);
                 }
                 else
                 {
@@ -513,8 +517,7 @@ namespace neogfx
                 if ((aWindow.style() & window_style::Nested) != window_style::Nested)
                 {
                     aResult = make_ref<window>(*this, aSurfaceManager, aWindow, *parent, aPosition, aDimensions, aWindowTitle, aStyle);
-                    auto newSurface = make_ref<opengl_surface>(*this, aWindow);
-                    aResult->attach(*newSurface);
+                    attach_surface(aWindow, *aResult);
                 }
                 else
                 {
@@ -534,7 +537,7 @@ namespace neogfx
 
         void renderer::sync()
         {
-            glCheck(glFinish());
+            backend().finish();
         }
 
         void renderer::render_now()
@@ -603,6 +606,25 @@ namespace neogfx
             return nullptr;
         }
 
+        bool renderer::vulkan() const
+        {
+            return opengl_renderer::renderer() == neogfx::renderer::Vulkan;
+        }
+
+        void renderer::attach_surface(i_surface_window& aWindow, i_native_window& aNativeWindow)
+        {
+            if (vulkan())
+            {
+                auto newSurface = make_ref<vulkan_surface>(*this, aWindow);
+                aNativeWindow.attach(*newSurface);
+            }
+            else
+            {
+                auto newSurface = make_ref<opengl_surface>(*this, aWindow);
+                aNativeWindow.attach(*newSurface);
+            }
+        }
+
         std::shared_ptr<neogfx::offscreen_window> renderer::allocate_offscreen_window(const i_render_target* aRenderTarget)
         {
             auto existingWindow = iOffscreenWindows.find(aRenderTarget);
@@ -640,6 +662,12 @@ namespace neogfx
             iActiveTarget = &aTarget;
 
             ++iTargetActivationCounter[static_cast<std::size_t>(aTarget.target_type())];
+
+            if (vulkan())
+            {
+                disable_vsync();
+                return;
+            }
 
             BOOL result = TRUE;
 

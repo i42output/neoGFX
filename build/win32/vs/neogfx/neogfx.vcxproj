@@ -112,6 +112,8 @@
     </Link>
     <Lib>
       <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+      <AdditionalDependencies>vulkan-1.lib;shaderc_shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(DevDirVulkan)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -144,6 +146,8 @@
     </Link>
     <Lib>
       <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+      <AdditionalDependencies>vulkan-1.lib;shaderc_shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(DevDirVulkan)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">
@@ -176,6 +180,8 @@
     </Link>
     <Lib>
       <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+      <AdditionalDependencies>vulkan-1.lib;shaderc_shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(DevDirVulkan)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">
@@ -208,6 +214,8 @@
     </Link>
     <Lib>
       <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+      <AdditionalDependencies>vulkan-1.lib;shaderc_shared.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(DevDirVulkan)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -472,11 +480,13 @@
     <ClInclude Include="..\..\..\..\src\app\native\windows_drag_drop.hpp" />
     <ClInclude Include="..\..\..\..\src\audio\3rdparty\miniaudio\miniaudio.h" />
     <ClInclude Include="..\..\..\..\src\gfx\native\i_native_texture.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\i_graphics_backend.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\native_texture.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_buffer.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_buffer.ipp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_error.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_graphics_backend.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_vertex.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_renderer.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_rendering_context.hpp" />
@@ -489,6 +499,11 @@
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_vertex.ipp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_error.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_glsl.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_graphics_backend.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_shader_program.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_shader_program.ipp" />
+    <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_surface.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_texture.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\windows_renderer.hpp" />
@@ -577,6 +592,7 @@
     <ClCompile Include="..\..\..\..\src\gfx\native\native_texture.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_buffer.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_error.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_graphics_backend.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_vertex.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_renderer.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_rendering_context.cpp" />
@@ -586,6 +602,10 @@
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_texture_manager.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_triangle_renderer.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_error.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_glsl.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_graphics_backend.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_shader_program.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_surface.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_texture.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\native\windows_renderer.cpp" />

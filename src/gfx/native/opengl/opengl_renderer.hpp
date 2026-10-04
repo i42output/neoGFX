@@ -28,6 +28,7 @@
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
 #include <neogfx/gfx/i_standard_shader_program.hpp>
+#include "../i_graphics_backend.hpp"
 #include "opengl.hpp"
 #include "opengl_texture_manager.hpp"
 #include "opengl_vertex.hpp"
@@ -174,9 +175,12 @@ namespace neogfx
         void unregister_frame_counter(i_widget& aWidget, std::chrono::milliseconds const& aDuration) override;
         std::uint32_t frame_counter(std::chrono::milliseconds const& aDuration) const override;
         i_ping_pong_buffer& create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, size& aPreviousExtents, texture_sampling aSampling);
+    public:
+        i_graphics_backend& backend() const;
     private:
         neogfx::renderer iRenderer;
-        mutable std::optional<opengl_texture_manager> iTextureManager;
+        std::unique_ptr<i_graphics_backend> iBackend;
+        mutable std::unique_ptr<neogfx::texture_manager> iTextureManager;
         mutable std::optional<neogfx::font_manager> iFontManager;
         mutable shader_program_list iShaderPrograms;
         bool iLimitFrameRate;

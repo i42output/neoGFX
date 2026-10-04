@@ -73,6 +73,7 @@
 
 #include <neolib/core/string_utf.hpp>
 
+#include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_window_manager.hpp>
@@ -1732,7 +1733,9 @@ namespace neogfx
 
         void window::display()
         {
-            ::SwapBuffers(static_cast<HDC>(iHdc));
+            // n.b. a Vulkan surface presents itself (see vulkan_surface::do_render)
+            if (rendering_engine().renderer() != neogfx::renderer::Vulkan)
+                ::SwapBuffers(static_cast<HDC>(iHdc));
         }
 
     }

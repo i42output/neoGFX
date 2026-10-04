@@ -37,6 +37,7 @@
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/hid/i_native_surface.hpp>
 #include "../i_native_texture.hpp"
+#include "../i_graphics_backend.hpp"
 #include "../../text/native/i_native_font_face.hpp"
 #include "opengl_rendering_context.hpp"
 
@@ -929,13 +930,13 @@ namespace neogfx
     void opengl_rendering_context::scissor_on()
     {
         bool const scissorOn = (applying_scissor() || iFastState.scissorCounter >= 0);
-        glCheck((scissorOn ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST)));
+        graphics_backend().enable_scissor(scissorOn);
     }
 
     void opengl_rendering_context::scissor_off()
     {
         bool const scissorOff = (applying_scissor() || iFastState.scissorCounter < 0);
-        glCheck((scissorOff ? glDisable(GL_SCISSOR_TEST) : glEnable(GL_SCISSOR_TEST)));
+        graphics_backend().enable_scissor(!scissorOff);
     }
 
     std::optional<rect> const& opengl_rendering_context::scissor_rect() const
@@ -959,11 +960,11 @@ namespace neogfx
         if (aScissorRect)
         {
             auto const& sr = *aScissorRect;
-            GLint x = static_cast<GLint>(std::ceil(sr.x));
-            GLint y = static_cast<GLint>(std::ceil(sr.y));
-            GLsizei cx = static_cast<GLsizei>(std::ceil(sr.cx));
-            GLsizei cy = static_cast<GLsizei>(std::ceil(sr.cy));
-            glCheck(glScissor(x, y, cx, cy));
+            std::int32_t x = static_cast<std::int32_t>(std::ceil(sr.x));
+            std::int32_t y = static_cast<std::int32_t>(std::ceil(sr.y));
+            std::int32_t cx = static_cast<std::int32_t>(std::ceil(sr.cx));
+            std::int32_t cy = static_cast<std::int32_t>(std::ceil(sr.cy));
+            graphics_backend().set_scissor(x, y, cx, cy);
             scissor_on();
         }
         else
@@ -980,14 +981,7 @@ namespace neogfx
         if (iSlowState.multisample != aMultisample || slow_state_invalid())
         {
             iSlowState.multisample = aMultisample;
-            if (multisample())
-            {
-                glCheck(glEnable(GL_MULTISAMPLE));
-            }
-            else
-            {
-                glCheck(glDisable(GL_MULTISAMPLE));
-            }
+            graphics_backend().enable_multisample(multisample());
         }
     }
 
@@ -996,8 +990,7 @@ namespace neogfx
         if (iSlowState.sampleShadingRate != aSampleShadingRate)
         {
             iSlowState.sampleShadingRate = aSampleShadingRate;
-            glCheck(glEnable(GL_SAMPLE_SHADING));
-            glCheck(glMinSampleShading(static_cast<float>(iSlowState.sampleShadingRate.value())));
+            graphics_backend().set_sample_shading(iSlowState.sampleShadingRate);
         }
     }
 
@@ -1006,7 +999,7 @@ namespace neogfx
         if (iSlowState.sampleShadingRate != std::nullopt)
         {
             iSlowState.sampleShadingRate = std::nullopt;
-            glCheck(glDisable(GL_SAMPLE_SHADING));
+            graphics_backend().set_sample_shading(std::nullopt);
         }
     }
 
@@ -1020,15 +1013,7 @@ namespace neogfx
         if (iSlowState.frontFace != aFrontFace || slow_state_invalid())
         {
             iSlowState.frontFace = aFrontFace;
-            switch (iSlowState.frontFace.value())
-            {
-            case neogfx::front_face::CounterClockwise:
-                glCheck(glFrontFace(GL_CCW));
-                break;
-            case neogfx::front_face::Clockwise:
-                glCheck(glFrontFace(GL_CW));
-                break;
-            }
+            graphics_backend().set_front_face(iSlowState.frontFace.value());
         }
     }
 
@@ -1048,24 +1033,7 @@ namespace neogfx
         {
             iSlowState.faceCulling = aCulling;
             iSlowState.faceCullingFlipped = flipped;
-            switch (iSlowState.faceCulling.value())
-            {
-            case neogfx::face_culling::None:
-                glCheck(glDisable(GL_CULL_FACE));
-                break;
-            case neogfx::face_culling::Front:
-                glCheck(glCullFace(!flipped ? GL_FRONT : GL_BACK));
-                glCheck(glEnable(GL_CULL_FACE));
-                break;
-            case neogfx::face_culling::Back:
-                glCheck(glCullFace(!flipped ? GL_BACK : GL_FRONT));
-                glCheck(glEnable(GL_CULL_FACE));
-                break;
-            case neogfx::face_culling::FrontAndBack:
-                glCheck(glCullFace(GL_FRONT_AND_BACK));
-                glCheck(glEnable(GL_CULL_FACE));
-                break;
-            }
+            graphics_backend().set_face_culling(iSlowState.faceCulling.value(), flipped);
         }
     }
 
@@ -1089,47 +1057,7 @@ namespace neogfx
         if (iSlowState.blendingMode != aBlendingMode || slow_state_invalid())
         {
             iSlowState.blendingMode = aBlendingMode;
-            switch (*iSlowState.blendingMode)
-            {
-            case neogfx::blending_mode::None:
-                glCheck(glDisable(GL_BLEND));
-                break;
-            case neogfx::blending_mode::Default:
-                glCheck(glEnable(GL_BLEND));
-                glCheck(glBlendEquation(GL_FUNC_ADD));
-                glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-                break;
-            case neogfx::blending_mode::Sprite:
-                glCheck(glEnable(GL_BLEND));
-                glCheck(glBlendEquation(GL_FUNC_ADD));
-                glCheck(glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-                break;
-            case neogfx::blending_mode::Blit:
-                glCheck(glEnable(GL_BLEND));
-                glCheck(glBlendEquation(GL_FUNC_ADD));
-                glCheck(glBlendFunc(GL_ONE, GL_ZERO));
-                break;
-            case neogfx::blending_mode::Lighten:
-                glCheck(glEnable(GL_BLEND));
-                glCheck(glBlendEquationSeparate(GL_MAX, GL_FUNC_ADD));
-                glCheck(glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
-                break;
-            case neogfx::blending_mode::Filter:
-                glCheck(glEnable(GL_BLEND));
-                glCheck(glBlendEquation(GL_FUNC_ADD));
-                glCheck(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
-                break;
-            case neogfx::blending_mode::FilterFinish:
-                glCheck(glEnable(GL_BLEND));
-                glCheck(glBlendEquation(GL_FUNC_ADD));
-                glCheck(glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-                break;
-            case neogfx::blending_mode::Premultiply:
-                glCheck(glEnable(GL_BLEND));
-                glCheck(glBlendEquation(GL_FUNC_ADD));
-                glCheck(glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
-                break;
-            }
+            graphics_backend().set_blending_mode(*iSlowState.blendingMode);
         }
     }
 
@@ -1143,16 +1071,7 @@ namespace neogfx
         if (iSlowState.smoothingMode != aSmoothingMode || slow_state_invalid())
         {
             iSlowState.smoothingMode = aSmoothingMode;
-            if (*iSlowState.smoothingMode == neogfx::smoothing_mode::AntiAlias)
-            {
-                glCheck(glEnable(GL_LINE_SMOOTH));
-                glCheck(glEnable(GL_POLYGON_SMOOTH));
-            }
-            else
-            {
-                glCheck(glDisable(GL_LINE_SMOOTH));
-                glCheck(glDisable(GL_POLYGON_SMOOTH));
-            }
+            graphics_backend().enable_smoothing(*iSlowState.smoothingMode == neogfx::smoothing_mode::AntiAlias);
         }
     }
 
@@ -1200,9 +1119,7 @@ namespace neogfx
             switch (iLogicalOperationStack.back())
             {
             case logical_operation::Xor:
-                glCheck(glEnable(GL_BLEND));
-                glCheck(glBlendEquation(GL_FUNC_ADD));
-                glCheck(glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR));
+                graphics_backend().set_xor_blending();
                 break;
             default:
                 iSlowState.blendingMode = std::nullopt;
@@ -1274,36 +1191,24 @@ namespace neogfx
 
     void opengl_rendering_context::clear(const color& aColor)
     {
-        glCheck(glClearColor(aColor.red<GLclampf>(), aColor.green<GLclampf>(), aColor.blue<GLclampf>(), aColor.alpha<GLclampf>()));
-        glCheck(glClear(GL_COLOR_BUFFER_BIT));
+        graphics_backend().clear(aColor);
     }
 
     void opengl_rendering_context::clear_depth_buffer()
     {
-        GLboolean depthMask;
-        glCheck(glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask));
-        if (!depthMask)
-            glCheck(glDepthMask(GL_TRUE));
-        glCheck(glClearDepth(1.0));
-        glCheck(glClear(GL_DEPTH_BUFFER_BIT));
-        if (!depthMask)
-            glCheck(glDepthMask(GL_FALSE));
+        graphics_backend().clear_depth_buffer();
     }
 
     void opengl_rendering_context::clear_stencil_buffer()
     {
-        glCheck(glStencilMask(0xFF));
-        glCheck(glClearStencil(0));
-        glCheck(glClear(GL_STENCIL_BUFFER_BIT));
+        graphics_backend().clear_stencil_buffer(0);
     }
 
     void opengl_rendering_context::fill_stencil_buffer()
     {
         if (!iStencilRef.has_value())
             throw std::logic_error("neogfx::opengl_rendering_context: fill_stencil_buffer called without active stencil ref");
-        glCheck(glStencilMask(0xFF));
-        glCheck(glClearStencil(static_cast<GLint>(*iStencilRef)));
-        glCheck(glClear(GL_STENCIL_BUFFER_BIT));
+        graphics_backend().clear_stencil_buffer(*iStencilRef);
     }
 
     void opengl_rendering_context::enable_stencil_test()
@@ -1337,30 +1242,7 @@ namespace neogfx
 
     void opengl_rendering_context::apply_stencil()
     {
-        if (iStencilEnabled)
-        {
-            glCheck(glEnable(GL_STENCIL_TEST));
-            if (iUpdatingStencil)
-            {
-                glCheck(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
-                glCheck(glDepthMask(GL_FALSE));
-                glCheck(glStencilFunc(GL_ALWAYS, iStencilRef.value_or(1), 0xFF));
-                glCheck(glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE));
-                glCheck(glStencilMask(0xFF));
-            }
-            else
-            {
-                glCheck(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
-                glCheck(glDepthMask(GL_TRUE));
-                glCheck(glStencilFunc(GL_EQUAL, iStencilRef.value_or(1), 0xFF));
-                glCheck(glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP));
-                glCheck(glStencilMask(0x00));
-            }
-        }
-        else
-        {
-            glCheck(glDisable(GL_STENCIL_TEST));
-        }
+        graphics_backend().apply_stencil(iStencilEnabled, iUpdatingStencil, iStencilRef.value_or(1));
     }
 
     void opengl_rendering_context::set_pixel(const render_batch& aSetPixelOps)
@@ -3329,25 +3211,8 @@ namespace neogfx
 
     namespace scene_shadows
     {
-        // the shadow map atlas (see standard-pbr.frag): view 0 (the directional light's) is the bottom left quarter; views 1 to 48
-        // (six cube faces for each of up to eight point lights) are 512 square tiles in the other quarters
-        constexpr GLsizei AtlasSize = 4096;
-        constexpr GLsizei DirectionalSize = 2048;
-        constexpr GLsizei FaceSize = 512;
-        constexpr std::uint32_t MaxShadowCastingPointLights = 8u;
-
-        inline std::array<GLint, 4> tile(std::uint32_t aView)
-        {
-            if (aView == 0u)
-                return { 0, 0, DirectionalSize, DirectionalSize };
-            auto const face = aView - 1u;
-            auto const quadrant = 1u + face / 16u;
-            auto const local = face % 16u;
-            return {
-                static_cast<GLint>((quadrant % 2u) * DirectionalSize + (local % 4u) * FaceSize),
-                static_cast<GLint>((quadrant / 2u) * DirectionalSize + (local / 4u) * FaceSize),
-                FaceSize, FaceSize };
-        }
+        using scene_shadow_atlas::DirectionalSize;
+        using scene_shadow_atlas::MaxShadowCastingPointLights;
 
         // column major (m[column][row]), OpenGL clip space
         inline mat44 look_at(vec3 const& aEye, vec3 const& aTarget, vec3 const& aUp)
@@ -3394,359 +3259,6 @@ namespace neogfx
             result[0][0] = 0.5; result[1][1] = 0.5; result[2][2] = 0.5;
             result[3][0] = 0.5; result[3][1] = 0.5; result[3][2] = 0.5;
             return result;
-        }
-
-        // the depth only program, FBO and atlas (created when first needed; n.b. one GL context)
-        struct resources
-        {
-            bool failed = false;
-            GLuint program = 0;
-            GLint viewProjection = -1;
-            GLint modelTableBase = -1;
-            GLint baseTexture = -1;
-            GLint alphaTest = -1;
-            GLint alphaCutoff = -1;
-            GLint textureTransform = -1;
-            GLint textureWrap = -1;
-            GLuint framebuffer = 0;
-            GLuint atlas = 0;
-        };
-
-        inline GLuint compile(GLenum aType, std::string const& aSource)
-        {
-            GLuint const shader = glCreateShader(aType);
-            char const* source = aSource.c_str();
-            glShaderSource(shader, 1, &source, nullptr);
-            glCompileShader(shader);
-            GLint ok = GL_FALSE;
-            glGetShaderiv(shader, GL_COMPILE_STATUS, &ok);
-            if (ok != GL_TRUE)
-            {
-                GLchar log[1024] = {};
-                glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
-                service<debug::logger>() << neolib::logger::severity::Debug << "neogfx: shadow map shader: " << log << std::endl;
-                glDeleteShader(shader);
-                return 0;
-            }
-            return shader;
-        }
-
-        inline resources& get(i_standard_shader_program& aProgram)
-        {
-            static resources sResources;
-            if (sResources.program != 0 || sResources.failed)
-                return sResources;
-            sResources.failed = true;
-            // n.b. the same model transformation (and skinning) as standard.vert
-            std::string vertexSource =
-                "#version 460 core\n"
-                "layout (location = 0) in vec3 VertexPosition;\n"
-                "layout (location = 1) in vec4 VertexColor;\n"
-                "layout (location = 2) in vec2 VertexTextureCoord;\n"
-                "layout (location = 11) in float VertexModel;\n"
-                "layout (location = 12) in vec4 VertexJoints;\n"
-                "layout (location = 13) in vec4 VertexWeights;\n"
-                "layout(std430, binding = %MATRICES%) buffer SSBO_bModelMatrices { mat4 bModelMatrices[]; };\n"
-                "layout(std430, binding = %TABLE%) buffer SSBO_bModelTable { uint bModelTable[]; };\n"
-                "uniform mat4 uViewProjection;\n"
-                "uniform uint uModelTableBase;\n"
-                "out vec2 TexCoord;\n"
-                "out float Alpha;\n"
-                "void main()\n"
-                "{\n"
-                "    TexCoord = VertexTextureCoord;\n"
-                "    Alpha = VertexColor.a;\n"
-                "    vec4 position = vec4(VertexPosition, 1.0);\n"
-                "    if (VertexModel > 0.0)\n"
-                "    {\n"
-                "        uint first = bModelTable[uModelTableBase + uint(VertexModel + 0.5)];\n"
-                "        if (any(greaterThan(VertexWeights, vec4(0.0))))\n"
-                "        {\n"
-                "            vec4 skinned = vec4(0.0);\n"
-                "            for (int i = 0; i < 4; ++i)\n"
-                "                if (VertexWeights[i] > 0.0)\n"
-                "                    skinned += VertexWeights[i] * (bModelMatrices[first + 1u + uint(VertexJoints[i] + 0.5)] * position);\n"
-                "            position = skinned;\n"
-                "        }\n"
-                "        position = bModelMatrices[first] * position;\n"
-                "    }\n"
-                "    gl_Position = uViewProjection * vec4(position.xyz / position.w, 1.0);\n"
-                "}\n";
-            auto const replace = [&](std::string const& aWhat, std::string const& aWith)
-                {
-                    vertexSource.replace(vertexSource.find(aWhat), aWhat.size(), aWith);
-                };
-            replace("%MATRICES%", std::to_string(static_cast<std::uint32_t>(aProgram.model_matrices().id())));
-            replace("%TABLE%", std::to_string(static_cast<std::uint32_t>(aProgram.model_table().id())));
-            // alpha tested (glTF alpha mode MASK) meshes' base colour alpha (wrapped as in standard-pbr.frag)
-            std::string const fragmentSource =
-                "#version 460 core\n"
-                "in vec2 TexCoord;\n"
-                "in float Alpha;\n"
-                "uniform sampler2D uBaseTexture;\n"
-                "uniform int uAlphaTest;\n"
-                "uniform float uAlphaCutoff;\n"
-                "uniform vec4 uTextureTransform;\n"
-                "uniform ivec2 uTextureWrap;\n"
-                "float wrap(float c, int mode)\n"
-                "{\n"
-                "    if (mode == 1)\n"
-                "        return fract(c);\n"
-                "    if (mode == 2)\n"
-                "    {\n"
-                "        float m = mod(c, 2.0);\n"
-                "        return m > 1.0 ? 2.0 - m : m;\n"
-                "    }\n"
-                "    return clamp(c, 0.0, 1.0);\n"
-                "}\n"
-                "void main()\n"
-                "{\n"
-                "    if (uAlphaTest != 0)\n"
-                "    {\n"
-                "        vec2 coord = vec2(wrap(TexCoord.x, uTextureWrap.x), wrap(TexCoord.y, uTextureWrap.y)) * uTextureTransform.xy + uTextureTransform.zw;\n"
-                "        vec2 unwrapped = TexCoord * uTextureTransform.xy;\n"
-                "        if (Alpha * textureGrad(uBaseTexture, coord, dFdx(unwrapped), dFdy(unwrapped)).a < uAlphaCutoff)\n"
-                "            discard;\n"
-                "    }\n"
-                "}\n";
-            GLuint const vertexShader = compile(GL_VERTEX_SHADER, vertexSource);
-            GLuint const fragmentShader = compile(GL_FRAGMENT_SHADER, fragmentSource);
-            if (vertexShader == 0 || fragmentShader == 0)
-                return sResources;
-            GLuint const program = glCreateProgram();
-            glAttachShader(program, vertexShader);
-            glAttachShader(program, fragmentShader);
-            glLinkProgram(program);
-            glDeleteShader(vertexShader);
-            glDeleteShader(fragmentShader);
-            GLint ok = GL_FALSE;
-            glGetProgramiv(program, GL_LINK_STATUS, &ok);
-            if (ok != GL_TRUE)
-            {
-                glDeleteProgram(program);
-                return sResources;
-            }
-            sResources.program = program;
-            sResources.viewProjection = glGetUniformLocation(program, "uViewProjection");
-            sResources.modelTableBase = glGetUniformLocation(program, "uModelTableBase");
-            sResources.baseTexture = glGetUniformLocation(program, "uBaseTexture");
-            sResources.alphaTest = glGetUniformLocation(program, "uAlphaTest");
-            sResources.alphaCutoff = glGetUniformLocation(program, "uAlphaCutoff");
-            sResources.textureTransform = glGetUniformLocation(program, "uTextureTransform");
-            sResources.textureWrap = glGetUniformLocation(program, "uTextureWrap");
-            glCheck(glCreateTextures(GL_TEXTURE_2D, 1, &sResources.atlas));
-            glCheck(glTextureStorage2D(sResources.atlas, 1, GL_DEPTH_COMPONENT32F, AtlasSize, AtlasSize));
-            glCheck(glTextureParameteri(sResources.atlas, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-            glCheck(glTextureParameteri(sResources.atlas, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-            glCheck(glTextureParameteri(sResources.atlas, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-            glCheck(glTextureParameteri(sResources.atlas, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-            glCheck(glTextureParameteri(sResources.atlas, GL_TEXTURE_COMPARE_MODE, GL_NONE));
-            glCheck(glCreateFramebuffers(1, &sResources.framebuffer));
-            glCheck(glNamedFramebufferTexture(sResources.framebuffer, GL_DEPTH_ATTACHMENT, sResources.atlas, 0));
-            glCheck(glNamedFramebufferDrawBuffer(sResources.framebuffer, GL_NONE));
-            glCheck(glNamedFramebufferReadBuffer(sResources.framebuffer, GL_NONE));
-            if (glCheckNamedFramebufferStatus(sResources.framebuffer, GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-                return sResources;
-            sResources.failed = false;
-            return sResources;
-        }
-    }
-
-    namespace scene_background
-    {
-        // the background program: a quad covering the camera's view (its NDC square), each fragment the environment in the
-        // direction it views (equirectangular: u = atan2(z, x) / 2pi + 0.5, v = 0.5 - asin(y) / pi), tone mapped and sRGB
-        // encoded as standard-pbr.frag does; from the prefiltered environment texture (see pbr_environment in
-        // fragment_shader.cpp: bands 0 to 5 prefiltered for roughness 0 to 1) or the background texture (RGBE texels: the
-        // panorama at the top, versions of it halved repeatedly side by side below it; n.b. all filtering is done here (texel
-        // fetches) so that it wraps horizontally)
-        struct resources
-        {
-            bool failed = false;
-            GLuint program = 0;
-            GLuint vertexArray = 0;
-            GLint ndcToClip = -1;
-            GLint clipToWorld = -1;
-            GLint source = -1;
-            GLint blur = -1;
-            GLint intensity = -1;
-            GLint backgroundExtents = -1;
-        };
-
-        inline resources& get()
-        {
-            static resources sResources;
-            if (sResources.program != 0 || sResources.failed)
-                return sResources;
-            sResources.failed = true;
-            std::string const vertexSource =
-                "#version 460 core\n"
-                "uniform mat4 uNdcToClip;\n"
-                "out vec2 Ndc;\n"
-                "void main()\n"
-                "{\n"
-                "    Ndc = vec2(float((gl_VertexID & 1) * 2 - 1), float((gl_VertexID >> 1) * 2 - 1));\n"
-                "    vec4 position = uNdcToClip * vec4(Ndc, 0.0, 1.0);\n"
-                "    gl_Position = vec4(position.xy, 0.0, position.w);\n"
-                "}\n";
-            std::string const fragmentSource =
-                "#version 460 core\n"
-                "in vec2 Ndc;\n"
-                "layout (location = 0) out vec4 FragColor;\n"
-                "uniform mat4 uClipToWorld;\n"
-                "uniform sampler2DRect uEnvironment;\n"
-                "uniform sampler2DRect uBackground;\n"
-                "uniform int uSource;\n"
-                "uniform float uBlur;\n"
-                "uniform float uIntensity;\n"
-                "uniform ivec2 uBackgroundExtents;\n"
-                "const float PI = 3.14159265358979;\n"
-                "vec3 environment_texel(int band, ivec2 t)\n"
-                "{\n"
-                "    return texelFetch(uEnvironment, ivec2(((t.x % 256) + 256) % 256, band * 128 + clamp(t.y, 0, 127))).rgb;\n"
-                "}\n"
-                "vec3 environment_band(int band, vec2 uv)\n"
-                "{\n"
-                "    vec2 p = uv * vec2(256.0, 128.0) - 0.5;\n"
-                "    ivec2 i = ivec2(floor(p));\n"
-                "    vec2 f = p - vec2(i);\n"
-                "    return mix(mix(environment_texel(band, i), environment_texel(band, i + ivec2(1, 0)), f.x),\n"
-                "        mix(environment_texel(band, i + ivec2(0, 1)), environment_texel(band, i + ivec2(1, 1)), f.x), f.y);\n"
-                "}\n"
-                "int background_top_level()\n"
-                "{\n"
-                "    int level = 0;\n"
-                "    for (ivec2 e = uBackgroundExtents; e.x > 8 && e.y > 4; e /= 2)\n"
-                "        ++level;\n"
-                "    return level;\n"
-                "}\n"
-                "ivec4 background_level(int level)\n"
-                "{\n"
-                "    if (level == 0)\n"
-                "        return ivec4(0, 0, uBackgroundExtents);\n"
-                "    int x = 0;\n"
-                "    for (int i = 1; i < level; ++i)\n"
-                "        x += uBackgroundExtents.x >> i;\n"
-                "    return ivec4(x, uBackgroundExtents.y, uBackgroundExtents.x >> level, uBackgroundExtents.y >> level);\n"
-                "}\n"
-                "vec3 background_texel(ivec4 level, ivec2 t)\n"
-                "{\n"
-                "    vec4 rgbe = floor(texelFetch(uBackground, level.xy + ivec2(((t.x % level.z) + level.z) % level.z, clamp(t.y, 0, level.w - 1))) * 255.0 + 0.5);\n"
-                "    return rgbe.a > 0.0 ? (rgbe.rgb + 0.5) * exp2(rgbe.a - 136.0) : vec3(0.0);\n"
-                "}\n"
-                "vec3 background_bilinear(int level, vec2 uv)\n"
-                "{\n"
-                "    ivec4 l = background_level(level);\n"
-                "    vec2 p = uv * vec2(l.zw) - 0.5;\n"
-                "    ivec2 i = ivec2(floor(p));\n"
-                "    vec2 f = p - vec2(i);\n"
-                "    return mix(mix(background_texel(l, i), background_texel(l, i + ivec2(1, 0)), f.x),\n"
-                "        mix(background_texel(l, i + ivec2(0, 1)), background_texel(l, i + ivec2(1, 1)), f.x), f.y);\n"
-                "}\n"
-                "vec4 bspline(float t)\n"
-                "{\n"
-                "    float s = 1.0 - t;\n"
-                "    return vec4(s * s * s, 4.0 - 6.0 * t * t + 3.0 * t * t * t, 4.0 - 6.0 * s * s + 3.0 * s * s * s, t * t * t) / 6.0;\n"
-                "}\n"
-                "// cubic B-spline: smooth where the halved versions are magnified\n"
-                "vec3 background_bicubic(int level, vec2 uv)\n"
-                "{\n"
-                "    ivec4 l = background_level(level);\n"
-                "    vec2 p = uv * vec2(l.zw) - 0.5;\n"
-                "    ivec2 i = ivec2(floor(p));\n"
-                "    vec2 f = p - vec2(i);\n"
-                "    vec4 wx = bspline(f.x);\n"
-                "    vec4 wy = bspline(f.y);\n"
-                "    vec3 result = vec3(0.0);\n"
-                "    for (int y = 0; y < 4; ++y)\n"
-                "    {\n"
-                "        vec3 row = vec3(0.0);\n"
-                "        for (int x = 0; x < 4; ++x)\n"
-                "            row += wx[x] * background_texel(l, i + ivec2(x - 1, y - 1));\n"
-                "        result += wy[y] * row;\n"
-                "    }\n"
-                "    return result;\n"
-                "}\n"
-                "vec3 from_linear(vec3 c)\n"
-                "{\n"
-                "    c = clamp(c, 0.0, 1.0);\n"
-                "    return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), c));\n"
-                "}\n"
-                "vec3 tone_map(vec3 color)\n"
-                "{\n"
-                "    const float startCompression = 0.8 - 0.04;\n"
-                "    const float desaturation = 0.15;\n"
-                "    float x = min(color.r, min(color.g, color.b));\n"
-                "    float offset = x < 0.08 ? x - 6.25 * x * x : 0.04;\n"
-                "    color -= offset;\n"
-                "    float peak = max(color.r, max(color.g, color.b));\n"
-                "    if (peak < startCompression)\n"
-                "        return color;\n"
-                "    const float d = 1.0 - startCompression;\n"
-                "    float newPeak = 1.0 - d * d / (peak + d - startCompression);\n"
-                "    color *= newPeak / peak;\n"
-                "    float g = 1.0 - 1.0 / (desaturation * (peak - newPeak) + 1.0);\n"
-                "    return mix(color, vec3(newPeak), g);\n"
-                "}\n"
-                "void main()\n"
-                "{\n"
-                "    vec4 nearPoint = uClipToWorld * vec4(Ndc, -1.0, 1.0);\n"
-                "    vec4 farPoint = uClipToWorld * vec4(Ndc, 1.0, 1.0);\n"
-                "    vec3 direction = normalize(farPoint.xyz * nearPoint.w - nearPoint.xyz * farPoint.w);\n"
-                "    vec2 uv = vec2(atan(direction.z, direction.x) / (2.0 * PI) + 0.5, 0.5 - asin(clamp(direction.y, -1.0, 1.0)) / PI);\n"
-                "    // the angle (radians) a fragment covers\n"
-                "    float footprint = max(length(dFdx(direction)), length(dFdy(direction)));\n"
-                "    float blur = clamp(uBlur, 0.0, 1.0);\n"
-                "    vec3 radiance;\n"
-                "    if (uSource == 1)\n"
-                "    {\n"
-                "        // the level whose texels match the blur (about the width of a GGX lobe of roughness blur) or the footprint\n"
-                "        float texelsPerRadian = float(uBackgroundExtents.x) / (2.0 * PI);\n"
-                "        float level = log2(max(max(footprint, 2.0 * blur * blur) * texelsPerRadian, 1.0));\n"
-                "        level = min(level, float(background_top_level()));\n"
-                "        int level0 = int(floor(level));\n"
-                "        float t = level - float(level0);\n"
-                "        radiance = level0 == 0 ? background_bilinear(0, uv) : background_bicubic(level0, uv);\n"
-                "        if (t > 0.0)\n"
-                "            radiance = mix(radiance, background_bicubic(level0 + 1, uv), t);\n"
-                "    }\n"
-                "    else\n"
-                "    {\n"
-                "        float band = blur * 5.0;\n"
-                "        int band0 = min(int(floor(band)), 4);\n"
-                "        radiance = mix(environment_band(band0, uv), environment_band(band0 + 1, uv), band - float(band0));\n"
-                "    }\n"
-                "    FragColor = vec4(from_linear(tone_map(radiance * uIntensity)), 1.0);\n"
-                "}\n";
-            GLuint const vertexShader = scene_shadows::compile(GL_VERTEX_SHADER, vertexSource);
-            GLuint const fragmentShader = scene_shadows::compile(GL_FRAGMENT_SHADER, fragmentSource);
-            if (vertexShader == 0 || fragmentShader == 0)
-                return sResources;
-            GLuint const program = glCreateProgram();
-            glAttachShader(program, vertexShader);
-            glAttachShader(program, fragmentShader);
-            glLinkProgram(program);
-            glDeleteShader(vertexShader);
-            glDeleteShader(fragmentShader);
-            GLint ok = GL_FALSE;
-            glGetProgramiv(program, GL_LINK_STATUS, &ok);
-            if (ok != GL_TRUE)
-            {
-                glDeleteProgram(program);
-                return sResources;
-            }
-            sResources.program = program;
-            sResources.ndcToClip = glGetUniformLocation(program, "uNdcToClip");
-            sResources.clipToWorld = glGetUniformLocation(program, "uClipToWorld");
-            sResources.source = glGetUniformLocation(program, "uSource");
-            sResources.blur = glGetUniformLocation(program, "uBlur");
-            sResources.intensity = glGetUniformLocation(program, "uIntensity");
-            sResources.backgroundExtents = glGetUniformLocation(program, "uBackgroundExtents");
-            glCheck(glProgramUniform1i(program, glGetUniformLocation(program, "uEnvironment"), static_cast<GLint>(reserved_texture_unit::PbrEnvironment)));
-            glCheck(glProgramUniform1i(program, glGetUniformLocation(program, "uBackground"), static_cast<GLint>(reserved_texture_unit::Pbr0)));
-            glCheck(glCreateVertexArrays(1, &sResources.vertexArray));
-            sResources.failed = false;
-            return sResources;
         }
     }
 
@@ -3799,7 +3311,7 @@ namespace neogfx
             transformation = translation(contextOrigin.x, contextOrigin.y) * *transform() * translation(-contextOrigin.x, -contextOrigin.y) * aTransformation;
         }
 
-        bool const depthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
+        bool const depthTestEnabled = graphics_backend().depth_test_enabled();
         i_texture const* previousTexture = nullptr;
         // physically based shading (see i_pbr_shader): the textures bound to reserved_texture_unit::Pbr0 to Pbr3
         auto& pbrShader = program.pbr_shader();
@@ -3940,12 +3452,7 @@ namespace neogfx
             bool const textured = patch_drawable::has_texture(meshRenderer, material);
 
             if (depthTestEnabled)
-            {
-                if (!meshRenderer.depthTest)
-                    glCheck(glDisable(GL_DEPTH_TEST))
-                else
-                    glCheck(glEnable(GL_DEPTH_TEST))
-            }
+                graphics_backend().enable_depth_test(meshRenderer.depthTest);
 
             if (material.gradient)
                 apply_gradients(program.gradient_shader(), service<i_gradient_manager>().find_gradient(material.gradient->id.cookie()));
@@ -3977,16 +3484,7 @@ namespace neogfx
                     previousTexture = &texture;
                 }
                 if (sampling != texture_sampling::Multisample)
-                {
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ?
-                        GL_LINEAR :
-                        GL_NEAREST));
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling == texture_sampling::NormalMipmap ?
-                        GL_LINEAR_MIPMAP_LINEAR :
-                        sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ?
-                        GL_LINEAR :
-                        GL_NEAREST));
-                }
+                    graphics_backend().set_texture_filter(texture, sampling);
                 program.texture_shader().set_texture(texture);
                 if (material.pbr)
                     program.texture_shader().set_wrap(scene_textures::wrap_transform(texture, materialTexture.subTexture), material.pbr->wrapS, material.pbr->wrapT);
@@ -4081,29 +3579,17 @@ namespace neogfx
                         pbrTextures[unit]->unbind();
                     texture->bind(static_cast<std::uint32_t>(reserved_texture_unit::Pbr0) + static_cast<std::uint32_t>(unit));
                     pbrTextures[unit] = texture;
-                    auto const sampling = texture->sampling();
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ?
-                        GL_LINEAR :
-                        GL_NEAREST));
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling == texture_sampling::NormalMipmap ?
-                        GL_LINEAR_MIPMAP_LINEAR :
-                        sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ?
-                        GL_LINEAR :
-                        GL_NEAREST));
+                    graphics_backend().set_texture_filter(*texture, texture->sampling());
                 }
                 if (pbrEnvironment == nullptr)
                 {
                     // image based lighting: an equirectangular (texture_sampling::Data, so rectangle) texture, bilinear
                     pbrEnvironment = &pbrShader.environment();
                     pbrEnvironment->bind(static_cast<std::uint32_t>(reserved_texture_unit::PbrEnvironment));
-                    auto const environmentHandle = static_cast<GLuint>(pbrEnvironment->native_handle());
-                    glCheck(glTextureParameteri(environmentHandle, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-                    glCheck(glTextureParameteri(environmentHandle, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-                    glCheck(glTextureParameteri(environmentHandle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-                    glCheck(glTextureParameteri(environmentHandle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+                    graphics_backend().set_texture_linear_clamp(*pbrEnvironment);
                 }
                 // the base colour texture's sampling state (above) assumes its unit is active
-                glCheck(glActiveTexture(GL_TEXTURE0 + static_cast<GLenum>(reserved_texture_unit::Tex)));
+                graphics_backend().set_active_texture_unit(static_cast<std::uint32_t>(reserved_texture_unit::Tex));
                 pbrShader.set_pbr(pbr);
             }
             else
@@ -4120,13 +3606,13 @@ namespace neogfx
                 texture->unbind();
         if (pbrEnvironment != nullptr)
             pbrEnvironment->unbind();
-        glCheck(glBindTextureUnit(static_cast<GLuint>(reserved_texture_unit::PbrShadow), 0));
+        graphics_backend().unbind_texture_unit(static_cast<std::uint32_t>(reserved_texture_unit::PbrShadow));
 
         if (previousTexture != nullptr)
             previousTexture->unbind();
 
         if (depthTestEnabled)
-            glCheck(glEnable(GL_DEPTH_TEST))
+            graphics_backend().enable_depth_test(true);
     }
 
     void opengl_rendering_context::draw_scene_lights_and_shadows(i_standard_shader_program& aProgram, opengl_scene_buffer& aSceneBuffer,
@@ -4138,7 +3624,7 @@ namespace neogfx
         auto& pbrShader = aProgram.pbr_shader();
         auto const& pointLights = vertexShader.scene_point_lights();
         vec3 const originOffset = origin().to_vec3();
-        bool const shadows = pbrShader.pbr_light().has_value() && pbrShader.pbr_shadows().has_value() && !scene_shadows::get(aProgram).failed;
+        bool const shadows = pbrShader.pbr_light().has_value() && pbrShader.pbr_shadows().has_value() && graphics_backend().scene_shadows_available(aProgram);
 
         // shadow views: 0 the directional light's, then six (cube faces) for each point light casting shadows
         thread_local std::vector<mat44> tViews;
@@ -4195,39 +3681,14 @@ namespace neogfx
             pbrShader.set_pbr_light_buffer(0u, 0u);
         }
 
-        auto& resources = scene_shadows::get(aProgram);
         if (tViews.empty())
         {
             pbrShader.set_pbr_shadow_buffer(0u, -1, 0.0);
             return;
         }
 
-        // the shadow maps: depth only, drawn with their own program into the atlas (n.b. GL state saved and restored)
-        GLint previousDrawFramebuffer = 0;
-        GLint previousReadFramebuffer = 0;
-        GLint previousViewport[4] = {};
-        GLint previousScissor[4] = {};
-        GLint previousDepthFunc = GL_LESS;
-        GLboolean previousDepthMask = GL_TRUE;
-        glCheck(glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &previousDrawFramebuffer));
-        glCheck(glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &previousReadFramebuffer));
-        glCheck(glGetIntegerv(GL_VIEWPORT, previousViewport));
-        glCheck(glGetIntegerv(GL_SCISSOR_BOX, previousScissor));
-        glCheck(glGetIntegerv(GL_DEPTH_FUNC, &previousDepthFunc));
-        glCheck(glGetBooleanv(GL_DEPTH_WRITEMASK, &previousDepthMask));
-        bool const previousDepthTest = glIsEnabled(GL_DEPTH_TEST);
-        bool const previousScissorTest = glIsEnabled(GL_SCISSOR_TEST);
-        bool const previousCullFace = glIsEnabled(GL_CULL_FACE);
-        bool const previousBlend = glIsEnabled(GL_BLEND);
-        bool const previousPolygonOffset = glIsEnabled(GL_POLYGON_OFFSET_FILL);
-
-        glCheck(glBindFramebuffer(GL_FRAMEBUFFER, resources.framebuffer));
-        glCheck(glUseProgram(resources.program));
-        glCheck(glUniform1ui(resources.modelTableBase, aModelTableBase));
-        // alpha tested meshes' base colour textures are bound to reserved_texture_unit::Pbr0 (unbound by the time it is used)
-        glCheck(glUniform1i(resources.baseTexture, static_cast<GLint>(reserved_texture_unit::Pbr0)));
         // the meshes' alpha testing (glTF alpha mode MASK, with a base colour texture)
-        thread_local std::vector<std::optional<std::tuple<GLuint, vec4f, float, texture_wrap, texture_wrap>>> tAlphaTests;
+        thread_local std::vector<std::optional<scene_shadow_alpha_test>> tAlphaTests;
         tAlphaTests.assign(aMeshes.size(), std::nullopt);
         for (std::size_t meshIndex = 0u; meshIndex < aMeshes.size(); ++meshIndex)
         {
@@ -4239,74 +3700,19 @@ namespace neogfx
                 continue;
             auto const& materialTexture = patch_drawable::texture(meshRenderer, material);
             auto const& texture = *service<i_texture_manager>().find_texture(materialTexture.id.cookie());
-            tAlphaTests[meshIndex].emplace(static_cast<GLuint>(texture.native_handle()),
+            tAlphaTests[meshIndex].emplace(&texture,
                 scene_textures::wrap_transform(texture, materialTexture.subTexture).as<float>(),
                 static_cast<float>(*material.pbr->alphaCutoff), material.pbr->wrapS, material.pbr->wrapT);
         }
-        glCheck(glEnable(GL_DEPTH_TEST));
-        glCheck(glDepthFunc(GL_LESS));
-        glCheck(glDepthMask(GL_TRUE));
-        glCheck(glDisable(GL_CULL_FACE));
-        glCheck(glDisable(GL_BLEND));
-        glCheck(glEnable(GL_SCISSOR_TEST));
-        // slope scaled depth bias against shadow acne
-        glCheck(glEnable(GL_POLYGON_OFFSET_FILL));
-        glCheck(glPolygonOffset(1.5f, 2.0f));
-        for (std::uint32_t view = 0u; view < tViews.size(); ++view)
-        {
-            if (view == 0u && directionalView != 0)
-                continue;
-            auto const tile = scene_shadows::tile(view);
-            glCheck(glViewport(tile[0], tile[1], tile[2], tile[3]));
-            glCheck(glScissor(tile[0], tile[1], tile[2], tile[3]));
-            glCheck(glClear(GL_DEPTH_BUFFER_BIT));
-            auto const viewProjection = tViews[view].as<float>();
-            glCheck(glUniformMatrix4fv(resources.viewProjection, 1, GL_FALSE, viewProjection.data()));
-            for (std::size_t meshIndex = 0u; meshIndex < aMeshes.size(); ++meshIndex)
-            {
-                auto const& mesh = aMeshes[meshIndex];
-                if (!mesh)
-                    continue;
-                auto const& alphaTest = tAlphaTests[meshIndex];
-                glCheck(glUniform1i(resources.alphaTest, alphaTest ? 1 : 0));
-                if (alphaTest)
-                {
-                    auto const& [texture, transform, cutoff, wrapS, wrapT] = *alphaTest;
-                    glCheck(glBindTextureUnit(static_cast<GLuint>(reserved_texture_unit::Pbr0), texture));
-                    glCheck(glUniform4f(resources.textureTransform, transform.x, transform.y, transform.z, transform.w));
-                    glCheck(glUniform1f(resources.alphaCutoff, cutoff));
-                    glCheck(glUniform2i(resources.textureWrap, static_cast<GLint>(wrapS), static_cast<GLint>(wrapT)));
-                }
-                aSceneBuffer.draw_depth(mesh->indexStart, mesh->indexEnd - mesh->indexStart);
-            }
-        }
 
-        glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, static_cast<GLuint>(previousDrawFramebuffer)));
-        glCheck(glBindFramebuffer(GL_READ_FRAMEBUFFER, static_cast<GLuint>(previousReadFramebuffer)));
-        glCheck(glViewport(previousViewport[0], previousViewport[1], previousViewport[2], previousViewport[3]));
-        glCheck(glScissor(previousScissor[0], previousScissor[1], previousScissor[2], previousScissor[3]));
-        glCheck(glDepthFunc(static_cast<GLenum>(previousDepthFunc)));
-        glCheck(glDepthMask(previousDepthMask));
-        if (!previousDepthTest)
-            glCheck(glDisable(GL_DEPTH_TEST));
-        if (!previousScissorTest)
-            glCheck(glDisable(GL_SCISSOR_TEST));
-        if (previousCullFace)
-            glCheck(glEnable(GL_CULL_FACE));
-        if (previousBlend)
-            glCheck(glEnable(GL_BLEND));
-        if (!previousPolygonOffset)
-            glCheck(glDisable(GL_POLYGON_OFFSET_FILL));
-        glCheck(glBindTextureUnit(static_cast<GLuint>(reserved_texture_unit::Pbr0), 0));
-        // n.b. the standard program still considers itself active
-        glCheck(glUseProgram(static_cast<GLuint>(reinterpret_cast<std::intptr_t>(aProgram.handle()))));
+        // the shadow maps: depth only, drawn with their own program into the atlas
+        graphics_backend().draw_scene_shadow_maps(aProgram, aSceneBuffer, tViews, directionalView, aMeshes, tAlphaTests, aModelTableBase);
 
         scoped_lock_ssbo<mat4f> matrices{ aProgram.shadow_matrices(), static_cast<std::uint32_t>(tViews.size()) };
         auto const bias = scene_shadows::bias();
         for (std::size_t view = 0u; view < tViews.size(); ++view)
             matrices.data()[view] = (bias * tViews[view]).as<float>();
         pbrShader.set_pbr_shadow_buffer(matrices.range().first, directionalView, directionalTexel);
-        glCheck(glBindTextureUnit(static_cast<GLuint>(reserved_texture_unit::PbrShadow), resources.atlas));
     }
 
     void opengl_rendering_context::draw_scene_background(i_standard_shader_program& aProgram, optional_mat44 const& aTransformation)
@@ -4315,9 +3721,6 @@ namespace neogfx
         auto const background = *pbrShader.background();
         // n.b. drawn once (the first layer drawn)
         pbrShader.set_background(std::nullopt);
-        auto& resources = scene_background::get();
-        if (resources.failed)
-            return;
 
         // the camera's NDC square (at NDC depth 0; it maps to the canvas) to clip space: as standard.vert transforms the scene
         // meshes' vertices, which have the context origin added (see draw_entities; the transformation is conjugated by it, see
@@ -4347,49 +3750,9 @@ namespace neogfx
             background.clipToWorld;
 
         i_texture const* backgroundTexture = (background.source == pbr_background_source::Texture ? pbrShader.background_texture() : nullptr);
-        GLint previousVertexArray = 0;
-        glCheck(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &previousVertexArray));
-        GLboolean previousDepthMask = GL_TRUE;
-        glCheck(glGetBooleanv(GL_DEPTH_WRITEMASK, &previousDepthMask));
-        bool const previousDepthTest = glIsEnabled(GL_DEPTH_TEST);
-        bool const previousCullFace = glIsEnabled(GL_CULL_FACE);
-        bool const previousBlend = glIsEnabled(GL_BLEND);
-
-        glCheck(glUseProgram(resources.program));
-        auto const ndcToClipf = ndcToClip.as<float>();
-        auto const clipToWorldf = background.clipToWorld.as<float>();
-        glCheck(glUniformMatrix4fv(resources.ndcToClip, 1, GL_FALSE, ndcToClipf.data()));
-        glCheck(glUniformMatrix4fv(resources.clipToWorld, 1, GL_FALSE, clipToWorldf.data()));
-        glCheck(glUniform1i(resources.source, backgroundTexture != nullptr ? 1 : 0));
-        glCheck(glUniform1f(resources.blur, static_cast<float>(background.blur)));
-        glCheck(glUniform1f(resources.intensity, static_cast<float>(pbrShader.environment_intensity())));
-        if (backgroundTexture != nullptr)
-        {
-            // the panorama's extents: the texture is half as tall again (see i_pbr_shader::set_background_texture)
-            auto const extents = backgroundTexture->storage_extents();
-            glCheck(glUniform2i(resources.backgroundExtents, static_cast<GLint>(extents.cx), static_cast<GLint>(extents.cy * 2.0 / 3.0 + 0.5)));
-            glCheck(glBindTextureUnit(static_cast<GLuint>(reserved_texture_unit::Pbr0), static_cast<GLuint>(backgroundTexture->native_handle())));
-        }
-        else
-            glCheck(glBindTextureUnit(static_cast<GLuint>(reserved_texture_unit::PbrEnvironment), static_cast<GLuint>(pbrShader.environment().native_handle())));
-        glCheck(glDisable(GL_DEPTH_TEST));
-        glCheck(glDepthMask(GL_FALSE));
-        glCheck(glDisable(GL_CULL_FACE));
-        glCheck(glDisable(GL_BLEND));
-        glCheck(glBindVertexArray(resources.vertexArray));
-        glCheck(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
-
-        glCheck(glBindVertexArray(static_cast<GLuint>(previousVertexArray)));
-        glCheck(glBindTextureUnit(static_cast<GLuint>(backgroundTexture != nullptr ? reserved_texture_unit::Pbr0 : reserved_texture_unit::PbrEnvironment), 0));
-        glCheck(glDepthMask(previousDepthMask));
-        if (previousDepthTest)
-            glCheck(glEnable(GL_DEPTH_TEST));
-        if (previousCullFace)
-            glCheck(glEnable(GL_CULL_FACE));
-        if (previousBlend)
-            glCheck(glEnable(GL_BLEND));
-        // n.b. the standard program still considers itself active
-        glCheck(glUseProgram(static_cast<GLuint>(reinterpret_cast<std::intptr_t>(aProgram.handle()))));
+        graphics_backend().draw_scene_background(aProgram, ndcToClip, background.clipToWorld, 
+            backgroundTexture, backgroundTexture == nullptr ? &pbrShader.environment() : nullptr,
+            background.blur, pbrShader.environment_intensity());
     }
 
     void opengl_rendering_context::draw_patch(patch_drawable& aPatch, const mat44& aTransformation)
@@ -4407,7 +3770,7 @@ namespace neogfx
 
         i_texture const* previousTexture = nullptr;
 
-        bool const depthTestEnabled = glIsEnabled(GL_DEPTH_TEST); // @todo move to API
+        bool const depthTestEnabled = graphics_backend().depth_test_enabled();
 
         for (auto item = aPatch.items.begin(); item != aPatch.items.end();)
         {
@@ -4457,12 +3820,7 @@ namespace neogfx
             }
 
             if (depthTestEnabled)
-            {
-                if (!item->meshDrawable->renderer->depthTest)
-                    glCheck(glDisable(GL_DEPTH_TEST))
-                else
-                    glCheck(glEnable(GL_DEPTH_TEST))
-            }
+                graphics_backend().enable_depth_test(item->meshDrawable->renderer->depthTest);
 
             if (item->material->gradient)
                 // whatever is being drawn brought a gradient of its own: ours filter it rather than
@@ -4495,16 +3853,7 @@ namespace neogfx
                 }
 
                 if (sampling != texture_sampling::Multisample)
-                {
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ?
-                        GL_LINEAR :
-                        GL_NEAREST));
-                    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling == texture_sampling::NormalMipmap ?
-                        GL_LINEAR_MIPMAP_LINEAR :
-                        sampling != texture_sampling::Nearest && sampling != texture_sampling::Data ?
-                        GL_LINEAR :
-                        GL_NEAREST));
-                }
+                    graphics_backend().set_texture_filter(texture, sampling);
 
                 rendering_engine().default_shader_program().texture_shader().set_texture(texture);
                 rendering_engine().default_shader_program().texture_shader().set_effect(batchMaterial.shaderEffect != std::nullopt ?
@@ -4549,7 +3898,7 @@ namespace neogfx
             previousTexture->unbind();
 
         if (depthTestEnabled)
-            glCheck(glEnable(GL_DEPTH_TEST))
+            graphics_backend().enable_depth_test(true);
     }
 
     void opengl_rendering_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect)

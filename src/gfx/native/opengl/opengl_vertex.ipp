@@ -38,24 +38,8 @@ namespace neogfx
     template <typename Vertex, typename Attrib>
     inline void opengl_vertex_attrib_array<Vertex, Attrib>::update(opengl_buffer<vertex_type>& aBuffer)
     {
-        GLint previousBindingHandle;
-        glCheck(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &previousBindingHandle));
-        glCheck(glBindBuffer(GL_ARRAY_BUFFER, aBuffer.handle()));
-        GLuint index;
-        glCheck(index = glGetAttribLocation(to_gl_handle<GLuint>(iShaderProgram.handle()), iVariableName.c_str()));
-        if (index != -1)
-        {
-            glCheck(glVertexAttribPointer(
-                index,
-                static_cast<GLint>(arity),
-                opengl_attrib_data_type<value_type>::type,
-                iNormalized ? GL_TRUE : GL_FALSE,
-                static_cast<GLsizei>(iStride),
-                reinterpret_cast<const GLvoid*>(iOffset)));
-            glCheck(glEnableVertexAttribArray(index));
-        }
-        if (previousBindingHandle != gl_handle_cast<GLint>(aBuffer.handle()))
-            glCheck(glBindBuffer(GL_ARRAY_BUFFER, previousBindingHandle));
+        graphics_backend().set_vertex_attribute(iShaderProgram, iVariableName, aBuffer.handle(),
+            static_cast<std::uint32_t>(arity), gpu_attribute_type_of<value_type>::type, iNormalized, iStride, iOffset);
     }
 
     template <typename V>
