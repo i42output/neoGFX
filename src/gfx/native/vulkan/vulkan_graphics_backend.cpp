@@ -2081,7 +2081,7 @@ namespace neogfx
         if (result.GetCompilationStatus() != shaderc_compilation_status_success)
         {
             auto const& errMsg = result.GetErrorMessage();
-            std::cerr << "neogfx::vulkan_graphics_backend::error: " << errMsg << std::endl;
+            std::cerr << "neogfx::vulkan_graphics_backend::compile_shader::error: " << errMsg << std::endl;
             throw failed_to_create_shader_program(errMsg);
         }
         return std::vector<std::uint32_t>{ result.cbegin(), result.cend() };
