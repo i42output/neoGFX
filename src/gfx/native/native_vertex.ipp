@@ -1,4 +1,4 @@
-// opengl_vertex.ipp
+// native_vertex.ipp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015-2026 Leigh Johnston.  All Rights Reserved.
@@ -19,37 +19,37 @@
 
 #pragma once
 
-#include "opengl_buffer.hpp"
-#include "opengl_vertex.hpp"
+#include "native_buffer.hpp"
+#include "native_vertex.hpp"
 
 namespace neogfx
 {
     template <typename Vertex, typename Attrib>
-    inline opengl_vertex_attrib_array<Vertex, Attrib>::opengl_vertex_attrib_array(bool aNormalized, std::size_t aStride, std::size_t aOffset, const i_shader_program& aShaderProgram, std::string const& aVariableName) :
+    inline native_vertex_attrib_array<Vertex, Attrib>::native_vertex_attrib_array(bool aNormalized, std::size_t aStride, std::size_t aOffset, const i_shader_program& aShaderProgram, std::string const& aVariableName) :
         iNormalized{ aNormalized }, iStride{ aStride }, iOffset{ aOffset }, iShaderProgram{ aShaderProgram }, iVariableName{ aVariableName }
     {
     }
 
     template <typename Vertex, typename Attrib>
-    inline opengl_vertex_attrib_array<Vertex, Attrib>::~opengl_vertex_attrib_array()
+    inline native_vertex_attrib_array<Vertex, Attrib>::~native_vertex_attrib_array()
     {
     }
 
     template <typename Vertex, typename Attrib>
-    inline void opengl_vertex_attrib_array<Vertex, Attrib>::update(opengl_buffer<vertex_type>& aBuffer)
+    inline void native_vertex_attrib_array<Vertex, Attrib>::update(native_buffer<vertex_type>& aBuffer)
     {
         graphics_backend().set_vertex_attribute(iShaderProgram, iVariableName, aBuffer.handle(),
             static_cast<std::uint32_t>(arity), gpu_attribute_type_of<value_type>::type, iNormalized, iStride, iOffset);
     }
 
     template <typename V>
-    inline opengl_vertex_buffer<V>::opengl_vertex_buffer(i_vertex_provider& aProvider, vertex_buffer_type aType) :
+    inline native_vertex_buffer<V>::native_vertex_buffer(i_vertex_provider& aProvider, vertex_buffer_type aType) :
         vertex_buffer{ aProvider, aType }, iBuffer{ *this, aProvider.cacheable() }
     {
     }
 
     template <typename V>
-    inline void opengl_vertex_buffer<V>::attach_shader(i_rendering_context& aContext, i_shader_program& aShaderProgram)
+    inline void native_vertex_buffer<V>::attach_shader(i_rendering_context& aContext, i_shader_program& aShaderProgram)
     {
         if (iVao == std::nullopt)
             iVao.emplace();
@@ -155,25 +155,25 @@ namespace neogfx
     }
 
     template <typename V>
-    inline void opengl_vertex_buffer<V>::detach_shader()
+    inline void native_vertex_buffer<V>::detach_shader()
     {
         vertex_buffer::detach_shader();
     }
 
     template <typename V>
-    inline const optional_mat44& opengl_vertex_buffer<V>::transformation() const
+    inline const optional_mat44& native_vertex_buffer<V>::transformation() const
     {
         return iTransformation;
     }
 
     template <typename V>
-    inline void opengl_vertex_buffer<V>::set_transformation(const optional_mat44& aTransformation)
+    inline void native_vertex_buffer<V>::set_transformation(const optional_mat44& aTransformation)
     {
         iTransformation = aTransformation;
     }
 
     template <typename V>
-    inline void opengl_vertex_buffer<V>::reclaim(std::size_t aStartIndex, std::size_t aEndIndex)
+    inline void native_vertex_buffer<V>::reclaim(std::size_t aStartIndex, std::size_t aEndIndex)
     {
         // n.b. a scene mesh's cached range is the range of its vertices in the scene buffer
         if (iSceneBuffer && iSceneBuffer->reclaim(static_cast<std::uint32_t>(aStartIndex), static_cast<std::uint32_t>(aEndIndex)))
@@ -182,7 +182,7 @@ namespace neogfx
     }
 
     template <typename V>
-    inline void opengl_vertex_buffer<V>::reclaim()
+    inline void native_vertex_buffer<V>::reclaim()
     {
         vertices().reclaim();
         if (iSceneBuffer)
@@ -190,37 +190,37 @@ namespace neogfx
     }
 
     template <typename V>
-    inline void opengl_vertex_buffer<V>::flush()
+    inline void native_vertex_buffer<V>::flush()
     {
         flush(vertices().size());
     }
 
     template <typename V>
-    inline void opengl_vertex_buffer<V>::flush(std::size_t aCount)
+    inline void native_vertex_buffer<V>::flush(std::size_t aCount)
     {
         flush(0, aCount);
     }
 
     template <typename V>
-    inline void opengl_vertex_buffer<V>::flush(std::size_t aOffset, std::size_t aCount)
+    inline void native_vertex_buffer<V>::flush(std::size_t aOffset, std::size_t aCount)
     {
         iBuffer.flush(aOffset, aCount);
     }
 
     template <typename V>
-    inline opengl_vertex_buffer<V>::vertex_array& opengl_vertex_buffer<V>::vertices()
+    inline native_vertex_buffer<V>::vertex_array& native_vertex_buffer<V>::vertices()
     {
         return iBuffer;
     }
 
     template <typename V>
-    inline std::size_t opengl_vertex_buffer<V>::capacity() const
+    inline std::size_t native_vertex_buffer<V>::capacity() const
     {
         return iBuffer.capacity();
     }
 
     template <typename V>
-    inline opengl_scene_buffer& opengl_vertex_buffer<V>::scene_buffer()
+    inline native_scene_buffer& native_vertex_buffer<V>::scene_buffer()
     {
         if (!iSceneBuffer)
             iSceneBuffer.emplace();
@@ -228,13 +228,13 @@ namespace neogfx
     }
 
     template <typename V>
-    inline void opengl_vertex_buffer<V>::buffer_grown()
+    inline void native_vertex_buffer<V>::buffer_grown()
     {
         update_attrib_arrays();
     }
 
     template <typename V>
-    inline void opengl_vertex_buffer<V>::update_attrib_arrays()
+    inline void native_vertex_buffer<V>::update_attrib_arrays()
     {
         if (iVao)
             iVao->bind();

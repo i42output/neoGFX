@@ -1,4 +1,4 @@
-// opengl_buffer.hpp
+// native_buffer.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -25,12 +25,11 @@
 #include <bit>
 
 #include <neogfx/gfx/i_rendering_engine.hpp>
-#include "../i_graphics_backend.hpp"
-#include "opengl.hpp"
+#include "i_graphics_backend.hpp"
 
 namespace neogfx
 {
-    class opengl_buffer_owner
+    class native_buffer_owner
     {
     public:
         virtual void buffer_grown() = 0;
@@ -40,7 +39,7 @@ namespace neogfx
     // frame). A device local buffer (e.g. cached scene meshes, mostly unchanged from frame to frame) lives in GPU
     // memory and is written with write(): it cannot be mapped.
     template <typename T>
-    class opengl_buffer
+    class native_buffer
     {
     private:
         static constexpr std::size_t kRingBufferSize = 3u;
@@ -54,14 +53,14 @@ namespace neogfx
         using iterator = pointer;
         using size_type = std::size_t;
     public:
-        struct no_owner : std::logic_error { no_owner() : std::logic_error{ "neogfx::opengl_buffer::no_owner" } {} };
+        struct no_owner : std::logic_error { no_owner() : std::logic_error{ "neogfx::native_buffer::no_owner" } {} };
     private:
         using free_block = std::pair<size_type, size_type>;
         using free_blocks = std::vector<free_block>;
     public:
-        opengl_buffer(bool aCacheable, size_type aCapacity, bool aDeviceLocal = false);
-        opengl_buffer(opengl_buffer_owner& aOwner, bool aCacheable, size_type aCapacity = 0u, bool aDeviceLocal = false);
-        ~opengl_buffer();
+        native_buffer(bool aCacheable, size_type aCapacity, bool aDeviceLocal = false);
+        native_buffer(native_buffer_owner& aOwner, bool aCacheable, size_type aCapacity = 0u, bool aDeviceLocal = false);
+        ~native_buffer();
     public:
         size_type capacity() const;
         bool empty() const;
@@ -116,7 +115,7 @@ namespace neogfx
         size_type iCapacity = 0;
         size_type iSize = 0;
         mutable pointer iMemory = nullptr;
-        opengl_buffer_owner* iOwner = nullptr;
+        native_buffer_owner* iOwner = nullptr;
         bool iCacheable;
         bool iDeviceLocal;
         std::array<std::array<std::array<free_blocks, 32u>, kRingBufferSize>, static_cast<std::size_t>(render_target_type::COUNT)> iBlocksToFree;

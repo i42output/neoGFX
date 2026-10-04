@@ -30,9 +30,9 @@
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gfx/i_rendering_context.hpp>
 #include "opengl_surface.hpp"
-#include "opengl_vertex.hpp"
+#include "../native_vertex.hpp"
 #include "opengl_texture.hpp"
-#include "opengl_rendering_context.hpp"
+#include "../native_rendering_context.hpp"
 
 namespace neogfx
 {
@@ -164,12 +164,12 @@ namespace neogfx
 
     std::unique_ptr<i_rendering_context> opengl_surface::create_rendering_context(blending_mode aBlendingMode) const
     {
-        return std::make_unique<opengl_rendering_context>(*this, aBlendingMode);
+        return std::make_unique<native_rendering_context>(*this, aBlendingMode);
     }
 
     std::unique_ptr<i_rendering_context> opengl_surface::create_rendering_context(const i_widget& aWidget, blending_mode aBlendingMode) const
     {
-        return std::make_unique<opengl_rendering_context>(*this, aWidget, aBlendingMode);
+        return std::make_unique<native_rendering_context>(*this, aWidget, aBlendingMode);
     }
 
     void opengl_surface::set_destroying()

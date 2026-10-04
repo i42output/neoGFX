@@ -1,4 +1,4 @@
-// opengl_triangle_renderer.hpp
+// native_triangle_renderer.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2018-2026 Leigh Johnston.  All Rights Reserved.
@@ -21,28 +21,28 @@
 
 #include <neogfx/gfx/i_rendering_context.hpp>
 #include <neogfx/gfx/i_vertex_buffer.hpp>
-#include "opengl_vertex.hpp"
+#include "native_vertex.hpp"
 
 namespace neogfx
 {
     inline constexpr struct with_textures_t {} with_textures;
 
-    class opengl_triangle_renderer
+    class native_triangle_renderer
     {
     public:
-        struct not_enough_room : std::invalid_argument { not_enough_room() : std::invalid_argument("neogfx::opengl_triangle_renderer::not_enough_room") {} };
-        struct invalid_draw_count : std::invalid_argument { invalid_draw_count() : std::invalid_argument("neogfx::opengl_triangle_renderer::invalid_draw_count") {} };
-        struct cannot_use_barrier : std::invalid_argument { cannot_use_barrier() : std::invalid_argument("neogfx::opengl_triangle_renderer::cannot_use_barrier") {} };
+        struct not_enough_room : std::invalid_argument { not_enough_room() : std::invalid_argument("neogfx::native_triangle_renderer::not_enough_room") {} };
+        struct invalid_draw_count : std::invalid_argument { invalid_draw_count() : std::invalid_argument("neogfx::native_triangle_renderer::invalid_draw_count") {} };
+        struct cannot_use_barrier : std::invalid_argument { cannot_use_barrier() : std::invalid_argument("neogfx::native_triangle_renderer::cannot_use_barrier") {} };
     public:
-        typedef opengl_vertex_buffer<>::vertex_array::value_type value_type;
-        typedef opengl_vertex_buffer<>::vertex_array::const_iterator const_iterator;
-        typedef opengl_vertex_buffer<>::vertex_array::iterator iterator;
+        typedef native_vertex_buffer<>::vertex_array::value_type value_type;
+        typedef native_vertex_buffer<>::vertex_array::const_iterator const_iterator;
+        typedef native_vertex_buffer<>::vertex_array::iterator iterator;
     public:
-        opengl_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, std::size_t aNeed = 0u, bool aUseBarrier = false);
-        opengl_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false);
-        opengl_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false);
-        opengl_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false);
-        ~opengl_triangle_renderer();
+        native_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, std::size_t aNeed = 0u, bool aUseBarrier = false);
+        native_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false);
+        native_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, std::uint32_t aMode, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false);
+        native_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false);
+        ~native_triangle_renderer();
     public:
         i_rendering_context& parent();
         std::size_t primitive_vertex_count() const;
@@ -79,14 +79,14 @@ namespace neogfx
         bool is_new_transformation(const optional_mat44& aTransformation) const;
         const optional_mat44& transformation() const;
         void set_transformation(const optional_mat44& aTransformation);
-        const opengl_vertex_buffer<>::vertex_array& vertices() const;
-        opengl_vertex_buffer<>::vertex_array& vertices();
+        const native_vertex_buffer<>::vertex_array& vertices() const;
+        native_vertex_buffer<>::vertex_array& vertices();
     private:
         i_vertex_provider& iProvider;
         i_rendering_context& iParent;
-        opengl_vertex_buffer<>& iVertexBuffer;
+        native_vertex_buffer<>& iVertexBuffer;
         bool iWithTextures;
-        GLint iStart;
+        std::int32_t iStart;
         bool iUseBarrier;
         bool iDrawOnExit;
     };

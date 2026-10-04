@@ -1,4 +1,4 @@
-// opengl_triangle_renderer.cpp
+// native_triangle_renderer.cpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2018-2026 Leigh Johnston.  All Rights Reserved.
@@ -19,16 +19,16 @@
 
 #include <neogfx/neogfx.hpp>
 
-#include "opengl_triangle_renderer.hpp"
+#include "native_triangle_renderer.hpp"
 
 namespace neogfx
 {
-    opengl_triangle_renderer::opengl_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, std::size_t aNeed, bool aUseBarrier) :
+    native_triangle_renderer::native_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, std::size_t aNeed, bool aUseBarrier) :
         iProvider{ aProvider },
         iParent{ aParent },
-        iVertexBuffer{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
+        iVertexBuffer{ static_cast<native_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
         iWithTextures{ false },
-        iStart{ static_cast<GLint>(vertices().size()) },
+        iStart{ static_cast<std::int32_t>(vertices().size()) },
         iUseBarrier{ aUseBarrier },
         iDrawOnExit{ true }
     {
@@ -37,12 +37,12 @@ namespace neogfx
             throw not_enough_room();
     }
     
-    opengl_triangle_renderer::opengl_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, const optional_mat44& aTransformation, std::size_t aNeed, bool aUseBarrier) :
+    native_triangle_renderer::native_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, const optional_mat44& aTransformation, std::size_t aNeed, bool aUseBarrier) :
         iProvider{ aProvider },
         iParent{ aParent },
-        iVertexBuffer{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
+        iVertexBuffer{ static_cast<native_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
         iWithTextures{ false },
-        iStart{ static_cast<GLint>(vertices().size()) },
+        iStart{ static_cast<std::int32_t>(vertices().size()) },
         iUseBarrier{ aUseBarrier },
         iDrawOnExit{ true }
     {
@@ -51,12 +51,12 @@ namespace neogfx
             throw not_enough_room();
     }
     
-    opengl_triangle_renderer::opengl_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, GLenum aMode, with_textures_t, std::size_t aNeed, bool aUseBarrier) :
+    native_triangle_renderer::native_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, std::uint32_t aMode, with_textures_t, std::size_t aNeed, bool aUseBarrier) :
         iProvider{ aProvider },
         iParent{ aParent },
-        iVertexBuffer{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
+        iVertexBuffer{ static_cast<native_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
         iWithTextures{ true },
-        iStart{ static_cast<GLint>(vertices().size()) },
+        iStart{ static_cast<std::int32_t>(vertices().size()) },
         iUseBarrier{ aUseBarrier },
         iDrawOnExit{ true }
     {
@@ -65,12 +65,12 @@ namespace neogfx
             throw not_enough_room();
     }
     
-    opengl_triangle_renderer::opengl_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed, bool aUseBarrier) :
+    native_triangle_renderer::native_triangle_renderer(i_vertex_provider& aProvider, i_rendering_context& aParent, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed, bool aUseBarrier) :
         iProvider{ aProvider },
         iParent{ aParent },
-        iVertexBuffer{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
+        iVertexBuffer{ static_cast<native_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
         iWithTextures{ true },
-        iStart{ static_cast<GLint>(vertices().size()) },
+        iStart{ static_cast<std::int32_t>(vertices().size()) },
         iUseBarrier{ aUseBarrier },
         iDrawOnExit{ true }
     {
@@ -79,83 +79,83 @@ namespace neogfx
             throw not_enough_room();
     }
     
-    opengl_triangle_renderer::~opengl_triangle_renderer()
+    native_triangle_renderer::~native_triangle_renderer()
     {
         if (iDrawOnExit)
             draw();
     }
 
-    i_rendering_context& opengl_triangle_renderer::parent()
+    i_rendering_context& native_triangle_renderer::parent()
     {
         return iParent;
     }
 
-    std::size_t opengl_triangle_renderer::primitive_vertex_count() const
+    std::size_t native_triangle_renderer::primitive_vertex_count() const
     {
         return 3; // triangle
     }
 
-    bool opengl_triangle_renderer::with_textures() const
+    bool native_triangle_renderer::with_textures() const
     {
         return iWithTextures;
     }
 
-    opengl_triangle_renderer::const_iterator opengl_triangle_renderer::begin() const
+    native_triangle_renderer::const_iterator native_triangle_renderer::begin() const
     {
         return vertices().begin() + static_cast<std::size_t>(iStart);
     }
     
-    opengl_triangle_renderer::iterator opengl_triangle_renderer::begin()
+    native_triangle_renderer::iterator native_triangle_renderer::begin()
     {
         return vertices().begin() + static_cast<std::size_t>(iStart);
     }
     
-    opengl_triangle_renderer::const_iterator opengl_triangle_renderer::end() const
+    native_triangle_renderer::const_iterator native_triangle_renderer::end() const
     {
         return vertices().end();
     }
     
-    opengl_triangle_renderer::iterator opengl_triangle_renderer::end()
+    native_triangle_renderer::iterator native_triangle_renderer::end()
     {
         return vertices().end();
     }
     
-    bool opengl_triangle_renderer::empty() const
+    bool native_triangle_renderer::empty() const
     {
         return vertices().size() == static_cast<std::size_t>(iStart);
     }
 
-    std::size_t opengl_triangle_renderer::size() const
+    std::size_t native_triangle_renderer::size() const
     {
         return end() - begin();
     }
 
-    opengl_triangle_renderer::value_type const& opengl_triangle_renderer::operator[](std::size_t aOffset) const
+    native_triangle_renderer::value_type const& native_triangle_renderer::operator[](std::size_t aOffset) const
     {
         return *(begin() + aOffset);
     }
 
-    opengl_triangle_renderer::value_type& opengl_triangle_renderer::operator[](std::size_t aOffset)
+    native_triangle_renderer::value_type& native_triangle_renderer::operator[](std::size_t aOffset)
     {
         return *(begin() + aOffset);
     }
 
-    void opengl_triangle_renderer::push_back(value_type const& aVertex)
+    void native_triangle_renderer::push_back(value_type const& aVertex)
     {
         vertices().push_back(aVertex);
     }
 
-    std::size_t opengl_triangle_renderer::room() const
+    std::size_t native_triangle_renderer::room() const
     {
         return vertices().room();
     }
 
-    bool opengl_triangle_renderer::room_for(std::size_t aAmount) const
+    bool native_triangle_renderer::room_for(std::size_t aAmount) const
     {
         return vertices().room_for(aAmount);
     }
 
-    bool opengl_triangle_renderer::need(std::size_t aAmount)
+    bool native_triangle_renderer::need(std::size_t aAmount)
     {
         try
         {
@@ -168,7 +168,7 @@ namespace neogfx
         }
     }
     
-    void opengl_triangle_renderer::draw_and_execute()
+    void native_triangle_renderer::draw_and_execute()
     {
         draw();
         graphics_backend().execute();
@@ -176,18 +176,18 @@ namespace neogfx
         iStart = 0;
     }
     
-    void opengl_triangle_renderer::draw(const skip& aSkip)
+    void native_triangle_renderer::draw(const skip& aSkip)
     {
         draw(vertices().size() - static_cast<std::size_t>(iStart), aSkip);
     }
 
-    void opengl_triangle_renderer::draw(std::size_t aStart, std::size_t aCount, const skip& aSkip)
+    void native_triangle_renderer::draw(std::size_t aStart, std::size_t aCount, const skip& aSkip)
     {
-        iStart = static_cast<GLint>(aStart);
+        iStart = static_cast<std::int32_t>(aStart);
         draw(aCount, aSkip);
     }
 
-    void opengl_triangle_renderer::draw(std::size_t aCount, const skip& aSkip)
+    void native_triangle_renderer::draw(std::size_t aCount, const skip& aSkip)
     {
         if (aCount == 0u)
             return;
@@ -208,7 +208,7 @@ namespace neogfx
         if (!iUseBarrier)
         {
             graphics_backend().draw_arrays(gpu_primitive::Triangles, static_cast<std::size_t>(iStart), aCount);
-            iStart += static_cast<GLint>(aCount);
+            iStart += static_cast<std::int32_t>(aCount);
         }
         else
         {
@@ -219,24 +219,24 @@ namespace neogfx
             {
                 auto amount = std::min(chunk, aCount);
                 graphics_backend().draw_arrays(gpu_primitive::Triangles, static_cast<std::size_t>(iStart), amount);
-                iStart += static_cast<GLint>(amount);
+                iStart += static_cast<std::int32_t>(amount);
                 aCount -= amount;
                 graphics_backend().texture_barrier();
             }
         }
     }
 
-    bool opengl_triangle_renderer::is_new_transformation(const optional_mat44& aTransformation) const
+    bool native_triangle_renderer::is_new_transformation(const optional_mat44& aTransformation) const
     {
         return iVertexBuffer.transformation() != aTransformation;
     }
 
-    const optional_mat44& opengl_triangle_renderer::transformation() const
+    const optional_mat44& native_triangle_renderer::transformation() const
     {
         return iVertexBuffer.transformation();
     }
 
-    void opengl_triangle_renderer::set_transformation(const optional_mat44& aTransformation)
+    void native_triangle_renderer::set_transformation(const optional_mat44& aTransformation)
     {
         auto const& contextTransform = iParent.transform();
 
@@ -263,12 +263,12 @@ namespace neogfx
         iVertexBuffer.set_transformation(aTransformation ? transform * *aTransformation : transform);
     }
 
-    const opengl_vertex_buffer<>::vertex_array& opengl_triangle_renderer::vertices() const
+    const native_vertex_buffer<>::vertex_array& native_triangle_renderer::vertices() const
     {
         return iVertexBuffer.vertices();
     }
 
-    opengl_vertex_buffer<>::vertex_array& opengl_triangle_renderer::vertices()
+    native_vertex_buffer<>::vertex_array& native_triangle_renderer::vertices()
     {
         return iVertexBuffer.vertices();
     }

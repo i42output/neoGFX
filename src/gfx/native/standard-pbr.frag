@@ -10,7 +10,7 @@
 #define PBR_ENVIRONMENT_SPECULAR_BANDS 6.0
 #define PBR_ENVIRONMENT_IRRADIANCE_BAND 6.0
 #define PBR_ENVIRONMENT_BRDF_BAND 7.0
-// the shadow map atlas (see opengl_rendering_context::draw_scene_meshes): view 0 (the directional light's) is the bottom left
+// the shadow map atlas (see native_rendering_context::draw_scene_meshes): view 0 (the directional light's) is the bottom left
 // quarter; views 1 to 48 (six cube faces for each of up to eight point lights) are 512 square tiles in the other quarters
 #define PBR_SHADOW_ATLAS_SIZE 4096.0
 #define PBR_SHADOW_BIAS 0.0005

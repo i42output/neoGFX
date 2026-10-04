@@ -1,4 +1,4 @@
-// opengl_renderer.cpp
+// native_renderer.cpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -35,12 +35,12 @@
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 
-#include "opengl_renderer.hpp"
-#include "opengl_surface.hpp"
-#include "opengl_shader_program.hpp"
-#include "opengl_graphics_backend.hpp"
-#include "../vulkan/vulkan_graphics_backend.hpp"
-#include "../i_native_texture.hpp"
+#include "native_renderer.hpp"
+#include "opengl/opengl_surface.hpp"
+#include "opengl/opengl_shader_program.hpp"
+#include "opengl/opengl_graphics_backend.hpp"
+#include "vulkan/vulkan_graphics_backend.hpp"
+#include "i_native_texture.hpp"
 
 #include <neogfx/gfx/vertex_shader.hpp>
 #include <neogfx/gfx/fragment_shader.hpp>
@@ -63,7 +63,7 @@ namespace neogfx
 
     i_graphics_backend& graphics_backend()
     {
-        return static_cast<opengl_renderer&>(service<i_rendering_engine>()).backend();
+        return static_cast<native_renderer&>(service<i_rendering_engine>()).backend();
     }
 
     frame_counter::frame_counter(std::chrono::milliseconds const& aDuration) : iTimer{ service<i_async_task>(), [this](neolib::callback_timer& aTimer)
@@ -95,7 +95,7 @@ namespace neogfx
             iWidgets.erase(iterWidget);
     }
 
-    opengl_renderer::opengl_renderer(neogfx::renderer aRenderer) :
+    native_renderer::native_renderer(neogfx::renderer aRenderer) :
         iRenderer{ aRenderer },
         iBackend{ create_graphics_backend(aRenderer) },
         iLimitFrameRate{ true },
@@ -109,28 +109,28 @@ namespace neogfx
 #endif
     }
 
-    opengl_renderer::~opengl_renderer()
+    native_renderer::~native_renderer()
     {
     }
 
-    const i_device_metrics& opengl_renderer::default_screen_metrics() const
+    const i_device_metrics& native_renderer::default_screen_metrics() const
     {
         return service<i_basic_services>().display().metrics();
     }
 
-    renderer opengl_renderer::renderer() const
+    renderer native_renderer::renderer() const
     {
         return iRenderer;
     }
 
-    void opengl_renderer::initialize()
+    void native_renderer::initialize()
     {
         backend().initialize();
 
         iDefaultShaderProgram = add_shader_program(backend().create_standard_shader_program()).as<i_standard_shader_program>();
     }
 
-    void opengl_renderer::cleanup()
+    void native_renderer::cleanup()
     {
         // We explictly destroy these OpenGL objects here when context should still exist
         iVertexBuffers.clear();
@@ -143,12 +143,12 @@ namespace neogfx
         backend().cleanup();
     }
 
-    const opengl_renderer::shader_program_list& opengl_renderer::shader_programs() const
+    const native_renderer::shader_program_list& native_renderer::shader_programs() const
     {
         return iShaderPrograms;
     }
 
-    const i_shader_program& opengl_renderer::shader_program(const neolib::i_string& aName) const
+    const i_shader_program& native_renderer::shader_program(const neolib::i_string& aName) const
     {
         for (auto const& s : shader_programs())
             if (s->name() == aName)
@@ -156,18 +156,18 @@ namespace neogfx
         throw shader_program_not_found();
     }
 
-    i_shader_program& opengl_renderer::shader_program(const neolib::i_string& aName)
+    i_shader_program& native_renderer::shader_program(const neolib::i_string& aName)
     {
         return const_cast<i_shader_program&>(to_const(*this).shader_program(aName));
     }
 
-    i_shader_program& opengl_renderer::add_shader_program(const neolib::i_ref_ptr<i_shader_program>& aShaderProgram)
+    i_shader_program& native_renderer::add_shader_program(const neolib::i_ref_ptr<i_shader_program>& aShaderProgram)
     {
         iShaderPrograms.push_back(aShaderProgram);
         return *aShaderProgram;
     }
 
-    bool opengl_renderer::is_shader_program_active() const
+    bool native_renderer::is_shader_program_active() const
     {
         for (auto const& shaderProgram : shader_programs())
             if (shaderProgram->active())
@@ -175,7 +175,7 @@ namespace neogfx
         return false;
     }
 
-    i_shader_program& opengl_renderer::active_shader_program()
+    i_shader_program& native_renderer::active_shader_program()
     {
         for (auto const& shaderProgram : shader_programs())
             if (shaderProgram->active())
@@ -183,56 +183,56 @@ namespace neogfx
         throw no_shader_program_active();
     }
 
-    const i_standard_shader_program& opengl_renderer::default_shader_program() const
+    const i_standard_shader_program& native_renderer::default_shader_program() const
     {
         return *iDefaultShaderProgram;
     }
 
-    i_standard_shader_program& opengl_renderer::default_shader_program()
+    i_standard_shader_program& native_renderer::default_shader_program()
     {
         return *iDefaultShaderProgram;
     }
 
-    opengl_renderer::handle opengl_renderer::create_shader_program_object()
+    native_renderer::handle native_renderer::create_shader_program_object()
     {
         return backend().create_shader_program_object();
     }
 
-    void opengl_renderer::destroy_shader_program_object(handle aShaderProgramObject)
+    void native_renderer::destroy_shader_program_object(handle aShaderProgramObject)
     {
         backend().destroy_shader_program_object(aShaderProgramObject);
     }
 
-    opengl_renderer::handle opengl_renderer::create_shader_object(shader_type aShaderType)
+    native_renderer::handle native_renderer::create_shader_object(shader_type aShaderType)
     {
         return backend().create_shader_object(aShaderType);
     }
 
-    void opengl_renderer::destroy_shader_object(handle aShaderObject)
+    void native_renderer::destroy_shader_object(handle aShaderObject)
     {
         backend().destroy_shader_object(aShaderObject);
     }
       
-    i_font_manager& opengl_renderer::font_manager()
+    i_font_manager& native_renderer::font_manager()
     {
         if (iFontManager == std::nullopt)
             iFontManager.emplace();
         return *iFontManager;
     }
 
-    i_texture_manager& opengl_renderer::texture_manager()
+    i_texture_manager& native_renderer::texture_manager()
     {
         if (iTextureManager == nullptr)
             iTextureManager = backend().create_texture_manager();
         return *iTextureManager;
     }
 
-    bool opengl_renderer::vertex_buffer_allocated(i_vertex_provider& aProvider) const
+    bool native_renderer::vertex_buffer_allocated(i_vertex_provider& aProvider) const
     {
         return iVertexBuffers.find(&aProvider) != iVertexBuffers.end();
     }
 
-    i_vertex_buffer& opengl_renderer::allocate_vertex_buffer(i_vertex_provider& aProvider, vertex_buffer_type aType)
+    i_vertex_buffer& native_renderer::allocate_vertex_buffer(i_vertex_provider& aProvider, vertex_buffer_type aType)
     {
         auto existing = iVertexBuffers.find(&aProvider);
         if (existing == iVertexBuffers.end())
@@ -241,7 +241,7 @@ namespace neogfx
             throw consumer_exists();
     }
 
-    void opengl_renderer::deallocate_vertex_buffer(i_vertex_provider& aProvider)
+    void native_renderer::deallocate_vertex_buffer(i_vertex_provider& aProvider)
     {
         auto existing = iVertexBuffers.find(&aProvider);
         if (existing != iVertexBuffers.end())
@@ -254,7 +254,7 @@ namespace neogfx
             throw consumer_not_found();
     }
 
-    const i_vertex_buffer& opengl_renderer::vertex_buffer(i_vertex_provider& aProvider) const
+    const i_vertex_buffer& native_renderer::vertex_buffer(i_vertex_provider& aProvider) const
     {
         auto existing = iVertexBuffers.find(&aProvider);
         if (existing != iVertexBuffers.end())
@@ -270,12 +270,12 @@ namespace neogfx
         throw consumer_not_found();
     }
 
-    i_vertex_buffer& opengl_renderer::vertex_buffer(i_vertex_provider& aProvider)
+    i_vertex_buffer& native_renderer::vertex_buffer(i_vertex_provider& aProvider)
     {
         return const_cast<i_vertex_buffer&>(to_const(*this).vertex_buffer(aProvider));
     }
 
-    void opengl_renderer::execute_vertex_buffers()
+    void native_renderer::execute_vertex_buffers()
     {
         for (auto& vb : iVertexBuffers)
         {
@@ -286,7 +286,7 @@ namespace neogfx
         }
     }
 
-    void opengl_renderer::clear_non_cacheable_vertex_buffers()
+    void native_renderer::clear_non_cacheable_vertex_buffers()
     {
         // the vertices (and SSBO data) about to be reused may still be being read by the GPU
         backend().execute();
@@ -302,7 +302,7 @@ namespace neogfx
             default_shader_program().ssbo(ssboIndex).reclaim();
     }
 
-    i_ping_pong_buffer& opengl_renderer::ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
+    i_ping_pong_buffer& native_renderer::ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
     {
         if (!iPingPongBuffer1s)
             iPingPongBuffer1s.emplace();
@@ -310,7 +310,7 @@ namespace neogfx
         return pingPongBuffer;
     }
 
-    i_ping_pong_buffer& opengl_renderer::ping_pong_buffer2(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
+    i_ping_pong_buffer& native_renderer::ping_pong_buffer2(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
     {
         if (!iPingPongBuffer2s)
             iPingPongBuffer2s.emplace();
@@ -318,42 +318,42 @@ namespace neogfx
         return pingPongBuffer;
     }
 
-    bool opengl_renderer::is_stencil_based_invalidation_on() const
+    bool native_renderer::is_stencil_based_invalidation_on() const
     {
         return iStencilBasedInvalidation;
     }
 
-    void opengl_renderer::stencil_based_invalidation_on()
+    void native_renderer::stencil_based_invalidation_on()
     {
         iStencilBasedInvalidation = true;
     }
 
-    void opengl_renderer::stencil_based_invalidation_off()
+    void native_renderer::stencil_based_invalidation_off()
     {
         iStencilBasedInvalidation = false;
     }
 
-    bool opengl_renderer::is_rendering_queue_optimization_on() const
+    bool native_renderer::is_rendering_queue_optimization_on() const
     {
         return iRenderQueueOptimisation;
     }
 
-    void opengl_renderer::rendering_queue_optimization_on()
+    void native_renderer::rendering_queue_optimization_on()
     {
         iRenderQueueOptimisation = true;
     }
 
-    void opengl_renderer::rendering_queue_optimization_off()
+    void native_renderer::rendering_queue_optimization_off()
     {
         iRenderQueueOptimisation = false;
     }
 
-    bool opengl_renderer::is_subpixel_rendering_on() const
+    bool native_renderer::is_subpixel_rendering_on() const
     {
         return iSubpixelRendering;
     }
     
-    void opengl_renderer::subpixel_rendering_on()
+    void native_renderer::subpixel_rendering_on()
     {
         if (!iSubpixelRendering)
         {
@@ -362,7 +362,7 @@ namespace neogfx
         }
     }
 
-    void opengl_renderer::subpixel_rendering_off()
+    void native_renderer::subpixel_rendering_off()
     {
         if (iSubpixelRendering)
         {
@@ -371,27 +371,27 @@ namespace neogfx
         }
     }
 
-    bool opengl_renderer::frame_rate_limited() const
+    bool native_renderer::frame_rate_limited() const
     {
         return iLimitFrameRate && neolib::service<neolib::i_power>().green_mode_active(); 
     }
 
-    void opengl_renderer::enable_frame_rate_limiter(bool aEnable)
+    void native_renderer::enable_frame_rate_limiter(bool aEnable)
     {
         iLimitFrameRate = aEnable;
     }
 
-    std::uint32_t opengl_renderer::frame_rate_limit() const
+    std::uint32_t native_renderer::frame_rate_limit() const
     {
         return iFrameRateLimit;
     }
 
-    void opengl_renderer::set_frame_rate_limit(std::uint32_t aFps)
+    void native_renderer::set_frame_rate_limit(std::uint32_t aFps)
     {
         iFrameRateLimit = aFps;
     }
 
-    bool opengl_renderer::process_events()
+    bool native_renderer::process_events()
     {
         bool didSome = false;
         auto lastRenderTime = neolib::this_process::elapsed_ms();
@@ -418,7 +418,7 @@ namespace neogfx
         return didSome;
     }
 
-    void opengl_renderer::register_frame_counter(i_widget& aWidget, std::chrono::milliseconds const& aDuration)
+    void native_renderer::register_frame_counter(i_widget& aWidget, std::chrono::milliseconds const& aDuration)
     {
         auto iterFrameCounter = iFrameCounters.find(aDuration);
         if (iterFrameCounter == iFrameCounters.end())
@@ -426,14 +426,14 @@ namespace neogfx
         iterFrameCounter->second.add(aWidget);
     }
 
-    void opengl_renderer::unregister_frame_counter(i_widget& aWidget, std::chrono::milliseconds const& aDuration)
+    void native_renderer::unregister_frame_counter(i_widget& aWidget, std::chrono::milliseconds const& aDuration)
     {
         auto iterFrameCounter = iFrameCounters.find(aDuration);
         if (iterFrameCounter != iFrameCounters.end())
             iterFrameCounter->second.remove(aWidget);
     }
 
-    std::uint32_t opengl_renderer::frame_counter(std::chrono::milliseconds const& aDuration) const
+    std::uint32_t native_renderer::frame_counter(std::chrono::milliseconds const& aDuration) const
     {
         auto iterFrameCounter = iFrameCounters.find(aDuration);
         if (iterFrameCounter != iFrameCounters.end())
@@ -441,7 +441,7 @@ namespace neogfx
         return 0;
     }    
     
-    i_ping_pong_buffer& opengl_renderer::create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
+    i_ping_pong_buffer& native_renderer::create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
     {
         for (auto existing = aBufferList.lower_bound(std::make_pair(aSampling, aExtents)); existing != aBufferList.end(); ++existing)
         {
@@ -463,7 +463,7 @@ namespace neogfx
         return pingPongBuffer;
     }
 
-    i_graphics_backend& opengl_renderer::backend() const
+    i_graphics_backend& native_renderer::backend() const
     {
         return *iBackend;
     }

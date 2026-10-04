@@ -24,7 +24,7 @@
 #include "../i_native_texture.hpp"
 #include "opengl_texture_manager.hpp"
 #include "opengl_shader_program.hpp"
-#include "opengl_vertex.hpp"
+#include "../native_vertex.hpp"
 #include "opengl_graphics_backend.hpp"
 
 namespace neogfx
@@ -892,7 +892,7 @@ namespace neogfx
         return !scene_shadows::get(aProgram).failed;
     }
 
-    void opengl_graphics_backend::draw_scene_shadow_maps(i_standard_shader_program& aProgram, opengl_scene_buffer& aSceneBuffer,
+    void opengl_graphics_backend::draw_scene_shadow_maps(i_standard_shader_program& aProgram, native_scene_buffer& aSceneBuffer,
         std::vector<mat44> const& aViews, std::int32_t aDirectionalView,
         std::vector<std::optional<gpu_mesh_range>> const& aMeshes, std::vector<std::optional<scene_shadow_alpha_test>> const& aAlphaTests,
         std::uint32_t aModelTableBase)

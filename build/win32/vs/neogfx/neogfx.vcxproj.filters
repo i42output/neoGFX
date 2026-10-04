@@ -64,6 +64,9 @@
     <Filter Include="Source Files\audio">
       <UniqueIdentifier>{a20c32bf-b880-486a-a596-ada01058f793}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\native\shader">
+      <UniqueIdentifier>{f3167abc-b41d-4289-a22e-e13d96bf19a0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\neogfx\app\action.hpp">
@@ -841,11 +844,11 @@
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl.hpp">
       <Filter>Header Files\native\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_buffer.hpp">
-      <Filter>Header Files\native\opengl</Filter>
+    <ClInclude Include="..\..\..\..\src\gfx\native\native_buffer.hpp">
+      <Filter>Header Files\native</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_buffer.ipp">
-      <Filter>Header Files\native\opengl</Filter>
+    <ClInclude Include="..\..\..\..\src\gfx\native\native_buffer.ipp">
+      <Filter>Header Files\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_error.hpp">
       <Filter>Header Files\native\opengl</Filter>
@@ -853,14 +856,14 @@
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_graphics_backend.hpp">
       <Filter>Header Files\native\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_vertex.hpp">
-      <Filter>Header Files\native\opengl</Filter>
+    <ClInclude Include="..\..\..\..\src\gfx\native\native_vertex.hpp">
+      <Filter>Header Files\native</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_renderer.hpp">
-      <Filter>Header Files\native\opengl</Filter>
+    <ClInclude Include="..\..\..\..\src\gfx\native\native_renderer.hpp">
+      <Filter>Header Files\native</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_rendering_context.hpp">
-      <Filter>Header Files\native\opengl</Filter>
+    <ClInclude Include="..\..\..\..\src\gfx\native\native_rendering_context.hpp">
+      <Filter>Header Files\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_shader_program.hpp">
       <Filter>Header Files\native\opengl</Filter>
@@ -877,11 +880,11 @@
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_texture_manager.hpp">
       <Filter>Header Files\native\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_triangle_renderer.hpp">
-      <Filter>Header Files\native\opengl</Filter>
+    <ClInclude Include="..\..\..\..\src\gfx\native\native_triangle_renderer.hpp">
+      <Filter>Header Files\native</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl_vertex.ipp">
-      <Filter>Header Files\native\opengl</Filter>
+    <ClInclude Include="..\..\..\..\src\gfx\native\native_vertex.ipp">
+      <Filter>Header Files\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan.hpp">
       <Filter>Header Files\native\vulkan</Filter>
@@ -1014,20 +1017,44 @@
     <CustomBuild Include="..\..\..\..\src\resources.nrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\..\src\gfx\native\shader.glsl" />
-    <CustomBuild Include="..\..\..\..\src\gfx\native\shader.glsl-gles" />
-    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-texture.vert" />
-    <CustomBuild Include="..\..\..\..\src\gfx\native\standard.vert" />
-    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-filter.frag" />
-    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-glyph.frag" />
-    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-gradient.frag" />
-    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-shape.frag" />
-    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-stipple.frag" />
-    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-pbr.frag" />
-    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-texture.frag" />
-    <CustomBuild Include="..\..\..\..\src\gfx\native\standard.frag" />
     <CustomBuild Include="..\..\..\..\src\icons.nrc">
       <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\shader.glsl">
+      <Filter>Source Files\native\shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\shader.glsl-gles">
+      <Filter>Source Files\native\shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard.frag">
+      <Filter>Source Files\native\shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard.vert">
+      <Filter>Source Files\native\shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-filter.frag">
+      <Filter>Source Files\native\shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-glyph.frag">
+      <Filter>Source Files\native\shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-gradient.frag">
+      <Filter>Source Files\native\shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-pbr.frag">
+      <Filter>Source Files\native\shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-shape.frag">
+      <Filter>Source Files\native\shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-stipple.frag">
+      <Filter>Source Files\native\shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-texture.frag">
+      <Filter>Source Files\native\shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\gfx\native\standard-texture.vert">
+      <Filter>Source Files\native\shader</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -1184,8 +1211,8 @@
     <ClCompile Include="..\..\..\..\src\gfx\native\native_texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_buffer.cpp">
-      <Filter>Source Files\native\opengl</Filter>
+    <ClCompile Include="..\..\..\..\src\gfx\native\native_buffer.cpp">
+      <Filter>Source Files\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_error.cpp">
       <Filter>Source Files\native\opengl</Filter>
@@ -1193,14 +1220,14 @@
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_graphics_backend.cpp">
       <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_vertex.cpp">
-      <Filter>Source Files\native\opengl</Filter>
+    <ClCompile Include="..\..\..\..\src\gfx\native\native_vertex.cpp">
+      <Filter>Source Files\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_renderer.cpp">
-      <Filter>Source Files\native\opengl</Filter>
+    <ClCompile Include="..\..\..\..\src\gfx\native\native_renderer.cpp">
+      <Filter>Source Files\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_rendering_context.cpp">
-      <Filter>Source Files\native\opengl</Filter>
+    <ClCompile Include="..\..\..\..\src\gfx\native\native_rendering_context.cpp">
+      <Filter>Source Files\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_shader_program.cpp">
       <Filter>Source Files\native\opengl</Filter>
@@ -1214,8 +1241,8 @@
     <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_texture_manager.cpp">
       <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\gfx\native\opengl\opengl_triangle_renderer.cpp">
-      <Filter>Source Files\native\opengl</Filter>
+    <ClCompile Include="..\..\..\..\src\gfx\native\native_triangle_renderer.cpp">
+      <Filter>Source Files\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\vulkan\vulkan_error.cpp">
       <Filter>Source Files\native\vulkan</Filter>
@@ -1378,6 +1405,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\game\sequencer.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Tools_Debug\GeneratedFiles\resources.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Tools\GeneratedFiles\resources.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Tools_Debug\GeneratedFiles\icons.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Tools\GeneratedFiles\icons.res.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

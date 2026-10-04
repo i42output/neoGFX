@@ -1,4 +1,4 @@
-// opengl_rendering_context.cpp
+// native_rendering_context.cpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015-2026 Leigh Johnston.  All Rights Reserved.
@@ -36,10 +36,10 @@
 #include <neogfx/game/animator.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/hid/i_native_surface.hpp>
-#include "../i_native_texture.hpp"
-#include "../i_graphics_backend.hpp"
-#include "../../text/native/i_native_font_face.hpp"
-#include "opengl_rendering_context.hpp"
+#include "i_native_texture.hpp"
+#include "i_graphics_backend.hpp"
+#include "../text/native/i_native_font_face.hpp"
+#include "native_rendering_context.hpp"
 
 namespace neogfx
 {
@@ -188,7 +188,7 @@ namespace neogfx
             }
         }
 
-        bool emit_any_stipple(i_rendering_context& aContext, opengl_triangle_renderer& aInstance, bool aLoop = false)
+        bool emit_any_stipple(i_rendering_context& aContext, native_triangle_renderer& aInstance, bool aLoop = false)
         {
             // assumes vertices are quads (as two triangles) created with quads_to_triangles above.
             auto& stippleShader = aContext.rendering_engine().default_shader_program().stipple_shader();
@@ -237,7 +237,7 @@ namespace neogfx
         }
     }
 
-    opengl_rendering_context::opengl_rendering_context(const i_render_target& aTarget, neogfx::blending_mode aBlendingMode) :
+    native_rendering_context::native_rendering_context(const i_render_target& aTarget, neogfx::blending_mode aBlendingMode) :
         iRenderingEngine{ service<i_rendering_engine>() },
         iTarget{ aTarget },
         iWidget{ nullptr },
@@ -276,7 +276,7 @@ namespace neogfx
         iTarget.begin_rendering();
     }
 
-    opengl_rendering_context::opengl_rendering_context(const i_render_target& aTarget, const i_widget& aWidget, neogfx::blending_mode aBlendingMode) :
+    native_rendering_context::native_rendering_context(const i_render_target& aTarget, const i_widget& aWidget, neogfx::blending_mode aBlendingMode) :
         iRenderingEngine{ service<i_rendering_engine>() },
         iTarget{ aTarget },
         iWidget{ &aWidget },
@@ -316,7 +316,7 @@ namespace neogfx
         iTarget.begin_rendering();
     }
 
-    opengl_rendering_context::opengl_rendering_context(const opengl_rendering_context& aOther) :
+    native_rendering_context::native_rendering_context(const native_rendering_context& aOther) :
         iRenderingEngine{ aOther.iRenderingEngine },
         iTarget{ aOther.iTarget },
         iWidget{ aOther.iWidget },
@@ -357,27 +357,27 @@ namespace neogfx
         iTarget.begin_rendering();
     }
 
-    opengl_rendering_context::~opengl_rendering_context()
+    native_rendering_context::~native_rendering_context()
     {
         iTarget.end_rendering();
     }
 
-    std::unique_ptr<i_rendering_context> opengl_rendering_context::clone() const
+    std::unique_ptr<i_rendering_context> native_rendering_context::clone() const
     {
-        return std::unique_ptr<i_rendering_context>(new opengl_rendering_context(*this));
+        return std::unique_ptr<i_rendering_context>(new native_rendering_context(*this));
     }
 
-    i_rendering_engine& opengl_rendering_context::rendering_engine() const
+    i_rendering_engine& native_rendering_context::rendering_engine() const
     {
         return iRenderingEngine;
     }
 
-    const i_render_target& opengl_rendering_context::render_target() const
+    const i_render_target& native_rendering_context::render_target() const
     {
         return iTarget;
     }
 
-    rect opengl_rendering_context::rendering_area(bool aConsiderScissor) const
+    rect native_rendering_context::rendering_area(bool aConsiderScissor) const
     {
         if (scissor_rect() == std::nullopt || !aConsiderScissor)
             return rect{ render_target().target_origin(), render_target().target_extents() };
@@ -385,20 +385,20 @@ namespace neogfx
             return *scissor_rect();
     }
 
-    neogfx::logical_coordinate_system opengl_rendering_context::logical_coordinate_system() const
+    neogfx::logical_coordinate_system native_rendering_context::logical_coordinate_system() const
     {
         if (iSlowState.logicalCoordinateSystem != std::nullopt)
             return *iSlowState.logicalCoordinateSystem;
         return render_target().logical_coordinate_system();
     }
 
-    void opengl_rendering_context::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
+    void native_rendering_context::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
     {
         iSlowState.logicalCoordinateSystem = aSystem;
         render_target().set_logical_coordinate_system(aSystem);
     }
 
-    logical_coordinates opengl_rendering_context::logical_coordinates() const
+    logical_coordinates native_rendering_context::logical_coordinates() const
     {
         if (iSlowState.logicalCoordinates != std::nullopt)
             return *iSlowState.logicalCoordinates;
@@ -408,64 +408,64 @@ namespace neogfx
         return result;
     }
 
-    void opengl_rendering_context::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
+    void native_rendering_context::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
     {
         iSlowState.logicalCoordinates = aCoordinates;
         render_target().set_logical_coordinates(aCoordinates);
     }
 
-    point opengl_rendering_context::origin() const
+    point native_rendering_context::origin() const
     {
         return iFastState.origin;
     }
 
-    void opengl_rendering_context::set_origin(const point& aOrigin)
+    void native_rendering_context::set_origin(const point& aOrigin)
     {
         iFastState.origin = aOrigin;
     }
 
-    vec2 opengl_rendering_context::offset() const
+    vec2 native_rendering_context::offset() const
     {
         return iOffset.value_or(vec2{}) + (snap_to_pixel() && iSnapToPixelUsesOffset ? 0.5 : 0.0);
     }
 
-    void opengl_rendering_context::set_offset(const optional_vec2& aOffset)
+    void native_rendering_context::set_offset(const optional_vec2& aOffset)
     {
         iOffset = aOffset;
     }
 
-    optional_mat44 opengl_rendering_context::transform() const
+    optional_mat44 native_rendering_context::transform() const
     {
         if (iTransforms.empty())
             return {};
         return iTransforms.back();
     }
 
-    void opengl_rendering_context::set_transform(const optional_mat44& aTransform)
+    void native_rendering_context::set_transform(const optional_mat44& aTransform)
     {
         iTransforms.clear();
         if (aTransform)
             iTransforms.push_back(*aTransform);
     }
 
-    void opengl_rendering_context::push_transform(const mat44& aTransform)
+    void native_rendering_context::push_transform(const mat44& aTransform)
     {
         iTransforms.push_back(iTransforms.empty() ? aTransform : iTransforms.back() * aTransform);
     }
 
-    void opengl_rendering_context::pop_transform()
+    void native_rendering_context::pop_transform()
     {
         if (iTransforms.empty())
-            throw std::logic_error("neogfx::opengl_rendering_context::pop_transform: transform stack empty");
+            throw std::logic_error("neogfx::native_rendering_context::pop_transform: transform stack empty");
         iTransforms.pop_back();
     }
 
-    bool opengl_rendering_context::gradient_set() const
+    bool native_rendering_context::gradient_set() const
     {
         return iGradient != std::nullopt || !iFilterGradients.empty();
     }
 
-    void opengl_rendering_context::blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, neogfx::blending_mode aBlendingMode)
+    void native_rendering_context::blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, neogfx::blending_mode aBlendingMode)
     {
         scoped_blending_mode sbm{ *this, aBlendingMode };
         auto shaderEffect = shader_effect::None;
@@ -482,7 +482,7 @@ namespace neogfx
         draw_texture(aDestinationRect, aTexture, aSourceRect, {}, shaderEffect);
     }
 
-    void opengl_rendering_context::apply_gradients(i_gradient_shader& aShader, std::optional<gradient> const& aBase)
+    void native_rendering_context::apply_gradients(i_gradient_shader& aShader, std::optional<gradient> const& aBase)
     {
         // a gradient set on the context, or brought by whatever is being drawn, colors it; a gradient
         // composed onto the context filters its alpha, whether anything is coloring it or not. Each
@@ -497,32 +497,32 @@ namespace neogfx
             aShader.clear_gradient();
     }
 
-    void opengl_rendering_context::apply_gradient(i_gradient_shader& aShader)
+    void native_rendering_context::apply_gradient(i_gradient_shader& aShader)
     {
         apply_gradients(aShader);
     }
 
-    bool opengl_rendering_context::snap_to_pixel() const
+    bool native_rendering_context::snap_to_pixel() const
     {
         return iSnapToPixel;
     }
 
-    void opengl_rendering_context::set_snap_to_pixel(bool aSnapToPixel)
+    void native_rendering_context::set_snap_to_pixel(bool aSnapToPixel)
     {
         iSnapToPixel = aSnapToPixel;
     }
 
-    i_rendering_queue& opengl_rendering_context::queue() const
+    i_rendering_queue& native_rendering_context::queue() const
     {
         return iTarget.rendering_queue();
     }
 
-    i_optimised_rendering_queue const& opengl_rendering_context::optimised_queue() const
+    i_optimised_rendering_queue const& native_rendering_context::optimised_queue() const
     {
         return iTarget.optimised_rendering_queue();
     }
 
-    void opengl_rendering_context::enqueue(const graphics_operation::operation& aOperation)
+    void native_rendering_context::enqueue(const graphics_operation::operation& aOperation)
     {
         queue().push_back(aOperation);
         for (auto filter : iFilters)
@@ -550,7 +550,7 @@ namespace neogfx
         return batchable(*aLeft, *aRight);
     }
 
-    void opengl_rendering_context::flush(graphics_operation::operation_type aOperationType)
+    void native_rendering_context::flush(graphics_operation::operation_type aOperationType)
     {
         if (iInFlush)
             return;
@@ -580,7 +580,7 @@ namespace neogfx
         tail.clear();
     }
 
-    void opengl_rendering_context::flush()
+    void native_rendering_context::flush()
     {
         if (iInFlush)
             return;
@@ -807,39 +807,39 @@ namespace neogfx
         (void)queue();
     }
 
-    void opengl_rendering_context::add_filter(i_rendering_context_filter& aFilter)
+    void native_rendering_context::add_filter(i_rendering_context_filter& aFilter)
     {
         iFilters.push_back(&aFilter);
     }
 
-    void opengl_rendering_context::remove_filter(i_rendering_context_filter& aFilter)
+    void native_rendering_context::remove_filter(i_rendering_context_filter& aFilter)
     {
         auto existing = std::find(iFilters.begin(), iFilters.end(), &aFilter);
         if (existing != iFilters.end())
             iFilters.erase(existing);
     }
 
-    bool opengl_rendering_context::redirecting() const
+    bool native_rendering_context::redirecting() const
     {
         throw std::logic_error("not yet implemented");
     }
 
-    point opengl_rendering_context::redirect_origin() const
+    point native_rendering_context::redirect_origin() const
     {
         throw std::logic_error("not yet implemented");
     }
 
-    void opengl_rendering_context::begin_redirect(i_rendering_context& aRcBase, point const& aOrigin)
+    void native_rendering_context::begin_redirect(i_rendering_context& aRcBase, point const& aOrigin)
     {
         throw std::logic_error("not yet implemented");
     }
 
-    void opengl_rendering_context::end_redirect()
+    void native_rendering_context::end_redirect()
     {
         throw std::logic_error("not yet implemented");
     }
 
-    void opengl_rendering_context::update_state(queue_batch_item const& aQbi)
+    void native_rendering_context::update_state(queue_batch_item const& aQbi)
     {
         if (iFastState.generation != aQbi.fastState->generation)
         {
@@ -865,7 +865,7 @@ namespace neogfx
         apply_state();
     }
 
-    void opengl_rendering_context::apply_state()
+    void native_rendering_context::apply_state()
     {
         neolib::scoped_flag sf{ iApplyingState };
 
@@ -896,65 +896,65 @@ namespace neogfx
         }
     }
 
-    bool opengl_rendering_context::fast_state_invalid() const
+    bool native_rendering_context::fast_state_invalid() const
     {
         return shared_fast_state_generation().load() != iSharedFastStateGeneration;
     }
 
-    bool opengl_rendering_context::slow_state_invalid() const
+    bool native_rendering_context::slow_state_invalid() const
     {
         return shared_slow_state_generation().load() != iSharedSlowStateGeneration;
     }
 
-    void opengl_rendering_context::invalidate_fast_state()
+    void native_rendering_context::invalidate_fast_state()
     {
         ++shared_fast_state_generation();
     }
 
-    void opengl_rendering_context::invalidate_slow_state()
+    void native_rendering_context::invalidate_slow_state()
     {
         ++shared_slow_state_generation();
     }
 
-    void opengl_rendering_context::validate_fast_state()
+    void native_rendering_context::validate_fast_state()
     {
         // we have just (re)applied our state to GL, so any other context's cached state is now stale
         iSharedFastStateGeneration = ++shared_fast_state_generation();
     }
 
-    void opengl_rendering_context::validate_slow_state()
+    void native_rendering_context::validate_slow_state()
     {
         iSharedSlowStateGeneration = ++shared_slow_state_generation();
     }
 
-    void opengl_rendering_context::scissor_on()
+    void native_rendering_context::scissor_on()
     {
         bool const scissorOn = (applying_scissor() || iFastState.scissorCounter >= 0);
         graphics_backend().enable_scissor(scissorOn);
     }
 
-    void opengl_rendering_context::scissor_off()
+    void native_rendering_context::scissor_off()
     {
         bool const scissorOff = (applying_scissor() || iFastState.scissorCounter < 0);
         graphics_backend().enable_scissor(!scissorOff);
     }
 
-    std::optional<rect> const& opengl_rendering_context::scissor_rect() const
+    std::optional<rect> const& native_rendering_context::scissor_rect() const
     {
         return iFastState.clipRegion;
     }
 
-    bool opengl_rendering_context::applying_scissor() const
+    bool native_rendering_context::applying_scissor() const
     {
         return iApplyingScissor;
     }
 
-    void opengl_rendering_context::apply_scissor()
+    void native_rendering_context::apply_scissor()
     {
         apply_scissor(scissor_rect());
     }
 
-    void opengl_rendering_context::apply_scissor(std::optional<rect> const& aScissorRect)
+    void native_rendering_context::apply_scissor(std::optional<rect> const& aScissorRect)
     {
         neolib::scoped_flag sf{ iApplyingScissor };
         if (aScissorRect)
@@ -971,12 +971,12 @@ namespace neogfx
             scissor_off();
     }
 
-    bool opengl_rendering_context::multisample() const
+    bool native_rendering_context::multisample() const
     {
         return iSlowState.multisample.value_or(true);
     }
 
-    void opengl_rendering_context::set_multisample(bool aMultisample)
+    void native_rendering_context::set_multisample(bool aMultisample)
     {
         if (iSlowState.multisample != aMultisample || slow_state_invalid())
         {
@@ -985,7 +985,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::enable_sample_shading(double aSampleShadingRate)
+    void native_rendering_context::enable_sample_shading(double aSampleShadingRate)
     {
         if (iSlowState.sampleShadingRate != aSampleShadingRate)
         {
@@ -994,7 +994,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::disable_sample_shading()
+    void native_rendering_context::disable_sample_shading()
     {
         if (iSlowState.sampleShadingRate != std::nullopt)
         {
@@ -1003,12 +1003,12 @@ namespace neogfx
         }
     }
 
-    front_face opengl_rendering_context::front_face() const
+    front_face native_rendering_context::front_face() const
     {
         return iSlowState.frontFace.value_or(neogfx::front_face::CounterClockwise);
     }
 
-    void opengl_rendering_context::set_front_face(neogfx::front_face aFrontFace)
+    void native_rendering_context::set_front_face(neogfx::front_face aFrontFace)
     {
         if (iSlowState.frontFace != aFrontFace || slow_state_invalid())
         {
@@ -1017,12 +1017,12 @@ namespace neogfx
         }
     }
 
-    face_culling opengl_rendering_context::face_culling() const
+    face_culling native_rendering_context::face_culling() const
     {
         return iSlowState.faceCulling.value_or(face_culling::None);
     }
 
-    void opengl_rendering_context::set_face_culling(neogfx::face_culling aCulling)
+    void native_rendering_context::set_face_culling(neogfx::face_culling aCulling)
     {
         // a flipped projection reverses the winding the rasterizer sees, so the face we
         // must ask GL to cull is the opposite of the one requested. n.b. this is not the
@@ -1037,22 +1037,22 @@ namespace neogfx
         }
     }
 
-    double opengl_rendering_context::opacity() const
+    double native_rendering_context::opacity() const
     {
         return iFastState.opacity;
     }
 
-    void opengl_rendering_context::set_opacity(double aOpacity)
+    void native_rendering_context::set_opacity(double aOpacity)
     {
         iFastState.opacity = aOpacity;
     }
 
-    neogfx::blending_mode opengl_rendering_context::blending_mode() const
+    neogfx::blending_mode native_rendering_context::blending_mode() const
     {
         return *iSlowState.blendingMode;
     }
 
-    void opengl_rendering_context::set_blending_mode(neogfx::blending_mode aBlendingMode)
+    void native_rendering_context::set_blending_mode(neogfx::blending_mode aBlendingMode)
     {
         if (iSlowState.blendingMode != aBlendingMode || slow_state_invalid())
         {
@@ -1061,12 +1061,12 @@ namespace neogfx
         }
     }
 
-    smoothing_mode opengl_rendering_context::smoothing_mode() const
+    smoothing_mode native_rendering_context::smoothing_mode() const
     {
         return *iSlowState.smoothingMode;
     }
 
-    void opengl_rendering_context::set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode)
+    void native_rendering_context::set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode)
     {
         if (iSlowState.smoothingMode != aSmoothingMode || slow_state_invalid())
         {
@@ -1075,36 +1075,36 @@ namespace neogfx
         }
     }
 
-    vec4 opengl_rendering_context::gain() const
+    vec4 native_rendering_context::gain() const
     {
         return *iSlowState.gain;
     }
 
-    void opengl_rendering_context::set_gain(vec4 const& aGain)
+    void native_rendering_context::set_gain(vec4 const& aGain)
     {
         if (iSlowState.gain != aGain || slow_state_invalid())
             iSlowState.gain = aGain;
     }
 
-    bool opengl_rendering_context::logical_operation_active() const
+    bool native_rendering_context::logical_operation_active() const
     {
         return !iLogicalOperationStack.empty() && iLogicalOperationStack.back() != logical_operation::None;
     }
 
-    void opengl_rendering_context::push_logical_operation(logical_operation aLogicalOperation)
+    void native_rendering_context::push_logical_operation(logical_operation aLogicalOperation)
     {
         iLogicalOperationStack.push_back(aLogicalOperation);
         apply_logical_operation();
     }
 
-    void opengl_rendering_context::pop_logical_operation()
+    void native_rendering_context::pop_logical_operation()
     {
         if (!iLogicalOperationStack.empty())
             iLogicalOperationStack.pop_back();
         apply_logical_operation();
     }
 
-    void opengl_rendering_context::apply_logical_operation()
+    void native_rendering_context::apply_logical_operation()
     {
         auto const currentBlendingMode = iSlowState.blendingMode;
 
@@ -1130,28 +1130,28 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::line_stipple_on(stipple const& aStipple)
+    void native_rendering_context::line_stipple_on(stipple const& aStipple)
     {
         rendering_engine().default_shader_program().stipple_shader().set_stipple(aStipple);
     }
 
-    void opengl_rendering_context::line_stipple_off()
+    void native_rendering_context::line_stipple_off()
     {
         rendering_engine().default_shader_program().stipple_shader().clear_stipple();
     }
 
-    void opengl_rendering_context::set_gradient(const gradient& aGradient)
+    void native_rendering_context::set_gradient(const gradient& aGradient)
     {
         iGradient = aGradient;
     }
 
-    void opengl_rendering_context::push_filter_gradient(const gradient& aGradient)
+    void native_rendering_context::push_filter_gradient(const gradient& aGradient)
     {
         iFilterGradients.push_back(aGradient);
         apply_filter_gradient();
     }
 
-    void opengl_rendering_context::apply_filter_gradient()
+    void native_rendering_context::apply_filter_gradient()
     {
         // a filter gradient outlives the gradients that color what is drawn, of which there is one
         // per draw operation, so it is applied when it changes rather than with each of them
@@ -1162,90 +1162,90 @@ namespace neogfx
             shader.clear_filter_gradient();
     }
 
-    void opengl_rendering_context::pop_filter_gradient()
+    void native_rendering_context::pop_filter_gradient()
     {
         if (!iFilterGradients.empty())
             iFilterGradients.pop_back();
         apply_filter_gradient();
     }
 
-    void opengl_rendering_context::clear_gradient()
+    void native_rendering_context::clear_gradient()
     {
         iGradient = std::nullopt;
     }
 
-    bool opengl_rendering_context::is_subpixel_rendering_on() const
+    bool native_rendering_context::is_subpixel_rendering_on() const
     {
         return iSubpixelRendering;
     }
 
-    void opengl_rendering_context::subpixel_rendering_on()
+    void native_rendering_context::subpixel_rendering_on()
     {
         iSubpixelRendering = true;
     }
 
-    void opengl_rendering_context::subpixel_rendering_off()
+    void native_rendering_context::subpixel_rendering_off()
     {
         iSubpixelRendering = false;
     }
 
-    void opengl_rendering_context::clear(const color& aColor)
+    void native_rendering_context::clear(const color& aColor)
     {
         graphics_backend().clear(aColor);
     }
 
-    void opengl_rendering_context::clear_depth_buffer()
+    void native_rendering_context::clear_depth_buffer()
     {
         graphics_backend().clear_depth_buffer();
     }
 
-    void opengl_rendering_context::clear_stencil_buffer()
+    void native_rendering_context::clear_stencil_buffer()
     {
         graphics_backend().clear_stencil_buffer(0);
     }
 
-    void opengl_rendering_context::fill_stencil_buffer()
+    void native_rendering_context::fill_stencil_buffer()
     {
         if (!iStencilRef.has_value())
-            throw std::logic_error("neogfx::opengl_rendering_context: fill_stencil_buffer called without active stencil ref");
+            throw std::logic_error("neogfx::native_rendering_context: fill_stencil_buffer called without active stencil ref");
         graphics_backend().clear_stencil_buffer(*iStencilRef);
     }
 
-    void opengl_rendering_context::enable_stencil_test()
+    void native_rendering_context::enable_stencil_test()
     {
         iStencilEnabled = true;
         apply_stencil();
     }
 
-    void opengl_rendering_context::disable_stencil_test()
+    void native_rendering_context::disable_stencil_test()
     {
         iStencilEnabled = false;
         apply_stencil();
     }
 
-    void opengl_rendering_context::enable_stencil_update(std::int32_t aRef)
+    void native_rendering_context::enable_stencil_update(std::int32_t aRef)
     {
         if (iUpdatingStencil)
-            throw std::logic_error("neogfx::opengl_rendering_context: enable_stencil_update called without matching disable_stencil_update");
+            throw std::logic_error("neogfx::native_rendering_context: enable_stencil_update called without matching disable_stencil_update");
         iUpdatingStencil = true;
         iStencilRef = aRef;
         apply_stencil();
     }
 
-    void opengl_rendering_context::disable_stencil_update()
+    void native_rendering_context::disable_stencil_update()
     {
         if (!iUpdatingStencil)
-            throw std::logic_error("neogfx::opengl_rendering_context: disable_stencil_update called without matching enable_stencil_update");
+            throw std::logic_error("neogfx::native_rendering_context: disable_stencil_update called without matching enable_stencil_update");
         iUpdatingStencil = false;
         apply_stencil();
     }
 
-    void opengl_rendering_context::apply_stencil()
+    void native_rendering_context::apply_stencil()
     {
         graphics_backend().apply_stencil(iStencilEnabled, iUpdatingStencil, iStencilRef.value_or(1));
     }
 
-    void opengl_rendering_context::set_pixel(const render_batch& aSetPixelOps)
+    void native_rendering_context::set_pixel(const render_batch& aSetPixelOps)
     {
         /* todo: faster alternative to this... */
         disable_anti_alias daa{ *this };
@@ -1256,14 +1256,14 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_pixel(const point& aPoint, const color& aColor)
+    void native_rendering_context::draw_pixel(const point& aPoint, const color& aColor)
     {
         graphics_operation::operation const op{ graphics_operation::draw_pixel{ aPoint, aColor } };
         queue_batch_item const qbi{ &op, 1, &iFastState, &iSlowState };
         draw_pixels(render_batch{ &qbi, &qbi + 1 });
     }
 
-    void opengl_rendering_context::draw_pixels(const render_batch& aDrawPixelOps)
+    void native_rendering_context::draw_pixels(const render_batch& aDrawPixelOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
@@ -1272,7 +1272,7 @@ namespace neogfx
         disable_multisample disableMultisample{ *this };
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawPixelOps.cend() - aDrawPixelOps.cbegin())) };
+            native_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawPixelOps.cend() - aDrawPixelOps.cbegin())) };
 
             for (auto op = aDrawPixelOps.cbegin(); op != aDrawPixelOps.cend(); ++op)
             {
@@ -1291,21 +1291,21 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
+    void native_rendering_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
     {
         graphics_operation::operation const op{ graphics_operation::draw_line{ aFrom, aTo, aPen } };
         queue_batch_item const qbi{ &op, 1, &iFastState, &iSlowState };
         draw_lines(render_batch{ &qbi, &qbi + 1 });
     }
 
-    void opengl_rendering_context::draw_lines(const render_batch& aDrawLineOps)
+    void native_rendering_context::draw_lines(const render_batch& aDrawLineOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Line);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawLineOps.cend() - aDrawLineOps.cbegin())) };
+            native_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawLineOps.cend() - aDrawLineOps.cbegin())) };
 
             for (auto op = aDrawLineOps.cbegin(); op != aDrawLineOps.cend(); ++op)
             {
@@ -1340,7 +1340,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_triangles(const render_batch& aDrawTriangleOps)
+    void native_rendering_context::draw_triangles(const render_batch& aDrawTriangleOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
@@ -1356,7 +1356,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Triangle);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawTriangleOps.cend() - aDrawTriangleOps.cbegin())) };
+            native_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawTriangleOps.cend() - aDrawTriangleOps.cbegin())) };
 
             for (auto op = aDrawTriangleOps.cbegin(); op != aDrawTriangleOps.cend(); ++op)
             {
@@ -1395,13 +1395,13 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_rects(const render_batch& aDrawRectOps)
+    void native_rendering_context::draw_rects(const render_batch& aDrawRectOps)
     {
         std::optional<use_shader_program> usp;
         std::optional<neolib::scoped_flag> snap;
 
         {
-            std::optional<opengl_triangle_renderer> maybeVertexArrays;
+            std::optional<native_triangle_renderer> maybeVertexArrays;
 
             for (auto op = aDrawRectOps.cbegin(); op != aDrawRectOps.cend(); ++op)
             {
@@ -1504,7 +1504,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_rounded_rects(const render_batch& aDrawRoundedRectOps)
+    void native_rendering_context::draw_rounded_rects(const render_batch& aDrawRoundedRectOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
@@ -1520,7 +1520,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::RoundedRect);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawRoundedRectOps.cend() - aDrawRoundedRectOps.cbegin())) };
+            native_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawRoundedRectOps.cend() - aDrawRoundedRectOps.cbegin())) };
 
             for (auto op = aDrawRoundedRectOps.cbegin(); op != aDrawRoundedRectOps.cend(); ++op)
             {
@@ -1558,7 +1558,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_ellipse_rects(const render_batch& aDrawEllpseRectOps)
+    void native_rendering_context::draw_ellipse_rects(const render_batch& aDrawEllpseRectOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
@@ -1574,7 +1574,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::EllipseRect);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllpseRectOps.cend() - aDrawEllpseRectOps.cbegin())) };
+            native_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllpseRectOps.cend() - aDrawEllpseRectOps.cbegin())) };
 
             for (auto op = aDrawEllpseRectOps.cbegin(); op != aDrawEllpseRectOps.cend(); ++op)
             {
@@ -1613,13 +1613,13 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_checkerboards(const render_batch& aDrawCheckerboardOps)
+    void native_rendering_context::draw_checkerboards(const render_batch& aDrawCheckerboardOps)
     {
         std::optional<use_shader_program> usp;
         std::optional<neolib::scoped_flag> snap;
 
         {
-            std::optional<opengl_triangle_renderer> maybeVertexArrays;
+            std::optional<native_triangle_renderer> maybeVertexArrays;
 
             for (auto op = aDrawCheckerboardOps.cbegin(); op != aDrawCheckerboardOps.cend(); ++op)
             {
@@ -1679,7 +1679,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_ellipses(const render_batch& aDrawEllipseOps)
+    void native_rendering_context::draw_ellipses(const render_batch& aDrawEllipseOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
@@ -1695,7 +1695,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Ellipse);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllipseOps.cend() - aDrawEllipseOps.cbegin())) };
+            native_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawEllipseOps.cend() - aDrawEllipseOps.cbegin())) };
 
             for (auto op = aDrawEllipseOps.cbegin(); op != aDrawEllipseOps.cend(); ++op)
             {
@@ -1732,7 +1732,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_circles(const render_batch& aDrawCircleOps)
+    void native_rendering_context::draw_circles(const render_batch& aDrawCircleOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
@@ -1748,7 +1748,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Circle);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawCircleOps.cend() - aDrawCircleOps.cbegin())) };
+            native_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawCircleOps.cend() - aDrawCircleOps.cbegin())) };
 
             for (auto op = aDrawCircleOps.cbegin(); op != aDrawCircleOps.cend(); ++op)
             {
@@ -1785,7 +1785,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_pies(const render_batch& aDrawPieOps)
+    void native_rendering_context::draw_pies(const render_batch& aDrawPieOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
@@ -1801,7 +1801,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Pie);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawPieOps.cend() - aDrawPieOps.cbegin())) };
+            native_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawPieOps.cend() - aDrawPieOps.cbegin())) };
 
             for (auto op = aDrawPieOps.cbegin(); op != aDrawPieOps.cend(); ++op)
             {
@@ -1838,7 +1838,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_arcs(const render_batch& aDrawArcOps)
+    void native_rendering_context::draw_arcs(const render_batch& aDrawArcOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
@@ -1854,7 +1854,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Arc);
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawArcOps.cend() - aDrawArcOps.cbegin())) };
+            native_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u * (aDrawArcOps.cend() - aDrawArcOps.cbegin())) };
 
             for (auto op = aDrawArcOps.cbegin(); op != aDrawArcOps.cend(); ++op)
             {
@@ -1891,7 +1891,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen)
+    void native_rendering_context::draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen)
     {
         if (!aPen.width())
             return;
@@ -1909,7 +1909,7 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aPen.color()));
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u) };
+            native_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u) };
 
             auto boundingRect = rect{ p0.min(p1.min(p2.min(p3))), p0.max(p1.max(p2.max(p3))) }.inflated(aPen.width());
             auto const function = to_function(*this, aPen.color(), boundingRect);
@@ -1928,7 +1928,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_path(const ssbo_range& aPath, path_shape aPathShape, const rect aBoundingRect, const pen& aPen, const brush& aFill)
+    void native_rendering_context::draw_path(const ssbo_range& aPath, path_shape aPathShape, const rect aBoundingRect, const pen& aPen, const brush& aFill)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
@@ -1946,7 +1946,7 @@ namespace neogfx
             rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Polygon);
 
             {
-                opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u) };
+                native_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u) };
 
                 auto boundingRect = aBoundingRect.inflated(aPen.width() * 2.0) + origin();
                 auto boundingRectVertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
@@ -1977,11 +1977,11 @@ namespace neogfx
         }
         break;
         default:
-            throw std::logic_error("opengl_rendering_context::draw_path: path shape not yet implemented");
+            throw std::logic_error("native_rendering_context::draw_path: path shape not yet implemented");
         }
     }
 
-    void opengl_rendering_context::draw_shapes(const render_batch& aDrawShapeOps)
+    void native_rendering_context::draw_shapes(const render_batch& aDrawShapeOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
@@ -1995,7 +1995,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_shape(const game::mesh& aMesh, const vec3& aPosition, const pen& aPen)
+    void native_rendering_context::draw_shape(const game::mesh& aMesh, const vec3& aPosition, const pen& aPen)
     {
         if (!aPen.width())
             return;
@@ -2013,7 +2013,7 @@ namespace neogfx
         triangles.clear();
         quads_to_triangles(quads, triangles);
 
-        opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, triangles.size() };
+        native_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, triangles.size() };
 
         auto const function = to_function(*this, aPen.color(), bounding_rect(aMesh) + origin());
 
@@ -2028,7 +2028,7 @@ namespace neogfx
                 function });
     }
 
-    void opengl_rendering_context::fill_shape(const game::mesh& aMesh, const vec3& aPosition, const brush& aFill)
+    void native_rendering_context::fill_shape(const game::mesh& aMesh, const vec3& aPosition, const brush& aFill)
     {
         if (std::holds_alternative<std::monostate>(aFill))
             return;
@@ -2039,7 +2039,7 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
 
         {
-            opengl_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this };
+            native_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this };
 
             auto const& pos = (aPosition + origin().to_vec3()).as<float>();
             auto const& vertices = aMesh.vertices;
@@ -2077,7 +2077,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer, const mat44& aTransformation)
+    void native_rendering_context::draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer, const mat44& aTransformation)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
@@ -2249,7 +2249,7 @@ namespace neogfx
         }
     }
 
-    subpixel_format opengl_rendering_context::subpixel_format() const
+    subpixel_format native_rendering_context::subpixel_format() const
     {
         if (render_target().target_type() == render_target_type::Texture)
             return neogfx::subpixel_format::None;
@@ -2259,7 +2259,7 @@ namespace neogfx
         return service<i_basic_services>().display(0).subpixel_format();
     }
 
-    void opengl_rendering_context::draw_glyphs(const render_batch& aDrawGlyphOps)
+    void native_rendering_context::draw_glyphs(const render_batch& aDrawGlyphOps)
     {
         thread_local neolib::variable_stack<std::vector<draw_glyph>> glyphCacheStack;
         neolib::variable_stack_context<std::vector<draw_glyph>> context{ glyphCacheStack };
@@ -2324,7 +2324,7 @@ namespace neogfx
         };
     }
 
-    void opengl_rendering_context::draw_glyphs(const draw_glyph* aBegin, const draw_glyph* aEnd)
+    void native_rendering_context::draw_glyphs(const draw_glyph* aBegin, const draw_glyph* aEnd)
     {
         // Ensure texture shader enabled as glyph shader depends on it...
         rendering_engine().default_shader_program().texture_shader().clear_texture();
@@ -2983,12 +2983,12 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation, const std::optional<game::filter>& aFilter)
+    void native_rendering_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation, const std::optional<game::filter>& aFilter)
     {
         draw_mesh(game::mesh_filter{ { aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {}, true, 0, true, aFilter }, aTransformation);
     }
 
-    void opengl_rendering_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation)
+    void native_rendering_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation)
     {
         if (!aMeshRenderer.render)
             return;
@@ -3003,7 +3003,7 @@ namespace neogfx
         draw_meshes(ignore, as_vertex_provider<>(*this), aMeshRenderer.layer, &drawable, &drawable + 1, aTransformation);
     }
 
-    void opengl_rendering_context::draw_meshes(optional_ecs_render_lock& aLock, i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)
+    void native_rendering_context::draw_meshes(optional_ecs_render_lock& aLock, i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)
     {
         auto const logicalCoordinates = logical_coordinates();
         auto const defaultDecalOffset = static_cast<float>(logicalCoordinates.z_far() * 1e-5);
@@ -3040,7 +3040,7 @@ namespace neogfx
             }
         }
 
-        auto& vertexBuffer = static_cast<opengl_vertex_buffer<>&>(service<i_rendering_engine>().vertex_buffer(aVertexProvider));
+        auto& vertexBuffer = static_cast<native_vertex_buffer<>&>(service<i_rendering_engine>().vertex_buffer(aVertexProvider));
         auto& vertices = vertexBuffer.vertices();
         auto const extra = vertexCount - cachedVertexCount;
         if (!vertices.room_for(extra))
@@ -3262,7 +3262,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_scene_meshes(i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation, std::uint32_t aModelTableBase)
+    void native_rendering_context::draw_scene_meshes(i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation, std::uint32_t aModelTableBase)
     {
         // scene meshes (entities with a model_transformation component): each mesh's vertices are cached once, in model
         // space, in a compact format (scene_vertex) with an index buffer; the model (or skin joint) matrices are
@@ -3272,7 +3272,7 @@ namespace neogfx
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& program = rendering_engine().default_shader_program();
-        auto& vertexBuffer = static_cast<opengl_vertex_buffer<>&>(service<i_rendering_engine>().vertex_buffer(aVertexProvider));
+        auto& vertexBuffer = static_cast<native_vertex_buffer<>&>(service<i_rendering_engine>().vertex_buffer(aVertexProvider));
         auto& sceneBuffer = vertexBuffer.scene_buffer();
         auto& cache = aVertexProvider.cache();
 
@@ -3295,7 +3295,7 @@ namespace neogfx
         if (newVertices != 0u)
             sceneBuffer.reserve(newVertices, newIndices);
 
-        // the context transform is expressed relative to the context origin (cf. opengl_triangle_renderer::set_transformation)
+        // the context transform is expressed relative to the context origin (cf. native_triangle_renderer::set_transformation)
         optional_mat44 transformation = aTransformation;
         if (transform())
         {
@@ -3321,7 +3321,7 @@ namespace neogfx
         thread_local std::vector<std::uint32_t> tIndices;
 
         // the meshes' vertices and indices (uploaded if not cached), then any shadow maps, then the meshes drawn
-        thread_local std::vector<std::optional<opengl_scene_buffer::mesh_range>> tRanges;
+        thread_local std::vector<std::optional<native_scene_buffer::mesh_range>> tRanges;
         tRanges.assign(static_cast<std::size_t>(aLast - aFirst), std::nullopt);
         for (auto md = aFirst; md != aLast; ++md)
         {
@@ -3338,7 +3338,7 @@ namespace neogfx
             auto& meshRenderCache = cache.entity_record_no_lock(meshDrawable.entity, true);
             auto const vertexCount = static_cast<std::uint32_t>(mesh.vertices.size());
             auto const indexCount = static_cast<std::uint32_t>(mesh.faces.size() * 3u);
-            std::optional<opengl_scene_buffer::mesh_range> range;
+            std::optional<native_scene_buffer::mesh_range> range;
             if (meshRenderCache.state != game::cache_state::Invalid)
                 range = sceneBuffer.find(meshRenderCache.meshVertexArrayIndices[0], meshRenderCache.meshVertexArrayIndices[1]);
             if (meshRenderCache.state != game::cache_state::Clean || range == std::nullopt)
@@ -3615,8 +3615,8 @@ namespace neogfx
             graphics_backend().enable_depth_test(true);
     }
 
-    void opengl_rendering_context::draw_scene_lights_and_shadows(i_standard_shader_program& aProgram, opengl_scene_buffer& aSceneBuffer,
-        mesh_drawable const* aDrawables, std::vector<std::optional<opengl_scene_buffer::mesh_range>> const& aMeshes, std::uint32_t aModelTableBase)
+    void native_rendering_context::draw_scene_lights_and_shadows(i_standard_shader_program& aProgram, native_scene_buffer& aSceneBuffer,
+        mesh_drawable const* aDrawables, std::vector<std::optional<native_scene_buffer::mesh_range>> const& aMeshes, std::uint32_t aModelTableBase)
     {
         // the point lights and shadow views are in the space of the model transformed vertices, which includes the context
         // origin (see draw_entities)
@@ -3715,7 +3715,7 @@ namespace neogfx
         pbrShader.set_pbr_shadow_buffer(matrices.range().first, directionalView, directionalTexel);
     }
 
-    void opengl_rendering_context::draw_scene_background(i_standard_shader_program& aProgram, optional_mat44 const& aTransformation)
+    void native_rendering_context::draw_scene_background(i_standard_shader_program& aProgram, optional_mat44 const& aTransformation)
     {
         auto& pbrShader = aProgram.pbr_shader();
         auto const background = *pbrShader.background();
@@ -3755,7 +3755,7 @@ namespace neogfx
             background.blur, pbrShader.environment_intensity());
     }
 
-    void opengl_rendering_context::draw_patch(patch_drawable& aPatch, const mat44& aTransformation)
+    void native_rendering_context::draw_patch(patch_drawable& aPatch, const mat44& aTransformation)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iFastState.opacity };
 
@@ -3763,7 +3763,7 @@ namespace neogfx
 
         std::optional<std::pair<point, mat44f>> originTranslatedTransformation;
 
-        std::optional<opengl_triangle_renderer> triangleRenderer;
+        std::optional<native_triangle_renderer> triangleRenderer;
         bool triangleRendererBarrier = false;
 
         auto const logicalCoordinates = logical_coordinates();
@@ -3774,7 +3774,7 @@ namespace neogfx
 
         for (auto item = aPatch.items.begin(); item != aPatch.items.end();)
         {
-            auto& vertexBuffer = static_cast<opengl_vertex_buffer<>&>(service<i_rendering_engine>().vertex_buffer(*aPatch.provider));
+            auto& vertexBuffer = static_cast<native_vertex_buffer<>&>(service<i_rendering_engine>().vertex_buffer(*aPatch.provider));
             auto& vertices = vertexBuffer.vertices();
 
             auto const& batchRenderer = *item->meshDrawable->renderer;
@@ -3872,7 +3872,7 @@ namespace neogfx
                 // barrier batches are drawn a skip pass at a time (see draw_glyphs) so contain no overlapping
                 // triangles: one draw call bracketed by texture barriers suffices
                 triangleRenderer->draw(item->vertexArrayIndexStart, faceCount * 3,
-                    opengl_triangle_renderer::skip{ batchRenderer.barrier ? std::optional<std::size_t>{ faceCount } : std::nullopt });
+                    native_triangle_renderer::skip{ batchRenderer.barrier ? std::optional<std::size_t>{ faceCount } : std::nullopt });
             }
             else
             {
@@ -3901,7 +3901,7 @@ namespace neogfx
             graphics_backend().enable_depth_test(true);
     }
 
-    void opengl_rendering_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect)
+    void native_rendering_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect)
     {
         auto mesh = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
             to_ecs_component(aRect) : to_ecs_component(game_rect{ aRect });

@@ -24,7 +24,7 @@
 
 #include <neogfx/gfx/i_texture_manager.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
-#include "../opengl/opengl_rendering_context.hpp"
+#include "../native_rendering_context.hpp"
 #include "vulkan_error.hpp"
 #include "vulkan_texture.hpp"
 
@@ -604,7 +604,7 @@ namespace neogfx
     std::unique_ptr<i_rendering_context> vulkan_texture<T>::create_rendering_context(blending_mode aBlendingMode) const
     {
         // n.b. the rendering context shared by the native backends (see i_graphics_backend)
-        return std::unique_ptr<i_rendering_context>(new opengl_rendering_context{ *this, aBlendingMode });
+        return std::unique_ptr<i_rendering_context>(new native_rendering_context{ *this, aBlendingMode });
     }
 
     template <typename T>

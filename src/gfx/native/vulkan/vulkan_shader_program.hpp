@@ -23,21 +23,21 @@
 
 #include <neogfx/gfx/shader_program.hpp>
 #include <neogfx/gfx/standard_shader_program.hpp>
-#include "../opengl/opengl_buffer.hpp"
+#include "../native_buffer.hpp"
 #include "vulkan_graphics_backend.hpp"
 #include "vulkan_glsl.hpp"
 
 namespace neogfx
 {
-    // n.b. as opengl_ssbo (the buffer is the shared opengl_buffer, whose GPU buffer the backend creates); drawing binds
+    // n.b. as opengl_ssbo (the buffer is the shared native_buffer, whose GPU buffer the backend creates); drawing binds
     // the buffer it has at the time (see basic_vulkan_shader_program::link)
     template <typename T>
-    class vulkan_ssbo : public ssbo<T>, public opengl_buffer<ssbo_element_t<T>>, private opengl_buffer_owner
+    class vulkan_ssbo : public ssbo<T>, public native_buffer<ssbo_element_t<T>>, private native_buffer_owner
     {
     public:
         using typename ssbo<T>::value_type;
         using typename ssbo<T>::size_type;
-        using buffer_type = opengl_buffer<ssbo_element_t<T>>;
+        using buffer_type = native_buffer<ssbo_element_t<T>>;
     public:
         vulkan_ssbo(i_string const& aName, ssbo_id aId, size_type aCapacity = 0u);
         ~vulkan_ssbo();

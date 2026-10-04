@@ -37,10 +37,10 @@
 
 namespace neogfx
 {
-    class opengl_scene_buffer;
+    class native_scene_buffer;
 
-    // The graphics API calls made by the code shared by the native backends (opengl_rendering_context,
-    // opengl_renderer, opengl_buffer, opengl_vertex_buffer, opengl_scene_buffer and opengl_triangle_renderer).
+    // The graphics API calls made by the code shared by the native backends (native_rendering_context,
+    // native_renderer, native_buffer, native_vertex_buffer, native_scene_buffer and native_triangle_renderer).
     // n.b. the shared code is the code that was written for OpenGL: it keeps its names and the semantics of each
     // call are those of the OpenGL calls it replaces (an immediate, ordered state machine); a backend for an
     // explicit API (Vulkan) records and orders the work itself.
@@ -75,7 +75,7 @@ namespace neogfx
     template <>
     struct gpu_attribute_type_of<std::uint16_t> { static constexpr gpu_attribute_type type = gpu_attribute_type::UnsignedShort; };
 
-    // a scene mesh's vertices and indices in a scene buffer (see opengl_scene_buffer)
+    // a scene mesh's vertices and indices in a scene buffer (see native_scene_buffer)
     struct gpu_mesh_range
     {
         std::uint32_t vertexStart;
@@ -137,7 +137,7 @@ namespace neogfx
     public:
         virtual neogfx::viewport viewport() const = 0;
         virtual std::optional<rect> scissor() const = 0;
-        // buffers (see opengl_buffer): a buffer is either mapped (persistently, written through the mapping) or device local
+        // buffers (see native_buffer): a buffer is either mapped (persistently, written through the mapping) or device local
         // (written with write_buffer)
     public:
         virtual gpu_buffer create_buffer(std::size_t aSize, bool aDeviceLocal) = 0;
@@ -147,7 +147,7 @@ namespace neogfx
         virtual void unmap_buffer(gpu_buffer aBuffer) = 0;
         virtual void write_buffer(gpu_buffer aBuffer, std::size_t aOffset, void const* aData, std::size_t aSize) = 0;
         virtual void copy_buffer(gpu_buffer aSource, gpu_buffer aDestination, std::size_t aSize) = 0;
-        // vertex arrays (see opengl_vertex_array): vertex attributes and the index buffer apply to the bound vertex array
+        // vertex arrays (see native_vertex_array): vertex attributes and the index buffer apply to the bound vertex array
     public:
         virtual gpu_vertex_array create_vertex_array() = 0;
         virtual void destroy_vertex_array(gpu_vertex_array aVertexArray) = 0;
@@ -165,7 +165,7 @@ namespace neogfx
         virtual void draw_elements(gpu_primitive aPrimitive, std::size_t aFirstIndex, std::size_t aCount) = 0;
         // make what has been drawn so far visible to what is drawn next (glTextureBarrier)
         virtual void texture_barrier() = 0;
-        // fixed function state (see opengl_rendering_context)
+        // fixed function state (see native_rendering_context)
     public:
         virtual void enable_scissor(bool aEnable) = 0;
         virtual void set_scissor(std::int32_t aX, std::int32_t aY, std::int32_t aWidth, std::int32_t aHeight) = 0;
@@ -192,12 +192,12 @@ namespace neogfx
         virtual void set_texture_linear_clamp(i_texture const& aTexture) = 0;
         virtual void set_active_texture_unit(std::uint32_t aTextureUnit) = 0;
         virtual void unbind_texture_unit(std::uint32_t aTextureUnit) = 0;
-        // scene meshes (see opengl_rendering_context::draw_scene_meshes)
+        // scene meshes (see native_rendering_context::draw_scene_meshes)
     public:
         virtual bool scene_shadows_available(i_standard_shader_program& aProgram) = 0;
         // depth only, into the shadow map atlas (see scene_shadow_atlas), which is then bound to reserved_texture_unit::PbrShadow;
         // n.b. the state is unchanged
-        virtual void draw_scene_shadow_maps(i_standard_shader_program& aProgram, opengl_scene_buffer& aSceneBuffer,
+        virtual void draw_scene_shadow_maps(i_standard_shader_program& aProgram, native_scene_buffer& aSceneBuffer,
             std::vector<mat44> const& aViews, std::int32_t aDirectionalView,
             std::vector<std::optional<gpu_mesh_range>> const& aMeshes, std::vector<std::optional<scene_shadow_alpha_test>> const& aAlphaTests,
             std::uint32_t aModelTableBase) = 0;

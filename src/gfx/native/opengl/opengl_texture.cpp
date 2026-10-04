@@ -22,8 +22,8 @@
 #include <neogfx/gfx/i_texture_manager.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include "opengl_error.hpp"
-#include "opengl_vertex.hpp"
-#include "opengl_rendering_context.hpp"
+#include "../native_vertex.hpp"
+#include "../native_rendering_context.hpp"
 #include "opengl_texture.hpp"
 
 namespace neogfx
@@ -729,7 +729,7 @@ namespace neogfx
     template <typename T>
     std::unique_ptr<i_rendering_context> opengl_texture<T>::create_rendering_context(blending_mode aBlendingMode) const
     {
-        return std::unique_ptr<i_rendering_context>(new opengl_rendering_context{ *this, aBlendingMode });
+        return std::unique_ptr<i_rendering_context>(new native_rendering_context{ *this, aBlendingMode });
     }
 
     template <typename T>

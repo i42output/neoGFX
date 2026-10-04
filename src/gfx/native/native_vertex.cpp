@@ -1,4 +1,4 @@
-// opengl_vertex.cpp
+// native_vertex.cpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -19,44 +19,44 @@
 
 #include <neogfx/neogfx.hpp>
 
-#include "opengl_buffer.ipp"
-#include "opengl_vertex.hpp"
-#include "opengl_vertex.ipp"
+#include "native_buffer.ipp"
+#include "native_vertex.hpp"
+#include "native_vertex.ipp"
 
 #include <limits>
 
 namespace neogfx
 {
-    template class opengl_buffer<standard_vertex>;
-    template class opengl_vertex_buffer<>;
-    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::xyz)>;
-    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::rgba)>;
-    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::st)>;
-    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::xyzw)>;
-    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::abcd)>;
-    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::efgh)>;
-    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::ijkl)>;
-    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::mnop)>;
-    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::abcd2)>;
-    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::efgh2)>;
-    template class opengl_vertex_attrib_array<standard_vertex, decltype(standard_vertex::debug)>;
+    template class native_buffer<standard_vertex>;
+    template class native_vertex_buffer<>;
+    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::xyz)>;
+    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::rgba)>;
+    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::st)>;
+    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::xyzw)>;
+    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::abcd)>;
+    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::efgh)>;
+    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::ijkl)>;
+    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::mnop)>;
+    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::abcd2)>;
+    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::efgh2)>;
+    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::debug)>;
 
-    opengl_scene_buffer::opengl_scene_buffer() :
+    native_scene_buffer::native_scene_buffer() :
         iVertices{ *this, true, 0u, true }, iIndices{ *this, true, 0u, true }
     {
     }
 
-    opengl_scene_buffer::~opengl_scene_buffer()
+    native_scene_buffer::~native_scene_buffer()
     {
     }
 
-    void opengl_scene_buffer::reserve(std::size_t aExtraVertices, std::size_t aExtraIndices)
+    void native_scene_buffer::reserve(std::size_t aExtraVertices, std::size_t aExtraIndices)
     {
         iVertices.reserve(iVertices.size() + aExtraVertices);
         iIndices.reserve(iIndices.size() + aExtraIndices);
     }
 
-    opengl_scene_buffer::mesh_range opengl_scene_buffer::allocate(std::uint32_t aVertexCount, std::uint32_t aIndexCount)
+    native_scene_buffer::mesh_range native_scene_buffer::allocate(std::uint32_t aVertexCount, std::uint32_t aIndexCount)
     {
         auto const vertexStart = iVertices.find_space_for(aVertexCount);
         if (vertexStart == iVertices.size())
@@ -66,7 +66,7 @@ namespace neogfx
             iIndices.resize(iIndices.size() + aIndexCount);
         if (vertexStart + aVertexCount > std::numeric_limits<std::uint32_t>::max() || 
             indexStart + aIndexCount > std::numeric_limits<std::uint32_t>::max())
-            throw std::overflow_error("neogfx::opengl_scene_buffer::allocate");
+            throw std::overflow_error("neogfx::native_scene_buffer::allocate");
         mesh_range const result{
             static_cast<std::uint32_t>(vertexStart), static_cast<std::uint32_t>(vertexStart + aVertexCount),
             static_cast<std::uint32_t>(indexStart), static_cast<std::uint32_t>(indexStart + aIndexCount) };
@@ -74,7 +74,7 @@ namespace neogfx
         return result;
     }
 
-    std::optional<opengl_scene_buffer::mesh_range> opengl_scene_buffer::find(std::uint32_t aVertexStart, std::uint32_t aVertexEnd) const
+    std::optional<native_scene_buffer::mesh_range> native_scene_buffer::find(std::uint32_t aVertexStart, std::uint32_t aVertexEnd) const
     {
         auto existing = iMeshes.find(aVertexStart);
         if (existing == iMeshes.end() || existing->second.vertexEnd != aVertexEnd)
@@ -82,13 +82,13 @@ namespace neogfx
         return existing->second;
     }
 
-    void opengl_scene_buffer::write(mesh_range const& aMesh, scene_vertex const* aVertices, std::uint32_t const* aIndices)
+    void native_scene_buffer::write(mesh_range const& aMesh, scene_vertex const* aVertices, std::uint32_t const* aIndices)
     {
         iVertices.write(aMesh.vertexStart, aVertices, aMesh.vertexEnd - aMesh.vertexStart);
         iIndices.write(aMesh.indexStart, aIndices, aMesh.indexEnd - aMesh.indexStart);
     }
 
-    bool opengl_scene_buffer::reclaim(std::uint32_t aVertexStart, std::uint32_t aVertexEnd)
+    bool native_scene_buffer::reclaim(std::uint32_t aVertexStart, std::uint32_t aVertexEnd)
     {
         auto existing = iMeshes.find(aVertexStart);
         if (existing == iMeshes.end() || existing->second.vertexEnd != aVertexEnd)
@@ -99,13 +99,13 @@ namespace neogfx
         return true;
     }
 
-    void opengl_scene_buffer::reclaim()
+    void native_scene_buffer::reclaim()
     {
         iVertices.reclaim();
         iIndices.reclaim();
     }
 
-    void opengl_scene_buffer::draw_depth(std::uint32_t aIndexStart, std::uint32_t aIndexCount)
+    void native_scene_buffer::draw_depth(std::uint32_t aIndexStart, std::uint32_t aIndexCount)
     {
         if (aIndexCount == 0u)
             return;
@@ -125,7 +125,7 @@ namespace neogfx
         backend.draw_elements(gpu_primitive::Triangles, aIndexStart, aIndexCount);
     }
 
-    void opengl_scene_buffer::draw(i_rendering_context& aContext, i_shader_program& aShaderProgram, optional_mat44 const& aTransformation, std::uint32_t aIndexStart, std::uint32_t aIndexCount)
+    void native_scene_buffer::draw(i_rendering_context& aContext, i_shader_program& aShaderProgram, optional_mat44 const& aTransformation, std::uint32_t aIndexStart, std::uint32_t aIndexCount)
     {
         if (aIndexCount == 0u)
             return;
@@ -174,35 +174,35 @@ namespace neogfx
         graphics_backend().draw_elements(gpu_primitive::Triangles, aIndexStart, aIndexCount);
     }
 
-    gpu_buffer opengl_scene_buffer::vertex_buffer() const
+    gpu_buffer native_scene_buffer::vertex_buffer() const
     {
         return iVertices.handle();
     }
 
-    gpu_buffer opengl_scene_buffer::index_buffer() const
+    gpu_buffer native_scene_buffer::index_buffer() const
     {
         return iIndices.handle();
     }
 
-    void opengl_scene_buffer::buffer_grown()
+    void native_scene_buffer::buffer_grown()
     {
         // nothing to do: draw() binds the (possibly new) buffers every time
     }
 
-    opengl_vertex_array::opengl_vertex_array()
+    native_vertex_array::native_vertex_array()
     {
         iPreviousVertexArrayBindingHandle = graphics_backend().bound_vertex_array();
         iHandle = graphics_backend().create_vertex_array();
         bind();
     }
 
-    opengl_vertex_array::~opengl_vertex_array()
+    native_vertex_array::~native_vertex_array()
     {
         graphics_backend().bind_vertex_array(iPreviousVertexArrayBindingHandle);
         graphics_backend().destroy_vertex_array(iHandle);
     }
 
-    void opengl_vertex_array::bind()
+    void native_vertex_array::bind()
     {
         graphics_backend().bind_vertex_array(iHandle);
     }

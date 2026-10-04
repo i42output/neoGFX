@@ -220,7 +220,7 @@ namespace neogfx
         };
 
         renderer::renderer(neogfx::renderer aRenderer) :
-            opengl_renderer{ aRenderer },
+            native_renderer{ aRenderer },
             iInitialized{ false },
             iVsyncEnabled{ true },
             iContext{ nullptr },
@@ -275,19 +275,19 @@ namespace neogfx
                     iDefaultOffscreenWindow = dow;
                     iContext = create_opengl_context(static_cast<HDC>(dow->device_handle()));
                 }
-                opengl_renderer::initialize();
+                native_renderer::initialize();
                 iInitialized = true;
             }
         }
 
         void renderer::cleanup()
         {
-            if (iInitialized && opengl_renderer::renderer() != neogfx::renderer::None)
+            if (iInitialized && native_renderer::renderer() != neogfx::renderer::None)
             {
                 if (iContext != nullptr)
                     wglMakeCurrent(static_cast<HDC>(iDefaultOffscreenWindow.lock()->device_handle()),
                         static_cast<HGLRC>(iContext));
-                opengl_renderer::cleanup();
+                native_renderer::cleanup();
                 if (iContext != nullptr)
                     destroy_context(iContext);
                 iOffscreenWindows.clear();
@@ -563,7 +563,7 @@ namespace neogfx
                     eventsAlreadyQueued = true;
             }
             if (eventsAlreadyQueued)
-                return opengl_renderer::process_events();
+                return native_renderer::process_events();
             else
                 return false;
         }
@@ -608,7 +608,7 @@ namespace neogfx
 
         bool renderer::vulkan() const
         {
-            return opengl_renderer::renderer() == neogfx::renderer::Vulkan;
+            return native_renderer::renderer() == neogfx::renderer::Vulkan;
         }
 
         void renderer::attach_surface(i_surface_window& aWindow, i_native_window& aNativeWindow)

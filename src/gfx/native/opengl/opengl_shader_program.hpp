@@ -23,17 +23,18 @@
 
 #include <neogfx/gfx/shader_program.hpp>
 #include <neogfx/gfx/standard_shader_program.hpp>
-#include "opengl_buffer.hpp"
+#include "../native_buffer.hpp"
+#include "opengl.hpp"
 
 namespace neogfx
 {
     template <typename T>
-    class opengl_ssbo : public ssbo<T>, public opengl_buffer<ssbo_element_t<T>>, private opengl_buffer_owner
+    class opengl_ssbo : public ssbo<T>, public native_buffer<ssbo_element_t<T>>, private native_buffer_owner
     {
     public:
         using typename ssbo<T>::value_type;
         using typename ssbo<T>::size_type;
-        using buffer_type = opengl_buffer<ssbo_element_t<T>>;
+        using buffer_type = native_buffer<ssbo_element_t<T>>;
     public:
         opengl_ssbo(i_string const& aName, ssbo_id aId, size_type aCapacity = 0u);
         ~opengl_ssbo();

@@ -93,7 +93,7 @@ namespace neogfx
         void unbind_texture_unit(std::uint32_t aTextureUnit) final;
     public:
         bool scene_shadows_available(i_standard_shader_program& aProgram) final;
-        void draw_scene_shadow_maps(i_standard_shader_program& aProgram, opengl_scene_buffer& aSceneBuffer,
+        void draw_scene_shadow_maps(i_standard_shader_program& aProgram, native_scene_buffer& aSceneBuffer,
             std::vector<mat44> const& aViews, std::int32_t aDirectionalView,
             std::vector<std::optional<gpu_mesh_range>> const& aMeshes, std::vector<std::optional<scene_shadow_alpha_test>> const& aAlphaTests,
             std::uint32_t aModelTableBase) final;

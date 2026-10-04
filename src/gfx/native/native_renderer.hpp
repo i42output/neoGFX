@@ -1,4 +1,4 @@
-// opengl_renderer.hpp
+// native_renderer.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -28,10 +28,9 @@
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
 #include <neogfx/gfx/i_standard_shader_program.hpp>
-#include "../i_graphics_backend.hpp"
-#include "opengl.hpp"
-#include "opengl_texture_manager.hpp"
-#include "opengl_vertex.hpp"
+#include "i_graphics_backend.hpp"
+#include <neogfx/gfx/texture_manager.hpp>
+#include "native_vertex.hpp"
 
 namespace neogfx
 {
@@ -50,21 +49,11 @@ namespace neogfx
         std::vector<i_widget*> iWidgets;
     };
 
-    class opengl_renderer : public i_rendering_engine
+    class native_renderer : public i_rendering_engine
     {
         // events
     public:
         define_declared_event(SubpixelRenderingChanged, subpixel_rendering_changed)
-        // exceptions
-    public:
-        struct shader_program_error : i_rendering_engine::shader_program_error {
-            shader_program_error(GLenum aErrorCode) :
-                i_rendering_engine::shader_program_error(glErrorString(aErrorCode)) {}
-        };
-        struct failed_to_create_framebuffer : std::runtime_error {
-            failed_to_create_framebuffer(GLenum aErrorCode) :
-                std::runtime_error("neogfx::opengl_renderer::failed_to_create_framebuffer: Failed to create frame buffer, reason: " + glErrorString(aErrorCode)) {}
-        };
         // types
     public:
         typedef neolib::vector<neolib::ref_ptr<i_shader_program>> shader_program_list;
@@ -91,7 +80,7 @@ namespace neogfx
             void release() final
             {
                 if (!iInUse)
-                    throw std::logic_error("neogfx::opengl_renderer::ping_pong_buffer::release");
+                    throw std::logic_error("neogfx::native_renderer::ping_pong_buffer::release");
                 iInUse = false;
             }
         public:
@@ -102,7 +91,7 @@ namespace neogfx
             void use()
             {
                 if (iInUse)
-                    throw std::logic_error("neogfx::opengl_renderer::ping_pong_buffer::use");
+                    throw std::logic_error("neogfx::native_renderer::ping_pong_buffer::use");
                 iInUse = true;
             }
         private:
@@ -111,11 +100,11 @@ namespace neogfx
             bool iInUse = false;
         };
         typedef std::multimap<std::pair<texture_sampling, size>, ping_pong_buffer> ping_pong_buffers_t;
-        typedef i_rendering_engine::handle opengl_context;
+        typedef i_rendering_engine::handle native_context;
         // construction
     public:
-        opengl_renderer(neogfx::renderer aRenderer);
-        ~opengl_renderer();
+        native_renderer(neogfx::renderer aRenderer);
+        ~native_renderer();
     public:
         const i_device_metrics& default_screen_metrics() const override;
     public:
@@ -188,7 +177,7 @@ namespace neogfx
         bool iStencilBasedInvalidation;
         bool iRenderQueueOptimisation;
         bool iSubpixelRendering;
-        typedef std::unordered_map<i_vertex_provider*, opengl_vertex_buffer<>> vertex_buffers_map;
+        typedef std::unordered_map<i_vertex_provider*, native_vertex_buffer<>> vertex_buffers_map;
         mutable vertex_buffers_map iVertexBuffers;
         mutable std::optional<vertex_buffers_map::iterator> iLastVertexBufferUsed;
         std::map<std::chrono::milliseconds, neogfx::frame_counter> iFrameCounters;

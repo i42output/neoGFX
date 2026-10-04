@@ -1,4 +1,4 @@
-// opengl_rendering_context.hpp
+// native_rendering_context.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -31,16 +31,14 @@
 #include <neogfx/game/mesh_renderer.hpp>
 #include <neogfx/game/mesh_render_cache.hpp>
 #include <neogfx/game/model_transformation.hpp>
-#include "opengl.hpp"
-#include "opengl_error.hpp"
-#include "opengl_vertex.hpp"
-#include "opengl_triangle_renderer.hpp"
+#include "native_vertex.hpp"
+#include "native_triangle_renderer.hpp"
 
 namespace neogfx
 {
     class i_widget;
 
-    class opengl_rendering_context : public i_rendering_context
+    class native_rendering_context : public i_rendering_context
     {
     public:
         template <typename Tag = void>
@@ -74,7 +72,7 @@ namespace neogfx
         class scoped_anti_alias
         {
         public:
-            scoped_anti_alias(opengl_rendering_context& aParent, neogfx::smoothing_mode aNewSmoothingMode) : iParent(aParent), iOldSmoothingMode(aParent.smoothing_mode())
+            scoped_anti_alias(native_rendering_context& aParent, neogfx::smoothing_mode aNewSmoothingMode) : iParent(aParent), iOldSmoothingMode(aParent.smoothing_mode())
             {
                 iParent.set_smoothing_mode(aNewSmoothingMode);
             }
@@ -83,20 +81,20 @@ namespace neogfx
                 iParent.set_smoothing_mode(iOldSmoothingMode);
             }
         private:
-            opengl_rendering_context& iParent;
+            native_rendering_context& iParent;
             neogfx::smoothing_mode iOldSmoothingMode;
         };
         class disable_anti_alias : public scoped_anti_alias
         {
         public:
-            disable_anti_alias(opengl_rendering_context& aParent) : scoped_anti_alias{ aParent, neogfx::smoothing_mode::None }
+            disable_anti_alias(native_rendering_context& aParent) : scoped_anti_alias{ aParent, neogfx::smoothing_mode::None }
             {
             }
         };
         class scoped_multisample
         {
         public:
-            scoped_multisample(opengl_rendering_context& aParent, bool aMultisample) : iParent(aParent), iOldMultiSample(aParent.multisample())
+            scoped_multisample(native_rendering_context& aParent, bool aMultisample) : iParent(aParent), iOldMultiSample(aParent.multisample())
             {
                 iParent.set_multisample(aMultisample);
             }
@@ -105,20 +103,20 @@ namespace neogfx
                 iParent.set_multisample(iOldMultiSample);
             }
         private:
-            opengl_rendering_context& iParent;
+            native_rendering_context& iParent;
             bool iOldMultiSample;
         };
         class disable_multisample : public scoped_multisample
         {
         public:
-            disable_multisample(opengl_rendering_context& aParent) : scoped_multisample{ aParent, false }
+            disable_multisample(native_rendering_context& aParent) : scoped_multisample{ aParent, false }
             {
             }
         };
         class scoped_blending_mode
         {
         public:
-            scoped_blending_mode(opengl_rendering_context& aParent, neogfx::blending_mode aBlendigMode) :
+            scoped_blending_mode(native_rendering_context& aParent, neogfx::blending_mode aBlendigMode) :
                 iParent{ aParent }, iPreviousBlendingMode{ aParent.blending_mode() }
             {
                 iParent.set_blending_mode(aBlendigMode);
@@ -128,13 +126,13 @@ namespace neogfx
                 iParent.set_blending_mode(iPreviousBlendingMode);
             }
         private:
-            opengl_rendering_context& iParent;
+            native_rendering_context& iParent;
             neogfx::blending_mode iPreviousBlendingMode;
         };
         class scoped_opacity
         {
         public:
-            scoped_opacity(opengl_rendering_context& aParent, scalar aOpacity) :
+            scoped_opacity(native_rendering_context& aParent, scalar aOpacity) :
                 iParent{ aParent }, iPreviousOpacity{ aParent.opacity()}
             {
                 iParent.set_opacity(aOpacity);
@@ -144,7 +142,7 @@ namespace neogfx
                 iParent.set_opacity(iPreviousOpacity);
             }
         private:
-            opengl_rendering_context& iParent;
+            native_rendering_context& iParent;
             scalar iPreviousOpacity;
         };
         struct draw_glyph
@@ -200,7 +198,7 @@ namespace neogfx
         };
         struct patch_drawable
         {
-            struct no_texture : std::logic_error { no_texture() : std::logic_error{ "neogfx::opengl_rendering_context::patch_drawable::no_texture" } {} };
+            struct no_texture : std::logic_error { no_texture() : std::logic_error{ "neogfx::native_rendering_context::patch_drawable::no_texture" } {} };
             static bool has_texture(const game::mesh_renderer& meshRenderer, const game::material& material)
             {
                 if (material.texture != std::nullopt)
@@ -231,7 +229,7 @@ namespace neogfx
             struct item
             {
                 mesh_drawable* meshDrawable;
-                typedef opengl_vertex_buffer<>::vertex_array vertices;
+                typedef native_vertex_buffer<>::vertex_array vertices;
                 vertices::size_type vertexArrayIndexStart;
                 vertices::size_type vertexArrayIndexEnd;
                 game::material const* material;
@@ -265,10 +263,10 @@ namespace neogfx
         typedef game::scoped_component_data_lock<game::mesh_renderer, game::mesh_render_cache, game::mesh_filter, game::animation_filter, game::rigid_body> ecs_render_lock;
         typedef std::optional<ecs_render_lock> optional_ecs_render_lock;
     public:
-        opengl_rendering_context(const i_render_target& aTarget, blending_mode aBlendingMode = blending_mode::Default);
-        opengl_rendering_context(const i_render_target& aTarget, const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default);
-        opengl_rendering_context(const opengl_rendering_context& aOther);
-        ~opengl_rendering_context();
+        native_rendering_context(const i_render_target& aTarget, blending_mode aBlendingMode = blending_mode::Default);
+        native_rendering_context(const i_render_target& aTarget, const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default);
+        native_rendering_context(const native_rendering_context& aOther);
+        ~native_rendering_context();
     public:
         std::unique_ptr<i_rendering_context> clone() const final;
     public:
@@ -377,8 +375,8 @@ namespace neogfx
         void draw_patch(patch_drawable& aPatch, const mat44& aTransformation);
         void draw_scene_meshes(i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation, std::uint32_t aModelTableBase);
         // the scene meshes' point lights (see i_standard_shader_program::scene_lights) and shadow maps (see i_pbr_shader::set_pbr_shadows)
-        void draw_scene_lights_and_shadows(i_standard_shader_program& aProgram, opengl_scene_buffer& aSceneBuffer,
-            mesh_drawable const* aDrawables, std::vector<std::optional<opengl_scene_buffer::mesh_range>> const& aMeshes, std::uint32_t aModelTableBase);
+        void draw_scene_lights_and_shadows(i_standard_shader_program& aProgram, native_scene_buffer& aSceneBuffer,
+            mesh_drawable const* aDrawables, std::vector<std::optional<native_scene_buffer::mesh_range>> const& aMeshes, std::uint32_t aModelTableBase);
         // the scene's background (see i_pbr_shader::set_background), drawn behind the scene meshes
         void draw_scene_background(i_standard_shader_program& aProgram, optional_mat44 const& aTransformation);
         void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = {}, shader_effect aShaderEffect = shader_effect::None);
@@ -409,7 +407,7 @@ namespace neogfx
             return sGeneration;
         }
         template <typename Tag = void>
-        static standard_batching<Tag>& as_vertex_provider(opengl_rendering_context& aContext)
+        static standard_batching<Tag>& as_vertex_provider(native_rendering_context& aContext)
         {
             if (aContext.iTarget.target_type() == render_target_type::Surface)
             {

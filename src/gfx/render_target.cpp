@@ -104,7 +104,7 @@ namespace neogfx
                 break;
             case graphics_operation::PopScissor:
                 if (aContext.clipRegionStack.empty())
-                    throw std::logic_error("neogfx::opengl_rendering_context::flush: unmatched PopScissor");
+                    throw std::logic_error("neogfx::native_rendering_context::flush: unmatched PopScissor");
                 aContext.clipRegionStack.pop_back();
                 keepOp = false;
                 break;

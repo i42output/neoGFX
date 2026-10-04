@@ -1,4 +1,4 @@
-// opengl_buffer.ipp
+// native_buffer.ipp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015-2026 Leigh Johnston.  All Rights Reserved.
@@ -19,12 +19,12 @@
 
 #pragma once
 
-#include "opengl_buffer.hpp"
+#include "native_buffer.hpp"
 
 namespace neogfx
 {
     template <typename T>
-    inline opengl_buffer<T>::opengl_buffer(bool aCacheable, size_type aCapacity, bool aDeviceLocal)
+    inline native_buffer<T>::native_buffer(bool aCacheable, size_type aCapacity, bool aDeviceLocal)
         : iCacheable{ aCacheable }, iDeviceLocal{ aDeviceLocal }
     {
         if (aCapacity != 0)
@@ -39,82 +39,82 @@ namespace neogfx
     }
 
     template <typename T>
-    inline opengl_buffer<T>::opengl_buffer(opengl_buffer_owner& aOwner, bool aCacheable, size_type aCapacity, bool aDeviceLocal) :
-        opengl_buffer{ aCacheable, aCapacity, aDeviceLocal }
+    inline native_buffer<T>::native_buffer(native_buffer_owner& aOwner, bool aCacheable, size_type aCapacity, bool aDeviceLocal) :
+        native_buffer{ aCacheable, aCapacity, aDeviceLocal }
     {
         iOwner = &aOwner;
     }
 
     template <typename T>
-    inline opengl_buffer<T>::~opengl_buffer()
+    inline native_buffer<T>::~native_buffer()
     {
         if (iBufferName != no_gpu_buffer)
             graphics_backend().destroy_buffer(iBufferName);
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::size_type opengl_buffer<T>::capacity() const
+    inline typename native_buffer<T>::size_type native_buffer<T>::capacity() const
     {
         return iCapacity;
     }
 
     template <typename T>
-    inline bool opengl_buffer<T>::empty() const
+    inline bool native_buffer<T>::empty() const
     {
         return iSize == 0;
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::size_type opengl_buffer<T>::size() const
+    inline typename native_buffer<T>::size_type native_buffer<T>::size() const
     {
         return iSize;
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::const_iterator opengl_buffer<T>::cbegin() const
+    inline typename native_buffer<T>::const_iterator native_buffer<T>::cbegin() const
     {
         return map();
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::const_iterator opengl_buffer<T>::cend() const
+    inline typename native_buffer<T>::const_iterator native_buffer<T>::cend() const
     {
         return map() + size();
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::const_iterator opengl_buffer<T>::begin() const
+    inline typename native_buffer<T>::const_iterator native_buffer<T>::begin() const
     {
         return cbegin();
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::const_iterator opengl_buffer<T>::end() const
+    inline typename native_buffer<T>::const_iterator native_buffer<T>::end() const
     {
         return cend();
     }
     
     template <typename T>
-    inline typename opengl_buffer<T>::iterator opengl_buffer<T>::begin()
+    inline typename native_buffer<T>::iterator native_buffer<T>::begin()
     {
         return map();
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::iterator opengl_buffer<T>::end()
+    inline typename native_buffer<T>::iterator native_buffer<T>::end()
     {
         return map() + size();
     }
 
     template <typename T>
-    inline void opengl_buffer<T>::reserve(size_type aCapacity)
+    inline void native_buffer<T>::reserve(size_type aCapacity)
     {
         if (aCapacity > capacity())
             grow(aCapacity);
     }
 
     template <typename T>
-    void opengl_buffer<T>::resize(size_type aSize)
+    void native_buffer<T>::resize(size_type aSize)
     {
         if (aSize > size())
             need(aSize - size());
@@ -122,31 +122,31 @@ namespace neogfx
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::const_reference opengl_buffer<T>::operator[](size_type aOffset) const
+    inline typename native_buffer<T>::const_reference native_buffer<T>::operator[](size_type aOffset) const
     {
         return *std::next(cbegin(), aOffset);
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::reference opengl_buffer<T>::operator[](size_type aOffset)
+    inline typename native_buffer<T>::reference native_buffer<T>::operator[](size_type aOffset)
     {
         return *std::next(begin(), aOffset);
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::const_reference opengl_buffer<T>::back() const
+    inline typename native_buffer<T>::const_reference native_buffer<T>::back() const
     {
         return *std::prev(cend());
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::reference opengl_buffer<T>::back()
+    inline typename native_buffer<T>::reference native_buffer<T>::back()
     {
         return *std::prev(end());
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::size_type opengl_buffer<T>::find_space_for(size_type aCount)
+    inline typename native_buffer<T>::size_type native_buffer<T>::find_space_for(size_type aCount)
     {
         auto maybeFreeBlock = find_free_block(aCount);
 
@@ -167,7 +167,7 @@ namespace neogfx
     }
 
     template <typename T>
-    inline void opengl_buffer<T>::push_back(const_reference aValue)
+    inline void native_buffer<T>::push_back(const_reference aValue)
     {
         need(1);
         new (map() + iSize) value_type{ aValue };
@@ -175,13 +175,13 @@ namespace neogfx
     }
 
     template <typename T>
-    inline void opengl_buffer<T>::pop_back()
+    inline void native_buffer<T>::pop_back()
     {
         --iSize;
     }
 
     template <typename T>
-    inline void opengl_buffer<T>::clear()
+    inline void native_buffer<T>::clear()
     {
         iSize = 0;
         iBlocksToFree = {};
@@ -189,35 +189,35 @@ namespace neogfx
     }
 
     template <typename T>
-    inline gpu_buffer opengl_buffer<T>::handle() const
+    inline gpu_buffer native_buffer<T>::handle() const
     {
         return iBufferName;
     }
 
     template <typename T>
-    inline bool opengl_buffer<T>::mapped() const
+    inline bool native_buffer<T>::mapped() const
     {
         return iMemory != nullptr;
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::const_pointer opengl_buffer<T>::map() const
+    inline typename native_buffer<T>::const_pointer native_buffer<T>::map() const
     {
         if (iDeviceLocal)
-            throw std::logic_error("neogfx::opengl_buffer<T>::map: device local buffer cannot be mapped");
+            throw std::logic_error("neogfx::native_buffer<T>::map: device local buffer cannot be mapped");
         if (iMemory == nullptr)
             iMemory = static_cast<value_type*>(graphics_backend().map_buffer(handle(), capacity() * sizeof(value_type)));
         return iMemory;
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::pointer opengl_buffer<T>::map()
+    inline typename native_buffer<T>::pointer native_buffer<T>::map()
     {
         return const_cast<pointer>(to_const(*this).map());
     }
 
     template <typename T>
-    inline void opengl_buffer<T>::flush(size_type aOffset, size_type aElements)
+    inline void native_buffer<T>::flush(size_type aOffset, size_type aElements)
     {
         if (iDeviceLocal || aElements == 0)
             return; // n.b. a device local buffer is written directly (see write()) and a buffer never written may not be mapped
@@ -226,16 +226,16 @@ namespace neogfx
             graphics_backend().flush_buffer(handle(), aOffset * sizeof(value_type), aElements * sizeof(value_type));
         }
         else
-            throw std::logic_error("neogfx::opengl_buffer<T>::flush: buffer not mapped!");
+            throw std::logic_error("neogfx::native_buffer<T>::flush: buffer not mapped!");
     }
 
     template <typename T>
-    inline void opengl_buffer<T>::write(size_type aOffset, const_pointer aData, size_type aElements)
+    inline void native_buffer<T>::write(size_type aOffset, const_pointer aData, size_type aElements)
     {
         if (aElements == 0)
             return;
         if (aOffset + aElements > size())
-            throw std::logic_error("neogfx::opengl_buffer<T>::write: out of range");
+            throw std::logic_error("neogfx::native_buffer<T>::write: out of range");
         if (iDeviceLocal)
             graphics_backend().write_buffer(handle(), aOffset * sizeof(value_type), aData, aElements * sizeof(value_type));
         else
@@ -246,7 +246,7 @@ namespace neogfx
     }
 
     template <typename T>
-    inline void opengl_buffer<T>::unmap()
+    inline void native_buffer<T>::unmap()
     {
         if (iMemory != nullptr)
         {
@@ -257,13 +257,13 @@ namespace neogfx
     }
 
     template <typename T>
-    inline typename opengl_buffer<T>::size_type opengl_buffer<T>::room() const
+    inline typename native_buffer<T>::size_type native_buffer<T>::room() const
     {
         return capacity() - size();
     }
 
     template <typename T>
-    inline bool opengl_buffer<T>::room_for(size_type aExtra) const
+    inline bool native_buffer<T>::room_for(size_type aExtra) const
     {
         if (aExtra <= room())
             return true;
@@ -273,7 +273,7 @@ namespace neogfx
     }
 
     template <typename T>
-    inline void opengl_buffer<T>::need(size_type aExtra)
+    inline void native_buffer<T>::need(size_type aExtra)
     {
         if (aExtra > room())
         {
@@ -286,14 +286,14 @@ namespace neogfx
     }
 
     template <typename T>
-    inline void opengl_buffer<T>::reclaim(size_type aStartIndex, size_type aEndIndex)
+    inline void native_buffer<T>::reclaim(size_type aStartIndex, size_type aEndIndex)
     {
         if (aEndIndex != aStartIndex)
             blocks_to_free()[std::countr_zero(std::bit_ceil(aEndIndex - aStartIndex))].emplace_back(aStartIndex, aEndIndex);
     }
 
     template <typename T>
-    inline void opengl_buffer<T>::reclaim()
+    inline void native_buffer<T>::reclaim()
     {
         for (std::size_t bucket = 0u; bucket < iFreeBlocks.size(); ++bucket)
         {
@@ -307,7 +307,7 @@ namespace neogfx
     }
 
     template <typename T>
-    inline std::array<typename opengl_buffer<T>::free_blocks, 32u>& opengl_buffer<T>::blocks_to_free()
+    inline std::array<typename native_buffer<T>::free_blocks, 32u>& native_buffer<T>::blocks_to_free()
     {
         if (!iCacheable)
             return iBlocksToFree[0u][0u];
@@ -321,7 +321,7 @@ namespace neogfx
     }
 
     template <typename T>
-    inline auto opengl_buffer<T>::find_free_block(size_type aCount) const -> std::optional<std::pair<typename opengl_buffer<T>::free_blocks const*, typename opengl_buffer<T>::free_blocks::const_iterator>>
+    inline auto native_buffer<T>::find_free_block(size_type aCount) const -> std::optional<std::pair<typename native_buffer<T>::free_blocks const*, typename native_buffer<T>::free_blocks::const_iterator>>
     {
         auto probe = std::bit_ceil(aCount);
         bool peek = std::countr_zero(probe * 2) < iFreeBlocks.size();
@@ -349,9 +349,9 @@ namespace neogfx
     }
 
     template <typename T>
-    inline auto opengl_buffer<T>::find_free_block(size_type aCount) -> std::optional<std::pair<typename opengl_buffer<T>::free_blocks*, typename opengl_buffer<T>::free_blocks::iterator>>
+    inline auto native_buffer<T>::find_free_block(size_type aCount) -> std::optional<std::pair<typename native_buffer<T>::free_blocks*, typename native_buffer<T>::free_blocks::iterator>>
     {
-        auto const result = const_cast<opengl_buffer const&>(*this).find_free_block(aCount);
+        auto const result = const_cast<native_buffer const&>(*this).find_free_block(aCount);
         if (!result)
             return {};
         auto freeBlocks = const_cast<free_blocks*>(result->first);
@@ -359,12 +359,12 @@ namespace neogfx
     }
 
     template <typename T>   
-    inline void opengl_buffer<T>::grow(size_type aCapacity)
+    inline void native_buffer<T>::grow(size_type aCapacity)
     {
         unmap();
 
         {
-            opengl_buffer<T> temp{ iCacheable, aCapacity, iDeviceLocal };
+            native_buffer<T> temp{ iCacheable, aCapacity, iDeviceLocal };
             if (!empty())
                 graphics_backend().copy_buffer(iBufferName, temp.iBufferName, size() * sizeof(value_type));
             std::swap(iBufferName, temp.iBufferName);

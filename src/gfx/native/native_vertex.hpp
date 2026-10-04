@@ -1,4 +1,4 @@
-// opengl_vertex.hpp
+// native_vertex.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -31,17 +31,16 @@
 #include <neogfx/gfx/i_rendering_context.hpp>
 #include <neogfx/gfx/i_shader_program.hpp>
 #include <neogfx/gfx/vertex_buffer.hpp>
-#include "../i_graphics_backend.hpp"
-#include "opengl_buffer.hpp"
-#include "opengl.hpp"
+#include "i_graphics_backend.hpp"
+#include "native_buffer.hpp"
 
 namespace neogfx
 {
-    class opengl_vertex_array
+    class native_vertex_array
     {
     public:
-        opengl_vertex_array();
-        ~opengl_vertex_array();
+        native_vertex_array();
+        ~native_vertex_array();
     public:
         void bind();
     private:
@@ -49,32 +48,21 @@ namespace neogfx
         gpu_vertex_array iHandle;
     };
 
-    template <typename T>
-    struct opengl_attrib_data_type {};
-    template <>
-    struct opengl_attrib_data_type<double> { static constexpr GLenum type = GL_DOUBLE; };
-    template <>
-    struct opengl_attrib_data_type<float> { static constexpr GLenum type = GL_FLOAT; };
-    template <>
-    struct opengl_attrib_data_type<std::uint8_t> { static constexpr GLenum type = GL_UNSIGNED_BYTE; };
-    template <>
-    struct opengl_attrib_data_type<std::uint16_t> { static constexpr GLenum type = GL_UNSIGNED_SHORT; };
-
     template <typename Vertex, typename Attrib>
-    class opengl_vertex_attrib_array
+    class native_vertex_attrib_array
     {
     public:
-        struct cannot_get_attrib_location : std::logic_error { cannot_get_attrib_location(std::string const& aName) : std::logic_error("neogfx::opengl_vertex_attrib_array::cannot_get_attrib_location: " + aName) {} };
+        struct cannot_get_attrib_location : std::logic_error { cannot_get_attrib_location(std::string const& aName) : std::logic_error("neogfx::native_vertex_attrib_array::cannot_get_attrib_location: " + aName) {} };
     public:
         typedef Vertex vertex_type;
         typedef Attrib attribute_type;
         typedef typename attribute_type::value_type value_type;
         static constexpr std::size_t arity = sizeof(attribute_type) / sizeof(value_type);
     public:
-        opengl_vertex_attrib_array(bool aNormalized, std::size_t aStride, std::size_t aOffset, const i_shader_program& aShaderProgram, std::string const& aVariableName);
-        ~opengl_vertex_attrib_array();
+        native_vertex_attrib_array(bool aNormalized, std::size_t aStride, std::size_t aOffset, const i_shader_program& aShaderProgram, std::string const& aVariableName);
+        ~native_vertex_attrib_array();
     public:
-        void update(opengl_buffer<vertex_type>& aBuffer);
+        void update(native_buffer<vertex_type>& aBuffer);
     private:
         bool const iNormalized;
         std::size_t const iStride;
@@ -149,15 +137,15 @@ namespace neogfx
     };
 
     // The scene meshes of a vertex provider: device local vertex and index buffers.
-    class opengl_scene_buffer : private opengl_buffer_owner
+    class native_scene_buffer : private native_buffer_owner
     {
     public:
         using mesh_range = gpu_mesh_range;
     public:
-        opengl_scene_buffer();
-        ~opengl_scene_buffer();
-        opengl_scene_buffer(opengl_scene_buffer const&) = delete;
-        opengl_scene_buffer& operator=(opengl_scene_buffer const&) = delete;
+        native_scene_buffer();
+        ~native_scene_buffer();
+        native_scene_buffer(native_scene_buffer const&) = delete;
+        native_scene_buffer& operator=(native_scene_buffer const&) = delete;
     public:
         // make room for meshes about to be allocated (so that a model's first upload allocates exactly what it needs)
         void reserve(std::size_t aExtraVertices, std::size_t aExtraIndices);
@@ -177,28 +165,28 @@ namespace neogfx
     private:
         void buffer_grown() final;
     private:
-        opengl_buffer<scene_vertex> iVertices;
-        opengl_buffer<std::uint32_t> iIndices;
+        native_buffer<scene_vertex> iVertices;
+        native_buffer<std::uint32_t> iIndices;
         std::unordered_map<std::uint32_t, mesh_range> iMeshes;
-        std::optional<opengl_vertex_array> iVao;
-        std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::xyz)>> iPositionAttribArray;
-        std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::rgba)>> iColorAttribArray;
-        std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::st)>> iTextureCoordAttribArray;
-        std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::model)>> iModelAttribArray;
-        std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::joints)>> iJointsAttribArray;
-        std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::weights)>> iWeightsAttribArray;
-        std::optional<opengl_vertex_attrib_array<scene_vertex, decltype(scene_vertex::normal)>> iNormalAttribArray;
+        std::optional<native_vertex_array> iVao;
+        std::optional<native_vertex_attrib_array<scene_vertex, decltype(scene_vertex::xyz)>> iPositionAttribArray;
+        std::optional<native_vertex_attrib_array<scene_vertex, decltype(scene_vertex::rgba)>> iColorAttribArray;
+        std::optional<native_vertex_attrib_array<scene_vertex, decltype(scene_vertex::st)>> iTextureCoordAttribArray;
+        std::optional<native_vertex_attrib_array<scene_vertex, decltype(scene_vertex::model)>> iModelAttribArray;
+        std::optional<native_vertex_attrib_array<scene_vertex, decltype(scene_vertex::joints)>> iJointsAttribArray;
+        std::optional<native_vertex_attrib_array<scene_vertex, decltype(scene_vertex::weights)>> iWeightsAttribArray;
+        std::optional<native_vertex_attrib_array<scene_vertex, decltype(scene_vertex::normal)>> iNormalAttribArray;
     };
 
     template <typename V = standard_vertex>
-    class opengl_vertex_buffer : public vertex_buffer, private opengl_buffer_owner
+    class native_vertex_buffer : public vertex_buffer, private native_buffer_owner
     {
     public:
         typedef V vertex_type;
     public:
-        typedef opengl_buffer<vertex_type> vertex_array;
+        typedef native_buffer<vertex_type> vertex_array;
     public:
-        opengl_vertex_buffer(i_vertex_provider& aProvider, vertex_buffer_type aType);
+        native_vertex_buffer(i_vertex_provider& aProvider, vertex_buffer_type aType);
     public:
         void attach_shader(i_rendering_context& aContext, i_shader_program& aShaderProgram) override;
         void detach_shader() override;
@@ -214,27 +202,27 @@ namespace neogfx
         void flush(std::size_t aOffset, std::size_t aCount);
         vertex_array& vertices();
         std::size_t capacity() const;
-        // scene meshes (see opengl_rendering_context::draw_scene_meshes)
-        opengl_scene_buffer& scene_buffer();
+        // scene meshes (see native_rendering_context::draw_scene_meshes)
+        native_scene_buffer& scene_buffer();
     private:
         void buffer_grown() override;
         void update_attrib_arrays();
     private:
-        opengl_buffer<vertex_type> iBuffer;
+        native_buffer<vertex_type> iBuffer;
         optional_mat44 iTransformation;
-        std::optional<opengl_vertex_array> iVao;
-        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::xyz)>> iVertexPositionAttribArray;
-        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::rgba)>> iVertexColorAttribArray;
-        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::st)>> iVertexTextureCoordAttribArray;
-        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::xyzw)>> iVertexFunction0AttribArray;
-        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::abcd)>> iVertexFunction1AttribArray;
-        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::efgh)>> iVertexFunction2AttribArray;
-        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::ijkl)>> iVertexFunction3AttribArray;
-        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::mnop)>> iVertexFunction4AttribArray;
-        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::abcd2)>> iVertexFunction5AttribArray;
-        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::efgh2)>> iVertexFunction6AttribArray;
-        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::debug)>> iVertexDebugAttribArray;
-        std::optional<opengl_scene_buffer> iSceneBuffer;
+        std::optional<native_vertex_array> iVao;
+        std::optional<native_vertex_attrib_array<vertex_type, decltype(vertex_type::xyz)>> iVertexPositionAttribArray;
+        std::optional<native_vertex_attrib_array<vertex_type, decltype(vertex_type::rgba)>> iVertexColorAttribArray;
+        std::optional<native_vertex_attrib_array<vertex_type, decltype(vertex_type::st)>> iVertexTextureCoordAttribArray;
+        std::optional<native_vertex_attrib_array<vertex_type, decltype(vertex_type::xyzw)>> iVertexFunction0AttribArray;
+        std::optional<native_vertex_attrib_array<vertex_type, decltype(vertex_type::abcd)>> iVertexFunction1AttribArray;
+        std::optional<native_vertex_attrib_array<vertex_type, decltype(vertex_type::efgh)>> iVertexFunction2AttribArray;
+        std::optional<native_vertex_attrib_array<vertex_type, decltype(vertex_type::ijkl)>> iVertexFunction3AttribArray;
+        std::optional<native_vertex_attrib_array<vertex_type, decltype(vertex_type::mnop)>> iVertexFunction4AttribArray;
+        std::optional<native_vertex_attrib_array<vertex_type, decltype(vertex_type::abcd2)>> iVertexFunction5AttribArray;
+        std::optional<native_vertex_attrib_array<vertex_type, decltype(vertex_type::efgh2)>> iVertexFunction6AttribArray;
+        std::optional<native_vertex_attrib_array<vertex_type, decltype(vertex_type::debug)>> iVertexDebugAttribArray;
+        std::optional<native_scene_buffer> iSceneBuffer;
     };
 
     class use_shader_program

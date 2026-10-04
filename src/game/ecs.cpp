@@ -58,7 +58,7 @@ namespace neogfx
             return existing != vertex_providers().end() ? existing->second : nullptr;
         }
 
-        // n.b. only entities with a model_transformation component use the cache (see opengl_rendering_context::draw_entities)
+        // n.b. only entities with a model_transformation component use the cache (see native_rendering_context::draw_entities)
         ecs::ecs(ecs_flags aCreationFlags) : 
             base_type{ aCreationFlags },
             iCacheable{ true }

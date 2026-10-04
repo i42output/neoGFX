@@ -24,7 +24,7 @@
 #include <set>
 #include <map>
 
-#include "opengl/opengl_renderer.hpp"
+#include "native_renderer.hpp"
 
 namespace neogfx
 {
@@ -41,7 +41,7 @@ namespace neogfx
 
     namespace native::windows
     {
-        class renderer : public opengl_renderer
+        class renderer : public native_renderer
         {
         public:
             struct unsupported_renderer : std::runtime_error { unsupported_renderer() : std::runtime_error("neogfx::native::windows::renderer::unsupported_renderer") {} };

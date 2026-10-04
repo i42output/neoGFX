@@ -536,7 +536,7 @@ namespace neogfx
             aTexture->set_pixels(rect{ point{}, extents }, data.data());
         }
 
-        // the background texture (see i_pbr_shader::set_background_texture and opengl_rendering_context::draw_scene_background):
+        // the background texture (see i_pbr_shader::set_background_texture and native_rendering_context::draw_scene_background):
         // RGBE texels; the panorama (at most MaxBackgroundWidth wide, at least 16 x 8 and an even height) at the top, then below
         // it, side by side, versions of it halved while wider than 8 and taller than 4 (so the texture is half as tall again)
         constexpr std::uint32_t MaxBackgroundWidth = 4096u;

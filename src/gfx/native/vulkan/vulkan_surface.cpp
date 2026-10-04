@@ -21,12 +21,13 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <vulkan/vulkan.h>
 #include <vulkan/vulkan_win32.h>
 #endif
 
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gfx/i_rendering_context.hpp>
-#include "../opengl/opengl_rendering_context.hpp"
+#include "../native_rendering_context.hpp"
 #include "vulkan_error.hpp"
 #include "vulkan_surface.hpp"
 
@@ -121,12 +122,12 @@ namespace neogfx
     std::unique_ptr<i_rendering_context> vulkan_surface::create_rendering_context(blending_mode aBlendingMode) const
     {
         // n.b. the rendering context shared by the native backends (see i_graphics_backend)
-        return std::make_unique<opengl_rendering_context>(*this, aBlendingMode);
+        return std::make_unique<native_rendering_context>(*this, aBlendingMode);
     }
 
     std::unique_ptr<i_rendering_context> vulkan_surface::create_rendering_context(const i_widget& aWidget, blending_mode aBlendingMode) const
     {
-        return std::make_unique<opengl_rendering_context>(*this, aWidget, aBlendingMode);
+        return std::make_unique<native_rendering_context>(*this, aWidget, aBlendingMode);
     }
 
     void vulkan_surface::set_destroying()
