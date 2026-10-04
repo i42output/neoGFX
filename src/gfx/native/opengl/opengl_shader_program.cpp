@@ -90,7 +90,7 @@ namespace neogfx
     void opengl_ssbo<T>::buffer_grown()
     {
         glCheck(glBindBufferBase(GL_SHADER_STORAGE_BUFFER,
-            static_cast<GLuint>(this->id()), buffer_type::handle()));
+            static_cast<GLuint>(this->id()), static_cast<GLuint>(buffer_type::handle())));
     }
 
     template class opengl_ssbo<bool>;
