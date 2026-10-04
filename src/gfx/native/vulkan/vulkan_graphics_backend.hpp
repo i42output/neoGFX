@@ -433,6 +433,15 @@ namespace neogfx
             std::uint64_t transientBytes = 0u;
             std::uint64_t swapchainsCreated = 0u;
             std::uint64_t discards = 0u;
+            std::uint64_t allocations = 0u;
+            std::chrono::steady_clock::duration allocationTime = {};
+            // the longest frame (present to present), the time of it spent waiting, presenting and allocating in the
+            // backend, and the frames longer than LongFrame
+            std::chrono::steady_clock::time_point lastPresentEnd;
+            std::chrono::steady_clock::duration frameBackend = {};
+            std::chrono::steady_clock::duration longestFrame = {};
+            std::chrono::steady_clock::duration longestFrameBackend = {};
+            std::uint64_t longFrames = 0u;
         };
         VkInstance iInstance = VK_NULL_HANDLE;
         VkDebugUtilsMessengerEXT iDebugMessenger = VK_NULL_HANDLE;

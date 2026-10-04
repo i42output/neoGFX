@@ -820,6 +820,18 @@ namespace neogfx
 
     vulkan_buffer vulkan_graphics_backend::allocate_buffer(VkDeviceSize aSize, VkBufferUsageFlags aUsage, bool aMapped)
     {
+        struct allocation_statistics
+        {
+            vulkan_graphics_backend& backend;
+            std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+            ~allocation_statistics()
+            {
+                auto const elapsed = std::chrono::steady_clock::now() - start;
+                ++backend.iStatistics.allocations;
+                backend.iStatistics.allocationTime += elapsed;
+                backend.iStatistics.frameBackend += elapsed;
+            }
+        } allocationStatistics{ *this };
         vulkan_buffer result;
         result.size = std::max<VkDeviceSize>(aSize, 4u);
         result.deviceLocal = !aMapped;
@@ -916,6 +928,8 @@ namespace neogfx
                 auto const waitStart = std::chrono::steady_clock::now();
                 vkCheck(vkWaitForFences(iDevice, 1u, &f.fence, VK_TRUE, UINT64_MAX));
                 iStatistics.fenceWait += std::chrono::steady_clock::now() - waitStart;
+            iStatistics.frameBackend += std::chrono::steady_clock::now() - waitStart;
+                iStatistics.frameBackend += std::chrono::steady_clock::now() - waitStart;
                 retire_frame(iFrame);
             }
             iCommandBuffer = f.commandBuffer;
@@ -973,6 +987,7 @@ namespace neogfx
             auto const waitStart = std::chrono::steady_clock::now();
             vkCheck(vkWaitForFences(iDevice, 1u, &f.fence, VK_TRUE, UINT64_MAX));
             iStatistics.fenceWait += std::chrono::steady_clock::now() - waitStart;
+            iStatistics.frameBackend += std::chrono::steady_clock::now() - waitStart;
             retire_frame(index);
         }
     }
@@ -2434,8 +2449,24 @@ namespace neogfx
             std::chrono::steady_clock::time_point start;
             ~present_statistics()
             {
-                backend.iStatistics.present += std::chrono::steady_clock::now() - start;
-                ++backend.iStatistics.frames;
+                auto& stats = backend.iStatistics;
+                auto const now = std::chrono::steady_clock::now();
+                stats.present += now - start;
+                stats.frameBackend += now - start;
+                ++stats.frames;
+                if (stats.lastPresentEnd != std::chrono::steady_clock::time_point{})
+                {
+                    auto const frame = now - stats.lastPresentEnd;
+                    if (frame > stats.longestFrame)
+                    {
+                        stats.longestFrame = frame;
+                        stats.longestFrameBackend = stats.frameBackend;
+                    }
+                    if (frame > std::chrono::milliseconds{ 50 })
+                        ++stats.longFrames;
+                }
+                stats.lastPresentEnd = now;
+                stats.frameBackend = {};
                 backend.report_statistics();
             }
         } presentStatistics{ *this, presentStart };
@@ -2544,13 +2575,19 @@ namespace neogfx
             perFrame(iStatistics.descriptorPushes) << " descriptor pushes, " <<
             perFrame(iStatistics.uploads) << " uploads (" << perFrame(iStatistics.uploadBytes) / 1024.0 << " KiB), " <<
             perFrame(iStatistics.transientBytes) / 1024.0 << " KiB transient; " <<
-            perFrame(iStatistics.discards) << " buffer discards; " <<
+            perFrame(iStatistics.discards) << " buffer discards, " <<
+            iStatistics.allocations << " allocations (" << std::chrono::duration<double, std::milli>{ iStatistics.allocationTime }.count() << " ms); " <<
+            "longest frame " << std::chrono::duration<double, std::milli>{ iStatistics.longestFrame }.count() << " ms (" <<
+            std::chrono::duration<double, std::milli>{ iStatistics.longestFrameBackend }.count() << " ms in backend), " <<
+            iStatistics.longFrames << " frames over 50 ms; " <<
             iStatistics.pipelinesCreated << " pipelines created, " <<
             iStatistics.swapchainsCreated << " swapchains created" << std::endl;
         auto const enabled = iStatistics.enabled;
+        auto const lastPresentEnd = iStatistics.lastPresentEnd;
         iStatistics = statistics{};
         iStatistics.enabled = enabled;
         iStatistics.periodStart = now;
+        iStatistics.lastPresentEnd = lastPresentEnd;
     }
 
     vulkan_graphics_backend::shadow_resources& vulkan_graphics_backend::shadows(i_standard_shader_program& aProgram)
