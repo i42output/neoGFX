@@ -34,10 +34,10 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 
 Version | ETA             | Features
 --------|-----------------|---------------------------------------------------
-v0.99   | WID\*           | Windows OpenGL; widget library feature complete; UI design tool
-v1.00   | WID + 12 months | Linux OpenGL; scripting engine
-v1.10   | WID + 24 months | Vulkan; Android support; physics engine
-v1.20   | WID + 36 months | macOS support
+v0.99   | WID\*           | Windows OpenGL + Vulkan; widget library feature complete; UI design tool
+v1.00   | WID + 3 months  | Linux OpenGL + Vulkan; scripting engine
+v1.10   | WID + 6 months  | Android support; physics engine
+v1.20   | WID + 12 months | macOS support
 
 \* When It's Done
 
@@ -87,7 +87,7 @@ Drag and drop                   | 75      |
 UI/Resource Description (RJSON) | 40      |
 tool: neoGFX Design Studio      | 40      |
 i18n                            | 70      |
-l10n                            | 0       |     UK English, US English, French, German, Chinese
+l10n                            | 0       |     
 HID: Game Controllers           | 80      |     Calibration/settings UI; DirectInput button mapping
 Multi-monitor					| 50      |     DPI changes when changing or dragging between monitors
 Scene Graph						| 90      |		

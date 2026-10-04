@@ -20,6 +20,9 @@
 #include <neogfx/neogfx.hpp>
 
 #include <cstring>
+#include <cstdlib>
+#include <iostream>
+#include <iomanip>
 #include <algorithm>
 #include <shaderc/shaderc.hpp>
 
@@ -448,6 +451,8 @@ namespace neogfx
 
     void vulkan_graphics_backend::initialize()
     {
+        iStatistics.enabled = (std::getenv("NEOGFX_VULKAN_STATS") != nullptr);
+        iStatistics.periodStart = std::chrono::steady_clock::now();
         if (iDevice != VK_NULL_HANDLE)
             return;
         create_instance();
@@ -465,9 +470,8 @@ namespace neogfx
             return;
         execute();
         vkDeviceWaitIdle(iDevice);
-        for (auto& deferred : iDeferred)
-            deferred();
-        iDeferred.clear();
+        for (std::uint32_t f = 0u; f < FramesInFlight; ++f)
+            retire_frame(f);
         if (iShadows)
         {
             if (iShadows->atlas)
@@ -502,14 +506,22 @@ namespace neogfx
                 *image = nullptr;
             }
         free_buffer(iZeroBuffer);
-        for (auto& chunk : iTransient)
-            free_buffer(chunk.buffer);
-        iTransient.clear();
+        for (auto& f : iFrames)
+        {
+            for (auto& chunk : f.transient)
+                free_buffer(chunk.buffer);
+            f.transient.clear();
+        }
         for (auto& s : iSamplers)
             vkDestroySampler(iDevice, s.second, nullptr);
         iSamplers.clear();
-        vkDestroyFence(iDevice, iFence, nullptr);
-        vkDestroyCommandPool(iDevice, iCommandPool, nullptr);
+        for (auto& f : iFrames)
+        {
+            vkDestroyFence(iDevice, f.fence, nullptr);
+            vkDestroyCommandPool(iDevice, f.commandPool, nullptr);
+            f = frame{};
+        }
+        iCommandBuffer = VK_NULL_HANDLE;
         vkDestroyDevice(iDevice, nullptr);
         iDevice = VK_NULL_HANDLE;
         if (iDebugMessenger != VK_NULL_HANDLE)
@@ -537,8 +549,14 @@ namespace neogfx
 
     void vulkan_graphics_backend::execute()
     {
+        // n.b. the work recorded so far submitted and all the work in flight done (e.g. before the shared code reuses
+        // vertex buffer space; see native_renderer::clear_non_cacheable_vertex_buffers)
         if (iRecording)
+        {
+            ++iStatistics.executes;
             submit();
+        }
+        wait_for_frames();
     }
 
     void vulkan_graphics_backend::create_instance()
@@ -707,17 +725,22 @@ namespace neogfx
         if (iDepthStencilFormat == VK_FORMAT_UNDEFINED)
             throw failed_to_initialize("no depth/stencil format");
 
-        VkCommandPoolCreateInfo poolInfo{ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
-        poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
-        poolInfo.queueFamilyIndex = iQueueFamily;
-        vkCheck(vkCreateCommandPool(iDevice, &poolInfo, nullptr, &iCommandPool));
-        VkCommandBufferAllocateInfo allocateInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
-        allocateInfo.commandPool = iCommandPool;
-        allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocateInfo.commandBufferCount = 1u;
-        vkCheck(vkAllocateCommandBuffers(iDevice, &allocateInfo, &iCommandBuffer));
-        VkFenceCreateInfo fenceInfo{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
-        vkCheck(vkCreateFence(iDevice, &fenceInfo, nullptr, &iFence));
+        for (auto& f : iFrames)
+        {
+            VkCommandPoolCreateInfo poolInfo{ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
+            poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+            poolInfo.queueFamilyIndex = iQueueFamily;
+            vkCheck(vkCreateCommandPool(iDevice, &poolInfo, nullptr, &f.commandPool));
+            VkCommandBufferAllocateInfo allocateInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
+            allocateInfo.commandPool = f.commandPool;
+            allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+            allocateInfo.commandBufferCount = 1u;
+            vkCheck(vkAllocateCommandBuffers(iDevice, &allocateInfo, &f.commandBuffer));
+            VkFenceCreateInfo fenceInfo{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
+            vkCheck(vkCreateFence(iDevice, &fenceInfo, nullptr, &f.fence));
+        }
+        iFrame = 0u;
+        iCommandBuffer = iFrames[iFrame].commandBuffer;
     }
 
     void vulkan_graphics_backend::create_defaults()
@@ -809,10 +832,28 @@ namespace neogfx
         vkGetBufferMemoryRequirements(iDevice, result.buffer, &requirements);
         VkMemoryAllocateInfo allocateInfo{ VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
         allocateInfo.allocationSize = requirements.size;
-        allocateInfo.memoryTypeIndex = aMapped ?
-            memory_type(requirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) :
-            memory_type(requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        vkCheck(vkAllocateMemory(iDevice, &allocateInfo, nullptr, &result.memory));
+        if (aMapped)
+        {
+            // n.b. mapped buffers (which the GPU reads every frame: vertices, SSBOs and uniforms) are preferably in device local
+            // memory the host can write (resizable BAR); else (or if that small heap is full) in host memory
+            auto const hostVisible = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+            allocateInfo.memoryTypeIndex = memory_type(requirements.memoryTypeBits, hostVisible, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+            if (vkAllocateMemory(iDevice, &allocateInfo, nullptr, &result.memory) != VK_SUCCESS)
+            {
+                std::uint32_t hostMemoryTypeBits = 0u;
+                for (std::uint32_t i = 0u; i < iMemoryProperties.memoryTypeCount; ++i)
+                    if ((iMemoryProperties.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) == 0u)
+                        hostMemoryTypeBits |= (1u << i);
+                auto const fallbackTypeBits = requirements.memoryTypeBits & hostMemoryTypeBits;
+                allocateInfo.memoryTypeIndex = memory_type(fallbackTypeBits != 0u ? fallbackTypeBits : requirements.memoryTypeBits, hostVisible);
+                vkCheck(vkAllocateMemory(iDevice, &allocateInfo, nullptr, &result.memory));
+            }
+        }
+        else
+        {
+            allocateInfo.memoryTypeIndex = memory_type(requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+            vkCheck(vkAllocateMemory(iDevice, &allocateInfo, nullptr, &result.memory));
+        }
         vkCheck(vkBindBufferMemory(iDevice, result.buffer, result.memory, 0u));
         if (aMapped)
             vkCheck(vkMapMemory(iDevice, result.memory, 0u, VK_WHOLE_SIZE, 0u, &result.mapping));
@@ -832,35 +873,51 @@ namespace neogfx
 
     vulkan_graphics_backend::transient_allocation vulkan_graphics_backend::allocate_transient(VkDeviceSize aSize, VkDeviceSize aAlignment)
     {
+        iStatistics.transientBytes += aSize;
         auto const align = [&](VkDeviceSize aOffset) { return (aOffset + aAlignment - 1u) / aAlignment * aAlignment; };
-        while (iTransientChunk < iTransient.size())
+        command_buffer(); // n.b. the current frame's transient memory is reusable once it is recording
+        auto& f = iFrames[iFrame];
+        while (f.transientChunk < f.transient.size())
         {
-            auto& chunk = iTransient[iTransientChunk];
+            auto& chunk = f.transient[f.transientChunk];
             auto const offset = align(chunk.used);
             if (offset + aSize <= chunk.buffer.size)
             {
                 chunk.used = offset + aSize;
                 return { chunk.buffer.buffer, offset, static_cast<std::uint8_t*>(chunk.buffer.mapping) + offset };
             }
-            ++iTransientChunk;
+            ++f.transientChunk;
         }
-        iTransient.push_back(transient_chunk{ allocate_buffer(std::max(TransientChunkSize, aSize),
+        f.transient.push_back(transient_chunk{ allocate_buffer(std::max(TransientChunkSize, aSize),
             VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, true) });
-        iTransientChunk = iTransient.size() - 1u;
-        auto& chunk = iTransient.back();
+        f.transientChunk = f.transient.size() - 1u;
+        auto& chunk = f.transient.back();
         chunk.used = aSize;
         return { chunk.buffer.buffer, 0u, chunk.buffer.mapping };
     }
 
     void vulkan_graphics_backend::defer(std::function<void()> aDestroy)
     {
-        iDeferred.push_back(std::move(aDestroy));
+        // n.b. with the current frame recording, so that this frame's previous use is done and the destruction follows
+        // the frames submitted so far
+        command_buffer();
+        iFrames[iFrame].deferred.push_back(std::move(aDestroy));
     }
 
     VkCommandBuffer vulkan_graphics_backend::command_buffer()
     {
         if (!iRecording)
         {
+            // this frame's previous use must be done before its command buffer and memory are reused
+            auto& f = iFrames[iFrame];
+            if (f.inFlight)
+            {
+                auto const waitStart = std::chrono::steady_clock::now();
+                vkCheck(vkWaitForFences(iDevice, 1u, &f.fence, VK_TRUE, UINT64_MAX));
+                iStatistics.fenceWait += std::chrono::steady_clock::now() - waitStart;
+                retire_frame(iFrame);
+            }
+            iCommandBuffer = f.commandBuffer;
             VkCommandBufferBeginInfo beginInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
             beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
             vkCheck(vkBeginCommandBuffer(iCommandBuffer, &beginInfo));
@@ -892,20 +949,50 @@ namespace neogfx
         submitInfo.pWaitSemaphoreInfos = &waitInfo;
         submitInfo.signalSemaphoreInfoCount = (aSignal != VK_NULL_HANDLE ? 1u : 0u);
         submitInfo.pSignalSemaphoreInfos = &signalInfo;
-        vkCheck(vkQueueSubmit2(iQueue, 1u, &submitInfo, iFence));
-        vkCheck(vkWaitForFences(iDevice, 1u, &iFence, VK_TRUE, UINT64_MAX));
-        vkCheck(vkResetFences(iDevice, 1u, &iFence));
-        vkCheck(vkResetCommandPool(iDevice, iCommandPool, 0u));
+        auto& f = iFrames[iFrame];
+        vkCheck(vkQueueSubmit2(iQueue, 1u, &submitInfo, f.fence));
+        ++iStatistics.submits;
+        f.inFlight = true;
+        // n.b. not waited for: the next frame is recorded while the GPU executes this one (see command_buffer and
+        // wait_for_frames); the uniform blocks uploaded are in this frame's transient memory
+        iUploadedUniformBlocks.clear();
+        iFrame = (iFrame + 1u) % FramesInFlight;
+    }
 
-        // the GPU is done with everything recorded so far
-        auto deferred = std::move(iDeferred);
-        iDeferred.clear();
+    void vulkan_graphics_backend::wait_for_frames()
+    {
+        // all the frames in flight
+        for (std::uint32_t i = 1u; i <= FramesInFlight; ++i)
+        {
+            auto const index = (iFrame + i) % FramesInFlight;
+            auto& f = iFrames[index];
+            if (!f.inFlight)
+                continue;
+            auto const waitStart = std::chrono::steady_clock::now();
+            vkCheck(vkWaitForFences(iDevice, 1u, &f.fence, VK_TRUE, UINT64_MAX));
+            iStatistics.fenceWait += std::chrono::steady_clock::now() - waitStart;
+            retire_frame(index);
+        }
+    }
+
+    void vulkan_graphics_backend::retire_frame(std::uint32_t aFrame)
+    {
+        // the GPU is done with everything recorded for the frame
+        auto& f = iFrames[aFrame];
+        if (f.inFlight)
+        {
+            vkCheck(vkResetFences(iDevice, 1u, &f.fence));
+            vkCheck(vkResetCommandPool(iDevice, f.commandPool, 0u));
+            f.inFlight = false;
+        }
+
+        auto deferred = std::move(f.deferred);
+        f.deferred.clear();
         for (auto& d : deferred)
             d();
-        for (auto& chunk : iTransient)
+        for (auto& chunk : f.transient)
             chunk.used = 0u;
-        iTransientChunk = 0u;
-        iUploadedUniformBlocks.clear();
+        f.transientChunk = 0u;
     }
 
     void vulkan_graphics_backend::begin_rendering()
@@ -915,6 +1002,7 @@ namespace neogfx
         if (iColor == nullptr && iDepthStencil == nullptr)
             throw no_target();
         auto const commandBuffer = command_buffer();
+        ++iStatistics.passes;
         memory_barrier();
         VkRenderingAttachmentInfo colorAttachment{ VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
         VkRenderingAttachmentInfo depthStencilAttachment{ VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
@@ -954,6 +1042,7 @@ namespace neogfx
 
     void vulkan_graphics_backend::memory_barrier()
     {
+        ++iStatistics.barriers;
         VkMemoryBarrier2 barrier{ VK_STRUCTURE_TYPE_MEMORY_BARRIER_2 };
         barrier.srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
         barrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
@@ -967,6 +1056,7 @@ namespace neogfx
 
     void vulkan_graphics_backend::image_barrier(VkImage aImage, VkImageAspectFlags aAspect, VkImageLayout aOldLayout, VkImageLayout aNewLayout)
     {
+        ++iStatistics.barriers;
         VkImageMemoryBarrier2 barrier{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
         barrier.srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
         barrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
@@ -1145,6 +1235,10 @@ namespace neogfx
         if (existing != aProgram.pipelines.end())
             return existing->second;
 
+        // the sample count, for gl_NumSamples (see vulkan_glsl); n.b. ignored by shaders that don't use it
+        std::int32_t const numSamples = static_cast<std::int32_t>(key.samples);
+        VkSpecializationMapEntry const numSamplesEntry{ VulkanGlslNumSamplesConstantId, 0u, sizeof(numSamples) };
+        VkSpecializationInfo const specializationInfo{ 1u, &numSamplesEntry, sizeof(numSamples), &numSamples };
         std::vector<VkPipelineShaderStageCreateInfo> stages;
         for (std::size_t stage = 0u; stage < aProgram.modules.size(); ++stage)
             if (aProgram.modules[stage] != VK_NULL_HANDLE && static_cast<shader_type>(stage) != shader_type::Compute)
@@ -1153,6 +1247,7 @@ namespace neogfx
                 stageInfo.stage = to_vk_stage(static_cast<shader_type>(stage));
                 stageInfo.module = aProgram.modules[stage];
                 stageInfo.pName = "main";
+                stageInfo.pSpecializationInfo = &specializationInfo;
                 stages.push_back(stageInfo);
             }
 
@@ -1290,6 +1385,7 @@ namespace neogfx
         VkPipeline result = VK_NULL_HANDLE;
         vkCheck(vkCreateGraphicsPipelines(iDevice, VK_NULL_HANDLE, 1u, &pipelineInfo, nullptr, &result));
         aProgram.pipelines.emplace(key, result);
+        ++iStatistics.pipelinesCreated;
         return result;
     }
 
@@ -1362,6 +1458,7 @@ namespace neogfx
 
     void vulkan_graphics_backend::push_descriptors(vulkan_program& aProgram)
     {
+        ++iStatistics.descriptorPushes;
         thread_local std::vector<VkWriteDescriptorSet> tWrites;
         thread_local std::vector<VkDescriptorBufferInfo> tBufferInfos;
         thread_local std::vector<VkDescriptorImageInfo> tImageInfos;
@@ -1419,6 +1516,7 @@ namespace neogfx
 
     void vulkan_graphics_backend::prepare_draw()
     {
+        ++iStatistics.draws;
         if (iProgram == nullptr || !iProgram->linked)
             throw no_program();
         if (iColor == nullptr && iDepthStencil == nullptr)
@@ -1489,6 +1587,7 @@ namespace neogfx
         if (p != iBoundPipeline)
         {
             vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, p);
+            ++iStatistics.pipelineBinds;
             iBoundPipeline = p;
         }
         apply_dynamic_state(false);
@@ -1921,6 +2020,8 @@ namespace neogfx
         if (aWidth == 0u || aHeight == 0u)
             return;
         auto const rowSize = static_cast<std::size_t>(aWidth) * aImage.texelSize;
+        ++iStatistics.uploads;
+        iStatistics.uploadBytes += rowSize * aHeight;
         auto const staging = allocate_transient(rowSize * aHeight, 16u);
         auto const* source = static_cast<std::uint8_t const*>(aData);
         auto* destination = static_cast<std::uint8_t*>(staging.mapping);
@@ -1975,6 +2076,7 @@ namespace neogfx
 
     void vulkan_graphics_backend::read_image(vulkan_image const& aImage, std::uint32_t aX, std::uint32_t aY, std::uint32_t aWidth, std::uint32_t aHeight, void* aData)
     {
+        ++iStatistics.readbacks;
         if (aWidth == 0u || aHeight == 0u)
             return;
         auto const size = static_cast<VkDeviceSize>(aWidth) * aHeight * aImage.texelSize;
@@ -1988,6 +2090,7 @@ namespace neogfx
         vkCmdCopyImageToBuffer(command_buffer(), aImage.image, VK_IMAGE_LAYOUT_GENERAL, readBack.buffer, 1u, &region);
         memory_barrier();
         submit();
+        wait_for_frames();
         std::memcpy(aData, readBack.mapping, static_cast<std::size_t>(size));
         free_buffer(readBack);
     }
@@ -2046,7 +2149,7 @@ namespace neogfx
         iProgram = aProgram;
     }
 
-    std::vector<std::uint32_t> vulkan_graphics_backend::compile_shader(shader_type aType, std::string const& aSource, std::string const& aName) const
+    std::vector<std::uint32_t> vulkan_graphics_backend::compile_shader(shader_type aType, std::string const& aSource, std::string const& aName, bool aOptimize) const
     {
         shaderc_shader_kind kind;
         switch (aType)
@@ -2075,8 +2178,8 @@ namespace neogfx
         shaderc::CompileOptions options;
         options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_3);
         options.SetSourceLanguage(shaderc_source_language_glsl);
-        // n.b. unoptimized so that the uniform blocks' member names are kept (see basic_vulkan_shader_program::link)
-        options.SetOptimizationLevel(shaderc_optimization_level_zero);
+        // n.b. optimizing strips the names that reflection needs (see basic_vulkan_shader_program::compile)
+        options.SetOptimizationLevel(aOptimize ? shaderc_optimization_level_performance : shaderc_optimization_level_zero);
         auto const result = compiler.CompileGlslToSpv(aSource, kind, aName.c_str(), options);
         if (result.GetCompilationStatus() != shaderc_compilation_status_success)
         {
@@ -2140,6 +2243,7 @@ namespace neogfx
 
     void vulkan_graphics_backend::create_surface_swapchain(vulkan_swapchain& aSwapchain, std::uint32_t aWidth, std::uint32_t aHeight)
     {
+        ++iStatistics.swapchainsCreated;
         execute();
         vkDeviceWaitIdle(iDevice);
 
@@ -2185,10 +2289,11 @@ namespace neogfx
         VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
         if (!iVsync)
         {
-            if (std::find(presentModes.begin(), presentModes.end(), VK_PRESENT_MODE_MAILBOX_KHR) != presentModes.end())
-                presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-            else if (std::find(presentModes.begin(), presentModes.end(), VK_PRESENT_MODE_IMMEDIATE_KHR) != presentModes.end())
+            // n.b. as OpenGL with a swap interval of 0: presented immediately (mailbox shows at most one frame per refresh)
+            if (std::find(presentModes.begin(), presentModes.end(), VK_PRESENT_MODE_IMMEDIATE_KHR) != presentModes.end())
                 presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+            else if (std::find(presentModes.begin(), presentModes.end(), VK_PRESENT_MODE_MAILBOX_KHR) != presentModes.end())
+                presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
         }
 
         std::uint32_t imageCount = capabilities.minImageCount + 1u;
@@ -2233,8 +2338,12 @@ namespace neogfx
         VkSemaphoreCreateInfo semaphoreInfo{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
         for (auto& semaphore : aSwapchain.renderingFinished)
             vkCheck(vkCreateSemaphore(iDevice, &semaphoreInfo, nullptr, &semaphore));
-        if (aSwapchain.imageAcquired == VK_NULL_HANDLE)
-            vkCheck(vkCreateSemaphore(iDevice, &semaphoreInfo, nullptr, &aSwapchain.imageAcquired));
+        if (aSwapchain.imageAcquired.empty())
+        {
+            aSwapchain.imageAcquired.assign(FramesInFlight, VK_NULL_HANDLE);
+            for (auto& semaphore : aSwapchain.imageAcquired)
+                vkCheck(vkCreateSemaphore(iDevice, &semaphoreInfo, nullptr, &semaphore));
+        }
     }
 
     void vulkan_graphics_backend::destroy_swapchain(vulkan_swapchain& aSwapchain, bool aDestroySurface)
@@ -2248,9 +2357,9 @@ namespace neogfx
         for (auto semaphore : aSwapchain.renderingFinished)
             vkDestroySemaphore(iDevice, semaphore, nullptr);
         aSwapchain.renderingFinished.clear();
-        if (aSwapchain.imageAcquired != VK_NULL_HANDLE)
-            vkDestroySemaphore(iDevice, aSwapchain.imageAcquired, nullptr);
-        aSwapchain.imageAcquired = VK_NULL_HANDLE;
+        for (auto semaphore : aSwapchain.imageAcquired)
+            vkDestroySemaphore(iDevice, semaphore, nullptr);
+        aSwapchain.imageAcquired.clear();
         if (aSwapchain.swapchain != VK_NULL_HANDLE)
             vkDestroySwapchainKHR(iDevice, aSwapchain.swapchain, nullptr);
         aSwapchain.swapchain = VK_NULL_HANDLE;
@@ -2266,6 +2375,18 @@ namespace neogfx
     {
         if (!alive())
             return;
+        auto const presentStart = std::chrono::steady_clock::now();
+        struct present_statistics
+        {
+            vulkan_graphics_backend& backend;
+            std::chrono::steady_clock::time_point start;
+            ~present_statistics()
+            {
+                backend.iStatistics.present += std::chrono::steady_clock::now() - start;
+                ++backend.iStatistics.frames;
+                backend.report_statistics();
+            }
+        } presentStatistics{ *this, presentStart };
         aWidth = std::min(aWidth, aSource.width);
         aHeight = std::min(aHeight, aSource.height);
         if (aSwapchain.swapchain == VK_NULL_HANDLE || aSwapchain.outOfDate || aSwapchain.vsyncGeneration != iVsyncGeneration ||
@@ -2277,8 +2398,13 @@ namespace neogfx
             return;
         }
 
+        // n.b. recording (so this frame's previous use, and so its wait on its acquire semaphore, is done)
+        command_buffer();
+        auto const imageAcquired = aSwapchain.imageAcquired[iFrame];
         std::uint32_t imageIndex = 0u;
-        auto result = vkAcquireNextImageKHR(iDevice, aSwapchain.swapchain, UINT64_MAX, aSwapchain.imageAcquired, VK_NULL_HANDLE, &imageIndex);
+        auto const acquireStart = std::chrono::steady_clock::now();
+        auto result = vkAcquireNextImageKHR(iDevice, aSwapchain.swapchain, UINT64_MAX, imageAcquired, VK_NULL_HANDLE, &imageIndex);
+        iStatistics.acquire += std::chrono::steady_clock::now() - acquireStart;
         if (result == VK_ERROR_OUT_OF_DATE_KHR)
         {
             // n.b. this frame is dropped; the swapchain is recreated for the next
@@ -2324,7 +2450,7 @@ namespace neogfx
         blit.dstOffsets[1] = VkOffset3D{ static_cast<std::int32_t>(width), 0, 1 };
         vkCmdBlitImage(commandBuffer, source->image, VK_IMAGE_LAYOUT_GENERAL, swapchainImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1u, &blit, VK_FILTER_NEAREST);
         image_barrier(swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-        submit(aSwapchain.imageAcquired, aSwapchain.renderingFinished[imageIndex]);
+        submit(imageAcquired, aSwapchain.renderingFinished[imageIndex]);
 
         VkPresentInfoKHR presentInfo{ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
         presentInfo.waitSemaphoreCount = 1u;
@@ -2337,6 +2463,41 @@ namespace neogfx
             aSwapchain.outOfDate = true;
         else
             vkCheck(result);
+    }
+
+    void vulkan_graphics_backend::report_statistics()
+    {
+        if (!iStatistics.enabled)
+            return;
+        auto const now = std::chrono::steady_clock::now();
+        auto const period = now - iStatistics.periodStart;
+        if (period < std::chrono::seconds{ 1 } || iStatistics.frames == 0u)
+            return;
+        auto const frames = static_cast<double>(iStatistics.frames);
+        auto const ms = [&](std::chrono::steady_clock::duration aDuration)
+        {
+            return std::chrono::duration<double, std::milli>{ aDuration }.count() / frames;
+        };
+        auto const perFrame = [&](std::uint64_t aCount) { return static_cast<double>(aCount) / frames; };
+        std::cerr << std::fixed << std::setprecision(2) <<
+            "neogfx::vulkan_graphics_backend: " << frames / std::chrono::duration<double>{ period }.count() << " fps, per frame: " <<
+            ms(period) << " ms total, " <<
+            ms(iStatistics.fenceWait) << " ms fence wait, " <<
+            ms(iStatistics.present) << " ms present (" << ms(iStatistics.acquire) << " ms acquire), " <<
+            perFrame(iStatistics.submits) << " submits (" << perFrame(iStatistics.executes) << " execute, " << perFrame(iStatistics.readbacks) << " readback), " <<
+            perFrame(iStatistics.passes) << " passes, " <<
+            perFrame(iStatistics.barriers) << " barriers, " <<
+            perFrame(iStatistics.draws) << " draws, " <<
+            perFrame(iStatistics.pipelineBinds) << " pipeline binds, " <<
+            perFrame(iStatistics.descriptorPushes) << " descriptor pushes, " <<
+            perFrame(iStatistics.uploads) << " uploads (" << perFrame(iStatistics.uploadBytes) / 1024.0 << " KiB), " <<
+            perFrame(iStatistics.transientBytes) / 1024.0 << " KiB transient; " <<
+            iStatistics.pipelinesCreated << " pipelines created, " <<
+            iStatistics.swapchainsCreated << " swapchains created" << std::endl;
+        auto const enabled = iStatistics.enabled;
+        iStatistics = statistics{};
+        iStatistics.enabled = enabled;
+        iStatistics.periodStart = now;
     }
 
     vulkan_graphics_backend::shadow_resources& vulkan_graphics_backend::shadows(i_standard_shader_program& aProgram)
@@ -2356,8 +2517,8 @@ namespace neogfx
                 };
             replace("%MATRICES%", std::to_string(resources.matricesBinding));
             replace("%TABLE%", std::to_string(resources.tableBinding));
-            resources.vertex = create_shader_module(compile_shader(shader_type::Vertex, vertexSource, "neogfx::shadow_map.vert"));
-            resources.fragment = create_shader_module(compile_shader(shader_type::Fragment, sShadowFragmentShader, "neogfx::shadow_map.frag"));
+            resources.vertex = create_shader_module(compile_shader(shader_type::Vertex, vertexSource, "neogfx::shadow_map.vert", true));
+            resources.fragment = create_shader_module(compile_shader(shader_type::Fragment, sShadowFragmentShader, "neogfx::shadow_map.frag", true));
 
             VkFormat const atlasFormat = VK_FORMAT_D32_SFLOAT;
             auto atlas = std::make_unique<vulkan_image>();
@@ -2609,8 +2770,8 @@ namespace neogfx
         auto& resources = *iBackground;
         try
         {
-            resources.vertex = create_shader_module(compile_shader(shader_type::Vertex, sBackgroundVertexShader, "neogfx::scene_background.vert"));
-            resources.fragment = create_shader_module(compile_shader(shader_type::Fragment, sBackgroundFragmentShader, "neogfx::scene_background.frag"));
+            resources.vertex = create_shader_module(compile_shader(shader_type::Vertex, sBackgroundVertexShader, "neogfx::scene_background.vert", true));
+            resources.fragment = create_shader_module(compile_shader(shader_type::Fragment, sBackgroundFragmentShader, "neogfx::scene_background.frag", true));
             VkDescriptorSetLayoutBinding const bindings[] =
             {
                 { 0u, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1u, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr },

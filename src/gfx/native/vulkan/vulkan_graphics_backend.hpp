@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <array>
+#include <chrono>
 #include <deque>
 #include <functional>
 #include <map>
@@ -171,7 +172,8 @@ namespace neogfx
         VkExtent2D extent = {};
         std::vector<VkImage> images;
         std::vector<VkSemaphore> renderingFinished;
-        VkSemaphore imageAcquired = VK_NULL_HANDLE;
+        // one per frame in flight (see vulkan_graphics_backend::FramesInFlight)
+        std::vector<VkSemaphore> imageAcquired;
         std::unique_ptr<vulkan_image> resolved;
         std::uint64_t vsyncGeneration = 0u;
         bool outOfDate = false;
@@ -185,6 +187,9 @@ namespace neogfx
         struct no_program : std::logic_error { no_program() : std::logic_error{ "neogfx::vulkan_graphics_backend::no_program" } {} };
         struct no_vertex_array : std::logic_error { no_vertex_array() : std::logic_error{ "neogfx::vulkan_graphics_backend::no_vertex_array" } {} };
     public:
+        // frames recorded while the GPU executes earlier ones (cf. opengl_surface's fences): a frame's command buffer,
+        // transient (uniform and upload staging) memory and deferred destruction are reused once its fence has signalled
+        static constexpr std::uint32_t FramesInFlight = 2u;
         static constexpr std::uint32_t MaxTextureUnits = 32u;
         // descriptor bindings of the generated GLSL (see basic_vulkan_shader_program): a stage's uniform block binding is its
         // shader_type, an SSBO's is StorageBindingBase + its id and the samplers' start at SamplerBindingBase
@@ -297,7 +302,7 @@ namespace neogfx
     public:
         void use_program(vulkan_program* aProgram);
         // GLSL (Vulkan) to SPIR-V; throws (i_rendering_engine::shader_program_error) on failure
-        std::vector<std::uint32_t> compile_shader(shader_type aType, std::string const& aSource, std::string const& aName) const;
+        std::vector<std::uint32_t> compile_shader(shader_type aType, std::string const& aSource, std::string const& aName, bool aOptimize = false) const;
         VkShaderModule create_shader_module(std::vector<std::uint32_t> const& aSpirv);
         void destroy_shader_module(VkShaderModule aModule);
         // n.b. the program's pipelines and descriptor layouts (it is about to be (re)linked or destroyed)
@@ -370,6 +375,8 @@ namespace neogfx
         void defer(std::function<void()> aDestroy);
         VkCommandBuffer command_buffer();
         void submit(VkSemaphore aWait = VK_NULL_HANDLE, VkSemaphore aSignal = VK_NULL_HANDLE);
+        void wait_for_frames();
+        void retire_frame(std::uint32_t aFrame);
         void begin_rendering();
         void end_rendering();
         void memory_barrier();
@@ -386,7 +393,31 @@ namespace neogfx
         shadow_resources& shadows(i_standard_shader_program& aProgram);
         background_resources& background();
         void invalidate_bindings();
+        void report_statistics();
     private:
+        // per-frame statistics, reported once a second (to std::cerr) when NEOGFX_VULKAN_STATS is set
+        struct statistics
+        {
+            bool enabled = false;
+            std::chrono::steady_clock::time_point periodStart;
+            std::uint64_t frames = 0u;
+            std::uint64_t submits = 0u;
+            std::uint64_t executes = 0u;
+            std::uint64_t readbacks = 0u;
+            std::chrono::steady_clock::duration fenceWait = {};
+            std::chrono::steady_clock::duration present = {};
+            std::chrono::steady_clock::duration acquire = {};
+            std::uint64_t passes = 0u;
+            std::uint64_t barriers = 0u;
+            std::uint64_t draws = 0u;
+            std::uint64_t pipelineBinds = 0u;
+            std::uint64_t descriptorPushes = 0u;
+            std::uint64_t pipelinesCreated = 0u;
+            std::uint64_t uploads = 0u;
+            std::uint64_t uploadBytes = 0u;
+            std::uint64_t transientBytes = 0u;
+            std::uint64_t swapchainsCreated = 0u;
+        };
         VkInstance iInstance = VK_NULL_HANDLE;
         VkDebugUtilsMessengerEXT iDebugMessenger = VK_NULL_HANDLE;
         VkPhysicalDevice iPhysicalDevice = VK_NULL_HANDLE;
@@ -398,13 +429,20 @@ namespace neogfx
         PFN_vkCmdPushDescriptorSetKHR iCmdPushDescriptorSet = nullptr;
         bool iSampleRateShading = false;
         VkFormat iDepthStencilFormat = VK_FORMAT_UNDEFINED;
-        VkCommandPool iCommandPool = VK_NULL_HANDLE;
+        struct frame
+        {
+            VkCommandPool commandPool = VK_NULL_HANDLE;
+            VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+            VkFence fence = VK_NULL_HANDLE;
+            bool inFlight = false;
+            std::vector<std::function<void()>> deferred;
+            std::vector<transient_chunk> transient;
+            std::size_t transientChunk = 0u;
+        };
+        std::array<frame, FramesInFlight> iFrames;
+        std::uint32_t iFrame = 0u;
         VkCommandBuffer iCommandBuffer = VK_NULL_HANDLE;
-        VkFence iFence = VK_NULL_HANDLE;
         bool iRecording = false;
-        std::vector<std::function<void()>> iDeferred;
-        std::vector<transient_chunk> iTransient;
-        std::size_t iTransientChunk = 0u;
         std::map<std::pair<vulkan_sampler_state, std::uint32_t>, VkSampler> iSamplers;
         std::unique_ptr<vulkan_image> iDummyTexture;
         std::unique_ptr<vulkan_image> iDummyTextureMS;
@@ -426,5 +464,6 @@ namespace neogfx
         std::uint64_t iVsyncGeneration = 1u;
         std::unique_ptr<shadow_resources> iShadows;
         std::unique_ptr<background_resources> iBackground;
+        statistics iStatistics;
     };
 }

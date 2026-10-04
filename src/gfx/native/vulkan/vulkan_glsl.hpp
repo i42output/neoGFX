@@ -39,10 +39,14 @@ namespace neogfx
     };
     using vulkan_glsl_samplers = std::map<std::string, vulkan_glsl_sampler>;
 
+    // the specialization constant (an int) that replaces gl_NumSamples, which Vulkan GLSL lacks: the pipeline's sample count
+    constexpr std::uint32_t VulkanGlslNumSamplesConstantId = 0u;
+
     // The GLSL generated for OpenGL made Vulkan GLSL: the uniform blocks (whose binding is their stage) are std140 in
     // descriptor set 0, the SSBOs' bindings are offset by aStorageBindingBase, the sampler uniforms are given bindings
     // (from aSamplerBindingBase; a sampler keeps its binding across compiles and stages) and the rectangle samplers
     // (which Vulkan GLSL lacks) become 2D samplers with their texelFetch, texture and textureSize calls adapted.
+    // gl_NumSamples (also lacking) becomes a specialization constant (see VulkanGlslNumSamplesConstantId).
     std::string vulkan_glsl(std::string const& aSource, VkShaderStageFlagBits aStage, vulkan_glsl_samplers& aSamplers,
         std::uint32_t aStorageBindingBase, std::uint32_t aSamplerBindingBase);
 

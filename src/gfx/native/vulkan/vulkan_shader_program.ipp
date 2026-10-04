@@ -131,10 +131,14 @@ namespace neogfx
                     service<debug::logger>() << neolib::logger::severity::Debug << lineNumber++ << ": " << line << std::endl;
             };
             std::vector<std::uint32_t> spirv;
+            std::vector<std::uint32_t> optimizedSpirv;
             try
             {
-                spirv = backend().compile_shader(stage->type(), vulkanCode,
-                    this->name().to_std_string() + "." + enum_to_string<shader_type, std::string>(stage->type()));
+                auto const shaderName = this->name().to_std_string() + "." + enum_to_string<shader_type, std::string>(stage->type());
+                // n.b. unoptimized for the reflection (see link), which needs the uniform blocks' member names, and optimized
+                // for the shader module (the uniform blocks' layout, which is explicit, is the same)
+                spirv = backend().compile_shader(stage->type(), vulkanCode, shaderName);
+                optimizedSpirv = backend().compile_shader(stage->type(), vulkanCode, shaderName, true);
             }
             catch (...)
             {
@@ -147,7 +151,7 @@ namespace neogfx
             auto& shaderObject = *static_cast<vulkan_shader_object*>(shaders[0]->handle(*this));
             backend().destroy_shader_module(shaderObject.module);
             shaderObject.spirv = std::move(spirv);
-            shaderObject.module = backend().create_shader_module(shaderObject.spirv);
+            shaderObject.module = backend().create_shader_module(optimizedSpirv);
         }
     }
 

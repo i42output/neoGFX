@@ -225,6 +225,24 @@ namespace neogfx
         replace_identifier(result, "gl_VertexID", "gl_VertexIndex");
         replace_identifier(result, "gl_InstanceID", "gl_InstanceIndex");
 
+        // gl_NumSamples: the pipeline's sample count, as a specialization constant declared after the leading directives
+        std::string const numSamples = "neogfx_NumSamples";
+        replace_identifier(result, "gl_NumSamples", numSamples);
+        if (result.find(numSamples) != std::string::npos)
+        {
+            std::size_t position = 0u;
+            while (position < result.size())
+            {
+                auto const lineEnd = result.find('\n', position);
+                auto const next = (lineEnd == std::string::npos ? result.size() : lineEnd + 1u);
+                auto const first = result.find_first_not_of(" \t\r", position);
+                if (first < next && result[first] != '#' && result[first] != '\n')
+                    break;
+                position = next;
+            }
+            result.insert(position, "layout (constant_id = " + std::to_string(VulkanGlslNumSamplesConstantId) + ") const int " + numSamples + " = 1;\n");
+        }
+
         return result;
     }
 
