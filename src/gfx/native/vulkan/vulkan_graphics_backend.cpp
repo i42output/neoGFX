@@ -2079,7 +2079,11 @@ namespace neogfx
         options.SetOptimizationLevel(shaderc_optimization_level_zero);
         auto const result = compiler.CompileGlslToSpv(aSource, kind, aName.c_str(), options);
         if (result.GetCompilationStatus() != shaderc_compilation_status_success)
-            throw failed_to_create_shader_program(result.GetErrorMessage());
+        {
+            auto const& errMsg = result.GetErrorMessage();
+            std::cerr << "neogfx::vulkan_graphics_backend::error: " << errMsg << std::endl;
+            throw failed_to_create_shader_program(errMsg);
+        }
         return std::vector<std::uint32_t>{ result.cbegin(), result.cend() };
     }
 

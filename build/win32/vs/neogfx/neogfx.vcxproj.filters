@@ -67,6 +67,9 @@
     <Filter Include="Source Files\native\shader">
       <UniqueIdentifier>{f3167abc-b41d-4289-a22e-e13d96bf19a0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\3rdparty">
+      <UniqueIdentifier>{f5aa3336-dd4b-45ed-b592-020ad4f693e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\neogfx\app\action.hpp">
@@ -829,9 +832,6 @@
     <ClInclude Include="..\..\..\..\src\app\native\windows_drag_drop.hpp">
       <Filter>Header Files\native\windows</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\audio\3rdparty\miniaudio\miniaudio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\i_graphics_backend.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1011,6 +1011,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_playback.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\audio\3rdparty\miniaudio\miniaudio.h">
+      <Filter>Header Files\3rdparty</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
