@@ -137,6 +137,7 @@ namespace neogfx
         virtual const i_string& name() const = 0;
         virtual const std::type_info& type() const = 0;
         virtual const std::type_info& category() const = 0;
+        virtual const std::type_info* secondary_category() const = 0; ///< optional (nullptr if none), e.g. a font (appearance) affects geometry too
         virtual const std::type_info& context() const = 0; ///< the class declaring the property
         virtual bool optional() const = 0;
         virtual property_variant get_as_variant() const = 0;

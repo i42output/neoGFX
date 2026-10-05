@@ -125,14 +125,20 @@ namespace neogfx
         {
             { std::type_index{ typeid(property_category::hard_geometry) }, invalidate_layout },
             { std::type_index{ typeid(property_category::soft_geometry) }, invalidate_window_canvas },
-            { std::type_index{ typeid(property_category::font) }, invalidate_layout },
-            { std::type_index{ typeid(property_category::color) }, invalidate_canvas },
+            { std::type_index{ typeid(property_category::appearance) }, invalidate_canvas },
             { std::type_index{ typeid(property_category::other_appearance) }, invalidate_canvas },
             { std::type_index{ typeid(property_category::other) }, ignore }
         };
         auto iterAction = sActions.find(std::type_index{ aProperty.category() });
         if (iterAction != sActions.end())
             iterAction->second(*this);
+        // (and that of its secondary category if it has one, e.g. a font (appearance) which also affects geometry)
+        if (aProperty.secondary_category() != nullptr)
+        {
+            auto iterSecondaryAction = sActions.find(std::type_index{ *aProperty.secondary_category() });
+            if (iterSecondaryAction != sActions.end())
+                iterSecondaryAction->second(*this);
+        }
     }
 
     template <WidgetInterface Interface>

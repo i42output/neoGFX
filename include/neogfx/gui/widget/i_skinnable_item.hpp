@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/core/geometrical.hpp>
+#include <neogfx/gfx/color.hpp>
 
 namespace neogfx
 {
@@ -72,5 +73,6 @@ namespace neogfx
         virtual const i_widget& as_widget() const = 0;
     public:
         virtual rect element_rect(skin_element aElement) const = 0;
+        virtual optional_color element_color(skin_element aElement) const { return {}; }
     };
 }

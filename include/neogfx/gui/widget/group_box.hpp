@@ -137,8 +137,8 @@ namespace neogfx
         group_box_border_style iBorderStyle = group_box_border_style::None;
         dimension iBorderThickness = DEFAULT_BORDER_THICKNESS;
         std::optional<border_radii> iBorderRadii;
-        define_property(property_category::color, optional_color, BorderColor, border_color)
-        define_property(property_category::color, optional_color, FillColor, fill_color)
+        define_property(property_category::appearance, optional_color, BorderColor, border_color)
+        define_property(property_category::appearance, optional_color, FillColor, fill_color)
         define_property(property_category::other_appearance, double, FillOpacity, fill_opacity, 1.0)
         sink iSink;
     };

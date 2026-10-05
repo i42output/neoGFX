@@ -81,6 +81,11 @@ namespace neogfx::DesignStudio
                 aObject = static_cast<i_console_client_manager*>(this);
                 return true;
             }
+            else if (aId == i_property_component_registry::iid())
+            {
+                aObject = static_cast<i_property_component_registry*>(&the_property_component_registry());
+                return true;
+            }
             return main_app::discover(aId, aObject);
         }
     private:

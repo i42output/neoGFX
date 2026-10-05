@@ -63,7 +63,7 @@ Toolbars                        | 90      |     Drop-down button support
 Layout Managers                 | 100     |
 Label                           | 100     |     
 Button                          | 100     |     
-Table View                      | 95      |     Selection; cell widget
+Table View                      | 98      |     Selection
 Tree View                       | 95      |
 List View                       | 95      |
 Text Edit                       | 95      |     Rich text (HTML); undo/redo

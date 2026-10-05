@@ -27,6 +27,101 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::DesignStudio
 {
+    namespace
+    {
+        // set while the Properties toolbox and a property are being made consistent (a cell updated to show its property's changed value or 
+        // a property set from its cell) so that neither recursively updates the other
+        thread_local bool tUpdatingProperty = false;
+
+        // the .nrc attribute that would be associated with an object property: its name in snake case (e.g. SizePolicy: "size_policy") 
+        // except FixedSize ("size": an .nrc size is the fixed size) and Size (none: it is the extents)
+        std::string attribute_name_of(std::string const& aPropertyName)
+        {
+            if (aPropertyName == "FixedSize")
+                return "size";
+            if (aPropertyName == "Size")
+                return {};
+            std::string result;
+            for (auto ch : aPropertyName)
+            {
+                if (std::isupper(static_cast<unsigned char>(ch)))
+                {
+                    if (!result.empty())
+                        result += '_';
+                    result += static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+                }
+                else
+                    result += ch;
+            }
+            return result;
+        }
+
+        // the object property that would be associated with an .nrc attribute (the reverse of attribute_name_of)
+        std::string property_name_of(std::string const& aAttribute)
+        {
+            if (aAttribute == "size")
+                return "FixedSize";
+            std::string result;
+            bool upper = true;
+            for (auto ch : aAttribute)
+            {
+                if (ch == '_')
+                    upper = true;
+                else
+                {
+                    result += upper ? static_cast<char>(std::toupper(static_cast<unsigned char>(ch))) : ch;
+                    upper = false;
+                }
+            }
+            return result;
+        }
+
+        // an .nrc attribute value's items (e.g. "[ 42px 3cm ]": "42px" and "3cm"; strings unquoted)
+        std::vector<std::string> attribute_items(std::string const& aValue)
+        {
+            std::vector<std::string> result;
+            for (auto const& item : nrc_attributes::items(aValue))
+                result.push_back(nrc_attributes::unquote(item));
+            return result;
+        }
+
+        // an .nrc attribute value from items (as entered: a length's units are kept, e.g. "42 px" is "42px"); strings are quoted
+        std::string attribute_value(std::vector<std::string> const& aItems, bool aStrings)
+        {
+            std::vector<std::string> values;
+            for (auto const& item : aItems)
+            {
+                std::string value;
+                if (aStrings)
+                {
+                    value = "\"";
+                    for (auto ch : item)
+                        switch (ch)
+                        {
+                        case '\"': value += "\\\""; break;
+                        case '\\': value += "\\\\"; break;
+                        case '\n': value += "\\n"; break;
+                        case '\r': value += "\\r"; break;
+                        case '\t': value += "\\t"; break;
+                        default: value += ch; break;
+                        }
+                    value += "\"";
+                }
+                else
+                    for (auto ch : item)
+                        if (ch != ' ' && ch != '\t')
+                            value += ch;
+                values.push_back(value);
+            }
+            if (values.size() == 1u)
+                return values[0];
+            std::string result = "[";
+            for (auto const& value : values)
+                result += " " + value;
+            return result + " ]";
+        }
+    }
+
     class compact_tree_view : public ng::tree_view
     {
     public:
@@ -88,10 +183,23 @@ namespace neogfx::DesignStudio
         iWorkflowPresentationModel{ aProjectManager },
         iObjectPresentationModel{ aProjectManager }
     {
-        // todo: decompose this ctor body into smaller member initialization functions...
-
         hide();
 
+        init_view_actions(aApp, aSettings);
+        init_docks();
+        init_appearance();
+        init_tool_views();
+        init_object_explorer();
+        init_properties();
+        init_workspace(aApp);
+        init_file_actions(aApp, aSettings, aProjectManager);
+
+        activate();
+    }
+
+    // View menu: toolbar, status bar and layout icons
+    void main_window_ex::init_view_actions(main_app& aApp, settings& aSettings)
+    {
         aApp.actionShowStandardToolbar.checked([&]() { standardToolbar.show(); });
         aApp.actionShowStandardToolbar.unchecked([&]() { standardToolbar.hide(); });
         aApp.actionShowStatusBar.checked([&]() { statusBar.show(); });
@@ -107,7 +215,11 @@ namespace neogfx::DesignStudio
         };
         showLayoutIcons.changing(showLayoutIconsChanged);
         showLayoutIcons.changed(showLayoutIconsChanged);
+    }
 
+    // the window's size and position, the docks and their dockables (with their sizes/weights saved in the settings)
+    void main_window_ex::init_docks()
+    {
         if (!workspaceSize.is_default())
             set_extents(workspaceSize.value<ng::size>());
         if (!workspacePosition.is_default())
@@ -172,7 +284,11 @@ namespace neogfx::DesignStudio
         ng::i_layout& mainLayout = client_layout();
         mainLayout.set_padding(ng::padding{});
         mainLayout.set_spacing(ng::size{});
+    }
 
+    // appearance settings: font, subpixel rendering, toolbar icon size, theme colour and workspace grid
+    void main_window_ex::init_appearance()
+    {
         auto fontChanged = [&]()
         {
             ng::service<ng::i_app>().current_style().set_font_info(workspaceFont.value<ng::font_info>(true));
@@ -239,14 +355,11 @@ namespace neogfx::DesignStudio
         workspaceGridSize.changed(workspaceGridChanged);
         workspaceGridSubdivisions.changing(workspaceGridChanged);
         workspaceGridSubdivisions.changed(workspaceGridChanged);
+    }
 
-        iWorkspace.view_stack().enable_drag_drop_target();
-        iWorkspace.view_stack().object_acceptable([&](const ng::i_drag_drop_object& aObject, ng::optional_point const& aDropPosition, ng::drop_operation& aOperation)
-        {
-            aOperation = preview_mode() ? ng::drop_operation::None : ng::drop_operation::Move;
-        });
-        iWorkspace.view_stack().set_focus_policy(ng::focus_policy::ClickFocus);
-
+    // the Project, Toolbox and Workflow views
+    void main_window_ex::init_tool_views()
+    {
         populate_project_model(iProjectModel, iProjectPresentationModel);
         auto& projectTree = iProject.docked_widget<compact_tree_view>();
         projectTree.set_presentation_model(iProjectPresentationModel);
@@ -268,7 +381,11 @@ namespace neogfx::DesignStudio
         workflowTree.set_presentation_model(iWorkflowPresentationModel);
         workflowTree.selection_model().set_mode(ng::item_selection_mode::NoSelection);
         workflowTree.set_focus_policy(ng::focus_policy::TabFocus);
+    }
 
+    // Object Explorer: the current/selected elements, moving elements by drag and drop, context menu and clipboard
+    void main_window_ex::init_object_explorer()
+    {
         iObjectModel.set_column_name(0u, "Object"_t);
         iObjectModel.set_column_name(1u, "Type"_t);
 
@@ -320,141 +437,6 @@ namespace neogfx::DesignStudio
                 }
             }
         });
-
-        iPropertyModel.set_column_name(0u, "Property"_t);
-        iPropertyModel.set_column_name(1u, "Value"_t);
-        iPropertyPresentationModel.set_item_model(iPropertyModel);
-        iPropertyPresentationModel.set_alternating_row_color(true);
-        auto& propertyTable = iProperties.docked_widget<ng::table_view>();
-        propertyTable.set_minimum_size(ng::size{ 128_dip, 128_dip });
-        propertyTable.set_presentation_model(iPropertyPresentationModel);
-        propertyTable.column_header().set_expand_last_column(true);
-        iSink += iPropertyModel.item_changed([&](item_model_index const& aIndex)
-        {
-            if (iUpdatingProperties || !iPropertyElement.valid() || !iProjectManager.project_active())
-                return;
-            auto& element = *iPropertyElement;
-            auto cell_text = [&](item_model_index const& aCellIndex)
-            {
-                auto const& cellData = iPropertyModel.cell_data(aCellIndex);
-                return std::holds_alternative<string>(cellData) ? std::get<string>(cellData) : string{};
-            };
-            auto const text = cell_text(aIndex);
-            auto const& item = iPropertyModel.item(aIndex);
-            if (std::holds_alternative<std::monostate>(item))
-                return; // class node
-            if (std::holds_alternative<i_property*>(item))
-            {
-                // object property
-                if (aIndex.column() != 1u)
-                    return;
-                auto& property = *std::get<i_property*>(item);
-                auto const value = property_value_from_string(property, text.to_std_string());
-                if (value)
-                    property.set_from_variant(*value);
-                iPropertiesNeedUpdate = true; // show the resulting value
-                return;
-            }
-            auto const attributeIndex = std::get<std::uint32_t>(item);
-            if (attributeIndex == property_presentation_model::new_property_row)
-            {
-                // new property: name entered in the trailing row
-                if (aIndex.column() != 0u || text.empty())
-                    return;
-                auto value = cell_text(aIndex.with_column(1u));
-                if (value.empty())
-                    value = "\"\"";
-                element.attributes().push_back(neolib::pair<string, string>{ text, value });
-                iPropertiesNeedUpdate = true;
-            }
-            else if (aIndex.column() == 1u && attributeIndex < element.attributes().size())
-                std::next(element.attributes().begin(), attributeIndex)->second() = text; // an empty value removes the property on save
-            else
-                return;
-            element.apply_attributes(show_ids());
-            iProjectManager.active_project().set_dirty();
-        });
-        // the property being edited in place (if any)
-        auto edited_property = [this, &propertyTable]() -> i_property*
-        {
-            if (!propertyTable.editing() || propertyTable.editing()->column() != 1u)
-                return nullptr;
-            auto const& item = iPropertyModel.item(iPropertyPresentationModel.to_item_model_index(*propertyTable.editing()));
-            return std::holds_alternative<i_property*>(item) ? std::get<i_property*>(item) : nullptr;
-        };
-        // "..." button: opens the color or font dialog for the property being edited; the result replaces the editor text and is committed
-        auto open_property_dialog = [this, &propertyTable, edited_property]()
-        {
-            auto property = edited_property();
-            if (property == nullptr || iPropertyDialogOpen)
-                return;
-            neolib::scoped_flag sf{ iPropertyDialogOpen }; // the button mustn't be destroyed while its click handler is running
-            std::string const text = propertyTable.editor_has_text_edit() ? propertyTable.editor_text_edit().text().to_std_string() : std::string{};
-            std::optional<std::string> newText;
-            switch (property_dialog_for(*property))
-            {
-            case property_dialog::Color:
-                {
-                    auto const current = property_parse(text, static_cast<ng::color const*>(nullptr));
-                    ng::color_dialog dialog{ *this, current && text != "(none)" && !text.empty() ? *current : ng::color::Black };
-                    if (dialog.exec() == ng::dialog_result::Accepted)
-                        newText = property_text(dialog.selected_color());
-                }
-                break;
-            case property_dialog::Font:
-                {
-                    auto const current = property_parse(text, static_cast<ng::font const*>(nullptr));
-                    ng::font_dialog dialog{ *this, current ? *current : ng::font{} };
-                    if (dialog.exec() == ng::dialog_result::Accepted)
-                        newText = property_text(dialog.selected_font());
-                }
-                break;
-            default:
-                break;
-            }
-            if (!newText)
-                return;
-            if (edited_property() == property && propertyTable.editor_has_text_edit())
-            {
-                propertyTable.editor_text_edit().set_text(*newText);
-                propertyTable.end_edit(true);
-            }
-            else if (auto const value = property_value_from_string(*property, *newText))
-            {
-                // the in-place edit ended while the dialog was open
-                property->set_from_variant(*value);
-                iPropertiesNeedUpdate = true;
-            }
-        };
-        iPropertiesUpdater.emplace(*this, [this, &propertyTable, edited_property, open_property_dialog](ng::widget_timer& aTimer)
-        {
-            aTimer.again();
-            if (iPropertiesNeedUpdate || (!iPropertyElement.valid() && iPropertyModel.rows() != 0u))
-            {
-                iPropertiesNeedUpdate = false;
-                update_properties();
-            }
-            // show the "..." button at the right of the in-place editor of a color or font property
-            if (iPropertyDialogOpen)
-                return;
-            auto property = edited_property();
-            if (property != nullptr && property_dialog_for(*property) != property_dialog::None)
-            {
-                if (!iPropertyDialogButton)
-                {
-                    iPropertyDialogButton = std::make_unique<ng::push_button>(propertyTable, ng::string{ "..." });
-                    iPropertyDialogButton->set_focus_policy(ng::focus_policy::NoFocus); // keep focus (and the edit) in the editor
-                    iPropertyDialogButton->Clicked(open_property_dialog);
-                }
-                auto const& editor = propertyTable.editor();
-                auto const buttonSize = editor.extents().cy;
-                iPropertyDialogButton->move(ng::point{ editor.position().x + editor.extents().cx - buttonSize, editor.position().y });
-                iPropertyDialogButton->resize(ng::size{ buttonSize, buttonSize });
-                iPropertyDialogButton->bring_to_front();
-            }
-            else
-                iPropertyDialogButton = nullptr;
-        }, std::chrono::milliseconds{ 20 });
 
         // dragging within Object Explorer moves elements: onto a container (layout, window, group box, tab page) appends to it, 
         // onto any other element inserts before it, onto the project/user interface makes a widget top level
@@ -555,6 +537,219 @@ namespace neogfx::DesignStudio
                 service<i_clipboard>().deactivate(*this);
             }
         });
+    }
+
+    // Properties toolbox: editing elements' .nrc attributes and their objects' properties (see update_properties)
+    void main_window_ex::init_properties()
+    {
+        iPropertyModel.set_column_name(0u, "Property"_t);
+        iPropertyModel.set_column_name(1u, "Value"_t);
+        iPropertyPresentationModel.set_item_model(iPropertyModel);
+        iPropertyPresentationModel.set_alternating_row_color(true);
+        auto& propertyTable = iProperties.docked_widget<ng::table_view>();
+        propertyTable.set_minimum_size(ng::size{ 128_dip, 128_dip });
+        propertyTable.set_presentation_model(iPropertyPresentationModel);
+        propertyTable.column_header().set_expand_last_column(true);
+        // each cell has a 1 pixel border
+        iSink += propertyTable.painted([this, &propertyTable](ng::i_graphics_context& aGc)
+        {
+            auto const& palette = ng::service<ng::i_app>().current_style().palette();
+            ng::pen const border{ palette.color(ng::color_role::Base).mid(palette.color(ng::color_role::Text)), 1.0 };
+            auto const visible = propertyTable.client_rect();
+            for (std::uint32_t row = 0u; row < iPropertyPresentationModel.rows(); ++row)
+                for (std::uint32_t col = 0u; col < iPropertyPresentationModel.columns(); ++col)
+                {
+                    auto const cellRect = propertyTable.cell_rect(ng::item_presentation_model_index{ row, col }, ng::cell_part::Background);
+                    if (cellRect.intersects(visible))
+                        aGc.draw_rect(cellRect, border);
+                }
+        });
+        iSink += iPropertyModel.item_changed([&](item_model_index const& aIndex)
+        {
+            if (tUpdatingProperty || iUpdatingProperties || !iPropertyElement.valid() || !iProjectManager.project_active())
+                return;
+            neolib::scoped_flag sfUpdatingProperty{ tUpdatingProperty };
+            auto& element = *iPropertyElement;
+            auto cell_text = [&](item_model_index const& aCellIndex)
+            {
+                auto const& cellData = iPropertyModel.cell_data(aCellIndex);
+                return std::holds_alternative<string>(cellData) ? std::get<string>(cellData) : string{};
+            };
+            auto const text = cell_text(aIndex);
+            auto const& item = iPropertyModel.item(aIndex);
+            if (std::holds_alternative<std::monostate>(item))
+                return; // class node
+            if (std::holds_alternative<i_property*>(item))
+            {
+                // object property
+                if (aIndex.column() != 1u)
+                    return;
+                auto& property = *std::get<i_property*>(item);
+                ng::scoped_units_context suc{ element.layout_item() }; // (lengths can have units, e.g. "42 px")
+                // (a property with an associated .nrc attribute: the text as entered (e.g. with units) is the attribute's value)
+                auto const value = property_value_from_string(property, text.to_std_string());
+                if (value && !set_property_attribute(property, {}, text.to_std_string()))
+                    property.set_from_variant(*value);
+                // show the resulting value (not rebuilding the tree so expanded composite properties stay expanded)
+                neolib::scoped_flag sf{ iUpdatingProperties };
+                update_property_rows(property);
+                return;
+            }
+            if (std::holds_alternative<property_component>(item))
+            {
+                // a component of a composite property (e.g. a size's width)
+                if (aIndex.column() != 1u)
+                    return;
+                auto const& component = std::get<property_component>(item);
+                ng::scoped_units_context suc{ element.layout_item() }; // (lengths can have units, e.g. "42 px")
+                if (auto const value = property_component_from_string(*component.property, component.index, text.to_std_string()))
+                    if (!set_property_attribute(*component.property, component.index, text.to_std_string()))
+                        component.property->set_from_variant(*value);
+                neolib::scoped_flag sf{ iUpdatingProperties };
+                update_property_rows(*component.property);
+                return;
+            }
+            auto const attributeIndex = std::get<std::uint32_t>(item);
+            if (attributeIndex == property_presentation_model::new_property_row)
+            {
+                // an attribute that can be added (a row of the "Attributes" node): added when given a value
+                if (aIndex.column() != 1u || text.empty())
+                    return;
+                element.attributes().push_back(neolib::pair<string, string>{ cell_text(aIndex.with_column(0u)), text });
+                iPropertiesNeedUpdate = true;
+            }
+            else if (aIndex.column() == 1u && attributeIndex < element.attributes().size())
+                std::next(element.attributes().begin(), attributeIndex)->second() = text; // an empty value removes the property on save
+            else
+                return;
+            element.apply_attributes(show_ids());
+            iProjectManager.active_project().set_dirty();
+        });
+        // the property being edited in place (if any)
+        auto edited_property = [this, &propertyTable]() -> i_property*
+        {
+            if (!propertyTable.editing() || propertyTable.editing()->column() != 1u)
+                return nullptr;
+            auto const& item = iPropertyModel.item(iPropertyPresentationModel.to_item_model_index(*propertyTable.editing()));
+            return std::holds_alternative<i_property*>(item) ? std::get<i_property*>(item) : nullptr;
+        };
+        // the property whose "..." button is shown: the one being edited or, as its (read only) row can't be edited, the current composite 
+        // property (e.g. a font: its row shows a summary of its components)
+        auto dialog_property = [this, &propertyTable, edited_property]() -> i_property*
+        {
+            if (auto property = edited_property())
+                return property;
+            if (propertyTable.editing() || !propertyTable.selection_model().has_current_index())
+                return nullptr;
+            auto const& item = iPropertyModel.item(iPropertyPresentationModel.to_item_model_index(propertyTable.selection_model().current_index()));
+            if (std::holds_alternative<i_property*>(item) && !property_components(*std::get<i_property*>(item)).empty())
+                return std::get<i_property*>(item);
+            return nullptr;
+        };
+        // "..." button: opens the color or font dialog for the property being edited (the result replaces the editor text and is committed) 
+        // or for the current composite property (the result is its new value)
+        auto open_property_dialog = [this, &propertyTable, edited_property, dialog_property]()
+        {
+            auto property = dialog_property();
+            if (property == nullptr || iPropertyDialogOpen)
+                return;
+            neolib::scoped_flag sf{ iPropertyDialogOpen }; // the button mustn't be destroyed while its click handler is running
+            std::string const text = edited_property() == property && propertyTable.editor_has_text_edit() ? 
+                propertyTable.editor_text_edit().text().to_std_string() : property_value_to_string(*property);
+            std::optional<std::string> newText;
+            switch (property_dialog_for(*property))
+            {
+            case property_dialog::Color:
+                {
+                    auto const current = property_parse(text, static_cast<ng::color const*>(nullptr));
+                    ng::color_dialog dialog{ *this, current && text != "(none)" && !text.empty() ? *current : ng::color::Black };
+                    if (dialog.exec() == ng::dialog_result::Accepted)
+                        newText = property_text(dialog.selected_color());
+                }
+                break;
+            case property_dialog::Font:
+                {
+                    auto const current = property_parse(text, static_cast<ng::font const*>(nullptr));
+                    ng::font_dialog dialog{ *this, current ? *current : ng::font{} };
+                    if (dialog.exec() == ng::dialog_result::Accepted)
+                        newText = property_text(dialog.selected_font());
+                }
+                break;
+            default:
+                break;
+            }
+            if (!newText)
+                return;
+            if (edited_property() == property && propertyTable.editor_has_text_edit())
+            {
+                propertyTable.editor_text_edit().set_text(*newText);
+                propertyTable.end_edit(true);
+            }
+            else if (auto const value = property_value_from_string(*property, *newText))
+                property->set_from_variant(*value); // (a composite property, or the in-place edit ended while the dialog was open; its row shows the new value when it changes)
+        };
+        iPropertiesUpdater.emplace(*this, [this, &propertyTable, edited_property, dialog_property, open_property_dialog](ng::widget_timer& aTimer)
+        {
+            aTimer.again();
+            if (iPropertiesNeedUpdate || (!iPropertyElement.valid() && iPropertyModel.rows() != 0u))
+            {
+                iPropertiesNeedUpdate = false;
+                update_properties();
+            }
+            else if (!iChangedProperties.empty())
+            {
+                // a batch update of the rows of the properties that have changed (see iChangedProperties) except one being edited
+                std::optional<std::uint32_t> editingRow;
+                if (propertyTable.editing())
+                    editingRow = iPropertyPresentationModel.to_item_model_index(*propertyTable.editing()).row();
+                neolib::scoped_flag sf{ iUpdatingProperties };
+                neolib::scoped_flag sfUpdatingProperty{ tUpdatingProperty };
+                {
+                    // (cell by cell: a presentation model update (begin_update/end_update) resets all of its cell metadata (every cell's text 
+                    // is then shaped again) and the view lays out all of its items again)
+                    for (auto property : iChangedProperties)
+                        update_property_rows(*property, editingRow);
+                }
+                for (auto property : iChangedProperties)
+                    iPropertyPresentationModel.sync_cell_widgets(*property);
+                iChangedProperties.clear();
+            }
+            // show the "..." button at the right of the in-place editor of a color or font property (or of a composite one's current row)
+            if (iPropertyDialogOpen)
+                return;
+            auto property = dialog_property();
+            if (property != nullptr && property_dialog_for(*property) != property_dialog::None)
+            {
+                if (!iPropertyDialogButton)
+                {
+                    iPropertyDialogButton = std::make_unique<ng::push_button>(propertyTable, ng::string{ "..." });
+                    iPropertyDialogButton->set_focus_policy(ng::focus_policy::NoFocus); // keep focus (and the edit) in the editor
+                    iPropertyDialogButton->Clicked(open_property_dialog);
+                }
+                auto const cellRect = edited_property() == property ? ng::rect{ propertyTable.editor().position(), propertyTable.editor().extents() } :
+                    propertyTable.cell_rect(propertyTable.selection_model().current_index().with_column(1u), ng::cell_part::Editor);
+                auto const buttonSize = cellRect.cy;
+                iPropertyDialogButton->move(ng::point{ cellRect.x + cellRect.cx - buttonSize, cellRect.y });
+                iPropertyDialogButton->resize(ng::size{ buttonSize, buttonSize });
+                iPropertyDialogButton->bring_to_front();
+            }
+            else
+                iPropertyDialogButton = nullptr;
+        }, std::chrono::milliseconds{ 20 });
+    }
+
+    // the workspace (design surface): drops, painting, rubber band selection, context menu, keyboard, preview and display ids
+    void main_window_ex::init_workspace(main_app& aApp)
+    {
+        auto& toolboxTree = iToolbox.docked_widget<ng::tree_view>();
+        auto& objectTree = iObjects.docked_widget<ng::table_view>();
+
+        iWorkspace.view_stack().enable_drag_drop_target();
+        iWorkspace.view_stack().object_acceptable([&](const ng::i_drag_drop_object& aObject, ng::optional_point const& aDropPosition, ng::drop_operation& aOperation)
+        {
+            aOperation = preview_mode() ? ng::drop_operation::None : ng::drop_operation::Move;
+        });
+        iWorkspace.view_stack().set_focus_policy(ng::focus_policy::ClickFocus);
 
         thread_local optional_point tMouseSelectorAnchor;
         thread_local optional_point tMouseSelectorMousePos;
@@ -693,7 +888,11 @@ namespace neogfx::DesignStudio
             if (aEvent.type() == ng::keyboard_event_type::KeyPressed && aEvent.scan_code() == ScanCode_ESCAPE && iProjectManager.project_active())
                 iProjectManager.active_project().root().select(false, true);
         });
+    }
 
+    // File menu (new, open, add .nrc file, save, close) and settings; enabling actions and docks for the active project
+    void main_window_ex::init_file_actions(main_app& aApp, settings& aSettings, project_manager& aProjectManager)
+    {
         auto update_ui = [&]()
         {
             aApp.actionFileClose.enable(aProjectManager.project_active());
@@ -840,8 +1039,6 @@ namespace neogfx::DesignStudio
             ng::settings_dialog dialog{ mainWindow, aSettings };
             dialog.exec();
         });
-
-        activate();
     }
 
     void main_window_ex::close()
@@ -993,29 +1190,74 @@ namespace neogfx::DesignStudio
     void main_window_ex::update_properties()
     {
         neolib::scoped_flag sf{ iUpdatingProperties };
+        iPropertySink.clear();
+        iPropertyRows.clear();
+        iChangedProperties.clear();
+        iPropertyPresentationModel.clear_cell_widgets();
         iPropertyModel.clear();
         if (!iPropertyElement.valid())
             return;
         auto& element = *iPropertyElement;
+        // (its .nrc attributes changed elsewhere, e.g. default_size by resizing a window: shown again)
+        iPropertySink += element.attributes_changed([this]()
+        {
+            iPropertiesNeedUpdate = true;
+        });
+        // the object's property names (an .nrc attribute with an associated object property (e.g. "size_policy" and SizePolicy) isn't shown 
+        // as the property is shown instead: editing the property sets the attribute, see set_property_attribute)
+        std::set<std::string> propertyNames;
+        if (element.has_layout_item())
+            for (auto const& entry : std::as_const(element.layout_item().properties()).property_map())
+                propertyNames.insert(entry.second()->name().to_std_string());
+        auto has_property = [&](std::string const& aAttribute)
+        {
+            return propertyNames.find(property_name_of(aAttribute)) != propertyNames.end();
+        };
         // .nrc attributes (saved to the project file)
         auto attributesNode = iPropertyModel.insert_item(iPropertyModel.send(), property_model_item{}, string{ element.type().to_std_string() + " (.nrc)" });
         std::uint32_t attributeIndex = 0u;
         for (auto const& attribute : element.attributes())
         {
-            // skip metadata ('#' prefix) and removed (empty) properties
-            if (!attribute.first().empty() && attribute.first().to_std_string_view()[0] != '#' && !attribute.second().empty())
+            // skip metadata ('#' prefix), removed (empty) properties and those with an associated object property
+            if (!attribute.first().empty() && attribute.first().to_std_string_view()[0] != '#' && !attribute.second().empty() && 
+                !has_property(attribute.first().to_std_string()))
             {
                 auto row = iPropertyModel.append_item(attributesNode, property_model_item{ attributeIndex }, string{ attribute.first() });
                 iPropertyModel.insert_cell_data(row, 1u, string{ attribute.second() });
             }
             ++attributeIndex;
         }
-        // trailing row for adding a new attribute (name then value)
-        iPropertyModel.append_item(attributesNode, property_model_item{ property_presentation_model::new_property_row }, string{});
+        // the attributes that can be added (those supported not already added) are rows of an "Attributes" node; giving one a value adds it
+        // (except those with an associated object property)
+        neolib::vector<string> available;
+        element.available_attributes(available);
+        std::vector<std::string> attributesToShow;
+        for (auto const& name : available)
+            if (!has_property(name.to_std_string()))
+                attributesToShow.push_back(name.to_std_string());
+        if (!attributesToShow.empty())
+        {
+            auto availableNode = iPropertyModel.append_item(attributesNode, property_model_item{}, string{ "Attributes" });
+            for (auto const& name : attributesToShow)
+                iPropertyModel.append_item(availableNode, property_model_item{ property_presentation_model::new_property_row }, string{ name });
+        }
         // object properties grouped by class: derived classes first, base classes last
         if (!element.has_layout_item())
             return;
         auto& owner = element.layout_item();
+        // show a property's new value when it changes (e.g. Size/Position changed with the mouse on the design surface) unless it is being edited
+        // (noted here and their rows updated in a batch by iPropertiesUpdater: e.g. resizing a widget with the mouse changes properties at a high rate)
+        iPropertySink += static_cast<ng::i_object&>(owner).property_changed([this](i_property const& aProperty)
+        {
+            if (iPropertyRows.find(&aProperty) != iPropertyRows.end())
+                iChangedProperties.insert(&aProperty);
+        });
+        // (the properties shown are all the object's: if it is destroyed they are too)
+        iPropertySink += static_cast<ng::i_object&>(owner).destroyed([this]()
+        {
+            iChangedProperties.clear();
+            iPropertyRows.clear();
+        });
         std::map<std::string, std::vector<i_property*>> classes;
         for (auto const& entry : std::as_const(owner.properties()).property_map())
             classes[property_class_name(*entry.second())].push_back(entry.second());
@@ -1043,6 +1285,20 @@ namespace neogfx::DesignStudio
             orderedClasses.emplace_back(rank(c.first), c.first);
         std::sort(orderedClasses.begin(), orderedClasses.end());
         // e.g. "neogfx::layout_item" -> "Layout Item"
+        // e.g. "BorderColor" -> "Border Color", "DpiAutoScale" -> "Dpi Auto Scale", "RGBValue" -> "RGB Value"
+        auto property_display_name = [](std::string const& aName)
+        {
+            std::string displayName;
+            for (std::size_t i = 0u; i < aName.size(); ++i)
+            {
+                auto const is_upper = [&](std::size_t j) { return j < aName.size() && std::isupper(static_cast<unsigned char>(aName[j])); };
+                auto const is_lower = [&](std::size_t j) { return j < aName.size() && std::islower(static_cast<unsigned char>(aName[j])); };
+                if (i != 0u && is_upper(i) && (is_lower(i - 1u) || (is_upper(i - 1u) && is_lower(i + 1u))))
+                    displayName += ' ';
+                displayName += aName[i];
+            }
+            return displayName;
+        };
         auto display_name = [&](std::string const& aName)
         {
             std::string displayName;
@@ -1057,29 +1313,14 @@ namespace neogfx::DesignStudio
             }
             return displayName;
         };
-        // property categories in declaration order (see property_category); any others follow
-        static std::vector<std::type_index> const categoryOrder =
-        {
-            typeid(property_category::soft_geometry),
-            typeid(property_category::hard_geometry),
-            typeid(property_category::font),
-            typeid(property_category::color),
-            typeid(property_category::other_appearance),
-            typeid(property_category::interaction),
-            typeid(property_category::other)
-        };
-        auto category_rank = [&](std::type_index const& aCategory)
-        {
-            return static_cast<std::size_t>(std::distance(categoryOrder.begin(), std::find(categoryOrder.begin(), categoryOrder.end(), aCategory)));
-        };
+        // (categories in rank order: see property_category_rank)
         for (auto const& c : orderedClasses)
         {
             auto classNode = iPropertyModel.insert_item(iPropertyModel.send(), property_model_item{}, string{ display_name(c.second) });
             std::map<std::pair<std::size_t, std::string>, std::vector<i_property*>> categories;
             for (auto property : classes[c.second])
             {
-                std::type_index const category{ property->category() };
-                categories[{ category_rank(category), property_class_name(property->category()) }].push_back(property);
+                categories[{ property_category_rank(property->category()), property_class_name(property->category()) }].push_back(property);
             }
             for (auto& category : categories)
             {
@@ -1091,10 +1332,127 @@ namespace neogfx::DesignStudio
                 });
                 for (auto property : properties)
                 {
-                    auto row = iPropertyModel.append_item(categoryNode, property_model_item{ property }, string{ property->name() });
-                    iPropertyModel.insert_cell_data(row, 1u, string{ property_value_to_string(*property) });
+                    auto row = iPropertyModel.append_item(categoryNode, property_model_item{ property }, string{ property_display_name(property->name().to_std_string()) });
+                    iPropertyModel.insert_cell_data(row, 1u, string{ property_cell_text(*property) });
+                    // a composite property's components (e.g. a size's width and height) are edited individually
+                    auto const components = property_components(*property);
+                    for (std::uint32_t component = 0u; component < components.size(); ++component)
+                    {
+                        auto componentRow = iPropertyModel.append_item(row, property_model_item{ property_component{ property, component } }, string{ components[component] });
+                        iPropertyModel.insert_cell_data(componentRow, 1u, string{ property_cell_text(*property, component) });
+                    }
                 }
             }
+        }
+        // composite properties' components are initially hidden (expanding the property's row shows them); each property's rows are noted
+        for (std::uint32_t propertyRow = 0u; propertyRow < iPropertyModel.rows(); ++propertyRow)
+        {
+            auto const& item = iPropertyModel.item(item_model_index{ propertyRow, 0u });
+            if (std::holds_alternative<i_property*>(item))
+                iPropertyRows[std::get<i_property*>(item)].push_back(propertyRow);
+            else if (std::holds_alternative<property_component>(item))
+                iPropertyRows[std::get<property_component>(item).property].push_back(propertyRow);
+            if (std::holds_alternative<i_property*>(item) && !property_components(*std::get<i_property*>(item)).empty() && 
+                iPropertyPresentationModel.has_item_model_index(item_model_index{ propertyRow, 0u }))
+                iPropertyPresentationModel.collapse(iPropertyPresentationModel.from_item_model_index(item_model_index{ propertyRow, 0u }));
+        }
+    }
+
+    // the .nrc attribute associated with a property of the element whose properties are shown, if it has one (one the element supports, see 
+    // i_element::available_attributes, or has)
+    std::optional<std::string> main_window_ex::property_attribute(i_property const& aProperty) const
+    {
+        if (!iPropertyElement.valid())
+            return {};
+        auto const name = attribute_name_of(aProperty.name().to_std_string());
+        if (name.empty())
+            return {};
+        auto const& element = *iPropertyElement;
+        for (auto const& attribute : element.attributes())
+            if (attribute.first().to_std_string() == name)
+                return name;
+        neolib::vector<string> available;
+        element.available_attributes(available);
+        for (auto const& attribute : available)
+            if (attribute.to_std_string() == name)
+                return name;
+        return {};
+    }
+
+    // the text of a property's row (or of one of its components' rows): its .nrc attribute's value (as entered, e.g. with units) if it has 
+    // one, otherwise its value
+    std::string main_window_ex::property_cell_text(i_property const& aProperty, std::optional<std::uint32_t> aComponent) const
+    {
+        if (auto const name = property_attribute(aProperty))
+        {
+            // (the last of the attribute's entries is the one that applies)
+            std::vector<std::string> items;
+            for (auto const& attribute : (*iPropertyElement).attributes())
+                if (attribute.first().to_std_string() == *name && !attribute.second().empty())
+                    items = attribute_items(attribute.second().to_std_string());
+            if (!items.empty())
+            {
+                if (aComponent)
+                    return items[*aComponent % items.size()]; // (e.g. "[ 4px 2px ]" padding: left/right 4px, top/bottom 2px)
+                std::string result;
+                for (auto const& item : items)
+                    result += (result.empty() ? "" : ", ") + item;
+                return result;
+            }
+        }
+        return aComponent ? property_component_to_string(aProperty, *aComponent) : property_value_to_string(aProperty);
+    }
+
+    // an edit of a property (or of one of its components) with an associated .nrc attribute: the text as entered (e.g. with units) becomes the 
+    // attribute's value (which is applied to the object and saved); false if it has no associated attribute
+    bool main_window_ex::set_property_attribute(i_property const& aProperty, std::optional<std::uint32_t> aComponent, std::string const& aText)
+    {
+        auto const name = property_attribute(aProperty);
+        if (!name)
+            return false;
+        auto& element = *iPropertyElement;
+        bool const strings = property_has_type<ng::string>(aProperty);
+        std::vector<std::string> items;
+        if (aComponent)
+        {
+            auto const components = static_cast<std::uint32_t>(property_components(aProperty).size());
+            for (std::uint32_t component = 0u; component < components; ++component)
+                items.push_back(component == *aComponent ? aText : property_cell_text(aProperty, component));
+        }
+        else if (strings)
+            items.push_back(aText);
+        else if (!(aProperty.optional() && (aText.empty() || aText == "(none)"))) // (unset: the attribute is removed)
+            for (auto const& token : property_text_tokens(aText, ','))
+                items.push_back(token);
+        string const value{ items.empty() ? std::string{} : attribute_value(items, strings) };
+        // (the last of the attribute's entries is the one that applies; an empty value removes the attribute on save)
+        auto existing = element.attributes().end();
+        for (auto attribute = element.attributes().begin(); attribute != element.attributes().end(); ++attribute)
+            if (attribute->first().to_std_string() == *name)
+                existing = attribute;
+        if (existing != element.attributes().end())
+            existing->second() = value;
+        else if (!value.empty())
+            element.attributes().push_back(neolib::pair<string, string>{ string{ *name }, value });
+        element.apply_attributes(show_ids());
+        iProjectManager.active_project().set_dirty();
+        return true;
+    }
+
+    // show a property's value (or attribute value, see property_cell_text) in its rows
+    void main_window_ex::update_property_rows(i_property const& aProperty, std::optional<std::uint32_t> aExceptRow)
+    {
+        auto const rows = iPropertyRows.find(&aProperty);
+        if (rows == iPropertyRows.end())
+            return;
+        for (auto propertyRow : rows->second)
+        {
+            if (propertyRow == aExceptRow)
+                continue;
+            auto const& item = iPropertyModel.item(item_model_index{ propertyRow, 0u });
+            auto const text = std::holds_alternative<property_component>(item) ?
+                property_cell_text(aProperty, std::get<property_component>(item).index) : property_cell_text(aProperty);
+            iPropertyModel.update_cell_data(item_model_index{ propertyRow, 1u }, string{ text });
         }
     }
 

@@ -138,6 +138,7 @@ namespace neogfx::DesignStudio
         ref_ptr<i_widget> iDropHighlight;
         bool iDropCandidate = false;
         ref_ptr<i_widget> iTextEditor;
+        sink iTextEditorSink; // clicks elsewhere end the in-place edit
         std::optional<bool> iEndTextEdit; // end in-place text edit (true: commit) at next opportunity
         i_element* iTextElement = nullptr; // the element whose text is being edited in place (this caddy's or a child's without a caddy, e.g. a tab page)
         std::optional<point> iRubberBandAnchor; // shift+click+move within a design selects the elements within the rubber band (design position)

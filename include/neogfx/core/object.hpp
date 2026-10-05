@@ -33,6 +33,9 @@ namespace neogfx
     class object : public neolib::object<Base>, i_properties
     {
         typedef neolib::object<Base> base_type;
+        // events
+    public:
+        define_declared_event(PropertyChanged, property_changed, i_property const&)
     public:
         using base_type::base_type;
     public:

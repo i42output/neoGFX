@@ -36,6 +36,26 @@
 
 namespace neogfx
 {
+    namespace property_category
+    {
+        // a primary category and a secondary one (see define_property_ex)
+        template <typename Primary, typename Secondary>
+        struct with_secondary {};
+    }
+
+    template <typename Category>
+    struct property_category_traits
+    {
+        typedef Category primary;
+        typedef void secondary;
+    };
+    template <typename Primary, typename Secondary>
+    struct property_category_traits<property_category::with_secondary<Primary, Secondary>>
+    {
+        typedef Primary primary;
+        typedef Secondary secondary;
+    };
+
     template <typename T, typename Category, class Context, typename Calculator>
     class property;
 
@@ -220,7 +240,14 @@ namespace neogfx
         }
         const std::type_info& category() const final
         {
-            return typeid(category_type);
+            return typeid(typename property_category_traits<category_type>::primary);
+        }
+        const std::type_info* secondary_category() const final
+        {
+            if constexpr (std::is_void_v<typename property_category_traits<category_type>::secondary>)
+                return nullptr;
+            else
+                return &typeid(typename property_category_traits<category_type>::secondary);
         }
         const std::type_info& context() const final
         {
@@ -503,6 +530,11 @@ namespace neogfx
             if (destroyed)
                 return;
 
+            // (the owner's event for any of its properties changing: one subscription rather than one per property)
+            iOwner.ev_property_changed().trigger(*this);
+            if (destroyed)
+                return;
+
             bool const discardChanged = event_consumed(PropertyChanged(get_as_variant()));
             if (destroyed)
                 return;
@@ -541,14 +573,15 @@ namespace neogfx
     {
         struct soft_geometry {};
         struct hard_geometry {};
-        struct font {};
-        struct color {};
+        struct appearance {};
         struct other_appearance {};
         struct interaction {};
         struct other {};
     };
 
     #define define_property( category, type, name, calculator, ... ) neogfx::property<type, category, property_context_type, decltype(&property_context_type::##calculator)> name = { *this, #name ##s, &property_context_type::##calculator, __VA_ARGS__ };
+    // a property with a secondary category too (e.g. a font: appearance, and hard_geometry as it affects size)
+    #define define_property_ex( category, secondaryCategory, type, name, calculator, ... ) neogfx::property<type, neogfx::property_category::with_secondary<category, secondaryCategory>, property_context_type, decltype(&property_context_type::##calculator)> name = { *this, #name ##s, &property_context_type::##calculator, __VA_ARGS__ };
 }
 
 #ifdef _MSC_VER

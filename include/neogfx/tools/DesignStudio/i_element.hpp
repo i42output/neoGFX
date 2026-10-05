@@ -83,6 +83,7 @@ namespace neogfx::DesignStudio
         declare_event(mode_changed)
         declare_event(selection_changed)
         declare_event(context_menu, i_menu&)
+        declare_event(attributes_changed) // .nrc attributes changed (other than by the Properties toolbox), e.g. default_size by resizing a window
     public:
         typedef i_element abstract_type;
     public:
@@ -133,6 +134,7 @@ namespace neogfx::DesignStudio
         virtual i_string const& text_attribute() const = 0; // the .nrc attribute holding the element's text: "text", "title" (windows) or "tab_text" (tab pages)
         virtual i_widget& text_area() const = 0; // the widget displaying the element's text (the in-place text editor goes over it)
         virtual neogfx::alignment text_alignment() const = 0; // the alignment of the text in text_area() (so the in-place text editor matches it)
+        virtual void available_attributes(neolib::i_vector<i_string>& aResult) const = 0; // .nrc attributes that can be added
         virtual void apply_attributes(bool aShowIds) = 0;
     public:
         virtual element_mode mode() const = 0;

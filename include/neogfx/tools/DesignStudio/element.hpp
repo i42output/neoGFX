@@ -362,6 +362,35 @@ namespace neogfx::DesignStudio
             }
         }
 
+        // the attributes apply() supports for a target (each with its alternative names, e.g. "transparency" for "opacity")
+        template <typename Target>
+        inline std::vector<std::vector<std::string>> supported()
+        {
+            std::vector<std::vector<std::string>> result;
+            if constexpr (std::is_base_of_v<i_geometry, Target>)
+                for (char const* name : { "size_policy", "size", "minimum_size", "maximum_size", "minimum_width", "minimum_height", "maximum_width", "maximum_height", "weight", "padding" })
+                    result.push_back({ name });
+            if constexpr (std::is_base_of_v<i_layout, Target>)
+                result.push_back({ "spacing" });
+            if constexpr (requires(Target& aT) { aT.set_alignment(neogfx::alignment::Left); { aT.alignment() } -> std::convertible_to<neogfx::alignment>; })
+                result.push_back({ "alignment" });
+            if constexpr (std::is_base_of_v<i_widget, Target>)
+            {
+                result.push_back({ "base_color" });
+                result.push_back({ "background_color" });
+                result.push_back({ "opacity", "transparency" });
+                result.push_back({ "enabled", "disabled" });
+            }
+            if constexpr (requires(Target& aT) { aT.set_image(string{}); aT.set_image(neogfx::texture{}); })
+                result.push_back({ "image", "uri" });
+            if constexpr (requires(Target& aT) { aT.set_aspect_ratio(neogfx::aspect_ratio::Keep); { aT.aspect_ratio() } -> std::convertible_to<neogfx::aspect_ratio>; })
+                result.push_back({ "aspect_ratio" });
+            if constexpr (requires(Target& aT) { aT.set_placement(neogfx::label_placement::ImageTextHorizontal); { aT.placement() } -> std::convertible_to<neogfx::label_placement>; } ||
+                requires(Target& aT) { aT.set_placement(neogfx::cardinal::Center); { aT.placement() } -> std::convertible_to<neogfx::cardinal>; })
+                result.push_back({ "placement" });
+            return result;
+        }
+
         template <typename Target>
         inline void apply(Target& aTarget, std::vector<std::pair<std::string, std::string>> const& aAttributes, bool aIncludeText, restorers& aRestorers, std::string const& aPath)
         {
@@ -762,6 +791,7 @@ namespace neogfx::DesignStudio
         define_declared_event(ModeChanged, mode_changed)
         define_declared_event(SelectionChanged, selection_changed)
         define_declared_event(ContextMenu, context_menu, i_menu&)
+        define_declared_event(AttributesChanged, attributes_changed)
     public:
         using typename i_element::no_parent;
         using typename i_element::no_layout_item;
@@ -1110,6 +1140,29 @@ namespace neogfx::DesignStudio
             }
             else
                 return neogfx::alignment::Left | neogfx::alignment::VCenter;
+        }
+        void available_attributes(neolib::i_vector<i_string>& aResult) const override
+        {
+            // the attributes that can be added: those supported (see nrc_attributes::apply) not already added (by any of their names)
+            aResult.clear();
+            auto added = [&](std::string const& aName)
+            {
+                for (auto const& attribute : iAttributes)
+                    if (attribute.first().to_std_string() == aName && !attribute.second().empty())
+                        return true;
+                return false;
+            };
+            std::vector<std::vector<std::string>> candidates;
+            if (has_text())
+                candidates.push_back({ text_attribute().to_std_string() });
+            if constexpr (std::is_base_of_v<i_widget, Type> || std::is_base_of_v<i_layout, Type>)
+            {
+                auto const supported = nrc_attributes::supported<Type>();
+                candidates.insert(candidates.end(), supported.begin(), supported.end());
+            }
+            for (auto const& names : candidates)
+                if (std::none_of(names.begin(), names.end(), added))
+                    aResult.push_back(string{ names[0] });
         }
         void apply_attributes(bool aShowIds) override
         {

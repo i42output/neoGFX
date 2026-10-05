@@ -28,6 +28,7 @@
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
 #include <neogfx/tools/DesignStudio/console_client.hpp>
 #include "telnet.hpp"
+#include "ssh.hpp"
 
 namespace neogfx::DesignStudio
 {
@@ -82,6 +83,21 @@ namespace neogfx::DesignStudio
                                         create_console<>();
                                     });
                                 telnetSession.connect(bits[1]);
+                            }
+                            else if (bits[0] == "ssh")
+                            {
+                                auto& sshSession = create_console<ssh>();
+                                aConsole = iConsole;
+                                sshSession.disconnected([&]()
+                                    {
+                                        create_console<>();
+                                    });
+                                sshSession.connection_failure([&](std::string const& aError)
+                                    {
+                                        iTerminal.output(string{ aError + "\r\n" });
+                                        create_console<>();
+                                    });
+                                sshSession.connect(std::vector<std::string>{ std::next(bits.begin()), bits.end() });
                             }
                         }
                     }

@@ -194,8 +194,8 @@ namespace neogfx
             iPresentationModelSink += presentation_model().item_added([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); item_added(aItemIndex); });
             iPresentationModelSink += presentation_model().item_changed([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); item_changed(aItemIndex); });
             iPresentationModelSink += presentation_model().item_removed([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); item_removed(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_expanded([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); tree_changed(); invalidate_item(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_collapsed([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); tree_changed(); invalidate_item(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_expanded([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); tree_changed(); invalidate_item(aItemIndex); update_cell_widgets(); });
+            iPresentationModelSink += presentation_model().item_collapsed([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); tree_changed(); invalidate_item(aItemIndex); update_cell_widgets(); });
             iPresentationModelSink += presentation_model().item_toggled([this](item_presentation_model_index const& aItemIndex) { update(cell_rect(aItemIndex, cell_part::Background)); });
             iPresentationModelSink += presentation_model().items_updating([this]() { /* todo: hourglass */ });
             iPresentationModelSink += presentation_model().items_updated([this]() { iElidedCellText.clear(); items_updated(); });
@@ -273,6 +273,49 @@ namespace neogfx
         base_type::layout_items_completed();
     }
 
+    void item_view::update_cell_widgets()
+    {
+        // cells' widgets (e.g. drop-down lists) are children of this view placed in their cells (as an editor is); widgets of cells 
+        // not present (e.g. collapsed) are hidden rather than removed (creating widgets isn't cheap) unless the presentation model 
+        // no longer has them (this view's references (iCellWidgets and as a child) are then the only ones)
+        std::vector<i_widget*> placed;
+        if (has_presentation_model() && !presentation_model().updating())
+            for (item_presentation_model_index::value_type row = 0u; row < presentation_model().rows(); ++row)
+                for (std::uint32_t col = 0u; col < presentation_model().columns(); ++col)
+                {
+                    item_presentation_model_index const index{ row, col };
+                    auto cellWidget = presentation_model().cell_widget(index);
+                    if (!cellWidget)
+                        continue;
+                    if (!cellWidget->has_parent() || &cellWidget->parent() != this)
+                        add(cellWidget);
+                    if (std::find_if(iCellWidgets.begin(), iCellWidgets.end(), [&](auto const& w) { return &*w == &*cellWidget; }) == iCellWidgets.end())
+                        iCellWidgets.push_back(cellWidget); // (the model may have added it to this view already)
+                    auto const cellRect = cell_rect(index, cell_part::Editor);
+                    cellWidget->move(cellRect.position());
+                    cellWidget->resize(cellRect.extents());
+                    cellWidget->show();
+                    placed.push_back(&*cellWidget);
+                }
+        for (auto existing = iCellWidgets.begin(); existing != iCellWidgets.end();)
+        {
+            if (std::find(placed.begin(), placed.end(), &**existing) != placed.end())
+                ++existing;
+            else if (existing->use_count() > 2)
+            {
+                (*existing)->hide();
+                ++existing;
+            }
+            else
+            {
+                auto keep = *existing;
+                existing = iCellWidgets.erase(existing);
+                if (keep->has_parent() && &keep->parent() == this)
+                    keep->parent().remove(*keep);
+            }
+        }
+    }
+
     widget_part item_view::hit_test(const point& aPosition) const
     {
         if (item_display_rect().contains(aPosition))
@@ -318,6 +361,8 @@ namespace neogfx
                 finished = false;
                 if (cellRect.bottom() < clipRect.y)
                     continue;
+                auto const cellBackground = presentation_model().cell_background(itemIndex);
+                bool const cellBackgroundGradient = std::holds_alternative<gradient>(cellBackground) && !selection_model().is_selected(itemIndex); // (selected: the selection is shown)
                 optional_color cellBackgroundColor = presentation_model().cell_color(itemIndex, color_role::Background);
                 bool const cellBackgroundSpecified = !!cellBackgroundColor;
                 if (!cellBackgroundSpecified)
@@ -336,6 +381,12 @@ namespace neogfx
                         aGc.fill_rect(cellBackgroundRect,
                             cellBackgroundColor.value().with_combined_alpha(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ?
                                 1.0 : 0.5));
+                    else if (cellBackgroundGradient)
+                    {
+                        auto cellGradient = std::get<gradient>(cellBackground);
+                        cellGradient.set_bounding_box_if_none(row_rect(itemIndex));
+                        aGc.fill_rect(cellBackgroundRect, cellGradient);
+                    }
                     else
                         aGc.fill_rect(cellBackgroundRect, cellBackgroundColor.value());
                 }
@@ -347,6 +398,7 @@ namespace neogfx
                     {
                         const item_view* widget;
                         rect treeExpanderRect;
+                        optional_color treeExpanderColor;
                         bool is_widget() const override
                         {
                             return true;
@@ -366,9 +418,21 @@ namespace neogfx
                                 return widget->element_rect(aElement);
                             }
                         }
+                        optional_color element_color(skin_element aElement) const override
+                        {
+                            switch (aElement)
+                            {
+                            case skin_element::ClickableArea:
+                            case skin_element::TreeExpander:
+                                return treeExpanderColor;
+                            default:
+                                return {};
+                            }
+                        }
                     } skinnableItem = {};
                     skinnableItem.widget = this;
                     skinnableItem.treeExpanderRect = expanderRect;
+                    skinnableItem.treeExpanderColor = presentation_model().cell_color(itemIndex, color_role::Text);
                     service<i_skin_manager>().active_skin().draw_tree_expander(aGc, skinnableItem, presentation_model().cell_meta(itemIndex).expanded);
                 }
                 {
@@ -412,7 +476,7 @@ namespace neogfx
                         aGc.draw_texture(cell_rect(itemIndex, aGc, cell_part::Image), *cellImage, cellImageColor );
                     auto cellTextRect = cell_rect(itemIndex, aGc, cell_part::Text);
                     auto const& glyphText = presentation_model().cell_glyph_text(itemIndex);
-                    if (!editing() || editing() != itemIndex)
+                    if ((!editing() || editing() != itemIndex) && !presentation_model().cell_widget(itemIndex)) // (a cell's widget shows its contents)
                     {
                         auto const availableWidth = cellTextRect.width();
                         if (use_ellipsis() && availableWidth > 0.0 && aGc.glyph_text_extent(glyphText).cx > availableWidth)
@@ -887,22 +951,41 @@ namespace neogfx
     void item_view::item_added(item_presentation_model_index const& aItemIndex)
     {
         invalidate_item(aItemIndex);
+        // (rows after it move so any cells' widgets must too; only if there are some, so views without them don't pay for this)
+        bool cellWidget = !iCellWidgets.empty();
+        for (std::uint32_t col = 0u; !cellWidget && col < presentation_model().columns(); ++col)
+            cellWidget = !!presentation_model().cell_widget(aItemIndex.with_column(col));
+        if (cellWidget)
+            update_cell_widgets();
     }
 
     void item_view::item_changed(item_presentation_model_index const& aItemIndex)
     {
-        invalidate_item(aItemIndex);
+        // a changed item (e.g. a value shown changing at a high rate) only needs repainting; only if the items' total height has changed 
+        // (e.g. the item's text now has more lines) do the items need laying out again (scrollbars etc.) (a change in its column's width 
+        // is handled by the header view (see header_view_updated))
+        auto const totalHeight = presentation_model().total_height(*this);
+        if (totalHeight != iTotalHeight)
+        {
+            iTotalHeight = totalHeight;
+            invalidate_item(aItemIndex);
+            return;
+        }
+        update(row_rect(aItemIndex));
     }
 
     void item_view::item_removed(item_presentation_model_index const& aItemIndex)
     {
         invalidate_item(aItemIndex);
+        if (!iCellWidgets.empty())
+            update_cell_widgets();
     }
 
     void item_view::items_updated()
     {
         layout_items(true);
         update();
+        update_cell_widgets();
     }
 
     void item_view::items_sorting()
@@ -1310,6 +1393,7 @@ namespace neogfx
             editor().move(editorRect.position());
             editor().resize(editorRect.extents());
         }
+        update_cell_widgets(); // (cells' widgets are placed as the editor is)
     }
 
     rect item_view::row_rect(item_presentation_model_index const& aItemIndex) const

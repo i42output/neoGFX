@@ -114,9 +114,9 @@ namespace neogfx
         sink iSink;
         sink iSink2;
     public:
-        define_property(property_category::color, optional_color, BorderColor, border_color)
-        define_property(property_category::color, optional_color, OuterBorderColor, outer_border_color)
-        define_property(property_category::color, optional_color, HoverColor, hover_color)
+        define_property(property_category::appearance, optional_color, BorderColor, border_color)
+        define_property(property_category::appearance, optional_color, OuterBorderColor, outer_border_color)
+        define_property(property_category::appearance, optional_color, HoverColor, hover_color)
         define_property(property_category::other_appearance, std::optional<border_radii>, BorderRadius, border_radius)
     };
 

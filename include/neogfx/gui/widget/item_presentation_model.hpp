@@ -840,6 +840,10 @@ namespace neogfx
         {
             return optional_color{};
         }
+        color_or_gradient cell_background(item_presentation_model_index const&) const override
+        {
+            return color_or_gradient{};
+        }
         optional_font cell_font(item_presentation_model_index const&) const override
         {
             return optional_font{};
@@ -878,6 +882,11 @@ namespace neogfx
         color_or_gradient cell_image_color(item_presentation_model_index const& aIndex) const override
         {
             return color_or_gradient{};
+        }
+        using i_item_presentation_model::cell_widget;
+        void cell_widget(item_presentation_model_index const& aIndex, i_ref_ptr<i_widget>& aWidget) const override
+        {
+            aWidget.reset();
         }
         neogfx::glyph_text& cell_glyph_text(item_presentation_model_index const& aIndex) const override
         {

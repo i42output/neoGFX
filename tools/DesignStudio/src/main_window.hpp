@@ -39,6 +39,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "toolbox_model.hpp"
 #include "workflow_model.hpp"
 #include "object_model.hpp"
+#include <unordered_map>
+#include <set>
 #include "property_model.hpp"
 #include "DesignStudio.ui.hpp"
 
@@ -85,8 +87,21 @@ namespace neogfx::DesignStudio
         void delete_selected() override;
         void select_all() override;
     private:
+        void init_view_actions(main_app& aApp, settings& aSettings);
+        void init_docks();
+        void init_appearance();
+        void init_tool_views();
+        void init_object_explorer();
+        void init_properties();
+        void init_workspace(main_app& aApp);
+        void init_file_actions(main_app& aApp, settings& aSettings, project_manager& aProjectManager);
+    private:
         void paint_workspace(ng::i_graphics_context& aGc);
         void update_properties();
+        std::optional<std::string> property_attribute(i_property const& aProperty) const;
+        std::string property_cell_text(i_property const& aProperty, std::optional<std::uint32_t> aComponent = {}) const;
+        bool set_property_attribute(i_property const& aProperty, std::optional<std::uint32_t> aComponent, std::string const& aText);
+        void update_property_rows(i_property const& aProperty, std::optional<std::uint32_t> aExceptRow = {});
     private:
         project_manager& iProjectManager;
         ng::dock iLeftDock;
@@ -117,6 +132,9 @@ namespace neogfx::DesignStudio
         std::unique_ptr<ng::push_button> iPropertyDialogButton; // "..." next to the in-place editor of a color or font property
         std::optional<ng::widget_timer> iPropertiesUpdater;
         ng::sink iSink;
+        ng::sink iPropertySink; // property_changed of the properties shown in the Properties toolbox
+        std::unordered_map<i_property const*, std::vector<std::uint32_t>> iPropertyRows; // the rows (item model) showing each property's value (its own and its components')
+        std::set<i_property const*> iChangedProperties; // changed since their rows were last updated (a batch update every 20ms: see iPropertiesUpdater); emptied if their object is destroyed before then
     };
 }
 

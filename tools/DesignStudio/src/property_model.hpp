@@ -28,23 +28,43 @@
 #include <sstream>
 #include <typeinfo>
 #include <typeindex>
+#include <map>
+#include <functional>
+#include <cmath>
+#include <iterator>
+#include <charconv>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/widget/item_selection_model.hpp>
+#include <neogfx/core/units.hpp>
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/gfx/gradient.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/app/i_style.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
 #include <neogfx/gui/widget/widget_bits.hpp>
 #include <neogfx/gui/widget/i_text_widget.hpp>
 #include <neogfx/gui/widget/label.hpp>
+#include <neogfx/gui/widget/drop_list.hpp>
+#include <neogfx/gui/widget/item_view.hpp>
+#include <neogfx/gfx/text/i_font_manager.hpp>
+#include <neogfx/tools/DesignStudio/i_property_component_registry.hpp>
 
 namespace neogfx::DesignStudio
 {
-    // row: std::monostate: class (group) node; std::uint32_t: .nrc attribute index (new_property_row: add an attribute); i_property*: object property
-    typedef std::variant<std::monostate, std::uint32_t, ng::i_property*> property_model_item;
+    // a component of a composite property's value (e.g. a size's width), shown as a child of the property's row
+    struct property_component
+    {
+        ng::i_property* property;
+        std::uint32_t index;
+        auto operator<=>(property_component const&) const = default;
+    };
+
+    // row: std::monostate: class (group) node; std::uint32_t: .nrc attribute index (new_property_row: an attribute that can be added, see the "Attributes" node); i_property*: object property;
+    // property_component: a component of a composite object property
+    typedef std::variant<std::monostate, std::uint32_t, ng::i_property*, property_component> property_model_item;
     typedef ng::basic_item_tree_model<property_model_item, 2> property_model;
 
     inline bool property_value_editable(ng::property_variant const& aValue)
@@ -133,21 +153,21 @@ namespace neogfx::DesignStudio
     inline std::optional<ng::property_variant> property_unset_value_prototype(ng::i_property const& aProperty)
     {
         auto const& type = aProperty.type();
-        if (type == typeid(ng::optional<bool>))
+        if (same_type(type, typeid(ng::optional<bool>)))
             return ng::property_variant{ false };
-        if (type == typeid(ng::optional<std::int32_t>))
+        if (same_type(type, typeid(ng::optional<std::int32_t>)))
             return ng::property_variant{ std::int32_t{} };
-        if (type == typeid(ng::optional<std::uint32_t>))
+        if (same_type(type, typeid(ng::optional<std::uint32_t>)))
             return ng::property_variant{ std::uint32_t{} };
-        if (type == typeid(ng::optional<std::int64_t>))
+        if (same_type(type, typeid(ng::optional<std::int64_t>)))
             return ng::property_variant{ std::int64_t{} };
-        if (type == typeid(ng::optional<std::uint64_t>))
+        if (same_type(type, typeid(ng::optional<std::uint64_t>)))
             return ng::property_variant{ std::uint64_t{} };
-        if (type == typeid(ng::optional<float>))
+        if (same_type(type, typeid(ng::optional<float>)))
             return ng::property_variant{ float{} };
-        if (type == typeid(ng::optional<double>))
+        if (same_type(type, typeid(ng::optional<double>)))
             return ng::property_variant{ double{} };
-        if (type == typeid(ng::optional<ng::string>))
+        if (same_type(type, typeid(ng::optional<ng::string>)))
             return ng::property_variant{ ng::string{} };
         return {};
     }
@@ -156,46 +176,10 @@ namespace neogfx::DesignStudio
     template <typename T>
     inline bool property_has_type(ng::i_property const& aProperty)
     {
-        return aProperty.type() == typeid(T) || aProperty.type() == typeid(ng::optional<T>);
+        return same_type(aProperty.type(), typeid(T)) || same_type(aProperty.type(), typeid(ng::optional<T>));
     }
 
-    // the T held by a property value (either a property_variant alternative or a custom_type), or nullptr
-    template <typename T>
-    inline T const* property_value_as(ng::property_variant const& aValue)
-    {
-        return std::visit([](auto const& aAlternative) -> T const*
-        {
-            using type = std::decay_t<decltype(aAlternative)>;
-            if constexpr (std::is_same_v<type, T>)
-                return &aAlternative;
-            else if constexpr (std::is_same_v<type, ng::custom_type>)
-                return aAlternative.type() == typeid(T) ? &neolib::any_cast<T const&>(aAlternative) : nullptr;
-            else
-                return nullptr;
-        }, aValue);
-    }
-
-    // the value to pass to i_property::set_from_variant for a T (property_variant alternatives are passed as is, 
-    // otherwise as a custom_type holding exactly the property's type)
-    template <typename T>
-    inline ng::property_variant property_value_for(ng::i_property const& aProperty, T const& aValue)
-    {
-        auto as_custom = [&]()
-        {
-            if (aProperty.type() == typeid(ng::optional<T>))
-                return ng::property_variant{ ng::custom_type{ ng::optional<T>{ aValue } } };
-            return ng::property_variant{ ng::custom_type{ aValue } };
-        };
-        if constexpr (neolib::is_variant_v<T>)
-            return as_custom();
-        else
-        {
-            ng::property_variant result{ aValue };
-            if (std::holds_alternative<ng::custom_type>(result))
-                return as_custom();
-            return result;
-        }
-    }
+    // (property_value_as and property_value_for: see i_property_component_registry.hpp)
 
     inline std::vector<std::string> property_text_tokens(std::string const& aText, char aSeparator)
     {
@@ -217,24 +201,40 @@ namespace neogfx::DesignStudio
         return result;
     }
 
-    inline std::optional<std::vector<double>> property_text_numbers(std::string const& aText)
+    // a length: a number of pixels or a number with units (e.g. "42 px", "10mm", "12pt", "2em", "1.5 dip") converted to pixels using the 
+    // current units context (see scoped_units_context: the object whose property it is)
+    inline std::optional<double> property_text_length(std::string const& aText)
     {
+        double number = 0.0;
+        auto const [end, error] = std::from_chars(aText.data(), aText.data() + aText.size(), number);
+        if (aText.empty() || error != std::errc{})
+            return {};
+        auto const unitsText = aText.substr(static_cast<std::size_t>(end - aText.data()));
+        auto const first = unitsText.find_first_not_of(" \t");
+        if (first == std::string::npos)
+            return number; // pixels
         try
         {
-            std::vector<double> result;
-            for (auto const& token : property_text_tokens(aText, ','))
-            {
-                std::size_t used = 0;
-                result.push_back(std::stod(token, &used));
-                if (used != token.size())
-                    return {};
-            }
-            return result;
+            return ng::length::from_string(ng::string{ aText.substr(0u, static_cast<std::size_t>(end - aText.data())) + " " + unitsText.substr(first) }).value();
         }
         catch (...)
         {
             return {};
         }
+    }
+
+    // numbers separated by commas; each can have units (see property_text_length)
+    inline std::optional<std::vector<double>> property_text_numbers(std::string const& aText)
+    {
+        std::vector<double> result;
+        for (auto const& token : property_text_tokens(aText, ','))
+        {
+            auto const number = property_text_length(token);
+            if (!number)
+                return {};
+            result.push_back(*number);
+        }
+        return result;
     }
 
     inline std::string property_text_numbers(std::initializer_list<double> aNumbers)
@@ -549,6 +549,193 @@ namespace neogfx::DesignStudio
         return property_value_from_string(current, aText);
     }
 
+    // composite property types: their components are registered with Design Studio's property component registry (by Design Studio and 
+    // by plugins); a composite property's own row is read only (it shows a summary of its value), its components are shown (indented) 
+    // beneath it and edited individually
+    template <typename Component>
+    inline std::string property_component_text(Component const& aValue)
+    {
+        if constexpr (std::is_enum_v<Component>)
+            return property_enum_to_string(aValue);
+        else if constexpr (std::is_same_v<Component, std::string>)
+            return aValue;
+        else
+        {
+            std::ostringstream result;
+            result << aValue;
+            return result.str();
+        }
+    }
+
+    template <typename Component>
+    inline std::optional<Component> property_component_parse(std::string const& aText)
+    {
+        if constexpr (std::is_enum_v<Component>)
+            return property_enum_from_string<Component>(aText);
+        else if constexpr (std::is_same_v<Component, std::string>)
+            return aText;
+        else
+        {
+            try
+            {
+                std::size_t used = 0;
+                auto const result = std::stod(aText, &used);
+                if (used != aText.size())
+                    return {};
+                return static_cast<Component>(result);
+            }
+            catch (...)
+            {
+                return {};
+            }
+        }
+    }
+
+    // a component of a T property that is a Component (as text: see property_component_text and property_component_parse)
+    template <typename T, typename Component>
+    inline ng::ref_ptr<i_property_component> property_component_of(std::string const& aName, std::function<Component(T const&)> aGet, std::function<void(T&, Component const&)> aSet,
+        typename basic_property_component<T>::choices_function aChoices = {})
+    {
+        return ng::make_ref<basic_property_component<T>>(aName,
+            [aGet](T const& aValue) { return property_component_text(aGet(aValue)); },
+            [aSet](T& aValue, std::string const& aText)
+            {
+                auto const component = property_component_parse<Component>(aText);
+                if (!component)
+                    return false;
+                aSet(aValue, *component);
+                return true;
+            },
+            aChoices);
+    }
+
+    // a component of a T property that is a length (e.g. a size's width): its text can have units (see property_text_length)
+    template <typename T>
+    inline ng::ref_ptr<i_property_component> property_length_component_of(std::string const& aName, std::function<double(T const&)> aGet, std::function<void(T&, double const&)> aSet)
+    {
+        return ng::make_ref<basic_property_component<T>>(aName,
+            [aGet](T const& aValue) { return property_component_text(aGet(aValue)); },
+            [aSet](T& aValue, std::string const& aText)
+            {
+                auto const component = property_text_length(aText);
+                if (!component)
+                    return false;
+                aSet(aValue, *component);
+                return true;
+            });
+    }
+
+    // installed font families and the styles of a font's family
+    inline std::vector<std::string> property_font_families(ng::font const*)
+    {
+        std::vector<std::string> result;
+        auto const& fm = ng::service<ng::i_font_manager>();
+        for (std::uint32_t family = 0u; family < fm.font_family_count(); ++family)
+            result.push_back(fm.font_family(family).to_std_string());
+        return result;
+    }
+    inline std::vector<std::string> property_font_styles(ng::font const* aFont)
+    {
+        std::vector<std::string> result;
+        if (!aFont)
+            return result;
+        auto const& fm = ng::service<ng::i_font_manager>();
+        for (std::uint32_t family = 0u; family < fm.font_family_count(); ++family)
+            if (fm.font_family(family).to_std_string_view() == aFont->family_name().to_std_string_view())
+            {
+                for (std::uint32_t style = 0u; style < fm.font_style_count(family); ++style)
+                    result.push_back(fm.font_style_name(family, style).to_std_string());
+                break;
+            }
+        return result;
+    }
+
+    class property_component_registry : public ng::reference_counted<i_property_component_registry>
+    {
+    public:
+        using i_property_component_registry::register_component;
+        using i_property_component_registry::component_count;
+        using i_property_component_registry::component;
+        void register_component(ng::i_string const& aPropertyTypeName, i_property_component& aComponent) override
+        {
+            iComponents[aPropertyTypeName.to_std_string()].push_back(ng::ref_ptr<i_property_component>{ &aComponent });
+        }
+        std::uint32_t component_count(ng::i_string const& aPropertyTypeName) const override
+        {
+            auto const existing = iComponents.find(aPropertyTypeName.to_std_string());
+            return existing != iComponents.end() ? static_cast<std::uint32_t>(existing->second.size()) : 0u;
+        }
+        i_property_component& component(ng::i_string const& aPropertyTypeName, std::uint32_t aComponentIndex) const override
+        {
+            return *iComponents.at(aPropertyTypeName.to_std_string()).at(aComponentIndex);
+        }
+    private:
+        std::map<std::string, std::vector<ng::ref_ptr<i_property_component>>> iComponents; // (by type name)
+    };
+
+    // Design Studio's property component registry (discoverable by plugins: see app::discover) with its own components registered
+    inline property_component_registry& the_property_component_registry()
+    {
+        static property_component_registry sRegistry;
+        static bool const sInitialized = []()
+        {
+            sRegistry.add_ref(); // (lives as long as the application)
+            sRegistry.register_component<ng::size>(*property_length_component_of<ng::size>("Width", [](ng::size const& v) { return v.cx; }, [](ng::size& v, double const& c) { v.cx = c; }));
+            sRegistry.register_component<ng::size>(*property_length_component_of<ng::size>("Height", [](ng::size const& v) { return v.cy; }, [](ng::size& v, double const& c) { v.cy = c; }));
+            sRegistry.register_component<ng::point>(*property_length_component_of<ng::point>("X", [](ng::point const& v) { return v.x; }, [](ng::point& v, double const& c) { v.x = c; }));
+            sRegistry.register_component<ng::point>(*property_length_component_of<ng::point>("Y", [](ng::point const& v) { return v.y; }, [](ng::point& v, double const& c) { v.y = c; }));
+            sRegistry.register_component<ng::padding>(*property_length_component_of<ng::padding>("Left", [](ng::padding const& v) { return v.left; }, [](ng::padding& v, double const& c) { v.left = c; }));
+            sRegistry.register_component<ng::padding>(*property_length_component_of<ng::padding>("Top", [](ng::padding const& v) { return v.top; }, [](ng::padding& v, double const& c) { v.top = c; }));
+            sRegistry.register_component<ng::padding>(*property_length_component_of<ng::padding>("Right", [](ng::padding const& v) { return v.right; }, [](ng::padding& v, double const& c) { v.right = c; }));
+            sRegistry.register_component<ng::padding>(*property_length_component_of<ng::padding>("Bottom", [](ng::padding const& v) { return v.bottom; }, [](ng::padding& v, double const& c) { v.bottom = c; }));
+            sRegistry.register_component<ng::font>(*property_component_of<ng::font, std::string>("Family", [](ng::font const& v) { return v.family_name().to_std_string(); }, 
+                [](ng::font& v, std::string const& c) { v = ng::font{ ng::string{ c }, ng::string{ v.style_name() }, v.size() }; }, property_font_families));
+            sRegistry.register_component<ng::font>(*property_component_of<ng::font, std::string>("Style", [](ng::font const& v) { return v.style_name().to_std_string(); }, 
+                [](ng::font& v, std::string const& c) { v = ng::font{ ng::string{ v.family_name() }, ng::string{ c }, v.size() }; }, property_font_styles));
+            sRegistry.register_component<ng::font>(*property_component_of<ng::font, double>("Size", [](ng::font const& v) { return static_cast<double>(v.size()); }, 
+                [](ng::font& v, double const& c) { v = ng::font{ ng::string{ v.family_name() }, ng::string{ v.style_name() }, c }; }));
+            sRegistry.register_component<ng::size_policy>(*property_component_of<ng::size_policy, ng::size_constraint>("Horizontal", [](ng::size_policy const& v) { return v.horizontal_constraint(false); }, 
+                [](ng::size_policy& v, ng::size_constraint const& c) { v.set_horizontal_constraint(c); }));
+            sRegistry.register_component<ng::size_policy>(*property_component_of<ng::size_policy, ng::size_constraint>("Vertical", [](ng::size_policy const& v) { return v.vertical_constraint(false); }, 
+                [](ng::size_policy& v, ng::size_constraint const& c) { v.set_vertical_constraint(c); }));
+            return true;
+        }();
+        (void)sInitialized;
+        return sRegistry;
+    }
+
+    // the names of a composite property's components (empty if it isn't composite)
+    inline std::vector<std::string> property_components(ng::i_property const& aProperty)
+    {
+        std::vector<std::string> result;
+        auto const& registry = the_property_component_registry();
+        for (std::uint32_t component = 0u; component < registry.component_count(aProperty); ++component)
+            result.push_back(registry.component(aProperty, component).name().to_std_string());
+        return result;
+    }
+
+    inline std::string property_component_to_string(ng::i_property const& aProperty, std::uint32_t aIndex)
+    {
+        auto const& registry = the_property_component_registry();
+        if (aIndex >= registry.component_count(aProperty))
+            return {};
+        ng::string text;
+        registry.component(aProperty, aIndex).get(aProperty, text);
+        return text.to_std_string();
+    }
+
+    // the property's value with one of its components changed (as property_value_from_string)
+    inline std::optional<ng::property_variant> property_component_from_string(ng::i_property const& aProperty, std::uint32_t aIndex, std::string const& aText)
+    {
+        auto const& registry = the_property_component_registry();
+        if (aIndex >= registry.component_count(aProperty))
+            return {};
+        ng::property_variant value;
+        if (!registry.component(aProperty, aIndex).set(aProperty, ng::string{ aText }, value))
+            return {};
+        return value;
+    }
+
     // which dialog (if any) the "..." button next to a property's editor opens
     enum class property_dialog
     {
@@ -564,6 +751,25 @@ namespace neogfx::DesignStudio
         if (property_has_type<ng::font>(aProperty))
             return property_dialog::Font;
         return property_dialog::None;
+    }
+
+    // the rank of a property category: its position in declaration order (see property_category); any others (e.g. a plugin's) follow 
+    // in the order they are first seen (categories are compared by name: see same_type)
+    inline std::size_t property_category_rank(std::type_info const& aCategory)
+    {
+        static std::vector<std::string> sCategoryOrder =
+        {
+            typeid(ng::property_category::soft_geometry).name(),
+            typeid(ng::property_category::hard_geometry).name(),
+            typeid(ng::property_category::appearance).name(),
+            typeid(ng::property_category::other_appearance).name(),
+            typeid(ng::property_category::interaction).name(),
+            typeid(ng::property_category::other).name()
+        };
+        auto existing = std::find(sCategoryOrder.begin(), sCategoryOrder.end(), std::string{ aCategory.name() });
+        if (existing == sCategoryOrder.end())
+            existing = sCategoryOrder.insert(sCategoryOrder.end(), aCategory.name());
+        return static_cast<std::size_t>(std::distance(sCategoryOrder.begin(), existing));
     }
 
     // class name without template arguments, e.g. "neogfx::layout_item"
@@ -607,11 +813,159 @@ namespace neogfx::DesignStudio
             if (std::holds_alternative<std::monostate>(item))
                 return readOnly; // class node
             if (std::holds_alternative<std::uint32_t>(item))
-                return aIndex.column() == 1u || std::get<std::uint32_t>(item) == new_property_row ? ng::item_cell_flags::Default : readOnly;
+                return aIndex.column() == 1u ? ng::item_cell_flags::Default : readOnly; // (its value)
+            if (std::holds_alternative<property_component>(item))
+            {
+                auto const& component = std::get<property_component>(item);
+                if (has_choices(component))
+                    return readOnly; // (chosen from its drop-down list, see cell_widget)
+                return aIndex.column() == 1u && property_value_editable(*component.property) ? ng::item_cell_flags::Default : readOnly;
+            }
             auto const& property = *std::get<ng::i_property*>(item);
-            if (aIndex.column() == 1u && property_value_editable(property))
+            if (aIndex.column() == 1u && property_value_editable(property) && property_components(property).empty())
                 return ng::item_cell_flags::Default;
-            return readOnly;
+            return readOnly; // (a composite property's components are edited instead)
         }
+        ng::optional_color cell_color(ng::item_presentation_model_index const& aIndex, ng::color_role aColorRole) const override
+        {
+            // (class nodes have the default colours) a category node has its properties' shade (hue) but as if for the opposite theme (light if 
+            // the theme is dark, dark if light), with ink to match; a property's rows (its own and its components') alternate between two shades of a hue particular to its category (from a 
+            // hash of the category's name), dark shades for a dark theme and light shades for a light one; selected rows are left to the view 
+            // (which shows the selection) and the attachment is the property table (an item_view)
+            bool const selected = attached() && static_cast<ng::item_view const&>(attachment()).has_selection_model() &&
+                static_cast<ng::item_view const&>(attachment()).selection_model().is_selected(aIndex);
+            if (auto const category = category_of_node(aIndex); category && !selected)
+            {
+                auto const shade = category_shade(*category, false, true);
+                if (aColorRole == ng::color_role::Background)
+                    return shade;
+                if (aColorRole == ng::color_role::Text)
+                    return shade.light() ? ng::color::Black : ng::color::White;
+            }
+            if (aColorRole == ng::color_role::Background)
+            {
+                auto const& item = item_model().item(to_item_model_index(aIndex));
+                ng::i_property const* property = std::holds_alternative<ng::i_property*>(item) ? std::get<ng::i_property*>(item) :
+                    std::holds_alternative<property_component>(item) ? std::get<property_component>(item).property : nullptr;
+                if (property != nullptr && !selected)
+                    return category_shade(property->category(), aIndex.row() % 2u == 1u);
+            }
+            return ng::basic_item_presentation_model<property_model>::cell_color(aIndex, aColorRole);
+        }
+        // a drop-down list for a component that has choices (e.g. a font's family)
+        using ng::basic_item_presentation_model<property_model>::cell_widget;
+        void cell_widget(ng::item_presentation_model_index const& aIndex, ng::i_ref_ptr<ng::i_widget>& aWidget) const override
+        {
+            aWidget.reset();
+            if (aIndex.column() != 1u)
+                return;
+            auto const& item = item_model().item(to_item_model_index(aIndex));
+            if (!std::holds_alternative<property_component>(item) || !has_choices(std::get<property_component>(item)))
+                return;
+            auto const component = std::get<property_component>(item);
+            auto existing = iCellWidgets.find(component);
+            if (existing == iCellWidgets.end())
+            {
+                auto dropList = ng::make_ref<ng::drop_list>();
+                auto& dropListRef = *dropList;
+                dropList->SelectionChanged([this, component, &dropListRef](ng::optional_item_model_index const& aSelection)
+                {
+                    if (iSyncingCellWidgets || !aSelection)
+                        return;
+                    auto const text = static_variant_cast<ng::string const&>(dropListRef.model().cell_data(*aSelection)).to_std_string();
+                    if (auto const value = property_component_from_string(*component.property, component.index, text))
+                        component.property->set_from_variant(*value);
+                });
+                existing = iCellWidgets.emplace(component, ng::ref_ptr<ng::i_widget>{ dropList }).first;
+                // (it must be in the view, so it has a root, before its own models are populated)
+                if (attached())
+                    attachment().add(existing->second);
+                sync_cell_widget(component, dropListRef);
+            }
+            aWidget = existing->second;
+        }
+        // the cell widgets no longer apply (the model is being rebuilt)
+        void clear_cell_widgets()
+        {
+            iCellWidgets.clear();
+        }
+        // show a property's new value (and, e.g. for a font's style, new choices) in its components' drop-down lists
+        void sync_cell_widgets(ng::i_property const& aProperty)
+        {
+            for (auto& [component, widget] : iCellWidgets)
+                if (component.property == &aProperty)
+                    sync_cell_widget(component, static_cast<ng::drop_list&>(*widget));
+        }
+        ng::dimension indent(ng::item_presentation_model_index const& aIndex, ng::i_units_context const& aUnitsContext) const override
+        {
+            // all items are indented the same amount (room for a tree expander) whatever their depth except the components of 
+            // composite properties which are indented beneath their property
+            if (aIndex.column() != 0u)
+                return 0.0;
+            auto const levels = std::holds_alternative<property_component>(item_model().item(to_item_model_index(aIndex))) ? 2.0 : 1.0;
+            return levels * cell_tree_expander_size(aIndex, aUnitsContext)->cx;
+        }
+    private:
+        // the shades of a property category's rows: a hue from a hash of the category's name; dark shades for a dark theme, light for a light one
+        static ng::color category_shade(std::type_info const& aCategory, bool aAlternate, bool aOppositeTheme = false)
+        {
+            auto const& palette = ng::service<ng::i_app>().current_style().palette();
+            bool const darkTheme = (palette.color(ng::color_role::Base).dark() != aOppositeTheme);
+            // categories (in the tree they are in rank order, some may be absent) have hues 150 degrees apart by rank: categories whose ranks 
+            // differ by one are 150 degrees apart and the first twelve categories (any categories whose ranks differ by less than twelve) are at 
+            // least 30 degrees apart
+            auto const rank = property_category_rank(aCategory);
+            auto const hue = std::fmod(30.0 + static_cast<double>(rank) * 150.0, 360.0);
+            auto const lightness = darkTheme ? (aAlternate ? 0.20 : 0.15) : (aAlternate ? 0.87 : 0.93);
+            return ng::color::from_hsl(hue, darkTheme ? 0.35 : 0.50, lightness);
+        }
+        // the category of a category node (a class node's child whose children are properties), if it is one
+        std::type_info const* category_of_node(ng::item_presentation_model_index const& aIndex) const
+        {
+            auto const modelIndex = to_item_model_index(aIndex);
+            if (!std::holds_alternative<std::monostate>(item_model().item(modelIndex)) || modelIndex.row() + 1u >= item_model().rows())
+                return nullptr;
+            ng::item_model_index const firstChild{ modelIndex.row() + 1u, 0u };
+            if (!item_model().has_parent(firstChild) || item_model().parent(firstChild).row() != modelIndex.row())
+                return nullptr;
+            auto const& child = item_model().item(firstChild);
+            return std::holds_alternative<ng::i_property*>(child) ? &std::get<ng::i_property*>(child)->category() : nullptr;
+        }
+    private:
+        static bool has_choices(property_component const& aComponent)
+        {
+            auto const& registry = the_property_component_registry();
+            return aComponent.index < registry.component_count(*aComponent.property) && 
+                registry.component(*aComponent.property, aComponent.index).has_choices();
+        }
+        void sync_cell_widget(property_component const& aComponent, ng::drop_list& aDropList) const
+        {
+            neolib::scoped_flag sf{ iSyncingCellWidgets };
+            neolib::vector<ng::string> choiceList;
+            the_property_component_registry().component(*aComponent.property, aComponent.index).choices(*aComponent.property, choiceList);
+            std::vector<std::string> choices;
+            for (auto const& choice : choiceList)
+                choices.push_back(choice.to_std_string());
+            std::vector<std::string> existingChoices;
+            for (std::uint32_t row = 0u; row < aDropList.model().rows(); ++row)
+                existingChoices.push_back(static_variant_cast<ng::string const&>(aDropList.model().cell_data(ng::item_model_index{ row })).to_std_string());
+            if (existingChoices != choices)
+            {
+                aDropList.model().clear();
+                for (std::uint32_t row = 0u; row < choices.size(); ++row)
+                    aDropList.model().insert_item(ng::item_model_index{ row }, ng::string{ choices[row] });
+            }
+            auto const current = property_component_to_string(*aComponent.property, aComponent.index);
+            auto const match = std::find(choices.begin(), choices.end(), current);
+            if (match != choices.end())
+            {
+                aDropList.selection_model().set_current_index(aDropList.presentation_model().from_item_model_index(
+                    ng::item_model_index{ static_cast<std::uint32_t>(std::distance(choices.begin(), match)) }));
+                aDropList.accept_selection();
+            }
+        }
+    private:
+        mutable std::map<property_component, ng::ref_ptr<ng::i_widget>> iCellWidgets;
+        mutable bool iSyncingCellWidgets = false;
     };
 }

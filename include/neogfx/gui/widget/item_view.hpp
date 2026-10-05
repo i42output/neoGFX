@@ -188,6 +188,7 @@ namespace neogfx
         void init();
         neogfx::glyph_text const& elided_cell_glyph_text(item_presentation_model_index const& aItemIndex, i_graphics_context& aGc, dimension aAvailableWidth) const;
         void invalidate_item(item_presentation_model_index const& aItemIndex);
+        void update_cell_widgets();
         void update_hover(const optional_point& aPosition);
         item_selection_operation to_selection_operation(key_modifier aKeyModifier) const;
         void select(item_presentation_model_index const& aItemIndex, key_modifier aKeyModifier);
@@ -232,5 +233,7 @@ namespace neogfx
         optional_item_model_index iSavedModelIndex;
         basic_size<i_scrollbar::value_type> iOldPositionForScrollbarVisibility;
         std::optional<drag_drop_item> iDragDropItem;
+        std::vector<ref_ptr<i_widget>> iCellWidgets; // cells' widgets (see i_item_presentation_model::cell_widget) currently placed in this view
+        std::optional<double> iTotalHeight; // the items' total height when an item last changed (see item_changed)
     };
 }

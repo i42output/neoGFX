@@ -23,6 +23,7 @@
 #include <neolib/neolib.hpp>
 #include <neolib/core/i_string.hpp>
 #include <neolib/app/i_object.hpp>
+#include <neolib/task/i_event.hpp>
 #include <neogfx/core/object_type.hpp>
 
 namespace neogfx
@@ -65,8 +66,13 @@ namespace neogfx
 
 namespace neogfx
 {
+    class i_property;
+
     class i_object : public neolib::i_object
     {
+        // events
+    public:
+        declare_event(property_changed, i_property const&) // (any of the object's properties has changed)
     public:
         virtual ~i_object() = default;
     public:

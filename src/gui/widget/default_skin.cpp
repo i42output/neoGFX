@@ -246,7 +246,7 @@ namespace neogfx
     void default_skin::draw_tree_expander(i_graphics_context& aGc, const i_skinnable_item& aItem, bool aExpandedState) const
     {
         auto const expanderRect = aItem.element_rect(skin_element::TreeExpander);
-        auto const expanderColor = aItem.is_widget() && aItem.as_widget().has_base_color() ? aItem.as_widget().base_color() : service<i_app>().current_style().palette().color(color_role::Text);
+        auto const expanderColor = aItem.element_color(skin_element::TreeExpander) ? aItem.element_color(skin_element::TreeExpander).value() : aItem.is_widget() && aItem.as_widget().has_base_color() ? aItem.as_widget().base_color() : service<i_app>().current_style().palette().color(color_role::Text);
         thread_local neogfx::game::mesh mesh{ {}, neogfx::game::vertices_2d{ 3, neogfx::vec2f{} }, neogfx::game::default_faces(3) };
         auto const d1 = static_cast<float>(3.0_dip);
         auto const d2 = static_cast<float>(1.0_dip);

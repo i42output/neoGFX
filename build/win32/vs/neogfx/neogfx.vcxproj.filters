@@ -70,754 +70,796 @@
     <Filter Include="Header Files\3rdparty">
       <UniqueIdentifier>{f5aa3336-dd4b-45ed-b592-020ad4f693e0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\app">
+      <UniqueIdentifier>{958f6805-7a2b-4249-91a2-28f56ddcb2b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\audio">
+      <UniqueIdentifier>{c54d6190-ab1c-4de2-9032-8ec07274de37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\core">
+      <UniqueIdentifier>{5d28cef8-e81f-4d46-9016-1518e2024a70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\game">
+      <UniqueIdentifier>{fe172b6d-5548-478d-9734-3c8bf946c2c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gfx">
+      <UniqueIdentifier>{eed59c0b-66a6-4af2-b63a-fbd5d660796f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui">
+      <UniqueIdentifier>{e7a65640-3db1-4a92-b4cf-3aca5930be62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\hid">
+      <UniqueIdentifier>{101f6954-9e75-4000-b0ce-069ea9c23229}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\support">
+      <UniqueIdentifier>{dd42f36a-6dae-4a84-bfc1-e5a932976187}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{b9480038-d949-491d-b100-8cd1dd25d3a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\game">
+      <UniqueIdentifier>{a404b467-e093-470b-843e-cf73e279ad1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gfx">
+      <UniqueIdentifier>{2664ed17-aac5-4bab-b5bb-13cd8ec1cabe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui">
+      <UniqueIdentifier>{133e4c96-812f-4216-aa4b-b2edc07d5f22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\hid">
+      <UniqueIdentifier>{57650421-11d0-4dae-8da2-6016a3fd151a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\resources">
+      <UniqueIdentifier>{9793b68c-4ffc-433c-8b2e-68ba2b4de153}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\neogfx\app\action.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\app.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\clipboard.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\drag_drop.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\event_processing_context.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i18n.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i_accessibility.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i_action.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i_app.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i_basic_services.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i_clipboard.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i_drag_drop.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i_event_processing_context.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i_help.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i_mnemonic.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i_palette.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i_resource.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i_resource_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i_shared_menu_bar.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\i_style.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\modal_task.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\module_resource.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\palette.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\resource.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\resource_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\settings.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\app\style.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_bitstream.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_clip.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_device.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_instrument.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_instrument_atlas.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_oscillator.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_primitives.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_sample.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_waveform.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_bitstream.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_clip.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_device.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_instrument.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_instrument_atlas.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_oscillator.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_sample.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_track.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\i_audio_waveform.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\alignment.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\i_style_sheet.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\i_object.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\style.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\transition_animator.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\async_task.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\async_thread.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\style_sheet.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\device_metrics.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\event.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\geometrical.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\html.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\i_transition_animator.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\i_event.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\i_plugin_properties.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\i_plugin_property.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\i_properties.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\i_property.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\object_type.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\units.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\numerical.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\object.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\primitives.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\property.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\core\easing.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\aabb_quadtree.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\animation.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\animation_filter.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\animator.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\box_collider.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\clock.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\collision_detector.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\color.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\component.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\ecs.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\ecs_helpers.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\ecs_ids.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\entity.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\entity_archetype.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\entity_info.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\entity_life_span.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\filter.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\font.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\game_world.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\image.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\i_ecs.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\material.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\gradient.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\i_component.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\i_component_data.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\i_entity_archetype.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\mesh.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\i_system.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\mesh_filter.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\model_transformation.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\mesh_renderer.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\mesh_render_cache.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\outline.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\patch.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\physics.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\renderable_entity_archetype.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\simple_physics.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\rigid_body.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\aabb_octree.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\rectangle.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\sprite.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\canvas.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\scene_graph_canvas.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\standard_archetypes.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\system.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\text_mesh.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\chrono.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\texture.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\time.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\transformation.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\color.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\color_bits.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\fragment_shader.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\gradient.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\gradient_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\graphics_context.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\graphics_operations.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\hsl_color.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\hsv_color.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\image.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_fragment_shader.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_gradient.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_gradient_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_graphics_context.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_ping_pong_buffer.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_rendering_context.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_image.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_rendering_engine.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_render_target.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_scene_graph.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\scene_graph.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_shader.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_shader_array.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_shader_program.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_ssbo.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_standard_shader_program.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_sub_texture.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_texture.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_texture_atlas.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_texture_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_vertex_buffer.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_vertex_provider.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_vertex_shader.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\line.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\path.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\pen.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\primitives.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\rect_pack.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\render_target.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\shader.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\shader_array.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\shader_program.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\shapes.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\standard_shader_program.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\stipple.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\sub_texture.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\texture.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\texture_atlas.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\texture_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\emoji_atlas.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\font.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\font_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\glyph.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\glyph_text.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\i_emoticon_translator.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\i_emoji_atlas.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\i_font_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\i_glyph.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\text\text_category_map.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\utility.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\vertex_buffer.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\vertex_shader.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\layout\anchor.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\layout\anchorable.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\layout\i_anchor.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\layout\i_anchorable.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\layout\i_async_layout.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\layout\i_geometry.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\layout\async_layout.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\controller.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\i_controller.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\i_model.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\i_view.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\i_view_container.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\model.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\view.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\view_container.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\cursor.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\default_skin.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\framed_widget.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_basic_item_model.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_button.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_cursor.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_document.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_native_widget.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_progress_bar.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_text_document.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_tool.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\skin.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\skin_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\slider.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\timer.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\window\i_native_window.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\window\i_window.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\window\window_events.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\window\window_bits.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\display.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\game_controller.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\game_controllers.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\hid_device.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\hid_devices.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\i_display.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\i_game_controller.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\i_game_controllers.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\i_hid_device.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\i_hid_devices.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\i_keyboard.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\i_native_surface.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\i_nest.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\i_surface.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\i_surface_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\i_surface_window.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\i_window_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\keyboard.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\i_mouse.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\mouse.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\nest.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\surface_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\surface_window.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\video_mode.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\hid\window_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\hid</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\neogfx.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\support\file\gfx\gltf.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\support</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\support\file\gfx\svg.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\support</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\app\native\3rdparty\tinyfiledialogs.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\app\native\windows_accessibility.hpp">
       <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\app\native\i_native_clipboard.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\app\native\windows_basic_services.hpp">
       <Filter>Header Files\native\windows</Filter>
@@ -829,13 +871,13 @@
       <Filter>Header Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\i_graphics_backend.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\i_native_texture.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\native_texture.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\opengl\opengl.hpp">
       <Filter>Header Files\native\opengl</Filter>
@@ -910,31 +952,31 @@
       <Filter>Header Files\native\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\native\windows_renderer.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\text\native\i_native_font.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\text\native\i_native_font_face.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\text\native\native_font.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\text\native\native_font_face.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gui\window\native\native_surface.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gui\window\native\native_window.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gui\window\native\virtual_surface.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gui\window\native\virtual_window.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\gui\window\native\windows_window.hpp">
       <Filter>Header Files\native\windows</Filter>
@@ -1000,28 +1042,28 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\i_sequencer.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\game\sequencer.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_playback.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\audio\3rdparty\miniaudio\miniaudio.h">
       <Filter>Header Files\3rdparty</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\view_container.ipp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\audio\audio_bitstream.ipp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\framed_widget.ipp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gfx\i_graphics_context.ipp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1070,31 +1112,31 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\app\action.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\app</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\app.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\app</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\clipboard.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\app</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\drag_drop.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\app</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\event_processing_context.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\app</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\file_dialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\app</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\i18n.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\app</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\module_resource.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\app</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\native\3rdparty\tinyfiledialogs.c">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\app</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\native\windows_accessibility.cpp">
       <Filter>Source Files\native\windows</Filter>
@@ -1109,118 +1151,118 @@
       <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\palette.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\app</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\resource.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\app</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\settings.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\app</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\app\style.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\app</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\audio\3rdparty\smb\smbPitchShift.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\audio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\audio\audio.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\audio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\audio\audio_bitstream.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\audio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\audio\audio_clip.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\audio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\audio\audio_device.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\audio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\audio\audio_instrument.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\audio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\audio\audio_instrument_atlas.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\audio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\audio\audio_oscillator.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\audio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\audio\audio_sample.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\audio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\audio\audio_waveform.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\audio</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\core\async_task.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\core\async_thread.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\core\units.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\game\animator.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\game\collision_detector.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\game\ecs.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\game\game_world.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\game\renderable_entity_archetype.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\game\simple_physics.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\game\rectangle.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\game\canvas.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\game\scene_graph_canvas.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\game\text_mesh.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\color.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\fragment_shader.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\gradient.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\graphics_context.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\graphics_operations.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\hsl_color.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\hsv_color.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\image.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\gltf.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\scene_graph.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\native_texture.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\native_buffer.cpp">
       <Filter>Source Files\native</Filter>
@@ -1277,94 +1319,94 @@
       <Filter>Source Files\native\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\native\windows_renderer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\rect_pack.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\render_target.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\standard_shader_program.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\sub_texture.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\texture.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\texture_atlas.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\texture_manager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\text\emoji_atlas.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\text\font.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\text\font_manager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\text\glyph.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\text\glyph_text.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\text\native\native_font.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\text\native\native_font_face.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\utility.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\vertex_shader.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gui\widget\native_widget.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gui\widget\timer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gui\window\native\native_surface.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gui\window\native\native_window.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gui\window\native\virtual_surface.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gui\window\native\virtual_window.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gui\window\native\windows_window.cpp">
       <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\display.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\hid</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\game_controller.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\hid</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\game_controllers.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\hid</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\hid_devices.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\hid</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\keyboard.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\hid</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\mouse.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\hid</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\native\windows_directinput_controller.cpp">
       <Filter>Source Files\native\windows</Filter>
@@ -1391,13 +1433,13 @@
       <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\nest.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\hid</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\surface_manager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\hid</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\surface_window.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\hid</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\neogfx.cpp">
       <Filter>Source Files</Filter>
@@ -1415,7 +1457,7 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\game\sequencer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\game</Filter>
     </ClCompile>
     <ClCompile Include="x64\Tools_Debug\GeneratedFiles\resources.res.cpp">
       <Filter>Generated Files</Filter>
@@ -1432,30 +1474,30 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\include\neogfx\gfx\color.inl">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </None>
     <None Include="..\..\..\..\include\neogfx\gfx\path.inl">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </None>
     <None Include="..\..\..\..\include\neogfx\gfx\shader_program.inl">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gfx</Filter>
     </None>
     <None Include="..\..\..\..\src\resources\emoticon.json">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\resources</Filter>
     </None>
     <None Include="..\..\..\..\include\neogfx\gfx\text\glyph_text.ipp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gfx</Filter>
     </None>
     <None Include="..\..\..\..\include\neogfx\gui\widget\slider.ipp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\..\..\src\resources\gamecontrollerdb.txt">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\resources</Filter>
     </Text>
     <Text Include="..\..\..\..\src\resources\language-subtag-registry.txt">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\resources</Filter>
     </Text>
   </ItemGroup>
 </Project>

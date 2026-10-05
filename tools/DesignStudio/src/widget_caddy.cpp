@@ -28,6 +28,7 @@
 #include <neogfx/gui/widget/widget.ipp>
 #include <neogfx/gui/window/context_menu.hpp>
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
+#include <neogfx/tools/DesignStudio/element.hpp>
 #include "widget_caddy.hpp"
 
 namespace neogfx
@@ -142,6 +143,8 @@ namespace neogfx::DesignStudio
         // while a mouse button is held down on a caddy the hovered caddy stays the clicked one: a click can make the window being designed 
         // active which can then (from its out of date record of where the mouse is) tell an unrelated caddy that the mouse has entered it
         thread_local widget_caddy* tClickedCaddy = nullptr;
+        // the caddy whose element's text is being edited in place (clicking anywhere other than the editor accepts the edit)
+        thread_local widget_caddy* tTextEditCaddy = nullptr;
 
         void set_hovered_caddy(widget_caddy* aCaddy)
         {
@@ -364,8 +367,11 @@ namespace neogfx::DesignStudio
             }
         });
         iItem = aElement.has_layout_item() ? aElement.layout_item() : (aElement.create_layout_item(*this), aElement.layout_item());
-        // only register as the element's caddy once it has a layout item (layout_item() throws if the element type can't be created)
-        element().set_caddy(*this);
+        // only register as the element's caddy once it has a layout item (layout_item() throws if the element type can't be created);
+        // an element that doesn't need a caddy (e.g. a console) only has one temporarily while being dragged from the toolbox, after
+        // which the caddy is destroyed, so it must not be registered (the element would be left referring to a destroyed caddy)
+        if (element().needs_caddy())
+            element().set_caddy(*this);
         if (item().is_widget())
         {
             auto& itemAsWidget = item().as_widget();
@@ -572,6 +578,14 @@ namespace neogfx::DesignStudio
             }
         }
         editor->set_text(string{ plainText });
+        // clicking anywhere other than the editor accepts its contents and ends the edit: a click on a caddy (see mouse_button_clicked) or 
+        // elsewhere in the main window (the editor may be in a window being designed, a nested window, which doesn't then lose focus)
+        tTextEditCaddy = this;
+        iTextEditorSink = editor->root().ultimate_ancestor().dismissing_children([this](const i_widget* aClickedWidget)
+        {
+            if (iTextEditor && !iEndTextEdit && (aClickedWidget == nullptr || (aClickedWidget != &*iTextEditor && !iTextEditor->is_ancestor_of(*aClickedWidget))))
+                iEndTextEdit = true;
+        });
         position_text_editor(*editor, host, textArea);
         editor->bring_to_front();
         editor->keyboard_event([this, &editorRef = *editor](const neogfx::keyboard_event& aEvent)
@@ -639,6 +653,9 @@ namespace neogfx::DesignStudio
         iEndTextEdit = std::nullopt;
         if (!iTextEditor)
             return;
+        iTextEditorSink.clear();
+        if (tTextEditCaddy == this)
+            tTextEditCaddy = nullptr;
         auto editor = iTextEditor;
         iTextEditor = {};
         auto textElement = iTextElement;
@@ -665,6 +682,8 @@ namespace neogfx::DesignStudio
             tHoveredCaddy = nullptr;
         if (tClickedCaddy == this)
             tClickedCaddy = nullptr;
+        if (tTextEditCaddy == this)
+            tTextEditCaddy = nullptr;
         if (iTextEditor && iTextEditor->has_parent())
             iTextEditor->parent().remove(*iTextEditor); // the in-place editor may be a child of one of the element's widgets
         end_rubber_band();
@@ -938,6 +957,9 @@ namespace neogfx::DesignStudio
     void widget_caddy::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
         widget::mouse_button_clicked(aButton, aPosition, aKeyModifier);
+        // (a click on a caddy is never on an in-place editor (which handles its own clicks) so it accepts any edit in progress)
+        if (tTextEditCaddy != nullptr && tTextEditCaddy->iTextEditor && !tTextEditCaddy->iEndTextEdit)
+            tTextEditCaddy->iEndTextEdit = true;
         tClickedCaddy = nullptr;
         set_hovered_caddy(this);
         tClickedCaddy = this;
@@ -1316,7 +1338,29 @@ namespace neogfx::DesignStudio
     {
         bool const wasDragged = iDragInfo && iDragInfo->wasDragged;
         bool const droppable = wasDragged && capturing_drop() ;
+        bool const wasResized = wasDragged && iDragInfo->part != cardinal::Center;
         iDragInfo = std::nullopt;
+        if (wasResized && has_element() && has_item() && item().is_widget() && item().as_widget().is_root())
+        {
+            // a resized window or dialog: its new size (the caddy less its padding, see create_caddies) is its .nrc default_size (in 
+            // device-independent pixels)
+            auto const& window = item().as_widget();
+            auto const windowSize = client_rect(false).extents() / window.dpi_scale_factor();
+            auto const value = string{ "[ " + std::to_string(static_cast<long long>(std::round(windowSize.cx))) + "dip " +
+                std::to_string(static_cast<long long>(std::round(windowSize.cy))) + "dip ]" };
+            // (the last of the attribute's entries is the one that applies)
+            auto& attributes = element().attributes();
+            auto existing = attributes.end();
+            for (auto attribute = attributes.begin(); attribute != attributes.end(); ++attribute)
+                if (attribute->first().to_std_string_view() == "default_size")
+                    existing = attribute;
+            if (existing != attributes.end())
+                existing->second() = value;
+            else
+                attributes.push_back(neolib::pair<string, string>{ string{ "default_size" }, value });
+            iProject.set_dirty();
+            element().ev_attributes_changed().trigger();
+        }
         auto const target = iDropTarget;
         iDropTarget = nullptr;
         hide_drop_highlight(iDropHighlight);
@@ -1699,10 +1743,25 @@ namespace neogfx::DesignStudio
             auto caddy = make_ref<widget_caddy>(aProject, aElement, aWorkspace.root().as_widget(), point{});
             aWorkspace.add(ref_ptr<i_widget>{ caddy });
             caddy->move(position);
+            // a window or dialog has its .nrc default_size if it has one, otherwise (as when dropped from the toolbox) its default size, 
+            // the ideal size it has before its contents are created, or, if larger, the minimum size its contents need; other widgets 
+            // have their ideal size (with their contents)
+            bool const isWindow = caddy->has_item() && caddy->item().is_widget() && caddy->item().as_widget().is_root();
+            std::optional<size> nrcDefaultSize;
+            if (isWindow)
+                for (auto const& attribute : aElement.attributes())
+                    if (attribute.first().to_std_string_view() == "default_size")
+                        nrcDefaultSize = nrc_attributes::to_size(static_cast<i_geometry const&>(caddy->item().as_widget()), attribute.second().to_std_string());
+            auto const defaultSize = caddy->transformed_ideal_size();
             create_nested(aElement);
-            auto const idealSize = caddy->transformed_ideal_size();
-            auto const minimumSize = caddy->minimum_size();
-            caddy->resize(size{ std::max(idealSize.cx, minimumSize.cx), std::max(idealSize.cy, minimumSize.cy) });
+            if (nrcDefaultSize)
+                caddy->resize(*nrcDefaultSize + (caddy->extents() - caddy->client_rect(false).extents())); // (the window's size: the caddy also has its padding)
+            else
+            {
+                auto const idealSize = isWindow ? defaultSize : caddy->transformed_ideal_size();
+                auto const minimumSize = caddy->minimum_size();
+                caddy->resize(size{ std::max(idealSize.cx, minimumSize.cx), std::max(idealSize.cy, minimumSize.cy) });
+            }
             position += point{ 32.0_dip, 32.0_dip };
         };
         for (auto& e : aProject.root().children())

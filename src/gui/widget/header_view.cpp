@@ -213,8 +213,20 @@ namespace neogfx
     void header_view::item_changed(item_presentation_model_index const&)
     {
         iSectionWidths.resize(presentation_model().columns());
-        /* todo : optimize (don't do full update) */
-        full_update();
+        if (layout().count() < presentation_model().columns())
+        {
+            full_update();
+            return;
+        }
+        // a changed item can only make its column wider (the column widths are cached by the presentation model) so only the section 
+        // widths need updating, and the owner only needs telling if one has changed (a full update reconfigures every section and makes the 
+        // owner lay out all of its items again, for every changed item)
+        bool sectionWidthChanged = false;
+        for (std::uint32_t col = 0u; col < presentation_model().columns(); ++col)
+            if (update_section_width(col, presentation_model().column_width(col, *this, true)))
+                sectionWidthChanged = true;
+        if (sectionWidthChanged)
+            iOwner.header_view_updated(*this, header_view_update_reason::PanesResized);
     }
 
     void header_view::item_removed(item_presentation_model_index const&)

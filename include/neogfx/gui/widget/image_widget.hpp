@@ -74,7 +74,7 @@ namespace neogfx
         texture iTexture;
     public:
         define_property(property_category::other_appearance, optional_size, ImageSize, image_size)
-        define_property(property_category::color, color_or_gradient, ImageColor, image_color)
+        define_property(property_category::appearance, color_or_gradient, ImageColor, image_color)
         define_property(property_category::other_appearance, neogfx::aspect_ratio, AspectRatio, aspect_ratio, neogfx::aspect_ratio::Keep)
         define_property(property_category::other_appearance, cardinal, Placement, placement, cardinal::Center)
         define_property(property_category::hard_geometry, angle, Rotation, rotation, 0.0)
