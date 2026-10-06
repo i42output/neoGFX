@@ -91,6 +91,8 @@ namespace neogfx::DesignStudio
             iDragSink.clear();
             hide_drop_highlight(iDropHighlight);
             ref_ptr<widget_caddy> widgetCaddy = aItem.source().drag_drop_widget();
+            // dropped on a target other than the design surface (e.g. Object Explorer): the container it resolves to
+            auto const resolved = iDropResolver ? iDropResolver(aTarget) : std::optional<std::pair<i_element*, i_element const*>>{};
             if (widgetCaddy && iSelectedElement && 
                 (iSelectedElement->group() == element_group::Widget || iSelectedElement->group() == element_group::Layout))
             {
@@ -98,8 +100,19 @@ namespace neogfx::DesignStudio
                 auto const dropPosition = design_rect(*widgetCaddy).center();
                 bool const isRootWidget = iSelectedElement->has_layout_item() && iSelectedElement->layout_item().is_widget() &&
                     iSelectedElement->layout_item().as_widget().is_root();
-                auto container = !isRootWidget ? find_drop_container(project.root(), *iSelectedElement, dropPosition) : nullptr;
-                if (container != nullptr || iSelectedElement->group() == element_group::Layout)
+                i_element* container = nullptr;
+                i_element const* before = nullptr;
+                if (resolved)
+                {
+                    if (!isRootWidget)
+                    {
+                        container = resolved->first;
+                        before = resolved->second;
+                    }
+                }
+                else if (!isRootWidget)
+                    container = find_drop_container(project.root(), *iSelectedElement, dropPosition);
+                if (container != nullptr || iSelectedElement->group() == element_group::Layout || resolved)
                 {
                     auto dropped = iSelectedElement;
                     iDragDropItem = nullptr;
@@ -113,7 +126,15 @@ namespace neogfx::DesignStudio
                     {
                         auto& newElement = project.create_element(*container, type, id);
                         newElement.attributes().push_back(neolib::pair<string, string>{ string{ "id" }, id });
-                        add_to_container(project, newElement, dropPosition);
+                        if (resolved)
+                        {
+                            // (where it was dropped in Object Explorer)
+                            add_to_container(project, newElement);
+                            if (before != nullptr)
+                                move_element_to_container(project, newElement, *container, before);
+                        }
+                        else
+                            add_to_container(project, newElement, dropPosition);
                         newElement.select();
                         if (newElement.has_text())
                         {
@@ -128,6 +149,14 @@ namespace neogfx::DesignStudio
                     }
                     return;
                 }
+            }
+            if (resolved && iSelectedElement)
+            {
+                // (e.g. a window dropped on Object Explorer: it can't go there)
+                aProjectManager.active_project().remove_element(*iSelectedElement);
+                iDragDropItem = nullptr;
+                iSelectedElement = {};
+                return;
             }
             if (widgetCaddy && iSelectedElement)
             {

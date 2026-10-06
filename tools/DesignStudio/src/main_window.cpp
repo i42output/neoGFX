@@ -438,85 +438,277 @@ namespace neogfx::DesignStudio
             }
         });
 
-        // dragging within Object Explorer moves elements: onto a container (layout, window, group box, tab page) appends to it, 
-        // onto any other element inserts before it, onto the project/user interface makes a widget top level
+        // dragging elements onto Object Explorer (from within it, from the Toolbox and from the design surface) moves them (or, from the 
+        // Toolbox, adds them): onto a container (layout, window, group box, tab page) appends to it, onto any other element inserts before it, 
+        // onto the project/user interface makes a widget top level (not from the Toolbox)
+        auto& toolboxTree = iToolbox.docked_widget<ng::tree_view>();
         objectTree.enable_drag_drop_source();
         objectTree.enable_drag_drop_target();
         struct object_drop
         {
-            i_element* element = nullptr;
             i_element* container = nullptr;
             i_element const* before = nullptr;
             bool toCanvas = false;
         };
-        auto resolve_object_drop = [this, &objectTree](i_drag_drop_object const& aObject, optional_point const& aDropPosition) -> object_drop
+        // where an element dropped at a position in Object Explorer goes (aDragged: the element being moved, if any (a new element from the 
+        // Toolbox has none yet))
+        auto resolve_drop_at = [this, &objectTree](i_element* aDragged, point const& aPosition) -> object_drop
         {
             object_drop result;
-            if (preview_mode() || !iProjectManager.project_active() || !aDropPosition || aObject.ddo_type() != i_drag_drop_item::otid())
+            if (preview_mode() || !iProjectManager.project_active())
                 return result;
-            auto const& item = static_cast<i_drag_drop_item const&>(aObject);
-            if (&item.presentation_model() != static_cast<i_item_presentation_model const*>(&iObjectPresentationModel))
+            if (aDragged != nullptr && !can_be_moved(*aDragged))
                 return result;
-            auto& dragged = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(item.index()));
-            if (!can_be_moved(dragged))
-                return result;
-            auto const targetIndex = objectTree.item_at(*aDropPosition);
+            auto const targetIndex = objectTree.item_at(aPosition);
             if (!targetIndex)
                 return result;
             auto& target = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*targetIndex));
-            if (&target == &dragged)
-                return result;
-            for (i_element const* e = &target; e->has_parent(); e = &e->parent())
-                if (&e->parent() == &dragged)
-                    return result; // can't move into itself
+            if (aDragged != nullptr)
+            {
+                if (&target == aDragged)
+                    return result;
+                for (i_element const* e = &target; e->has_parent(); e = &e->parent())
+                    if (&e->parent() == aDragged)
+                        return result; // can't move into itself
+            }
             if (target.group() == element_group::Project || target.group() == element_group::UserInterface)
             {
-                if (dragged.group() == element_group::Widget && dragged.is_nested())
+                if (aDragged != nullptr && aDragged->group() == element_group::Widget && aDragged->is_nested())
                 {
-                    result.element = &dragged;
                     result.container = &target;
                     result.toCanvas = true;
                 }
                 return result;
             }
             if (target.has_child_layout())
-            {
-                result.element = &dragged;
                 result.container = &target;
-            }
             else if (target.has_parent() && target.parent().has_child_layout())
             {
-                result.element = &dragged;
                 result.container = &target.parent();
                 result.before = &target;
             }
             return result;
         };
-        objectTree.object_acceptable([resolve_object_drop](i_drag_drop_object const& aObject, optional_point const& aDropPosition, drop_operation& aOperation)
+        // the element being dragged (from within Object Explorer) or, from the Toolbox, none (a new element); false if not an element
+        auto dragged_element = [this, &toolboxTree](i_drag_drop_object const& aObject, i_element*& aElement) -> bool
         {
-            if (resolve_object_drop(aObject, aDropPosition).element != nullptr)
-                aOperation = drop_operation::Move;
-        });
-        objectTree.object_dropped([this, resolve_object_drop](i_drag_drop_object const& aObject, optional_point const& aDropPosition)
+            aElement = nullptr;
+            if (aObject.ddo_type() != i_drag_drop_item::otid())
+                return false;
+            auto const& item = static_cast<i_drag_drop_item const&>(aObject);
+            if (&item.presentation_model() == static_cast<i_item_presentation_model const*>(&iObjectPresentationModel))
+            {
+                aElement = iObjectModel.item(iObjectPresentationModel.to_item_model_index(item.index()));
+                return true;
+            }
+            if (&item.presentation_model() == &toolboxTree.presentation_model())
+                return std::holds_alternative<element_tool_t>(iToolboxModel.item(iToolboxPresentationModel.to_item_model_index(item.index())));
+            return false;
+        };
+        auto move_dropped = [this](i_element& aElement, object_drop const& aDrop)
         {
-            auto const drop = resolve_object_drop(aObject, aDropPosition);
-            if (drop.element == nullptr)
-                return;
             auto& project = iProjectManager.active_project();
             try
             {
-                if (drop.toCanvas)
+                if (aDrop.toCanvas)
                 {
                     auto& workspace = iWorkspace.view_stack();
-                    move_element_to_canvas(project, *drop.element, *drop.container, workspace, design_rect(workspace).top_left() + point{ 128.0_dip, 128.0_dip });
+                    move_element_to_canvas(project, aElement, *aDrop.container, workspace, design_rect(workspace).top_left() + point{ 128.0_dip, 128.0_dip });
                 }
                 else
-                    move_element_to_container(project, *drop.element, *drop.container, drop.before);
+                    move_element_to_container(project, aElement, *aDrop.container, aDrop.before);
             }
             catch (...)
             {
                 // not droppable there
             }
+        };
+        objectTree.object_acceptable([resolve_drop_at, dragged_element](i_drag_drop_object const& aObject, optional_point const& aDropPosition, drop_operation& aOperation)
+        {
+            i_element* dragged = nullptr;
+            if (aDropPosition && dragged_element(aObject, dragged) && resolve_drop_at(dragged, *aDropPosition).container != nullptr)
+                aOperation = drop_operation::Move;
+        });
+        // (a new element from the Toolbox is added by the Toolbox when it is dropped (just after this): where it goes is noted here for it)
+        auto toolboxDrop = std::make_shared<std::optional<object_drop>>();
+        objectTree.object_dropped([resolve_drop_at, dragged_element, move_dropped, toolboxDrop](i_drag_drop_object const& aObject, optional_point const& aDropPosition)
+        {
+            i_element* dragged = nullptr;
+            if (!aDropPosition || !dragged_element(aObject, dragged))
+                return;
+            auto const drop = resolve_drop_at(dragged, *aDropPosition);
+            if (drop.container == nullptr)
+                return;
+            if (dragged == nullptr)
+                *toolboxDrop = drop;
+            else
+                move_dropped(*dragged, drop);
+        });
+        iToolboxPresentationModel.set_drop_resolver([&objectTree, toolboxDrop](i_drag_drop_target& aTarget) -> std::optional<std::pair<i_element*, i_element const*>>
+        {
+            if (!aTarget.is_widget() || &aTarget.as_widget() != static_cast<i_widget const*>(&objectTree))
+                return {};
+            std::pair<i_element*, i_element const*> result;
+            if (*toolboxDrop)
+                result = { (*toolboxDrop)->container, (*toolboxDrop)->before };
+            *toolboxDrop = std::nullopt;
+            return result;
+        });
+        // an element dragged on the design surface and released over Object Explorer
+        set_external_element_drop([this, &objectTree, resolve_drop_at, move_dropped](i_element& aElement, point const& aPosition) -> bool
+        {
+            auto const position = objectTree.to_client_coordinates(aPosition - objectTree.root().window_position());
+            if (objectTree.effectively_hidden() || !objectTree.client_rect().contains(position))
+                return false;
+            auto const drop = resolve_drop_at(&aElement, position);
+            if (drop.container != nullptr)
+                move_dropped(aElement, drop);
+            return true; // (released over Object Explorer: not dropped on the design surface whether or not it was moved)
+        });
+        // what is dragged from Object Explorer is shown under the mouse: the element's icon and id
+        iSink += iObjectPresentationModel.dragging_item_render_info([&objectTree](i_drag_drop_item const& aItem, bool& aCanRender, size& aExtents)
+        {
+            size const icon{ 16.0_dip, 16.0_dip };
+            aCanRender = true;
+            aExtents = size{ icon.cx * 1.25 + objectTree.font().height() * 8.0, std::max(icon.cy, objectTree.font().height()) };
+        });
+        iSink += iObjectPresentationModel.dragging_item_render([this, &objectTree](i_drag_drop_item const& aItem, i_graphics_context& aGc, point const& aPosition)
+        {
+            auto const& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(aItem.index()));
+            size const icon{ 16.0_dip, 16.0_dip };
+            auto const position = aPosition + point{ icon * 0.75 }; // (beside the mouse pointer)
+            aGc.draw_texture(rect{ position, icon }, element.library().element_icon(element.type()));
+            aGc.draw_text(position + point{ icon.cx * 1.25, (icon.cy - objectTree.font().height()) / 2.0 }, string{ element.id() }, objectTree.font(),
+                text_format{ service<i_app>().current_style().palette().color(color_role::Text), text_effect{ text_effect_type::Outline, 
+                    service<i_app>().current_style().palette().color(color_role::Base), 2.0 } });
+        });
+        // while an element is dragged (from Object Explorer, the Toolbox or the design surface) where it would be dropped is shown: in 
+        // Object Explorer the row it would go into (highlighted) or before (a line above it) and, for one from Object Explorer, on the 
+        // design surface the layout it would go into and where (as when dragged on the design surface)
+        struct drop_indicator
+        {
+            std::optional<item_presentation_model_index> row;
+            bool before = false;
+            ref_ptr<i_widget> designHighlight;
+            std::optional<std::pair<i_element*, bool>> drag; // the drag in progress (if any): the element dragged (none: new, from the Toolbox) and aDesignSurface
+        };
+        auto indicator = std::make_shared<drop_indicator>();
+        // (aPosition: the (screen) position being dragged over, if any (none: the drag has ended); aDesignSurface: also show it on the design surface)
+        auto update_drop_indicators = [this, &objectTree, resolve_drop_at, indicator](i_element* aDragged, optional_point const& aPosition, bool aDesignSurface)
+        {
+            if (aPosition)
+                indicator->drag.emplace(aDragged, aDesignSurface);
+            else
+                indicator->drag = std::nullopt;
+            std::optional<item_presentation_model_index> row;
+            bool before = false;
+            if (aPosition && !objectTree.effectively_hidden())
+            {
+                auto const position = objectTree.to_client_coordinates(*aPosition - objectTree.root().window_position());
+                if (objectTree.client_rect().contains(position))
+                {
+                    auto const drop = resolve_drop_at(aDragged, position);
+                    if (drop.container != nullptr)
+                    {
+                        row = objectTree.item_at(position);
+                        before = (drop.before != nullptr);
+                    }
+                }
+            }
+            if (row != indicator->row || before != indicator->before)
+            {
+                indicator->row = row;
+                indicator->before = before;
+                objectTree.update();
+            }
+            i_element* container = nullptr;
+            if (aDesignSurface && aDragged != nullptr && aPosition && !row && iProjectManager.project_active() && can_be_moved(*aDragged))
+            {
+                auto& viewStack = iWorkspace.view_stack();
+                if (viewStack.client_rect().contains(viewStack.to_client_coordinates(*aPosition - viewStack.root().window_position())))
+                    container = find_drop_container(iProjectManager.active_project().root(), *aDragged, *aPosition);
+            }
+            if (container != nullptr)
+            {
+                try
+                {
+                    show_drop_highlight(*container, aDragged->type(), indicator->designHighlight, *aPosition, &aDragged->caddy());
+                    return;
+                }
+                catch (...)
+                {
+                    // not droppable there
+                }
+            }
+            // (only if it is shown: hiding it also stops the insertion line (there is one) shown by a drag on the design surface or from the Toolbox)
+            if (indicator->designHighlight)
+                hide_drop_highlight(indicator->designHighlight);
+        };
+        iSink += objectTree.painted([this, &objectTree, indicator](i_graphics_context& aGc)
+        {
+            if (!indicator->row)
+                return;
+            auto const lastColumn = iObjectPresentationModel.columns() - 1u;
+            auto const rowRect = objectTree.cell_rect(indicator->row->with_column(0u), cell_part::Background).combined(
+                objectTree.cell_rect(indicator->row->with_column(lastColumn), cell_part::Background));
+            if (indicator->before)
+                aGc.draw_line(rowRect.top_left(), rowRect.top_right(), pen{ color::Yellow, 2.0_dip });
+            else
+            {
+                aGc.fill_rect(rowRect, color::Yellow.with_alpha(0.25));
+                aGc.draw_rect(rowRect, pen{ color::Yellow, 1.0 });
+            }
+        });
+        // (Object Explorer scrolled (e.g. by the mouse wheel) while dragging: the row under the mouse has changed)
+        iSink += static_cast<ng::i_object&>(objectTree.vertical_scrollbar()).property_changed([&objectTree, indicator, update_drop_indicators](i_property const& aProperty)
+        {
+            if (!indicator->drag || aProperty.name().to_std_string_view() != "Position")
+                return;
+            auto const drag = *indicator->drag;
+            update_drop_indicators(drag.first, objectTree.root().mouse_position() + objectTree.root().window_position(), drag.second);
+        });
+        // (dragging from Object Explorer or the Toolbox: these views capture the mouse while dragging)
+        iSink += objectTree.mouse_event([&objectTree, dragged_element, update_drop_indicators](neogfx::mouse_event const& aEvent)
+        {
+            i_element* dragged = nullptr;
+            if (aEvent.type() != mouse_event_type::Moved || !objectTree.drag_drop_active() || 
+                !dragged_element(objectTree.object_being_dragged(), dragged) || dragged == nullptr)
+                return;
+            // (once dragged out of Object Explorer it is a design drag (as on the design surface): layouts there show where things can be dropped)
+            auto const position = aEvent.position() - objectTree.origin();
+            if (!design_drag_active() && !objectTree.client_rect().contains(position))
+                set_design_drag_active(true);
+            update_drop_indicators(dragged, objectTree.to_window_coordinates(position) + objectTree.root().window_position(), true);
+        });
+        iSink += toolboxTree.mouse_event([&toolboxTree, dragged_element, update_drop_indicators](neogfx::mouse_event const& aEvent)
+        {
+            i_element* dragged = nullptr;
+            if (aEvent.type() != mouse_event_type::Moved || !toolboxTree.drag_drop_active() || 
+                !dragged_element(toolboxTree.object_being_dragged(), dragged))
+                return;
+            update_drop_indicators(nullptr, toolboxTree.to_window_coordinates(aEvent.position() - toolboxTree.origin()) + toolboxTree.root().window_position(), false);
+        });
+        set_external_element_drag([update_drop_indicators](i_element& aElement, optional_point const& aPosition)
+        {
+            update_drop_indicators(&aElement, aPosition, false);
+        });
+        iSink += iObjectPresentationModel.dragging_item_cancelled([update_drop_indicators](i_drag_drop_item const&)
+        {
+            update_drop_indicators(nullptr, {}, false);
+            set_design_drag_active(false);
+        });
+        iSink += iObjectPresentationModel.item_dropped([update_drop_indicators](i_drag_drop_item const&, i_drag_drop_target&)
+        {
+            update_drop_indicators(nullptr, {}, false);
+            set_design_drag_active(false); // (after the drop (so its insertion point is where it was shown))
+        });
+        iSink += iToolboxPresentationModel.dragging_item_cancelled([update_drop_indicators](i_drag_drop_item const&)
+        {
+            update_drop_indicators(nullptr, {}, false);
+        });
+        iSink += iToolboxPresentationModel.item_dropped([update_drop_indicators](i_drag_drop_item const&, i_drag_drop_target&)
+        {
+            update_drop_indicators(nullptr, {}, false);
         });
 
         objectTree.cell_context_menu([&](item_presentation_model_index const& aIndex)
@@ -744,10 +936,43 @@ namespace neogfx::DesignStudio
         auto& toolboxTree = iToolbox.docked_widget<ng::tree_view>();
         auto& objectTree = iObjects.docked_widget<ng::table_view>();
 
-        iWorkspace.view_stack().enable_drag_drop_target();
-        iWorkspace.view_stack().object_acceptable([&](const ng::i_drag_drop_object& aObject, ng::optional_point const& aDropPosition, ng::drop_operation& aOperation)
+        // an element dragged from Object Explorer (otherwise it is from the Toolbox or Workflow (which add it when it is dropped))
+        auto object_explorer_element = [this](const ng::i_drag_drop_object& aObject) -> i_element*
         {
-            aOperation = preview_mode() ? ng::drop_operation::None : ng::drop_operation::Move;
+            if (aObject.ddo_type() != i_drag_drop_item::otid())
+                return nullptr;
+            auto const& item = static_cast<i_drag_drop_item const&>(aObject);
+            if (&item.presentation_model() != static_cast<i_item_presentation_model const*>(&iObjectPresentationModel))
+                return nullptr;
+            return iObjectModel.item(iObjectPresentationModel.to_item_model_index(item.index()));
+        };
+        iWorkspace.view_stack().enable_drag_drop_target();
+        iWorkspace.view_stack().object_acceptable([&, object_explorer_element](const ng::i_drag_drop_object& aObject, ng::optional_point const& aDropPosition, ng::drop_operation& aOperation)
+        {
+            auto const element = object_explorer_element(aObject);
+            aOperation = preview_mode() || (element != nullptr && !can_be_moved(*element)) ? ng::drop_operation::None : ng::drop_operation::Move;
+        });
+        // an element dragged from Object Explorer onto the design surface: into the container there (as when dragged on the design surface) 
+        // or, if none, a widget is made top level there
+        iWorkspace.view_stack().object_dropped([&, object_explorer_element](const ng::i_drag_drop_object& aObject, ng::optional_point const& aDropPosition)
+        {
+            auto const element = object_explorer_element(aObject);
+            if (element == nullptr || !aDropPosition || !iProjectManager.project_active())
+                return;
+            auto& project = iProjectManager.active_project();
+            auto& viewStack = iWorkspace.view_stack();
+            auto const designPosition = viewStack.to_window_coordinates(*aDropPosition) + viewStack.root().window_position();
+            try
+            {
+                if (auto const container = find_drop_container(project.root(), *element, designPosition))
+                    move_element_to(project, *element, *container, designPosition);
+                else if (element->is_nested())
+                    move_element_to_canvas(project, *element, project.root(), viewStack, designPosition);
+            }
+            catch (...)
+            {
+                // not droppable there
+            }
         });
         iWorkspace.view_stack().set_focus_policy(ng::focus_policy::ClickFocus);
 

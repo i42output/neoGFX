@@ -61,6 +61,9 @@ namespace neogfx::DesignStudio
     public:
         neogfx::size_policy size_policy() const override;
         size minimum_size(optional_size const& aAvailableSpace = {}) const override;
+        size maximum_size(optional_size const& aAvailableSpace = {}) const override;
+        bool has_fixed_size() const noexcept override;
+        size fixed_size(optional_size const& aAvailableSpace = {}) const override;
     protected:
         neogfx::widget_type widget_type() const override;
         neogfx::padding padding() const override;
@@ -171,6 +174,12 @@ namespace neogfx::DesignStudio
     void hide_drop_highlight(ref_ptr<i_widget>& aHighlight);
     bool can_be_moved(i_element const& aElement);
     void move_element_to_container(i_project& aProject, i_element& aElement, i_element& aContainer, i_element const* aBefore = nullptr);
+    void move_element_to(i_project& aProject, i_element& aElement, i_element& aContainer, point const& aDropPosition);
     void move_element_to_canvas(i_project& aProject, i_element& aElement, i_element& aNewParent, i_widget& aWorkspace, point const& aDropPosition);
     void remove_caddies(i_project& aProject);
+    // an element dragged on the design surface and released elsewhere (e.g. over Object Explorer): the handler (if any) is given the 
+    // element and the (screen) position it was released at and returns true if it was released over something that handles it
+    void set_external_element_drop(std::function<bool(i_element& aElement, point const& aPosition)> aHandler);
+    // and while it is dragged: the handler (if any) is given the (screen) position it is dragged over (none: the drag has ended)
+    void set_external_element_drag(std::function<void(i_element& aElement, optional_point const& aPosition)> aHandler);
 }

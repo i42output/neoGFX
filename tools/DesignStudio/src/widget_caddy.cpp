@@ -46,6 +46,18 @@ namespace neogfx::DesignStudio
         neolib::event<> sDisplayIdsChanged;
         bool sDesignDragActive = false;
         neolib::event<> sDesignDragActiveChanged;
+        std::function<bool(i_element& aElement, point const& aPosition)> sExternalElementDrop;
+        std::function<void(i_element& aElement, optional_point const& aPosition)> sExternalElementDrag;
+    }
+
+    void set_external_element_drop(std::function<bool(i_element& aElement, point const& aPosition)> aHandler)
+    {
+        sExternalElementDrop = aHandler;
+    }
+
+    void set_external_element_drag(std::function<void(i_element& aElement, optional_point const& aPosition)> aHandler)
+    {
+        sExternalElementDrag = aHandler;
     }
 
     bool design_drag_active()
@@ -727,10 +739,21 @@ namespace neogfx::DesignStudio
         return has_element() && element().is_nested();
     }
 
+    // an empty layout without a size policy of its own (it would be Minimum: no size): its (nested) caddy expands so it can be seen and 
+    // dropped into; once it has items it has their policy (as when the application runs)
+    static bool empty_layout_without_size_policy(i_layout_item const& aItem)
+    {
+        return aItem.is_layout() && !aItem.has_size_policy() && aItem.as_layout().count() == 0u;
+    }
+
     neogfx::size_policy widget_caddy::size_policy() const
     {
         if (nested() && has_item())
+        {
+            if (empty_layout_without_size_policy(item()))
+                return size_constraint::Expanding;
             return item().size_policy();
+        }
         return widget::size_policy();
     }
 
@@ -744,6 +767,39 @@ namespace neogfx::DesignStudio
         if (result.cy != 0.0)
             result.cy += internal_spacing().size().cy;
         return result != size{} ? result : widget::minimum_size(aAvailableSpace);
+    }
+
+    size widget_caddy::maximum_size(optional_size const& aAvailableSpace) const
+    {
+        // (as minimum_size: the item's maximum size (e.g. a button's Maximum Size) plus the caddy's padding so that the layout the caddy 
+        // is in respects it; only if it has one as a maximum size calculated from its contents (e.g. that of an empty layout: zero) 
+        // would constrain the caddy)
+        if (nested() && has_item() && empty_layout_without_size_policy(item()))
+            return size::max_size(); // (expanding, see size_policy: not the maximum size of the empty layout (with its own Minimum policy): zero)
+        if (!has_item() || !item().has_maximum_size())
+            return widget::maximum_size(aAvailableSpace);
+        size result = item().maximum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - internal_spacing().size() : aAvailableSpace);
+        if (result.cx != size::max_dimension())
+            result.cx += internal_spacing().size().cx;
+        if (result.cy != size::max_dimension())
+            result.cy += internal_spacing().size().cy;
+        return result;
+    }
+
+    bool widget_caddy::has_fixed_size() const noexcept
+    {
+        // (as size_policy: a nested caddy has its item's fixed size (e.g. a button's Fixed Size) plus its padding so that the layout the 
+        // caddy is in respects it)
+        if (nested() && has_item())
+            return item().has_fixed_size();
+        return widget::has_fixed_size();
+    }
+
+    size widget_caddy::fixed_size(optional_size const& aAvailableSpace) const
+    {
+        if (nested() && has_item() && item().has_fixed_size())
+            return item().fixed_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - internal_spacing().size() : aAvailableSpace) + internal_spacing().size();
+        return widget::fixed_size(aAvailableSpace);
     }
 
     neogfx::widget_type widget_caddy::widget_type() const
@@ -1220,23 +1276,7 @@ namespace neogfx::DesignStudio
 
     void widget_caddy::move_to(i_element& aContainer, point const& aDropPosition)
     {
-        auto& layout = aContainer.child_layout(element().type());
-        auto const insertion = find_insertion_point(layout, aDropPosition, this);
-        if (has_parent_layout() && &parent_layout() == &layout)
-        {
-            // already there?
-            auto const current = layout.find(*this);
-            i_widget const* after = (current && *current + 1u < layout.count() && layout.is_widget_at(*current + 1u)) ?
-                &layout.get_widget_at(*current + 1u) : nullptr;
-            if (insertion.next == after)
-                return;
-        }
-        i_element const* before = nullptr;
-        if (insertion.next != nullptr)
-            for (auto const& sibling : aContainer.children())
-                if (sibling->has_caddy() && static_cast<i_widget const*>(&sibling->caddy()) == insertion.next)
-                    before = &*sibling;
-        move_element_to_container(iProject, element(), aContainer, before);
+        move_element_to(iProject, element(), aContainer, aDropPosition);
     }
 
     void widget_caddy::move_to_canvas(point const& aDropPosition)
@@ -1269,6 +1309,8 @@ namespace neogfx::DesignStudio
                 iDropCandidate = true;
                 set_design_drag_active(true);
                 update_drop_target(aPosition);
+                if (sExternalElementDrag)
+                    sExternalElementDrag(element(), to_window_coordinates(aPosition) + root().window_position());
             }
         }
         if (nested())
@@ -1339,6 +1381,7 @@ namespace neogfx::DesignStudio
         bool const wasDragged = iDragInfo && iDragInfo->wasDragged;
         bool const droppable = wasDragged && capturing_drop() ;
         bool const wasResized = wasDragged && iDragInfo->part != cardinal::Center;
+        bool const wasMoved = wasDragged && iDragInfo->part == cardinal::Center;
         iDragInfo = std::nullopt;
         if (wasResized && has_element() && has_item() && item().is_widget() && item().as_widget().is_root())
         {
@@ -1360,6 +1403,29 @@ namespace neogfx::DesignStudio
                 attributes.push_back(neolib::pair<string, string>{ string{ "default_size" }, value });
             iProject.set_dirty();
             element().ev_attributes_changed().trigger();
+        }
+        if (wasMoved && sExternalElementDrag && has_element())
+            sExternalElementDrag(element(), std::nullopt); // (the drag has ended)
+        if (wasMoved && sExternalElementDrop && can_be_dropped())
+        {
+            // released outside the design surface (e.g. over Object Explorer)?
+            bool external = false;
+            try
+            {
+                external = sExternalElementDrop(element(), root().mouse_position() + root().window_position());
+            }
+            catch (...)
+            {
+                // not droppable there
+            }
+            if (external)
+            {
+                iDropTarget = nullptr;
+                hide_drop_highlight(iDropHighlight);
+                iDropCandidate = false;
+                set_design_drag_active(false);
+                return;
+            }
         }
         auto const target = iDropTarget;
         iDropTarget = nullptr;
@@ -1693,6 +1759,31 @@ namespace neogfx::DesignStudio
         caddy.set_ignore_mouse_events(false);
         caddy.set_consider_ancestors_for_mouse_events(false);
         grow_top_level_caddy(aElement);
+    }
+
+    // moving an element into a container where it is dropped (a design position), e.g. dragged there on the design surface or from Object Explorer
+    void move_element_to(i_project& aProject, i_element& aElement, i_element& aContainer, point const& aDropPosition)
+    {
+        if (!can_be_moved(aElement))
+            return;
+        i_widget const& caddy = aElement.caddy();
+        auto& layout = aContainer.child_layout(aElement.type());
+        auto const insertion = find_insertion_point(layout, aDropPosition, &caddy);
+        if (caddy.has_parent_layout() && &caddy.parent_layout() == &layout)
+        {
+            // already there?
+            auto const current = layout.find(caddy);
+            i_widget const* after = (current && *current + 1u < layout.count() && layout.is_widget_at(*current + 1u)) ?
+                &layout.get_widget_at(*current + 1u) : nullptr;
+            if (insertion.next == after)
+                return;
+        }
+        i_element const* before = nullptr;
+        if (insertion.next != nullptr)
+            for (auto const& sibling : aContainer.children())
+                if (sibling->has_caddy() && static_cast<i_widget const*>(&sibling->caddy()) == insertion.next)
+                    before = &*sibling;
+        move_element_to_container(aProject, aElement, aContainer, before);
     }
 
     void move_element_to_canvas(i_project& aProject, i_element& aElement, i_element& aNewParent, i_widget& aWorkspace, point const& aDropPosition)
