@@ -379,6 +379,9 @@ namespace neogfx
         using component = view_component;
         // constants
     public:
+        static const sRGB_color Transparent;
+        // X11 colors
+    public:
         static const sRGB_color AliceBlue;
         static const sRGB_color AntiqueWhite;
         static const sRGB_color AntiqueWhite1;

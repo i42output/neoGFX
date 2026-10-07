@@ -592,6 +592,8 @@ namespace neogfx
                     auto const& cellInfo = item_model().cell_info(modelIndex);
                     if (cell_editable(index) && cellInfo.dataStep != neolib::none)
                         height = std::max<dimension>(height, dip(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cy * 2.0));
+                    if (auto const cellWidget = cell_widget(index))
+                        height = std::max(height, units_converter(aUnitsContext).from_device_units(size{ 0.0, cell_widget_height(*cellWidget, aUnitsContext) }).cy);
                 }
             }
             return height + cell_padding(aUnitsContext).size().cy + cell_spacing(aUnitsContext).cy;
@@ -840,6 +842,10 @@ namespace neogfx
         {
             return optional_color{};
         }
+        optional_color cell_border(item_presentation_model_index const&) const override
+        {
+            return optional_color{};
+        }
         color_or_gradient cell_background(item_presentation_model_index const&) const override
         {
             return color_or_gradient{};
@@ -929,11 +935,23 @@ namespace neogfx
                 cellExtents.cy = std::max(cellExtents.cy, maybeCellImageSize->cy);
             }
             cellExtents.cy = std::max(cellExtents.cy, effectiveFont.height());
+            if (auto const cellWidget = cell_widget(aIndex))
+                cellExtents.cy = std::max(cellExtents.cy, cell_widget_height(*cellWidget, aUnitsContext));
             cache_cell_meta_extents(aIndex, cellExtents.ceil());
             if (iTotalHeight != std::nullopt)
                 *iTotalHeight += (item_height(aIndex, aUnitsContext) - oldItemHeight);
             return units_converter(aUnitsContext).from_device_units(*cell_meta(aIndex).extents);
         }
+    private:
+        // the height (device units) of a cell's contents for its widget (e.g. a drop-down list) to fit in its row (a row is its cells' height 
+        // plus cell padding and spacing; a cell's widget is placed in the whole row: see item_view::update_cell_widgets)
+        dimension cell_widget_height(i_widget const& aCellWidget, i_units_context const& aUnitsContext) const
+        {
+            units_converter const uc{ aUnitsContext };
+            return std::max(0.0, aCellWidget.minimum_size().cy - uc.to_device_units(cell_padding(aUnitsContext).size()).cy - 
+                uc.to_device_units(cell_spacing(aUnitsContext)).cy);
+        }
+    public:
         dimension indent(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const override
         {
             if constexpr (container_traits::is_flat)

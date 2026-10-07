@@ -471,6 +471,23 @@ namespace neogfx
         iOwner.header_view_updated(*this, header_view_update_reason::FullUpdate);
     }
 
+    void header_view::set_section_width(std::uint32_t aSectionIndex, optional_dimension const& aWidth)
+    {
+        if (aSectionIndex >= iSectionWidths.size() || aSectionIndex >= layout().count())
+            return;
+        if (aWidth == std::nullopt)
+        {
+            reset_pane_sizes_requested(aSectionIndex);
+            return;
+        }
+        // as if resized by the user (see splitter::mouse_moved): the section's button is resized (the first's includes half the cell 
+        // spacing: see section_width) then the section's width is taken from it (see panes_resized)
+        auto& button = layout().get_widget_at(aSectionIndex);
+        dimension const buttonWidth = *aWidth + (aSectionIndex == 0u ? presentation_model().cell_spacing(*this).cx / 2.0 : 0.0);
+        button.set_fixed_size(size{ std::max(buttonWidth, layout().spacing().cx * 3.0), button.extents().cy }, false);
+        panes_resized();
+    }
+
     bool header_view::update_section_width(std::uint32_t aColumn, dimension aColumnWidth)
     {
         neolib::scoped_flag sf{ iUpdatingSectionWidth };

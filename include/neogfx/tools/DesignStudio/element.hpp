@@ -1351,6 +1351,55 @@ namespace neogfx::DesignStudio
                         return true;
             return false;
         }
+        void member_elements(neolib::i_vector<i_string>& aResult) const override
+        {
+            aResult.clear();
+            visit_members([&](char const* aMember, auto*) { aResult.push_back(string{ aMember }); });
+        }
+        i_widget* member_widget(i_string const& aMember) const override
+        {
+            i_widget* result = nullptr;
+            visit_members([&](char const* aName, auto* aWidget) { if (aMember.to_std_string_view() == aName && aWidget != nullptr) result = aWidget; });
+            return result;
+        }
+        void available_member_attributes(i_string const& aMember, neolib::i_vector<i_string>& aResult) const override
+        {
+            // (as available_attributes: those supported except those associated with a property of the member's type; including its text)
+            aResult.clear();
+            visit_members([&](char const* aName, auto* aWidget)
+            {
+                using member_type = std::remove_pointer_t<decltype(aWidget)>;
+                if (aMember.to_std_string_view() != aName)
+                    return;
+                std::vector<property_type_info> properties;
+                collect_property_types<member_type>(properties);
+                std::set<std::string> associated;
+                for (auto const& property : properties)
+                    associated.insert(nrc_attributes::attribute_name_of(property.name));
+                if constexpr (requires(member_type& aT) { aT.set_text(string{}); })
+                    aResult.push_back(string{ "text" });
+                for (auto const& names : nrc_attributes::supported<member_type>())
+                    if (std::none_of(names.begin(), names.end(), [&](std::string const& aAttribute) { return associated.find(aAttribute) != associated.end(); }))
+                        aResult.push_back(string{ names[0] });
+            });
+        }
+        bool accepts_member_attribute(i_string const& aMember, i_string const& aName) const override
+        {
+            bool result = false;
+            visit_members([&](char const* aMemberName, auto* aWidget)
+            {
+                using member_type = std::remove_pointer_t<decltype(aWidget)>;
+                if (aMember.to_std_string_view() != aMemberName)
+                    return;
+                if constexpr (requires(member_type& aT) { aT.set_text(string{}); })
+                    if (aName.to_std_string_view() == "text")
+                        result = true;
+                for (auto const& names : nrc_attributes::supported<member_type>())
+                    if (std::find(names.begin(), names.end(), aName.to_std_string()) != names.end())
+                        result = true;
+            });
+            return result;
+        }
         void apply_attributes(bool aShowIds) override
         {
             // show the element's text (as in a running application) or, if requested, its id
@@ -1578,6 +1627,24 @@ namespace neogfx::DesignStudio
             }
         }
     private:
+        // calls aFunction with the name of each member element its type has (as nrc_attributes::apply_member applies them) and a pointer to its 
+        // widget (null (of its type) if the element has no widget)
+        template <typename Function>
+        void visit_members(Function&& aFunction) const
+        {
+            if constexpr (std::is_base_of_v<i_widget, Type>)
+            {
+                Type* const widget = has_layout_item() && layout_item().is_widget() ? &static_cast<Type&>(layout_item().as_widget()) : nullptr;
+                if constexpr (requires(Type& aT) { aT.label().text_widget(); })
+                    aFunction(".label", widget != nullptr ? &widget->label() : static_cast<std::remove_reference_t<decltype(std::declval<Type&>().label())>*>(nullptr));
+                if constexpr (requires(Type& aT) { aT.text_widget().set_size_hint(neogfx::size_hint{}); })
+                    aFunction(".text_widget", widget != nullptr ? &widget->text_widget() : static_cast<std::remove_reference_t<decltype(std::declval<Type&>().text_widget())>*>(nullptr));
+                if constexpr (requires(Type& aT) { aT.image_widget().set_aspect_ratio(neogfx::aspect_ratio::Keep); })
+                    aFunction(".image_widget", widget != nullptr ? &widget->image_widget() : static_cast<std::remove_reference_t<decltype(std::declval<Type&>().image_widget())>*>(nullptr));
+                if constexpr (requires(Type& aT) { aT.input_box().set_text(string{}); })
+                    aFunction(".input_box", widget != nullptr ? &widget->input_box() : static_cast<std::remove_reference_t<decltype(std::declval<Type&>().input_box())>*>(nullptr));
+            }
+        }
         // value of the element's text attribute (or title/tab text) as plain text
         std::string design_text() const
         {

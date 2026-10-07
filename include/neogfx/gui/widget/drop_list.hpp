@@ -245,6 +245,10 @@ namespace neogfx
         void cancel_selection(bool aClearInput = false);
         void cancel_and_restore_selection(bool aOnlyRestoreIfViewCreated = false);
     public:
+        // a list whose items are checkable (e.g. a set of flags): its items are checked and unchecked rather than chosen (choosing one doesn't 
+        // close the list) and its owner sets its text (input_widget().set_text) to show which are checked
+        bool checkable() const;
+    public:
         drop_list_style style() const;
         void set_style(drop_list_style aStyle);
         bool editable() const;

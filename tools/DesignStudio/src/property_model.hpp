@@ -49,6 +49,7 @@
 #include <neogfx/gui/widget/i_text_widget.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/drop_list.hpp>
+#include <neogfx/gui/widget/push_button.hpp>
 #include <neogfx/gui/widget/item_view.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>
 #include <neogfx/tools/DesignStudio/i_property_component_registry.hpp>
@@ -63,9 +64,17 @@ namespace neogfx::DesignStudio
         auto operator<=>(property_component const&) const = default;
     };
 
+    // an .nrc attribute of a member element (e.g. ".text_widget"'s "text"): a member of the element's (member element) attribute's object value
+    struct member_attribute
+    {
+        std::string member;
+        std::string name;
+        auto operator<=>(member_attribute const&) const = default;
+    };
+
     // row: std::monostate: class (group) node; std::uint32_t: .nrc attribute index (new_property_row: an attribute that can be added, see the "Attributes" node); i_property*: object property;
-    // property_component: a component of a composite object property
-    typedef std::variant<std::monostate, std::uint32_t, ng::i_property*, property_component> property_model_item;
+    // property_component: a component of a composite object property; member_attribute: an .nrc attribute of a member element (that it has or can have)
+    typedef std::variant<std::monostate, std::uint32_t, ng::i_property*, property_component, member_attribute> property_model_item;
     typedef ng::basic_item_tree_model<property_model_item, 2> property_model;
 
     inline bool property_value_editable(ng::property_variant const& aValue)
@@ -297,6 +306,40 @@ namespace neogfx::DesignStudio
             { static_cast<std::uint64_t>(ng::text_widget_flags::UseFade), "UseFade" } };
     }
 
+    // enums whose values are combinations of their enumerators (flags): edited as text (e.g. "Left | Top") rather than chosen from a list
+    template <typename Enum>
+    inline constexpr bool property_enum_is_flags = false;
+    template <>
+    inline constexpr bool property_enum_is_flags<ng::alignment> = true;
+    template <>
+    inline constexpr bool property_enum_is_flags<ng::focus_policy> = true;
+    template <>
+    inline constexpr bool property_enum_is_flags<ng::text_widget_flags> = true;
+
+    // the enumerator names an enum's value is chosen from (empty if it is flags)
+    template <typename Enum>
+    inline std::vector<std::string> property_enum_choices()
+    {
+        std::vector<std::string> result;
+        if constexpr (!property_enum_is_flags<Enum>)
+            for (auto const& name : property_enum_names<Enum>())
+                if (std::find(result.begin(), result.end(), name.second) == result.end())
+                    result.push_back(name.second);
+        return result;
+    }
+
+    // the individual flags (single bit enumerators, the first name of each) of a flags enum (empty if it isn't flags)
+    template <typename Enum>
+    inline std::vector<std::pair<std::uint64_t, std::string>> property_enum_flags()
+    {
+        std::vector<std::pair<std::uint64_t, std::string>> result;
+        if constexpr (property_enum_is_flags<Enum>)
+            for (auto const& name : property_enum_names<Enum>())
+                if (std::popcount(name.first) == 1 && std::find_if(result.begin(), result.end(), [&](auto const& f) { return f.first == name.first; }) == result.end())
+                    result.push_back(name);
+        return result;
+    }
+
     // an enumerator name, or for flags the contained enumerators joined with " | " (largest first)
     template <typename Enum>
     inline std::string property_enum_to_string(Enum aValue)
@@ -495,6 +538,59 @@ namespace neogfx::DesignStudio
         return ((property_has_type<Types>(aProperty) ? (aFunction(static_cast<Types const*>(nullptr)), true) : false) || ...);
     }
 
+    // the values an enum property (not flags) is chosen from (with "(none)" first if it is optional); empty if it isn't one
+    inline std::vector<std::string> property_choices(ng::i_property const& aProperty)
+    {
+        std::vector<std::string> result;
+        property_visit_text_type(aProperty, [&](auto const* aType)
+        {
+            using type = std::decay_t<decltype(*aType)>;
+            if constexpr (std::is_enum_v<type>)
+                result = property_enum_choices<type>();
+        }, property_text_types{});
+        if (!result.empty() && aProperty.optional())
+            result.insert(result.begin(), "(none)");
+        return result;
+    }
+
+    // the individual flags of a flags enum property (see property_enum_flags); empty if it isn't one
+    inline std::vector<std::pair<std::uint64_t, std::string>> property_flags(ng::i_property const& aProperty)
+    {
+        std::vector<std::pair<std::uint64_t, std::string>> result;
+        property_visit_text_type(aProperty, [&](auto const* aType)
+        {
+            using type = std::decay_t<decltype(*aType)>;
+            if constexpr (std::is_enum_v<type>)
+                result = property_enum_flags<type>();
+        }, property_text_types{});
+        return result;
+    }
+
+    // a flags enum property's value as bits (0 if it is unset) and its text for some bits ("Left | Top")
+    inline std::uint64_t property_flags_value(ng::i_property const& aProperty, std::string const& aText)
+    {
+        std::uint64_t result = 0u;
+        property_visit_text_type(aProperty, [&](auto const* aType)
+        {
+            using type = std::decay_t<decltype(*aType)>;
+            if constexpr (std::is_enum_v<type>)
+                if (auto const value = property_enum_from_string<type>(aText))
+                    result = static_cast<std::uint64_t>(*value);
+        }, property_text_types{});
+        return result;
+    }
+    inline std::string property_flags_text(ng::i_property const& aProperty, std::uint64_t aValue)
+    {
+        std::string result;
+        property_visit_text_type(aProperty, [&](auto const* aType)
+        {
+            using type = std::decay_t<decltype(*aType)>;
+            if constexpr (std::is_enum_v<type>)
+                result = property_enum_to_string(static_cast<type>(static_cast<std::underlying_type_t<type>>(aValue)));
+        }, property_text_types{});
+        return result;
+    }
+
     inline bool property_has_text_type(ng::i_property const& aProperty)
     {
         return property_visit_text_type(aProperty, [](auto) {}, property_text_types{});
@@ -599,6 +695,9 @@ namespace neogfx::DesignStudio
     inline ng::ref_ptr<i_property_component> property_component_of(std::string const& aName, std::function<Component(T const&)> aGet, std::function<void(T&, Component const&)> aSet,
         typename basic_property_component<T>::choices_function aChoices = {})
     {
+        if constexpr (std::is_enum_v<Component>)
+            if (!aChoices && !property_enum_is_flags<Component>)
+                aChoices = [](T const*) { return property_enum_choices<Component>(); }; // (an enum component is chosen from its enumerators)
         return ng::make_ref<basic_property_component<T>>(aName,
             [aGet](T const& aValue) { return property_component_text(aGet(aValue)); },
             [aSet](T& aValue, std::string const& aText)
@@ -854,7 +953,7 @@ namespace neogfx::DesignStudio
             auto const& item = item_model().item(to_item_model_index(aIndex));
             if (std::holds_alternative<std::monostate>(item))
                 return readOnly; // class node
-            if (std::holds_alternative<std::uint32_t>(item))
+            if (std::holds_alternative<std::uint32_t>(item) || std::holds_alternative<member_attribute>(item))
                 return aIndex.column() == 1u ? ng::item_cell_flags::Default : readOnly; // (its value)
             if (std::holds_alternative<property_component>(item))
             {
@@ -864,6 +963,8 @@ namespace neogfx::DesignStudio
                 return aIndex.column() == 1u && property_value_editable(*component.property) ? ng::item_cell_flags::Default : readOnly;
             }
             auto const& property = *std::get<ng::i_property*>(item);
+            if (has_choices(property))
+                return readOnly; // (chosen from its drop-down list, see cell_widget)
             if (aIndex.column() == 1u && property_value_editable(property) && property_components(property).empty())
                 return ng::item_cell_flags::Default;
             return readOnly; // (a composite property's components are edited instead)
@@ -882,6 +983,12 @@ namespace neogfx::DesignStudio
                 return false;
             iDialogButtonCells = aCells;
             return true;
+        }
+        // each cell has a 1 pixel border: a colour between the current style's base and text colours
+        ng::optional_color cell_border(ng::item_presentation_model_index const&) const override
+        {
+            auto const& palette = ng::service<ng::i_app>().current_style().palette();
+            return palette.color(ng::color_role::Base).mid(palette.color(ng::color_role::Text));
         }
         ng::optional_color cell_color(ng::item_presentation_model_index const& aIndex, ng::color_role aColorRole) const override
         {
@@ -909,35 +1016,62 @@ namespace neogfx::DesignStudio
             }
             return ng::basic_item_presentation_model<property_model>::cell_color(aIndex, aColorRole);
         }
-        // a drop-down list for a component that has choices (e.g. a font's family)
+        // a drop-down list for an enum property (not flags) or a component that has choices (e.g. a font's family or a size policy's 
+        // horizontal constraint)
         using ng::basic_item_presentation_model<property_model>::cell_widget;
         void cell_widget(ng::item_presentation_model_index const& aIndex, ng::i_ref_ptr<ng::i_widget>& aWidget) const override
         {
             aWidget.reset();
             if (aIndex.column() != 1u)
                 return;
-            auto const& item = item_model().item(to_item_model_index(aIndex));
-            if (!std::holds_alternative<property_component>(item) || !has_choices(std::get<property_component>(item)))
+            auto const modelIndex = to_item_model_index(aIndex);
+            auto const& item = item_model().item(modelIndex);
+            if (!(std::holds_alternative<property_component>(item) && has_choices(std::get<property_component>(item))) &&
+                !(std::holds_alternative<ng::i_property*>(item) && has_choices(*std::get<ng::i_property*>(item))))
                 return;
-            auto const component = std::get<property_component>(item);
-            auto existing = iCellWidgets.find(component);
+            auto existing = iCellWidgets.find(item);
             if (existing == iCellWidgets.end())
             {
                 auto dropList = ng::make_ref<ng::drop_list>();
                 auto& dropListRef = *dropList;
-                dropList->SelectionChanged([this, component, &dropListRef](ng::optional_item_model_index const& aSelection)
+                dropListRef.set_padding(ng::padding{});
+                auto& inputButton = static_cast<ng::push_button&>(dropListRef.input_widget().as_widget());
+                inputButton.set_size_policy(ng::size_policy{ ng::size_constraint::Expanding, ng::size_constraint::Expanding });
+                inputButton.set_face_color(ng::color{});
+                if (attached())
+                {
+                    auto const cellPadding = cell_padding(attachment());
+                    inputButton.set_padding(ng::padding{ cellPadding.left * 2.0 + 1.0_dip, 0.0, cellPadding.right, 0.0 });
+                }
+                // (a flags property's flags are checked and unchecked: the checked ones are its new value)
+                dropList->presentation_model().item_toggled([this, item, modelIndex, &dropListRef](ng::item_presentation_model_index const&)
+                {
+                    if (iSyncingCellWidgets || !std::holds_alternative<ng::i_property*>(item))
+                        return;
+                    auto const& property = *std::get<ng::i_property*>(item);
+                    auto const flags = property_flags(property);
+                    std::uint64_t value = 0u;
+                    for (std::uint32_t row = 0u; row < dropListRef.model().rows() && row < flags.size(); ++row)
+                        if (dropListRef.presentation_model().is_checked(dropListRef.presentation_model().from_item_model_index(ng::item_model_index{ row })))
+                            value |= flags[row].first;
+                    auto const text = property_flags_text(property, value);
+                    dropListRef.input_widget().set_text(ng::string{ text });
+                    item_model().update_cell_data(modelIndex, ng::string{ text });
+                });
+                dropList->SelectionChanged([this, modelIndex, &dropListRef](ng::optional_item_model_index const& aSelection)
                 {
                     if (iSyncingCellWidgets || !aSelection)
                         return;
-                    auto const text = static_variant_cast<ng::string const&>(dropListRef.model().cell_data(*aSelection)).to_std_string();
-                    if (auto const value = property_component_from_string(*component.property, component.index, text))
-                        component.property->set_from_variant(*value);
+                    // (the choice is the cell's new text: committed as an edit of the cell's text is (the property (or component) and its .nrc 
+                    // attribute are set: see main_window_ex))
+                    auto const text = static_variant_cast<ng::string const&>(dropListRef.model().cell_data(*aSelection));
+                    item_model().update_cell_data(modelIndex, text);
                 });
-                existing = iCellWidgets.emplace(component, ng::ref_ptr<ng::i_widget>{ dropList }).first;
+                existing = iCellWidgets.emplace(item, ng::ref_ptr<ng::i_widget>{ dropList }).first;
                 // (it must be in the view, so it has a root, before its own models are populated)
                 if (attached())
                     attachment().add(existing->second);
-                sync_cell_widget(component, dropListRef);
+                sync_cell_widget(item, dropListRef);
             }
             aWidget = existing->second;
         }
@@ -949,9 +1083,10 @@ namespace neogfx::DesignStudio
         // show a property's new value (and, e.g. for a font's style, new choices) in its components' drop-down lists
         void sync_cell_widgets(ng::i_property const& aProperty)
         {
-            for (auto& [component, widget] : iCellWidgets)
-                if (component.property == &aProperty)
-                    sync_cell_widget(component, static_cast<ng::drop_list&>(*widget));
+            for (auto& [item, widget] : iCellWidgets)
+                if ((std::holds_alternative<ng::i_property*>(item) && std::get<ng::i_property*>(item) == &aProperty) ||
+                    (std::holds_alternative<property_component>(item) && std::get<property_component>(item).property == &aProperty))
+                    sync_cell_widget(item, static_cast<ng::drop_list&>(*widget));
         }
         ng::dimension indent(ng::item_presentation_model_index const& aIndex, ng::i_units_context const& aUnitsContext) const override
         {
@@ -995,14 +1130,50 @@ namespace neogfx::DesignStudio
             return aComponent.index < registry.component_count(*aComponent.property) && 
                 registry.component(*aComponent.property, aComponent.index).has_choices();
         }
-        void sync_cell_widget(property_component const& aComponent, ng::drop_list& aDropList) const
+        static bool has_choices(ng::i_property const& aProperty)
+        {
+            return !aProperty.read_only() && property_components(aProperty).empty() && 
+                (!property_choices(aProperty).empty() || !property_flags(aProperty).empty());
+        }
+        void sync_cell_widget(property_model_item const& aItem, ng::drop_list& aDropList) const
         {
             neolib::scoped_flag sf{ iSyncingCellWidgets };
-            neolib::vector<ng::string> choiceList;
-            the_property_component_registry().component(*aComponent.property, aComponent.index).choices(*aComponent.property, choiceList);
             std::vector<std::string> choices;
-            for (auto const& choice : choiceList)
-                choices.push_back(choice.to_std_string());
+            std::string current;
+            if (std::holds_alternative<property_component>(aItem))
+            {
+                auto const& component = std::get<property_component>(aItem);
+                neolib::vector<ng::string> choiceList;
+                the_property_component_registry().component(*component.property, component.index).choices(*component.property, choiceList);
+                for (auto const& choice : choiceList)
+                    choices.push_back(choice.to_std_string());
+                current = property_component_to_string(*component.property, component.index);
+            }
+            else
+            {
+                auto const& property = *std::get<ng::i_property*>(aItem);
+                current = property_value_to_string(property);
+                if (auto const flags = property_flags(property); !flags.empty())
+                {
+                    // (a flags property: its flags, checked if set (see drop_list::checkable); the list's text is the property's)
+                    if (aDropList.model().rows() != flags.size())
+                    {
+                        aDropList.model().clear();
+                        for (std::uint32_t row = 0u; row < flags.size(); ++row)
+                            aDropList.model().insert_item(ng::item_model_index{ row }, ng::string{ flags[row].second });
+                    }
+                    auto const value = property_flags_value(property, current);
+                    for (std::uint32_t row = 0u; row < flags.size(); ++row)
+                    {
+                        auto const index = aDropList.presentation_model().from_item_model_index(ng::item_model_index{ row });
+                        aDropList.presentation_model().set_cell_checkable(index);
+                        aDropList.presentation_model().set_checked(index, (value & flags[row].first) == flags[row].first);
+                    }
+                    aDropList.input_widget().set_text(ng::string{ current });
+                    return;
+                }
+                choices = property_choices(property);
+            }
             std::vector<std::string> existingChoices;
             for (std::uint32_t row = 0u; row < aDropList.model().rows(); ++row)
                 existingChoices.push_back(static_variant_cast<ng::string const&>(aDropList.model().cell_data(ng::item_model_index{ row })).to_std_string());
@@ -1012,7 +1183,6 @@ namespace neogfx::DesignStudio
                 for (std::uint32_t row = 0u; row < choices.size(); ++row)
                     aDropList.model().insert_item(ng::item_model_index{ row }, ng::string{ choices[row] });
             }
-            auto const current = property_component_to_string(*aComponent.property, aComponent.index);
             auto const match = std::find(choices.begin(), choices.end(), current);
             if (match != choices.end())
             {
@@ -1022,8 +1192,8 @@ namespace neogfx::DesignStudio
             }
         }
     private:
-        mutable std::map<property_component, ng::ref_ptr<ng::i_widget>> iCellWidgets;
+        mutable std::map<property_model_item, ng::ref_ptr<ng::i_widget>> iCellWidgets; // (a property's or a component's)
         mutable bool iSyncingCellWidgets = false;
         std::map<ng::item_presentation_model_index, ng::size> iDialogButtonCells;
     };
-}
+}

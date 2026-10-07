@@ -68,7 +68,20 @@ namespace neogfx
     void drop_list_view::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
         bool const wasCapturing = capturing();
+        // (a checkable list's items are checked and unchecked rather than chosen: clicking one toggles it (a click on its check box is 
+        // toggled by the view itself) and the list stays open)
+        optional_item_presentation_model_index itemToToggle;
+        if (aButton == mouse_button::Left && wasCapturing && iDropList.checkable())
+            if (auto const item = item_at(aPosition); item != std::nullopt && row_rect(*item).contains(aPosition) &&
+                !(presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition)))
+                itemToToggle = item;
         list_view::mouse_button_released(aButton, aPosition);
+        if (iDropList.checkable())
+        {
+            if (itemToToggle != std::nullopt && presentation_model().cell_checkable(*itemToToggle))
+                presentation_model().toggle_check(*itemToToggle);
+            return;
+        }
         if (aButton == mouse_button::Left && wasCapturing)
         {
             if (selection_model().has_current_index())
@@ -97,7 +110,9 @@ namespace neogfx
             break;
         case ScanCode_RETURN:
         case ScanCode_KEYPAD_ENTER:
-            if (selection_model().has_current_index())
+            if (iDropList.checkable() && selection_model().has_current_index() && presentation_model().cell_checkable(selection_model().current_index()))
+                presentation_model().toggle_check(selection_model().current_index()); // (see mouse_button_released)
+            else if (selection_model().has_current_index())
                 iDropList.accept_selection();
             else
                 service<i_basic_services>().system_beep();
@@ -446,6 +461,13 @@ namespace neogfx
             {
                 image_widget().set_padding(neogfx::padding{});
                 text_widget().set_padding(neogfx::padding{});
+                // (its text fills the room it has (up to the drop list's arrow) and is elided if it doesn't fit, e.g. when the drop list is 
+                // narrower than its widest item)
+                text_widget().set_type(text_widget_type::SingleLine); // (a button's label's text is multi-line and only single line text is elided)
+                text_widget().set_flags(text_widget().flags() | text_widget_flags::UseEllipsis);
+                text_widget().set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+                text_widget().set_alignment(alignment::Left | alignment::VCenter);
+                label().set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum }); // (so that its text can)
                 image_widget().set_dpi_auto_scale(false);
             }
         public:
@@ -776,7 +798,7 @@ namespace neogfx
 
         iSelectionSink = selection_model().current_index_changed([this](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& /* aPreviousIndex */)
         {
-            if (!presentation_model().filtering() && !handling_text_change())
+            if (!presentation_model().filtering() && !handling_text_change() && !checkable())
             {
                 neolib::scoped_flag sf{ iChangingText };
                 texture image;
@@ -944,6 +966,11 @@ namespace neogfx
     void drop_list::cancel_and_restore_selection(bool aOnlyRestoreIfViewCreated)
     {
         handle_cancel_selection(aOnlyRestoreIfViewCreated ? view_created() : true);
+    }
+
+    bool drop_list::checkable() const
+    {
+        return has_presentation_model() && presentation_model().rows() > 0u && presentation_model().cell_checkable(item_presentation_model_index{ 0u, 0u });
     }
 
     drop_list_style drop_list::style() const
@@ -1191,7 +1218,7 @@ namespace neogfx
             auto& inputLabelLayout = inputWidget.label().layout();
             inputLabelLayout.set_alignment(neogfx::alignment::Left | neogfx::alignment::VCenter);
             auto& s1 = inputWidget.layout().add_spacer();
-            s1.set_minimum_width(inputLabelLayout.spacing().cx);
+            s1.set_fixed_size(size{ inputLabelLayout.spacing().cx, 0.0 }); // (the label (and its text) has the rest of the room: see non_editable_input_widget)
             inputWidget.layout().add(iDownArrow);
             auto& s2 = inputWidget.layout().add_spacer();
             s2.set_fixed_size(size{ inputLabelLayout.spacing().cx, 0.0 });
@@ -1335,7 +1362,7 @@ namespace neogfx
         if (iSelection != previousSelection)
             SelectionChanged.async_trigger(iSelection);
 
-        if (!editable() && aUpdateEditor)
+        if (!editable() && aUpdateEditor && !checkable())
         {
             texture image;
             string text;

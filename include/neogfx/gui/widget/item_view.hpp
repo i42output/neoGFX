@@ -93,6 +93,8 @@ namespace neogfx
         void set_read_only(bool aReadOnly);
         bool use_ellipsis() const;
         void set_use_ellipsis(bool aUseEllipsis);
+        bool extend_row_background() const; ///< Rows' backgrounds extend past the last column to the right of the view (default: off)
+        void set_extend_row_background(bool aExtendRowBackground);
         bool is_valid(item_presentation_model_index const& aItemIndex) const;
         bool is_visible(item_presentation_model_index const& aItemIndex, bool aPartiallyVisible = false) const;
         bool make_visible(item_presentation_model_index const& aItemIndex);
@@ -127,6 +129,7 @@ namespace neogfx
         std::pair<item_model_index::value_type, coordinate> last_visible_item(i_graphics_context& aGc) const;
     protected:
         void layout_items_completed() override;
+        void resized() override;
     protected:
         widget_part hit_test(const point& aPosition) const override;
     protected:
@@ -201,6 +204,7 @@ namespace neogfx
         sink iDragDropSink;
         bool iReadOnly;
         bool iUseEllipsis = true;
+        bool iExtendRowBackground = false;
         struct elided_cell_text
         {
             dimension availableWidth;

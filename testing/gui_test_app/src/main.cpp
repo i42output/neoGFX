@@ -838,7 +838,7 @@ int main(int argc, char* argv[])
         tableView1.set_model(itemModel);
         my_item_presentation_model ipm1{ itemModel, true };
         tableView1.set_presentation_model(ipm1);
-        ipm1.set_column_editable_when_focused(4);
+        ipm1.set_column_editable_when_focused(4);   
         ipm1.set_column_editable_when_focused(5);
         ipm1.set_column_editable_when_focused(6);
         ipm1.set_column_editable_when_focused(7);

@@ -61,6 +61,8 @@ namespace neogfx::DesignStudio
         register_setting<double>("environment.windows_and_tabs.right_dock_width"_s, 256.0_dip);
         register_setting<double>("environment.windows_and_tabs.left_dock_weight"_s, 0.3);
         register_setting<double>("environment.windows_and_tabs.right_dock_weight"_s, 0.3);
+        register_setting<ng::size>("environment.windows_and_tabs.property_column_widths"_s, {}); // (default: evenly distributed)
+        register_setting<ng::size>("environment.windows_and_tabs.object_column_widths"_s, {}); // (default: evenly distributed)
         register_setting<color>("environment.fonts_and_colors.theme"_s, service<i_app>().current_style().palette().color(color_role::Theme), "Theme color: %?%"_t);
         register_setting<font_info>("environment.fonts_and_colors.workspace_font"_s, service<i_app>().current_style().font_info(), "Workspace font: %?%"_t);
         register_setting<extended_font>("environment.fonts_and_colors.editor_font"_s, extended_font{ service<i_app>().current_style().font_info(), text_format{} }, "Editor font: %?%"_t);

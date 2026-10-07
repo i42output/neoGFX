@@ -30,9 +30,76 @@ namespace neogfx::DesignStudio
 {
     namespace
     {
-        // set while the Properties toolbox and a property are being made consistent (a cell updated to show its property's changed value or 
-        // a property set from its cell) so that neither recursively updates the other
-        thread_local bool tUpdatingProperty = false;
+        // a two column table's columns' widths as its header's section buttons are (they are resized (e.g. by the user dragging a 
+        // separator) before the sections' widths are: see header_view::panes_resized); the first includes half the cell spacing (see 
+        // header_view::section_width)
+        ng::size column_widths(ng::table_view& aTable)
+        {
+            auto& header = aTable.column_header();
+            auto button_width = [&](std::uint32_t aSection)
+            {
+                auto const& button = header.layout().get_widget_at(aSection);
+                return button.has_fixed_size() ? button.fixed_size().cx : button.extents().cx;
+            };
+            return ng::size{ button_width(0u) - aTable.presentation_model().cell_spacing(aTable).cx / 2.0, button_width(1u) };
+        }
+
+        // whether a two column table's columns have been resized by the user since they were given the same width (aWidth)
+        bool columns_resized(ng::table_view& aTable, std::optional<ng::dimension> const& aWidth)
+        {
+            auto const widths = column_widths(aTable);
+            return aWidth && (std::abs(widths.cx - *aWidth) > 1.0 || std::abs(widths.cy - *aWidth) > 1.0);
+        }
+
+        // set while a two column table's columns are given their widths (see distribute_columns): not resized by the user
+        thread_local bool tDistributingColumns = false;
+
+        // a two column table's column widths, once the user has resized them, saved (hidden setting) for the next session as they change 
+        // (see distribute_columns)
+        void save_columns(ng::table_view& aTable, std::optional<ng::dimension> const& aWidth, bool& aResized, neolib::i_setting& aSaved)
+        {
+            if (tDistributingColumns || aTable.column_header().section_count() < 2u || (!aResized && !columns_resized(aTable, aWidth)))
+                return;
+            aResized = true;
+            aSaved.set_value(column_widths(aTable));
+        }
+
+        // a two column table's columns are given their initial widths, once (when the table has been laid out: false until then): as the 
+        // user last left them (aSaved, see save_columns) or the same width (whatever the width of their contents) sharing the table's 
+        // width; their widths are then saved as the user resizes them (aWidth: the width given them; aResized: set once the user has 
+        // resized them (or they are as the user left them); aSink: their header's sections' buttons' sizes are watched)
+        bool distribute_columns(ng::table_view& aTable, std::optional<ng::dimension>& aWidth, bool& aResized, neolib::i_setting& aSaved, 
+            ng::sink& aSink)
+        {
+            auto& header = aTable.column_header();
+            if (header.section_count() < 2u || header.layout().count() < 2u)
+                return false;
+            // (the header's total width (see header_view::total_width) is the columns' widths plus half a separator before the first 
+            // column and a separator between the two)
+            auto const width = std::floor((aTable.client_rect(false).cx - header.separator_width() * 1.5) / 2.0);
+            if (width <= 0.0)
+                return false;
+            {
+                neolib::scoped_flag sf{ tDistributingColumns };
+                if (!aSaved.is_default())
+                {
+                    auto const saved = aSaved.value<ng::size>();
+                    aResized = true;
+                    header.set_section_width(0u, saved.cx);
+                    header.set_section_width(1u, saved.cy);
+                }
+                else
+                {
+                    aWidth = width;
+                    header.set_section_width(0u, width);
+                    header.set_section_width(1u, width);
+                }
+            }
+            for (std::uint32_t col = 0u; col < 2u; ++col)
+                aSink += ng::get_property(header.layout().get_widget_at(col), "FixedSize").property_changed(
+                    [&aTable, &aWidth, &aResized, &aSaved](ng::property_variant const&) { save_columns(aTable, aWidth, aResized, aSaved); });
+            return true;
+        }
 
         // (attributes and the object properties (and property components) associated with them: see nrc_attributes)
         using nrc_attributes::attribute_name_of;
@@ -145,6 +212,8 @@ namespace neogfx::DesignStudio
         rightDockWidth{ aSettings.setting("environment.windows_and_tabs.right_dock_width"_s) },
         leftDockWeight{ aSettings.setting("environment.windows_and_tabs.left_dock_weight"_s) },
         rightDockWeight{ aSettings.setting("environment.windows_and_tabs.right_dock_weight"_s) },
+        propertyColumnWidths{ aSettings.setting("environment.windows_and_tabs.property_column_widths"_s) },
+        objectColumnWidths{ aSettings.setting("environment.windows_and_tabs.object_column_widths"_s) },
         workspaceFont{ aSettings.setting("environment.fonts_and_colors.workspace_font"_s) },
         subpixelRendering{ aSettings.setting("environment.fonts_and_colors.subpixel"_s) },
         toolbarIconSize{ aSettings.setting("environment.toolbars.icon_size"_s) },
@@ -383,7 +452,7 @@ namespace neogfx::DesignStudio
         objectTree.set_selection_model(iObjectPresentationModel.selection_model());
         iObjectPresentationModel.selection_model().set_mode(ng::item_selection_mode::ExtendedSelection);
         objectTree.set_presentation_model(iObjectPresentationModel);
-        objectTree.column_header().set_expand_last_column(true);
+        // (its columns' widths: see iPropertiesUpdater)
         iObjectPresentationModel.selection_model().current_index_changed([&](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
         {
             if (aCurrentIndex)
@@ -720,6 +789,8 @@ namespace neogfx::DesignStudio
     // Properties toolbox: editing elements' .nrc attributes and their objects' properties (see update_properties)
     void main_window_ex::init_properties()
     {
+        thread_local bool tUpdatingProperty = false;
+
         iPropertyModel.set_column_name(0u, "Property"_t);
         iPropertyModel.set_column_name(1u, "Value"_t);
         iPropertyPresentationModel.set_item_model(iPropertyModel);
@@ -727,21 +798,8 @@ namespace neogfx::DesignStudio
         auto& propertyTable = iProperties.docked_widget<ng::table_view>();
         propertyTable.set_minimum_size(ng::size{ 128_dip, 128_dip });
         propertyTable.set_presentation_model(iPropertyPresentationModel);
-        propertyTable.column_header().set_expand_last_column(true);
-        // each cell has a 1 pixel border
-        iSink += propertyTable.painted([this, &propertyTable](ng::i_graphics_context& aGc)
-        {
-            auto const& palette = ng::service<ng::i_app>().current_style().palette();
-            ng::pen const border{ palette.color(ng::color_role::Base).mid(palette.color(ng::color_role::Text)), 1.0 };
-            auto const visible = propertyTable.client_rect();
-            for (std::uint32_t row = 0u; row < iPropertyPresentationModel.rows(); ++row)
-                for (std::uint32_t col = 0u; col < iPropertyPresentationModel.columns(); ++col)
-                {
-                    auto const cellRect = propertyTable.cell_rect(ng::item_presentation_model_index{ row, col }, ng::cell_part::Background);
-                    if (cellRect.intersects(visible))
-                        aGc.draw_rect(cellRect, border);
-                }
-        });
+        // (its columns' widths: see iPropertiesUpdater)
+        // (each cell has a 1 pixel border: see property_presentation_model::cell_border)
         iSink += iPropertyModel.item_changed([&](item_model_index const& aIndex)
         {
             if (tUpdatingProperty || iUpdatingProperties || !iPropertyElement.valid() || !iProjectManager.project_active())
@@ -787,6 +845,21 @@ namespace neogfx::DesignStudio
                         component.property->set_from_variant(*value);
                 neolib::scoped_flag sf{ iUpdatingProperties };
                 update_property_rows(*component.property);
+                return;
+            }
+            if (std::holds_alternative<member_attribute>(item))
+            {
+                // an .nrc attribute of a member element (e.g. ".text_widget"'s "text"): a member of the element's attribute's object value (an 
+                // empty value removes it; with no members left the attribute is removed)
+                if (aIndex.column() != 1u)
+                    return;
+                auto const& memberAttribute = std::get<member_attribute>(item);
+                write_attribute(memberAttribute.name, text.to_std_string(), memberAttribute.member);
+                element.apply_attributes(show_ids());
+                if (element.has_caddy())
+                    element.caddy().update_layout(true, true);
+                iProjectManager.active_project().set_dirty();
+                iPropertiesNeedUpdate = true; // (e.g. an attribute added: it is no longer one that can be added)
                 return;
             }
             auto const attributeIndex = std::get<std::uint32_t>(item);
@@ -926,6 +999,13 @@ namespace neogfx::DesignStudio
         iPropertiesUpdater.emplace(*this, [this, &propertyTable, property_row_at, dialog_for, property_gradient, open_property_dialog](ng::widget_timer& aTimer)
         {
             aTimer.again();
+            // the Properties toolbox's and Object Explorer's initial column widths (see distribute_columns), once each table has been laid 
+            // out (here rather than as it is laid out: a header's sections resized while its table is being laid out may not be laid out 
+            // again (the header then doesn't line up with the columns))
+            if (!iPropertyColumnsDistributed)
+                iPropertyColumnsDistributed = distribute_columns(propertyTable, iPropertyColumnWidth, iPropertyColumnsResized, propertyColumnWidths, iSink);
+            if (!iObjectColumnsDistributed)
+                iObjectColumnsDistributed = distribute_columns(iObjects.docked_widget<ng::table_view>(), iObjectColumnWidth, iObjectColumnsResized, objectColumnWidths, iSink);
             if (iPropertiesNeedUpdate || (!iPropertyElement.valid() && iPropertyModel.rows() != 0u))
             {
                 iPropertiesNeedUpdate = false;
@@ -1498,8 +1578,10 @@ namespace neogfx::DesignStudio
     void main_window_ex::update_properties()
     {
         neolib::scoped_flag sf{ iUpdatingProperties };
+        scoped_item_update siu{ iPropertyPresentationModel }; // (the rows are made in a batch)
         iPropertySink.clear();
         iPropertyRows.clear();
+        iPropertyMembers.clear();
         iChangedProperties.clear();
         iPropertyPresentationModel.clear_cell_widgets();
         static_cast<void>(iPropertyPresentationModel.set_dialog_button_cells({})); // (the rows are made again)
@@ -1523,6 +1605,14 @@ namespace neogfx::DesignStudio
         {
             return propertyNames.find(property_name_of(aAttribute)) != propertyNames.end();
         };
+        // (member elements' attributes (e.g. ".text_widget: { ... }") are shown under a node for each one: see below)
+        neolib::vector<string> memberElements;
+        element.member_elements(memberElements);
+        std::set<std::uint32_t> memberNodeRows;
+        auto is_member_element = [&](std::string const& aAttribute)
+        {
+            return std::any_of(memberElements.begin(), memberElements.end(), [&](string const& aMember) { return aMember.to_std_string() == aAttribute; });
+        };
         // .nrc attributes (saved to the project file)
         auto attributesNode = iPropertyModel.insert_item(iPropertyModel.send(), property_model_item{}, string{ element.type().to_std_string() + " (.nrc)" });
         std::uint32_t attributeIndex = 0u;
@@ -1530,7 +1620,7 @@ namespace neogfx::DesignStudio
         {
             // skip metadata ('#' prefix), removed (empty) properties and those with an associated object property
             if (!attribute.first().empty() && attribute.first().to_std_string_view()[0] != '#' && !attribute.second().empty() && 
-                !has_property(attribute.first().to_std_string()))
+                !has_property(attribute.first().to_std_string()) && !is_member_element(attribute.first().to_std_string()))
             {
                 auto row = iPropertyModel.append_item(attributesNode, property_model_item{ attributeIndex }, string{ attribute.first() });
                 iPropertyModel.insert_cell_data(row, 1u, string{ attribute.second() });
@@ -1562,11 +1652,12 @@ namespace neogfx::DesignStudio
             if (iPropertyRows.find(&aProperty) != iPropertyRows.end())
                 iChangedProperties.insert(&aProperty);
         });
-        // (the properties shown are all the object's: if it is destroyed they are too)
+        // (the properties shown are all the object's (or its member elements' widgets'): if it is destroyed they are too)
         iPropertySink += static_cast<ng::i_object&>(owner).destroyed([this]()
         {
             iChangedProperties.clear();
             iPropertyRows.clear();
+            iPropertyMembers.clear();
         });
         std::map<std::string, std::vector<i_property*>> classes;
         for (auto const& entry : std::as_const(owner.properties()).property_map())
@@ -1654,6 +1745,81 @@ namespace neogfx::DesignStudio
                 }
             }
         }
+        // a property's row (and its components' rows) under a node
+        auto add_property_rows = [&](auto aNode, i_property* aProperty)
+        {
+            auto row = iPropertyModel.append_item(aNode, property_model_item{ aProperty }, string{ property_display_name(aProperty->name().to_std_string()) });
+            iPropertyModel.insert_cell_data(row, 1u, string{ property_cell_text(*aProperty) });
+            auto const components = property_components(*aProperty);
+            for (std::uint32_t component = 0u; component < components.size(); ++component)
+            {
+                auto componentRow = iPropertyModel.append_item(row, property_model_item{ property_component{ aProperty, component } }, string{ components[component] });
+                iPropertyModel.insert_cell_data(componentRow, 1u, string{ property_cell_text(*aProperty, component) });
+            }
+        };
+        // member elements (e.g. a button's ".text_widget"): a node (under the .nrc attributes) for each one with its .nrc attributes (members of 
+        // the element's attribute's object value, e.g. ".text_widget: { text: "Hello" }"), those that can be added and its widget's properties 
+        // (editing which sets its attributes, as for the element's own properties)
+        for (auto const& memberElement : memberElements)
+        {
+            auto const member = memberElement.to_std_string();
+            auto const memberWidget = element.member_widget(memberElement);
+            std::set<std::string> memberPropertyNames;
+            if (memberWidget != nullptr)
+                for (auto const& entry : std::as_const(memberWidget->properties()).property_map())
+                    memberPropertyNames.insert((*entry.second()).name().to_std_string());
+            auto member_has_property = [&](std::string const& aAttribute)
+            {
+                return memberPropertyNames.find(property_name_of(aAttribute)) != memberPropertyNames.end();
+            };
+            auto memberNode = iPropertyModel.append_item(attributesNode, property_model_item{}, string{ member });
+            memberNodeRows.insert(iPropertyModel.iterator_to_index(memberNode).row()); // (rows added after it are its or later ones)
+            std::set<std::string> memberAttributes;
+            for (auto const& [name, value] : nrc_attributes::members(attribute_text(member)))
+            {
+                memberAttributes.insert(name);
+                if (member_has_property(name))
+                    continue;
+                auto row = iPropertyModel.append_item(memberNode, property_model_item{ member_attribute{ member, name } }, string{ name });
+                iPropertyModel.insert_cell_data(row, 1u, string{ value });
+            }
+            neolib::vector<string> memberAvailable;
+            element.available_member_attributes(memberElement, memberAvailable);
+            std::vector<std::string> memberAttributesToShow;
+            for (auto const& name : memberAvailable)
+                if (memberAttributes.find(name.to_std_string()) == memberAttributes.end() && !member_has_property(name.to_std_string()))
+                    memberAttributesToShow.push_back(name.to_std_string());
+            if (!memberAttributesToShow.empty())
+            {
+                auto availableNode = iPropertyModel.append_item(memberNode, property_model_item{}, string{ "Attributes" });
+                for (auto const& name : memberAttributesToShow)
+                    iPropertyModel.append_item(availableNode, property_model_item{ member_attribute{ member, name } }, string{ name });
+            }
+            if (memberWidget == nullptr)
+                continue;
+            iPropertySink += static_cast<ng::i_object&>(*memberWidget).property_changed([this](i_property const& aProperty)
+            {
+                if (iPropertyRows.find(&aProperty) != iPropertyRows.end())
+                    iChangedProperties.insert(&aProperty);
+            });
+            std::map<std::pair<std::size_t, std::string>, std::vector<i_property*>> categories;
+            for (auto const& entry : std::as_const(memberWidget->properties()).property_map())
+            {
+                iPropertyMembers[entry.second()] = member;
+                categories[{ property_category_rank(entry.second()->category()), property_class_name(entry.second()->category()) }].push_back(entry.second());
+            }
+            for (auto& category : categories)
+            {
+                auto categoryNode = iPropertyModel.append_item(memberNode, property_model_item{}, string{ display_name(category.first.second) });
+                auto& properties = category.second;
+                std::sort(properties.begin(), properties.end(), [](i_property const* lhs, i_property const* rhs)
+                {
+                    return lhs->name().to_std_string_view() < rhs->name().to_std_string_view();
+                });
+                for (auto property : properties)
+                    add_property_rows(categoryNode, property);
+            }
+        }
         // composite properties' components are initially hidden (expanding the property's row shows them); each property's rows are noted
         for (std::uint32_t propertyRow = 0u; propertyRow < iPropertyModel.rows(); ++propertyRow)
         {
@@ -1662,9 +1828,28 @@ namespace neogfx::DesignStudio
                 iPropertyRows[std::get<i_property*>(item)].push_back(propertyRow);
             else if (std::holds_alternative<property_component>(item))
                 iPropertyRows[std::get<property_component>(item).property].push_back(propertyRow);
-            if (std::holds_alternative<i_property*>(item) && !property_components(*std::get<i_property*>(item)).empty() && 
-                iPropertyPresentationModel.has_item_model_index(item_model_index{ propertyRow, 0u }))
-                iPropertyPresentationModel.collapse(iPropertyPresentationModel.from_item_model_index(item_model_index{ propertyRow, 0u }));
+        }
+        // member elements' nodes (and the nodes within them) are initially collapsed too (expanding one shows only its children); collapsed 
+        // last row first so that a node's children are collapsed whilst it is still expanded
+        auto in_member = [&](item_model_index aIndex)
+        {
+            for (;;)
+            {
+                if (memberNodeRows.find(aIndex.row()) != memberNodeRows.end())
+                    return true;
+                if (!iPropertyModel.has_parent(aIndex))
+                    return false;
+                aIndex = iPropertyModel.parent(aIndex);
+            }
+        };
+        for (std::uint32_t propertyRow = iPropertyModel.rows(); propertyRow-- > 0u;)
+        {
+            item_model_index const index{ propertyRow, 0u };
+            if (!iPropertyModel.has_children(index) || !iPropertyPresentationModel.has_item_model_index(index))
+                continue;
+            auto const& item = iPropertyModel.item(index);
+            if ((std::holds_alternative<i_property*>(item) && !property_components(*std::get<i_property*>(item)).empty()) || in_member(index))
+                iPropertyPresentationModel.collapse(iPropertyPresentationModel.from_item_model_index(index));
         }
     }
 
@@ -1674,7 +1859,15 @@ namespace neogfx::DesignStudio
     {
         if (!iPropertyElement.valid())
             return {};
-        return element_attribute(attribute_name_of(aProperty.name().to_std_string()));
+        return element_attribute(attribute_name_of(aProperty.name().to_std_string()), property_member(aProperty));
+    }
+
+    // the member element (e.g. ".text_widget") whose widget a property shown is a property of, if it isn't the element's own
+    std::optional<std::string> main_window_ex::property_member(i_property const& aProperty) const
+    {
+        if (auto const existing = iPropertyMembers.find(&aProperty); existing != iPropertyMembers.end())
+            return existing->second;
+        return std::nullopt;
     }
 
     // the member of the property's .nrc attribute's object value that is a component of a property of the element whose properties are 
@@ -1691,34 +1884,64 @@ namespace neogfx::DesignStudio
         // (a geometry property's components are members (e.g. "MaximumSize: { Width: 100 }") so that each can be set or cleared on its own 
         // (clearing all of them removes the attribute: the default); with all of them set the attribute is an array (see set_property_attribute))
         static std::set<std::string> const sMemberAttributes{ "Palette", "MinimumSize", "MaximumSize", "FixedSize", "Weight", "Padding", "SizePolicy" };
-        if (sMemberAttributes.find(*name) == sMemberAttributes.end() && !nrc_attributes::is_object(attribute_text(*name)))
+        if (sMemberAttributes.find(*name) == sMemberAttributes.end() && !nrc_attributes::is_object(attribute_text(*name, property_member(aProperty))))
             return {};
         return member_name_of(components[aComponent]);
     }
 
-    // the value of the named .nrc attribute of the element whose properties are shown (the last of its entries is the one that applies)
-    std::string main_window_ex::attribute_text(std::string const& aName) const
+    // the value of the named .nrc attribute of the element whose properties are shown (the last of its entries is the one that applies) or, 
+    // for a member element (e.g. ".text_widget"), of the member of that attribute's object value
+    std::string main_window_ex::attribute_text(std::string const& aName, std::optional<std::string> const& aMember) const
     {
         std::string result;
         if (iPropertyElement.valid())
             for (auto const& attribute : (*iPropertyElement).attributes())
-                if (attribute.first().to_std_string() == aName && !attribute.second().empty())
+                if (attribute.first().to_std_string() == (aMember ? *aMember : aName) && !attribute.second().empty())
                     result = attribute.second().to_std_string();
+        if (aMember)
+            result = nrc_attributes::member(result, aName).value_or(std::string{});
         return result;
     }
 
-    // the named .nrc attribute if the element whose properties are shown has it or accepts it (see i_element::accepts_attribute)
-    std::optional<std::string> main_window_ex::element_attribute(std::string const& aName) const
+    // the named .nrc attribute if the element whose properties are shown (or its member element) has it or accepts it (see 
+    // i_element::accepts_attribute and i_element::accepts_member_attribute)
+    std::optional<std::string> main_window_ex::element_attribute(std::string const& aName, std::optional<std::string> const& aMember) const
     {
         if (!iPropertyElement.valid() || aName.empty())
             return {};
         auto const& element = *iPropertyElement;
+        if (aMember)
+        {
+            if (nrc_attributes::member(attribute_text(*aMember), aName) || element.accepts_member_attribute(string{ *aMember }, string{ aName }))
+                return aName;
+            return {};
+        }
         for (auto const& attribute : element.attributes())
             if (attribute.first().to_std_string() == aName)
                 return aName;
         if (element.accepts_attribute(string{ aName }))
             return aName;
         return {};
+    }
+
+    // sets the value of the named .nrc attribute of the element whose properties are shown (the last of its entries is the one that applies; 
+    // an empty value removes the attribute on save) or, for a member element (e.g. ".text_widget"), of the member of that attribute's object 
+    // value (an empty value removes the member)
+    void main_window_ex::write_attribute(std::string const& aName, std::string const& aValue, std::optional<std::string> const& aMember)
+    {
+        if (!iPropertyElement.valid())
+            return;
+        auto& element = *iPropertyElement;
+        auto const name = aMember ? *aMember : aName;
+        auto const value = aMember ? nrc_attributes::with_member(attribute_text(*aMember), aName, aValue) : aValue;
+        auto existing = element.attributes().end();
+        for (auto attribute = element.attributes().begin(); attribute != element.attributes().end(); ++attribute)
+            if (attribute->first().to_std_string() == name)
+                existing = attribute;
+        if (existing != element.attributes().end())
+            existing->second() = string{ value };
+        else if (!value.empty())
+            element.attributes().push_back(neolib::pair<string, string>{ string{ name }, string{ value } });
     }
 
     // the text of a property's row (or of one of its components' rows): its .nrc attribute's value (as entered, e.g. with units) if it has 
@@ -1730,7 +1953,7 @@ namespace neogfx::DesignStudio
             {
                 // (a component that is a member of its attribute's object value (e.g. Palette's Base: "Palette: { Base: Red }") or, if 
                 // all of them are set, an item of its array value (e.g. "[ 4px 2px ]" padding: left/right 4px, top/bottom 2px))
-                auto const value = attribute_text(*property_attribute(aProperty));
+                auto const value = attribute_text(*property_attribute(aProperty), property_member(aProperty));
                 if (!value.empty() && !nrc_attributes::is_object(value))
                 {
                     if (auto const items = attribute_items(value); !items.empty())
@@ -1743,7 +1966,7 @@ namespace neogfx::DesignStudio
         if (auto const name = property_attribute(aProperty))
         {
             std::vector<std::string> items;
-            if (auto const value = attribute_text(*name); !nrc_attributes::is_object(value)) // (an object's members are its components: its value is shown)
+            if (auto const value = attribute_text(*name, property_member(aProperty)); !nrc_attributes::is_object(value)) // (an object's members are its components: its value is shown)
                 items = attribute_items(value);
             if (!items.empty())
             {
@@ -1775,7 +1998,7 @@ namespace neogfx::DesignStudio
         if (member)
         {
             name = property_attribute(aProperty);
-            auto current = attribute_text(*name);
+            auto current = attribute_text(*name, property_member(aProperty));
             if (!current.empty() && !nrc_attributes::is_object(current))
             {
                 // (an array value (e.g. "[ 100 50 ]"): as an object (e.g. "{ Width: 100 Height: 50 }") so its other components are kept)
@@ -1829,15 +2052,7 @@ namespace neogfx::DesignStudio
                     items.push_back(token);
             value = string{ items.empty() ? std::string{} : attribute_value(items, strings) };
         }
-        // (the last of the attribute's entries is the one that applies; an empty value removes the attribute on save)
-        auto existing = element.attributes().end();
-        for (auto attribute = element.attributes().begin(); attribute != element.attributes().end(); ++attribute)
-            if (attribute->first().to_std_string() == *name)
-                existing = attribute;
-        if (existing != element.attributes().end())
-            existing->second() = value;
-        else if (!value.empty())
-            element.attributes().push_back(neolib::pair<string, string>{ string{ *name }, value });
+        write_attribute(*name, value.to_std_string(), property_member(aProperty));
         element.apply_attributes(show_ids());
         // (e.g. a maximum size: what the element's caddy (if any) allows changes so the layout it is in lays out again)
         if (element.has_caddy())

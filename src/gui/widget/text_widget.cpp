@@ -383,6 +383,17 @@ namespace neogfx
         return iType == text_widget_type::MultiLine;
     }
 
+    void text_widget::set_type(text_widget_type aType)
+    {
+        if (iType != aType)
+        {
+            iType = aType;
+            reset_cache();
+            update_layout();
+            update();
+        }
+    }
+
     text_widget_flags text_widget::flags() const
     {
         return Flags;

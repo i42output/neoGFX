@@ -59,6 +59,8 @@ namespace neogfx::DesignStudio
         neolib::i_setting& rightDockWidth;
         neolib::i_setting& leftDockWeight;
         neolib::i_setting& rightDockWeight;
+        neolib::i_setting& propertyColumnWidths;
+        neolib::i_setting& objectColumnWidths;
         neolib::i_setting& workspaceFont;
         neolib::i_setting& subpixelRendering;
         neolib::i_setting& toolbarIconSize;
@@ -103,8 +105,10 @@ namespace neogfx::DesignStudio
         void update_properties();
         std::optional<std::string> property_attribute(i_property const& aProperty) const;
         std::optional<std::string> property_component_member(i_property const& aProperty, std::uint32_t aComponent) const;
-        std::string attribute_text(std::string const& aName) const;
-        std::optional<std::string> element_attribute(std::string const& aName) const;
+        std::optional<std::string> property_member(i_property const& aProperty) const;
+        std::string attribute_text(std::string const& aName, std::optional<std::string> const& aMember = {}) const;
+        std::optional<std::string> element_attribute(std::string const& aName, std::optional<std::string> const& aMember = {}) const;
+        void write_attribute(std::string const& aName, std::string const& aValue, std::optional<std::string> const& aMember = {});
         std::string property_cell_text(i_property const& aProperty, std::optional<std::uint32_t> aComponent = {}) const;
         bool set_property_attribute(i_property const& aProperty, std::optional<std::uint32_t> aComponent, std::string const& aText);
         void update_property_rows(i_property const& aProperty, std::optional<std::uint32_t> aExceptRow = {});
@@ -140,6 +144,13 @@ namespace neogfx::DesignStudio
         ng::sink iSink;
         ng::sink iPropertySink; // property_changed of the properties shown in the Properties toolbox
         std::unordered_map<i_property const*, std::vector<std::uint32_t>> iPropertyRows; // the rows (item model) showing each property's value (its own and its components')
+        std::optional<ng::dimension> iPropertyColumnWidth; // the Properties toolbox's columns' width when evenly distributed (see distribute_columns)
+        bool iPropertyColumnsResized = false;
+        bool iPropertyColumnsDistributed = false;
+        std::optional<ng::dimension> iObjectColumnWidth; // Object Explorer's columns' width when evenly distributed (see distribute_columns)
+        bool iObjectColumnsResized = false;
+        bool iObjectColumnsDistributed = false;
+        std::unordered_map<i_property const*, std::string> iPropertyMembers; // the member element (e.g. ".text_widget") whose widget a property shown is a property of (if it isn't the element's own)
         std::set<i_property const*> iChangedProperties; // changed since their rows were last updated (a batch update every 20ms: see iPropertiesUpdater); emptied if their object is destroyed before then
     };
 }

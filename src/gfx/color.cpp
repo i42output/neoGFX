@@ -212,6 +212,8 @@ namespace neogfx
         return red<double>() * 0.2126 + green<double>() * 0.7152 + blue<double>() * 0.0722;
     }
 
+    const sRGB_color sRGB_color::Transparent = sRGB_color{};
+
     const sRGB_color sRGB_color::AliceBlue = sRGB_color{ 0xF0, 0xF8, 0xFF };
     const sRGB_color sRGB_color::AntiqueWhite = sRGB_color{ 0xFA, 0xEB, 0xD7 };
     const sRGB_color sRGB_color::AntiqueWhite1 = sRGB_color{ 0xFF, 0xEF, 0xDB };

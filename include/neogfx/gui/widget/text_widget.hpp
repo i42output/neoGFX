@@ -57,6 +57,7 @@ namespace neogfx
         void set_text(i_string const& aText) override;
         void set_size_hint(size_hint const& aSizeHint) override;
         bool multi_line() const override;
+        void set_type(text_widget_type aType); ///< e.g. a (multi-line by default) label's text as single line (only single line text is elided: see text_widget_flags::UseEllipsis)
         text_widget_flags flags() const override;
         void set_flags(text_widget_flags aFlags) override;
         neogfx::alignment alignment() const override;

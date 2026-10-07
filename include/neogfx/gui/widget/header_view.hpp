@@ -83,6 +83,7 @@ namespace neogfx
         void set_separator_width(const optional_dimension& aWidth);
         std::uint32_t section_count() const;
         dimension section_width(std::uint32_t aSectionIndex, bool aForHeaderButton = false) const;
+        void set_section_width(std::uint32_t aSectionIndex, optional_dimension const& aWidth); ///< As if resized by the user (nullopt: as its contents)
         dimension total_width() const;
     public:
         bool is_managing_layout() const override;

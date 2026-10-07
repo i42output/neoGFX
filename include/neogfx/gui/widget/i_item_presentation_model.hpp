@@ -325,6 +325,7 @@ namespace neogfx
         virtual item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, i_string const& aString, bool& aError) const = 0;
         virtual boost::basic_format<char> cell_format(item_presentation_model_index const& aIndex) const = 0;
         virtual optional_color cell_color(item_presentation_model_index const& aIndex, color_role aColorRole) const = 0;
+        virtual optional_color cell_border(item_presentation_model_index const& aIndex) const = 0;
         virtual color_or_gradient cell_background(item_presentation_model_index const& aIndex) const = 0; ///< A gradient background for the cell (in place of cell_color(Background)) if any; a gradient without a bounding box spans the cell's row.
         virtual optional_font cell_font(item_presentation_model_index const& aIndex) const = 0;
         virtual optional_size cell_image_size(item_presentation_model_index const& aIndex) const = 0;

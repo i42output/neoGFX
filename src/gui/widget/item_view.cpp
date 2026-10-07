@@ -273,6 +273,14 @@ namespace neogfx
         base_type::layout_items_completed();
     }
 
+    void item_view::resized()
+    {
+        base_type::resized();
+        // (the last column can be as wide as the view: its cells' widgets are placed again)
+        if (!iCellWidgets.empty())
+            update_cell_widgets();
+    }
+
     void item_view::update_cell_widgets()
     {
         // cells' widgets (e.g. drop-down lists) are children of this view placed in their cells (as an editor is); widgets of cells 
@@ -291,7 +299,12 @@ namespace neogfx
                         add(cellWidget);
                     if (std::find_if(iCellWidgets.begin(), iCellWidgets.end(), [&](auto const& w) { return &*w == &*cellWidget; }) == iCellWidgets.end())
                         iCellWidgets.push_back(cellWidget); // (the model may have added it to this view already)
-                    auto const cellRect = cell_rect(index, cell_part::Editor);
+                    // (within its row (which is tall enough for it: see basic_item_presentation_model::cell_extents) rather than overlapping 
+                    // the rows either side of it as an editor does)
+                    auto cellRect = cell_rect(index, cell_part::Editor);
+                    auto const rowRect = cell_rect(index, cell_part::Background);
+                    cellRect.y = rowRect.y;
+                    cellRect.cy = rowRect.cy;
                     cellWidget->move(cellRect.position());
                     cellWidget->resize(cellRect.extents());
                     cellWidget->show();
@@ -348,6 +361,11 @@ namespace neogfx
         auto first = first_visible_item(aGc);
         bool finished = false;
         rect clipRect = default_clip_rect().intersection(item_display_rect());
+        // (rows' backgrounds can extend to the right of the view even if its columns don't: see cell_rect)
+        rect backgroundArea = item_display_rect();
+        if (extend_row_background())
+            backgroundArea.cx = std::max(backgroundArea.cx, client_rect(false).right() - backgroundArea.x);
+        rect const backgroundClipRect = default_clip_rect().intersection(backgroundArea);
         for (item_presentation_model_index::value_type row = first.first; row < presentation_model().rows() && !finished; ++row)
         {
             finished = true;
@@ -374,7 +392,7 @@ namespace neogfx
                     textColor = service<i_app>().current_style().palette().color(!cellBackgroundSpecified && selection_model().is_selected(itemIndex) ? color_role::SelectedText : color_role::Text);
                 rect cellBackgroundRect = cell_rect(itemIndex, aGc, cell_part::Background);
                 {
-                    scoped_scissor scissor(aGc, clipRect.intersection(cellBackgroundRect));
+                    scoped_scissor scissor(aGc, backgroundClipRect.intersection(cellBackgroundRect));
                     if (cellBackgroundSpecified || !selection_model().is_selected(itemIndex))
                         cellBackgroundColor.value().set_alpha(has_background_opacity() ? background_opacity() : 1.0);
                     if (selection_model().is_selected(itemIndex) && (!currentCell || !editing()))
@@ -492,6 +510,27 @@ namespace neogfx
                         aGc.draw_focus_rect(cellBackgroundRect);
                 }
             }
+        }
+        // cells' borders (those that have them, see i_item_presentation_model::cell_border): drawn once all cells' backgrounds are 
+        // (adjacent cells' backgrounds would otherwise cover them)
+        {
+            scoped_scissor scissor(aGc, backgroundClipRect);
+            bool bordersFinished = false;
+            for (item_presentation_model_index::value_type row = first.first; row < presentation_model().rows() && !bordersFinished; ++row)
+                for (std::uint32_t col = 0u; col < presentation_model().columns(); ++col)
+                {
+                    auto const itemIndex = item_presentation_model_index{ row, col };
+                    auto const cellBackgroundRect = cell_rect(itemIndex, aGc, cell_part::Background);
+                    if (cellBackgroundRect.y > backgroundClipRect.bottom())
+                    {
+                        bordersFinished = true;
+                        break;
+                    }
+                    if (cellBackgroundRect.bottom() < backgroundClipRect.y)
+                        continue;
+                    if (auto const cellBorder = presentation_model().cell_border(itemIndex))
+                        aGc.draw_rect(cellBackgroundRect, pen{ *cellBorder, 1.0 });
+                }
         }
     }
 
@@ -1093,6 +1132,20 @@ namespace neogfx
         return iUseEllipsis;
     }
 
+    bool item_view::extend_row_background() const
+    {
+        return iExtendRowBackground;
+    }
+
+    void item_view::set_extend_row_background(bool aExtendRowBackground)
+    {
+        if (iExtendRowBackground != aExtendRowBackground)
+        {
+            iExtendRowBackground = aExtendRowBackground;
+            update();
+        }
+    }
+
     void item_view::set_use_ellipsis(bool aUseEllipsis)
     {
         if (iUseEllipsis != aUseEllipsis)
@@ -1394,6 +1447,7 @@ namespace neogfx
             editor().resize(editorRect.extents());
         }
         update_cell_widgets(); // (cells' widgets are placed as the editor is)
+        update(); // (its items are drawn at their columns' new widths)
     }
 
     rect item_view::row_rect(item_presentation_model_index const& aItemIndex) const
@@ -1444,7 +1498,12 @@ namespace neogfx
                         if (aPart != cell_part::Background)
                             result.cx -= indent;
                         if (lastColumn)
+                        {
                             result.cx += (item_display_rect().right() - result.right());
+                            // (a row's background can extend to the right of the view even if its columns don't)
+                            if (aPart == cell_part::Background && extend_row_background())
+                                result.cx = std::max(result.cx, client_rect(false).right() - result.x);
+                        }
                         return result;
                     }
                     x += column_width(col);
