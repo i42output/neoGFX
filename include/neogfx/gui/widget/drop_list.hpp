@@ -24,6 +24,7 @@
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/list_view.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
+#include <neogfx/gui/widget/drop_list_bits.hpp>
 
 namespace neogfx
 {
@@ -162,42 +163,11 @@ namespace neogfx
         virtual void set_text(i_string const& aText) = 0;
     };
 
-    enum class drop_list_style : std::uint32_t
-    {
-        Normal              = 0x0000,
-        Editable            = 0x0001,
-        ListAlwaysVisible   = 0x0002,
-        NoFilter            = 0x0004
-    };
-}
-
-begin_declare_enum(neogfx::drop_list_style)
-declare_enum_string(neogfx::drop_list_style, Normal)
-declare_enum_string(neogfx::drop_list_style, Editable)
-declare_enum_string(neogfx::drop_list_style, ListAlwaysVisible)
-declare_enum_string(neogfx::drop_list_style, NoFilter)
-end_declare_enum(neogfx::drop_list_style)
-
-namespace neogfx
-{
-    inline drop_list_style operator|(drop_list_style aLhs, drop_list_style aRhs)
-    {
-        return static_cast<drop_list_style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
-    }
-
-    inline drop_list_style operator&(drop_list_style aLhs, drop_list_style aRhs)
-    {
-        return static_cast<drop_list_style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
-    }
-
-    inline drop_list_style operator~(drop_list_style aLhs)
-    {
-        return static_cast<drop_list_style>(~static_cast<std::uint32_t>(aLhs));
-    }
-
     class drop_list : public widget<>, private i_drop_list_input_widget::i_visitor
     {
         friend class drop_list_view;
+    public:
+        using base_type = widget<>; // (see collect_property_types)
     public:
         define_event(SelectionChanged, selection_changed, optional_item_model_index)
     public:

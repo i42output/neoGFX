@@ -30,6 +30,8 @@ namespace neogfx
     class flashing_button : public push_button
     {
     public:
+        using base_type = push_button; // (see collect_property_types)
+    public:
         /// @todo custom/variable blink interval
         static constexpr std::chrono::milliseconds DEFAULT_BLINK_INTERVAL_ms{ 250 };
     public:

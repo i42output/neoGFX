@@ -781,7 +781,8 @@ namespace neogfx
     template <typename X = double, typename Y = double, typename Traits = default_graph_traits<X, Y>>
     class graph_widget : public widget<i_graph_widget<maybe_abstract_t<X>, maybe_abstract_t<Y>, Traits>>
     {
-        using base_type = widget<i_graph_widget<maybe_abstract_t<X>, maybe_abstract_t<Y>, Traits>>;
+    public:
+        using base_type = widget<i_graph_widget<maybe_abstract_t<X>, maybe_abstract_t<Y>, Traits>>; // (public: see collect_property_types)
     public:
         using abstract_type = i_graph_widget<maybe_abstract_t<X>, maybe_abstract_t<Y>, Traits>;
     public:

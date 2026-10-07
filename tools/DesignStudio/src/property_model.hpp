@@ -42,6 +42,7 @@
 #include <neogfx/gfx/gradient.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/app/i_style.hpp>
+#include <neogfx/app/palette.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
 #include <neogfx/gui/widget/widget_bits.hpp>
@@ -205,6 +206,8 @@ namespace neogfx::DesignStudio
     // current units context (see scoped_units_context: the object whose property it is)
     inline std::optional<double> property_text_length(std::string const& aText)
     {
+        if (aText == "max" || aText == "inf")
+            return std::numeric_limits<double>::infinity(); // (unbounded, e.g. a maximum size)
         double number = 0.0;
         auto const [end, error] = std::from_chars(aText.data(), aText.data() + aText.size(), number);
         if (aText.empty() || error != std::errc{})
@@ -673,6 +676,37 @@ namespace neogfx::DesignStudio
         std::map<std::string, std::vector<ng::ref_ptr<i_property_component>>> iComponents; // (by type name)
     };
 
+    // a component of a palette property: one of its colours (as text: see property_text/property_parse; empty or "(none)": the colour is 
+    // unset (the style's is used))
+    inline ng::ref_ptr<i_property_component> property_palette_component_of(std::string const& aName, ng::color_role aRole)
+    {
+        return ng::make_ref<basic_property_component<ng::palette>>(aName,
+            [aRole](ng::palette const& aValue) { return aValue.has_color(aRole) ? property_text(aValue.color(aRole)) : std::string{}; },
+            [aRole](ng::palette& aValue, std::string const& aText)
+            {
+                ng::optional_color color;
+                if (!aText.empty() && aText != "(none)")
+                {
+                    auto const parsed = property_parse(aText, static_cast<ng::color const*>(nullptr));
+                    if (!parsed)
+                        return false;
+                    color = *parsed;
+                }
+                if (aValue.has_proxy())
+                    aValue.set_color(aRole, color);
+                else
+                {
+                    // (a new palette (the property was unset): its other colours are the current style's)
+                    ng::palette result{ ng::current_style_palette_proxy() };
+                    for (auto role = static_cast<std::uint32_t>(ng::color_role::Theme); role <= static_cast<std::uint32_t>(ng::color_role::Void); ++role)
+                        result.set_color(static_cast<ng::color_role>(role), aValue.maybe_color(static_cast<ng::color_role>(role)));
+                    result.set_color(aRole, color);
+                    aValue = result;
+                }
+                return true;
+            });
+    }
+
     // Design Studio's property component registry (discoverable by plugins: see app::discover) with its own components registered
     inline property_component_registry& the_property_component_registry()
     {
@@ -696,6 +730,13 @@ namespace neogfx::DesignStudio
                 [](ng::font& v, double const& c) { v = ng::font{ ng::string{ v.family_name() }, ng::string{ v.style_name() }, c }; }));
             sRegistry.register_component<ng::size_policy>(*property_component_of<ng::size_policy, ng::size_constraint>("Horizontal", [](ng::size_policy const& v) { return v.horizontal_constraint(false); }, 
                 [](ng::size_policy& v, ng::size_constraint const& c) { v.set_horizontal_constraint(c); }));
+            for (auto const& [name, role] : std::initializer_list<std::pair<char const*, ng::color_role>>{
+                { "Theme", ng::color_role::Theme }, { "Background", ng::color_role::Background }, { "Foreground", ng::color_role::Foreground }, 
+                { "Base", ng::color_role::Base }, { "Alternate Base", ng::color_role::AlternateBase }, { "Text", ng::color_role::Text }, 
+                { "Selection", ng::color_role::Selection }, { "Alternate Selection", ng::color_role::AlternateSelection }, 
+                { "Selected Text", ng::color_role::SelectedText }, { "Focus", ng::color_role::Focus }, { "Hover", ng::color_role::Hover }, 
+                { "Primary Accent", ng::color_role::PrimaryAccent }, { "Secondary Accent", ng::color_role::SecondaryAccent }, { "Void", ng::color_role::Void } })
+                sRegistry.register_component<ng::palette>(*property_palette_component_of(name, role));
             sRegistry.register_component<ng::size_policy>(*property_component_of<ng::size_policy, ng::size_constraint>("Vertical", [](ng::size_policy const& v) { return v.vertical_constraint(false); }, 
                 [](ng::size_policy& v, ng::size_constraint const& c) { v.set_vertical_constraint(c); }));
             return true;
@@ -736,11 +777,12 @@ namespace neogfx::DesignStudio
         return value;
     }
 
-    // which dialog (if any) the "..." button next to a property's editor opens
+    // which dialog (if any) the "..." button next to a property's editor opens (a gradient's: from a color property row's context menu)
     enum class property_dialog
     {
         None,
         Color,
+        Gradient,
         Font
     };
 
@@ -825,6 +867,21 @@ namespace neogfx::DesignStudio
             if (aIndex.column() == 1u && property_value_editable(property) && property_components(property).empty())
                 return ng::item_cell_flags::Default;
             return readOnly; // (a composite property's components are edited instead)
+        }
+        // room before a cell's text (or in-place editor) for a "..." button shown in it (see main_window_ex)
+        ng::optional_size cell_image_size(ng::item_presentation_model_index const& aIndex) const override
+        {
+            if (auto const cell = iDialogButtonCells.find(aIndex); cell != iDialogButtonCells.end())
+                return cell->second;
+            return ng::basic_item_presentation_model<property_model>::cell_image_size(aIndex);
+        }
+        // the cells showing a "..." button and the buttons' sizes; true if changed
+        bool set_dialog_button_cells(std::map<ng::item_presentation_model_index, ng::size> const& aCells)
+        {
+            if (iDialogButtonCells == aCells)
+                return false;
+            iDialogButtonCells = aCells;
+            return true;
         }
         ng::optional_color cell_color(ng::item_presentation_model_index const& aIndex, ng::color_role aColorRole) const override
         {
@@ -967,5 +1024,6 @@ namespace neogfx::DesignStudio
     private:
         mutable std::map<property_component, ng::ref_ptr<ng::i_widget>> iCellWidgets;
         mutable bool iSyncingCellWidgets = false;
+        std::map<ng::item_presentation_model_index, ng::size> iDialogButtonCells;
     };
 }

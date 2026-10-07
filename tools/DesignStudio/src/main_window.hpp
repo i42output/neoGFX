@@ -18,6 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
+
+#include <map>
+
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
@@ -99,6 +102,9 @@ namespace neogfx::DesignStudio
         void paint_workspace(ng::i_graphics_context& aGc);
         void update_properties();
         std::optional<std::string> property_attribute(i_property const& aProperty) const;
+        std::optional<std::string> property_component_member(i_property const& aProperty, std::uint32_t aComponent) const;
+        std::string attribute_text(std::string const& aName) const;
+        std::optional<std::string> element_attribute(std::string const& aName) const;
         std::string property_cell_text(i_property const& aProperty, std::optional<std::uint32_t> aComponent = {}) const;
         bool set_property_attribute(i_property const& aProperty, std::optional<std::uint32_t> aComponent, std::string const& aText);
         void update_property_rows(i_property const& aProperty, std::optional<std::uint32_t> aExceptRow = {});
@@ -129,7 +135,7 @@ namespace neogfx::DesignStudio
         bool iUpdatingProperties = false;
         bool iPropertiesNeedUpdate = false;
         bool iPropertyDialogOpen = false;
-        std::unique_ptr<ng::push_button> iPropertyDialogButton; // "..." next to the in-place editor of a color or font property
+        std::map<ng::item_presentation_model_index, std::unique_ptr<ng::push_button>> iPropertyDialogButtons; // "..." before the text (or in-place editor) of a font property's row or a color or font property's row being edited
         std::optional<ng::widget_timer> iPropertiesUpdater;
         ng::sink iSink;
         ng::sink iPropertySink; // property_changed of the properties shown in the Properties toolbox

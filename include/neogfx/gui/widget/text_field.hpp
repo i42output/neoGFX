@@ -23,22 +23,7 @@
 
 #include "label.hpp"
 #include "line_edit.hpp"
-
-namespace neogfx
-{
-    enum class text_field_placement : std::uint32_t
-    {
-        NoLabel     = 0x00000000,
-        LabelLeft   = 0x00000001,
-        LabelAbove  = 0x00000002
-    };
-}
-
-begin_declare_enum(neogfx::text_field_placement)
-declare_enum_string(neogfx::text_field_placement, NoLabel)
-declare_enum_string(neogfx::text_field_placement, LabelLeft)
-declare_enum_string(neogfx::text_field_placement, LabelAbove)
-end_declare_enum(neogfx::text_field_placement)
+#include "text_field_bits.hpp"
 
 namespace neogfx
 {

@@ -35,86 +35,10 @@
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/widget/button.hpp>
+#include <neogfx/gui/widget/text_edit_bits.hpp>
 
 namespace neogfx
 {
-    enum class text_edit_caps : std::uint32_t
-    {
-        None                    = 0x00000000,
-
-        SingleLine              = 0x00000001,
-        MultiLine               = 0x00000002,
-        GrowLines               = SingleLine | MultiLine,
-
-        OverwriteMode           = 0x00000010,
-
-        Password                = 0x00000100,
-        ShowPassword            = 0x00000200,
-
-        NonPrintableWhitespace  = 0x00001000,
-        ParseURIs               = 0x00002000,
-        TranslateEmoticons      = 0x00004000,
-
-        OnlyAccept              = 0x00010000,
-
-        LINES_MASK              = SingleLine | MultiLine
-    };
-
-    enum class text_edit_line_ending : std::uint32_t
-    {
-        Lf              = 0,
-        CrLf            = 1,
-        LfCr            = 2,
-        AutomaticLf     = 3,
-        AutomaticCrLf   = 4,
-        AutomaticLfCr   = 5
-    };
-
-    inline bool is_automatic(text_edit_line_ending aLineEnding)
-    {
-        switch (aLineEnding)
-        {
-        case text_edit_line_ending::Lf:
-        case text_edit_line_ending::CrLf:
-        case text_edit_line_ending::LfCr:
-        default:
-            return false;
-        case text_edit_line_ending::AutomaticLf:
-        case text_edit_line_ending::AutomaticCrLf:
-        case text_edit_line_ending::AutomaticLfCr:
-            return true;
-        }
-    }
-}
-
-begin_declare_enum(neogfx::text_edit_caps)
-declare_enum_string(neogfx::text_edit_caps, SingleLine)
-declare_enum_string(neogfx::text_edit_caps, MultiLine)
-declare_enum_string(neogfx::text_edit_caps, GrowLines)
-declare_enum_string(neogfx::text_edit_caps, OverwriteMode)
-declare_enum_string(neogfx::text_edit_caps, Password)
-declare_enum_string(neogfx::text_edit_caps, ShowPassword)
-declare_enum_string(neogfx::text_edit_caps, ParseURIs)
-declare_enum_string(neogfx::text_edit_caps, OnlyAccept)
-end_declare_enum(neogfx::text_edit_caps)
-
-namespace neogfx
-{
-    inline text_edit_caps operator~(text_edit_caps aLhs)
-    {
-        return static_cast<text_edit_caps>(~static_cast<std::uint32_t>(aLhs));
-    }
-
-    inline text_edit_caps operator&(text_edit_caps aLhs, text_edit_caps aRhs)
-    {
-        return static_cast<text_edit_caps>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
-    }
-
-    inline text_edit_caps operator|(text_edit_caps aLhs, text_edit_caps aRhs)
-    {
-        return static_cast<text_edit_caps>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
-    }
-
     class text_edit : public framed_scrollable_widget, public i_clipboard_sink, public i_text_document
     {
         meta_object(framed_scrollable_widget)

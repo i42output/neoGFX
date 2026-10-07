@@ -28,6 +28,8 @@ namespace neogfx::game
     class canvas : public widget<>
     {
     public:
+        using base_type = widget<>; // (see collect_property_types)
+    public:
         define_event(RenderingEntities, rendering_entities, i_graphics_context&, std::int32_t)
         define_event(EntitiesRendered, entities_rendered, i_graphics_context&, std::int32_t)
         define_event(EntityClicked, entity_clicked, entity_id)

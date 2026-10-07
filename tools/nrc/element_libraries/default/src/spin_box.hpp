@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 
-#include <neogfx/gui/widget/spin_box.hpp>
 #include <neogfx/tools/nrc/ui_element.hpp>
 
 namespace neogfx::nrc

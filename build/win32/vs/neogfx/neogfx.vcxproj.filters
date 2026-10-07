@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Generated Files">
       <UniqueIdentifier>{6a5c9b0e-d2ac-415b-9726-7c45ace15060}</UniqueIdentifier>
     </Filter>
@@ -111,6 +107,9 @@
     </Filter>
     <Filter Include="Source Files\resources">
       <UniqueIdentifier>{9793b68c-4ffc-433c-8b2e-68ba2b4de153}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{8fc7d0bf-9d71-4619-8dc2-1684f191d313}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -753,6 +752,9 @@
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\slider.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\slider_bits.hpp">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\timer.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
@@ -1067,12 +1069,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\..\..\src\resources.nrc">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\..\..\src\icons.nrc">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\..\..\src\gfx\native\shader.glsl">
       <Filter>Source Files\native\shader</Filter>
     </CustomBuild>
@@ -1108,6 +1104,12 @@
     </CustomBuild>
     <CustomBuild Include="..\..\..\..\src\gfx\native\standard-texture.vert">
       <Filter>Source Files\native\shader</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\resources.nrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\icons.nrc">
+      <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/gfx/color.hpp>
+#include <neogfx/gui/widget/text_edit_bits.hpp>
 #include <neogfx/tools/nrc/ui_element.hpp>
 
 namespace neogfx::nrc
@@ -111,19 +112,9 @@ namespace neogfx::nrc
             if (iTextColor || iPaperColor)
                 emit("   text_edit::style %1%DefaultStyle;\n", id());
             if (iTextColor)
-            {
-                if (std::holds_alternative<color>(*iTextColor))
-                    emit("   %1%DefaultStyle.character().set_text_color(color{ %2% });\n", id(), std::get<color>(*iTextColor));
-                else
-                    emit("   %1%DefaultStyle.character().set_text_color(gradient{ %2% });\n", id(), std::get<gradient>(*iTextColor));
-            }
+                emit("   %1%DefaultStyle.character().set_text_color(%2%);\n", id(), std::string_view{ *iTextColor });
             if (iPaperColor)
-            {
-                if (std::holds_alternative<color>(*iPaperColor))
-                    emit("   %1%DefaultStyle.character().set_paper_color(color{ %2% });\n", id(), std::get<color>(*iPaperColor));
-                else
-                    emit("   %1%DefaultStyle.character().set_paper_color(gradient{ %2% });\n", id(), std::get<gradient>(*iPaperColor));
-            }
+                emit("   %1%DefaultStyle.character().set_paper_color(%2%);\n", id(), std::string_view{ *iPaperColor });
             if (iTextColor || iPaperColor)
                 emit("   %1%.set_default_style(%1%DefaultStyle);\n", id());
             if (iCaps && (*iCaps & text_edit_caps::Password) == text_edit_caps::Password)
@@ -136,7 +127,7 @@ namespace neogfx::nrc
     private:
         neolib::optional<size_hint> iSizeHint;
         neolib::optional<string> iTabStopHint;
-        neolib::optional<color_or_gradient> iTextColor;
-        neolib::optional<color_or_gradient> iPaperColor;
+        std::optional<std::string> iTextColor; // (the colour or gradient to emit, see get_color)
+        std::optional<std::string> iPaperColor;
     };
 }

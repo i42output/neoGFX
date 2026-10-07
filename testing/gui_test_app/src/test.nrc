@@ -245,33 +245,37 @@
                         tab_text: "Buttons"
                         vertical_layout: {
                             id: layoutButtons
-                            padding: 8px
+                            Padding: 8px
                             horizontal_layout: {
                                 id: layoutTopButtons
-                                size_policy: [Expanding Minimum]
+                                SizePolicy: [Expanding Minimum]
                                 push_button: {
                                     id: button0
                                     .label: {
-                                        placement: ImageTextVertical
+                                        Placement: ImageTextVertical
                                     }
                                     text: "This is the neoGFX test application."
-                                    .image: {
-                                        uri: ":/test/resources/neoGFX.png"
-                                        minimum_size: [ 32dip 32dip ]
-                                        maximum_size: [ 160dip max ]
+                                    image: ":/test/resources/neoGFX.png"
+                                    .image_widget: {
+                                        MinimumSize: [ 32dip 32dip ]
+                                        MaximumSize: [ 160dip max ]
                                     }
-                                    size_policy: Expanding
-                                    base_color: LightGoldenrodYellow
+                                    SizePolicy: Expanding
+                                    Palette: {
+                                        Base: LightGoldenrodYellow
+                                    }
                                 }
                                 push_button: {
                                     id: button1
                                     text: "the,,, quick brown fox jumps over the lazy dog.\nChange tab bar placement."
-                                    size_policy: Expanding
-                                    base_color: LightGoldenrod
+                                    SizePolicy: Expanding
+                                    Palette: {
+                                        Base: LightGoldenrod
+                                    }
                                 }
                                 push_button: {
                                     id: buttonGenerateUuid
-                                    size_policy: Expanding
+                                    SizePolicy: Expanding
                                     text: "&Generate UUID"
                                 }
                             }
@@ -280,12 +284,16 @@
                                 push_button: {
                                     id: button2
                                     text: "ويقفز الثعلب البني السريع فوق الكلب الكسول"
-                                    base_color: Goldenrod
+                                    Palette: {
+                                        Base: Goldenrod
+                                    }
                                 }
                                 push_button: {
                                     id: button3
                                     text: "שועל חום קפיצות מעל הכלב העצלן"
-                                    base_color: DarkGoldenrod
+                                    Palette: {
+                                        Base: DarkGoldenrod
+                                    }
                                 }
                                 push_button: {
                                     id: buttonJapan
@@ -294,7 +302,9 @@
                                 push_button: {
                                     id: buttonChina
                                     text: "一只敏捷的狐狸跳过一只懒狗。"
-                                    base_color: CadetBlue
+                                    Palette: {
+                                        Base: CadetBlue
+                                    }
                                 }
                             }
                             push_button: {
@@ -327,7 +337,7 @@
                                 text_edit: {
                                     id: textEdit
                                     caps: [ OverwriteMode ]
-                                    focus_policy: [ Default ConsumeTabKey ]
+                                    FocusPolicy: [ Default ConsumeTabKey ]
                                     tab_stop_hint: "00000000"
                                     drag_drop: true
                                 }
@@ -350,12 +360,16 @@
                                 vertical_layout: {
                                     text_edit: {
                                         id: textEditSmall
-                                        maximum_width: 100
+                                        MaximumSize: {
+                                            Width: 100
+                                        }
                                     }
                                     text_edit: {
                                         id: textEditSmall2
-                                        maximum_width: 100
-                                        alignment: Right
+                                        MaximumSize: {
+                                            Width: 100
+                                        }
+                                        Alignment: Right
                                     }
                                 }
                             }
@@ -403,21 +417,21 @@
                                         id: layoutSpinners2
                                         double_spin_box: {
                                             id: spinBox1
-                                            size_policy: [Expanding Minimum]
+                                            SizePolicy: [Expanding Minimum]
                                             minimum: -100.0
                                             maximum: 100.0
                                             step: 0.1
                                         }
                                         double_slider: {
                                             id: slider1
-                                            size_policy: [Expanding Minimum]
+                                            SizePolicy: [Expanding Minimum]
                                             minimum: -100.0
                                             maximum: 100.0
                                             step: 0.1
                                         }
                                         double_spin_box: {
                                             id: spinBox2
-                                            size_policy: [Expanding Minimum]
+                                            SizePolicy: [Expanding Minimum]
                                             minimum: -10
                                             maximum: 20
                                             step: 0.5
@@ -428,38 +442,44 @@
                             }
                             horizontal_layout: {
                                 id: layout2
-                                size_policy: [Expanding Minimum]
+                                SizePolicy: [Expanding Minimum]
                                 label: {
                                     id: label1
                                     text: "Label 1:"
                                 }
                                 push_button: {
                                     id: button6
-                                    size_policy: Expanding
+                                    SizePolicy: Expanding
                                     text: "RGB <-> HSV\ncolor space\nconversion test\n\n\nZ͕̰̦̼͖ͦ͆ͬ̍̋̓̚\n\n"
                                 }
                                 spacer: {
-                                    weight: 0.5
+                                    Weight: 0.5
                                 }
                                 vertical_layout: 
                                 {
                                     push_button: {
                                         id: buttonArcadeMode
                                         text: "Toggle arcade mode."
-                                        base_color: ForestGreen
-                                        size_policy: Expanding
+                                        Palette: {
+                                            Base: ForestGreen
+                                        }
+                                        SizePolicy: Expanding
                                     }
                                     push_button: {
                                         id: button7
                                         text: "Toggle &mute."
-                                        base_color: LightCoral
-                                        size_policy: Expanding
+                                        Palette: {
+                                            Base: LightCoral
+                                        }
+                                        SizePolicy: Expanding
                                     }
                                     push_button: {
                                         id: button8
                                         text: "Enable/disable\ncontacts action."
-                                        base_color: [ 255 235 160 ]
-                                        size_policy: Expanding
+                                        Palette: {
+                                            Base: [ 255 235 160 ]
+                                        }
+                                        SizePolicy: Expanding
                                     }
                                 }
                                 group_box: {
@@ -525,13 +545,13 @@
                                     }
                                     widget: {
                                         id: lw
-                                        padding: 0
+                                        Padding: 0
                                         grid_layout: {
                                             id: layoutEffects
                                             rows: 2
                                             columns: 2
-                                            alignment: [ Left VCenter ]
-                                            padding: 0
+                                            Alignment: [ Left VCenter ]
+                                            Padding: 0
                                             radio_button: {
                                                 id: editNormal
                                                 text: "normal"
@@ -561,7 +581,7 @@
                                     radio_button: {
                                         id: radio3
                                         text: "Radio 3"
-                                        enabled: false
+                                        Enabled: false
                                     }
                                     radio_button: {
                                         id: radioThemeColor
@@ -574,13 +594,15 @@
                                     push_button: {
                                         id: button9
                                         text: "Default/Slate\nStyle"
-                                        base_color: Aquamarine
+                                        Palette: {
+                                            Base: Aquamarine
+                                        }
                                     }
                                     grid_layout: {
                                         id: keypad
                                         rows: 4
                                         columns: 3
-                                        minimum_size: [ 100 0 ]
+                                        MinimumSize: [ 100 0 ]
                                         spacing: 0
                                     }
                                 }
@@ -605,41 +627,41 @@
                                 radio_button: {
                                     id: radioMessageBoxIconInformation
                                     text: "Information"
-                                    .image: {
-                                        uri: ":/neogfx/resources/icons/information.png"
-                                        size: 24dip
+                                    image: ":/neogfx/resources/icons/information.png"
+                                    .image_widget: {
+                                        FixedSize: 24dip
                                     }
                                 }
                                 radio_button: {
                                     id: radioMessageBoxIconQuestion
                                     text: "Question"
-                                    .image: {
-                                        uri: ":/neogfx/resources/icons/question.png"
-                                        size: 24dip
+                                    image: ":/neogfx/resources/icons/question.png"
+                                    .image_widget: {
+                                        FixedSize: 24dip
                                     }
                                 }
                                 radio_button: {
                                     id: radioMessageBoxIconStop
                                     text: "Stop"
-                                    .image: {
-                                        uri: ":/neogfx/resources/icons/stop.png"
-                                        size: 24dip
+                                    image: ":/neogfx/resources/icons/stop.png"
+                                    .image_widget: {
+                                        FixedSize: 24dip
                                     }
                                 }
                                 radio_button: {
                                     id: radioMessageBoxIconWarning
                                     text: "Warning"
-                                    .image: {
-                                        uri: ":/neogfx/resources/icons/warning.png"
-                                        size: 24dip
+                                    image: ":/neogfx/resources/icons/warning.png"
+                                    .image_widget: {
+                                        FixedSize: 24dip
                                     }
                                 }
                                 radio_button: {
                                     id: radioMessageBoxIconError
                                     text: "Error"
-                                    .image: {
-                                        uri: ":/neogfx/resources/icons/error.png"
-                                        size: 24dip
+                                    image: ":/neogfx/resources/icons/error.png"
+                                    .image_widget: {
+                                        FixedSize: 24dip
                                     }
                                 }
                             }
@@ -663,8 +685,8 @@
                                 text_edit: {
                                     id: textEditMessageBoxText
                                     text: "This is a test of the neoGFX message box.\nThis is a line of text.\n\nThis is a line of text after a blank line"
-                                    minimum_size: [ 256dip 128dip ]
-                                    size_policy: Minimum
+                                    MinimumSize: [ 256dip 128dip ]
+                                    SizePolicy: Minimum
                                 }
                                 label: {
                                     text: "Detailed Text:"
@@ -672,14 +694,14 @@
                                 text_edit: {
                                     id: textEditMessageBoxDetailedText
                                     text: "This is where optional informative text usually goes.\nThis is a line of text.\n\nThe previous line was intentionally left blank."
-                                    minimum_size: [ 256dip 128dip ]
-                                    size_policy: Minimum
+                                    MinimumSize: [ 256dip 128dip ]
+                                    SizePolicy: Minimum
                                 }
                             }
                             push_button: {
                                 id: buttonOpenMessageBox
                                 text: "Open Message Box"
-                                size_policy: Minimum
+                                SizePolicy: Minimum
                             }
                             label: {
                                 id: labelMessageBoxResult
@@ -693,20 +715,20 @@
                             id: layoutItemViews
                             table_view: {
                                 id: tableView1
-                                minimum_size: [ 128dip 128dip ]
+                                MinimumSize: [ 128dip 128dip ]
                             }
                             table_view: {
                                 id: tableView2
-                                minimum_size: [ 128dip 128dip ]
+                                MinimumSize: [ 128dip 128dip ]
                             }
                             horizontal_layout: {
                                 tree_view: {
                                     id: treeView1
-                                    minimum_size: [ 128dip 128dip ]
+                                    MinimumSize: [ 128dip 128dip ]
                                 }
                                 tree_view: {
                                     id: treeView2
-                                    minimum_size: [ 128dip 128dip ]
+                                    MinimumSize: [ 128dip 128dip ]
                                 }
                             }
                             push_button: {
@@ -715,7 +737,7 @@
                             }
                             horizontal_layout: {
                                 id: layoutTableViewTweaks
-                                alignment: Top
+                                Alignment: Top
                                 spacer: {}
                                 group_box: {
                                     text: "Table View Model"
@@ -754,7 +776,7 @@
                                                 }
                                                 drop_list: {
                                                     id: dropListEasingUpperTableView
-                                                    size_policy: Minimum
+                                                    SizePolicy: Minimum
                                                 }
                                             }
                                         }
@@ -789,7 +811,7 @@
                                                 }
                                                 drop_list: {
                                                     id: dropListEasingLowerTableView
-                                                    size_policy: Minimum
+                                                    SizePolicy: Minimum
                                                 }
                                             }
                                         }
@@ -848,31 +870,39 @@
                             vertical_layout: {
                                 image_widget: {
                                     image: ":/test/resources/channel_256.png"
-                                    aspect_ratio: Ignore
-                                    background_color: Red
-                                    size_policy: Expanding
-                                    minimum_size: 0
+                                    AspectRatio: Ignore
+                                    Palette: {
+                                        Background: Red
+                                    }
+                                    SizePolicy: Expanding
+                                    MinimumSize: 0
                                 }
                                 image_widget: {
                                     image: ":/test/resources/channel_256.png"
-                                    aspect_ratio: Keep
-                                    background_color: Green
-                                    size_policy: Expanding
-                                    minimum_size: 0
+                                    AspectRatio: Keep
+                                    Palette: {
+                                        Background: Green
+                                    }
+                                    SizePolicy: Expanding
+                                    MinimumSize: 0
                                 }
                                 image_widget: {
                                     image: ":/test/resources/channel_256.png"
-                                    aspect_ratio: KeepExpanding
-                                    background_color: Blue
-                                    size_policy: Expanding
-                                    minimum_size: 0
+                                    AspectRatio: KeepExpanding
+                                    Palette: {
+                                        Background: Blue
+                                    }
+                                    SizePolicy: Expanding
+                                    MinimumSize: 0
                                 }
                                 image_widget: {
                                     image: ":/test/resources/channel_256.png"
-                                    aspect_ratio: Stretch
-                                    background_color: Magenta
-                                    size_policy: Expanding
-                                    minimum_size: 0
+                                    AspectRatio: Stretch
+                                    Palette: {
+                                        Background: Magenta
+                                    }
+                                    SizePolicy: Expanding
+                                    MinimumSize: 0
                                 }
                             }
                             image_widget: {
@@ -958,7 +988,7 @@
                                 }
                                 drop_list: {
                                     id: dropListEasing
-                                    size_policy: Minimum
+                                    SizePolicy: Minimum
                                 }
                             }
                             spacer: {}
@@ -989,10 +1019,10 @@
                         tab_text: "Web Browser"
                         vertical_layout: {
                             id: layoutWebView
-                            size_policy: Expanding
+                            SizePolicy: Expanding
                             line_edit: {
                                 id: webViewUrl
-                                focus_policy: [ Default ConsumeReturnKey ]
+                                FocusPolicy: [ Default ConsumeReturnKey ]
                             }
                             web_view: {
                                 id: webView
@@ -1006,7 +1036,7 @@
                             canvas: {
                                 id: canvasInstancing
                                 vertical_layout: {
-                                    size_policy: Expanding
+                                    SizePolicy: Expanding
                                     spacer: {}
                                     horizontal_layout: {
                                         group_box: {
@@ -1166,7 +1196,7 @@
                             }
                             vertical_layout: {
                                 id: layoutSceneGraph
-                                size_policy: Expanding
+                                SizePolicy: Expanding
                             }
                         }
                     }

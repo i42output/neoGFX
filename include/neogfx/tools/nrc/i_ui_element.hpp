@@ -22,6 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 
 #include <bit>
+#include <cctype>
+#include <sstream>
+#include <iomanip>
 #include <algorithm>
 #include <vector>
 #include <neolib/neolib.hpp>
@@ -291,49 +294,124 @@ namespace neogfx::nrc
                 throw element_ill_formed(id().to_std_string());
             }
         }
-        color get_color(const data_t& aData) const
+        // colours and gradients are the C++ to emit (e.g. "color{ 0xFFFFFFE0u }" or "color::LightGoldenrodYellow") rather than neoGFX objects 
+        // so that nrc (and its element libraries) don't link against neoGFX (pass the C++ to emit as a std::string_view: a std::string 
+        // argument is emitted as the contents of a string literal)
+        std::string get_color(const data_t& aData) const
         {
-            color result;
-            std::visit([&result](auto&& v)
+            std::string result;
+            std::visit([this, &result](auto&& v)
             {
                 typedef std::decay_t<decltype(v)> vt;
                 if constexpr (std::is_same_v<vt, std::int64_t>)
-                    result = color{ static_cast<std::uint32_t>(v) };
+                    result = argb_color(static_cast<std::uint32_t>(v));
                 else if constexpr (std::is_same_v<vt, neolib::i_string>)
-                    result = v.to_std_string();
+                    result = text_color(v.to_std_string());
                 else
                     throw wrong_type();
             }, aData);
             return result;
         }
-        color get_color(const array_data_t& aArrayData) const
+        // a colour's text as in a CSS colour value ("#RGB", "#RGBA", "#RRGGBB", "#RRGGBBAA", "rgb(r, g, b)" or "rgba(r, g, b, a)"), otherwise a 
+        // colour name (e.g. "LightGoldenrodYellow": color::LightGoldenrodYellow)
+        std::string text_color(std::string const& aText) const
+        {
+            auto const ill_formed = [&]() { return element_ill_formed(id().to_std_string() + ": colour '" + aText + "'"); };
+            if (!aText.empty() && aText[0] == '#')
+            {
+                std::string hex;
+                switch (aText.size() - 1u)
+                {
+                case 3:
+                    hex = std::string{ "FF" } + aText[1] + aText[1] + aText[2] + aText[2] + aText[3] + aText[3];
+                    break;
+                case 4:
+                    hex = std::string{} + aText[4] + aText[4] + aText[1] + aText[1] + aText[2] + aText[2] + aText[3] + aText[3];
+                    break;
+                case 6:
+                    hex = "FF" + aText.substr(1u, 6u);
+                    break;
+                case 8:
+                    hex = aText.substr(7u, 2u) + aText.substr(1u, 6u);
+                    break;
+                default:
+                    throw ill_formed();
+                }
+                if (hex.find_first_not_of("0123456789abcdefABCDEF") != std::string::npos)
+                    throw ill_formed();
+                return argb_color(static_cast<std::uint32_t>(std::stoul(hex, nullptr, 16)));
+            }
+            auto const open = aText.find('(');
+            if (open != std::string::npos)
+            {
+                auto const function = aText.substr(0u, open);
+                auto const close = aText.find(')', open);
+                if ((function != "rgb" && function != "rgba") || close == std::string::npos)
+                    throw ill_formed();
+                std::vector<std::string> components;
+                std::istringstream args{ aText.substr(open + 1u, close - open - 1u) };
+                for (std::string component; std::getline(args, component, ',');)
+                    components.push_back(component);
+                if (components.size() != (function == "rgb" ? 3u : 4u))
+                    throw ill_formed();
+                try
+                {
+                    std::uint32_t const alpha = components.size() == 4u ? static_cast<std::uint32_t>(std::stod(components[3]) * 255.0) : 0xFFu;
+                    return argb_color(((alpha & 0xFFu) << 24u) | ((std::stoul(components[0]) & 0xFFu) << 16u) | 
+                        ((std::stoul(components[1]) & 0xFFu) << 8u) | (std::stoul(components[2]) & 0xFFu));
+                }
+                catch (...)
+                {
+                    throw ill_formed();
+                }
+            }
+            if (aText.empty() || !(std::isalpha(static_cast<unsigned char>(aText[0])) || aText[0] == '_') || 
+                aText.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_") != std::string::npos)
+                throw ill_formed();
+            return "color::" + aText;
+        }
+        std::string get_color(const array_data_t& aArrayData) const
         {
             if (aArrayData.size() == 3)
-                return color{ neolib::get_as<std::uint8_t>(aArrayData[0]), neolib::get_as<std::uint8_t>(aArrayData[1]), neolib::get_as<std::uint8_t>(aArrayData[2]) };
+                return argb_color((0xFFu << 24u) | 
+                    (static_cast<std::uint32_t>(neolib::get_as<std::uint8_t>(aArrayData[0])) << 16u) | 
+                    (static_cast<std::uint32_t>(neolib::get_as<std::uint8_t>(aArrayData[1])) << 8u) | 
+                    static_cast<std::uint32_t>(neolib::get_as<std::uint8_t>(aArrayData[2])));
             else if (aArrayData.size() == 4)
-                return color{ neolib::get_as<std::uint8_t>(aArrayData[0]), neolib::get_as<std::uint8_t>(aArrayData[1]), neolib::get_as<std::uint8_t>(aArrayData[2]), neolib::get_as<std::uint8_t>(aArrayData[3]) };
+                return argb_color((static_cast<std::uint32_t>(neolib::get_as<std::uint8_t>(aArrayData[3])) << 24u) | 
+                    (static_cast<std::uint32_t>(neolib::get_as<std::uint8_t>(aArrayData[0])) << 16u) | 
+                    (static_cast<std::uint32_t>(neolib::get_as<std::uint8_t>(aArrayData[1])) << 8u) | 
+                    static_cast<std::uint32_t>(neolib::get_as<std::uint8_t>(aArrayData[2])));
             else
                 throw element_ill_formed(id().to_std_string());
         }
-        color_or_gradient get_color_or_gradient(const array_data_t& aArrayData) const
+        std::string get_color_or_gradient(const array_data_t& aArrayData) const
         {
             if (aArrayData[0].which() == neolib::simple_variant_type::String)
             {
                 auto gradientDirection = neolib::try_string_to_enum<gradient_direction>(aArrayData[0].get<neolib::i_string>().to_std_string());
                 if (gradientDirection != std::nullopt)
                 {
-                    gradient::color_stop_list stops;
+                    std::ostringstream result;
                     // todo: full gradient specification support
+                    result << "gradient{ gradient::color_stop_list{ ";
                     auto interval = 1.0 / (aArrayData.size() - 2);
                     for (std::size_t i = 1; i < aArrayData.size(); ++i)
-                        stops.push_back(gradient::color_stop{ (i - 1) * interval, get_color(aArrayData[i]) });
-                    return gradient{ stops, *gradientDirection };
+                        result << (i > 1 ? ", " : "") << "gradient::color_stop{ " << (i - 1) * interval << ", " << get_color(aArrayData[i]) << " }";
+                    result << " }, " << enum_to_string<gradient_direction>("gradient_direction", *gradientDirection) << " }";
+                    return result.str();
                 }
                 else
                     return get_color(aArrayData);
             }
             else
                 return get_color(aArrayData);
+        }
+        static std::string argb_color(std::uint32_t aArgb)
+        {
+            std::ostringstream result;
+            result << "color{ 0x" << std::uppercase << std::hex << std::setfill('0') << std::setw(8) << aArgb << "u }";
+            return result.str();
         }
     protected:
         template <typename Enum>
@@ -422,26 +500,6 @@ namespace neogfx::nrc
                 return "size_constraint::" + hp;
             else
                 return "size_constraint::" + hp + ", size_constraint::" + vp;
-        }
-        static std::string convert_emit_argument(const color& aArgument)
-        {
-            std::ostringstream result;
-            result << "0x" << std::uppercase << std::hex << std::setfill('0') << std::setw(8) << aArgument.as_argb() << "u";
-            return result.str();
-        }
-        static std::string convert_emit_argument(const gradient& aArgument)
-        {
-            std::ostringstream result;
-            // todo: full gradient specification support
-            result << "gradient::color_stop_list{ ";
-            for (auto s = aArgument.color_stops().begin(); s != aArgument.color_stops().end(); ++s)
-            {
-                if (s != aArgument.color_stops().begin())
-                    result << ", ";
-                result << "gradient::color_stop{ " << s->first() << ", color{ " << convert_emit_argument(sRGB_color{ s->second() }) << " } }";
-            }
-            result << " }, " << enum_to_string<gradient_direction>("gradient_direction", aArgument.direction());
-            return result.str();
         }
     };
 }

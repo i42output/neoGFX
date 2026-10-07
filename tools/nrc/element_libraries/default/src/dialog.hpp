@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/tools/nrc/ui_element.hpp>
-#include <neogfx/gui/dialog/dialog_button_box.hpp>
+#include <neogfx/gui/dialog/dialog_button_box_bits.hpp>
 #include "window.hpp"
 
 namespace neogfx::nrc

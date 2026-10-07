@@ -22,20 +22,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/gui/widget/widget.hpp>
-
-namespace neogfx
-{
-    enum class slider_orientation : std::uint32_t
-    {
-        Horizontal,
-        Vertical
-    };
-}
-
-begin_declare_enum(neogfx::slider_orientation)
-declare_enum_string(neogfx::slider_orientation, Horizontal)
-declare_enum_string(neogfx::slider_orientation, Vertical)
-end_declare_enum(neogfx::slider_orientation)
+#include <neogfx/gui/widget/slider_bits.hpp>
 
 namespace neogfx
 {
@@ -87,6 +74,8 @@ namespace neogfx
     template <typename T>
     class basic_slider : public slider_impl
     {
+    public:
+        using base_type = slider_impl; // (see collect_property_types)
     public:
         typedef T value_type;
     public:

@@ -375,14 +375,16 @@ namespace neogfx
                 w = &aWidget;
             else
                 w = &w->parent();
-            if (w->has_background_color())
-            {
-                textColor = w->background_color().brightness() >= 0.509 ? color::Black : color::White;
-                break;
-            }
-            else if (w->has_base_color())
+            // (a widget's base colour (e.g. a push button's face, a text edit's text area) is what its text is drawn on so it takes 
+            // precedence over its background colour)
+            if (w->has_base_color())
             {
                 textColor = w->base_color().brightness() >= 0.509 ? color::Black : color::White;
+                break;
+            }
+            else if (w->has_background_color())
+            {
+                textColor = w->background_color().brightness() >= 0.509 ? color::Black : color::White;
                 break;
             }
         } while (w->has_parent());

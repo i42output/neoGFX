@@ -439,6 +439,7 @@
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\skin.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\skin_manager.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\slider.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\slider_bits.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\timer.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\window\i_native_window.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\window\i_window.hpp" />
@@ -697,17 +698,6 @@
     <None Include="..\..\..\..\include\neogfx\gfx\shader_program.inl" />
     <None Include="..\..\..\..\include\neogfx\gfx\text\glyph_text.ipp" />
     <None Include="..\..\..\..\include\neogfx\gui\widget\slider.ipp" />
-    <CustomBuild Include="..\..\..\..\src\resources.nrc">
-      <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
-    </CustomBuild>
     <CustomBuild Include="..\..\..\..\src\gfx\native\shader.glsl">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl Shader</Command>
@@ -840,16 +830,27 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\..\src\icons.nrc">
+    <CustomBuild Include="..\..\..\..\src\resources.nrc">
       <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\src\icons.nrc">
+      <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
     </CustomBuild>
     <None Include="..\..\..\..\src\resources\emoticon.json" />
   </ItemGroup>

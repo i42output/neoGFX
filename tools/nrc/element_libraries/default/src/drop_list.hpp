@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 
-#include <neogfx/gui/widget/drop_list.hpp>
+#include <neogfx/gui/widget/drop_list_bits.hpp>
 #include <neogfx/tools/nrc/ui_element.hpp>
 
 namespace neogfx::nrc

@@ -581,6 +581,18 @@ namespace neogfx
         base_type::layout_items_completed();
         if (iEnteredWidget != nullptr)
         {
+            if (is_nested() && !surface().has_capturing_widget())
+            {
+                // a nested window can be partly hidden (e.g. scrolled out of view under other widgets of the window hosting it): where it 
+                // is hidden the mouse isn't over it (or any of its widgets)
+                auto const& hostingWindow = window_manager().hosting_window(*this);
+                auto const& widgetUnderMouse = hostingWindow.as_widget().widget_for_mouse_event(window_manager().mouse_position(hostingWindow));
+                if (&widgetUnderMouse != &as_widget() && !as_widget().is_ancestor_of(widgetUnderMouse))
+                {
+                    mouse_left();
+                    return;
+                }
+            }
             i_widget& widgetUnderMouse = (!surface().has_capturing_widget() ? widget_for_mouse_event(mouse_position()) : surface().capturing_widget());
             if (iEnteredWidget != &widgetUnderMouse)
                 mouse_entered(mouse_position());

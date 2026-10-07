@@ -47,6 +47,7 @@ namespace neogfx
 }
 
 #define meta_object( ... ) \
+    public: \
         using base_type = __VA_ARGS__; \
     public: \
         mutable std::optional<std::string> ClassName; \

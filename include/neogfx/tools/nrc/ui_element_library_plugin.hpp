@@ -44,7 +44,9 @@ namespace neogfx::nrc
         using base_type::base_type;
         bool unload() override
         {
-            service<i_resource_manager>().clean();
+            // (only if the application has a resource manager (nrc doesn't): so that an element library needn't link against neoGFX)
+            if (neolib::services::service_registered<i_resource_manager>())
+                neolib::services::get_service_provider().service<i_resource_manager>().clean();
             return base_type::unload();
         }
     };

@@ -344,6 +344,8 @@ namespace neogfx::DesignStudio
                 std::string const type{ aNode.name().begin(), aNode.name().end() };
                 if (!type.empty() && type[0] == '.')
                     return nullptr; // (a member of its parent (e.g. a label's .text_widget), not an element: kept as an attribute)
+                if (!type.empty() && std::isupper(static_cast<unsigned char>(type[0])))
+                    return nullptr; // (a composite property's components (e.g. "Palette: { Base: Red }"), not an element: kept as an attribute)
                 std::string const id = aNode.as<neolib::fjson_object>().has("id") ? 
                     std::string{ aNode.as<neolib::fjson_object>().at("id").text().begin(), aNode.as<neolib::fjson_object>().at("id").text().end() } :
                     type + boost::lexical_cast<std::string>(++counters[type]);

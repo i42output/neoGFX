@@ -29,6 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <optional>
 #include <map>
+#include <set>
+#include <cctype>
 #include <functional>
 #include <iostream>
 
@@ -62,6 +64,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/symbol.hpp>
 #include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
+#include <neogfx/tools/DesignStudio/i_property_component_registry.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -100,6 +103,32 @@ namespace neogfx::DesignStudio
     // shows what nrc would generate (see neogfx::nrc::ui_element::parse/emit_body for the attributes supported)
     namespace nrc_attributes
     {
+        // the attribute associated with an object property: the property's name (e.g. "SizePolicy") except Size's (none: it is the extents)
+        inline std::string attribute_name_of(std::string const& aPropertyName)
+        {
+            if (aPropertyName == "Size")
+                return {};
+            return aPropertyName;
+        }
+
+        // the object property associated with an attribute: the attribute's name or, for a component of a composite property (e.g. 
+        // "MaximumSize.Width", as "MaximumSize: { Width: 100 }" is applied), its first part
+        inline std::string property_name_of(std::string const& aAttribute)
+        {
+            return aAttribute.substr(0u, aAttribute.find('.'));
+        }
+
+        // a composite property's component's name as a member of its attribute's object value (e.g. Palette's "Alternate Base": 
+        // "AlternateBase" as in "Palette: { AlternateBase: Red }")
+        inline std::string member_name_of(std::string const& aComponentName)
+        {
+            std::string result;
+            for (auto ch : aComponentName)
+                if (ch != ' ')
+                    result += ch;
+            return result;
+        }
+
         inline std::string trim(std::string_view aText)
         {
             auto const first = aText.find_first_not_of(" \t\r\n");
@@ -199,6 +228,53 @@ namespace neogfx::DesignStudio
             }
             add();
             return result;
+        }
+
+        // whether a value is an object ("{ name: value ... }": a composite property's components, e.g. "Palette: { Base: Red }")
+        inline bool is_object(std::string_view aValue)
+        {
+            auto const value = trim(aValue);
+            return value.size() >= 2u && value.front() == '{' && value.back() == '}';
+        }
+
+        // an object value's member's value (if it has the member)
+        inline std::optional<std::string> member(std::string_view aValue, std::string const& aMember)
+        {
+            std::optional<std::string> result;
+            for (auto const& [name, value] : members(aValue))
+                if (name == aMember)
+                    result = value;
+            return result;
+        }
+
+        // an object value with a member set (an empty member value removes it; an object without members is empty)
+        inline std::string with_member(std::string_view aValue, std::string const& aMember, std::string const& aMemberValue)
+        {
+            auto existing = members(aValue);
+            std::erase_if(existing, [&](auto const& m) { return m.first == aMember; });
+            if (!aMemberValue.empty())
+                existing.emplace_back(aMember, aMemberValue);
+            if (existing.empty())
+                return {};
+            std::string result = "{\n";
+            for (auto const& [name, value] : existing)
+                result += "    " + name + ": " + value + "\n";
+            return result + "}";
+        }
+
+        // a palette colour role by name (as in the .nrc, e.g. "AlternateBase")
+        inline std::optional<color_role> to_color_role(std::string_view aName)
+        {
+            static std::pair<std::string_view, color_role> const roles[] = {
+                { "Theme", color_role::Theme }, { "Background", color_role::Background }, { "Foreground", color_role::Foreground }, 
+                { "Base", color_role::Base }, { "AlternateBase", color_role::AlternateBase }, { "Text", color_role::Text }, 
+                { "Selection", color_role::Selection }, { "AlternateSelection", color_role::AlternateSelection }, 
+                { "SelectedText", color_role::SelectedText }, { "Focus", color_role::Focus }, { "Hover", color_role::Hover }, 
+                { "PrimaryAccent", color_role::PrimaryAccent }, { "SecondaryAccent", color_role::SecondaryAccent }, { "Void", color_role::Void } };
+            for (auto const& [name, role] : roles)
+                if (name == aName)
+                    return role;
+            return {};
         }
 
         // a length (e.g. "32dip", "max" or a number of pixels) in device units
@@ -334,7 +410,7 @@ namespace neogfx::DesignStudio
         template <typename Target>
         void apply(Target& aTarget, std::vector<std::pair<std::string, std::string>> const& aAttributes, bool aIncludeText, restorers& aRestorers, std::string const& aPath = {});
 
-        // a member element (e.g. ".label" or ".image" of a button)
+        // a member element (e.g. ".label" or ".image_widget" of a button)
         template <typename Target>
         inline void apply_member(Target& aTarget, std::string const& aName, std::string const& aValue, restorers& aRestorers, std::string const& aPath)
         {
@@ -345,12 +421,12 @@ namespace neogfx::DesignStudio
                 if constexpr (requires(Target& aT) { aT.label().text_widget(); })
                     apply(aTarget.label(), attributes, true, aRestorers, path);
             }
-            else if (aName == ".image" || aName == ".image_widget")
+            else if (aName == ".image_widget")
             {
                 if constexpr (requires(Target& aT) { aT.image_widget().set_aspect_ratio(neogfx::aspect_ratio::Keep); })
                     apply(aTarget.image_widget(), attributes, true, aRestorers, path);
             }
-            else if (aName == ".text" || aName == ".text_widget")
+            else if (aName == ".text_widget")
             {
                 if constexpr (requires(Target& aT) { aT.text_widget().set_size_hint(neogfx::size_hint{}); })
                     apply(aTarget.text_widget(), attributes, true, aRestorers, path);
@@ -362,32 +438,33 @@ namespace neogfx::DesignStudio
             }
         }
 
-        // the attributes apply() supports for a target (each with its alternative names, e.g. "transparency" for "opacity")
+        // the attributes apply() supports for a target (each with its alternative names, e.g. "uri" for "image"); those that are object 
+        // properties have the property's name (a composite property's components are members of its object value, e.g. "MaximumSize: 
+        // { Width: 100 }" or "Palette: { Base: Red }")
         template <typename Target>
         inline std::vector<std::vector<std::string>> supported()
         {
             std::vector<std::vector<std::string>> result;
             if constexpr (std::is_base_of_v<i_geometry, Target>)
-                for (char const* name : { "size_policy", "size", "minimum_size", "maximum_size", "minimum_width", "minimum_height", "maximum_width", "maximum_height", "weight", "padding" })
+                for (char const* name : { "SizePolicy", "FixedSize", "MinimumSize", "MaximumSize", "Weight", "Padding" })
                     result.push_back({ name });
             if constexpr (std::is_base_of_v<i_layout, Target>)
                 result.push_back({ "spacing" });
             if constexpr (requires(Target& aT) { aT.set_alignment(neogfx::alignment::Left); { aT.alignment() } -> std::convertible_to<neogfx::alignment>; })
-                result.push_back({ "alignment" });
+                result.push_back({ "Alignment" });
             if constexpr (std::is_base_of_v<i_widget, Target>)
             {
-                result.push_back({ "base_color" });
-                result.push_back({ "background_color" });
-                result.push_back({ "opacity", "transparency" });
-                result.push_back({ "enabled", "disabled" });
+                result.push_back({ "Palette" });
+                result.push_back({ "Opacity" });
+                result.push_back({ "Enabled" });
             }
             if constexpr (requires(Target& aT) { aT.set_image(string{}); aT.set_image(neogfx::texture{}); })
                 result.push_back({ "image", "uri" });
             if constexpr (requires(Target& aT) { aT.set_aspect_ratio(neogfx::aspect_ratio::Keep); { aT.aspect_ratio() } -> std::convertible_to<neogfx::aspect_ratio>; })
-                result.push_back({ "aspect_ratio" });
+                result.push_back({ "AspectRatio" });
             if constexpr (requires(Target& aT) { aT.set_placement(neogfx::label_placement::ImageTextHorizontal); { aT.placement() } -> std::convertible_to<neogfx::label_placement>; } ||
                 requires(Target& aT) { aT.set_placement(neogfx::cardinal::Center); { aT.placement() } -> std::convertible_to<neogfx::cardinal>; })
-                result.push_back({ "placement" });
+                result.push_back({ "Placement" });
             return result;
         }
 
@@ -395,7 +472,53 @@ namespace neogfx::DesignStudio
         inline void apply(Target& aTarget, std::vector<std::pair<std::string, std::string>> const& aAttributes, bool aIncludeText, restorers& aRestorers, std::string const& aPath)
         {
             auto key = [&](char const* aProperty) { return aPath + "/" + aProperty; };
+            // (a composite property's object value's members are its components, e.g. "MaximumSize: { Width: 100 }": "MaximumSize.Width: 100")
+            std::vector<std::pair<std::string, std::string>> attributes;
             for (auto const& [name, value] : aAttributes)
+                if (!name.empty() && std::isupper(static_cast<unsigned char>(name[0])) && is_object(value))
+                {
+                    // (a geometry property's members (e.g. "FixedSize: { Width: 24dip }") are applied to its default (unset) value so that a 
+                    // member not given (e.g. one cleared) is as it would be by default rather than as it last was)
+                    if constexpr (std::is_base_of_v<i_geometry, Target>)
+                    {
+                        auto& geometry = static_cast<i_geometry&>(aTarget);
+                        if (name == "MinimumSize")
+                        {
+                            remember(aRestorers, key("minimum_size"), [&geometry, previous = geometry.has_minimum_size() ? optional_size{ geometry.minimum_size() } : optional_size{}]() { geometry.set_minimum_size(previous); });
+                            geometry.set_minimum_size(optional_size{});
+                        }
+                        else if (name == "MaximumSize")
+                        {
+                            remember(aRestorers, key("maximum_size"), [&geometry, previous = geometry.has_maximum_size() ? optional_size{ geometry.maximum_size() } : optional_size{}]() { geometry.set_maximum_size(previous); });
+                            geometry.set_maximum_size(optional_size{});
+                        }
+                        else if (name == "FixedSize")
+                        {
+                            remember(aRestorers, key("fixed_size"), [&geometry, previous = geometry.has_fixed_size() ? optional_size{ geometry.fixed_size() } : optional_size{}]() { geometry.set_fixed_size(previous); });
+                            geometry.set_fixed_size(optional_size{});
+                        }
+                        else if (name == "Weight")
+                        {
+                            remember(aRestorers, key("weight"), [&geometry, previous = geometry.has_weight() ? optional_size{ geometry.weight() } : optional_size{}]() { geometry.set_weight(previous); });
+                            geometry.set_weight(optional_size{});
+                        }
+                        else if (name == "Padding")
+                        {
+                            remember(aRestorers, key("padding"), [&geometry, previous = geometry.has_padding() ? optional_padding{ geometry.padding() } : optional_padding{}]() { geometry.set_padding(previous); });
+                            geometry.set_padding(optional_padding{});
+                        }
+                        else if (name == "SizePolicy")
+                        {
+                            remember(aRestorers, key("size_policy"), [&geometry, previous = geometry.has_size_policy() ? optional_size_policy{ geometry.size_policy() } : optional_size_policy{}]() { geometry.set_size_policy(previous); });
+                            geometry.set_size_policy(optional_size_policy{});
+                        }
+                    }
+                    for (auto const& [memberName, memberValue] : members(value))
+                        attributes.emplace_back(name + "." + memberName, memberValue);
+                }
+                else
+                    attributes.emplace_back(name, value);
+            for (auto const& [name, value] : attributes)
             {
                 try
                 {
@@ -410,7 +533,7 @@ namespace neogfx::DesignStudio
                                 aTarget.set_text(string{ unquote(value) });
                             }
                     }
-                    else if (name == "size_policy")
+                    else if (name == "SizePolicy")
                     {
                         if constexpr (std::is_base_of_v<i_geometry, Target>)
                         {
@@ -423,32 +546,32 @@ namespace neogfx::DesignStudio
                             }
                         }
                     }
-                    else if (name == "minimum_size" || name == "maximum_size" || name == "size" || name == "weight" ||
-                        name == "minimum_width" || name == "minimum_height" || name == "maximum_width" || name == "maximum_height")
+                    else if (name == "MinimumSize" || name == "MaximumSize" || name == "FixedSize" || name == "Weight" ||
+                        name == "MinimumSize.Width" || name == "MinimumSize.Height" || name == "MaximumSize.Width" || name == "MaximumSize.Height")
                     {
                         if constexpr (std::is_base_of_v<i_geometry, Target>)
                         {
                             auto& geometry = static_cast<i_geometry&>(aTarget);
-                            bool const isMinimum = name.starts_with("minimum");
-                            bool const isMaximum = name.starts_with("maximum");
+                            bool const isMinimum = name.starts_with("MinimumSize");
+                            bool const isMaximum = name.starts_with("MaximumSize");
                             if (isMinimum)
                                 remember(aRestorers, key("minimum_size"), [&geometry, previous = geometry.has_minimum_size() ? optional_size{ geometry.minimum_size() } : optional_size{}]() { geometry.set_minimum_size(previous); });
                             else if (isMaximum)
                                 remember(aRestorers, key("maximum_size"), [&geometry, previous = geometry.has_maximum_size() ? optional_size{ geometry.maximum_size() } : optional_size{}]() { geometry.set_maximum_size(previous); });
-                            else if (name == "size")
+                            else if (name == "FixedSize")
                                 remember(aRestorers, key("fixed_size"), [&geometry, previous = geometry.has_fixed_size() ? optional_size{ geometry.fixed_size() } : optional_size{}]() { geometry.set_fixed_size(previous); });
                             else
                                 remember(aRestorers, key("weight"), [&geometry, previous = geometry.has_weight() ? optional_size{ geometry.weight() } : optional_size{}]() { geometry.set_weight(previous); });
-                            if (name.ends_with("_width") || name.ends_with("_height"))
+                            if (name.ends_with(".Width") || name.ends_with(".Height"))
                             {
                                 auto const d = to_dimension(geometry, unquote(value));
                                 if (d)
                                 {
-                                    if (name == "minimum_width")
+                                    if (name == "MinimumSize.Width")
                                         geometry.set_minimum_width(*d);
-                                    else if (name == "minimum_height")
+                                    else if (name == "MinimumSize.Height")
                                         geometry.set_minimum_height(*d);
-                                    else if (name == "maximum_width")
+                                    else if (name == "MaximumSize.Width")
                                         geometry.set_maximum_width(*d);
                                     else
                                         geometry.set_maximum_height(*d);
@@ -456,7 +579,7 @@ namespace neogfx::DesignStudio
                             }
                             else
                             {
-                                auto const s = name == "weight" ? 
+                                auto const s = name == "Weight" ? 
                                     [&]() -> std::optional<size> { auto const d = items(value); if (d.size() == 1u) return size{ std::stod(d[0]), std::stod(d[0]) }; if (d.size() == 2u) return size{ std::stod(d[0]), std::stod(d[1]) }; return {}; }() : 
                                     to_size(geometry, value);
                                 if (s)
@@ -465,7 +588,7 @@ namespace neogfx::DesignStudio
                                         geometry.set_minimum_size(optional_size{ *s });
                                     else if (isMaximum)
                                         geometry.set_maximum_size(optional_size{ *s });
-                                    else if (name == "size")
+                                    else if (name == "FixedSize")
                                         geometry.set_fixed_size(optional_size{ *s });
                                     else
                                         geometry.set_weight(optional_size{ *s });
@@ -473,7 +596,54 @@ namespace neogfx::DesignStudio
                             }
                         }
                     }
-                    else if (name == "padding")
+                    else if (name == "FixedSize.Width" || name == "FixedSize.Height" || name == "Weight.Width" || name == "Weight.Height" || 
+                        name == "Padding.Left" || name == "Padding.Top" || name == "Padding.Right" || name == "Padding.Bottom" || 
+                        name == "SizePolicy.Horizontal" || name == "SizePolicy.Vertical")
+                    {
+                        // (a geometry property's component given on its own (e.g. "FixedSize: { Width: 24dip }"): the others are as they are)
+                        if constexpr (std::is_base_of_v<i_geometry, Target>)
+                        {
+                            auto& geometry = static_cast<i_geometry&>(aTarget);
+                            if (name.starts_with("SizePolicy."))
+                            {
+                                if (auto const constraint = to_enum<size_constraint>(value))
+                                {
+                                    remember(aRestorers, key("size_policy"), [&geometry, previous = geometry.has_size_policy() ? optional_size_policy{ geometry.size_policy() } : optional_size_policy{}]() { geometry.set_size_policy(previous); });
+                                    auto policy = geometry.size_policy();
+                                    if (name.ends_with(".Horizontal"))
+                                        policy.set_horizontal_constraint(*constraint);
+                                    else
+                                        policy.set_vertical_constraint(*constraint);
+                                    geometry.set_size_policy(optional_size_policy{ policy });
+                                }
+                            }
+                            else if (name.starts_with("Weight."))
+                            {
+                                remember(aRestorers, key("weight"), [&geometry, previous = geometry.has_weight() ? optional_size{ geometry.weight() } : optional_size{}]() { geometry.set_weight(previous); });
+                                auto weight = geometry.weight();
+                                (name.ends_with(".Width") ? weight.cx : weight.cy) = std::stod(unquote(value));
+                                geometry.set_weight(optional_size{ weight });
+                            }
+                            else if (auto const d = to_dimension(geometry, unquote(value)))
+                            {
+                                if (name.starts_with("FixedSize."))
+                                {
+                                    remember(aRestorers, key("fixed_size"), [&geometry, previous = geometry.has_fixed_size() ? optional_size{ geometry.fixed_size() } : optional_size{}]() { geometry.set_fixed_size(previous); });
+                                    auto fixedSize = geometry.fixed_size();
+                                    (name.ends_with(".Width") ? fixedSize.cx : fixedSize.cy) = *d;
+                                    geometry.set_fixed_size(optional_size{ fixedSize });
+                                }
+                                else
+                                {
+                                    remember(aRestorers, key("padding"), [&geometry, previous = geometry.has_padding() ? optional_padding{ geometry.padding() } : optional_padding{}]() { geometry.set_padding(previous); });
+                                    auto padding = geometry.padding();
+                                    (name.ends_with(".Left") ? padding.left : name.ends_with(".Top") ? padding.top : name.ends_with(".Right") ? padding.right : padding.bottom) = *d;
+                                    geometry.set_padding(optional_padding{ padding });
+                                }
+                            }
+                        }
+                    }
+                    else if (name == "Padding")
                     {
                         if constexpr (std::is_base_of_v<i_geometry, Target>)
                         {
@@ -505,7 +675,7 @@ namespace neogfx::DesignStudio
                             }
                         }
                     }
-                    else if (name == "alignment")
+                    else if (name == "Alignment")
                     {
                         if constexpr (requires(Target& aT) { aT.set_alignment(neogfx::alignment::Left); { aT.alignment() } -> std::convertible_to<neogfx::alignment>; })
                             if (auto const a = to_enum<neogfx::alignment>(value))
@@ -514,35 +684,28 @@ namespace neogfx::DesignStudio
                                 aTarget.set_alignment(*a);
                             }
                     }
-                    else if (name == "base_color" || name == "background_color")
+                    else if (name.starts_with("Palette."))
                     {
                         if constexpr (std::is_base_of_v<i_widget, Target>)
-                            if (auto const c = to_color(value))
-                            {
-                                auto& widget = static_cast<i_widget&>(aTarget);
-                                if (name == "base_color")
+                            if (auto const role = to_color_role(std::string_view{ name }.substr(8u)))
+                                if (auto const c = to_color(value))
                                 {
-                                    remember(aRestorers, key("base_color"), [&widget, previous = widget.has_base_color() ? optional_color{ widget.base_color() } : optional_color{}]() { widget.set_base_color(previous); });
-                                    widget.set_base_color(optional_color{ *c });
+                                    auto& widget = static_cast<i_widget&>(aTarget);
+                                    remember(aRestorers, key(name.c_str()), [&widget, role = *role, previous = widget.has_palette_color(*role) ? optional_color{ widget.palette_color(*role) } : optional_color{}]() { widget.set_palette_color(role, previous); });
+                                    widget.set_palette_color(*role, optional_color{ *c });
                                 }
-                                else
-                                {
-                                    remember(aRestorers, key("background_color"), [&widget, previous = widget.has_background_color() ? optional_color{ widget.background_color() } : optional_color{}]() { widget.set_background_color(previous); });
-                                    widget.set_background_color(optional_color{ *c });
-                                }
-                            }
                     }
-                    else if (name == "opacity" || name == "transparency")
+                    else if (name == "Opacity")
                     {
                         if constexpr (std::is_base_of_v<i_widget, Target>)
                         {
                             auto& widget = static_cast<i_widget&>(aTarget);
                             auto const opacity = std::stod(unquote(value));
                             remember(aRestorers, key("opacity"), [&widget, previous = widget.opacity()]() { widget.set_opacity(previous); });
-                            widget.set_opacity(name == "opacity" ? opacity : 1.0 - opacity);
+                            widget.set_opacity(opacity);
                         }
                     }
-                    else if (name == "enabled" || name == "disabled")
+                    else if (name == "Enabled")
                     {
                         if constexpr (std::is_base_of_v<i_widget, Target>)
                         {
@@ -551,7 +714,7 @@ namespace neogfx::DesignStudio
                             if (v == "true" || v == "false")
                             {
                                 remember(aRestorers, key("enabled"), [&widget, previous = widget.enabled()]() { widget.enable(previous); });
-                                widget.enable((v == "true") == (name == "enabled"));
+                                widget.enable(v == "true");
                             }
                         }
                     }
@@ -564,7 +727,7 @@ namespace neogfx::DesignStudio
                             aTarget.set_image(string{ unquote(value) });
                         }
                     }
-                    else if (name == "aspect_ratio")
+                    else if (name == "AspectRatio")
                     {
                         if constexpr (requires(Target& aT) { aT.set_aspect_ratio(neogfx::aspect_ratio::Keep); { aT.aspect_ratio() } -> std::convertible_to<neogfx::aspect_ratio>; })
                             if (auto const a = to_enum<neogfx::aspect_ratio>(value))
@@ -573,7 +736,7 @@ namespace neogfx::DesignStudio
                                 aTarget.set_aspect_ratio(*a);
                             }
                     }
-                    else if (name == "placement")
+                    else if (name == "Placement")
                     {
                         if constexpr (requires(Target& aT) { aT.set_placement(neogfx::label_placement::ImageTextHorizontal); { aT.placement() } -> std::convertible_to<neogfx::label_placement>; })
                         {
@@ -1143,8 +1306,18 @@ namespace neogfx::DesignStudio
         }
         void available_attributes(neolib::i_vector<i_string>& aResult) const override
         {
-            // the attributes that can be added: those supported (see nrc_attributes::apply) not already added (by any of their names)
+            // the attributes that can be added: those supported (see nrc_attributes::apply) not already added (by any of their names) 
+            // except those associated with a property of the element's type (e.g. "SizePolicy"): editing the property (or one of its 
+            // components, e.g. MaximumSize's Width or Palette's Base) sets those (see accepts_attribute)
             aResult.clear();
+            std::set<std::string> associated;
+            if constexpr (std::is_base_of_v<i_widget, Type> || std::is_base_of_v<i_layout, Type>)
+            {
+                std::vector<property_type_info> properties;
+                collect_property_types<Type>(properties);
+                for (auto const& property : properties)
+                    associated.insert(nrc_attributes::attribute_name_of(property.name));
+            }
             auto added = [&](std::string const& aName)
             {
                 for (auto const& attribute : iAttributes)
@@ -1161,8 +1334,22 @@ namespace neogfx::DesignStudio
                 candidates.insert(candidates.end(), supported.begin(), supported.end());
             }
             for (auto const& names : candidates)
-                if (std::none_of(names.begin(), names.end(), added))
+                if (std::none_of(names.begin(), names.end(), added) && 
+                    std::none_of(names.begin(), names.end(), [&](std::string const& aName) { return associated.find(aName) != associated.end(); }))
                     aResult.push_back(string{ names[0] });
+        }
+        bool accepts_attribute(i_string const& aName) const override
+        {
+            // the attributes (with any of their names) that are applied (see nrc_attributes::apply), including those associated with a 
+            // property (which aren't available to add, see available_attributes) so editing the property can set them
+            auto const name = aName.to_std_string();
+            if (has_text() && name == text_attribute().to_std_string())
+                return true;
+            if constexpr (std::is_base_of_v<i_widget, Type> || std::is_base_of_v<i_layout, Type>)
+                for (auto const& names : nrc_attributes::supported<Type>())
+                    if (std::find(names.begin(), names.end(), name) != names.end())
+                        return true;
+            return false;
         }
         void apply_attributes(bool aShowIds) override
         {
@@ -1189,13 +1376,31 @@ namespace neogfx::DesignStudio
             if (visual != iAppliedVisualAttributes || resourceCount != iAppliedResourceCount)
             {
                 iAppliedResourceCount = resourceCount;
-                // put back the defaults (so removed attributes no longer apply) then apply the current attributes
-                nrc_attributes::restore(iVisualDefaults);
                 iAppliedVisualAttributes = visual;
+                // apply the current attributes then put back the defaults of those no longer applied (removed attributes); not putting back 
+                // all the defaults first as that would change (and then change back) every applied attribute's value, e.g. laying out again 
+                // when only a colour has changed
+                nrc_attributes::restorers applied; // (what was applied; for those not applied before, how to put back their defaults)
                 if constexpr (std::is_base_of_v<i_widget, Type>)
-                    nrc_attributes::apply(static_cast<Type&>(layout_item().as_widget()), visual, false, iVisualDefaults);
+                    nrc_attributes::apply(static_cast<Type&>(layout_item().as_widget()), visual, false, applied);
                 else if constexpr (std::is_base_of_v<i_layout, Type>)
-                    nrc_attributes::apply(static_cast<Type&>(layout_item().as_layout()), visual, false, iVisualDefaults);
+                    nrc_attributes::apply(static_cast<Type&>(layout_item().as_layout()), visual, false, applied);
+                for (auto existing = iVisualDefaults.begin(); existing != iVisualDefaults.end();)
+                {
+                    if (applied.find(existing->first) == applied.end())
+                    {
+                        try
+                        {
+                            existing->second();
+                        }
+                        catch (...) {}
+                        existing = iVisualDefaults.erase(existing);
+                    }
+                    else
+                        ++existing;
+                }
+                for (auto& restorer : applied)
+                    iVisualDefaults.emplace(restorer.first, std::move(restorer.second)); // (the defaults already noted are kept)
             }
             // menu bar menus and toolbar buttons
             if constexpr (std::is_base_of_v<i_widget, Type> && (std::is_base_of_v<i_menu, Type> || std::is_base_of_v<toolbar, Type>))

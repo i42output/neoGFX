@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 
 #include <algorithm>
+#include <map>
 #include <boost/lexical_cast.hpp>
 
 #include <neolib/core/reference_counted.hpp>
@@ -32,9 +33,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/core/units.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
-#include <neogfx/gui/widget/label.hpp>
-#include <neogfx/gui/widget/image_widget.hpp>
-#include <neogfx/gui/widget/text_field.hpp>
+#include <neogfx/gui/widget/label_bits.hpp>
+#include <neogfx/gui/widget/text_field_bits.hpp>
 #include <neogfx/tools/nrc/i_ui_element.hpp>
 
 namespace neogfx::nrc
@@ -257,33 +257,53 @@ namespace neogfx::nrc
             }
             if (aName == "type")
                 iWidgetType = get_enum<widget_type>(aData);
-            if (aName == "weight")
+            // (attributes that are object properties have the property's name; a composite property's component is "Property.Component", 
+            // e.g. "MaximumSize.Width" or, in the .nrc, "MaximumSize: { Width: 100 }")
+            if (aName == "Weight")
                 iWeight.emplace(get_scalar<double>(aData));
-            else if (aName == "size_policy")
+            else if (aName == "SizePolicy")
                 iSizePolicy = get_enum<size_constraint>(aData);
-            else if (aName == "alignment")
+            else if (aName == "Alignment")
                 iAlignment = get_enum<alignment>(aData);
-            else if (aName == "size")
+            else if (aName == "FixedSize")
                 iFixedSize.emplace(get_scalar<length>(aData));
-            else if (aName == "minimum_size")
+            else if (aName == "MinimumSize")
                 iMinimumSize.emplace(get_scalar<length>(aData));
-            else if (aName == "minimum_width")
+            else if (aName == "MinimumSize.Width")
                 iMinimumWidth.emplace(get_scalar<length>(aData));
-            else if (aName == "minimum_height")
+            else if (aName == "MinimumSize.Height")
                 iMinimumHeight.emplace(get_scalar<length>(aData));
-            else if (aName == "maximum_size")
+            else if (aName == "MaximumSize")
                 iMaximumSize.emplace(get_scalar<length>(aData));
-            else if (aName == "maximum_width")
+            else if (aName == "MaximumSize.Width")
                 iMaximumWidth.emplace(get_scalar<length>(aData));
-            else if (aName == "maximum_height")
+            else if (aName == "MaximumSize.Height")
                 iMaximumHeight.emplace(get_scalar<length>(aData));
-            else if (aName == "padding")
+            else if (aName == "FixedSize.Width")
+                iFixedWidth.emplace(get_scalar<length>(aData));
+            else if (aName == "FixedSize.Height")
+                iFixedHeight.emplace(get_scalar<length>(aData));
+            else if (aName == "Weight.Width")
+                iWeightWidth.emplace(get_scalar<double>(aData));
+            else if (aName == "Weight.Height")
+                iWeightHeight.emplace(get_scalar<double>(aData));
+            else if (aName == "Padding.Left")
+                iPaddingLeft.emplace(get_scalar<length>(aData));
+            else if (aName == "Padding.Top")
+                iPaddingTop.emplace(get_scalar<length>(aData));
+            else if (aName == "Padding.Right")
+                iPaddingRight.emplace(get_scalar<length>(aData));
+            else if (aName == "Padding.Bottom")
+                iPaddingBottom.emplace(get_scalar<length>(aData));
+            else if (aName == "SizePolicy.Horizontal")
+                iHorizontalSizePolicy = get_enum<size_constraint>(aData);
+            else if (aName == "SizePolicy.Vertical")
+                iVerticalSizePolicy = get_enum<size_constraint>(aData);
+            else if (aName == "Padding")
                 iPadding.emplace(get_scalar<length>(aData));
-            else if (aName == "enabled")
+            else if (aName == "Enabled")
                 iEnabled = aData.get<bool>();
-            else if (aName == "disabled")
-                iEnabled = !aData.get<bool>();
-            else if (aName == "focus_policy")
+            else if (aName == "FocusPolicy")
                 iFocusPolicy.first = get_enum<focus_policy>(aData);
             else if (aName == "text")
                 iText = aData.get<neolib::i_string>();
@@ -291,9 +311,9 @@ namespace neogfx::nrc
                 iLabelText = aData.get<neolib::i_string>();
             else if (aName == "image" || (aName == "uri" && (type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget))
                 iImage = aData.get<neolib::i_string>();
-            else if (aName == "aspect_ratio")
+            else if (aName == "AspectRatio")
                 iAspectRatio = get_enum<aspect_ratio>(aData);
-            else if (aName == "placement")
+            else if (aName == "Placement" || aName == "placement") // (a label's or image's Placement property; a text field's placement)
             {
                 if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) != ui_element_type::TextField)
                 {
@@ -305,14 +325,10 @@ namespace neogfx::nrc
                 else
                     iTextFieldPlacement = get_enum<text_field_placement>(aData);
             }
-            else if (aName == "base_color")
-                iBaseColor = get_color(aData);
-            else if (aName == "background_color")
-                iBackgroundColor = get_color(aData);
-            else if (aName == "opacity")
+            else if (aName.to_std_string_view().starts_with("Palette."))
+                iPaletteColors[aName.to_std_string().substr(8u)] = get_color(aData);
+            else if (aName == "Opacity")
                 iOpacity = aData.get<double>();
-            else if (aName == "transparency")
-                iOpacity = 1.0 - aData.get<double>();
             else if (aName == "default_focus")
                 iDefaultFocus = aData.get<neolib::i_string>();
         }
@@ -323,28 +339,26 @@ namespace neogfx::nrc
                 std::cerr << parser().source_location() << ": warning: nrc: Unknown element key '" << aName << "' in element '" << id() << "'." << std::endl;
                 return;
             }
-            if (aName == "size_policy" && !aArrayData.empty())
+            if (aName == "SizePolicy" && !aArrayData.empty())
                 iSizePolicy = size_policy::from_string(
                     aArrayData[0u].get<neolib::i_string>().to_std_string(),
                     aArrayData[std::min<std::size_t>(1u, aArrayData.size() - 1u)].get<neolib::i_string>().to_std_string());
-            else if (aName == "alignment")
+            else if (aName == "Alignment")
                 iAlignment = get_enum<alignment>(aArrayData);
-            else if (aName == "size")
-                emplace_2<length>("size", iFixedSize);
-            else if (aName == "minimum_size")
-                emplace_2<length>("minimum_size", iMinimumSize);
-            else if (aName == "maximum_size")
-                emplace_2<length>("maximum_size", iMaximumSize);
-            else if (aName == "padding")
-                emplace_4<length>("padding", iPadding);
-            else if (aName == "weight")
-                emplace_2<double>("weight", iWeight);
-            else if (aName == "focus_policy")
+            else if (aName == "FixedSize")
+                emplace_2<length>("FixedSize", iFixedSize);
+            else if (aName == "MinimumSize")
+                emplace_2<length>("MinimumSize", iMinimumSize);
+            else if (aName == "MaximumSize")
+                emplace_2<length>("MaximumSize", iMaximumSize);
+            else if (aName == "Padding")
+                emplace_4<length>("Padding", iPadding);
+            else if (aName == "Weight")
+                emplace_2<double>("Weight", iWeight);
+            else if (aName == "FocusPolicy")
                 iFocusPolicy.first = get_enum<focus_policy>(aArrayData, iFocusPolicy.second, "Default");
-            else if (aName == "base_color")
-                iBaseColor = get_color(aArrayData);
-            else if (aName == "background_color")
-                iBackgroundColor = get_color(aArrayData);
+            else if (aName.to_std_string_view().starts_with("Palette."))
+                iPaletteColors[aName.to_std_string().substr(8u)] = get_color(aArrayData);
         }
         void add_element_ref(const neolib::i_string& aRef) override
         {
@@ -427,6 +441,47 @@ namespace neogfx::nrc
                 emit("   %1%.set_maximum_height(%2%);\n", id(), *iMaximumHeight);
             if (iWeight)
                 emit("   %1%.set_weight(size{ %2%, %3% });\n", id(), iWeight->cx, iWeight->cy);
+            // (a composite property's components given on their own (e.g. "FixedSize: { Width: 24dip }"): the others are as they are)
+            if (iHorizontalSizePolicy || iVerticalSizePolicy)
+            {
+                emit("   { auto sizePolicy = %1%.size_policy();", id());
+                if (iHorizontalSizePolicy)
+                    emit(" sizePolicy.set_horizontal_constraint(%1%);", enum_to_string("size_constraint", *iHorizontalSizePolicy));
+                if (iVerticalSizePolicy)
+                    emit(" sizePolicy.set_vertical_constraint(%1%);", enum_to_string("size_constraint", *iVerticalSizePolicy));
+                emit(" %1%.set_size_policy(sizePolicy); }\n", id());
+            }
+            if (iFixedWidth || iFixedHeight)
+            {
+                emit("   { auto fixedSize = %1%.fixed_size();", id());
+                if (iFixedWidth)
+                    emit(" fixedSize.cx = %1%;", *iFixedWidth);
+                if (iFixedHeight)
+                    emit(" fixedSize.cy = %1%;", *iFixedHeight);
+                emit(" %1%.set_fixed_size(fixedSize); }\n", id());
+            }
+            if (iWeightWidth || iWeightHeight)
+            {
+                emit("   { auto weight = %1%.weight();", id());
+                if (iWeightWidth)
+                    emit(" weight.cx = %1%;", *iWeightWidth);
+                if (iWeightHeight)
+                    emit(" weight.cy = %1%;", *iWeightHeight);
+                emit(" %1%.set_weight(weight); }\n", id());
+            }
+            if (iPaddingLeft || iPaddingTop || iPaddingRight || iPaddingBottom)
+            {
+                emit("   { auto padding = %1%.padding();", id());
+                if (iPaddingLeft)
+                    emit(" padding.left = %1%;", *iPaddingLeft);
+                if (iPaddingTop)
+                    emit(" padding.top = %1%;", *iPaddingTop);
+                if (iPaddingRight)
+                    emit(" padding.right = %1%;", *iPaddingRight);
+                if (iPaddingBottom)
+                    emit(" padding.bottom = %1%;", *iPaddingBottom);
+                emit(" %1%.set_padding(padding); }\n", id());
+            }
             if (iPadding)
             {
                 auto const& padding = *iPadding;
@@ -465,10 +520,8 @@ namespace neogfx::nrc
                 emit("   %1%.label().set_text(\"%2%\"_t);\n", id(), *iLabelText);
             if (iOpacity)
                 emit("   %1%.set_opacity(%2%);\n", id(), *iOpacity);
-            if (iBaseColor)
-                emit("   %1%.set_base_color(color{ %2% });\n", id(), *iBaseColor);
-            if (iBackgroundColor)
-                emit("   %1%.set_background_color(color{ %2% });\n", id(), *iBackgroundColor);
+            for (auto const& [role, paletteColor] : iPaletteColors)
+                emit("   %1%.set_palette_color(color_role::%2%, %3%);\n", id(), role, std::string_view{ paletteColor });
             if (iDefaultFocus)
             {
                 check_element_ref(*iDefaultFocus);
@@ -478,7 +531,7 @@ namespace neogfx::nrc
                 (type() & ui_element_type::Separator) != ui_element_type::Separator && has_parent() &&
                 (parent().type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::StatusBar)
             {
-                if (!iPadding)
+                if (!iPadding && !iPaddingLeft && !iPaddingTop && !iPaddingRight && !iPaddingBottom)
                     emit("   %1%.set_padding(neogfx::padding{});\n", id());
                 emit("   %1%.set_font_role(font_role::StatusBar);\n", id());
             }
@@ -558,19 +611,23 @@ namespace neogfx::nrc
             if (!has_parent() && (type() & ui_element_type::Widget) == ui_element_type::Widget)
                 add_data_names({ "type", "default_focus" });
             if ((type() & ui_element_type::Widget) == ui_element_type::Widget)
-                add_data_names({ "drag_drop", "enabled", "disabled", "focus_policy" });
+                add_data_names({ "drag_drop", "Enabled", "FocusPolicy" });
             if ((type() & ui_element_type::HasGeometry) == ui_element_type::HasGeometry)
-                add_data_names({ "size_policy", "padding", "minimum_size", "maximum_size", "size", "minimum_width", "minimum_height", "maximum_width", "maximum_height", "weight" });
+                add_data_names({ "SizePolicy", "Padding", "MinimumSize", "MaximumSize", "FixedSize", "MinimumSize.Width", "MinimumSize.Height", "MaximumSize.Width", "MaximumSize.Height", "Weight", 
+                    "FixedSize.Width", "FixedSize.Height", "Weight.Width", "Weight.Height", "Padding.Left", "Padding.Top", "Padding.Right", "Padding.Bottom", 
+                    "SizePolicy.Horizontal", "SizePolicy.Vertical" });
             if ((type() & ui_element_type::HasAlignment) == ui_element_type::HasAlignment)
-                add_data_names({ "alignment" });
+                add_data_names({ "Alignment" });
             if ((type() & (ui_element_type::HasText | ui_element_type::HasLabel)) != ui_element_type::None)
                 add_data_names({ "text" });
             if ((type() & (ui_element_type::HasImage | ui_element_type::HasLabel)) != ui_element_type::None)
-                add_data_names({ "image", "aspect_ratio", "placement" });
+                add_data_names({ "image", "AspectRatio", (type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::TextField ? "placement" : "Placement" });
             if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget)
                 add_data_names({ "uri" });
             if ((type() & ui_element_type::HasColor) == ui_element_type::HasColor)
-                add_data_names({ "base_color", "background_color", "opacity", "transparency" });
+                add_data_names({ "Palette.Theme", "Palette.Background", "Palette.Foreground", "Palette.Base", "Palette.AlternateBase", "Palette.Text", 
+                    "Palette.Selection", "Palette.AlternateSelection", "Palette.SelectedText", "Palette.Focus", "Palette.Hover", "Palette.PrimaryAccent", 
+                    "Palette.SecondaryAccent", "Palette.Void", "Opacity" });
         }
     private:
         const i_ui_element_parser& iParser;
@@ -600,6 +657,16 @@ namespace neogfx::nrc
         std::optional<length> iMaximumHeight;
         std::optional<size> iWeight;
         std::optional<basic_padding<length>> iPadding;
+        std::optional<length> iFixedWidth; // (a composite property's components given on their own, e.g. "FixedSize: { Width: 24dip }")
+        std::optional<length> iFixedHeight;
+        std::optional<double> iWeightWidth;
+        std::optional<double> iWeightHeight;
+        std::optional<length> iPaddingLeft;
+        std::optional<length> iPaddingTop;
+        std::optional<length> iPaddingRight;
+        std::optional<length> iPaddingBottom;
+        std::optional<size_constraint> iHorizontalSizePolicy;
+        std::optional<size_constraint> iVerticalSizePolicy;
         std::optional<bool> iEnabled;
         std::pair<std::optional<focus_policy>, bool> iFocusPolicy;
         std::optional<label_placement> iLabelPlacement;
@@ -610,8 +677,7 @@ namespace neogfx::nrc
         std::optional<aspect_ratio> iAspectRatio;
         std::optional<cardinal> iImagePlacement;
         std::optional<double> iOpacity;
-        std::optional<color> iBaseColor;
-        std::optional<color> iBackgroundColor;
+        std::map<std::string, std::string> iPaletteColors; // (by color_role name, e.g. "Base"; the colour to emit, see get_color)
         std::optional<string> iDefaultFocus;
     };
 }

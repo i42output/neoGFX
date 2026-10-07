@@ -156,7 +156,8 @@ namespace neogfx
     template <typename Base = drag_drop_source_empty_base>
     class drag_drop_source : public Base, public i_drag_drop_source
     {
-        typedef Base base_type;
+    public:
+        typedef Base base_type; // (public: see collect_property_types)
     public:
         define_declared_event(DraggingObject, dragging_object, i_drag_drop_object const&)
         define_declared_event(DraggingCancelled, dragging_cancelled, i_drag_drop_object const&)

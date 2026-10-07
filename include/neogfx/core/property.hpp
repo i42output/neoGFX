@@ -22,6 +22,10 @@
 #include <neogfx/neogfx.hpp>
 
 #include <string>
+#include <vector>
+#include <unordered_map>
+#include <typeinfo>
+#include <type_traits>
 
 #include <neolib/core/optional.hpp>
 
@@ -579,9 +583,72 @@ namespace neogfx
         struct other {};
     };
 
-    #define define_property( category, type, name, calculator, ... ) neogfx::property<type, category, property_context_type, decltype(&property_context_type::##calculator)> name = { *this, #name ##s, &property_context_type::##calculator, __VA_ARGS__ };
+    // the properties each class declares (see define_property), known without creating an object of the class (e.g. so that the 
+    // properties a widget type has can be known before a widget of that type is created); classes are identified by name 
+    // (std::type_info::name()) as std::type_info objects can't be compared across module boundaries
+    struct property_type_info
+    {
+        std::string declaringClass; ///< typeid(Context).name()
+        std::string name; ///< e.g. "SizePolicy"
+        std::string category; ///< typeid(Category).name()
+    };
+
+    class property_type_registry
+    {
+    public:
+        // (one per module: filled as the module's static objects are initialized, see property_registrar)
+        static property_type_registry& instance()
+        {
+            static property_type_registry sInstance;
+            return sInstance;
+        }
+    public:
+        void register_property(property_type_info const& aInfo)
+        {
+            iProperties[aInfo.declaringClass].push_back(aInfo);
+        }
+        std::vector<property_type_info> const& properties(std::string const& aDeclaringClass) const
+        {
+            static std::vector<property_type_info> const sNone;
+            auto const existing = iProperties.find(aDeclaringClass);
+            return existing != iProperties.end() ? existing->second : sNone;
+        }
+    private:
+        std::unordered_map<std::string, std::vector<property_type_info>> iProperties;
+    };
+
+    // registers a property of a class (one for each property, a static member of the class, see define_property)
+    // (not typeid(T): that would instantiate (and so require the definitions of) property value class templates (e.g. neolib::optional<palette>) 
+    // in every module that includes the class, even one that only needs the class's declaration (e.g. nrc's element libraries))
+    template <typename Context, typename T, typename Category>
+    struct property_registrar
+    {
+        property_registrar(char const* aName)
+        {
+            property_type_registry::instance().register_property(property_type_info{ typeid(Context).name(), aName, typeid(Category).name() });
+        }
+    };
+
+    // the properties of a class: those it declares and those of its bases (its meta_object base and so on)
+    template <typename T>
+    inline void collect_property_types(std::vector<property_type_info>& aResult)
+    {
+        auto const& declared = property_type_registry::instance().properties(typeid(T).name());
+        aResult.insert(aResult.end(), declared.begin(), declared.end());
+        if constexpr (requires { typename T::base_type; })
+            if constexpr (!std::is_same_v<typename T::base_type, T>)
+                collect_property_types<typename T::base_type>(aResult);
+    }
+
+    // (the property's registrar is referred to by the property's initializer so that it exists (is created and so registers the property) 
+    // in a class template's specializations too)
+    #define define_property( category, type, name, calculator, ... ) \
+        static inline neogfx::property_registrar<property_context_type, type, category> name##Registrar{ #name }; \
+        neogfx::property<type, category, property_context_type, decltype(&property_context_type::##calculator)> name = { *this, (static_cast<void>(name##Registrar), #name ##s), &property_context_type::##calculator, __VA_ARGS__ };
     // a property with a secondary category too (e.g. a font: appearance, and hard_geometry as it affects size)
-    #define define_property_ex( category, secondaryCategory, type, name, calculator, ... ) neogfx::property<type, neogfx::property_category::with_secondary<category, secondaryCategory>, property_context_type, decltype(&property_context_type::##calculator)> name = { *this, #name ##s, &property_context_type::##calculator, __VA_ARGS__ };
+    #define define_property_ex( category, secondaryCategory, type, name, calculator, ... ) \
+        static inline neogfx::property_registrar<property_context_type, type, neogfx::property_category::with_secondary<category, secondaryCategory>> name##Registrar{ #name }; \
+        neogfx::property<type, neogfx::property_category::with_secondary<category, secondaryCategory>, property_context_type, decltype(&property_context_type::##calculator)> name = { *this, (static_cast<void>(name##Registrar), #name ##s), &property_context_type::##calculator, __VA_ARGS__ };
 }
 
 #ifdef _MSC_VER

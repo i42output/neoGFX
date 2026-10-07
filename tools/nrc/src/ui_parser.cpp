@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 
 #include <filesystem>
+#include <cctype>
 #include <boost/format.hpp>
 
 #include "ui_parser.hpp"
@@ -325,7 +326,30 @@ namespace neogfx::nrc
         {
         case neolib::json_type::Object:
             for (auto const& e : aNode.as<neolib::fjson_object>().contents())
-                if (e.type() == neolib::json_type::Object)
+                if (e.type() == neolib::json_type::Object && e.name().begin() != e.name().end() && std::isupper(static_cast<unsigned char>(*e.name().begin())))
+                {
+                    // a composite property's components (property names are PascalCase, element types are not), e.g. 
+                    // "Palette: { Base: LightGoldenrodYellow }": as if "Palette.Base: LightGoldenrodYellow"
+                    for (auto const& component : e.as<neolib::fjson_object>().contents())
+                    {
+                        iCurrentNode = &component;
+                        neolib::string const name{ std::string{ e.name().begin(), e.name().end() } + "." + std::string{ component.name().begin(), component.name().end() } };
+                        if (component.type() == neolib::json_type::Array)
+                        {
+                            array_data_t arrayData;
+                            to_array_data(component, arrayData);
+                            aElement.parse(name, arrayData);
+                        }
+                        else
+                        {
+                            data_t data;
+                            to_data(component, data);
+                            aElement.parse(name, data);
+                        }
+                    }
+                    iCurrentNode = &aNode;
+                }
+                else if (e.type() == neolib::json_type::Object)
                 {
                     iCurrentNode = &e;
                     try

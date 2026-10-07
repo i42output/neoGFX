@@ -26,62 +26,12 @@
 #include <neogfx/gui/layout/grid_layout.hpp>
 #include <neogfx/gui/widget/text_widget.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
+#include <neogfx/gui/widget/label_bits.hpp>
 
 namespace neogfx
 {
     class i_spacer;
 
-    enum class label_placement : std::uint32_t
-    {
-        Text                        = 0x00000001,
-        Image                       = 0x00000002,
-        Spacer                      = 0x00000004,
-        Horizontal                  = 0x00000010,
-        Vertical                    = 0x00000020,
-        TextBeforeImage             = Text | Image | 0x00000100,
-        ImageBeforeText             = Text | Image | 0x00000200,
-        TextHorizontal              = Text | Horizontal,
-        TextVertical                = Text | Vertical,
-        ImageHorizontal             = Image | Horizontal,
-        ImageVertical               = Image | Vertical,
-        TextImageHorizontal         = TextBeforeImage | Horizontal,
-        TextImageVertical           = TextBeforeImage | Vertical,
-        ImageTextHorizontal         = ImageBeforeText | Horizontal,
-        ImageTextVertical           = ImageBeforeText | Vertical,
-        TextSpacerImageHorizontal   = TextBeforeImage | Spacer | Horizontal,
-        TextSpacerImageVertical     = TextBeforeImage | Spacer | Vertical,
-        ImageSpacerTextHorizontal   = ImageBeforeText | Spacer | Horizontal,
-        ImageSpacerTextVertical     = ImageBeforeText | Spacer | Vertical
-    };
-
-    inline constexpr label_placement operator|(label_placement aLhs, label_placement aRhs)
-    {
-        return static_cast<label_placement>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
-    }
-
-    inline constexpr label_placement operator&(label_placement aLhs, label_placement aRhs)
-    {
-        return static_cast<label_placement>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
-    }
-}
-
-begin_declare_enum(neogfx::label_placement)
-declare_enum_string(neogfx::label_placement, TextHorizontal)
-declare_enum_string(neogfx::label_placement, TextVertical)
-declare_enum_string(neogfx::label_placement, ImageHorizontal)
-declare_enum_string(neogfx::label_placement, ImageVertical)
-declare_enum_string(neogfx::label_placement, TextImageHorizontal)
-declare_enum_string(neogfx::label_placement, TextImageVertical)
-declare_enum_string(neogfx::label_placement, ImageTextHorizontal)
-declare_enum_string(neogfx::label_placement, ImageTextVertical)
-declare_enum_string(neogfx::label_placement, TextSpacerImageHorizontal)
-declare_enum_string(neogfx::label_placement, TextSpacerImageVertical)
-declare_enum_string(neogfx::label_placement, ImageSpacerTextHorizontal)
-declare_enum_string(neogfx::label_placement, ImageSpacerTextVertical)
-end_declare_enum(neogfx::label_placement)
-
-namespace neogfx
-{
     typedef text_widget_type label_type;
 
     class label : public widget<>

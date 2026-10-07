@@ -135,6 +135,7 @@ namespace neogfx::DesignStudio
         virtual i_widget& text_area() const = 0; // the widget displaying the element's text (the in-place text editor goes over it)
         virtual neogfx::alignment text_alignment() const = 0; // the alignment of the text in text_area() (so the in-place text editor matches it)
         virtual void available_attributes(neolib::i_vector<i_string>& aResult) const = 0; // .nrc attributes that can be added
+        virtual bool accepts_attribute(i_string const& aName) const = 0; // an .nrc attribute that is applied (see available_attributes)
         virtual void apply_attributes(bool aShowIds) = 0;
     public:
         virtual element_mode mode() const = 0;

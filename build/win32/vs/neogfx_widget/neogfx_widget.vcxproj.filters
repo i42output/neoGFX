@@ -300,6 +300,9 @@
     <ClInclude Include="..\..\..\..\include\neogfx\gui\dialog\dialog_button_box.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\dialog\dialog_button_box_bits.hpp">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\dialog\font_dialog.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
@@ -373,6 +376,9 @@
       <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\drop_list.hpp">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\drop_list_bits.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\flashing_button.hpp">
@@ -501,6 +507,9 @@
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\label.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\label_bits.hpp">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\line_edit.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
@@ -576,7 +585,13 @@
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\text_edit.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\text_edit_bits.hpp">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\text_field.hpp">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\text_field_bits.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\text_widget.hpp">
