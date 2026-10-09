@@ -85,8 +85,8 @@ namespace neogfx::DesignStudio
                 {
                     auto const saved = aSaved.value<ng::size>();
                     aResized = true;
-                    header.set_section_width(0u, saved.cx);
-                    header.set_section_width(1u, saved.cy);
+                    header.set_section_width(0u, std::floor(saved.cx));
+                    header.set_section_width(1u, std::floor(saved.cy));
                 }
                 else
                 {
@@ -798,6 +798,7 @@ namespace neogfx::DesignStudio
         auto& propertyTable = iProperties.docked_widget<ng::table_view>();
         propertyTable.set_minimum_size(ng::size{ 128_dip, 128_dip });
         propertyTable.set_presentation_model(iPropertyPresentationModel);
+        propertyTable.column_header().set_expand_last_column(ng::last_column_expansion::ExpandToFitView);
         // (its columns' widths: see iPropertiesUpdater)
         // (each cell has a 1 pixel border: see property_presentation_model::cell_border)
         iSink += iPropertyModel.item_changed([&](item_model_index const& aIndex)

@@ -19,6 +19,8 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <filesystem>
+
 #include <neolib/app/version.hpp>
 #include <cef/include/cef_app.h>
 
@@ -100,7 +102,11 @@ namespace neogfx
     {
         CefSettings settings;
         auto const settingsFolder = service<i_app>().info().settings_folder().to_std_string();
-        CefString rootCachePath{ settingsFolder };
+        auto const webViewCacheFolder = std::filesystem::path{ std::u8string{
+            reinterpret_cast<char8_t const*>(settingsFolder.data()), settingsFolder.size() } } / u8"web_view_cache";
+        std::error_code ec;
+        std::filesystem::create_directories(webViewCacheFolder, ec);
+        CefString rootCachePath{ webViewCacheFolder.native() };
         settings.root_cache_path = *rootCachePath.GetWritableStruct();
         rootCachePath.Detach();
         settings.windowless_rendering_enabled = true;

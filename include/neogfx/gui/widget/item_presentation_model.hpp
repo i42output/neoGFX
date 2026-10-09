@@ -424,7 +424,8 @@ namespace neogfx
                 else
                     std::next(begin(), aIndex.row()).skip_children();
                 reset_row_map();
-                reset_meta();
+                if (!updating())
+                    reset_meta(); // (an update resets it when it ends: see end_update)
                 if (cell_meta(indexFirstColumn).expanded)
                     ItemExpanded(aIndex);
                 else

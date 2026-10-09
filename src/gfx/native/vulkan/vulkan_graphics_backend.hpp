@@ -24,9 +24,11 @@
 #include <array>
 #include <chrono>
 #include <deque>
+#include <filesystem>
 #include <functional>
 #include <map>
 #include <memory>
+#include <optional>
 #include <unordered_map>
 #include <vector>
 
@@ -385,6 +387,11 @@ namespace neogfx
         void create_instance();
         void create_device();
         void create_defaults();
+        // the on-disk caches' folder: the "vk_cache" sub-folder of the application's settings folder (std::nullopt if not available)
+        std::optional<std::filesystem::path> const& cache_folder() const;
+        // the pipeline cache (loaded from the cache folder when first needed; saved by cleanup)
+        VkPipelineCache pipeline_cache();
+        void save_pipeline_cache();
         std::uint32_t memory_type(std::uint32_t aTypeBits, VkMemoryPropertyFlags aRequired, VkMemoryPropertyFlags aPreferred = 0u) const;
         vulkan_buffer allocate_buffer(VkDeviceSize aSize, VkBufferUsageFlags aUsage, bool aMapped);
         void free_buffer(vulkan_buffer& aBuffer);
@@ -454,6 +461,8 @@ namespace neogfx
         VkPhysicalDeviceProperties iProperties = {};
         VkPhysicalDeviceMemoryProperties iMemoryProperties = {};
         VkDevice iDevice = VK_NULL_HANDLE;
+        VkPipelineCache iPipelineCache = VK_NULL_HANDLE;
+        mutable std::optional<std::filesystem::path> iCacheFolder;
         std::uint32_t iQueueFamily = 0u;
         VkQueue iQueue = VK_NULL_HANDLE;
         PFN_vkCmdPushDescriptorSetKHR iCmdPushDescriptorSet = nullptr;

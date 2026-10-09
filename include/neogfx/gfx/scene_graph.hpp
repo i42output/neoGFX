@@ -709,6 +709,12 @@ namespace neogfx
             index add_polygon(std::vector<vec2> const& aOutline, neogfx::color const& aColor, std::optional<std::string> const& aName = {});
             index add_rectangle(size const& aExtents, neogfx::color const& aColor, std::optional<std::string> const& aName = {});
             index add_regular_polygon(scalar aRadius, std::uint32_t aSides, neogfx::color const& aColor, std::optional<std::string> const& aName = {});
+            // a mesh from a small inline SVG document, its viewBox mapped to a 1 x 1 square centred on the origin (y up). Supported:
+            // the line, rect, circle, polyline, polygon and path (M, L, H, V and Z commands, absolute and relative) elements; the fill,
+            // stroke, stroke-width and stroke-linecap (butt, round or square) attributes, also as defaults on the svg element; colours as
+            // names or #rgb/#rrggbb. Strokes have round joins; fills must be convex (they are triangulated as fans). Each run of elements
+            // of the same colour is a primitive of the mesh, with drawing order (later elements on top) given by vertex z.
+            index add_svg_mesh(std::string const& aSvg, std::optional<std::string> const& aName = {});
         };
 
         // 3D: right-handed, +y up, cameras look down -z, as glTF

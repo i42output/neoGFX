@@ -23,9 +23,14 @@
 #include <cstdlib>
 #include <iostream>
 #include <iomanip>
+#include <chrono>
 #include <algorithm>
+#include <fstream>
+#include <iterator>
+#include <sstream>
 #include <shaderc/shaderc.hpp>
 
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include "../i_native_texture.hpp"
 #include "../native_vertex.hpp"
@@ -40,6 +45,121 @@ namespace neogfx
         vulkan_graphics_backend* sInstance;
 
         constexpr VkDeviceSize TransientChunkSize = 8u * 1024u * 1024u;
+
+        // the on-disk caches (see vulkan_graphics_backend::cache_folder): compiled SPIR-V, one file per compilation (named by a hash of
+        // its key, which is stored in it and compared, so a hash collision is a cache miss), and the pipeline cache (the driver's data
+        // prefixed by a header of our own). The data in each is hashed, so a corrupt file is a cache miss (n.b. not protection against
+        // tampering: anything that can write the files can also rewrite the hash). A SPIR-V file's last write time is when it was
+        // last used (see compile_shader); unused for SpirvCacheMaxAge they are deleted (see prune_cache_folder).
+        constexpr char SpirvCacheMagic[8] = { 'N', 'G', 'S', 'P', 'V', '0', '0', '2' };
+        constexpr char PipelineCacheMagic[8] = { 'N', 'G', 'P', 'L', 'C', '0', '0', '1' };
+        constexpr char PipelineCacheFileName[] = "pipeline_cache.bin";
+        // n.b. the driver never removes a pipeline cache's entries (e.g. those of shaders since changed), so it is discarded if this big
+        constexpr std::uint64_t PipelineCacheMaxSize = 64u * 1024u * 1024u;
+        constexpr std::chrono::hours SpirvCacheMaxAge{ 30 * 24 };
+
+        std::uint64_t fnv1a(void const* aData, std::size_t aSize)
+        {
+            std::uint64_t result = 0xCBF29CE484222325ull;
+            for (auto byte = static_cast<std::uint8_t const*>(aData); byte != static_cast<std::uint8_t const*>(aData) + aSize; ++byte)
+            {
+                result ^= *byte;
+                result *= 0x100000001B3ull;
+            }
+            return result;
+        }
+
+        std::uint64_t fnv1a(std::string const& aText)
+        {
+            return fnv1a(aText.data(), aText.size());
+        }
+
+        // written to a temporary file and then renamed, so a cache file is never partially written
+        void write_cache_file(std::filesystem::path const& aPath, std::string const& aContents)
+        {
+            try
+            {
+                auto temporary = aPath;
+                temporary += ".tmp";
+                {
+                    std::ofstream output{ temporary, std::ios::binary | std::ios::trunc };
+                    if (!output.write(aContents.data(), static_cast<std::streamsize>(aContents.size())))
+                        return;
+                }
+                std::filesystem::rename(temporary, aPath);
+            }
+            catch (...)
+            {
+                // n.b. the cache is an optimization: failing to write it is not an error
+            }
+        }
+
+        std::optional<std::vector<std::uint32_t>> read_cached_spirv(std::filesystem::path const& aPath, std::string const& aKey)
+        {
+            std::ifstream input{ aPath, std::ios::binary };
+            if (!input)
+                return std::nullopt;
+            char magic[sizeof(SpirvCacheMagic)];
+            if (!input.read(magic, sizeof(magic)) || std::memcmp(magic, SpirvCacheMagic, sizeof(magic)) != 0)
+                return std::nullopt;
+            std::uint64_t keySize = 0u;
+            if (!input.read(reinterpret_cast<char*>(&keySize), sizeof(keySize)) || keySize != aKey.size())
+                return std::nullopt;
+            std::string key(static_cast<std::size_t>(keySize), '\0');
+            if (!input.read(key.data(), static_cast<std::streamsize>(key.size())) || key != aKey)
+                return std::nullopt;
+            std::uint64_t wordCount = 0u;
+            if (!input.read(reinterpret_cast<char*>(&wordCount), sizeof(wordCount)) || wordCount == 0u || wordCount > (1ull << 26u))
+                return std::nullopt;
+            std::uint64_t hash = 0u;
+            if (!input.read(reinterpret_cast<char*>(&hash), sizeof(hash)))
+                return std::nullopt;
+            std::vector<std::uint32_t> result(static_cast<std::size_t>(wordCount));
+            if (!input.read(reinterpret_cast<char*>(result.data()), static_cast<std::streamsize>(result.size() * sizeof(std::uint32_t))))
+                return std::nullopt;
+            if (result[0] != 0x07230203u) // the SPIR-V magic number
+                return std::nullopt;
+            if (hash != fnv1a(result.data(), result.size() * sizeof(std::uint32_t)))
+                return std::nullopt;
+            return result;
+        }
+
+        void write_cached_spirv(std::filesystem::path const& aPath, std::string const& aKey, std::vector<std::uint32_t> const& aSpirv)
+        {
+            std::string contents{ std::begin(SpirvCacheMagic), std::end(SpirvCacheMagic) };
+            std::uint64_t const keySize = aKey.size();
+            contents.append(reinterpret_cast<char const*>(&keySize), sizeof(keySize));
+            contents += aKey;
+            std::uint64_t const wordCount = aSpirv.size();
+            contents.append(reinterpret_cast<char const*>(&wordCount), sizeof(wordCount));
+            std::uint64_t const hash = fnv1a(aSpirv.data(), aSpirv.size() * sizeof(std::uint32_t));
+            contents.append(reinterpret_cast<char const*>(&hash), sizeof(hash));
+            contents.append(reinterpret_cast<char const*>(aSpirv.data()), aSpirv.size() * sizeof(std::uint32_t));
+            write_cache_file(aPath, contents);
+        }
+
+        // delete the SPIR-V files not used for SpirvCacheMaxAge (and any temporary files left by write_cache_file)
+        void prune_cache_folder(std::filesystem::path const& aFolder)
+        {
+            try
+            {
+                auto const now = std::filesystem::file_time_type::clock::now();
+                std::error_code ec;
+                for (auto const& entry : std::filesystem::directory_iterator{ aFolder, ec })
+                {
+                    auto const extension = entry.path().extension();
+                    if (extension != ".spv" && extension != ".tmp")
+                        continue;
+                    auto const lastUsed = entry.last_write_time(ec);
+                    if (!ec && now - lastUsed > SpirvCacheMaxAge)
+                        std::filesystem::remove(entry.path(), ec);
+                }
+            }
+            catch (...)
+            {
+                // n.b. the cache is an optimization: failing to prune it is not an error
+            }
+        }
 
         VkShaderStageFlagBits to_vk_stage(shader_type aType)
         {
@@ -522,6 +642,9 @@ namespace neogfx
             f = frame{};
         }
         iCommandBuffer = VK_NULL_HANDLE;
+        save_pipeline_cache();
+        if (iCacheFolder)
+            prune_cache_folder(*iCacheFolder);
         vkDestroyDevice(iDevice, nullptr);
         iDevice = VK_NULL_HANDLE;
         if (iDebugMessenger != VK_NULL_HANDLE)
@@ -1462,7 +1585,7 @@ namespace neogfx
         pipelineInfo.pDynamicState = &dynamicInfo;
         pipelineInfo.layout = aProgram.pipelineLayout;
         VkPipeline result = VK_NULL_HANDLE;
-        vkCheck(vkCreateGraphicsPipelines(iDevice, VK_NULL_HANDLE, 1u, &pipelineInfo, nullptr, &result));
+        vkCheck(vkCreateGraphicsPipelines(iDevice, pipeline_cache(), 1u, &pipelineInfo, nullptr, &result));
         aProgram.pipelines.emplace(key, result);
         ++iStatistics.pipelinesCreated;
         return result;
@@ -2253,6 +2376,23 @@ namespace neogfx
             kind = shaderc_glsl_fragment_shader;
             break;
         }
+        // the on-disk cache: keyed by everything that determines the compilation's result
+        std::string const cacheKey = "neogfx::vulkan_graphics_backend::compile_shader;kind=" + std::to_string(static_cast<int>(kind)) +
+            ";optimize=" + (aOptimize ? "1" : "0") + ";env=vulkan_1_3\n" + aSource;
+        std::optional<std::filesystem::path> cacheFile;
+        if (auto const& folder = cache_folder())
+        {
+            std::ostringstream fileName;
+            fileName << std::hex << std::setw(16) << std::setfill('0') << fnv1a(cacheKey) << ".spv";
+            cacheFile = *folder / fileName.str();
+            if (auto cached = read_cached_spirv(*cacheFile, cacheKey))
+            {
+                // n.b. its last write time is when it was last used (see prune_cache_folder)
+                std::error_code ec;
+                std::filesystem::last_write_time(*cacheFile, std::filesystem::file_time_type::clock::now(), ec);
+                return std::move(*cached);
+            }
+        }
         shaderc::Compiler compiler;
         shaderc::CompileOptions options;
         options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_3);
@@ -2266,7 +2406,108 @@ namespace neogfx
             std::cerr << "neogfx::vulkan_graphics_backend::compile_shader::error: " << errMsg << std::endl;
             throw failed_to_create_shader_program(errMsg);
         }
-        return std::vector<std::uint32_t>{ result.cbegin(), result.cend() };
+        std::vector<std::uint32_t> spirv{ result.cbegin(), result.cend() };
+        if (cacheFile)
+            write_cached_spirv(*cacheFile, cacheKey, spirv);
+        return spirv;
+    }
+
+    std::optional<std::filesystem::path> const& vulkan_graphics_backend::cache_folder() const
+    {
+        // n.b. resolved when first needed (and retried until it can be: there may be no application yet)
+        if (!iCacheFolder)
+        {
+            try
+            {
+                auto const settingsFolder = service<i_app>().info().settings_folder().to_std_string();
+                std::filesystem::path folder{ std::u8string{ settingsFolder.begin(), settingsFolder.end() } };
+                folder /= "vk_cache";
+                std::filesystem::create_directories(folder);
+                iCacheFolder = folder;
+            }
+            catch (...)
+            {
+            }
+        }
+        return iCacheFolder;
+    }
+
+    VkPipelineCache vulkan_graphics_backend::pipeline_cache()
+    {
+        // n.b. created when first needed (as the cache folder needs the application)
+        if (iPipelineCache != VK_NULL_HANDLE)
+            return iPipelineCache;
+        // the saved pipeline cache, if it is intact (our header: magic, driver version, size and hash of the driver's data), not too big
+        // and this device's and driver's (the driver's data's VkPipelineCacheHeaderVersionOne header)
+        std::string data;
+        if (auto const& folder = cache_folder())
+        {
+            std::ifstream input{ *folder / PipelineCacheFileName, std::ios::binary };
+            if (input)
+                data.assign(std::istreambuf_iterator<char>{ input }, std::istreambuf_iterator<char>{});
+        }
+        std::size_t constexpr ourHeaderSize = sizeof(PipelineCacheMagic) + sizeof(std::uint32_t) + 2u * sizeof(std::uint64_t);
+        std::uint32_t driverVersion = 0u;
+        std::uint64_t dataSize = 0u;
+        std::uint64_t dataHash = 0u;
+        if (data.size() >= ourHeaderSize)
+        {
+            std::memcpy(&driverVersion, data.data() + sizeof(PipelineCacheMagic), sizeof(driverVersion));
+            std::memcpy(&dataSize, data.data() + sizeof(PipelineCacheMagic) + sizeof(driverVersion), sizeof(dataSize));
+            std::memcpy(&dataHash, data.data() + sizeof(PipelineCacheMagic) + sizeof(driverVersion) + sizeof(dataSize), sizeof(dataHash));
+        }
+        if (data.size() < ourHeaderSize || std::memcmp(data.data(), PipelineCacheMagic, sizeof(PipelineCacheMagic)) != 0 ||
+            driverVersion != iProperties.driverVersion || dataSize != data.size() - ourHeaderSize || dataSize > PipelineCacheMaxSize ||
+            dataHash != fnv1a(data.data() + ourHeaderSize, data.size() - ourHeaderSize))
+            data.clear();
+        else
+            data.erase(0u, ourHeaderSize);
+        VkPipelineCacheHeaderVersionOne header = {};
+        if (data.size() >= sizeof(header))
+            std::memcpy(&header, data.data(), sizeof(header));
+        if (data.size() < sizeof(header) || header.headerSize < sizeof(header) || header.headerVersion != VK_PIPELINE_CACHE_HEADER_VERSION_ONE ||
+            header.vendorID != iProperties.vendorID || header.deviceID != iProperties.deviceID ||
+            std::memcmp(header.pipelineCacheUUID, iProperties.pipelineCacheUUID, VK_UUID_SIZE) != 0)
+            data.clear();
+        VkPipelineCacheCreateInfo cacheInfo{ VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO };
+        cacheInfo.initialDataSize = data.size();
+        cacheInfo.pInitialData = data.empty() ? nullptr : data.data();
+        if (vkCreatePipelineCache(iDevice, &cacheInfo, nullptr, &iPipelineCache) != VK_SUCCESS)
+        {
+            // the saved data rejected: start empty
+            cacheInfo.initialDataSize = 0u;
+            cacheInfo.pInitialData = nullptr;
+            vkCheck(vkCreatePipelineCache(iDevice, &cacheInfo, nullptr, &iPipelineCache));
+        }
+        return iPipelineCache;
+    }
+
+    void vulkan_graphics_backend::save_pipeline_cache()
+    {
+        if (iPipelineCache == VK_NULL_HANDLE)
+            return;
+        std::size_t size = 0u;
+        if (auto const& folder = cache_folder())
+            if (vkGetPipelineCacheData(iDevice, iPipelineCache, &size, nullptr) == VK_SUCCESS && size != 0u)
+            {
+                std::string data(size, '\0');
+                if (vkGetPipelineCacheData(iDevice, iPipelineCache, &size, data.data()) == VK_SUCCESS)
+                {
+                    data.resize(size);
+                    // our header (see pipeline_cache)
+                    std::string contents{ std::begin(PipelineCacheMagic), std::end(PipelineCacheMagic) };
+                    std::uint32_t const driverVersion = iProperties.driverVersion;
+                    contents.append(reinterpret_cast<char const*>(&driverVersion), sizeof(driverVersion));
+                    std::uint64_t const dataSize = data.size();
+                    contents.append(reinterpret_cast<char const*>(&dataSize), sizeof(dataSize));
+                    std::uint64_t const dataHash = fnv1a(data);
+                    contents.append(reinterpret_cast<char const*>(&dataHash), sizeof(dataHash));
+                    contents += data;
+                    write_cache_file(*folder / PipelineCacheFileName, contents);
+                }
+            }
+        vkDestroyPipelineCache(iDevice, iPipelineCache, nullptr);
+        iPipelineCache = VK_NULL_HANDLE;
     }
 
     VkShaderModule vulkan_graphics_backend::create_shader_module(std::vector<std::uint32_t> const& aSpirv)
@@ -2744,7 +2985,7 @@ namespace neogfx
             pipelineInfo.pColorBlendState = &blendInfo;
             pipelineInfo.pDynamicState = &dynamicInfo;
             pipelineInfo.layout = resources.pipelineLayout;
-            vkCheck(vkCreateGraphicsPipelines(iDevice, VK_NULL_HANDLE, 1u, &pipelineInfo, nullptr, &resources.pipeline));
+            vkCheck(vkCreateGraphicsPipelines(iDevice, pipeline_cache(), 1u, &pipelineInfo, nullptr, &resources.pipeline));
             resources.failed = false;
         }
         catch (std::exception const& e)
@@ -2961,7 +3202,7 @@ namespace neogfx
             pipelineInfo.pDynamicState = &dynamicInfo;
             pipelineInfo.layout = resources.pipelineLayout;
             VkPipeline newPipeline = VK_NULL_HANDLE;
-            vkCheck(vkCreateGraphicsPipelines(iDevice, VK_NULL_HANDLE, 1u, &pipelineInfo, nullptr, &newPipeline));
+            vkCheck(vkCreateGraphicsPipelines(iDevice, pipeline_cache(), 1u, &pipelineInfo, nullptr, &newPipeline));
             existing = resources.pipelines.emplace(key, newPipeline).first;
         }
 

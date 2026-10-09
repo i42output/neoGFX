@@ -37,7 +37,8 @@ namespace neogfx::game
     // re-evaluated whenever the canvas is painted, so animating a scene graph is a matter of
     // changing node transformations and calling update().
     // 2D: drawn with an affine view transformation (scene origin at the centre of the canvas,
-    //     y up); z translation is drawing order.
+    //     y up); z translation is drawing order. Entities are pickable (box colliders): see
+    //     canvas::EntityClicked and entity_node. Emissive primitives glow (see set_glow).
     // 3D: drawn through the scene's camera (or a default camera framing the scene), depth tested
     //     and back face culled (unless any material is double sided); lit (on the GPU, by their normals) by a
     //     fixed directional light: per vertex (the default) or physically based (per pixel, glTF metallic-roughness
@@ -69,8 +70,16 @@ namespace neogfx::game
         void set_graph(neogfx::scene_graph::i_scene_graph& aGraph);
         void set_graph(std::shared_ptr<neogfx::scene_graph::i_scene_graph> aGraph);
         void clear_graph();
-        // re-create the entities (done automatically when the graph's revision changes)
+        // re-create the entities (done automatically when the graph's revision changes; when a node's mesh changes, which doesn't
+        // change the revision, just that node's entities are updated: they are stable, their components replaced)
         void rebuild();
+        // the node of one of the canvas's entities (e.g. from EntityClicked), or invalid_index
+        neogfx::scene_graph::index entity_node(entity_id aEntity) const;
+        // 2D: the glow of emissive primitives (drawn again, in their emissive colour, blurred and lightening what is drawn): its
+        // extent (scene units; 0 for none) and intensity (its opacity: at 1.0 the blurred emission's own, so a diffuse glow)
+        scalar glow_extent() const;
+        scalar glow_intensity() const;
+        void set_glow(scalar aExtent, scalar aIntensity = 1.0);
     public:
         // the scene displayed; invalid_index (the default) means the graph's active scene
         neogfx::scene_graph::index displayed_scene() const;
@@ -145,6 +154,7 @@ namespace neogfx::game
         void init();
         void destroy_entities();
         void build();
+        void build_node(neogfx::scene_graph::index aNode, std::optional<mat44> const& aWorld);
         void update_entities();
         neogfx::scene_graph::index scene_index() const;
         neogfx::scene_graph::index find_camera_node(std::vector<std::optional<mat44>> const& aWorld) const;
@@ -155,6 +165,8 @@ namespace neogfx::game
     private:
         std::shared_ptr<neogfx::scene_graph::i_scene_graph> iGraph;
         std::optional<std::uint64_t> iBuiltRevision;
+        // each node's mesh (invalid_index if none) when its entities were built
+        std::vector<neogfx::scene_graph::index> iBuiltMeshes;
         neogfx::scene_graph::index iScene;
         neogfx::scene_graph::index iCameraNode;
         std::optional<scalar> iViewScale;
@@ -164,6 +176,11 @@ namespace neogfx::game
         bool iShadows = false;
         std::optional<pbr_background_source> iEnvironmentBackground;
         scalar iEnvironmentBackgroundBlur = 0.0;
+        scalar iGlowExtent = 0.25;
+        scalar iGlowIntensity = 1.0;
+        // 2D: the entities drawing the glow of emissive primitives, on an ECS of their own (see init)
+        std::shared_ptr<game::i_ecs> iGlowEcs;
+        std::vector<primitive_entity> iGlowEntities;
         std::vector<primitive_entity> iEntities;
         std::optional<std::pair<vec3, vec3>> iBounds;
         std::map<std::pair<neogfx::scene_graph::index, texture_sampling>, std::optional<game::texture>> iTextures;

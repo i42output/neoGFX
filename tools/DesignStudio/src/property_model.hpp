@@ -1038,6 +1038,8 @@ namespace neogfx::DesignStudio
                 auto& inputButton = static_cast<ng::push_button&>(dropListRef.input_widget().as_widget());
                 inputButton.set_size_policy(ng::size_policy{ ng::size_constraint::Expanding, ng::size_constraint::Expanding });
                 inputButton.set_face_color(ng::color{});
+                inputButton.set_border_color(ng::color{}); // (no border: the cell's)
+                inputButton.set_outer_border_color(ng::color{});
                 if (attached())
                 {
                     auto const cellPadding = cell_padding(attachment());

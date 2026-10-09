@@ -44,6 +44,14 @@ namespace neogfx
         virtual void header_view_updated(header_view& aHeaderView, header_view_update_reason aUpdateReason) = 0;
     };
 
+    // how a header's last column is expanded (to the right of the view) if its columns don't fill it
+    enum class last_column_expansion : std::uint32_t
+    {
+        DontExpand,         ///< as wide as its contents (or as resized by the user)
+        ExpandToFitContent, ///< as wide as its contents (or as resized by the user) or, if wider, as the rest of the view
+        ExpandToFitView     ///< as wide as the rest of the view (whatever the width of its contents) unless resized wider by the user
+    };
+
     enum class header_view_type : std::uint32_t
     {
         Horizontal      = 0x0001,
@@ -76,8 +84,8 @@ namespace neogfx
         i_item_presentation_model& presentation_model();
         void set_presentation_model(i_item_presentation_model& aPresentationModel);
         void set_presentation_model(ref_ptr<i_item_presentation_model> aPresentationModel);
-        bool expand_last_column() const;
-        void set_expand_last_column(bool aExpandLastColumn);
+        last_column_expansion expand_last_column() const;
+        void set_expand_last_column(last_column_expansion aExpandLastColumn);
     public:
         dimension separator_width() const;
         void set_separator_width(const optional_dimension& aWidth);
@@ -105,6 +113,10 @@ namespace neogfx
         void init();
         void full_update();
         bool update_section_width(std::uint32_t aColumn, dimension aColumnWidth);
+        bool update_expanded_section();
+    protected:
+        void resized() override;
+        std::optional<separator_type> separator_at(const point& aPosition) const override;
     private:
         i_header_view_owner& iOwner;
         sink iSink;
@@ -113,7 +125,8 @@ namespace neogfx
         ref_ptr<i_item_model> iModel;
         ref_ptr<i_item_presentation_model> iPresentationModel;
         sink iPresentationModelSink;
-        bool iExpandLastColumn;
+        last_column_expansion iExpandLastColumn;
+        optional_dimension iExpandedSectionWidth; // (ExpandToFitView: the width the last section's button was given (not resized by the user))
         optional_dimension iSeparatorWidth;
         std::vector<section_dimension> iSectionWidths;
         bool iUpdatingSectionWidth;

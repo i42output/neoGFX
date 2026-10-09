@@ -59,7 +59,7 @@ namespace neogfx
         splitter{ splitter_style::ResizeSinglePane | (aType == header_view_type::Horizontal ? splitter_style::Horizontal : splitter_style::Vertical) },
         iOwner{ aOwner },
         iType{ aType },
-        iExpandLastColumn{ false },
+        iExpandLastColumn{ last_column_expansion::DontExpand },
         iUpdatingSectionWidth { false }
     {
         init();
@@ -69,7 +69,7 @@ namespace neogfx
         splitter{ aParent, splitter_style::ResizeSinglePane | (aType == header_view_type::Horizontal ? splitter_style::Horizontal : splitter_style::Vertical) },
         iOwner{ aOwner },
         iType{ aType },
-        iExpandLastColumn{ false },
+        iExpandLastColumn{ last_column_expansion::DontExpand },
         iUpdatingSectionWidth{ false }
     {
         init();
@@ -79,7 +79,7 @@ namespace neogfx
         splitter{ aLayout, splitter_style::ResizeSinglePane | (aType == header_view_type::Horizontal ? splitter_style::Horizontal : splitter_style::Vertical) },
         iOwner{ aOwner },
         iType{ aType },
-        iExpandLastColumn{ false },
+        iExpandLastColumn{ last_column_expansion::DontExpand },
         iUpdatingSectionWidth{ false }
     {
         init();
@@ -179,12 +179,12 @@ namespace neogfx
         }
     }
 
-    bool header_view::expand_last_column() const
+    last_column_expansion header_view::expand_last_column() const
     {
         return iExpandLastColumn;
     }
 
-    void header_view::set_expand_last_column(bool aExpandLastColumn)
+    void header_view::set_expand_last_column(last_column_expansion aExpandLastColumn)
     {
         if (iExpandLastColumn != aExpandLastColumn)
         {
@@ -225,6 +225,8 @@ namespace neogfx
         for (std::uint32_t col = 0u; col < presentation_model().columns(); ++col)
             if (update_section_width(col, presentation_model().column_width(col, *this, true)))
                 sectionWidthChanged = true;
+        if (update_expanded_section())
+            sectionWidthChanged = true;
         if (sectionWidthChanged)
             iOwner.header_view_updated(*this, header_view_update_reason::PanesResized);
     }
@@ -286,15 +288,22 @@ namespace neogfx
     {
         if (iSectionWidths.empty())
             return 0.0;
+        auto const lastColumn = presentation_model().columns() - 1u;
+        // (a last column that is expanded to fit the view isn't as wide as its contents: as the rest of the view unless resized wider)
         auto result = units_converter{ *this }.from_device_units(iSectionWidths[aSectionIndex].manual != std::nullopt ?
             *iSectionWidths[aSectionIndex].manual :
+            aSectionIndex == lastColumn && expand_last_column() == last_column_expansion::ExpandToFitView ? 0.0 : 
             iSectionWidths[aSectionIndex].calculated);
-        auto const lastColumn = presentation_model().columns() - 1u;
         thread_local bool tInSectionWidth = false;
-        if (aSectionIndex == lastColumn && expand_last_column() && !tInSectionWidth && !iUpdatingSectionWidth)
+        if (aSectionIndex == lastColumn && expand_last_column() != last_column_expansion::DontExpand && !tInSectionWidth && !iUpdatingSectionWidth)
         {
             neolib::scoped_flag sf{ tInSectionWidth };
-            auto const delta = client_rect(false).cx - total_width();
+            // (a last column expanded to fit the view fits the view (the header's parent) rather than the header itself: the header is as 
+            // wide as its sections (and the separator and section that follow the last column) so would otherwise grow each time the last 
+            // column did)
+            auto const width = (expand_last_column() == last_column_expansion::ExpandToFitView && has_parent()) ? 
+                parent().client_rect(false).cx : client_rect(false).cx;
+            auto const delta = width - total_width();
             if (delta > 0.0)
                 result += delta;
         }
@@ -327,15 +336,31 @@ namespace neogfx
 
     void header_view::panes_resized()
     {
+        auto const lastColumn = presentation_model().columns() - 1u;
         for (std::uint32_t col = 0; col < presentation_model().columns(); ++col)
         {
+            // (a last column expanded to fit the view whose button is as it was given (see update_expanded_section) hasn't been resized)
+            if (col == lastColumn && expand_last_column() == last_column_expansion::ExpandToFitView && iExpandedSectionWidth &&
+                layout().get_widget_at(col).fixed_size().cx == *iExpandedSectionWidth)
+                continue;
             dimension oldSectionWidth = section_width(col);
             dimension newSectionWidth = layout().get_widget_at(col).fixed_size().cx;
             if (col == 0)
                 newSectionWidth -= presentation_model().cell_spacing(*this).cx / 2.0;
             if (newSectionWidth != oldSectionWidth)
+            {
                 iSectionWidths[col].manual = newSectionWidth;
+                if (col == lastColumn && expand_last_column() == last_column_expansion::ExpandToFitView)
+                {
+                    // (only a last column resized wider than the rest of the view keeps its width; otherwise (e.g. given a width that the 
+                    // view is later too narrow for, a scrollbar shown) it fits the view as it is resized)
+                    iSectionWidths[col].manual = std::nullopt;
+                    if (newSectionWidth > section_width(col))
+                        iSectionWidths[col].manual = newSectionWidth;
+                }
+            }
         }
+        update_expanded_section();
         layout_items();
         iOwner.header_view_updated(*this, header_view_update_reason::PanesResized);
     }
@@ -350,6 +375,7 @@ namespace neogfx
             layout().get_widget_at(col).set_fixed_size({}, false);
             layout().get_widget_at(col).set_fixed_size(size(std::max(section_width(col), layout().spacing().cx * 3.0), layout().get_widget_at(col).minimum_size().cy), false);
         }
+        update_expanded_section();
         iOwner.header_view_updated(*this, header_view_update_reason::PanesResized);
     }
 
@@ -373,9 +399,9 @@ namespace neogfx
         iSectionWidths.resize(presentation_model().columns());
         for (auto& sw : iSectionWidths)
             sw.calculated = 0.0;
-        while (layout().count() > presentation_model().columns() + (expand_last_column() ? 0 : 1))
+        while (layout().count() > presentation_model().columns() + (expand_last_column() == last_column_expansion::ExpandToFitContent ? 0 : 1))
             layout().remove_at(layout().count() - 1);
-        while (layout().count() < presentation_model().columns() + (expand_last_column() ? 0 : 1))
+        while (layout().count() < presentation_model().columns() + (expand_last_column() == last_column_expansion::ExpandToFitContent ? 0 : 1))
             layout().add(make_ref<header_button>(*this));
         if (iButtonSinks.size() < layout().count())
             iButtonSinks.resize(layout().count());
@@ -395,7 +421,7 @@ namespace neogfx
                 button.set_text(string{ presentation_model().column_heading_text(i) });
                 button.set_minimum_size({});
                 button.set_maximum_size({});
-                if (!expand_last_column() || i != presentation_model().columns() - 1)
+                if (expand_last_column() != last_column_expansion::ExpandToFitContent || i != presentation_model().columns() - 1)
                     button.set_size_policy(iType == header_view_type::Horizontal ?
                         neogfx::size_policy{ size_constraint::Fixed, size_constraint::Expanding } :
                         neogfx::size_policy{ size_constraint::Expanding, size_constraint::Fixed });
@@ -458,7 +484,7 @@ namespace neogfx
                         }
                     });
             }
-            else if (!expand_last_column())
+            else if (expand_last_column() != last_column_expansion::ExpandToFitContent)
             {
                 button.set_text(string{});
                 button.set_size_policy(size_constraint::Expanding);
@@ -468,6 +494,8 @@ namespace neogfx
         }
         for (std::uint32_t col = 0u; col < presentation_model().columns(); ++col)
             update_section_width(col, presentation_model().column_width(col, *this, true));
+        iExpandedSectionWidth = std::nullopt;
+        update_expanded_section();
         iOwner.header_view_updated(*this, header_view_update_reason::FullUpdate);
     }
 
@@ -495,16 +523,69 @@ namespace neogfx
         dimension const oldSectionWidth = calculatedSectionWidth;
         dimension const headingWidth = presentation_model().column_heading_extents(aColumn, *this).cx + presentation_model().cell_padding(*this).size().cx * 2.0;
         calculatedSectionWidth = std::max(calculatedSectionWidth, units_converter{ *this }.to_device_units(std::max(headingWidth, aColumnWidth)));
+        auto const lastColumn = presentation_model().columns() - 1u;
+        if (aColumn == lastColumn && expand_last_column() == last_column_expansion::ExpandToFitView)
+            return false; // (its contents don't change its width: see update_expanded_section)
         if (calculatedSectionWidth != oldSectionWidth || layout().get_widget_at(aColumn).minimum_size().cx != section_width(aColumn, true))
         {
             size const widgetSize{ std::max(section_width(aColumn, true), layout().spacing().cx * 3.0), layout().get_widget_at(aColumn).minimum_size().cy };
-            auto const lastColumn = presentation_model().columns() - 1u;
-            if (!expand_last_column() || aColumn != lastColumn)
+            if (expand_last_column() != last_column_expansion::ExpandToFitContent || aColumn != lastColumn)
                 layout().get_widget_at(aColumn).set_fixed_size(widgetSize);
             else
                 layout().get_widget_at(aColumn).set_minimum_size(widgetSize);
             return true;
         }
         return false;
+    }
+
+    // a last column expanded to fit the view: its button is as wide as it is (the rest of the view unless resized wider by the user); true 
+    // if changed
+    bool header_view::update_expanded_section()
+    {
+        if (expand_last_column() != last_column_expansion::ExpandToFitView || !has_presentation_model() || presentation_model().columns() == 0u ||
+            layout().count() < presentation_model().columns())
+            return false;
+        auto const lastColumn = presentation_model().columns() - 1u;
+        auto& button = layout().get_widget_at(lastColumn);
+        dimension const width = std::max(section_width(lastColumn, true), layout().spacing().cx * 3.0);
+        iExpandedSectionWidth = width;
+        if (button.has_fixed_size() && button.fixed_size().cx == width)
+            return false;
+        button.set_fixed_size(size{ width, button.minimum_size().cy }, false);
+        return true;
+    }
+
+    std::optional<header_view::separator_type> header_view::separator_at(const point& aPosition) const
+    {
+        auto const result = splitter::separator_at(aPosition);
+        if (result || expand_last_column() != last_column_expansion::ExpandToFitView || !has_presentation_model() || 
+            presentation_model().columns() == 0u || layout().count() <= presentation_model().columns())
+            return result;
+        // a last column expanded to fit the view ends at the right of the view so the separator after it (that resizes it) is beyond 
+        // the view: it is grabbed at the right of the last column instead (or, if the column is wider than the visible part of the 
+        // header, at the right of the view), twice as wide as a separator is at least grabbed (see splitter::separator_at) as it is 
+        // at the very edge of the view
+        auto const lastColumn = presentation_model().columns() - 1u;
+        auto const& button = layout().get_widget_at(lastColumn);
+        scalar const tolerance = 6.0_dip;
+        dimension const grab = std::max(tolerance, separator_width()) * 2.0;
+        dimension right = button.position().x + button.extents().cx;
+        if (has_parent())
+            right = std::min(right, parent().client_rect(false).right() - position().x);
+        rect const grabRect{ point{ right - grab, button.position().y }, size{ grab, button.extents().cy } };
+        if (grabRect.contains(aPosition))
+            return separator_type{ lastColumn, lastColumn + 1u };
+        return result;
+    }
+
+    void header_view::resized()
+    {
+        splitter::resized();
+        // (the rest of the view, which a last column expanded to fit the view is as wide as, has changed)
+        if (update_expanded_section())
+        {
+            layout_items();
+            iOwner.header_view_updated(*this, header_view_update_reason::PanesResized);
+        }
     }
 }

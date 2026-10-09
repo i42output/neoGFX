@@ -34,6 +34,8 @@
 #include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/mesh_render_cache.hpp>
 #include <neogfx/game/model_transformation.hpp>
+#include <neogfx/game/box_collider.hpp>
+#include <neogfx/gfx/i_graphics_context.hpp>
 
 namespace neogfx::game
 {
@@ -48,6 +50,20 @@ namespace neogfx::game
                 { 0xd61bac8c, 0xed15, 0x4019, 0xbd0a, { 0x02, 0x57, 0x80, 0x7c, 0x40, 0x1b } },
                 "SceneGraphPrimitive",
                 { mesh_renderer::meta::id(), mesh_filter::meta::id(), model_transformation::meta::id() }
+            };
+            if (!aEcs.archetype_registered(sArchetype))
+                aEcs.register_archetype(sArchetype);
+            return sArchetype;
+        }
+
+        // 2D: pickable (see canvas::EntityClicked)
+        renderable_entity_archetype const& scene_graph_primitive_2d_archetype(i_ecs& aEcs)
+        {
+            static const renderable_entity_archetype sArchetype
+            {
+                { 0xde5d5800, 0xa316, 0x4725, 0xb301, { 0x5a, 0x18, 0x65, 0xcf, 0x80, 0xae } },
+                "SceneGraphPrimitive2D",
+                { mesh_renderer::meta::id(), mesh_filter::meta::id(), model_transformation::meta::id(), box_collider_2d::meta::id() }
             };
             if (!aEcs.archetype_registered(sArchetype))
                 aEcs.register_archetype(sArchetype);
@@ -412,6 +428,46 @@ namespace neogfx::game
                 update_entities();
             }
         });
+        // 2D: the glow of emissive primitives: their glow entities (on the glow ECS, so drawn entirely by the filter's front buffer
+        // rather than with the canvas's entities), blurred, lightening what is drawn
+        iSink += EntitiesRendered([this](i_graphics_context& aGc, std::int32_t aLayer)
+        {
+            if (aLayer != 0 || iGlowEntities.empty() || !entity_transformation())
+                return;
+            // a diffuse glow: the blurred emission at the glow's intensity (not glow_gain's, which saturates it into an opaque core),
+            // so translucent around the (solid) emissive primitives themselves
+            auto glow = blur_filter::glow(rect{ point{}, client_rect().extents() }, iGlowExtent * iLastScale2D,
+                1.0, 1u, blending_mode::Filter, blending_mode::Lighten);
+            glow.gain = iGlowIntensity;
+            scoped_filter<blur_filter> filter{ aGc, glow };
+            filter.front_buffer().clear_depth_buffer();
+            filter.front_buffer().draw_entities(*iGlowEcs, 0, *entity_transformation());
+        });
+    }
+
+    sg::index scene_graph_canvas::entity_node(entity_id aEntity) const
+    {
+        for (auto const& e : iEntities)
+            if (e.entity == aEntity)
+                return e.node;
+        return sg::invalid_index;
+    }
+
+    scalar scene_graph_canvas::glow_extent() const
+    {
+        return iGlowExtent;
+    }
+
+    scalar scene_graph_canvas::glow_intensity() const
+    {
+        return iGlowIntensity;
+    }
+
+    void scene_graph_canvas::set_glow(scalar aExtent, scalar aIntensity)
+    {
+        iGlowExtent = aExtent;
+        iGlowIntensity = aIntensity;
+        rebuild();
     }
 
     void scene_graph_canvas::destroy_entities()
@@ -419,6 +475,9 @@ namespace neogfx::game
         for (auto const& e : iEntities)
             ecs().destroy_entity(e.entity);
         iEntities.clear();
+        for (auto const& e : iGlowEntities)
+            iGlowEcs->destroy_entity(e.entity);
+        iGlowEntities.clear();
         iBounds = std::nullopt;
     }
 
@@ -446,16 +505,52 @@ namespace neogfx::game
     {
         destroy_entities();
         iBuiltRevision = has_graph() ? std::optional<std::uint64_t>{ graph().revision() } : std::nullopt;
+        iBuiltMeshes.clear();
         auto const scene = scene_index();
         if (scene == sg::invalid_index)
             return;
+        auto const world = sg::world_transformations(graph(), scene);
+        iBuiltMeshes.assign(graph().node_count(), sg::invalid_index);
+        for (sg::index n = 0u; n < graph().node_count(); ++n)
+            build_node(n, world[n]);
+    }
+
+    void scene_graph_canvas::build_node(sg::index aNode, std::optional<mat44> const& aWorld)
+    {
         auto const& g = graph();
         bool const twoD = (g.dimension() == sg::dimension::Two);
-        auto const world = sg::world_transformations(g, scene);
-        for (sg::index n = 0u; n < g.node_count(); ++n)
+        auto const n = aNode;
+        iBuiltMeshes[n] = g.node(n).has_mesh() ? g.node(n).mesh() : sg::invalid_index;
+        // the node's existing entities (when its mesh has changed, see update_entities): reused in order, their components replaced,
+        // so that entities are stable (and keep their drawing order); any not needed by the new mesh are destroyed
+        std::vector<primitive_entity> existing;
+        std::vector<primitive_entity> existingGlow;
+        auto const take_existing = [n](std::vector<primitive_entity>& aFrom, std::vector<primitive_entity>& aTo)
         {
-            if (!world[n] || !g.node(n).has_mesh() || g.node(n).mesh() >= g.mesh_count())
-                continue;
+            auto const nodeEntities = std::stable_partition(aFrom.begin(), aFrom.end(), [n](primitive_entity const& e) { return e.node != n; });
+            aTo.assign(std::make_move_iterator(nodeEntities), std::make_move_iterator(aFrom.end()));
+            aFrom.erase(nodeEntities, aFrom.end());
+        };
+        take_existing(iEntities, existing);
+        take_existing(iGlowEntities, existingGlow);
+        std::size_t reused = 0u;
+        std::size_t reusedGlow = 0u;
+        auto const stable_entity = [](i_ecs& aEcs, renderable_entity_archetype const& aArchetype, std::vector<primitive_entity> const& aExisting,
+            std::size_t& aReused, auto&&... aComponents) -> entity_id
+        {
+            if (aReused == aExisting.size())
+                return aEcs.create_entity(aArchetype, std::forward<decltype(aComponents)>(aComponents)...);
+            auto const entity = aExisting[aReused++].entity;
+            {
+                scoped_component_data_lock<std::decay_t<decltype(aComponents)>..., mesh_render_cache> lock{ aEcs };
+                aEcs.populate(entity, std::forward<decltype(aComponents)>(aComponents)...);
+                // n.b. dirty (not invalid): its cached vertices are reused (or reclaimed) when it is next drawn
+                set_render_cache_dirty(aEcs, entity);
+            }
+            return entity;
+        };
+        if (aWorld && g.node(n).has_mesh() && g.node(n).mesh() < g.mesh_count())
+        {
             auto const& mesh = g.mesh(g.node(n).mesh());
             for (std::uint32_t p = 0u; p < mesh.primitive_count(); ++p)
             {
@@ -555,14 +650,14 @@ namespace neogfx::game
                     g.material(primitive.material()).double_sided());
                 for (auto const& v : localMesh.vertices)
                 {
-                    auto const wv = *world[n] * v.as<scalar>();
+                    auto const wv = *aWorld * v.as<scalar>();
                     if (!iBounds)
                         iBounds.emplace(wv, wv);
                     else
                         iBounds = std::make_pair(iBounds->first.min(wv), iBounds->second.max(wv));
                 }
                 // vertices are cached in model space and transformed (and skinned) on the GPU
-                model_transformation modelTransformation{ world[n]->as<float>() };
+                model_transformation modelTransformation{ aWorld->as<float>() };
                 // the primitive's own normals for lighting (if it has none they are calculated from its faces when drawn)
                 if (primitive.attributes().has_attribute(sg::vertex_attribute::NORMAL))
                 {
@@ -615,13 +710,48 @@ namespace neogfx::game
                         modelTransformation.vertexWeights.clear();
                     }
                 }
-                newEntity.entity = ecs().create_entity(scene_graph_primitive_archetype(ecs()),
-                    mesh_filter{ {}, std::move(localMesh), {} },
-                    mesh_renderer{ material{ to_ecs_component(newEntity.color), {}, {}, texture, {}, {}, false, pbr } },
-                    std::move(modelTransformation));
+                if (twoD)
+                {
+                    // an emissive primitive glows: drawn again, in its emissive colour, on the glow ECS (see init)
+                    if (iGlowExtent > 0.0 && pbr.emissive != vec3{})
+                    {
+                        if (!iGlowEcs)
+                        {
+                            iGlowEcs = std::make_shared<game::ecs>(ecs_flags::Default | ecs_flags::NoThreads);
+                            iGlowEcs->component<mesh_filter>();
+                            iGlowEcs->component<mesh_renderer>();
+                            iGlowEcs->component<mesh_render_cache>();
+                        }
+                        primitive_entity glowEntity = newEntity;
+                        glowEntity.color = neogfx::color::from_linear(linear_color{ vec4{
+                            std::min(pbr.emissive.x, 1.0), std::min(pbr.emissive.y, 1.0), std::min(pbr.emissive.z, 1.0), 1.0 } });
+                        glowEntity.entity = stable_entity(*iGlowEcs, scene_graph_primitive_archetype(*iGlowEcs), existingGlow, reusedGlow,
+                            mesh_filter{ {}, localMesh, {} },
+                            mesh_renderer{ material{ to_ecs_component(glowEntity.color) } },
+                            model_transformation{ modelTransformation.matrix });
+                        iGlowEntities.push_back(std::move(glowEntity));
+                    }
+                    // pickable (see canvas::EntityClicked and entity_node): its collider's transformation (to canvas coordinates) is
+                    // set by update_entities
+                    box_collider_2d collider{ 0x1ull, { localMesh.vertices.begin(), localMesh.vertices.end() } };
+                    newEntity.entity = stable_entity(ecs(), scene_graph_primitive_2d_archetype(ecs()), existing, reused,
+                        mesh_filter{ {}, std::move(localMesh), {} },
+                        mesh_renderer{ material{ to_ecs_component(newEntity.color), {}, {}, texture, {}, {}, false, pbr } },
+                        std::move(modelTransformation),
+                        std::move(collider));
+                }
+                else
+                    newEntity.entity = stable_entity(ecs(), scene_graph_primitive_archetype(ecs()), existing, reused,
+                        mesh_filter{ {}, std::move(localMesh), {} },
+                        mesh_renderer{ material{ to_ecs_component(newEntity.color), {}, {}, texture, {}, {}, false, pbr } },
+                        std::move(modelTransformation));
                 iEntities.push_back(std::move(newEntity));
             }
         }
+        for (; reused < existing.size(); ++reused)
+            ecs().destroy_entity(existing[reused].entity);
+        for (; reusedGlow < existingGlow.size(); ++reusedGlow)
+            iGlowEcs->destroy_entity(existingGlow[reusedGlow].entity);
     }
 
     void scene_graph_canvas::update_entities()
@@ -635,6 +765,18 @@ namespace neogfx::game
         }
         if (iBuiltRevision != graph().revision())
             build();
+        else if (scene_index() != sg::invalid_index)
+        {
+            // the nodes whose meshes have changed (n.b. that doesn't change the graph's revision): their entities updated
+            std::optional<std::vector<std::optional<mat44>>> world;
+            for (sg::index n = 0u; n < graph().node_count() && n < iBuiltMeshes.size(); ++n)
+                if (iBuiltMeshes[n] != (graph().node(n).has_mesh() ? graph().node(n).mesh() : sg::invalid_index))
+                {
+                    if (!world)
+                        world = sg::world_transformations(graph(), scene_index());
+                    build_node(n, (*world)[n]);
+                }
+        }
         auto const scene = scene_index();
         if (scene == sg::invalid_index || iEntities.empty())
         {
@@ -714,6 +856,26 @@ namespace neogfx::game
                     model.matrix = transformation;
             }
         }
+        // the glow entities (2D)
+        if (!iGlowEntities.empty())
+        {
+            scoped_component_data_lock<mesh_renderer, mesh_render_cache, model_transformation> lock{ *iGlowEcs };
+            auto& renderers = iGlowEcs->component<mesh_renderer>();
+            auto& cache = iGlowEcs->component<mesh_render_cache>();
+            auto& models = iGlowEcs->component<model_transformation>();
+            for (auto const& e : iGlowEntities)
+            {
+                auto& renderer = renderers.entity_record_no_lock(e.entity);
+                bool const visible = world[e.node].has_value();
+                if (renderer.render != visible)
+                {
+                    renderer.render = visible;
+                    set_render_cache_dirty_no_lock(cache, e.entity);
+                }
+                if (visible)
+                    models.entity_record_no_lock(e.entity).matrix = world[e.node]->as<float>();
+            }
+        }
 
         if (twoD)
         {
@@ -734,6 +896,16 @@ namespace neogfx::game
                 view = translation_matrix(-vec3{ (iBounds->first.x + iBounds->second.x) / 2.0, (iBounds->first.y + iBounds->second.y) / 2.0, 0.0 });
             }
             iLastScale2D = scale * iZoom2D;
+            // entity colliders (for picking, see canvas::EntityClicked) are in canvas coordinates as mouse positions are (y down)
+            {
+                auto const pickView = translation_matrix(vec3{ width / 2.0, height / 2.0, 0.0 }) * scaling_matrix(vec3{ iLastScale2D, -iLastScale2D, 1.0 }) *
+                    translation_matrix(vec3{ iPan2D.x, iPan2D.y, 0.0 }) * view;
+                scoped_component_data_lock<box_collider_2d> lock{ ecs() };
+                auto& colliders = ecs().component<box_collider_2d>();
+                for (auto const& e : iEntities)
+                    if (world[e.node] && colliders.has_entity_record_no_lock(e.entity))
+                        colliders.entity_record_no_lock(e.entity).transformation = (pickView * *world[e.node]).as<float>();
+            }
             view = translation_matrix(vec3{ width / 2.0, height / 2.0, 0.0 }) * scaling_matrix(vec3{ iLastScale2D, iLastScale2D, 1.0 }) * 
                 translation_matrix(vec3{ iPan2D.x, iPan2D.y, 0.0 }) * view;
             // n.b. only x and y are viewed: z (drawing order) passes through unchanged

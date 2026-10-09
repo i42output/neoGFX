@@ -194,8 +194,9 @@ namespace neogfx
             iPresentationModelSink += presentation_model().item_added([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); item_added(aItemIndex); });
             iPresentationModelSink += presentation_model().item_changed([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); item_changed(aItemIndex); });
             iPresentationModelSink += presentation_model().item_removed([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); item_removed(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_expanded([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); tree_changed(); invalidate_item(aItemIndex); update_cell_widgets(); });
-            iPresentationModelSink += presentation_model().item_collapsed([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); tree_changed(); invalidate_item(aItemIndex); update_cell_widgets(); });
+            // (items expanded or collapsed during an update (e.g. as the items are made) are laid out when it ends: see items_updated)
+            iPresentationModelSink += presentation_model().item_expanded([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); if (presentation_model().updating()) return; tree_changed(); invalidate_item(aItemIndex); update_cell_widgets(); });
+            iPresentationModelSink += presentation_model().item_collapsed([this](item_presentation_model_index const& aItemIndex) { iElidedCellText.clear(); if (presentation_model().updating()) return; tree_changed(); invalidate_item(aItemIndex); update_cell_widgets(); });
             iPresentationModelSink += presentation_model().item_toggled([this](item_presentation_model_index const& aItemIndex) { update(cell_rect(aItemIndex, cell_part::Background)); });
             iPresentationModelSink += presentation_model().items_updating([this]() { /* todo: hourglass */ });
             iPresentationModelSink += presentation_model().items_updated([this]() { iElidedCellText.clear(); items_updated(); });
@@ -1490,6 +1491,9 @@ namespace neogfx
                         {
                         case cell_part::Background:
                             result.inflate(size{ cellSpacing.cx / 2.0, 0.0 });
+                            // (the last column's background (and border) ends where the column does: there is no spacing after it)
+                            if (lastColumn)
+                                result.cx -= cellSpacing.cx / 2.0;
                             break;
                         case cell_part::Base:
                             result.deflate(size{ 0.0, cellSpacing.cy / 2.0 });
@@ -1499,7 +1503,9 @@ namespace neogfx
                             result.cx -= indent;
                         if (lastColumn)
                         {
-                            result.cx += (item_display_rect().right() - result.right());
+                            // (the last column's cells extend to the right of the items' area if they don't reach it but aren't cut short 
+                            // by it if they go beyond it (e.g. the column has been resized wider than the view, which is scrolled across it))
+                            result.cx = std::max(result.cx, item_display_rect().right() - result.x);
                             // (a row's background can extend to the right of the view even if its columns don't)
                             if (aPart == cell_part::Background && extend_row_background())
                                 result.cx = std::max(result.cx, client_rect(false).right() - result.x);
@@ -1594,8 +1600,11 @@ namespace neogfx
                 bool const lastColumn = (aItemIndex.column() == presentation_model().columns() - 1);
                 if (lastColumn)
                 {
+                    // (no further right than the items' area or, if the column goes beyond it (e.g. resized wider than the view), the 
+                    // column: as wide as the column)
                     cellRect.cx += presentation_model().cell_spacing(aGc).cx;
-                    cellRect.cx = std::min(cellRect.cx, cellRect.cx + (item_display_rect().right() - cellRect.right()));
+                    auto const limit = std::max(item_display_rect().right(), cell_rect(aItemIndex).right());
+                    cellRect.cx = std::min(cellRect.cx, limit - cellRect.x);
                 }
                 return cellRect;
             }

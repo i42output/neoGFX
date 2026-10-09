@@ -27,6 +27,8 @@
 #include <filesystem>
 #include <cctype>
 #include <string>
+#include <map>
+#include <regex>
 
 #include <neogfx/gfx/scene_graph.hpp>
 
@@ -907,6 +909,267 @@ namespace neogfx::scene_graph
             outline.push_back(vec2{ aRadius * std::cos(angle), aRadius * std::sin(angle) });
         }
         return add_polygon(outline, aColor, aName);
+    }
+
+    index scene_graph_2d::add_svg_mesh(std::string const& aSvg, std::optional<std::string> const& aName)
+    {
+        using svg_attributes = std::map<std::string, std::string>;
+        static std::regex const sElementPattern{ R"re(<\s*(svg|line|rect|circle|polyline|polygon|path)\b([^>]*)>)re" };
+        static std::regex const sAttributePattern{ R"re(([A-Za-z_:][-\w:.]*)\s*=\s*"([^"]*)")re" };
+        static std::regex const sPathTokenPattern{ R"re(([MmLlHhVvZz])|([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?))re" };
+        auto const parse_attributes = [](std::string const& aText)
+        {
+            svg_attributes result;
+            for (std::sregex_iterator i{ aText.begin(), aText.end(), sAttributePattern }, end; i != end; ++i)
+                result[(*i)[1].str()] = (*i)[2].str();
+            return result;
+        };
+        auto const parse_numbers = [](std::string const& aText)
+        {
+            std::vector<scalar> result;
+            for (std::sregex_iterator i{ aText.begin(), aText.end(), sPathTokenPattern }, end; i != end; ++i)
+                if ((*i)[2].matched)
+                    result.push_back(std::stod((*i)[2].str()));
+            return result;
+        };
+        auto const paint = [](std::string const& aValue) -> std::optional<neogfx::color>
+        {
+            if (aValue == "none")
+                return std::nullopt;
+            return neogfx::color{ aValue };
+        };
+
+        vec2 viewOrigin{ 0.0, 0.0 };
+        vec2 viewExtents{ 1.0, 1.0 };
+        svg_attributes defaults{ { "fill", "black" }, { "stroke", "none" }, { "stroke-width", "1" }, { "stroke-linecap", "butt" } };
+        auto const to_scene = [&](scalar aX, scalar aY)
+        {
+            return vec2{ (aX - viewOrigin.x) / viewExtents.x - 0.5, 0.5 - (aY - viewOrigin.y) / viewExtents.y };
+        };
+
+        index result = invalid_index;
+        std::optional<neogfx::color> runColor;
+        game::mesh run;
+        float z = 0.0f;
+        auto const flush = [&]()
+        {
+            if (run.faces.empty())
+                return;
+            auto const newMaterial = add_material(*runColor, true, aName);
+            if (result == invalid_index)
+                result = add_mesh(run, newMaterial, aName);
+            else
+                add_primitive(result, run, newMaterial);
+            run = {};
+        };
+        auto const add_convex = [&](std::vector<vec2> const& aOutline, neogfx::color const& aColor)
+        {
+            if (aOutline.size() < 3u)
+                return;
+            if (runColor != aColor)
+            {
+                flush();
+                runColor = aColor;
+            }
+            auto const base = static_cast<std::uint32_t>(run.vertices.size());
+            for (auto const& p : aOutline)
+                run.vertices.push_back(vec3f{ static_cast<float>(p.x), static_cast<float>(p.y), z });
+            for (std::uint32_t i = 1u; i + 1u < static_cast<std::uint32_t>(aOutline.size()); ++i)
+                run.faces.push_back(game::face{ base, base + i, base + i + 1u });
+            z += 1.0e-4f;
+        };
+        auto const circle = [](vec2 const& aCentre, scalar aRadius, std::uint32_t aSides = 32u)
+        {
+            std::vector<vec2> result;
+            for (std::uint32_t s = 0u; s < aSides; ++s)
+            {
+                auto const angle = to_rad(360.0 * s / aSides);
+                result.push_back(aCentre + vec2{ aRadius * std::cos(angle), aRadius * std::sin(angle) });
+            }
+            return result;
+        };
+        auto const stroke = [&](std::vector<vec2> const& aPoints, bool aClosed, scalar aWidth, std::string const& aCap, neogfx::color const& aColor)
+        {
+            auto const n = aPoints.size();
+            if (n < 2u)
+                return;
+            auto const hw = aWidth / 2.0;
+            auto const segments = aClosed ? n : n - 1u;
+            for (std::size_t s = 0u; s < segments; ++s)
+            {
+                auto a = aPoints[s];
+                auto b = aPoints[(s + 1u) % n];
+                auto const length = (b - a).magnitude();
+                if (length < 1.0e-9)
+                    continue;
+                auto const u = (b - a) / length;
+                if (!aClosed && aCap == "square")
+                {
+                    if (s == 0u)
+                        a = a - u * hw;
+                    if (s + 1u == segments)
+                        b = b + u * hw;
+                }
+                vec2 const p{ -u.y * hw, u.x * hw };
+                add_convex({ a + p, b + p, b - p, a - p }, aColor);
+            }
+            // round joins (and round caps)
+            for (std::size_t v = 0u; v < n; ++v)
+                if (aClosed || (v > 0u && v + 1u < n) || aCap == "round")
+                    add_convex(circle(aPoints[v], hw, 12u), aColor);
+        };
+
+        for (std::sregex_iterator i{ aSvg.begin(), aSvg.end(), sElementPattern }, end; i != end; ++i)
+        {
+            auto const element = (*i)[1].str();
+            auto a = parse_attributes((*i)[2].str());
+            if (element == "svg")
+            {
+                if (a.find("viewBox") != a.end())
+                {
+                    auto const viewBox = parse_numbers(a["viewBox"]);
+                    if (viewBox.size() == 4u && viewBox[2] > 0.0 && viewBox[3] > 0.0)
+                    {
+                        viewOrigin = vec2{ viewBox[0], viewBox[1] };
+                        viewExtents = vec2{ viewBox[2], viewBox[3] };
+                    }
+                }
+                for (auto& d : defaults)
+                    if (a.find(d.first) != a.end())
+                        d.second = a[d.first];
+                continue;
+            }
+            for (auto const& d : defaults)
+                a.try_emplace(d.first, d.second);
+            auto const number = [&](char const* aAttribute) { return a.find(aAttribute) != a.end() ? std::stod(a[aAttribute]) : 0.0; };
+            auto const fill = paint(a["fill"]);
+            auto const strokeColor = paint(a["stroke"]);
+            auto const strokeWidth = std::stod(a["stroke-width"]) / viewExtents.x;
+            // the element's outlines (scene coordinates) and whether each is closed
+            std::vector<std::pair<std::vector<vec2>, bool>> outlines;
+            bool filled = true;
+            if (element == "line")
+            {
+                outlines.emplace_back(std::vector<vec2>{ to_scene(number("x1"), number("y1")), to_scene(number("x2"), number("y2")) }, false);
+                filled = false;
+            }
+            else if (element == "rect")
+            {
+                auto const x = number("x"), y = number("y"), w = number("width"), h = number("height");
+                outlines.emplace_back(std::vector<vec2>{ to_scene(x, y), to_scene(x + w, y), to_scene(x + w, y + h), to_scene(x, y + h) }, true);
+            }
+            else if (element == "circle")
+            {
+                auto const centre = to_scene(number("cx"), number("cy"));
+                auto const radius = number("r") / viewExtents.x;
+                if (fill)
+                    add_convex(circle(centre, radius), *fill);
+                if (strokeColor)
+                {
+                    // a ring of quads
+                    auto const outer = circle(centre, radius + strokeWidth / 2.0);
+                    auto const inner = circle(centre, std::max(radius - strokeWidth / 2.0, 0.0));
+                    for (std::size_t s = 0u; s < outer.size(); ++s)
+                    {
+                        auto const next = (s + 1u) % outer.size();
+                        add_convex({ inner[s], outer[s], outer[next], inner[next] }, *strokeColor);
+                    }
+                }
+                continue;
+            }
+            else if (element == "polyline" || element == "polygon")
+            {
+                auto const points = parse_numbers(a["points"]);
+                std::vector<vec2> outline;
+                for (std::size_t p = 0u; p + 1u < points.size(); p += 2u)
+                    outline.push_back(to_scene(points[p], points[p + 1u]));
+                outlines.emplace_back(std::move(outline), element == "polygon");
+            }
+            else if (element == "path")
+            {
+                auto const d = a["d"];
+                vec2 current{ 0.0, 0.0 };
+                vec2 subpathStart{ 0.0, 0.0 };
+                std::vector<vec2> subpath; // SVG coordinates
+                char command = 'M';
+                std::vector<scalar> arguments;
+                auto const end_subpath = [&](bool aClosed)
+                {
+                    if (subpath.size() >= 2u)
+                    {
+                        std::vector<vec2> outline;
+                        for (auto const& p : subpath)
+                            outline.push_back(to_scene(p.x, p.y));
+                        outlines.emplace_back(std::move(outline), aClosed);
+                    }
+                    subpath.clear();
+                };
+                auto const apply = [&]()
+                {
+                    bool const relative = std::islower(static_cast<unsigned char>(command)) != 0;
+                    auto const origin = relative ? current : vec2{ 0.0, 0.0 };
+                    switch (std::toupper(static_cast<unsigned char>(command)))
+                    {
+                    case 'M':
+                    case 'L':
+                        if (arguments.size() < 2u)
+                            return false;
+                        if (std::toupper(static_cast<unsigned char>(command)) == 'M')
+                        {
+                            end_subpath(false);
+                            current = origin + vec2{ arguments[0], arguments[1] };
+                            subpathStart = current;
+                            command = relative ? 'l' : 'L'; // subsequent coordinate pairs are line tos
+                        }
+                        else
+                            current = origin + vec2{ arguments[0], arguments[1] };
+                        break;
+                    case 'H':
+                        if (arguments.empty())
+                            return false;
+                        current.x = (relative ? current.x : 0.0) + arguments[0];
+                        break;
+                    case 'V':
+                        if (arguments.empty())
+                            return false;
+                        current.y = (relative ? current.y : 0.0) + arguments[0];
+                        break;
+                    default:
+                        return false;
+                    }
+                    subpath.push_back(current);
+                    arguments.clear();
+                    return true;
+                };
+                for (std::sregex_iterator t{ d.begin(), d.end(), sPathTokenPattern }, tend; t != tend; ++t)
+                {
+                    if ((*t)[1].matched)
+                    {
+                        command = (*t)[1].str()[0];
+                        arguments.clear();
+                        if (command == 'Z' || command == 'z')
+                        {
+                            end_subpath(true);
+                            current = subpathStart;
+                        }
+                    }
+                    else
+                    {
+                        arguments.push_back(std::stod((*t)[2].str()));
+                        apply();
+                    }
+                }
+                end_subpath(false);
+            }
+            if (fill && filled)
+                for (auto const& outline : outlines)
+                    add_convex(outline.first, *fill);
+            if (strokeColor)
+                for (auto const& outline : outlines)
+                    stroke(outline.first, outline.second, strokeWidth, a["stroke-linecap"], *strokeColor);
+        }
+        flush();
+        return result;
     }
 
     scene_graph_3d::scene_graph_3d() :

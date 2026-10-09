@@ -1542,7 +1542,13 @@ namespace neogfx::DesignStudio
                 {
                     auto& page = layout_item().as_widget();
                     if (!page.has_layout())
-                        page.set_layout(ref_ptr<i_layout>{ make_ref<vertical_layout>() });
+                    {
+                        // (a layout that holds the page's children's caddies: in the application a page's layout is the page's own (e.g. 
+                        // "vertical_layout{ page }") so this one has no padding of its own (which would be in addition to the child layout's))
+                        auto holder = make_ref<vertical_layout>();
+                        holder->set_padding(neogfx::padding{});
+                        page.set_layout(ref_ptr<i_layout>{ holder });
+                    }
                     return page.layout();
                 }
             }

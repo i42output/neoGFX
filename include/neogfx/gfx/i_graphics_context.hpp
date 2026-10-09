@@ -948,6 +948,9 @@ namespace neogfx
         gain() : vec4{ 1.0, 1.0, 1.0, 1.0 } {}
         gain(scalar s) : vec4{ s, s, s, s } {}
         gain(vec4 const& v) : vec4{ v } {}
+        // n.b. hides vec4's: a single value is every component's (as gain(scalar)), not { x, 0, 0, 0 }
+        gain(std::initializer_list<scalar> aValues) :
+            vec4{ aValues.size() == 1u ? vec4{ *aValues.begin(), *aValues.begin(), *aValues.begin(), *aValues.begin() } : vec4(aValues) } {}
     };
 
     struct blur_filter

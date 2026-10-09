@@ -47,7 +47,7 @@ namespace neogfx
     class splitter : public widget<>
     {
         meta_object(widget<>)
-    private:
+    protected:
         typedef std::pair<std::uint32_t, std::uint32_t> separator_type;
     public:
         splitter(splitter_style aStyle = splitter_style::Horizontal | splitter_style::DrawGrip);
@@ -72,9 +72,10 @@ namespace neogfx
         virtual void reset_pane_sizes_requested(const std::optional<std::uint32_t>& aPane = {});
     protected:
         void paint(i_graphics_context& aGc) const override;
+    protected:
+        virtual std::optional<separator_type> separator_at(const point& aPosition) const; ///< The separator that grabs the mouse at a position (if any)
     private:
         void init();
-        std::optional<separator_type> separator_at(const point& aPosition) const;
     private:
         splitter_style iStyle;
         std::optional<separator_type> iTracking;

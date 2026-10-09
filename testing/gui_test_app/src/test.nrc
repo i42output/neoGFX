@@ -1129,17 +1129,9 @@
                     }
                     tab_page: {
                         id: pageSceneGraph
-                        tab_text: "Scene Graph"
+                        tab_text: "Scene Graph (3D)"
                         vertical_layout: {
                             horizontal_layout: {
-                                radio_button: {
-                                    id: radioSceneGraph2D
-                                    text: "2D"
-                                }
-                                radio_button: {
-                                    id: radioSceneGraph3D
-                                    text: "3D"
-                                }
                                 check_box: {
                                     id: checkSceneGraphAnimate
                                     text: "Animate"
@@ -1187,7 +1179,7 @@
                                     value: 0.0
                                 }
                                 label: {
-                                    text: "Drag: orbit (3D) / pan (2D); right drag: pan; wheel: zoom; double click: reset view"
+                                    text: "Drag: orbit; right drag: pan; wheel: zoom; double click: reset view"
                                 }
                                 label: {
                                     id: labelSceneGraphStatus
@@ -1196,6 +1188,22 @@
                             }
                             vertical_layout: {
                                 id: layoutSceneGraph
+                                SizePolicy: Expanding
+                            }
+                        }
+                    }
+                    tab_page: {
+                        id: pageSceneGraph2D
+                        tab_text: "Scene Graph (2D)"
+                        vertical_layout: {
+                            horizontal_layout: {
+                                label: {
+                                    text: "An electronic circuit: a scene graph of 48 dip square tiles, each with a symbol generated from inline SVG. Click a switch to toggle it."
+                                }
+                                spacer: {}
+                            }
+                            vertical_layout: {
+                                id: layoutSceneGraph2D
                                 SizePolicy: Expanding
                             }
                         }

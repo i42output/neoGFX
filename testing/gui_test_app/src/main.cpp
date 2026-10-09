@@ -1,9 +1,5 @@
-﻿#ifdef _WIN32
-// n.b. as neolib's win32.hpp defines it but before anything includes Windows.h: otherwise Windows.h includes WinSock.h,
-// which Boost.Asio (used by neolib::http) cannot be used with
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <boost/lexical_cast.hpp>
+﻿#include <boost/lexical_cast.hpp>
+#include <neolib/neolib.hpp>
 #include <neolib/chrono/fast_clock.hpp>
 
 #include "test.hpp"
@@ -21,6 +17,7 @@
 #include <sstream>
 #include <fstream>
 #include <map>
+#include <array>
 
 void signal_handler(int signal)
 {
@@ -850,7 +847,7 @@ int main(int argc, char* argv[])
         ipm2.set_column_editable_when_focused(2);
         ipm2.set_column_editable_when_focused(3);
         tableView2.set_presentation_model(ipm2);
-        tableView2.column_header().set_expand_last_column(true);
+        tableView2.column_header().set_expand_last_column(ng::last_column_expansion::ExpandToFitContent);
         tableView1.Keyboard([&tableView1](const ng::keyboard_event& ke)
         {
             if (ke.type() == ng::keyboard_event_type::KeyPressed && ke.scan_code() == ng::ScanCode_DELETE && 
@@ -1477,7 +1474,7 @@ int main(int argc, char* argv[])
             }
         });
 
-        // Scene Graph: an orrery as a 2D and as a 3D glTF compatible scene graph
+        // Scene Graph (3D): an orrery as a 3D glTF compatible scene graph
         struct orrery
         {
             ng::scene_graph::index sun = ng::scene_graph::invalid_index;
@@ -1485,30 +1482,8 @@ int main(int argc, char* argv[])
             ng::scene_graph::index planet = ng::scene_graph::invalid_index;
             ng::scene_graph::index moonOrbit = ng::scene_graph::invalid_index;
             ng::scene_graph::index moon = ng::scene_graph::invalid_index;
-            ng::scene_graph::index lantern = ng::scene_graph::invalid_index; // 3D only
+            ng::scene_graph::index lantern = ng::scene_graph::invalid_index;
         };
-        auto const logoImage = ng::service<ng::i_resource_manager>().load_resource(std::string{ ":/test/resources/neoGFX.png" });
-        auto sceneGraph2D = std::make_shared<ng::scene_graph_2d>();
-        orrery orrery2D;
-        {
-            auto& g = *sceneGraph2D;
-            auto const backgroundMesh = g.add_rectangle(ng::size{ 18.0, 18.0 }, ng::color::DarkSlateGray, "background");
-            auto const sunMesh = g.add_regular_polygon(1.5, 12u, ng::color::Gold, "sun");
-            auto const planetMesh = g.add_rectangle(ng::size{ 1.6, 1.6 }, ng::color::White, "planet");
-            g.set_base_color_texture(planetMesh, g.add_texture(g.add_image(logoImage->cdata(), logoImage->size(), "image/png", "neoGFX logo")));
-            auto const moonMesh = g.add_regular_polygon(0.4, 3u, ng::color::LightGray, "moon");
-            auto const root = g.add_node("root", ng::vec2{});
-            g.add_node("background", ng::vec2{}, 0.0, ng::vec2{ 1.0, 1.0 }, root, backgroundMesh, -1.0);
-            orrery2D.sun = g.add_node("sun", ng::vec2{}, 0.0, ng::vec2{ 1.0, 1.0 }, root, sunMesh, 0.0);
-            orrery2D.planetOrbit = g.add_node("planet orbit", ng::vec2{}, 0.0, ng::vec2{ 1.0, 1.0 }, root);
-            orrery2D.planet = g.add_node("planet", ng::vec2{ 5.0, 0.0 }, 0.0, ng::vec2{ 1.0, 1.0 }, orrery2D.planetOrbit, planetMesh, 0.1);
-            orrery2D.moonOrbit = g.add_node("moon orbit", ng::vec2{}, 0.0, ng::vec2{ 1.0, 1.0 }, orrery2D.planet);
-            orrery2D.moon = g.add_node("moon", ng::vec2{ 1.5, 0.0 }, 0.0, ng::vec2{ 1.0, 1.0 }, orrery2D.moonOrbit, moonMesh, 0.1);
-            auto const camera = g.add_node("camera", ng::vec2{});
-            ng::scene_graph::camera orthographicCamera{ ng::scene_graph::orthographic_camera{ 10.0, 10.0, 100.0, 0.0 } };
-            g.node(camera).set_camera(g.add(orthographicCamera));
-            g.add_scene("orrery", { root, camera });
-        }
         auto sceneGraph3D = std::make_shared<ng::scene_graph_3d>();
         orrery orrery3D;
         ng::scene_graph::index orreryRoot3D = ng::scene_graph::invalid_index;
@@ -1646,16 +1621,7 @@ int main(int argc, char* argv[])
             if (!sceneGraphCanvas || !window.checkSceneGraphAnimate.is_checked())
                 return;
             double const t = std::chrono::duration<double>(std::chrono::steady_clock::now() - sceneGraphStart).count();
-            if (&sceneGraphCanvas->graph() == sceneGraph2D.get())
-            {
-                auto& g = *sceneGraph2D;
-                g.set_transform(orrery2D.sun, ng::vec2{}, t * 0.5);
-                g.set_transform(orrery2D.planetOrbit, ng::vec2{}, t * 0.8);
-                g.set_transform(orrery2D.planet, ng::vec2{ 5.0, 0.0 }, t * 2.0);
-                g.set_transform(orrery2D.moonOrbit, ng::vec2{}, t * 3.0);
-                g.set_transform(orrery2D.moon, ng::vec2{ 1.5, 0.0 }, -t * 4.0);
-            }
-            else if (&sceneGraphCanvas->graph() == sceneGraph3D.get())
+            if (&sceneGraphCanvas->graph() == sceneGraph3D.get())
             {
                 auto& g = *sceneGraph3D;
                 ng::vec3 const yAxis{ 0.0, 1.0, 0.0 };
@@ -1702,7 +1668,6 @@ int main(int argc, char* argv[])
                 sceneGraphCanvas->set_graph(sceneGraph3D);
                 orrery_lamp();
                 download_sample_models();
-                window.radioSceneGraph3D.check();
                 window.checkSceneGraphAnimate.check();
                 window.checkSceneGraphLighting.check();
                 window.checkSceneGraphShadows.check();
@@ -1716,22 +1681,10 @@ int main(int argc, char* argv[])
                 {
                     aTimer.again();
                     if (window.pageSceneGraph.visible() && window.checkSceneGraphAnimate.is_checked() && sceneGraphCanvas->has_graph() &&
-                        (&sceneGraphCanvas->graph() == sceneGraph2D.get() || &sceneGraphCanvas->graph() == sceneGraph3D.get()))
+                        &sceneGraphCanvas->graph() == sceneGraph3D.get())
                         sceneGraphCanvas->update();
                 }, std::chrono::milliseconds{ 8 });
             }
-        });
-        window.radioSceneGraph2D.Checked([&]()
-        {
-            if (sceneGraphCanvas)
-                sceneGraphCanvas->set_graph(sceneGraph2D);
-            orrery_lamp();
-        });
-        window.radioSceneGraph3D.Checked([&]()
-        {
-            if (sceneGraphCanvas)
-                sceneGraphCanvas->set_graph(sceneGraph3D);
-            orrery_lamp();
         });
         window.checkSceneGraphAnimate.Toggled([&]()
         {
@@ -1899,6 +1852,228 @@ int main(int argc, char* argv[])
             catch (std::exception const& e)
             {
                 ng::message_box::error(window, "Load Scene Graph", ng::string{ e.what() });
+            }
+        });
+
+        // Scene Graph (2D): an electronic circuit on a grid of 48 dip square tiles, each tile a node whose mesh is a circuit symbol
+        // generated from inline SVG (white on black). Clicking a switch toggles it; the LEDs with a closed circuit to the battery light.
+        auto circuit = std::make_shared<ng::scene_graph_2d>();
+        // symbols are drawn west to east (terminals at the middle of the west and east edges); tiles rotate them a quarter turn at a time.
+        // Each is drawn on a black tile square: the tile's entity, so clicking anywhere on a tile picks it (see EntityClicked below)
+        auto const symbol = [&](std::string const& aName, std::string const& aElements)
+        {
+            return circuit->add_svg_mesh(R"(<svg viewBox="0 0 32 32" fill="none" stroke="white" stroke-width="2">)"
+                R"(<rect x="0" y="0" width="32" height="32" fill="black" stroke="none"/>)" + aElements + "</svg>", aName);
+        };
+        auto const blankSymbol = symbol("blank", {});
+        auto const wireSymbol = symbol("wire", R"(<line x1="0" y1="16" x2="32" y2="16"/>)");
+        auto const cornerSymbol = symbol("corner", R"(<polyline points="32,16 16,16 16,32"/>)");
+        auto const teeSymbol = symbol("tee",
+            R"(<line x1="0" y1="16" x2="32" y2="16"/><line x1="16" y1="16" x2="16" y2="32"/>)"
+            R"(<circle cx="16" cy="16" r="3" fill="white" stroke="none"/>)");
+        // negative terminal west, positive east
+        auto const batterySymbol = symbol("battery",
+            R"(<line x1="0" y1="16" x2="11" y2="16"/><line x1="13" y1="10" x2="13" y2="22" stroke-width="4"/>)"
+            R"(<line x1="20" y1="5" x2="20" y2="27"/><line x1="20" y1="16" x2="32" y2="16"/>)"
+            R"(<path d="M 25 6 H 29 M 27 4 V 8" stroke-width="1.5"/>)");
+        std::string const resistorElements =
+            R"(<line x1="0" y1="16" x2="6" y2="16"/><rect x="6" y="11" width="20" height="10"/><line x1="26" y1="16" x2="32" y2="16"/>)";
+        auto const resistorSymbol = symbol("resistor", resistorElements);
+        auto const variableResistorSymbol = symbol("variable resistor", resistorElements +
+            R"(<line x1="8" y1="26" x2="21.4" y2="7.8" stroke-width="1.5"/><polygon points="25,3 23.8,9.6 19,6" fill="white" stroke="none"/>)");
+        std::string const switchContacts =
+            R"(<line x1="0" y1="16" x2="8" y2="16"/><line x1="24" y1="16" x2="32" y2="16"/>)"
+            R"(<circle cx="10" cy="16" r="2.5" fill="white" stroke="none"/><circle cx="22" cy="16" r="2.5" fill="white" stroke="none"/>)";
+        std::array<ng::scene_graph::index, 2> const switchSymbols{
+            symbol("switch (open)", switchContacts + R"(<line x1="10" y1="16" x2="21" y2="8.5" stroke-linecap="round"/>)"),
+            symbol("switch (closed)", switchContacts + R"(<line x1="10" y1="16" x2="23" y2="14" stroke-linecap="round"/>)") };
+        // anode west, cathode east; lit: the diode filled and the light arrows in the LED's colour
+        auto const ledSymbol = [&](std::string const& aName, std::string const& aFill, std::string const& aArrows)
+        {
+            return symbol(aName,
+                R"(<line x1="0" y1="16" x2="10" y2="16"/><polygon points="10,9 10,23 21,16" fill=")" + aFill + R"("/>)"
+                R"(<line x1="21" y1="9" x2="21" y2="23"/><line x1="21" y1="16" x2="32" y2="16"/>)"
+                R"(<line x1="12" y1="7" x2="15.2" y2="3.8" stroke-width="1.5" stroke=")" + aArrows + R"("/>)"
+                R"(<polygon points="18,1 16.6,5.2 13.8,2.4" stroke="none" fill=")" + aArrows + R"("/>)"
+                R"(<line x1="16" y1="9" x2="19.2" y2="5.8" stroke-width="1.5" stroke=")" + aArrows + R"("/>)"
+                R"(<polygon points="22,3 20.6,7.2 17.8,4.4" stroke="none" fill=")" + aArrows + R"("/>)");
+        };
+        // lit: the LED's colour is emitted (a black base colour plus the colour as emission, so it is shown as it is), so it glows
+        // (see scene_graph_canvas::set_glow)
+        auto const litLedSymbol = [&](std::string const& aName, std::string const& aColor)
+        {
+            auto const result = ledSymbol(aName, aColor, aColor);
+            auto const linear = ng::color{ aColor }.to_linear();
+            ng::vec3 const emissive{ linear.red<ng::scalar>(), linear.green<ng::scalar>(), linear.blue<ng::scalar>() };
+            for (auto const& primitive : circuit->mesh(result).primitives())
+                if (primitive.has_material())
+                {
+                    auto& material = circuit->material(primitive.material());
+                    auto const& base = material.pbr_metallic_roughness().base_color_factor();
+                    if (std::abs(base.x - emissive.x) + std::abs(base.y - emissive.y) + std::abs(base.z - emissive.z) < 1.0e-6)
+                    {
+                        material.pbr_metallic_roughness().set_base_color_factor(ng::vec4{ 0.0, 0.0, 0.0, base.w });
+                        material.set_emissive_factor(emissive);
+                    }
+                }
+            return result;
+        };
+        // LED symbols (unlit, lit) by layout character
+        std::map<char, std::array<ng::scene_graph::index, 2>> const ledSymbols{
+            { 'r', { ledSymbol("red LED (unlit)", "#4C0A0A", "#404040"), litLedSymbol("red LED (lit)", "#FF2020") } },
+            { 'b', { ledSymbol("blue LED (unlit)", "#0C1C4C", "#404040"), litLedSymbol("blue LED (lit)", "#3070FF") } },
+            { 'a', { ledSymbol("amber LED (unlit)", "#4C3300", "#404040"), litLedSymbol("amber LED (lit)", "#FFB000") } },
+            { 'g', { ledSymbol("green LED (unlit)", "#0A4412", "#404040"), litLedSymbol("green LED (lit)", "#20E040") } } };
+        // the circuit, a tile per two characters (".." blank): the symbol (-: wire, c: corner, t: tee, B: battery, S: switch, R: resistor,
+        // V: variable resistor, r/b/a/g: red/blue/amber/green LED) then its rotation (quarter turns anticlockwise)
+        std::vector<std::string> const circuitLayout{
+            ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..",
+            ".. c0 -0 S0 -0 R0 V0 -0 t0 -0 -0 t0 -0 -0 c3 .. ..",
+            ".. -1 .. .. .. .. .. .. S3 .. .. S3 .. .. S3 .. ..",
+            ".. -1 .. .. .. .. .. .. R1 .. .. V1 .. .. R1 .. ..",
+            ".. B1 .. .. .. .. .. .. -1 .. .. -1 .. c0 t2 c3 ..",
+            ".. -1 .. .. .. .. .. .. r3 .. .. b3 .. a3 .. g3 ..",
+            ".. -1 .. .. .. .. .. .. -1 .. .. -1 .. c1 t0 c2 ..",
+            ".. c1 -0 -0 -0 -0 -0 -0 t2 -0 -0 t2 -0 -0 c2 .. ..",
+            ".. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .." };
+        std::size_t const circuitRows = circuitLayout.size();
+        std::size_t const circuitColumns = (circuitLayout[0].size() + 1u) / 3u;
+        struct circuit_tile
+        {
+            char symbol;
+            std::uint32_t rotation;
+            std::size_t column;
+            std::size_t row;
+            ng::scene_graph::index node;
+            std::array<ng::scene_graph::index, 2> meshes; // by state (switch closed; LED lit)
+            bool on = false;
+        };
+        std::vector<circuit_tile> circuitTiles;
+        {
+            auto const root = circuit->add_node("circuit", ng::vec2{});
+            for (std::size_t row = 0u; row < circuitRows; ++row)
+                for (std::size_t column = 0u; column < circuitColumns; ++column)
+                {
+                    // a tile per scene unit, the grid centred on the origin (y up)
+                    ng::vec2 const position{ column - (circuitColumns - 1u) / 2.0, (circuitRows - 1u) / 2.0 - row };
+                    auto const code = circuitLayout[row].substr(column * 3u, 2u);
+                    if (code == "..")
+                    {
+                        circuit->add_node(code, position, 0.0, ng::vec2{ 1.0, 1.0 }, root, blankSymbol);
+                        continue;
+                    }
+                    circuit_tile tile{ code[0], static_cast<std::uint32_t>(code[1] - '0'), column, row };
+                    switch (tile.symbol)
+                    {
+                    case '-': tile.meshes = { wireSymbol, wireSymbol }; break;
+                    case 'c': tile.meshes = { cornerSymbol, cornerSymbol }; break;
+                    case 't': tile.meshes = { teeSymbol, teeSymbol }; break;
+                    case 'B': tile.meshes = { batterySymbol, batterySymbol }; break;
+                    case 'S': tile.meshes = switchSymbols; break;
+                    case 'R': tile.meshes = { resistorSymbol, resistorSymbol }; break;
+                    case 'V': tile.meshes = { variableResistorSymbol, variableResistorSymbol }; break;
+                    default: tile.meshes = ledSymbols.at(tile.symbol); break;
+                    }
+                    tile.node = circuit->add_node(code, position, ng::to_rad(90.0) * tile.rotation, ng::vec2{ 1.0, 1.0 }, root, tile.meshes[0]);
+                    circuitTiles.push_back(tile);
+                }
+            circuit->add_scene("circuit", { root });
+        }
+        // a tile's terminals: the edges it shares with its neighbours; sides a quarter turn apart (anticlockwise) from east
+        enum : std::uint32_t { East, North, West, South };
+        auto const terminal = [&](circuit_tile const& aTile, std::uint32_t aSide) -> std::size_t
+        {
+            switch ((aSide + aTile.rotation) % 4u)
+            {
+            case East:
+                return aTile.row * (circuitColumns + 1u) + aTile.column + 1u;
+            case West:
+                return aTile.row * (circuitColumns + 1u) + aTile.column;
+            case North:
+                return circuitRows * (circuitColumns + 1u) + aTile.row * circuitColumns + aTile.column;
+            default:
+                return circuitRows * (circuitColumns + 1u) + (aTile.row + 1u) * circuitColumns + aTile.column;
+            }
+        };
+        // the (unrotated) sides a symbol connects: LEDs anode west, cathode east; the battery negative west, positive east
+        auto const sides = [](char aSymbol) -> std::vector<std::uint32_t>
+        {
+            switch (aSymbol)
+            {
+            case 'c':
+                return { East, South };
+            case 't':
+                return { West, East, South };
+            default:
+                return { West, East };
+            }
+        };
+        ng::scene_graph_canvas* circuitCanvas = nullptr;
+        auto update_circuit = [&]()
+        {
+            auto const battery = std::find_if(circuitTiles.begin(), circuitTiles.end(), [](circuit_tile const& aTile) { return aTile.symbol == 'B'; });
+            // the terminals current can flow to from a terminal, without passing through the battery or an excluded LED: through wires,
+            // resistors and closed switches, and through LEDs from anode to cathode only
+            auto const reachable = [&](circuit_tile const& aExcluded, std::size_t aFrom)
+            {
+                std::vector<bool> result(circuitRows * (circuitColumns + 1u) + (circuitRows + 1u) * circuitColumns);
+                std::vector<std::size_t> pending{ aFrom };
+                result[aFrom] = true;
+                while (!pending.empty())
+                {
+                    auto const from = pending.back();
+                    pending.pop_back();
+                    for (auto const& tile : circuitTiles)
+                    {
+                        if (&tile == &aExcluded || tile.symbol == 'B' || (tile.symbol == 'S' && !tile.on))
+                            continue;
+                        bool const led = ledSymbols.find(tile.symbol) != ledSymbols.end();
+                        auto const connected = sides(tile.symbol);
+                        for (auto const side : connected)
+                            if (terminal(tile, side) == from && (!led || side == West))
+                                for (auto const otherSide : connected)
+                                    if (otherSide != side && !result[terminal(tile, otherSide)])
+                                    {
+                                        result[terminal(tile, otherSide)] = true;
+                                        pending.push_back(terminal(tile, otherSide));
+                                    }
+                    }
+                }
+                return result;
+            };
+            // an LED lights if current can flow from the battery's positive terminal to its anode and from its cathode to the negative
+            for (auto& led : circuitTiles)
+                if (ledSymbols.find(led.symbol) != ledSymbols.end())
+                    led.on = reachable(led, terminal(*battery, East))[terminal(led, West)] && reachable(led, terminal(led, East))[terminal(*battery, West)];
+            // n.b. the canvas updates the entities of the nodes whose meshes change
+            for (auto const& tile : circuitTiles)
+                circuit->node(tile.node).set_mesh(tile.meshes[tile.on ? 1 : 0]);
+            if (circuitCanvas)
+                circuitCanvas->update();
+        };
+        window.pageSceneGraph2D.VisibilityChanged([&]()
+        {
+            if (window.pageSceneGraph2D.visible() && !circuitCanvas)
+            {
+                circuitCanvas = &window.layoutSceneGraph2D.add(ng::make_ref<ng::scene_graph_canvas>());
+                circuitCanvas->set_background_color(ng::color::Black);
+                // a fixed view: a tile (scene unit) per 48 dip
+                circuitCanvas->set_mouse_camera_control(false);
+                circuitCanvas->set_view_scale(static_cast<ng::scalar>(48.0_dip));
+                circuitCanvas->set_graph(circuit);
+                // n.b. also triggered by double clicks (no EntityDoubleClicked handler)
+                circuitCanvas->EntityClicked([&](ng::game::entity_id aEntity)
+                {
+                    auto const node = circuitCanvas->entity_node(aEntity);
+                    for (auto& tile : circuitTiles)
+                        if (tile.node == node && tile.symbol == 'S')
+                        {
+                            tile.on = !tile.on;
+                            update_circuit();
+                            break;
+                        }
+                });
+                update_circuit();
             }
         });
 

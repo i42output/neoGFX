@@ -318,6 +318,24 @@ namespace neogfx
         surface().move_surface(correctedRect.top_left());
         resize(correctedRect.extents());
 
+        // ...then exactly: the estimate above doesn't allow for everything (e.g. a drop list with padding of its own) so the current 
+        // item's text (as laid out) is moved to where the drop button's text is (horizontally: its left; vertically: centred on it)
+        if (!iDropList.editable() && list_view().presentation_model().rows() > 0 && list_view().presentation_model().columns() > 0)
+        {
+            auto const index = (list_view().selection_model().has_current_index() ?
+                list_view().selection_model().current_index() :
+                item_presentation_model_index{ 0, 0 });
+            auto const& textWidget = iDropList.input_widget().text_widget();
+            rect const buttonText = textWidget.to_window_coordinates(textWidget.client_rect(false)) + iDropList.root().window_position();
+            rect const itemText = list_view().to_window_coordinates(list_view().cell_rect(index, cell_part::Text)) + correctedRect.top_left();
+            point const adjustment{ buttonText.x - itemText.x, std::round(buttonText.center().y - itemText.center().y) };
+            if (adjustment != point{})
+            {
+                correctedRect = corrected_popup_rect(*this, rect{ correctedRect.top_left() + adjustment, correctedRect.extents() });
+                surface().move_surface(correctedRect.top_left());
+            }
+        }
+
         set_ready_to_render(true);
     }
 
