@@ -38,8 +38,24 @@ namespace neogfx
         standard_fragment_shader{ aName }
     {
         disable();
-        // the shader refers to the filter gradient whether one is set or not, and a cached uniform
-        // only comes into being, with a type, once it has been given a value
+        // the shader refers to the gradient and the filter gradient whether one is set or not, and a
+        // cached uniform only comes into being, with a type, once it has been given a value
+        uGradientEnabled = false;
+        uGradientGuiCoordinates = false;
+        uGradientDirection = gradient_direction::Horizontal;
+        uGradientAngle = 0.0f;
+        uGradientStartFrom = -1;
+        uGradientSize = gradient_size::ClosestSide;
+        uGradientShape = gradient_shape::Ellipse;
+        uGradientExponents = vec2f{ 2.0f, 2.0f };
+        uGradientCenter = vec2f{};
+        uGradientTile = false;
+        uGradientTileParams = vec3i32{};
+        uGradientColorCount = 0;
+        uGradientColorRow = 0;
+        uGradientFilterSize = 0;
+        uGradientColors = sampler2DRect{ static_cast<std::uint32_t>(reserved_texture_unit::ColorSampler) };
+        uGradientFilter = sampler2DRect{ static_cast<std::uint32_t>(reserved_texture_unit::FilterSampler) };
         uFilterGradientEnabled = false;
         uFilterGradientGuiCoordinates = false;
         uFilterGradientDirection = gradient_direction::Horizontal;
