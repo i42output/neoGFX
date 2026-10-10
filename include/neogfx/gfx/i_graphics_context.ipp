@@ -23,12 +23,12 @@
 namespace neogfx
 {
     template <typename Filter>
-    scoped_filter<Filter>::scoped_filter(i_rendering_context& aRc, Filter const& aFilter, bool aSubtractRadius) :
+    scoped_filter<Filter>::scoped_filter(i_rendering_context& aRc, Filter const& aFilter, bool aSubtractRadius, texture_sampling aSampling) :
         iRc{ aRc },
         iFilter{ aFilter },
         iOutset{ aFilter.outset() },
         iBufferRect{ point{}, aFilter.region.extents() + size{ iOutset * 2.0 } },
-        iBuffers{ std::move(create_ping_pong_buffers(aRc, iBufferRect.extents(), texture_sampling::Multisample, color{}, iOutset + 1.0)) },
+        iBuffers{ std::move(create_ping_pong_buffers(aRc, iBufferRect.extents(), aSampling, color{}, iOutset + 1.0)) },
         iRenderTarget{ front_buffer() },
         iSubtractRadius{ aSubtractRadius }
     {

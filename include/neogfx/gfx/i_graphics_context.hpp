@@ -1136,7 +1136,9 @@ namespace neogfx
     class scoped_filter
     {
     public:
-        scoped_filter(i_rendering_context& aRc, Filter const& aFilter, bool aSubtractRadius = true);
+        // n.b. aSampling: the filter's buffers'; multisampled (the default) buffers are shaded per sample (so cost the sample count times
+        // more), which a filter whose result is blurred anyway (e.g. a glow) doesn't need: texture_sampling::Normal
+        scoped_filter(i_rendering_context& aRc, Filter const& aFilter, bool aSubtractRadius = true, texture_sampling aSampling = texture_sampling::Multisample);
         ~scoped_filter();
     public:
         i_graphics_context& front_buffer() const;

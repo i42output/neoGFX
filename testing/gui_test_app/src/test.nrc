@@ -1198,7 +1198,7 @@
                         vertical_layout: {
                             horizontal_layout: {
                                 label: {
-                                    text: "An electronic circuit: a scene graph of 48 dip square tiles, each with a symbol generated from inline SVG. Click a switch to toggle it."
+                                    text: "An electronic circuit: a scene graph of 48 dip square tiles, each with a symbol generated from inline SVG. Click a switch to toggle it; drag a variable resistor along its length to change its resistance, and so the brightness of the LEDs."
                                 }
                                 spacer: {}
                             }

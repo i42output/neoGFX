@@ -17,6 +17,7 @@
 #include <sstream>
 #include <fstream>
 #include <map>
+#include <numeric>
 #include <array>
 
 void signal_handler(int signal)
@@ -1856,7 +1857,8 @@ int main(int argc, char* argv[])
         });
 
         // Scene Graph (2D): an electronic circuit on a grid of 48 dip square tiles, each tile a node whose mesh is a circuit symbol
-        // generated from inline SVG (white on black). Clicking a switch toggles it; the LEDs with a closed circuit to the battery light.
+        // generated from inline SVG (white on black). Clicking a switch toggles it; dragging a variable resistor (along it) changes its
+        // resistance, moving its arrow (a child node). The circuit is solved (nodal analysis) for the LEDs' currents: their brightness.
         auto circuit = std::make_shared<ng::scene_graph_2d>();
         // symbols are drawn west to east (terminals at the middle of the west and east edges); tiles rotate them a quarter turn at a time.
         // Each is drawn on a black tile square: the tile's entity, so clicking anywhere on a tile picks it (see EntityClicked below)
@@ -1879,12 +1881,20 @@ int main(int argc, char* argv[])
         std::string const resistorElements =
             R"(<line x1="0" y1="16" x2="6" y2="16"/><rect x="6" y="11" width="20" height="10"/><line x1="26" y1="16" x2="32" y2="16"/>)";
         auto const resistorSymbol = symbol("resistor", resistorElements);
-        auto const variableResistorSymbol = symbol("variable resistor", resistorElements +
-            R"(<line x1="8" y1="26" x2="21.4" y2="7.8" stroke-width="1.5"/><polygon points="25,3 23.8,9.6 19,6" fill="white" stroke="none"/>)");
+        // a variable resistor's arrow: a child node of a resistor's tile, translated (along the resistor) by its setting
+        auto const variableResistorArrow = circuit->add_svg_mesh(R"(<svg viewBox="0 0 32 32" fill="none" stroke="white" stroke-width="2">)"
+            R"(<line x1="8.6" y1="26" x2="22" y2="7.8" stroke-width="1.5"/><polygon points="25.6,3 24.4,9.6 19.6,6" fill="white" stroke="none"/>)"
+            "</svg>", "variable resistor arrow");
+        // its travel (scene units) from setting 0 (least resistance) to 1
+        ng::scalar const variableResistorTravel = 12.0 / 32.0;
+        auto const variableResistorArrowPosition = [&](double aSetting)
+        {
+            return ng::vec2{ (aSetting - 0.5) * variableResistorTravel, 0.0 };
+        };
         std::string const switchContacts =
             R"(<line x1="0" y1="16" x2="8" y2="16"/><line x1="24" y1="16" x2="32" y2="16"/>)"
             R"(<circle cx="10" cy="16" r="2.5" fill="white" stroke="none"/><circle cx="22" cy="16" r="2.5" fill="white" stroke="none"/>)";
-        std::array<ng::scene_graph::index, 2> const switchSymbols{
+        std::vector<ng::scene_graph::index> const switchSymbols{
             symbol("switch (open)", switchContacts + R"(<line x1="10" y1="16" x2="21" y2="8.5" stroke-linecap="round"/>)"),
             symbol("switch (closed)", switchContacts + R"(<line x1="10" y1="16" x2="23" y2="14" stroke-linecap="round"/>)") };
         // anode west, cathode east; lit: the diode filled and the light arrows in the LED's colour
@@ -1898,32 +1908,41 @@ int main(int argc, char* argv[])
                 R"(<line x1="16" y1="9" x2="19.2" y2="5.8" stroke-width="1.5" stroke=")" + aArrows + R"("/>)"
                 R"(<polygon points="22,3 20.6,7.2 17.8,4.4" stroke="none" fill=")" + aArrows + R"("/>)");
         };
-        // lit: the LED's colour is emitted (a black base colour plus the colour as emission, so it is shown as it is), so it glows
-        // (see scene_graph_canvas::set_glow)
-        auto const litLedSymbol = [&](std::string const& aName, std::string const& aColor)
+        // lit: the LED's colour is emitted at a brightness (a black base colour plus the colour as emission, so at full brightness it is
+        // shown as it is), so it glows (see scene_graph_canvas::set_glow)
+        auto const litLedSymbol = [&](std::string const& aName, std::string const& aColor, ng::scalar aBrightness)
         {
             auto const result = ledSymbol(aName, aColor, aColor);
             auto const linear = ng::color{ aColor }.to_linear();
-            ng::vec3 const emissive{ linear.red<ng::scalar>(), linear.green<ng::scalar>(), linear.blue<ng::scalar>() };
+            ng::vec3 const fullColor{ linear.red<ng::scalar>(), linear.green<ng::scalar>(), linear.blue<ng::scalar>() };
             for (auto const& primitive : circuit->mesh(result).primitives())
                 if (primitive.has_material())
                 {
                     auto& material = circuit->material(primitive.material());
                     auto const& base = material.pbr_metallic_roughness().base_color_factor();
-                    if (std::abs(base.x - emissive.x) + std::abs(base.y - emissive.y) + std::abs(base.z - emissive.z) < 1.0e-6)
+                    if (std::abs(base.x - fullColor.x) + std::abs(base.y - fullColor.y) + std::abs(base.z - fullColor.z) < 1.0e-6)
                     {
                         material.pbr_metallic_roughness().set_base_color_factor(ng::vec4{ 0.0, 0.0, 0.0, base.w });
-                        material.set_emissive_factor(emissive);
+                        material.set_emissive_factor(fullColor * aBrightness);
                     }
                 }
             return result;
         };
-        // LED symbols (unlit, lit) by layout character
-        std::map<char, std::array<ng::scene_graph::index, 2>> const ledSymbols{
-            { 'r', { ledSymbol("red LED (unlit)", "#4C0A0A", "#404040"), litLedSymbol("red LED (lit)", "#FF2020") } },
-            { 'b', { ledSymbol("blue LED (unlit)", "#0C1C4C", "#404040"), litLedSymbol("blue LED (lit)", "#3070FF") } },
-            { 'a', { ledSymbol("amber LED (unlit)", "#4C3300", "#404040"), litLedSymbol("amber LED (lit)", "#FFB000") } },
-            { 'g', { ledSymbol("green LED (unlit)", "#0A4412", "#404040"), litLedSymbol("green LED (lit)", "#20E040") } } };
+        // LED symbols by layout character: unlit, then lit at each brightness level (1 to ledBrightnessLevels)
+        std::size_t const ledBrightnessLevels = 16u;
+        auto const ledSymbolSet = [&](std::string const& aName, std::string const& aUnlitColor, std::string const& aColor)
+        {
+            std::vector<ng::scene_graph::index> result{ ledSymbol(aName + " LED (unlit)", aUnlitColor, "#404040") };
+            for (std::size_t level = 1u; level <= ledBrightnessLevels; ++level)
+                result.push_back(litLedSymbol(aName + " LED (lit " + std::to_string(level) + "/" + std::to_string(ledBrightnessLevels) + ")",
+                    aColor, static_cast<ng::scalar>(level) / ledBrightnessLevels));
+            return result;
+        };
+        std::map<char, std::vector<ng::scene_graph::index>> const ledSymbols{
+            { 'r', ledSymbolSet("red", "#4C0A0A", "#FF2020") },
+            { 'b', ledSymbolSet("blue", "#0C1C4C", "#3070FF") },
+            { 'a', ledSymbolSet("amber", "#4C3300", "#FFB000") },
+            { 'g', ledSymbolSet("green", "#0A4412", "#20E040") } };
         // the circuit, a tile per two characters (".." blank): the symbol (-: wire, c: corner, t: tee, B: battery, S: switch, R: resistor,
         // V: variable resistor, r/b/a/g: red/blue/amber/green LED) then its rotation (quarter turns anticlockwise)
         std::vector<std::string> const circuitLayout{
@@ -1945,8 +1964,10 @@ int main(int argc, char* argv[])
             std::size_t column;
             std::size_t row;
             ng::scene_graph::index node;
-            std::array<ng::scene_graph::index, 2> meshes; // by state (switch closed; LED lit)
-            bool on = false;
+            std::vector<ng::scene_graph::index> meshes; // by state (switch: closed; LED: brightness level)
+            std::size_t state = 0u;
+            double setting = 0.5; // variable resistor: 0 (least resistance) to 1
+            ng::scene_graph::index arrowNode = ng::scene_graph::invalid_index; // variable resistor
         };
         std::vector<circuit_tile> circuitTiles;
         {
@@ -1971,10 +1992,13 @@ int main(int argc, char* argv[])
                     case 'B': tile.meshes = { batterySymbol, batterySymbol }; break;
                     case 'S': tile.meshes = switchSymbols; break;
                     case 'R': tile.meshes = { resistorSymbol, resistorSymbol }; break;
-                    case 'V': tile.meshes = { variableResistorSymbol, variableResistorSymbol }; break;
+                    case 'V': tile.meshes = { resistorSymbol }; break;
                     default: tile.meshes = ledSymbols.at(tile.symbol); break;
                     }
                     tile.node = circuit->add_node(code, position, ng::to_rad(90.0) * tile.rotation, ng::vec2{ 1.0, 1.0 }, root, tile.meshes[0]);
+                    if (tile.symbol == 'V')
+                        tile.arrowNode = circuit->add_node("arrow", variableResistorArrowPosition(tile.setting), 0.0, ng::vec2{ 1.0, 1.0 },
+                            tile.node, variableResistorArrow, 0.01);
                     circuitTiles.push_back(tile);
                 }
             circuit->add_scene("circuit", { root });
@@ -2009,48 +2033,147 @@ int main(int argc, char* argv[])
             }
         };
         ng::scene_graph_canvas* circuitCanvas = nullptr;
+        // the circuit's values: the battery's voltage (volts); resistances (ohms); LEDs' forward voltages (volts) and series resistance;
+        // the LED current (amps) at full brightness (brightness is its square root, as it is perceived), and below which it is unlit
+        double const batteryVoltage = 9.0;
+        double const resistorResistance = 68.0;
+        double const variableResistorMinimum = 10.0;
+        double const variableResistorMaximum = 1000.0;
+        std::map<char, double> const ledForwardVoltages{ { 'r', 1.9 }, { 'b', 3.0 }, { 'a', 2.0 }, { 'g', 2.1 } };
+        double const ledResistance = 15.0;
+        double const ledFullCurrent = 0.02;
+        double const ledMinimumCurrent = 0.0001;
         auto update_circuit = [&]()
         {
-            auto const battery = std::find_if(circuitTiles.begin(), circuitTiles.end(), [](circuit_tile const& aTile) { return aTile.symbol == 'B'; });
-            // the terminals current can flow to from a terminal, without passing through the battery or an excluded LED: through wires,
-            // resistors and closed switches, and through LEDs from anode to cathode only
-            auto const reachable = [&](circuit_tile const& aExcluded, std::size_t aFrom)
+            // the nets: terminals joined by wires, corners, tees and closed switches
+            std::vector<std::size_t> nets(circuitRows * (circuitColumns + 1u) + (circuitRows + 1u) * circuitColumns);
+            std::iota(nets.begin(), nets.end(), std::size_t{});
+            auto const net = [&](std::size_t aTerminal)
             {
-                std::vector<bool> result(circuitRows * (circuitColumns + 1u) + (circuitRows + 1u) * circuitColumns);
-                std::vector<std::size_t> pending{ aFrom };
-                result[aFrom] = true;
-                while (!pending.empty())
+                while (nets[aTerminal] != aTerminal)
+                    aTerminal = nets[aTerminal] = nets[nets[aTerminal]];
+                return aTerminal;
+            };
+            for (auto const& tile : circuitTiles)
+                if (tile.symbol == '-' || tile.symbol == 'c' || tile.symbol == 't' || (tile.symbol == 'S' && tile.state == 1u))
+                    for (auto const side : sides(tile.symbol))
+                        nets[net(terminal(tile, side))] = net(terminal(tile, sides(tile.symbol)[0]));
+            auto const battery = std::find_if(circuitTiles.begin(), circuitTiles.end(), [](circuit_tile const& aTile) { return aTile.symbol == 'B'; });
+            auto const ground = net(terminal(*battery, West));
+            auto const positive = net(terminal(*battery, East));
+            // nodal analysis: the voltages of the nets (but the battery's, which are fixed) of the resistors and LEDs; an LED conducts (from
+            // anode to cathode: its forward voltage in series with its resistance) if forward biased beyond its forward voltage, so is
+            // solved for until the LEDs conducting are consistent with the voltages
+            std::map<std::size_t, std::size_t> unknowns;
+            for (auto const& tile : circuitTiles)
+                if (tile.symbol == 'R' || tile.symbol == 'V' || ledForwardVoltages.find(tile.symbol) != ledForwardVoltages.end())
+                    for (auto const side : { West, East })
+                        if (net(terminal(tile, side)) != ground && net(terminal(tile, side)) != positive)
+                            unknowns.emplace(net(terminal(tile, side)), unknowns.size());
+            auto const n = unknowns.size();
+            std::vector<double> voltages(n);
+            auto const voltage = [&](std::size_t aNet)
+            {
+                return aNet == ground ? 0.0 : aNet == positive ? batteryVoltage : voltages[unknowns.at(aNet)];
+            };
+            std::map<circuit_tile const*, bool> conducting;
+            for (auto const& tile : circuitTiles)
+                if (ledForwardVoltages.find(tile.symbol) != ledForwardVoltages.end())
+                    conducting[&tile] = true;
+            for (std::size_t iteration = 0u; iteration <= conducting.size(); ++iteration)
+            {
+                std::vector<std::vector<double>> g(n, std::vector<double>(n + 1u)); // [G | I]
+                for (std::size_t i = 0u; i < n; ++i)
+                    g[i][i] = 1.0e-9; // n.b. so that nets not connected (by open switches) are at 0 V
+                // a conductance (from net aFrom to net aTo) in series with a source of aSource volts
+                auto const stamp = [&](std::size_t aFrom, std::size_t aTo, double aConductance, double aSource)
                 {
-                    auto const from = pending.back();
-                    pending.pop_back();
-                    for (auto const& tile : circuitTiles)
+                    auto const from = unknowns.find(aFrom);
+                    auto const to = unknowns.find(aTo);
+                    if (from != unknowns.end())
                     {
-                        if (&tile == &aExcluded || tile.symbol == 'B' || (tile.symbol == 'S' && !tile.on))
-                            continue;
-                        bool const led = ledSymbols.find(tile.symbol) != ledSymbols.end();
-                        auto const connected = sides(tile.symbol);
-                        for (auto const side : connected)
-                            if (terminal(tile, side) == from && (!led || side == West))
-                                for (auto const otherSide : connected)
-                                    if (otherSide != side && !result[terminal(tile, otherSide)])
-                                    {
-                                        result[terminal(tile, otherSide)] = true;
-                                        pending.push_back(terminal(tile, otherSide));
-                                    }
+                        g[from->second][from->second] += aConductance;
+                        if (to != unknowns.end())
+                            g[from->second][to->second] -= aConductance;
+                        else
+                            g[from->second][n] += aConductance * voltage(aTo);
+                        g[from->second][n] += aConductance * aSource;
+                    }
+                    if (to != unknowns.end())
+                    {
+                        g[to->second][to->second] += aConductance;
+                        if (from != unknowns.end())
+                            g[to->second][from->second] -= aConductance;
+                        else
+                            g[to->second][n] += aConductance * voltage(aFrom);
+                        g[to->second][n] -= aConductance * aSource;
+                    }
+                };
+                for (auto const& tile : circuitTiles)
+                    if (tile.symbol == 'R')
+                        stamp(net(terminal(tile, West)), net(terminal(tile, East)), 1.0 / resistorResistance, 0.0);
+                    else if (tile.symbol == 'V')
+                        stamp(net(terminal(tile, West)), net(terminal(tile, East)),
+                            1.0 / (variableResistorMinimum * std::pow(variableResistorMaximum / variableResistorMinimum, tile.setting)), 0.0);
+                    else if (conducting.find(&tile) != conducting.end() && conducting[&tile])
+                        stamp(net(terminal(tile, West)), net(terminal(tile, East)), 1.0 / ledResistance, ledForwardVoltages.at(tile.symbol));
+                // Gaussian elimination (partial pivoting)
+                for (std::size_t column = 0u; column < n; ++column)
+                {
+                    auto pivot = column;
+                    for (std::size_t row = column + 1u; row < n; ++row)
+                        if (std::abs(g[row][column]) > std::abs(g[pivot][column]))
+                            pivot = row;
+                    std::swap(g[column], g[pivot]);
+                    for (std::size_t row = column + 1u; row < n; ++row)
+                    {
+                        auto const factor = g[row][column] / g[column][column];
+                        for (std::size_t k = column; k <= n; ++k)
+                            g[row][k] -= factor * g[column][k];
                     }
                 }
-                return result;
-            };
-            // an LED lights if current can flow from the battery's positive terminal to its anode and from its cathode to the negative
-            for (auto& led : circuitTiles)
-                if (ledSymbols.find(led.symbol) != ledSymbols.end())
-                    led.on = reachable(led, terminal(*battery, East))[terminal(led, West)] && reachable(led, terminal(led, East))[terminal(*battery, West)];
+                for (std::size_t row = n; row-- > 0u;)
+                {
+                    auto sum = g[row][n];
+                    for (std::size_t k = row + 1u; k < n; ++k)
+                        sum -= g[row][k] * voltages[k];
+                    voltages[row] = sum / g[row][row];
+                }
+                bool consistent = true;
+                for (auto& [led, on] : conducting)
+                {
+                    bool const forward = voltage(net(terminal(*led, West))) - voltage(net(terminal(*led, East))) > ledForwardVoltages.at(led->symbol);
+                    if (on != forward)
+                    {
+                        on = forward;
+                        consistent = false;
+                    }
+                }
+                if (consistent)
+                    break;
+            }
+            // the LEDs' brightness levels
+            for (auto& tile : circuitTiles)
+                if (conducting.find(&tile) != conducting.end())
+                {
+                    auto const current = conducting[&tile] ? (voltage(net(terminal(tile, West))) - voltage(net(terminal(tile, East))) -
+                        ledForwardVoltages.at(tile.symbol)) / ledResistance : 0.0;
+                    tile.state = current < ledMinimumCurrent ? 0u : std::clamp<std::size_t>(static_cast<std::size_t>(
+                        std::ceil(std::sqrt(std::min(current / ledFullCurrent, 1.0)) * ledBrightnessLevels)), 1u, ledBrightnessLevels);
+                }
             // n.b. the canvas updates the entities of the nodes whose meshes change
             for (auto const& tile : circuitTiles)
-                circuit->node(tile.node).set_mesh(tile.meshes[tile.on ? 1 : 0]);
+            {
+                circuit->node(tile.node).set_mesh(tile.meshes[tile.state]);
+                if (tile.arrowNode != ng::scene_graph::invalid_index)
+                    circuit->set_transform(tile.arrowNode, variableResistorArrowPosition(tile.setting));
+            }
             if (circuitCanvas)
                 circuitCanvas->update();
         };
+        // the variable resistor being dragged (an index of circuitTiles) and the mouse position it was last dragged to
+        std::optional<std::size_t> draggedResistor;
+        ng::point lastDragPosition;
         window.pageSceneGraph2D.VisibilityChanged([&]()
         {
             if (window.pageSceneGraph2D.visible() && !circuitCanvas)
@@ -2068,10 +2191,35 @@ int main(int argc, char* argv[])
                     for (auto& tile : circuitTiles)
                         if (tile.node == node && tile.symbol == 'S')
                         {
-                            tile.on = !tile.on;
+                            tile.state = 1u - tile.state;
                             update_circuit();
                             break;
                         }
+                        else if ((tile.node == node || tile.arrowNode == node) && tile.symbol == 'V')
+                        {
+                            draggedResistor = static_cast<std::size_t>(&tile - &circuitTiles[0]);
+                            break;
+                        }
+                });
+                // dragging a variable resistor: along it, its arrow following the mouse
+                circuitCanvas->Mouse([&](ng::mouse_event const& aEvent)
+                {
+                    if (aEvent.type() == ng::mouse_event_type::ButtonClicked && aEvent.is_left_button())
+                        lastDragPosition = aEvent.position();
+                    else if (aEvent.type() == ng::mouse_event_type::ButtonReleased && aEvent.is_left_button())
+                        draggedResistor = std::nullopt;
+                    else if (aEvent.type() == ng::mouse_event_type::Moved && draggedResistor && aEvent.is_left_button())
+                    {
+                        auto& tile = circuitTiles[*draggedResistor];
+                        auto const dx = aEvent.position().x - lastDragPosition.x;
+                        auto const dy = aEvent.position().y - lastDragPosition.y;
+                        lastDragPosition = aEvent.position();
+                        // along the resistor (mouse positions are y down)
+                        auto const angle = ng::to_rad(90.0) * tile.rotation;
+                        auto const along = dx * std::cos(angle) - dy * std::sin(angle);
+                        tile.setting = std::clamp(tile.setting + along / (variableResistorTravel * static_cast<ng::scalar>(48.0_dip)), 0.0, 1.0);
+                        update_circuit();
+                    }
                 });
                 update_circuit();
             }

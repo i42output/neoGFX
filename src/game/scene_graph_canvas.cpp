@@ -434,12 +434,36 @@ namespace neogfx::game
         {
             if (aLayer != 0 || iGlowEntities.empty() || !entity_transformation())
                 return;
+            // the glow's region: the bounds (on the canvas) of the emissive primitives, as the filter's cost (its buffers' clearing and
+            // blitting, and the blur) is proportional to its region's area (plus the blur's extent, which the filter adds)
+            std::optional<std::pair<vec3, vec3>> bounds;
+            {
+                scoped_component_data_lock<mesh_filter, model_transformation> lock{ *iGlowEcs };
+                auto const& filters = iGlowEcs->component<mesh_filter>();
+                auto const& models = iGlowEcs->component<model_transformation>();
+                for (auto const& e : iGlowEntities)
+                {
+                    auto const& filter = filters.entity_record_no_lock(e.entity);
+                    if (!filter.mesh)
+                        continue;
+                    auto const transformation = *entity_transformation() * models.entity_record_no_lock(e.entity).matrix.as<scalar>();
+                    for (auto const& v : filter.mesh->vertices)
+                    {
+                        auto const cv = transformation * v.as<scalar>();
+                        bounds = bounds ? std::make_pair(bounds->first.min(cv), bounds->second.max(cv)) : std::make_pair(cv, cv);
+                    }
+                }
+            }
+            if (!bounds)
+                return;
+            rect const region{ point{ bounds->first.x, bounds->first.y }, size{ bounds->second.x - bounds->first.x, bounds->second.y - bounds->first.y } };
             // a diffuse glow: the blurred emission at the glow's intensity (not glow_gain's, which saturates it into an opaque core),
             // so translucent around the (solid) emissive primitives themselves
-            auto glow = blur_filter::glow(rect{ point{}, client_rect().extents() }, iGlowExtent * iLastScale2D,
-                1.0, 1u, blending_mode::Filter, blending_mode::Lighten);
+            auto glow = blur_filter::glow(region, iGlowExtent * iLastScale2D, 1.0, 1u, blending_mode::Filter, blending_mode::Lighten);
             glow.gain = iGlowIntensity;
-            scoped_filter<blur_filter> filter{ aGc, glow };
+            // n.b. single sampled buffers: multisampling them would only multiply the filter's cost (it is shaded per sample) for edges
+            // that are blurred anyway
+            scoped_filter<blur_filter> filter{ aGc, glow, true, texture_sampling::Normal };
             filter.front_buffer().clear_depth_buffer();
             filter.front_buffer().draw_entities(*iGlowEcs, 0, *entity_transformation());
         });
