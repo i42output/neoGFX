@@ -29,7 +29,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
-#include <neogfx/gui/widget/check_box.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
@@ -41,6 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <mod_tracker/player.hpp>
 #include <mod_tracker/pattern_view.hpp>
 #include <mod_tracker/sample_view.hpp>
+#include <mod_tracker/oscilloscope_view.hpp>
 #include <mod_tracker/spectrum_view.hpp>
 
 namespace mod_tracker
@@ -70,6 +70,7 @@ namespace mod_tracker
         void frame();
         void collect_load();
         void update_controls();
+        void update_icons();
         static void set_text(ng::label& aLabel, std::string const& aText);
     private:
         player iPlayer;
@@ -81,14 +82,16 @@ namespace mod_tracker
         ng::push_button iStop;
         ng::push_button iPrevious;
         ng::push_button iNext;
-        ng::check_box iLoop;
+        ng::push_button iLoop;
         ng::horizontal_spacer iToolbarSpacer;
         ng::label iStatus;
         ng::horizontal_layout iViews;
         pattern_view iPatternView;
         sample_view iSampleView;
         ng::horizontal_layout iSpectra;
+        oscilloscope_view iLeftScope;
         spectrum_view iLeftSpectrum;
+        oscilloscope_view iRightScope;
         spectrum_view iRightSpectrum;
         ng::horizontal_layout iInfoBar;
         ng::label iPosition;
@@ -98,5 +101,6 @@ namespace mod_tracker
         std::shared_ptr<load_job> iJob;
         std::jthread iLoadThread;
         ng::widget_timer iFrameTimer;
+        ng::sink iSink;
     };
 }

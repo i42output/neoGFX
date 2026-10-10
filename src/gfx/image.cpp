@@ -22,6 +22,25 @@
 #include <libpng/png.h>
 #include <openssl/sha.h>
 
+#include <algorithm>
+#include <cmath>
+#include <memory>
+#include <string>
+#include <string_view>
+
+// nanosvg (zlib licence): SVG images are parsed and rasterised with it
+#ifdef _MSC_VER
+#pragma warning(push, 0)
+#pragma warning(disable: 4996)
+#endif
+#define NANOSVG_IMPLEMENTATION
+#include "3rdparty/nanosvg/nanosvg.h"
+#define NANOSVGRAST_IMPLEMENTATION
+#include "3rdparty/nanosvg/nanosvgrast.h"
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include <neolib/core/vecarray.hpp>
 #include <neolib/core/string_utils.hpp>
 
@@ -373,6 +392,13 @@ namespace neogfx
                     if (magic[0] == 0xFF && magic[1] == 0xD8 && magic[2] == 0xFF)
                         return JpegImage;
                 }
+                // SVG is text: an svg element, perhaps after an XML declaration, comments, a doctype, a byte order mark or white space
+                std::string_view const text{ static_cast<const char*>(resource().data()), std::min<std::size_t>(resource().size(), 1024u) };
+                auto const start = text.find_first_not_of(" \t\r\n\xEF\xBB\xBF");
+                if (start != std::string_view::npos &&
+                    (text.substr(start).starts_with("<svg") ||
+                        ((text.substr(start).starts_with("<?xml") || text.substr(start).starts_with("<!")) && text.find("<svg") != std::string_view::npos)))
+                    return SvgImage;
             }
         }
         return UnknownImage;
@@ -388,6 +414,8 @@ namespace neogfx
             return load_png();
         case JpegImage:
             return load_jpeg();
+        case SvgImage:
+            return load_svg();
         default:
             throw unknown_image_format();
         }
@@ -490,6 +518,32 @@ namespace neogfx
         jpeg_finish_decompress(&info);
         iSize = neogfx::size(info.output_width, info.output_height);
         jpeg_destroy_decompress(&info);
+        return true;
+    }
+
+    bool image::load_svg()
+    {
+        // nanosvg parses the text in place (and needs it terminated)
+        std::string text{ static_cast<const char*>(resource().data()), resource().size() };
+        std::unique_ptr<NSVGimage, decltype(&nsvgDelete)> const svg{ nsvgParse(text.data(), "px", 96.0f), &nsvgDelete };
+        if (svg == nullptr || svg->width <= 0.0f || svg->height <= 0.0f)
+        {
+            iError = "SVG image not valid";
+            return false;
+        }
+        std::unique_ptr<NSVGrasterizer, decltype(&nsvgDeleteRasterizer)> const rasterizer{ nsvgCreateRasterizer(), &nsvgDeleteRasterizer };
+        if (rasterizer == nullptr)
+        {
+            iError = "SVG rasterizer not available";
+            return false;
+        }
+        // rasterised at the SVG's own size (its width and height, in CSS pixels, or else its viewBox's) scaled by the DPI scale factor
+        auto const scale = static_cast<float>(dpi_scale_factor());
+        auto const width = std::max(1, static_cast<int>(std::ceil(svg->width * scale)));
+        auto const height = std::max(1, static_cast<int>(std::ceil(svg->height * scale)));
+        iData.resize(static_cast<std::size_t>(width) * static_cast<std::size_t>(height) * 4u);
+        nsvgRasterize(rasterizer.get(), svg.get(), 0.0f, 0.0f, scale, static_cast<unsigned char*>(data()), width, height, width * 4);
+        iSize = neogfx::size(width, height);
         return true;
     }
 }

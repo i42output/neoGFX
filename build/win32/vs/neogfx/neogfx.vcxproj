@@ -480,6 +480,8 @@
     <ClInclude Include="..\..\..\..\src\app\native\windows_com.hpp" />
     <ClInclude Include="..\..\..\..\src\app\native\windows_drag_drop.hpp" />
     <ClInclude Include="..\..\..\..\src\audio\3rdparty\miniaudio\miniaudio.h" />
+    <ClInclude Include="..\..\..\..\src\gfx\3rdparty\nanosvg\nanosvg.h" />
+    <ClInclude Include="..\..\..\..\src\gfx\3rdparty\nanosvg\nanosvgrast.h" />
     <ClInclude Include="..\..\..\..\src\gfx\native\i_native_texture.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\i_graphics_backend.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\native_texture.hpp" />

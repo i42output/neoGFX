@@ -40,7 +40,8 @@ namespace neogfx
         {
             UnknownImage,
             PngImage,
-            JpegImage
+            JpegImage,
+            SvgImage
         };
     public:
         typedef neolib::vector<std::uint8_t> data_type;
@@ -98,6 +99,7 @@ namespace neogfx
         bool load();
         bool load_png();
         bool load_jpeg();
+        bool load_svg();
     private:
         ref_ptr<i_resource> iResource;
         string iUri;

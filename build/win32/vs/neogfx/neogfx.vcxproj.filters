@@ -1055,6 +1055,12 @@
     <ClInclude Include="..\..\..\..\src\audio\3rdparty\miniaudio\miniaudio.h">
       <Filter>Header Files\3rdparty</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\gfx\3rdparty\nanosvg\nanosvg.h">
+      <Filter>Header Files\3rdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\gfx\3rdparty\nanosvg\nanosvgrast.h">
+      <Filter>Header Files\3rdparty</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\mvc\view_container.ipp">
       <Filter>Source Files\gui</Filter>
     </ClInclude>

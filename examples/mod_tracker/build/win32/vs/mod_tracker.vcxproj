@@ -109,6 +109,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp" />
+    <ClCompile Include="..\..\..\src\icons.cpp" />
     <ClCompile Include="..\..\..\src\load_dbm.cpp" />
     <ClCompile Include="..\..\..\src\load_it.cpp" />
     <ClCompile Include="..\..\..\src\load_mo3.cpp" />
@@ -118,6 +119,7 @@
     <ClCompile Include="..\..\..\src\mixer.cpp" />
     <ClCompile Include="..\..\..\src\module.cpp" />
     <ClCompile Include="..\..\..\src\module_bitstream.cpp" />
+    <ClCompile Include="..\..\..\src\oscilloscope_view.cpp" />
     <ClCompile Include="..\..\..\src\pattern_view.cpp" />
     <ClCompile Include="..\..\..\src\player.cpp" />
     <ClCompile Include="..\..\..\src\replayer.cpp" />
@@ -130,9 +132,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\include\mod_tracker\icons.hpp" />
     <ClInclude Include="..\..\..\include\mod_tracker\mod_tracker.hpp" />
     <ClInclude Include="..\..\..\include\mod_tracker\module.hpp" />
     <ClInclude Include="..\..\..\include\mod_tracker\module_bitstream.hpp" />
+    <ClInclude Include="..\..\..\include\mod_tracker\oscilloscope_view.hpp" />
     <ClInclude Include="..\..\..\include\mod_tracker\pattern_view.hpp" />
     <ClInclude Include="..\..\..\include\mod_tracker\player.hpp" />
     <ClInclude Include="..\..\..\include\mod_tracker\replayer.hpp" />

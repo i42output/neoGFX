@@ -21,10 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <filesystem>
 #include <format>
 
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/app/file_dialog.hpp>
 #include <neogfx/gui/window/i_window.hpp>
 
 #include <mod_tracker/tracker.hpp>
+#include <mod_tracker/icons.hpp>
 
 namespace mod_tracker
 {
@@ -41,20 +43,22 @@ namespace mod_tracker
         ng::widget<>{ aLayout },
         iLayout{ *this },
         iToolbar{ iLayout },
-        iOpen{ iToolbar, "Open..." },
-        iPlay{ iToolbar, "Play" },
-        iPause{ iToolbar, "Pause" },
-        iStop{ iToolbar, "Stop" },
-        iPrevious{ iToolbar, "<< Previous" },
-        iNext{ iToolbar, "Next >>" },
-        iLoop{ iToolbar, "Loop" },
+        iOpen{ iToolbar },
+        iPlay{ iToolbar },
+        iPause{ iToolbar },
+        iStop{ iToolbar },
+        iPrevious{ iToolbar },
+        iNext{ iToolbar },
+        iLoop{ iToolbar },
         iToolbarSpacer{ iToolbar },
         iStatus{ iToolbar },
         iViews{ iLayout },
         iPatternView{ iViews, iPlayer },
         iSampleView{ iViews, iPlayer },
         iSpectra{ iLayout },
+        iLeftScope{ iSpectra, iPlayer, 0u, "Left" },
         iLeftSpectrum{ iSpectra, iPlayer, 0u, "Left" },
+        iRightScope{ iSpectra, iPlayer, 1u, "Right" },
         iRightSpectrum{ iSpectra, iPlayer, 1u, "Right" },
         iInfoBar{ iLayout },
         iPosition{ iInfoBar },
@@ -70,7 +74,14 @@ namespace mod_tracker
         iViews.set_spacing(ng::size{ 2.0 });
         iSpectra.set_spacing(ng::size{ 2.0 });
 
+        iLoop.set_checkable(ng::button_checkable::BiState);
         iLoop.set_checked(iPlayer.looping());
+        update_icons();
+        iSink += ng::service<ng::i_app>().current_style_changed([this](ng::style_aspect aAspect)
+            {
+                if ((aAspect & ng::style_aspect::Color) == ng::style_aspect::Color)
+                    update_icons();
+            });
 
         iOpen.Clicked([this]() { open(); });
         iPlay.Clicked([this]() { iPlayer.play(); iPatternView.set_focus(); });
@@ -151,7 +162,9 @@ namespace mod_tracker
         iPlayer.update();
         iPatternView.refresh();
         iSampleView.refresh();
+        iLeftScope.refresh();
         iLeftSpectrum.refresh();
+        iRightScope.refresh();
         iRightSpectrum.refresh();
         update_controls();
     }
@@ -224,6 +237,21 @@ namespace mod_tracker
         auto const pass = iPlayer.current_pass();
         set_text(iTime, to_time(static_cast<double>(iPlayer.current_frame()) / song.sampleRate) + " / " + to_time(song.duration_s()) +
             (pass != 0u ? std::format("  (loop {})", pass) : song.loopRow ? std::string{ "  (loops)" } : std::string{}));
+    }
+
+    void tracker::update_icons()
+    {
+        // Material Design style: monochrome icons in the colour the buttons' text would be (made again when the
+        // style changes); a disabled button greys its icon out itself
+        auto const color = iPlay.text_widget().text_color();
+        auto const dpiScale = dpi_scale_factor();
+        iOpen.set_image(icons::make("open", icons::OPEN, color, dpiScale));
+        iPlay.set_image(icons::make("play", icons::PLAY, color, dpiScale));
+        iPause.set_image(icons::make("pause", icons::PAUSE, color, dpiScale));
+        iStop.set_image(icons::make("stop", icons::STOP, color, dpiScale));
+        iPrevious.set_image(icons::make("previous", icons::PREVIOUS, color, dpiScale));
+        iNext.set_image(icons::make("next", icons::NEXT, color, dpiScale));
+        iLoop.set_image(icons::make("repeat", icons::REPEAT, color, dpiScale));
     }
 
     void tracker::set_text(ng::label& aLabel, std::string const& aText)
