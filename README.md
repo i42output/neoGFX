@@ -44,10 +44,10 @@ v1.20   | WID + 12 months | macOS support
 
 # Implementation Progress
 ![](http://neogfx.org/temp/3d.png?id=1)
-![](http://neogfx.org/temp/select_font.png?id=2)
-![](http://neogfx.org/temp/gradient2.png?id=1)
-![](http://neogfx.org/temp/video_poker.png?id=1)
-![](http://neogfx.org/temp/lol.png?id=4)
+![](http://neogfx.org/temp/select_font.png?id=3)
+![](http://neogfx.org/temp/gradient2.png?id=2)
+![](http://neogfx.org/temp/video_poker.png?id=2)
+![](http://neogfx.org/temp/lol.png?id=5)
 
 
 Feature                         | % done  |     TODO
