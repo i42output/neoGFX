@@ -236,6 +236,13 @@ namespace mod_tracker
         return std::min(iAudio->song_stream().take_peak(aChannel), 1.0f);
     }
 
+    bool player::output_samples(std::uint32_t aChannel, float* aSamples, std::size_t aFrames)
+    {
+        if (iAudio == nullptr || current_state() != state::Playing)
+            return false;
+        return iAudio->capture(aChannel, position(), aSamples, aFrames);
+    }
+
     void player::update()
     {
         if (loaded() && iSequencer.is_playing(iSequence))

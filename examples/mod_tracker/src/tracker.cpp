@@ -53,6 +53,9 @@ namespace mod_tracker
         iViews{ iLayout },
         iPatternView{ iViews, iPlayer },
         iSampleView{ iViews, iPlayer },
+        iSpectra{ iLayout },
+        iLeftSpectrum{ iSpectra, iPlayer, 0u, "Left" },
+        iRightSpectrum{ iSpectra, iPlayer, 1u, "Right" },
         iInfoBar{ iLayout },
         iPosition{ iInfoBar },
         iInfoSpacer{ iInfoBar },
@@ -65,6 +68,7 @@ namespace mod_tracker
         iLayout.set_spacing(ng::size{ 4.0 });
         iToolbar.set_spacing(ng::size{ 4.0 });
         iViews.set_spacing(ng::size{ 2.0 });
+        iSpectra.set_spacing(ng::size{ 2.0 });
 
         iLoop.set_checked(iPlayer.looping());
 
@@ -102,7 +106,7 @@ namespace mod_tracker
 
     void tracker::open()
     {
-        auto const paths = ng::open_file_dialog(*this, ng::file_dialog_spec{ "Open Module", {}, { "*.mod" }, "ProTracker Modules" });
+        auto const paths = ng::open_file_dialog(*this, ng::file_dialog_spec{ "Open Module", {}, module_file_patterns(), "Modules (MOD, S3M, XM, IT, MPTM, DBM, MO3)" });
         if (paths && !paths->empty())
             open(paths->front());
     }
@@ -147,6 +151,8 @@ namespace mod_tracker
         iPlayer.update();
         iPatternView.refresh();
         iSampleView.refresh();
+        iLeftSpectrum.refresh();
+        iRightSpectrum.refresh();
         update_controls();
     }
 
@@ -213,7 +219,7 @@ namespace mod_tracker
         }
         auto const& song = iPlayer.song();
         auto const& row = song.rows[iPlayer.current_row()];
-        set_text(iPosition, std::format("Position {:02}/{:02}   Pattern {:02}   Row {:02}   Speed {}   BPM {}",
+        set_text(iPosition, std::format("Position {:02}/{:02}   Pattern {:02}   Row {:02}   Speed {}   Tempo {:g}",
             row.orderPosition, iPlayer.song_module().orders.size() - 1u, row.pattern, row.row, row.speed, row.tempo));
         auto const pass = iPlayer.current_pass();
         set_text(iTime, to_time(static_cast<double>(iPlayer.current_frame()) / song.sampleRate) + " / " + to_time(song.duration_s()) +

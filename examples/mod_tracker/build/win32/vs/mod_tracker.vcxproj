@@ -58,7 +58,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;NEOLIB_HOSTED_ENVIRONMENT;NEOGFX_DEBUG;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(DevDirNeogfx)\examples\mod_tracker\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeogfx)\examples\mod_tracker\include;$(DevDirNeogfx)\include;$(DevDirNeogfx)\3rdparty;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/bigobj /std:c++latest %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -85,7 +85,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NEOLIB_HOSTED_ENVIRONMENT;NEOGFX_DEBUG;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(DevDirNeogfx)\examples\mod_tracker\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DevDirNeogfx)\examples\mod_tracker\include;$(DevDirNeogfx)\include;$(DevDirNeogfx)\3rdparty;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalOptions>/bigobj /std:c++latest %(AdditionalOptions)</AdditionalOptions>
@@ -109,13 +109,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\main.cpp" />
+    <ClCompile Include="..\..\..\src\load_dbm.cpp" />
+    <ClCompile Include="..\..\..\src\load_it.cpp" />
+    <ClCompile Include="..\..\..\src\load_mo3.cpp" />
+    <ClCompile Include="..\..\..\src\load_mod.cpp" />
+    <ClCompile Include="..\..\..\src\load_s3m.cpp" />
+    <ClCompile Include="..\..\..\src\load_xm.cpp" />
+    <ClCompile Include="..\..\..\src\mixer.cpp" />
     <ClCompile Include="..\..\..\src\module.cpp" />
     <ClCompile Include="..\..\..\src\module_bitstream.cpp" />
     <ClCompile Include="..\..\..\src\pattern_view.cpp" />
     <ClCompile Include="..\..\..\src\player.cpp" />
     <ClCompile Include="..\..\..\src\replayer.cpp" />
     <ClCompile Include="..\..\..\src\sample_view.cpp" />
+    <ClCompile Include="..\..\..\src\spectrum_view.cpp" />
+    <ClCompile Include="..\..\..\src\timeline.cpp" />
     <ClCompile Include="..\..\..\src\tracker.cpp" />
+    <ClCompile Include="..\..\..\src\vorbis.cpp">
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\mod_tracker\mod_tracker.hpp" />
@@ -125,7 +137,10 @@
     <ClInclude Include="..\..\..\include\mod_tracker\player.hpp" />
     <ClInclude Include="..\..\..\include\mod_tracker\replayer.hpp" />
     <ClInclude Include="..\..\..\include\mod_tracker\sample_view.hpp" />
+    <ClInclude Include="..\..\..\include\mod_tracker\spectrum_view.hpp" />
     <ClInclude Include="..\..\..\include\mod_tracker\tracker.hpp" />
+    <ClInclude Include="..\..\..\src\loader.hpp" />
+    <ClInclude Include="..\..\..\src\tables.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

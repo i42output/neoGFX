@@ -119,6 +119,9 @@ namespace mod_tracker
         void set_muted(std::uint32_t aChannel, bool aMuted);
         // the loudest a channel has been since the last call, 0.0 .. 1.0
         float take_level(std::uint32_t aChannel);
+        // the last aFrames frames of the left (0) or right (1) output channel heard, up to the playhead (at most
+        // 16384); false if the song isn't playing
+        bool output_samples(std::uint32_t aChannel, float* aSamples, std::size_t aFrames);
     public:
         void update();
         // the row under the playhead (an index into song().rows)

@@ -37,12 +37,13 @@ int main(int argc, char* argv[])
         app.change_style("Light").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
         app.change_style("Dark").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 
-        ng::window window{ ng::size{ 1120_dip, 720_dip } };
+        // the pattern and sample views need their minimum size, so the window isn't allowed to be smaller
+        ng::window window{ ng::size{ 1120_dip, 720_dip }, ng::window_style::Default | ng::window_style::MinimumSizeToContents };
 
         mod_tracker::tracker tracker{ window.client_layout() };
 
-        // n.b. false: the default also shrinks the window to its minimum size
-        window.center_on_parent(false);
+        // resize the window to its minimum size and centre it on the screen
+        window.center();
 
         return app.exec();
     }

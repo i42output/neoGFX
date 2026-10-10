@@ -66,22 +66,22 @@ namespace mod_tracker
         auto const& m = iPlayer.song_module();
         auto const row = iPlayer.current_row();
         bool changed = (iRow != row);
-        iGlow.resize(m.samples.size(), 0.0f);
+        iGlow.resize(m.instrument_mode() ? m.instruments.size() : m.samples.size(), 0.0f);
         for (auto& glow : iGlow)
             if (glow > 0.0f)
             {
                 glow = glow * GLOW_DECAY < 0.02f ? 0.0f : glow * GLOW_DECAY;
                 changed = true;
             }
-        // a sample lights up when a row that strikes it starts playing
+        // an instrument (or sample) lights up when a row that strikes it starts playing
         if (iRow != row && iPlayer.current_state() == player::state::Playing)
         {
             auto const& current = iPlayer.song().rows[row];
             for (std::uint32_t channel = 0u; channel < m.channels; ++channel)
             {
                 auto const& c = m.at(current.pattern, current.row, channel);
-                if (c.sample != 0u && c.sample <= iGlow.size() && c.period != 0u)
-                    iGlow[c.sample - 1u] = 1.0f;
+                if (c.instrument != 0u && c.instrument <= iGlow.size() && is_note(c.note))
+                    iGlow[c.instrument - 1u] = 1.0f;
             }
         }
         iRow = row;
@@ -109,13 +109,14 @@ namespace mod_tracker
             return;
         auto const& m = iPlayer.song_module();
         draw(headerRect.top_left() + ng::point{ charWidth, 0.0 }, m.title.empty() ? std::string{ "(untitled)" } : m.title, NAME);
+        auto const format = m.format == module_format::MOD ? (m.signature.empty() ? std::string{ "Soundtracker" } : m.signature) : m.formatName;
         draw(headerRect.top_left() + ng::point{ charWidth, lineHeight },
-            std::to_string(m.channels) + " channels, " + std::to_string(m.patterns.size()) + " patterns" +
-            (m.signature.empty() ? std::string{ ", Soundtracker" } : ", " + m.signature), HEADER_TEXT);
+            format + (m.container.empty() ? std::string{} : " (" + m.container + ")") + ", " + std::to_string(m.channels) + " channels", HEADER_TEXT);
 
-        for (std::size_t index = 0u; index < m.samples.size(); ++index)
+        // the instruments, or the samples if the module has no instruments
+        auto const count = m.instrument_mode() ? m.instruments.size() : m.samples.size();
+        for (std::size_t index = 0u; index < count; ++index)
         {
-            auto const& s = m.samples[index];
             ng::point const position{ clientRect.x + charWidth, headerRect.bottom() + static_cast<double>(index) * lineHeight };
             if (position.y > clientRect.bottom())
                 break;
@@ -123,11 +124,28 @@ namespace mod_tracker
             if (glow > 0.0f)
                 aGc.fill_rect(ng::rect{ ng::point{ clientRect.x, position.y }, ng::size{ clientRect.width(), lineHeight } },
                     ng::mix(BACKGROUND, GLOW, static_cast<double>(glow)));
+            bool empty = true;
+            std::string name;
+            if (m.instrument_mode())
+            {
+                auto const& ins = m.instruments[index];
+                name = ins.name;
+                for (auto const smp : ins.keyboard)
+                    if (smp != 0u && smp <= m.samples.size() && m.samples[smp - 1u].has_data())
+                    {
+                        empty = false;
+                        break;
+                    }
+            }
+            else
+            {
+                name = m.samples[index].name;
+                empty = !m.samples[index].has_data();
+            }
             cell numbered;
-            numbered.sample = static_cast<std::uint8_t>(index + 1u);
-            bool const empty = s.data.empty();
-            draw(position, sample_text(numbered), empty ? EMPTY : NUMBER);
-            draw(position + ng::point{ charWidth * 3.0, 0.0 }, s.name, empty ? EMPTY : NAME);
+            numbered.instrument = static_cast<std::uint8_t>(index + 1u);
+            draw(position, instrument_text(numbered), empty ? EMPTY : NUMBER);
+            draw(position + ng::point{ charWidth * 3.0, 0.0 }, name, empty ? EMPTY : NAME);
         }
     }
 }

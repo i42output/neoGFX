@@ -38,6 +38,7 @@ namespace mod_tracker
         ng::color const BEAT_ROW_NUMBER{ 170, 178, 195 };
         ng::color const NOTE{ 235, 238, 245 };
         ng::color const SAMPLE{ 255, 196, 92 };
+        ng::color const VOLUME{ 140, 230, 140 };
         ng::color const EFFECT{ 118, 200, 255 };
         ng::color const EMPTY{ 62, 68, 82 };
         ng::color const ORDER_TEXT{ 150, 158, 175 };
@@ -50,10 +51,11 @@ namespace mod_tracker
         constexpr float METER_DECAY = 0.88f;
 
         // columns of text per channel in each layout, including the gap after it
-        constexpr std::uint32_t FULL_CELL_COLUMNS = 12u;     // "C-2 01 A0F  "
-        constexpr std::uint32_t COMPACT_CELL_COLUMNS = 8u;   // "C-2 01  "
-        constexpr std::uint32_t MINIMAL_CELL_COLUMNS = 4u;   // "C-2 "
-        constexpr std::uint32_t ROW_NUMBER_COLUMNS = 4u;     // "00  "
+        constexpr std::uint32_t FULL_CELL_COLUMNS = 16u;     // "C-5 01 v64 A0F  " (without the volume column for MOD)
+        constexpr std::uint32_t VOLUME_COLUMNS = 4u;         // "v64 "
+        constexpr std::uint32_t COMPACT_CELL_COLUMNS = 8u;   // "C-5 01  "
+        constexpr std::uint32_t MINIMAL_CELL_COLUMNS = 4u;   // "C-5 "
+        constexpr std::uint32_t ROW_NUMBER_COLUMNS = 5u;     // "000  "
 
         std::string digits(std::uint32_t aValue, std::uint32_t aDigits)
         {
@@ -122,7 +124,7 @@ namespace mod_tracker
 
         if (!iPlayer.loaded() || iRow == std::nullopt)
         {
-            std::string const hint = "Open a ProTracker module to begin";
+            std::string const hint = "Open a module to begin";
             auto const extents = aGc.text_extent(ng::string{ hint }, iFont);
             draw(ng::point{ clientRect.center().x - extents.cx / 2.0, clientRect.center().y - lineHeight / 2.0 }, hint, ORDER_TEXT);
             return;
@@ -134,8 +136,8 @@ namespace mod_tracker
 
         // order list: the pattern played at each position, the current position highlighted
         iOrderListRect = ng::rect{ clientRect.top_left(), ng::size{ clientRect.width(), lineHeight } };
-        // pattern numbers go to three digits only in the largest multi-channel modules
-        auto const patternDigits = m.patterns.size() > 100u ? 3u : 2u;
+        // pattern numbers take as many digits as the module has patterns
+        auto const patternDigits = m.patterns.size() > 1000u ? 4u : m.patterns.size() > 100u ? 3u : 2u;
         iOrderCellWidth = charWidth * (patternDigits + 1u);
         aGc.fill_rect(iOrderListRect, HEADER_BACKGROUND);
         auto const ordersShown = static_cast<std::uint32_t>(std::max(1.0, std::floor((clientRect.width() - charWidth) / iOrderCellWidth)));
@@ -147,13 +149,18 @@ namespace mod_tracker
             ng::point const position{ clientRect.x + charWidth / 2.0 + (order - iFirstOrderShown) * iOrderCellWidth, clientRect.y };
             if (order == current.orderPosition)
                 aGc.fill_rect(ng::rect{ position - ng::point{ charWidth / 2.0, 0.0 }, ng::size{ iOrderCellWidth, lineHeight } }, PLAYHEAD_BACKGROUND);
-            draw(position, digits(m.orders[order], patternDigits), order == current.orderPosition ? ORDER_CURRENT : ORDER_TEXT);
+            // the markers: "+++" is skipped, "---" ends the song
+            auto const text = m.orders[order] == module_data::ORDER_SKIP ? std::string(patternDigits, '+') :
+                m.orders[order] == module_data::ORDER_END ? std::string(patternDigits, '-') : digits(m.orders[order], patternDigits);
+            draw(position, text, order == current.orderPosition ? ORDER_CURRENT : ORDER_TEXT);
         }
 
         // pick the widest layout the channels fit in
+        bool const volumeColumn = has_volume_column(m);
+        auto const fullColumns = volumeColumn ? FULL_CELL_COLUMNS : FULL_CELL_COLUMNS - VOLUME_COLUMNS;
         auto const available = clientRect.width() / charWidth - ROW_NUMBER_COLUMNS;
         auto const cellColumns =
-            m.channels * FULL_CELL_COLUMNS <= available ? FULL_CELL_COLUMNS :
+            m.channels * fullColumns <= available ? fullColumns :
             m.channels * COMPACT_CELL_COLUMNS <= available ? COMPACT_CELL_COLUMNS : MINIMAL_CELL_COLUMNS;
         auto const cellWidth = charWidth * cellColumns;
         auto const patternLeft = clientRect.x + charWidth * ROW_NUMBER_COLUMNS;
@@ -168,7 +175,7 @@ namespace mod_tracker
         {
             ng::point const position{ patternLeft + channel * cellWidth, headerRect.y };
             // the channel number, then its meter in the rest of the column (all meter when space is short)
-            auto const label = (cellColumns == MINIMAL_CELL_COLUMNS ? std::string{} : "Ch" + std::to_string(channel + 1u));
+            auto const label = (cellColumns == MINIMAL_CELL_COLUMNS ? std::string{} : std::to_string(channel + 1u));
             auto const labelColumns = label.empty() ? 0.0 : static_cast<double>(label.size() + 1u);
             auto const meterHeight = std::max(2.0, std::floor(lineHeight * 0.3));
             ng::rect const meterRect{
@@ -184,6 +191,8 @@ namespace mod_tracker
         }
 
         // the pattern, scrolling past the playhead row in the middle
+        auto const rows = m.patterns[current.pattern].rows;
+        auto const rowsPerBeat = std::max<std::uint32_t>(m.rowsPerBeat, 1u);
         ng::rect const patternRect{ ng::point{ clientRect.x, headerRect.bottom() }, ng::point{ clientRect.right(), clientRect.bottom() } };
         auto const playheadY = patternRect.y + std::floor((patternRect.height() - lineHeight) / 2.0 / lineHeight) * lineHeight;
         auto const rowsAbove = static_cast<std::int32_t>((playheadY - patternRect.y) / lineHeight);
@@ -191,26 +200,32 @@ namespace mod_tracker
         for (std::int32_t offset = -rowsAbove; offset < rowsBelow; ++offset)
         {
             auto const row = static_cast<std::int32_t>(current.row) + offset;
-            if (row < 0 || row >= static_cast<std::int32_t>(ROWS_PER_PATTERN))
+            if (row < 0 || row >= static_cast<std::int32_t>(rows))
                 continue;
             auto const y = playheadY + offset * lineHeight;
-            bool const beat = (row % 4 == 0);
+            bool const beat = (static_cast<std::uint32_t>(row) % rowsPerBeat == 0u);
             if (offset == 0)
                 aGc.fill_rect(ng::rect{ ng::point{ clientRect.x, y }, ng::size{ clientRect.width(), lineHeight } }, PLAYHEAD_BACKGROUND);
             else if (beat)
                 aGc.fill_rect(ng::rect{ ng::point{ clientRect.x, y }, ng::size{ clientRect.width(), lineHeight } }, BEAT_BACKGROUND);
-            draw(ng::point{ clientRect.x + charWidth, y }, digits(static_cast<std::uint32_t>(row), 2u), beat ? BEAT_ROW_NUMBER : ROW_NUMBER);
+            draw(ng::point{ clientRect.x + charWidth, y }, digits(static_cast<std::uint32_t>(row), rows > 100u ? 3u : 2u), beat ? BEAT_ROW_NUMBER : ROW_NUMBER);
             for (std::uint32_t channel = 0u; channel < m.channels; ++channel)
             {
                 auto const& c = m.at(current.pattern, static_cast<std::uint32_t>(row), channel);
                 ng::point const position{ patternLeft + channel * cellWidth, y };
-                draw(position, note_text(c), c.period != 0u ? NOTE : EMPTY);
+                draw(position, note_text(m, c), c.note != NOTE_NONE ? NOTE : EMPTY);
                 if (cellColumns == MINIMAL_CELL_COLUMNS)
                     continue;
-                draw(position + ng::point{ charWidth * 4.0, 0.0 }, sample_text(c), c.sample != 0u ? SAMPLE : EMPTY);
+                draw(position + ng::point{ charWidth * 4.0, 0.0 }, instrument_text(c), c.instrument != 0u ? SAMPLE : EMPTY);
                 if (cellColumns == COMPACT_CELL_COLUMNS)
                     continue;
-                draw(position + ng::point{ charWidth * 7.0, 0.0 }, effect_text(c), c.has_effect() ? EFFECT : EMPTY);
+                auto column = 7.0;
+                if (volumeColumn)
+                {
+                    draw(position + ng::point{ charWidth * column, 0.0 }, volume_text(m, c), c.volumeCommand != volume_command::None ? VOLUME : EMPTY);
+                    column += VOLUME_COLUMNS;
+                }
+                draw(position + ng::point{ charWidth * column, 0.0 }, effect_text(m, c), c.command != effect::None ? EFFECT : EMPTY);
             }
         }
     }

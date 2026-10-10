@@ -41,6 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <mod_tracker/player.hpp>
 #include <mod_tracker/pattern_view.hpp>
 #include <mod_tracker/sample_view.hpp>
+#include <mod_tracker/spectrum_view.hpp>
 
 namespace mod_tracker
 {
@@ -86,6 +87,9 @@ namespace mod_tracker
         ng::horizontal_layout iViews;
         pattern_view iPatternView;
         sample_view iSampleView;
+        ng::horizontal_layout iSpectra;
+        spectrum_view iLeftSpectrum;
+        spectrum_view iRightSpectrum;
         ng::horizontal_layout iInfoBar;
         ng::label iPosition;
         ng::horizontal_spacer iInfoSpacer;

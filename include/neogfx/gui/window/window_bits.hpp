@@ -59,6 +59,7 @@ namespace neogfx
         InitiallyCentered           = 0x0004000000000000,    // Center on desktop or parent
         InitiallyRenderable         = 0x0008000000000000,
         SizeToContents              = 0x0010000000000000,
+        MinimumSizeToContents       = 0x0020000000000000,    // The window can't be resized smaller than its contents' minimum size (rather than its contents scrolling)
         Weak                        = 0x8000000000000000,
         Default                     = Main | TitleBar | SystemMenu | Menu | MinimizeBox | MaximizeBox | Resize | SizeGrip | Close | DropShadow | InitiallyCentered | InitiallyRenderable,
         DefaultDialog               = (Default | Dialog) & ~(InitiallyRenderable | Main | Menu),
@@ -165,6 +166,7 @@ declare_enum_string(neogfx::window_style, InitiallyHidden)
 declare_enum_string(neogfx::window_style, InitiallyCentered)
 declare_enum_string(neogfx::window_style, InitiallyRenderable)
 declare_enum_string(neogfx::window_style, SizeToContents)
+declare_enum_string(neogfx::window_style, MinimumSizeToContents)
 declare_enum_string(neogfx::window_style, Weak)
 declare_enum_string(neogfx::window_style, Default)
 declare_enum_string(neogfx::window_style, DefaultDialog)

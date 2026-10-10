@@ -138,6 +138,7 @@ namespace neogfx
         if (has_minimum_size() || 
             (root().style() & window_style::Resize) != window_style::Resize || 
             (root().style() & window_style::SizeToContents) == window_style::SizeToContents ||
+            (root().style() & window_style::MinimumSizeToContents) == window_style::MinimumSizeToContents ||
             querying_ideal_size())
             return framed_scrollable_widget::minimum_size(aAvailableSpace);
         return service<i_app>().current_style().padding(padding_role::Window).size();
@@ -1056,7 +1057,10 @@ namespace neogfx
 
         set_decoration_style(window_style_to_decoration_style(style()));
 
-        if ((style() & (window_style::SizeToContents | window_style::Main)) == (window_style::SizeToContents | window_style::Main))
+        // the middle rows of the toolbar and dock layouts have a zero minimum size, so that the client scrolls rather
+        // than constraining the window; not so if the window is (at least) to be sized to its contents
+        if ((style() & window_style::Main) == window_style::Main &&
+            (style() & (window_style::SizeToContents | window_style::MinimumSizeToContents)) != window_style::Invalid)
         {
             if (has_layout(standard_layout::Toolbar))
                 layout(standard_layout::Toolbar, layout_position::Center).parent_layout().set_minimum_size({});
