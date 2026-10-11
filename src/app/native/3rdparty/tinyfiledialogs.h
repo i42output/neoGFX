@@ -10,6 +10,8 @@
 		|     email: tinyfiledialogs@ysengrin.com      |
 		|______________________________________________|
 
+Modified for neoGFX: tinyfd_winOwner, the owner window of the Windows file, folder and colour dialogs.
+
 A big thank you to Don Heyse http://ldglite.sf.net for
                    his code contributions, bug corrections & thorough testing!
 		
@@ -115,6 +117,13 @@ extern int tinyfd_winUtf8; /* 0 (default) or 1 */
 /* on windows string char can be 0:MBSC or 1:UTF-8
 unless your code is really prepared for UTF-8 on windows, leave this on MBSC.
 Or you can use the UTF-16 (wchar) prototypes at the end of ths file.*/
+
+/* neoGFX modification: the owner window (an HWND) of the file, folder and colour dialogs; NULL (the default) for
+none. A dialog is modal to its owner: it disables the owner while it is open and enables it again before it closes,
+so that Windows activates the owner afterwards (when an unowned dialog closes Windows activates whichever window it
+finds next, often another application's). It is used by the thread that shows the dialog, so set it on that thread
+just before. */
+extern void * tinyfd_winOwner;
 #endif
 
 extern int tinyfd_forceConsole ;  /* 0 (default) or 1 */

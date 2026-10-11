@@ -10,6 +10,8 @@
 		|     email: tinyfiledialogs@ysengrin.com      |
 		|______________________________________________|
 
+Modified for neoGFX: tinyfd_winOwner, the owner window of the Windows file, folder and colour dialogs.
+
 A big thank you to Don Heyse http://ldglite.sf.net for
                    his code contributions, bug corrections & thorough testing!
 
@@ -111,6 +113,7 @@ misrepresented as being the original software.
  /*#include <io.h>*/
  #define SLASH "\\"
  int tinyfd_winUtf8 = 1 ; /* on windows string char can be 0:MBSC or 1:UTF-8 */
+ void * tinyfd_winOwner = NULL ; /* neoGFX modification: see tinyfiledialogs.h */
 #else
  #include <limits.h>
  #include <unistd.h>
@@ -1167,7 +1170,7 @@ wchar_t const * tinyfd_saveFileDialogW(
 	}
 
 	ofn.lStructSize = sizeof(OPENFILENAMEW);
-	ofn.hwndOwner = 0;
+	ofn.hwndOwner = (HWND)tinyfd_winOwner;
 	ofn.hInstance = 0;
 	ofn.lpstrFilter = lFilterPatterns && wcslen(lFilterPatterns) ? lFilterPatterns : NULL;
 	ofn.lpstrCustomFilter = NULL;
@@ -1316,7 +1319,7 @@ wchar_t const * tinyfd_openFileDialogW(
 	}
 
 	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = 0;
+	ofn.hwndOwner = (HWND)tinyfd_winOwner;
 	ofn.hInstance = 0;
 	ofn.lpstrFilter = lFilterPatterns && wcslen(lFilterPatterns) ? lFilterPatterns : NULL;
 	ofn.lpstrCustomFilter = NULL;
@@ -1477,7 +1480,7 @@ wchar_t const * tinyfd_selectFolderDialogW(
 
 	lHResult = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
-	bInfo.hwndOwner = 0;
+	bInfo.hwndOwner = (HWND)tinyfd_winOwner;
 	bInfo.pidlRoot = NULL;
 	bInfo.pszDisplayName = lBuff;
 	bInfo.lpszTitle = aTitle && wcslen(aTitle) ? aTitle : NULL;
@@ -1572,7 +1575,7 @@ wchar_t const * tinyfd_colorChooserW(
 
 	/* we can't use aTitle */
 	cc.lStructSize = sizeof(CHOOSECOLOR);
-	cc.hwndOwner = NULL;
+	cc.hwndOwner = (HWND)tinyfd_winOwner;
 	cc.hInstance = NULL;
 	cc.rgbResult = RGB(lDefaultRGB[0], lDefaultRGB[1], lDefaultRGB[2]);
 	cc.lpCustColors = crCustColors;
@@ -1776,7 +1779,7 @@ static char const * saveFileDialogWinGuiA (
 	}
 
 	ofn.lStructSize     = sizeof(OPENFILENAME) ;
-	ofn.hwndOwner       = 0 ;
+	ofn.hwndOwner       = (HWND)tinyfd_winOwner ;
 	ofn.hInstance       = 0 ;
 	ofn.lpstrFilter		= lFilterPatterns && strlen(lFilterPatterns) ? lFilterPatterns : NULL;
 	ofn.lpstrCustomFilter = NULL ;
@@ -1869,7 +1872,7 @@ static char const * openFileDialogWinGuiA (
 	}
 
 	ofn.lStructSize     = sizeof ( OPENFILENAME ) ;
-	ofn.hwndOwner       = 0 ;
+	ofn.hwndOwner       = (HWND)tinyfd_winOwner ;
 	ofn.hInstance       = 0 ;
 	ofn.lpstrFilter		= lFilterPatterns && strlen(lFilterPatterns) ? lFilterPatterns : NULL;
 	ofn.lpstrCustomFilter = NULL ;
@@ -1955,7 +1958,7 @@ static char const * selectFolderDialogWinGuiA (
 	lHResult = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
 	/* we can't use aDefaultPath */
-	bInfo.hwndOwner = 0 ;
+	bInfo.hwndOwner = (HWND)tinyfd_winOwner ;
 	bInfo.pidlRoot = NULL ;
 	bInfo.pszDisplayName = aoBuff ;
 	bInfo.lpszTitle = aTitle && strlen(aTitle) ? aTitle : NULL;
@@ -2008,7 +2011,7 @@ static char const * colorChooserWinGuiA(
 
 	/* we can't use aTitle */
 	cc.lStructSize = sizeof ( CHOOSECOLOR ) ;
-	cc.hwndOwner = NULL ;
+	cc.hwndOwner = (HWND)tinyfd_winOwner ;
 	cc.hInstance = NULL ;
 	cc.rgbResult = RGB(lDefaultRGB[0], lDefaultRGB[1], lDefaultRGB[2]);
 	cc.lpCustColors = crCustColors;

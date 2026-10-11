@@ -105,7 +105,7 @@ namespace mod_tracker
                 else if (auto const existing = visited.find(visit); existing != visited.end())
                 {
                     result.loopRow = existing->second.row;
-                    result.loopTiming = existing->second.timing;
+                    result.loopState = existing->second.timing;
                     return false;
                 }
                 if (aEngine.frames() >= maximumFrames)
@@ -114,6 +114,7 @@ namespace mod_tracker
                 timing.speed = state.speed;
                 timing.tempo = state.tempo;
                 timing.tickFraction = state.tickFraction;
+                timing.globalVolume = state.globalVolume;
                 visited.insert_or_assign(visit, visit_info{ result.rows.size(), timing });
                 if (result.snapshots.empty() || aEngine.frames() - lastSnapshotFrame >= snapshotInterval)
                 {
@@ -233,12 +234,14 @@ namespace mod_tracker
         if (iNextRow >= iTimeline.rows.size())
         {
             // the end of the song: carry on into the loop (as the song itself would), taking the timing it had
-            // the first time through so that every pass lasts exactly as long as the scan says
+            // the first time through so that every pass lasts exactly as long as the scan says, and its global
+            // volume, which songs often fade out at their end, so that every pass sounds as the first did (and
+            // as playback sought to the loop does)
             if (!looping() || !iTimeline.loopRow)
                 return false;
             iNextRow = *iTimeline.loopRow;
-            if (iTimeline.loopTiming)
-                iReplayer.restore_timing(*iTimeline.loopTiming);
+            if (iTimeline.loopState)
+                iReplayer.restore_loop_state(*iTimeline.loopState);
         }
         ++iNextRow;
         return true;

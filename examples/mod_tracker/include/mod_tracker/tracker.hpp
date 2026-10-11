@@ -83,7 +83,6 @@ namespace mod_tracker
         ng::push_button iPrevious;
         ng::push_button iNext;
         ng::push_button iLoop;
-        ng::horizontal_spacer iToolbarSpacer;
         ng::label iStatus;
         ng::horizontal_layout iViews;
         pattern_view iPatternView;

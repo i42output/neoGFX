@@ -50,7 +50,6 @@ namespace mod_tracker
         iPrevious{ iToolbar },
         iNext{ iToolbar },
         iLoop{ iToolbar },
-        iToolbarSpacer{ iToolbar },
         iStatus{ iToolbar },
         iViews{ iLayout },
         iPatternView{ iViews, iPlayer },
@@ -71,6 +70,15 @@ namespace mod_tracker
         iLayout.set_padding(ng::padding{ 4.0 });
         iLayout.set_spacing(ng::size{ 4.0 });
         iToolbar.set_spacing(ng::size{ 4.0 });
+        // the buttons keep their own size (they would otherwise expand); the status takes all the rest of the room,
+        // its text at the right, cut short with an ellipsis if it doesn't fit (so it never widens the window)
+        for (auto* button : { &iOpen, &iPlay, &iPause, &iStop, &iPrevious, &iNext, &iLoop })
+            button->set_size_policy(ng::size_constraint::Minimum);
+        iStatus.set_size_policy(ng::size_policy{ ng::size_constraint::Expanding, ng::size_constraint::Minimum });
+        iStatus.text_widget().set_type(ng::text_widget_type::SingleLine);
+        iStatus.text_widget().set_flags(ng::text_widget_flags::UseEllipsis);
+        iStatus.text_widget().set_size_policy(ng::size_policy{ ng::size_constraint::Expanding, ng::size_constraint::Minimum });
+        iStatus.text_widget().set_alignment(ng::alignment::Right | ng::alignment::VCenter);
         iViews.set_spacing(ng::size{ 2.0 });
         iSpectra.set_spacing(ng::size{ 2.0 });
 

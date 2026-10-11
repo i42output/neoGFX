@@ -289,8 +289,8 @@ namespace mod_tracker
         void set_row_handler(row_handler aHandler);
         replayer_state const& state() const;
         void restore(replayer_state const& aState);
-        // take the tempo and tick timing of another state, keeping everything else as it is
-        void restore_timing(replayer_state const& aState);
+        // take the tempo, tick timing and global volume of another state, keeping everything else as it is
+        void restore_loop_state(replayer_state const& aState);
         bool ended() const;
         void end();
         // frames rendered (or advanced over) by this engine since it was made
@@ -435,7 +435,7 @@ namespace mod_tracker
         std::vector<std::size_t> snapshotRows;      // the rows (indices into rows) that have snapshots, in order
         std::vector<replayer_state> snapshots;      // the engine as each of those rows is about to start
         std::optional<std::size_t> loopRow;         // the row the song jumps back to at its end, if it loops
-        std::optional<replayer_state> loopTiming;   // the engine as the loop row was about to start, the first time
+        std::optional<replayer_state> loopState;    // the engine as the loop row was about to start, the first time
 
         double duration_s() const
         {

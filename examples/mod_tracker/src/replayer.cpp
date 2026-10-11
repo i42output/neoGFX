@@ -179,11 +179,12 @@ namespace mod_tracker
         iState.channels.reserve(MAX_VOICES);
     }
 
-    void replayer::restore_timing(replayer_state const& aState)
+    void replayer::restore_loop_state(replayer_state const& aState)
     {
         iState.speed = aState.speed;
         iState.tempo = aState.tempo;
         iState.tickFraction = aState.tickFraction;
+        iState.globalVolume = aState.globalVolume;
     }
 
     bool replayer::ended() const

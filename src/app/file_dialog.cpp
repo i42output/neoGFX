@@ -22,6 +22,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <neolib/core/string_utils.hpp>
 #include <neogfx/app/modal_task.hpp>
+#include <neogfx/gui/window/i_native_window.hpp>
 #include "native/3rdparty/tinyfiledialogs.h"
 
 namespace neogfx
@@ -91,18 +92,58 @@ namespace neogfx
         return do_select_folder_dialog(aTitle, aDefaultPath);
     }
 
+#ifdef _WIN32
+    namespace
+    {
+        // On Windows the dialog is owned by the parent's window and is modal to it: it disables the window while it is
+        // open and enables it again before it closes, so that Windows activates the window afterwards. (modal_task
+        // would disable the window itself first, and with the window still disabled as the dialog closed Windows would
+        // activate some other application's window instead.) The dialog is shown on a thread of its own so that this
+        // one carries on processing events meanwhile.
+        template <typename T, typename Task, typename... TaskArgs>
+        T owned_dialog_task(i_widget& aParent, std::string const& aTaskName, Task aTask, TaskArgs const&... aTaskArgs)
+        {
+            auto& root = aParent.root();
+            void* const owner = root.has_native_window() ? root.native_window().native_handle() : nullptr;
+            auto result = std::async(std::launch::async, [&]()
+                {
+                    tinyfd_winOwner = owner;
+                    auto taskResult = aTask(aTaskArgs...);
+                    tinyfd_winOwner = nullptr;
+                    return taskResult;
+                });
+            event_processing_context epc{ aTaskName };
+            while (result.wait_for(std::chrono::seconds{ 0 }) != std::future_status::ready)
+                epc.process_events();
+            return result.get();
+        }
+    }
+#endif
+
     optional_file_path save_file_dialog(i_widget& aParent, file_dialog_spec const& aSpec)
     {
+#ifdef _WIN32
+        return owned_dialog_task<optional_file_path>(aParent, "neogfx::save_file_dialog", do_save_file_dialog, aSpec);
+#else
         return modal_task<optional_file_path>(aParent, "neogfx::save_file_dialog", do_save_file_dialog, aSpec);
+#endif
     }
 
     optional_file_paths open_file_dialog(i_widget& aParent, file_dialog_spec const& aSpec, bool aAllowMultipleSelection)
     {
+#ifdef _WIN32
+        return owned_dialog_task<optional_file_paths>(aParent, "neogfx::open_file_dialog", do_open_file_dialog, aSpec, aAllowMultipleSelection);
+#else
         return modal_task<optional_file_paths>(aParent, "neogfx::open_file_dialog", do_open_file_dialog, aSpec, aAllowMultipleSelection);
+#endif
     }
 
     optional_file_path select_folder_dialog(i_widget& aParent, std::optional<string> const& aTitle, optional_file_path const& aDefaultPath)
     {
+#ifdef _WIN32
+        return owned_dialog_task<optional_file_path>(aParent, "neogfx::select_folder_dialog", do_select_folder_dialog, aTitle, aDefaultPath);
+#else
         return modal_task<optional_file_path>(aParent, "neogfx::select_folder_dialog", do_select_folder_dialog, aTitle, aDefaultPath);
+#endif
     }
 }

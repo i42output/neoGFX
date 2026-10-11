@@ -524,6 +524,10 @@ namespace neogfx
                     break;
                 }
             }
+            // whole pixels vertically: a fractional height (math, scaled images) would put every line after it, and the
+            // caret, off the pixel grid, and a partial repaint (e.g. of the flashing caret) would leave a row behind
+            result.ascent = std::ceil(result.ascent);
+            result.descent = std::ceil(result.descent);
             return metrics.emplace(std::move(key), result).first->second;
         }
 
@@ -1487,8 +1491,8 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
 
         framed_scrollable_widget::paint(aGc);
-        rect clipRect = default_clip_rect().intersection(client_rect(false));
-        clipRect.inflate(size{ padding_adjust() });
+        // the padding is included: glyphs can draw beyond their cells (italic overhangs, text effects)
+        rect const clipRect = default_clip_rect().intersection(client_rect(true));
 
         if (iOutOfMemory)
         {
@@ -1511,8 +1515,15 @@ namespace neogfx
 
             auto const& glyphColumn = iGlyphColumns[columnIndex];
 
+            // a column clips its neighbours' glyphs but not the widget's padding: the first column extends into the left padding,
+            // every column to the right of the page (a paragraph's last segment spans the remaining columns) and into the
+            // padding there, and into the top and bottom padding
             auto columnExtent = column_rect(columnIndex, true);
-            columnExtent.cx = std::max(0.0, page_rect().right() - columnExtent.x);
+            if (columnIndex == 0)
+                columnExtent.x = clipRect.x;
+            columnExtent.cx = std::max(0.0, clipRect.right() - columnExtent.x);
+            columnExtent.y = clipRect.y;
+            columnExtent.cy = clipRect.cy;
             auto columnClipRect = clipRect.intersection(columnExtent);
             columnClipRect.inflate(size{ std::max(calc_padding_adjust(column_style(columnIndex)), padding_adjust()) });
             scoped_scissor scissor2{ aGc, columnClipRect };
@@ -1527,9 +1538,9 @@ namespace neogfx
             for (auto paintLine = line; paintLine != lines.end(); paintLine++)
             {
                 point linePos = columnRectSansPadding.top_left() + point{ -horizontal_scrollbar().position(), paintLine->ypos() - top};
-                if (linePos.y + paintLine->extents.cy < columnRectSansPadding.top() || linePos.y + paintLine->extents.cy < update_rect().top())
+                if (linePos.y + paintLine->extents.cy < clipRect.top() || linePos.y + paintLine->extents.cy < update_rect().top())
                     continue;
-                if (linePos.y > columnRectSansPadding.bottom() || linePos.y > update_rect().bottom())
+                if (linePos.y > clipRect.bottom() || linePos.y > update_rect().bottom())
                     break;
                 linePos.x += paintLine->xpos();
                 draw_glyphs(aGc, linePos, glyphColumn, paintLine);
@@ -3710,7 +3721,9 @@ namespace neogfx
             {
                 try
                 {
-                    character.set_font(family ? neogfx::font{ *family, fontStyle, size } : neogfx::font{ baseFont, fontStyle, size });
+                    // by family name, so that a style in another of the family's files (e.g. tahomabd.ttf) is found: font{ baseFont, ... }
+                    // only looks in the base font's own file and would emulate it (Tahoma Bold became an emulated bold italic)
+                    character.set_font(neogfx::font{ family ? *family : string{ baseFont.family_name() }, fontStyle, size });
                 }
                 catch (...)
                 {
@@ -3746,14 +3759,14 @@ namespace neogfx
             neogfx::padding const padding{
                 listLevels * indentStep + dpi_scale(aSpan.paddingLeft), vertical(aSpan.paddingTop),
                 dpi_scale(aSpan.paddingRight), vertical(aSpan.paddingBottom) };
-            if (margin != neogfx::margin{})
-                result.paragraph().set_margin(margin);
-            if (padding != neogfx::padding{})
-                result.paragraph().set_padding(padding);
+            // always set, even when zero: the markup's box model (CSS defaults or its own) replaces the default style's
+            // paragraph margin and padding, which would otherwise add to it
+            result.paragraph().set_margin(margin);
+            result.paragraph().set_padding(padding);
             return result;
         };
 
-        // one style per distinct span format; runs with no formatting use the default style
+        // one style per distinct span format (unformatted runs too, for their paragraph spacing: see to_style)
         std::vector<rich_text::span_format const*> spans;
         std::vector<style> styles;
         std::vector<style const*> runStyles;
@@ -3761,11 +3774,6 @@ namespace neogfx
         styles.reserve(document.runs.size());
         for (auto const& run : document.runs)
         {
-            if (run.format == rich_text::span_format{})
-            {
-                runStyles.push_back(&default_style());
-                continue;
-            }
             auto existing = std::find_if(spans.begin(), spans.end(), [&](auto const* aSpan) { return *aSpan == run.format; });
             if (existing == spans.end())
             {
