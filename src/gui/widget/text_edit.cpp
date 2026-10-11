@@ -42,6 +42,7 @@
 #include <neogfx/app/i_resource_manager.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gui/widget/timer.hpp>
+#include <neogfx/app/i_help.hpp>
 #include <neolib/io/http.hpp>
 #include "rich_text_parser.hpp"
 
@@ -70,6 +71,27 @@ namespace neogfx
         {
             static uuid const sTtid{ 0x2f6b9d14, 0x7a03, 0x4c58, 0xb1e2, { 0x0c, 0x95, 0x3e, 0x7d, 0x48, 0xa6 } };
             return sTtid;
+        }
+
+        // a link imported from rich text: its tag's data is the URI
+        uuid const& link_tag_ttid()
+        {
+            static uuid const sTtid{ 0x8d2a4b7e, 0x3c1f, 0x4e95, 0xa0d6, { 0x51, 0x2b, 0x9e, 0x07, 0xc4, 0x3a } };
+            return sTtid;
+        }
+
+        // a link that is opened externally (http, mailto, ...) rather than followed in place (an embedded resource, a file,
+        // a path or a fragment of this document)
+        bool is_external_link(std::string_view aUri)
+        {
+            if (aUri.empty() || aUri.starts_with("#") || aUri.starts_with(":/"))
+                return false;
+            auto const colon = aUri.find(':');
+            bool const hasScheme = colon != std::string_view::npos && colon > 1 && std::all_of(aUri.begin(), aUri.begin() + colon,
+                [](char c) { return std::isalnum(static_cast<unsigned char>(c)) || c == '+' || c == '-' || c == '.'; });
+            bool const file = colon == 4 && std::equal(aUri.begin(), aUri.begin() + 4, "file",
+                [](char lhs, char rhs) { return std::tolower(static_cast<unsigned char>(lhs)) == rhs; });
+            return hasScheme && !file;
         }
 
         bool is_web_uri(std::string_view aUri)
@@ -230,6 +252,22 @@ namespace neogfx
         std::map<std::string, image_entry> images;
         std::map<std::pair<object, font_id>, object_metrics> metrics;
         std::unique_ptr<widget_timer> loadTimer;
+        // FollowLinks: the document a followed link refers to, being loaded; and where the current one came from (if a link)
+        std::future<std::vector<std::uint8_t>> pendingDocument;
+        std::string pendingDocumentUri;
+        std::string documentUri;
+        // the external link under the mouse, whose full URL the status bar shows
+        struct link_help : i_help_source
+        {
+            string text;
+
+            bool help_active() const override { return true; }
+            neogfx::help_type help_type() const override { return neogfx::help_type::Action; }
+            i_string const& help_text() const override { return text; }
+        };
+        std::optional<std::string> hoveredLink;
+        link_help linkHelp;
+        bool linkHelpActive = false;
         // a formula being edited: expanded to its source text ($...$ or $$...$$) in [start, end)
         struct edit_state
         {
@@ -245,6 +283,10 @@ namespace neogfx
         explicit inline_objects(text_edit& aOwner) :
             owner{ aOwner }
         {
+        }
+        ~inline_objects()
+        {
+            hover_link(std::nullopt); // the help service must not keep a pointer to linkHelp
         }
 
         static object const* object_at(text_edit const& aOwner, position_type aTextIndex)
@@ -349,25 +391,121 @@ namespace neogfx
                 else
                     entry.state = image_entry::state_e::Failed;
             }
+            else if ((owner.iCaps & text_edit_caps::AllowExternalResources) != text_edit_caps::AllowExternalResources)
+                entry.state = image_entry::state_e::Failed; // shown as its alt text
             else if (is_web_uri(aUri))
                 fetch(entry, aUri);
             else
             {
-                // local files are read on another thread so the GUI thread never blocks on I/O
-                auto const path = file_path(aUri);
-                auto task = std::make_shared<std::packaged_task<std::vector<std::uint8_t>()>>([path]()
-                {
-                    std::vector<std::uint8_t> data;
-                    std::ifstream file{ std::filesystem::path{ std::u8string{ path.begin(), path.end() } }, std::ios::binary };
-                    if (file)
-                        data.assign(std::istreambuf_iterator<char>{ file }, std::istreambuf_iterator<char>{});
-                    return data;
-                });
-                entry.pending = task->get_future();
-                std::thread{ [task]() { (*task)(); } }.detach();
+                entry.pending = read_file(file_path(aUri));
                 start_polling();
             }
             return entry;
+        }
+
+        // files are read on another thread so the GUI thread never blocks on I/O
+        static std::future<std::vector<std::uint8_t>> read_file(std::string const& aPath)
+        {
+            auto task = std::make_shared<std::packaged_task<std::vector<std::uint8_t>()>>([aPath]()
+            {
+                std::vector<std::uint8_t> data;
+                std::ifstream file{ std::filesystem::path{ std::u8string{ aPath.begin(), aPath.end() } }, std::ios::binary };
+                if (file)
+                    data.assign(std::istreambuf_iterator<char>{ file }, std::istreambuf_iterator<char>{});
+                return data;
+            });
+            auto result = task->get_future();
+            std::thread{ [task]() { (*task)(); } }.detach();
+            return result;
+        }
+
+        // FollowLinks: a link to an embedded resource (":/...") or a file (relative ones against the current document, if
+        // that came from a link) replaces the content; anything else (http, mailto, ...) is opened externally. The content
+        // is replaced from poll(), not here: this runs in the link's own tag's event handler, and replacing the content
+        // destroys the tag.
+        void follow(std::string const& aUri)
+        {
+            if (aUri.empty() || aUri.starts_with("#"))
+                return; // within this document: nothing to load
+            auto const colon = aUri.find(':');
+            bool const hasScheme = colon != std::string::npos && colon > 1 && std::all_of(aUri.begin(), aUri.begin() + colon,
+                [](char c) { return std::isalnum(static_cast<unsigned char>(c)) || c == '+' || c == '-' || c == '.'; });
+            bool const resource = aUri.starts_with(":/");
+            if (is_external_link(aUri))
+            {
+                if (!service<i_basic_services>().open_uri(aUri))
+                    service<i_basic_services>().system_beep();
+                return;
+            }
+            std::string uri = aUri;
+            bool const absolute = resource || hasScheme || uri.starts_with("/") || uri.starts_with("\\") ||
+                (uri.size() > 2 && std::isalpha(static_cast<unsigned char>(uri[0])) && uri[1] == ':');
+            if (!absolute && !documentUri.empty())
+                uri = documentUri.substr(0, documentUri.find_last_of("/\\") + 1) + uri;
+            if (auto const fragment = uri.find('#'); fragment != std::string::npos)
+                uri.erase(fragment);
+            if (uri.starts_with(":/"))
+            {
+                // embedded: already in memory
+                std::promise<std::vector<std::uint8_t>> loaded;
+                std::vector<std::uint8_t> data;
+                try
+                {
+                    auto const embedded = service<i_resource_manager>().load_resource(uri);
+                    if (embedded && embedded->available() && !embedded->is_empty())
+                        data.assign(static_cast<std::uint8_t const*>(embedded->cdata()), static_cast<std::uint8_t const*>(embedded->cdata()) + embedded->size());
+                }
+                catch (...)
+                {
+                }
+                loaded.set_value(std::move(data));
+                pendingDocument = loaded.get_future();
+            }
+            else if ((owner.iCaps & text_edit_caps::AllowExternalResources) == text_edit_caps::AllowExternalResources)
+                pendingDocument = read_file(file_path(uri));
+            else
+            {
+                service<i_basic_services>().system_beep();
+                return;
+            }
+            pendingDocumentUri = uri;
+            start_polling();
+        }
+
+        // the external link under the mouse: its full URL is shown in the status bar, as help
+        void hover_link(std::optional<std::string> const& aUri)
+        {
+            if (aUri == hoveredLink)
+                return;
+            if (linkHelpActive)
+            {
+                linkHelpActive = false;
+                service<i_app>().help().deactivate(linkHelp);
+            }
+            hoveredLink = aUri;
+            if (hoveredLink)
+            {
+                linkHelp.text = string{ *hoveredLink };
+                service<i_app>().help().activate(linkHelp);
+                linkHelpActive = true;
+            }
+        }
+
+        // a followed link's document replaces the content: HTML and Markdown (by extension) as rich text if allowed
+        void show_document(std::string const& aUri, std::vector<std::uint8_t> const& aData)
+        {
+            auto extension = std::filesystem::path{ std::u8string{ aUri.begin(), aUri.end() } }.extension().string();
+            for (auto& ch : extension)
+                ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+            string const content{ std::string{ aData.begin(), aData.end() } };
+            bool const richText = (owner.iCaps & text_edit_caps::AllowRichText) == text_edit_caps::AllowRichText;
+            if (richText && (extension == ".html" || extension == ".htm" || extension == ".xhtml"))
+                owner.set_rich_text(content, rich_text_format::Html);
+            else if (richText && (extension == ".md" || extension == ".markdown"))
+                owner.set_rich_text(content, rich_text_format::Markdown);
+            else
+                owner.set_plain_text(content);
+            documentUri = aUri;
         }
 
         // web images are fetched by neolib::http on the app thread's I/O service: resolving, connecting, the TLS handshake
@@ -473,6 +611,26 @@ namespace neogfx
                 metrics.clear();
                 owner.refresh_paragraph(owner.iText.begin(), 0);
                 owner.update();
+            }
+            if (pendingDocument.valid())
+            {
+                if (pendingDocument.wait_for(std::chrono::seconds{ 0 }) != std::future_status::ready)
+                    stillLoading = true;
+                else
+                {
+                    std::vector<std::uint8_t> data;
+                    try
+                    {
+                        data = pendingDocument.get();
+                    }
+                    catch (...)
+                    {
+                    }
+                    if (data.empty())
+                        service<i_basic_services>().system_beep();
+                    else
+                        show_document(pendingDocumentUri, data);
+                }
             }
             if (stillLoading)
                 aTimer.again_if(); // already restarted if a redirect was followed above
@@ -1760,8 +1918,15 @@ namespace neogfx
             pastePlainText->Triggered([this]() { paste_plain_text(); });
             pasteRichText->Triggered([this]() { paste_rich_text(); });
             pasteMarkdown->Triggered([this]() { paste_rich_text(rich_text_format::Markdown); });
+            bool const richText = (iCaps & text_edit_caps::AllowRichText) == text_edit_caps::AllowRichText;
+            if (!richText)
+            {
+                pasteRichText->disable();
+                pasteMarkdown->disable();
+            }
             sink tempSink;
-            tempSink += service<i_app>().action_paste().enabled([&pastePlainText, &pasteRichText, &pasteMarkdown]() { pastePlainText->enable(); pasteRichText->enable(); pasteMarkdown->enable(); });
+            tempSink += service<i_app>().action_paste().enabled([&pastePlainText, &pasteRichText, &pasteMarkdown, richText]()
+                { pastePlainText->enable(); if (richText) { pasteRichText->enable(); pasteMarkdown->enable(); } });
             tempSink += service<i_app>().action_paste().disabled([&pastePlainText, &pasteRichText, &pasteMarkdown]() { pastePlainText->disable(); pasteRichText->disable(); pasteMarkdown->disable(); });
             if (!read_only())
             {
@@ -1809,6 +1974,20 @@ namespace neogfx
         neolib::service<neolib::i_power>().register_activity();
         if (iDragger != nullptr)
             set_cursor_position(aPosition, false);
+        // the full URL of an external link under the mouse, in the status bar
+        std::optional<std::string> link;
+        if (iDragger == nullptr && client_rect(false).contains(aPosition))
+        {
+            auto const docPos = document_hit_test_ex(aPosition);
+            if (docPos.second && docPos.first < static_cast<position_type>(iText.size()) && iText[docPos.first].tag != neolib::invalid_cookie<tag_cookie>)
+                if (auto const existing = iTagMap.find(iText[docPos.first].tag); existing != iTagMap.end() && (**existing).ttid() == link_tag_ttid())
+                    if (auto const& uri = *static_cast<std::string const*>((**existing).data()); is_external_link(uri))
+                        link = uri;
+        }
+        if (link && !iInlineObjects)
+            iInlineObjects = std::make_unique<inline_objects>(*this);
+        if (iInlineObjects)
+            iInlineObjects->hover_link(link);
     }
 
     void text_edit::mouse_entered(const point& aPosition)
@@ -1818,6 +1997,8 @@ namespace neogfx
 
     void text_edit::mouse_left()
     {
+        if (iInlineObjects)
+            iInlineObjects->hover_link(std::nullopt);
         framed_scrollable_widget::mouse_left();
     }
 
@@ -3020,7 +3201,10 @@ namespace neogfx
     void text_edit::clear()
     {
         if (iInlineObjects)
+        {
             iInlineObjects->editing.reset();
+            iInlineObjects->hover_link(std::nullopt);
+        }
         cursor().set_position(0);
         iPreviousText = iText;
         iText.clear();
@@ -3791,11 +3975,10 @@ namespace neogfx
         };
 
         // links are tags created on first use (after any clear), each opening its URI when clicked
-        static uuid const sLinkTagTtid{ 0x8d2a4b7e, 0x3c1f, 0x4e95, 0xa0d6, { 0x51, 0x2b, 0x9e, 0x07, 0xc4, 0x3a } };
         std::vector<tag_ptr> runTags(document.runs.size());
         auto link_tag = [&](std::string const& aUri)
         {
-            auto const [tagPtr, created] = create_tag(sLinkTagTtid, aUri);
+            auto const [tagPtr, created] = create_tag(link_tag_ttid(), aUri);
             if (created)
             {
                 auto& linkTag = *tagPtr;
@@ -3803,16 +3986,26 @@ namespace neogfx
                 {
                     if (aEvent.type() != mouse_event_type::ButtonReleased || !aEvent.is_left_button())
                         return;
+                    // a click (Ctrl+click when editable), not the end of a selection
                     if (!read_only() && (aEvent.key_modifiers() & key_modifier::CTRL) == key_modifier::None)
+                        return;
+                    if (cursor().position() != cursor().anchor())
                         return;
                     linkTag.mouse_event().accept();
                     std::string const uri{ *static_cast<std::string const*>(linkTag.data()) };
-                    if (UriClicked.trigger(string{ uri }) != trigger_result::Accepted && !service<i_basic_services>().open_uri(uri))
-                        service<i_basic_services>().system_beep();
+                    if (UriClicked.trigger(string{ uri }) == trigger_result::Accepted)
+                        return;
+                    if ((iCaps & text_edit_caps::FollowLinks) == text_edit_caps::FollowLinks)
+                    {
+                        if (!iInlineObjects)
+                            iInlineObjects = std::make_unique<inline_objects>(*this);
+                        iInlineObjects->follow(uri);
+                    }
                 });
                 linkTag.query_mouse_cursor()([this](neogfx::mouse_cursor& aCursor)
                 {
-                    aCursor = (read_only() || (service<i_keyboard>().modifiers() & key_modifier::CTRL) != key_modifier::None) ?
+                    aCursor = ((iCaps & text_edit_caps::FollowLinks) == text_edit_caps::FollowLinks || UriClicked.has_slots()) &&
+                        (read_only() || (service<i_keyboard>().modifiers() & key_modifier::CTRL) != key_modifier::None) ?
                         mouse_system_cursor::Hand : mouse_system_cursor::IBeam;
                 });
             }

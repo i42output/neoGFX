@@ -129,7 +129,8 @@ namespace neogfx
                 neolib::tokens(aTextValue, std::string("()"), bits, 3, false);
                 try
                 {
-                    if ((bits.size() == 3 && bits[2] == ";") || bits.size() == 2)
+                    // "rgb(...)" tokenizes to { "rgb", "...", "" } (the empty token after ')'), "rgb(...);" to { ..., ";" }
+                    if ((bits.size() == 3 && (bits[2].empty() || bits[2] == ";")) || bits.size() == 2)
                     {
                         if (bits[0] == "rgb")
                         {

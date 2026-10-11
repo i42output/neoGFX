@@ -44,6 +44,10 @@ namespace neogfx
 
         OnlyAccept              = 0x00010000,
 
+        AllowExternalResources  = 0x00100000, // rich text may load images from the filesystem and the web (http/https)
+        FollowLinks             = 0x00200000, // a clicked link (Ctrl+click when editable) to an embedded resource or file replaces the content; others open externally
+        AllowRichText           = 0x00400000, // rich text may be pasted (Paste As) and links followed to HTML/Markdown are shown as such
+
         LINES_MASK              = SingleLine | MultiLine
     };
 
@@ -83,6 +87,9 @@ declare_enum_string(neogfx::text_edit_caps, Password)
 declare_enum_string(neogfx::text_edit_caps, ShowPassword)
 declare_enum_string(neogfx::text_edit_caps, ParseURIs)
 declare_enum_string(neogfx::text_edit_caps, OnlyAccept)
+declare_enum_string(neogfx::text_edit_caps, AllowExternalResources)
+declare_enum_string(neogfx::text_edit_caps, FollowLinks)
+declare_enum_string(neogfx::text_edit_caps, AllowRichText)
 end_declare_enum(neogfx::text_edit_caps)
 
 namespace neogfx
