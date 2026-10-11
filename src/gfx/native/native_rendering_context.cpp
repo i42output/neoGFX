@@ -2975,6 +2975,22 @@ namespace neogfx
                                 pen{ ink, cyUnderline, false });
                         }
                     }
+
+                    if (strike(glyphChar))
+                    {
+                        auto const& ink = !filtered_content_ink_is_effect_color(drawOp.appearance->being_filtered()) ?
+                            drawOp.appearance->ink() : drawOp.appearance->being_filtered()->color();
+
+                        auto const& glyphFont = glyphText.glyph_font(glyphChar);
+                        auto const& majorFont = glyphText.major_font();
+                        auto const yStrike = std::round(static_cast<float>(glyphFont.ascender()) * 0.3f);
+                        auto const cyStrike = std::max(1.0f, std::round(static_cast<float>(majorFont.native_font_face().underline_thickness())));
+
+                        draw_line(
+                            pos + vec3f{ glyphChar.cell[0].x, glyphChar.cell[0].y + baseline - yStrike },
+                            pos + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yStrike },
+                            pen{ ink, cyStrike, false });
+                    }
                 }
             }
             break;

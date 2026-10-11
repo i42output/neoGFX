@@ -35,8 +35,20 @@ namespace neogfx
         register_faces();
     }
 
+    native_font::native_font(FT_Library aFontLib, const std::string aFileName, std::string const& aFamilyName) :
+        iFontLib(aFontLib), iSource(filename_type(aFileName)), iCache{}, iFamilyName{ aFamilyName }, iFaceCount(0)
+    {
+        register_faces();
+    }
+
     native_font::native_font(FT_Library aFontLib, const void* aData, std::size_t aSizeInBytes) :
         iFontLib(aFontLib), iSource(memory_block_type(aData, aSizeInBytes)), iCache{}, iFaceCount(0)
+    {
+        register_faces();
+    }
+
+    native_font::native_font(FT_Library aFontLib, const void* aData, std::size_t aSizeInBytes, std::string const& aFamilyName) :
+        iFontLib(aFontLib), iSource(memory_block_type(aData, aSizeInBytes)), iCache{}, iFamilyName{ aFamilyName }, iFaceCount(0)
     {
         register_faces();
     }
@@ -50,6 +62,11 @@ namespace neogfx
     i_string const& native_font::family_name() const
     {
         return iFamilyName;
+    }
+
+    std::vector<std::string> const& native_font::other_families() const
+    {
+        return iOtherFamilies;
     }
 
     bool native_font::has_style(font_style aStyle) const
@@ -116,7 +133,7 @@ namespace neogfx
             matches.insert(std::make_pair(matching_bits(static_cast<std::uint32_t>(s.first.first), static_cast<std::uint32_t>(aStyle)), &s));
         if (matches.empty())
             throw no_matching_style_found();
-        font_style const faceStyle = (matches.rbegin()->second->first.first | (aStyle & (font_style::Superscript | font_style::Subscript | font_style::BelowAscenderLine | font_style::AboveBaseline | font_style::Emulated)));
+        font_style const faceStyle = (matches.rbegin()->second->first.first | (aStyle & (font_style::Superscript | font_style::Subscript | font_style::BelowAscenderLine | font_style::AboveBaseline | font_style::Strike | font_style::Emulated)));
         FT_Long const faceIndex = matches.rbegin()->second->second;
         aResult = create_face(faceIndex, faceStyle, aSize, aOutline, aHinting, aDevice);
     }
@@ -135,7 +152,7 @@ namespace neogfx
             create_face(aStyle, aSize, aOutline, aHinting, aDevice, aResult);
             return;
         }
-        font_style const faceStyle = foundStyle->first.first | (aStyle & (font_style::Superscript | font_style::Subscript | font_style::BelowAscenderLine | font_style::AboveBaseline));
+        font_style const faceStyle = foundStyle->first.first | (aStyle & (font_style::Superscript | font_style::Subscript | font_style::BelowAscenderLine | font_style::AboveBaseline | font_style::Strike));
         if ((aStyle & font_style::BoldItalic) != font_style::Invalid && (aStyle & font_style::BoldItalic) != (faceStyle & font_style::BoldItalic))
         {
             create_face(aStyle, aSize, aOutline, aHinting, aDevice, aResult);
@@ -191,7 +208,17 @@ namespace neogfx
             if (aFaceIndex == 0)
             {
                 iFaceCount = face.first->num_faces;
-                iFamilyName = face.first->family_name;
+                if (iFamilyName.empty())
+                    iFamilyName = face.first->family_name;
+            }
+            if (face.first->family_name != nullptr && iFamilyName.to_std_string_view() != std::string_view{ face.first->family_name })
+            {
+                // a collection whose faces belong to more than one family (e.g. Cambria and Cambria Math): the
+                // font manager registers the other families separately
+                if (std::find(iOtherFamilies.begin(), iOtherFamilies.end(), face.first->family_name) == iOtherFamilies.end())
+                    iOtherFamilies.push_back(face.first->family_name);
+                close_face(face.first);
+                return;
             }
             font_style style = font_style::Invalid;
             if (face.first->style_flags & FT_STYLE_FLAG_ITALIC)

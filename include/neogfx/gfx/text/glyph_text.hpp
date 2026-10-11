@@ -89,6 +89,7 @@ namespace neogfx
             Subscript           = 0x04,
             BelowAscenderLine   = 0x08,
             AboveBaseline       = 0x08,
+            Strike              = 0x10,
             Mnemonic            = 0x40,
             Subpixel            = 0x80,
         };
@@ -196,6 +197,16 @@ namespace neogfx
     inline void set_underline(glyph_char& g, bool aUnderline)
     { 
         g.flags = static_cast<glyph_char::flags_e>(aUnderline ? g.flags | glyph_char::Underline : g.flags & ~glyph_char::Underline);
+    }
+    
+    inline bool strike(glyph_char const& g)
+    { 
+        return (g.flags & glyph_char::Strike) == glyph_char::Strike;
+    }
+    
+    inline void set_strike(glyph_char& g, bool aStrike)
+    { 
+        g.flags = static_cast<glyph_char::flags_e>(aStrike ? g.flags | glyph_char::Strike : g.flags & ~glyph_char::Strike);
     }
     
     inline bool superscript(glyph_char const& g)

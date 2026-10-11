@@ -19,6 +19,10 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <filesystem>
+#include <fstream>
+#include <future>
+#include <thread>
 #include <boost/algorithm/string/find.hpp>
 
 #include <neolib/core/scoped.hpp>
@@ -35,10 +39,642 @@
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/core/easing.hpp>
+#include <neogfx/app/i_resource_manager.hpp>
+#include <neogfx/gfx/image.hpp>
+#include <neogfx/gui/widget/timer.hpp>
+#include <neolib/io/http.hpp>
+#include "rich_text_parser.hpp"
 
 namespace neogfx
 {
     template class basic_glyph_text_content<text_edit::glyph_container_type>;
+
+    namespace
+    {
+        constexpr char32_t ObjectReplacementCharacter = 0xFFFC;
+
+        // an inline object's glyph (see text_edit::inline_objects::lay_out)
+        bool is_inline_object(glyph_char const& aGlyph)
+        {
+            return is_whitespace(aGlyph) && aGlyph.value == ObjectReplacementCharacter;
+        }
+
+        uuid const& inline_object_ttid()
+        {
+            static uuid const sTtid{ 0x5c1e7a3b, 0x0d64, 0x4f2a, 0x9e18, { 0x73, 0x4b, 0xa2, 0x0f, 0xc6, 0x91 } };
+            return sTtid;
+        }
+
+        // the marker (bullet, number or task box) that starts a list item; it hangs into the paragraph's left padding
+        uuid const& list_marker_ttid()
+        {
+            static uuid const sTtid{ 0x2f6b9d14, 0x7a03, 0x4c58, 0xb1e2, { 0x0c, 0x95, 0x3e, 0x7d, 0x48, 0xa6 } };
+            return sTtid;
+        }
+
+        bool is_web_uri(std::string_view aUri)
+        {
+            auto starts_with = [&](std::string_view aScheme)
+            {
+                return aUri.size() >= aScheme.size() && std::equal(aScheme.begin(), aScheme.end(), aUri.begin(),
+                    [](char lhs, char rhs) { return lhs == std::tolower(static_cast<unsigned char>(rhs)); });
+            };
+            return starts_with("http://") || starts_with("https://");
+        }
+
+        // a redirect's Location relative to the URL that was requested
+        std::string resolve_url(std::string const& aBase, std::string const& aLocation)
+        {
+            if (is_web_uri(aLocation))
+                return aLocation;
+            auto const scheme = aBase.find("://");
+            if (scheme == std::string::npos)
+                return aLocation;
+            if (aLocation.starts_with("//"))
+                return aBase.substr(0, scheme + 1) + aLocation;
+            auto const path = aBase.find('/', scheme + 3);
+            if (path == std::string::npos)
+                return aBase + (aLocation.starts_with("/") ? "" : "/") + aLocation;
+            if (aLocation.starts_with("/"))
+                return aBase.substr(0, path) + aLocation;
+            return aBase.substr(0, aBase.rfind('/') + 1) + aLocation;
+        }
+
+        // the first installed font with an OpenType MATH table
+        std::optional<string> const& math_font_family()
+        {
+            static std::optional<string> const sFamily = []() -> std::optional<string>
+            {
+                auto const& fontManager = service<i_font_manager>();
+                for (auto const candidate : { "Cambria Math", "STIX Two Math", "Latin Modern Math", "XITS Math", "Libertinus Math",
+                    "TeX Gyre Termes Math", "TeX Gyre Pagella Math", "Asana Math", "Fira Math", "Garamond-Math", "New Computer Modern Math",
+                    "Noto Sans Math", "DejaVu Math TeX Gyre" })
+                    for (std::uint32_t familyIndex = 0; familyIndex < fontManager.font_family_count(); ++familyIndex)
+                        if (fontManager.font_family(familyIndex).to_std_string_view() == candidate)
+                            return string{ candidate };
+                return {};
+            }();
+            return sFamily;
+        }
+
+        std::optional<std::vector<std::uint8_t>> decode_data_uri(std::string_view aUri)
+        {
+            // data:[<media type>][;base64],<data>
+            auto const comma = aUri.find(',');
+            if (comma == std::string_view::npos)
+                return {};
+            auto const header = aUri.substr(0, comma);
+            auto const payload = aUri.substr(comma + 1);
+            std::vector<std::uint8_t> result;
+            if (header.find(";base64") == std::string_view::npos)
+            {
+                for (std::size_t i = 0; i < payload.size(); ++i)
+                    if (payload[i] == '%' && i + 2 < payload.size() &&
+                        std::isxdigit(static_cast<unsigned char>(payload[i + 1])) && std::isxdigit(static_cast<unsigned char>(payload[i + 2])))
+                    {
+                        result.push_back(static_cast<std::uint8_t>(std::stoi(std::string{ payload.substr(i + 1, 2) }, nullptr, 16)));
+                        i += 2;
+                    }
+                    else
+                        result.push_back(static_cast<std::uint8_t>(payload[i]));
+                return result;
+            }
+            std::uint32_t buffer = 0;
+            int bits = 0;
+            for (char const c : payload)
+            {
+                int value = -1;
+                if (c >= 'A' && c <= 'Z') value = c - 'A';
+                else if (c >= 'a' && c <= 'z') value = c - 'a' + 26;
+                else if (c >= '0' && c <= '9') value = c - '0' + 52;
+                else if (c == '+' || c == '-') value = 62;
+                else if (c == '/' || c == '_') value = 63;
+                else if (c == '=')
+                    break;
+                else
+                    continue; // whitespace
+                buffer = (buffer << 6) | static_cast<std::uint32_t>(value);
+                bits += 6;
+                if (bits >= 8)
+                {
+                    bits -= 8;
+                    result.push_back(static_cast<std::uint8_t>((buffer >> bits) & 0xFF));
+                }
+            }
+            return result;
+        }
+
+        std::string file_path(std::string_view aUri)
+        {
+            // file:///C:/x.png -> C:/x.png, file:///home/x.png -> /home/x.png, with %xx decoded
+            std::string_view path = aUri;
+            if (path.size() >= 5 && (path.substr(0, 5) == "file:" || path.substr(0, 5) == "FILE:"))
+            {
+                path.remove_prefix(5);
+                if (path.starts_with("///"))
+                    path.remove_prefix(2); // otherwise //server/share (UNC) is kept as is
+                if (path.size() > 2 && path[0] == '/' && std::isalpha(static_cast<unsigned char>(path[1])) && path[2] == ':')
+                    path.remove_prefix(1);
+            }
+            std::string result;
+            for (std::size_t i = 0; i < path.size(); ++i)
+                if (path[i] == '%' && i + 2 < path.size() && std::isxdigit(static_cast<unsigned char>(path[i + 1])) && std::isxdigit(static_cast<unsigned char>(path[i + 2])))
+                {
+                    result += static_cast<char>(std::stoi(std::string{ path.substr(i + 1, 2) }, nullptr, 16));
+                    i += 2;
+                }
+                else
+                    result += path[i];
+            return result;
+        }
+    }
+
+    // Math and images imported from rich text: each is one U+FFFC character with a tag whose data is the object. The
+    // character's glyph is given the object's size when paragraphs are shaped, and the object is painted over it.
+    struct text_edit::inline_objects
+    {
+        using object = rich_text::inline_object;
+
+        struct object_metrics
+        {
+            dimension width = 0.0;
+            dimension ascent = 0.0;
+            dimension descent = 0.0;
+        };
+
+        struct math_entry
+        {
+            std::vector<std::pair<float, neogfx::font>> fonts; // by scale; the first is the math font at the text size
+            math_formula formula;
+            std::optional<glyph_text> glyphs; // built on first paint
+            bool subpixel = false;
+        };
+
+        struct image_entry
+        {
+            enum class state_e
+            {
+                Loading,
+                Loaded,
+                Failed
+            } state = state_e::Loading;
+            std::optional<texture> image;
+            std::future<std::vector<std::uint8_t>> pending;
+            std::string redirect; // where a web server redirected the request
+            std::uint32_t redirects = 0;
+            std::unique_ptr<neolib::http> web; // last, so it goes (with its event handlers) before the members they use
+        };
+
+        text_edit& owner;
+        std::map<std::pair<object, font_id>, math_entry> maths;
+        std::map<std::string, image_entry> images;
+        std::map<std::pair<object, font_id>, object_metrics> metrics;
+        std::unique_ptr<widget_timer> loadTimer;
+        // a formula being edited: expanded to its source text ($...$ or $$...$$) in [start, end)
+        struct edit_state
+        {
+            position_type start;
+            position_type end;
+            object original;
+            style originalStyle;
+        };
+        std::optional<edit_state> editing;
+        dimension clampWidth = 0.0;
+        dimension widestImage = 0.0; // the widest any image asked to be, before clamping
+
+        explicit inline_objects(text_edit& aOwner) :
+            owner{ aOwner }
+        {
+        }
+
+        static object const* object_at(text_edit const& aOwner, position_type aTextIndex)
+        {
+            if (aTextIndex < 0 || aTextIndex >= static_cast<position_type>(aOwner.iText.size()))
+                return nullptr;
+            auto const& ch = aOwner.iText[aTextIndex];
+            if (ch.character != ObjectReplacementCharacter || ch.tag == neolib::invalid_cookie<tag_cookie>)
+                return nullptr;
+            auto const existing = aOwner.iTagMap.find(ch.tag);
+            if (existing == aOwner.iTagMap.end())
+                return nullptr;
+            auto const& tag = **existing;
+            if (tag.ttid() != inline_object_ttid() || !tag.has_data())
+                return nullptr;
+            return static_cast<object const*>(tag.data());
+        }
+
+        math_entry& math_for(object const& aObject, neogfx::font const& aFont)
+        {
+            auto key = std::make_pair(aObject, aFont.id());
+            auto existing = maths.find(key);
+            if (existing != maths.end())
+                return existing->second;
+            math_entry entry;
+            neogfx::font mathFont = aFont;
+            if (math_font_family())
+            {
+                try
+                {
+                    mathFont = neogfx::font{ *math_font_family(), font_style::Normal, aFont.size() };
+                }
+                catch (...)
+                {
+                }
+            }
+            entry.fonts.emplace_back(1.0f, mathFont);
+            entry.formula = service<i_font_manager>().typeset_math(mathFont, aObject.source, aObject.display);
+            return maths.emplace(std::move(key), std::move(entry)).first->second;
+        }
+
+        static glyph_text const& math_glyphs(math_entry& aEntry, i_graphics_context const& aGc)
+        {
+            bool const subpixel = aGc.is_subpixel_rendering_on();
+            if (aEntry.glyphs && aEntry.subpixel == subpixel)
+                return *aEntry.glyphs;
+            auto const baseFont = aEntry.fonts[0].second; // a copy: font_for() grows aEntry.fonts
+            aEntry.glyphs.emplace(baseFont);
+            aEntry.subpixel = subpixel;
+            auto font_for = [&](float aScale) -> neogfx::font const&
+            {
+                for (auto const& f : aEntry.fonts)
+                    if (std::abs(f.first - aScale) < 0.001f)
+                        return f.second;
+                aEntry.fonts.emplace_back(aScale, neogfx::font{ baseFont, font_style::Normal, baseFont.size() * aScale });
+                return aEntry.fonts.back().second;
+            };
+            for (auto const& item : aEntry.formula.glyphs)
+            {
+                auto const& f = font_for(item.scale);
+                glyph_char g{ item.glyph, { 0u, 1u }, character_type{ text_category::LTR, text_direction::LTR }, glyph_char::flags_e{}, f.id(), quadf_2d{}, quadf_2d{} };
+                if (subpixel && !f.is_bitmap_font())
+                    set_subpixel(g, true);
+                // as the glyph text factory does: the cell's top is the baseline less the font's ascent
+                auto const& fontGlyph = f.glyph(g);
+                auto const glyphExtents = fontGlyph.texture().extents().as<float>();
+                auto const& glyphMetrics = fontGlyph.metrics();
+                auto const cellHeight = static_cast<float>(f.height());
+                vec2f const origin{ item.x, item.y - (cellHeight + static_cast<float>(f.descender())) };
+                g.cell = quadf_2d{
+                    origin,
+                    origin + vec2f{ glyphExtents.cx, 0.0f },
+                    origin + vec2f{ glyphExtents.cx, cellHeight },
+                    origin + vec2f{ 0.0f, cellHeight } };
+                g.shape = quadf_2d{
+                    vec2f{ 0.0f, 0.0f },
+                    vec2f{ glyphExtents.cx, 0.0f },
+                    vec2f{ glyphExtents.cx, glyphExtents.cy },
+                    vec2f{ 0.0f, glyphExtents.cy } };
+                g.shape += vec2{ glyphMetrics.bearing.x, glyphMetrics.bearing.y - glyphMetrics.extents.y + -f.descender() }.as<float>();
+                if (aGc.logical_coordinate_system() == logical_coordinate_system::AutomaticGui)
+                    for (auto& v : g.shape)
+                        v.y = -v.y + cellHeight;
+                aEntry.glyphs->content().push_back(g);
+            }
+            return *aEntry.glyphs;
+        }
+
+        image_entry& image_for(std::string const& aUri)
+        {
+            auto existing = images.find(aUri);
+            if (existing != images.end())
+                return existing->second;
+            auto& entry = images[aUri];
+            if (aUri.starts_with(":/"))
+                finish(entry, aUri, {});
+            else if (aUri.size() > 5 && (aUri.substr(0, 5) == "data:" || aUri.substr(0, 5) == "DATA:"))
+            {
+                auto const data = decode_data_uri(aUri);
+                if (data && !data->empty())
+                    finish(entry, "neogfx-text-edit-image:" + std::to_string(std::hash<std::string>{}(aUri)), *data);
+                else
+                    entry.state = image_entry::state_e::Failed;
+            }
+            else if (is_web_uri(aUri))
+                fetch(entry, aUri);
+            else
+            {
+                // local files are read on another thread so the GUI thread never blocks on I/O
+                auto const path = file_path(aUri);
+                auto task = std::make_shared<std::packaged_task<std::vector<std::uint8_t>()>>([path]()
+                {
+                    std::vector<std::uint8_t> data;
+                    std::ifstream file{ std::filesystem::path{ std::u8string{ path.begin(), path.end() } }, std::ios::binary };
+                    if (file)
+                        data.assign(std::istreambuf_iterator<char>{ file }, std::istreambuf_iterator<char>{});
+                    return data;
+                });
+                entry.pending = task->get_future();
+                std::thread{ [task]() { (*task)(); } }.detach();
+                start_polling();
+            }
+            return entry;
+        }
+
+        // web images are fetched by neolib::http on the app thread's I/O service: resolving, connecting, the TLS handshake
+        // and the transfer are all asynchronous, so the GUI thread never waits on the network
+        void fetch(image_entry& aEntry, std::string const& aUrl)
+        {
+            auto const result = std::make_shared<std::promise<std::vector<std::uint8_t>>>();
+            auto const settled = std::make_shared<bool>(false);
+            auto settle = [result, settled](std::vector<std::uint8_t> aData)
+            {
+                if (!*settled) // a failed transfer can report more than once
+                {
+                    *settled = true;
+                    result->set_value(std::move(aData));
+                }
+            };
+            aEntry.pending = result->get_future();
+            aEntry.redirect.clear();
+            aEntry.web = std::make_unique<neolib::http>(static_cast<neolib::async_task&>(service<i_async_task>()));
+            auto& web = *aEntry.web;
+            web.Completed([&web, settle]()
+            {
+                settle({ web.body().begin(), web.body().end() });
+            });
+            web.Failure([&web, &aEntry, aUrl, settle]()
+            {
+                if (web.status_code() / 100 == 3)
+                    if (auto const location = web.response_headers().find("Location"); location != web.response_headers().end())
+                        aEntry.redirect = resolve_url(aUrl, location->second);
+                settle({});
+            });
+            web.request(aUrl, neolib::http::Get, { { "User-Agent", "neoGFX" }, { "Accept", "image/*" } });
+            start_polling();
+        }
+
+        void start_polling()
+        {
+            if (!loadTimer)
+                loadTimer = std::make_unique<widget_timer>(owner, [this](widget_timer& aTimer) { poll(aTimer); }, std::chrono::milliseconds{ 50 });
+            else
+                loadTimer->again_if(); // may be called from poll() (a redirect), which then also restarts the timer
+        }
+
+        void finish(image_entry& aEntry, std::string const& aResource, std::vector<std::uint8_t> const& aData)
+        {
+            try
+            {
+                if (!aData.empty())
+                    service<i_resource_manager>().add_resource(aResource, aData.data(), aData.size());
+                image const loaded{ string{ aResource } };
+                if (loaded.error() || loaded.extents().cx <= 0.0 || loaded.extents().cy <= 0.0)
+                    aEntry.state = image_entry::state_e::Failed;
+                else
+                {
+                    aEntry.image.emplace(loaded);
+                    aEntry.state = image_entry::state_e::Loaded;
+                }
+            }
+            catch (...)
+            {
+                aEntry.state = image_entry::state_e::Failed;
+            }
+        }
+
+        void poll(widget_timer& aTimer)
+        {
+            bool stillLoading = false;
+            bool changed = false;
+            for (auto& [uri, entry] : images)
+            {
+                if (entry.state != image_entry::state_e::Loading || !entry.pending.valid())
+                    continue;
+                if (entry.pending.wait_for(std::chrono::seconds{ 0 }) != std::future_status::ready)
+                {
+                    stillLoading = true;
+                    continue;
+                }
+                std::vector<std::uint8_t> data;
+                try
+                {
+                    data = entry.pending.get();
+                }
+                catch (...)
+                {
+                }
+                if (data.empty() && !entry.redirect.empty() && entry.redirects < 5)
+                {
+                    // follow it; the previous request is finished with, so it can go now (not from within its own event)
+                    ++entry.redirects;
+                    fetch(entry, std::string{ entry.redirect });
+                    stillLoading = true;
+                    continue;
+                }
+                entry.web.reset();
+                if (data.empty())
+                    entry.state = image_entry::state_e::Failed;
+                else
+                    finish(entry, "neogfx-text-edit-image:" + uri, data);
+                changed = true;
+            }
+            if (changed)
+            {
+                metrics.clear();
+                owner.refresh_paragraph(owner.iText.begin(), 0);
+                owner.update();
+            }
+            if (stillLoading)
+                aTimer.again_if(); // already restarted if a redirect was followed above
+        }
+
+        object_metrics const& measure(i_graphics_context const& aGc, object const& aObject, neogfx::font const& aFont)
+        {
+            auto key = std::make_pair(aObject, aFont.id());
+            if (auto const existing = metrics.find(key); existing != metrics.end())
+                return existing->second;
+            object_metrics result;
+            if (aObject.kind == object::kind_e::Math)
+            {
+                auto const& entry = math_for(aObject, aFont);
+                result = { entry.formula.metrics.width, entry.formula.metrics.ascent, entry.formula.metrics.descent };
+            }
+            else if (aObject.kind == object::kind_e::Rule)
+                result = { 0.0, aFont.ascender(), -aFont.descender() }; // a line of text's height; drawn across the paragraph
+            else
+            {
+                auto const& entry = image_for(aObject.source);
+                switch (entry.state)
+                {
+                case image_entry::state_e::Loaded:
+                    {
+                        auto extents = entry.image->extents();
+                        if (aObject.width && aObject.height)
+                            extents = size{ *aObject.width, *aObject.height };
+                        else if (aObject.width)
+                            extents = size{ *aObject.width, extents.cy * *aObject.width / extents.cx };
+                        else if (aObject.height)
+                            extents = size{ extents.cx * *aObject.height / extents.cy, *aObject.height };
+                        auto const maxWidth = owner.column_rect(0).width();
+                        clampWidth = maxWidth;
+                        widestImage = std::max(widestImage, extents.cx);
+                        if (maxWidth > 0.0 && extents.cx > maxWidth)
+                            extents = size{ maxWidth, extents.cy * maxWidth / extents.cx };
+                        result = { extents.cx, extents.cy, 0.0 };
+                    }
+                    break;
+                case image_entry::state_e::Loading:
+                    result = { aFont.height(), aFont.ascender(), 0.0 };
+                    break;
+                case image_entry::state_e::Failed:
+                    {
+                        auto const extents = aGc.text_extent(string{ aObject.alt.empty() ? "[image]" : aObject.alt }, aFont);
+                        result = { extents.cx, aFont.ascender(), -aFont.descender() };
+                    }
+                    break;
+                }
+            }
+            return metrics.emplace(std::move(key), result).first->second;
+        }
+
+        // images are no wider than the column: re-measure when a resize changes that for a loaded image
+        bool column_width_changed(dimension aWidth) const
+        {
+            if (aWidth == clampWidth || widestImage <= 0.0)
+                return false;
+            auto const narrower = std::min(aWidth, clampWidth);
+            return narrower <= 0.0 || widestImage > narrower;
+        }
+
+        object_metrics const* cached_metrics(object const& aObject, neogfx::font const& aFont) const
+        {
+            auto const existing = metrics.find(std::make_pair(aObject, aFont.id()));
+            return existing != metrics.end() ? &existing->second : nullptr;
+        }
+
+        // give each object's glyph in a newly shaped paragraph the object's size
+        static void lay_out(text_edit& aOwner, i_graphics_context const& aGc, document_text::const_iterator aParagraph, glyph_text& aGlyphs,
+            std::function<neogfx::font(std::u32string::size_type)> const& aFontSelector)
+        {
+            if (!aOwner.iInlineObjects)
+                return;
+            auto const paragraphStart = std::distance(aOwner.iText.cbegin(), aParagraph);
+            float shift = 0.0f;
+            for (auto& g : aGlyphs.content())
+            {
+                if (shift != 0.0f)
+                {
+                    if (is_whitespace(g) && g.value == U'\t' && aGc.has_tab_stops() && aGc.tab_stops().default_stop().pos > 0.0)
+                    {
+                        // a tab after an object still ends on a tab stop; what follows it moves by the change in its end
+                        auto const tabStop = static_cast<float>(aGc.tab_stops().default_stop().pos);
+                        auto const x = g.cell[0].x + shift;
+                        auto const width = tabStop - std::fmod(x, tabStop);
+                        auto const oldEnd = g.cell[1].x;
+                        auto const height = g.cell[3].y - g.cell[0].y;
+                        auto const top = g.cell[0].y;
+                        g.cell = quadf_2d{ vec2f{ x, top }, vec2f{ x + width, top }, vec2f{ x + width, top + height }, vec2f{ x, top + height } };
+                        g.cellExtents = std::nullopt;
+                        shift = (x + width) - oldEnd;
+                        continue;
+                    }
+                    for (auto& v : g.cell)
+                        v.x += shift;
+                    g.cellExtents = std::nullopt;
+                }
+                auto const* object = object_at(aOwner, paragraphStart + g.clusters.first);
+                if (!object)
+                    continue;
+                auto const objectFont = aFontSelector(g.clusters.first);
+                auto const& m = aOwner.iInlineObjects->measure(aGc, *object, objectFont);
+                auto const width = static_cast<float>(m.width);
+                // with the font's descender, align_baselines() puts this cell's baseline at the object's ascent
+                auto const height = static_cast<float>(m.ascent - objectFont.descender());
+                auto const oldWidth = g.cell[1].x - g.cell[0].x;
+                set_category(g, text_category::Whitespace); // the glyph itself is not drawn
+                g.value = ObjectReplacementCharacter;
+                g.font = objectFont.id();
+                g.shape = {};
+                g.outlineShape = std::nullopt;
+                auto const origin = g.cell[0];
+                g.cell = quadf_2d{ origin, origin + vec2f{ width, 0.0f }, origin + vec2f{ width, height }, origin + vec2f{ 0.0f, height } };
+                g.cellExtents = std::nullopt;
+                shift += width - oldWidth;
+            }
+        }
+
+        // aLineLeft and aLineRight: where the paragraph's lines may go (inside its margins and padding), which a rule spans
+        void draw(i_graphics_context& aGc, object const& aObject, neogfx::font const& aFont, point const& aBaseline, color_or_gradient const& aInk,
+            coordinate aLineLeft, coordinate aLineRight)
+        {
+            auto const& m = measure(aGc, aObject, aFont);
+            if (aObject.kind == object::kind_e::Rule)
+            {
+                auto const thickness = std::max(1.0, std::round(owner.dpi_scale(1.0)));
+                auto const y = std::floor(aBaseline.y - (m.ascent - m.descent) / 2.0) + thickness / 2.0;
+                aGc.draw_line(point{ aLineLeft, y }, point{ aLineRight, y }, pen{ aInk, thickness });
+                return;
+            }
+            if (aObject.kind == object::kind_e::Math)
+            {
+                auto& entry = math_for(aObject, aFont);
+                auto const& glyphs = math_glyphs(entry, aGc);
+                if (!glyphs.content().empty())
+                    aGc.draw_glyph_text(aBaseline, glyphs, text_format{ aInk });
+                for (auto const& r : entry.formula.rules)
+                    aGc.fill_rect(rect{ point{ aBaseline.x + r.x, aBaseline.y + r.y }, size{ r.width, std::max<dimension>(1.0, r.height) } }, to_brush(aInk));
+                return;
+            }
+            rect const bounds{ point{ aBaseline.x, aBaseline.y - m.ascent }, size{ m.width, m.ascent + m.descent } };
+            auto const& entry = image_for(aObject.source);
+            switch (entry.state)
+            {
+            case image_entry::state_e::Loaded:
+                aGc.draw_texture(bounds, *entry.image);
+                break;
+            case image_entry::state_e::Loading:
+                aGc.draw_rect(bounds.deflated(size{ 1.0, 1.0 }), pen{ aInk, 1.0 });
+                break;
+            case image_entry::state_e::Failed:
+                aGc.draw_text(point{ aBaseline.x, aBaseline.y - (aFont.height() + aFont.descender()) },
+                    string{ aObject.alt.empty() ? "[image]" : aObject.alt }, aFont, text_format{ aInk });
+                break;
+            }
+        }
+
+        // the math object whose glyph is under a point (in widget coordinates), if any
+        static std::optional<position_type> math_at(text_edit const& aOwner, point const& aPosition);
+
+        void begin_edit(position_type aPosition);
+        void end_edit(bool aCancel);
+
+        // keep the edited range in step with changes to the text
+        void text_inserted(position_type aPosition, position_type aLength)
+        {
+            if (!editing)
+                return;
+            if (aPosition <= editing->start)
+            {
+                editing->start += aLength;
+                editing->end += aLength;
+            }
+            else if (aPosition < editing->end)
+                editing->end += aLength;
+        }
+        void text_deleted(position_type aStart, position_type aEnd)
+        {
+            if (!editing)
+                return;
+            auto const adjusted = [&](position_type aPosition) { return aPosition >= aEnd ? aPosition - (aEnd - aStart) : aPosition > aStart ? aStart : aPosition; };
+            editing->start = adjusted(editing->start);
+            editing->end = adjusted(editing->end);
+            if (editing->start == editing->end)
+                editing.reset();
+        }
+
+        // the object's source, for copying as text
+        static std::u32string source_text(object const& aObject)
+        {
+            std::string result;
+            if (aObject.kind == object::kind_e::Math)
+                result = aObject.display ? "$$" + aObject.source + "$$" : "$" + aObject.source + "$";
+            else if (aObject.kind == object::kind_e::Rule)
+                result = "---";
+            else
+                result = "![" + aObject.alt + "](" + aObject.source + ")";
+            return neolib::utf8_to_utf32(result);
+        }
+    };
 
     text_edit::password_bits::password_bits(text_edit& aParent) :
         parent{ aParent },
@@ -263,7 +899,8 @@ namespace neogfx
     text_edit::paragraph_style::paragraph_style(paragraph_style const& aOther) :
         iAlignment{ aOther.iAlignment },
         iPadding{ aOther.iPadding },
-        iLineSpacing{ aOther.iLineSpacing }
+        iLineSpacing{ aOther.iLineSpacing },
+        iMargin{ aOther.iMargin }
     {
     }
 
@@ -296,6 +933,17 @@ namespace neogfx
         return *this;
     }
 
+    optional_margin const& text_edit::paragraph_style::margin() const
+    {
+        return iMargin;
+    }
+
+    text_edit::paragraph_style& text_edit::paragraph_style::set_margin(optional_margin const& aMargin)
+    {
+        iMargin = aMargin;
+        return *this;
+    }
+
     optional<double> const& text_edit::paragraph_style::line_spacing() const
     {
         return iLineSpacing;
@@ -315,12 +963,14 @@ namespace neogfx
             iPadding = aRhs.padding();
         if (aRhs.line_spacing() != std::nullopt)
             iLineSpacing = aRhs.line_spacing();
+        if (aRhs.margin() != std::nullopt)
+            iMargin = aRhs.margin();
         return *this;
     }
 
     bool text_edit::paragraph_style::operator==(const paragraph_style& aRhs) const
     {
-        return std::forward_as_tuple(iAlignment, iPadding, iLineSpacing) == std::forward_as_tuple(aRhs.iAlignment, aRhs.iPadding, aRhs.iLineSpacing);
+        return std::forward_as_tuple(iAlignment, iPadding, iLineSpacing, iMargin) == std::forward_as_tuple(aRhs.iAlignment, aRhs.iPadding, aRhs.iLineSpacing, aRhs.iMargin);
     }
 
     bool text_edit::paragraph_style::operator!=(const paragraph_style& aRhs) const
@@ -330,7 +980,7 @@ namespace neogfx
 
     bool text_edit::paragraph_style::operator<(const paragraph_style& aRhs) const
     {
-        return std::forward_as_tuple(iAlignment, iPadding, iLineSpacing) < std::forward_as_tuple(aRhs.iAlignment, aRhs.iPadding, aRhs.iLineSpacing);
+        return std::forward_as_tuple(iAlignment, iPadding, iLineSpacing, iMargin) < std::forward_as_tuple(aRhs.iAlignment, aRhs.iPadding, aRhs.iLineSpacing, aRhs.iMargin);
     }
 
     text_edit::style::style() : 
@@ -520,6 +1170,131 @@ namespace neogfx
         }
     };
 
+    void text_edit::inline_objects::begin_edit(position_type aPosition)
+    {
+        if (editing)
+        {
+            // finish another edit first; it may move this formula
+            auto const previous = *editing;
+            auto const sizeBefore = static_cast<position_type>(owner.iText.size());
+            end_edit(false);
+            if (aPosition >= previous.end)
+                aPosition -= sizeBefore - static_cast<position_type>(owner.iText.size());
+        }
+        auto const* object = object_at(owner, aPosition);
+        if (!object || object->kind != object::kind_e::Math)
+            return;
+        auto const original = *object;
+        auto const originalStyle = owner.style_at(aPosition);
+        std::string const delimiter = original.display ? "$$" : "$";
+        auto editStyle = originalStyle;
+        editStyle.character().set_paper_color(owner.default_text_color().with_alpha(0.12));
+        {
+            multiple_text_changes mtc{ owner };
+            owner.delete_text(aPosition, aPosition + 1);
+            auto const length = static_cast<position_type>(owner.insert_text(aPosition, string{ delimiter + original.source + delimiter }, format{ editStyle }));
+            editing = edit_state{ aPosition, aPosition + length, original, originalStyle };
+        }
+        // the caret goes before the closing delimiter
+        owner.cursor().set_position(editing->end - static_cast<position_type>(delimiter.size()));
+    }
+
+    void text_edit::inline_objects::end_edit(bool aCancel)
+    {
+        if (!editing)
+            return;
+        auto const state = *editing;
+        editing.reset(); // before changing the text: the changes below must not be tracked as edits
+        auto const size = static_cast<position_type>(owner.iText.size());
+        auto const start = std::clamp<position_type>(state.start, 0, size);
+        auto const end = std::clamp<position_type>(state.end, start, size);
+        auto result = state.original;
+        if (!aCancel)
+        {
+            std::u32string text;
+            for (auto i = start; i != end; ++i)
+                text += owner.iText[i].character;
+            auto const source = neolib::utf32_to_utf8(text);
+            auto const trim = [](std::string_view aText)
+            {
+                auto const first = aText.find_first_not_of(" \t\r\n");
+                if (first == std::string_view::npos)
+                    return std::string_view{};
+                return aText.substr(first, aText.find_last_not_of(" \t\r\n") - first + 1);
+            };
+            auto const trimmed = trim(source);
+            if (trimmed.size() >= 4 && trimmed.starts_with("$$") && trimmed.ends_with("$$"))
+            {
+                result.display = true;
+                result.source = trim(trimmed.substr(2, trimmed.size() - 4));
+            }
+            else if (trimmed.size() >= 2 && trimmed.front() == '$' && trimmed.back() == '$')
+            {
+                result.display = false;
+                result.source = trim(trimmed.substr(1, trimmed.size() - 2));
+            }
+            else
+            {
+                // the delimiters were removed: the formula is now ordinary text
+                owner.apply_style(start, end, state.originalStyle);
+                return;
+            }
+        }
+        auto const position = owner.cursor().position();
+        auto const anchor = owner.cursor().anchor();
+        bool const remove = result.source.empty();
+        {
+            multiple_text_changes mtc{ owner };
+            owner.delete_text(start, end);
+            if (!remove)
+            {
+                format objectFormat;
+                objectFormat.style = state.originalStyle;
+                objectFormat.tag = owner.create_tag(inline_object_ttid(), result).first;
+                owner.insert_text(start, string{ "\xEF\xBF\xBC" }, objectFormat);
+            }
+        }
+        // keep the caret where it was relative to the text around the formula
+        auto const removed = (end - start) - (remove ? 0 : 1);
+        auto const adjusted = [&](position_type aPosition)
+        {
+            return aPosition >= end ? aPosition - removed : aPosition > start ? start + (remove ? 0 : 1) : aPosition;
+        };
+        owner.cursor().set_anchor(adjusted(anchor));
+        owner.cursor().set_position(adjusted(position), false);
+    }
+
+    std::optional<text_edit::position_type> text_edit::inline_objects::math_at(text_edit const& aOwner, point const& aPosition)
+    {
+        if (!aOwner.iInlineObjects || aOwner.glyphs().empty())
+            return {};
+        // the hit test gives the nearest caret position: the formula is the character after or before it
+        auto const position = aOwner.document_hit_test(aPosition);
+        for (auto const candidate : { position, position - 1 })
+        {
+            auto const* object = object_at(aOwner, candidate);
+            if (!object || object->kind != object::kind_e::Math)
+                continue;
+            auto const glyph = aOwner.to_glyph(std::next(aOwner.iText.begin(), candidate));
+            if (glyph == aOwner.glyphs().end())
+                continue;
+            auto const glyphIndex = std::distance(aOwner.glyphs().begin(), glyph);
+            auto const info = aOwner.glyph_position(glyphIndex, true);
+            auto const columnRect = aOwner.column_rect(info.column_index());
+            auto const left = info.pos.x - aOwner.horizontal_scrollbar().position() + columnRect.x;
+            if (aPosition.x < left || aPosition.x >= left + glyph->cell_extents().x)
+                continue;
+            if (info.line)
+            {
+                auto const top = (*info.line)->ypos() - aOwner.vertical_scrollbar().position() + columnRect.y;
+                if (aPosition.y < top || aPosition.y >= top + (*info.line)->extents.cy)
+                    continue;
+            }
+            return candidate;
+        }
+        return {};
+    }
+
     dimension text_edit::glyph_paragraph::height(document_glyphs::iterator aStart, document_glyphs::iterator aEnd) const
     {
         if (heightMap.empty())
@@ -641,6 +1416,11 @@ namespace neogfx
     void text_edit::resized()
     {
         framed_scrollable_widget::resized();
+        if (iInlineObjects && iInlineObjects->column_width_changed(column_rect(0).width()))
+        {
+            iInlineObjects->metrics.clear();
+            refresh_paragraph(iText.begin(), 0);
+        }
     }
 
     void text_edit::layout_items(bool aDefer)
@@ -694,6 +1474,8 @@ namespace neogfx
     {
         scoped_units su{ *this, units::Pixels };
         auto result = framed_scrollable_widget::padding();
+        if (iRichText)
+            result += iMarkupPadding.value_or(neogfx::padding{ dpi_scale(8.0) }); // CSS default: body { margin: 8px }
         return to_units(*this, su.saved_units(), result + padding_adjust());
     }
 
@@ -827,6 +1609,9 @@ namespace neogfx
     {
         destroyed_flag destroyed{ *this };
 
+        if (iInlineObjects)
+            iInlineObjects->end_edit(false);
+
         framed_scrollable_widget::focus_lost(aFocusReason);
 
         if (destroyed)
@@ -876,6 +1661,13 @@ namespace neogfx
     void text_edit::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
         framed_scrollable_widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
+        if (!read_only() && aButton == mouse_button::Left && client_rect().contains(aPosition))
+            if (auto const formula = inline_objects::math_at(*this, aPosition))
+            {
+                // edit the formula's source in place
+                iInlineObjects->begin_edit(*formula);
+                return;
+            }
         if (!password() && aButton == mouse_button::Left && client_rect().contains(aPosition))
         {
             auto word = word_at(document_hit_test(aPosition));
@@ -914,6 +1706,32 @@ namespace neogfx
             iMenu = std::make_unique<neogfx::context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
             ContextMenu(iMenu->menu());
             if (!read_only())
+                if (auto const formula = inline_objects::math_at(*this, aPosition))
+                {
+                    iMenu->menu().add_action(make_ref<action>("Edit Math"_t)).triggered(
+                        [this, position = *formula, formulaObject = *inline_objects::object_at(*this, *formula)]()
+                    {
+                        if (!iInlineObjects)
+                            return;
+                        // the text may have changed since the menu opened (e.g. another edit finished): find the formula again
+                        auto target = position;
+                        auto const* atTarget = inline_objects::object_at(*this, target);
+                        if (!atTarget || *atTarget != formulaObject)
+                        {
+                            std::optional<position_type> nearest;
+                            for (position_type i = 0; i < static_cast<position_type>(iText.size()); ++i)
+                                if (auto const* candidate = inline_objects::object_at(*this, i); candidate && *candidate == formulaObject)
+                                    if (!nearest || std::abs(i - position) < std::abs(*nearest - position))
+                                        nearest = i;
+                            if (!nearest)
+                                return;
+                            target = *nearest;
+                        }
+                        iInlineObjects->begin_edit(target);
+                    });
+                    iMenu->menu().add_separator();
+                }
+            if (!read_only())
             {
                 iMenu->menu().add_action(service<i_app>().action_undo());
                 iMenu->menu().add_action(service<i_app>().action_redo());
@@ -927,16 +1745,19 @@ namespace neogfx
             }
             auto pastePlainText = make_ref<action>("Plain Text"_t);
             auto pasteRichText = make_ref<action>("Rich Text (HTML)"_t);
+            auto pasteMarkdown = make_ref<action>("Rich Text (Markdown)"_t);
             pastePlainText->Triggered([this]() { paste_plain_text(); });
             pasteRichText->Triggered([this]() { paste_rich_text(); });
+            pasteMarkdown->Triggered([this]() { paste_rich_text(rich_text_format::Markdown); });
             sink tempSink;
-            tempSink += service<i_app>().action_paste().enabled([&pastePlainText, &pasteRichText]() { pastePlainText->enable(); pasteRichText->enable(); });
-            tempSink += service<i_app>().action_paste().disabled([&pastePlainText, &pasteRichText]() { pastePlainText->disable(); pasteRichText->disable(); });
+            tempSink += service<i_app>().action_paste().enabled([&pastePlainText, &pasteRichText, &pasteMarkdown]() { pastePlainText->enable(); pasteRichText->enable(); pasteMarkdown->enable(); });
+            tempSink += service<i_app>().action_paste().disabled([&pastePlainText, &pasteRichText, &pasteMarkdown]() { pastePlainText->disable(); pasteRichText->disable(); pasteMarkdown->disable(); });
             if (!read_only())
             {
                 auto& pasteAs = iMenu->menu().add_sub_menu("Paste As"_t);
                 pasteAs.add_action(pastePlainText);
                 pasteAs.add_action(pasteRichText);
+                pasteAs.add_action(pasteMarkdown);
                 iMenu->menu().add_action(service<i_app>().action_delete());
             }
             iMenu->menu().add_separator();
@@ -1031,6 +1852,14 @@ namespace neogfx
     {
         neolib::service<neolib::i_power>().register_activity();
 
+        if (iInlineObjects && iInlineObjects->editing &&
+            (aScanCode == ScanCode_RETURN || aScanCode == ScanCode_KEYPAD_ENTER || aScanCode == ScanCode_ESCAPE))
+        {
+            // Enter typesets the formula being edited; Escape abandons the changes
+            iInlineObjects->end_edit(aScanCode == ScanCode_ESCAPE);
+            return true;
+        }
+
         neolib::scoped_flag sf{ iHandlingKeyPress };
 
         bool handled = true;
@@ -1087,8 +1916,17 @@ namespace neogfx
                     {
                         auto const from = cursor().position() - 1;
                         auto const to = cursor().position();
-                        cursor().set_position(cursor().position() - 1);
-                        delete_text(from, to);
+                        if (iInlineObjects && iInlineObjects->editing)
+                        {
+                            // delete first: moving the caret onto the formula's start would typeset it before the delete
+                            delete_text(from, to);
+                            cursor().set_position(from);
+                        }
+                        else
+                        {
+                            cursor().set_position(cursor().position() - 1);
+                            delete_text(from, to);
+                        }
                         make_cursor_visible(true);
                     }
                 }
@@ -1356,6 +2194,8 @@ namespace neogfx
     void text_edit::undo(i_clipboard&)
     {
         // todo: more intelligent undo
+        if (iInlineObjects)
+            iInlineObjects->editing.reset();
         iText.swap(iPreviousText);
         iUtf8TextCache = std::nullopt;
         std::erase_if(iBookmarks, [&](position_type aBookmark) { return aBookmark > static_cast<position_type>(iText.size()); });
@@ -1389,7 +2229,14 @@ namespace neogfx
             std::u32string selectedText;
             auto selectionStart = std::min(cursor().position(), cursor().anchor());
             auto selectionEnd = std::max(cursor().position(), cursor().anchor());
-            selectedText.assign(iText.begin() + selectionStart, iText.begin() + selectionEnd);
+            for (auto i = selectionStart; i != selectionEnd; ++i)
+            {
+                // inline objects copy as their source (e.g. $x^2$)
+                if (auto const* object = inline_objects::object_at(*this, i))
+                    selectedText += inline_objects::source_text(*object);
+                else
+                    selectedText += iText[i].character;
+            }
             for (auto sti = selectedText.begin(); sti != selectedText.end();)
             {
                 auto const ch = *sti++;
@@ -1608,8 +2455,7 @@ namespace neogfx
 
     bool text_edit::set_rich_text(i_string const& aRichText, rich_text_format aFormat)
     {
-        // todo
-        return set_text(aRichText) != 0 || aRichText.empty();
+        return do_insert_rich_text(0, aRichText, aFormat, true, true) != 0 || aRichText.empty();
     }
 
     void text_edit::paste_plain_text()
@@ -1619,8 +2465,14 @@ namespace neogfx
 
     void text_edit::paste_rich_text(rich_text_format aFormat)
     {
-        // todo
-        paste(service<i_clipboard>());
+        auto& clipboard = service<i_clipboard>();
+        if (!clipboard.has_text())
+            return;
+        multiple_text_changes mtc{ *this };
+        if (cursor().position() != cursor().anchor())
+            delete_selected();
+        auto const len = do_insert_rich_text(cursor().position(), clipboard.text(), aFormat, false, false);
+        cursor().set_position(cursor().position() + len);
     }
 
     void text_edit::begin_update()
@@ -1952,14 +2804,8 @@ namespace neogfx
             }
             if (aGlyphPosition >= lineStart && aGlyphPosition <= lineEnd)
             {
-                delta alignmentAdjust;
-                auto const& paragraphStyle = glyph_style(line->glyph_begin(), iColumns.at(columnIndex));
-                auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(alignment());
-                if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
-                    ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
-                    alignmentAdjust.dx = columnRectSansPadding.cx - line->extents.cx;
-                else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
-                    alignmentAdjust.dx = (columnRectSansPadding.cx - line->extents.cx) / 2.0;
+                delta alignmentAdjust; // alignment and indent: where refresh_lines() put the line, as painting and hit testing use
+                alignmentAdjust.dx = line->xpos();
                 if (lineStart != lineEnd)
                 {
                     auto iterGlyph = glyphs().begin() + aGlyphPosition;
@@ -2162,6 +3008,8 @@ namespace neogfx
 
     void text_edit::clear()
     {
+        if (iInlineObjects)
+            iInlineObjects->editing.reset();
         cursor().set_position(0);
         iPreviousText = iText;
         iText.clear();
@@ -2173,6 +3021,8 @@ namespace neogfx
         iTags.clear();
         iTagMap.clear();
         iBookmarks.clear();
+        iRichText = false;
+        iMarkupPadding = std::nullopt;
         refresh_columns();
         if (iPreviousText != iText && !iUpdatingContents)
             notify_text_changed();
@@ -2283,6 +3133,8 @@ namespace neogfx
             else if (bookmark > aStart)
                 bookmark = aStart;
         }
+        if (iInlineObjects)
+            iInlineObjects->text_deleted(aStart, aEnd);
         iBookmarks.erase(std::unique(iBookmarks.begin(), iBookmarks.end()), iBookmarks.end());
         refresh_paragraph(iText.erase(eraseBegin, eraseEnd), -eraseAmount);
 
@@ -2556,6 +3408,11 @@ namespace neogfx
         
         iSink += cursor().PositionChanged([this]()
         {
+            // moving the caret out of a formula being edited typesets it again
+            if (iInlineObjects && iInlineObjects->editing &&
+                (static_cast<position_type>(cursor().position()) <= iInlineObjects->editing->start ||
+                    static_cast<position_type>(cursor().position()) >= iInlineObjects->editing->end))
+                iInlineObjects->end_edit(false);
             if (service<i_keyboard>().layout().ime_active(*this))
                 service<i_keyboard>().layout().update_ime_position(cursor_rect().bottom_left());
             if (service<i_emoticon_translator>().active(*this))
@@ -2620,7 +3477,7 @@ namespace neogfx
         thread_local std::vector<std::ptrdiff_t> indexMap;
         indexMap.clear();
         indexMap.resize(aText.size(), -1);
-        auto readPos = 0;
+        std::size_t readPos = 0;
 
         auto insert = [&](document_text::const_iterator aWhere, const style& aStyle, std::u32string::const_iterator begin, std::u32string::const_iterator end)
         {
@@ -2680,11 +3537,12 @@ namespace neogfx
                 }
                 if (!discard)
                 {
-                    indexMap[readPos] = insertionSize;
+                    if (readPos < indexMap.size())
+                        indexMap[readPos] = insertionSize;
                     next = std::next(iText.insert(next, document_char{ ch, style.cookie() }));
                     ++insertionSize;
                 }
-                ++readPos;
+                readPos += (ch < 0x80 ? 1 : ch < 0x800 ? 2 : ch < 0x10000 ? 3 : 4); // indexMap is keyed on UTF-8 byte offsets into aText
                 previousChar = ch;
             }
             return std::next(iText.begin(), pos);
@@ -2761,6 +3619,8 @@ namespace neogfx
         for (auto& bookmark : iBookmarks)
             if (bookmark > aPosition)
                 bookmark += insertionSize;
+        if (iInlineObjects)
+            iInlineObjects->text_inserted(aPosition, static_cast<position_type>(insertionSize));
 
         if (!aClearFirst)
             refresh_paragraph(insertionPoint, insertionSize);
@@ -2779,6 +3639,224 @@ namespace neogfx
             notify_text_changed();
         
         return insertionSize;
+    }
+
+    std::size_t text_edit::do_insert_rich_text(position_type aPosition, i_string const& aRichText, rich_text_format aFormat, bool aMoveCursor, bool aClearFirst)
+    {
+        auto const document = (aFormat == rich_text_format::Markdown) ?
+            rich_text::parse_markdown(aRichText.to_std_string_view()) :
+            rich_text::parse_html(aRichText.to_std_string_view());
+
+        auto const& baseFont = font();
+        auto find_font_family = [](std::string_view aFamily) -> std::optional<string>
+        {
+            auto const& fontManager = service<i_font_manager>();
+            for (std::uint32_t familyIndex = 0; familyIndex < fontManager.font_family_count(); ++familyIndex)
+            {
+                auto const family = fontManager.font_family(familyIndex).to_std_string_view();
+                if (std::ranges::equal(family, aFamily, [](char lhs, char rhs) { return std::tolower(static_cast<unsigned char>(lhs)) == std::tolower(static_cast<unsigned char>(rhs)); }))
+                    return string{ family };
+            }
+            return {};
+        };
+        std::optional<std::optional<string>> monospaceFamily;
+        auto monospace_family = [&]() -> std::optional<string> const&
+        {
+            if (!monospaceFamily)
+            {
+                monospaceFamily.emplace();
+                for (auto const candidate : { "Consolas", "Cascadia Mono", "Cascadia Code", "Courier New", "DejaVu Sans Mono", "Liberation Mono", "Menlo", "Monaco", "Courier" })
+                    if ((*monospaceFamily = find_font_family(candidate)))
+                        break;
+            }
+            return *monospaceFamily;
+        };
+        auto parse_color = [](std::string const& aColor) -> std::optional<color>
+        {
+            if (auto const named = color::from_name(aColor))
+                return *named;
+            if (aColor.starts_with("#") || aColor.starts_with("rgb"))
+                return color{ aColor };
+            return {};
+        };
+        auto const textColor = default_text_color();
+        auto const linkColor = textColor.light() ? color::from_argb(0xFF58A6FFu) : color::from_argb(0xFF0645ADu);
+        auto const codeShade = textColor.with_alpha(0.12);
+        auto const indentStep = dpi_scale(40.0); // per list or block quote level, as browsers and Qt
+        auto const em = baseFont.em_size().cy; // default block margins are in ems of the widget's font
+
+        auto to_style = [&](rich_text::span_format const& aSpan)
+        {
+            style result;
+            auto& character = result.character();
+            font_style fontStyle = font_style::Invalid;
+            if (aSpan.bold)
+                fontStyle |= font_style::Bold;
+            if (aSpan.italic)
+                fontStyle |= font_style::Italic;
+            if (fontStyle == font_style::Invalid)
+                fontStyle = font_style::Normal;
+            if (aSpan.underline || aSpan.link)
+                fontStyle |= font_style::Underline;
+            if (aSpan.strike)
+                fontStyle |= font_style::Strike;
+            if (aSpan.superscript)
+                fontStyle |= font_style::Superscript;
+            else if (aSpan.subscript)
+                fontStyle |= font_style::Subscript;
+            auto const size = aSpan.pointSize ? *aSpan.pointSize : baseFont.size() * aSpan.fontScale;
+            auto const family = aSpan.monospace ? monospace_family() : aSpan.fontFamily ? find_font_family(*aSpan.fontFamily) : std::nullopt;
+            if (family || fontStyle != font_style::Normal || size != baseFont.size())
+            {
+                try
+                {
+                    character.set_font(family ? neogfx::font{ *family, fontStyle, size } : neogfx::font{ baseFont, fontStyle, size });
+                }
+                catch (...)
+                {
+                    character.set_font(neogfx::font{ baseFont, fontStyle, size });
+                }
+            }
+            if (auto const explicitColor = aSpan.textColor ? parse_color(*aSpan.textColor) : std::nullopt)
+                character.set_text_color(*explicitColor);
+            else if (aSpan.link)
+                character.set_text_color(linkColor);
+            if (auto const background = aSpan.backgroundColor ? parse_color(*aSpan.backgroundColor) : std::nullopt)
+                character.set_paper_color(*background);
+            else if (aSpan.codeShade)
+                character.set_paper_color(codeShade);
+            if (aSpan.alignment != rich_text::block_alignment::Default)
+            {
+                auto horizontal = neogfx::alignment::Left;
+                if (aSpan.alignment == rich_text::block_alignment::Center)
+                    horizontal = neogfx::alignment::Center;
+                else if (aSpan.alignment == rich_text::block_alignment::Right)
+                    horizontal = neogfx::alignment::Right;
+                else if (aSpan.alignment == rich_text::block_alignment::Justify)
+                    horizontal = neogfx::alignment::Justify;
+                result.paragraph().set_alignment((alignment() & neogfx::alignment::Vertical) | horizontal);
+            }
+            // lists indent with padding (as browsers' ul/ol padding-left), block quotes with margins (blockquote margin: 0 40px)
+            auto const listLevels = aSpan.indent - aSpan.rightIndent;
+            auto const quoteLevels = aSpan.rightIndent;
+            auto const vertical = [&](rich_text::css_length const& aLength) { return std::round(dpi_scale(aLength.px) + aLength.em * em); };
+            neogfx::margin const margin{
+                quoteLevels * indentStep + dpi_scale(aSpan.marginLeft), vertical(aSpan.marginTop),
+                quoteLevels * indentStep + dpi_scale(aSpan.marginRight), vertical(aSpan.marginBottom) };
+            neogfx::padding const padding{
+                listLevels * indentStep + dpi_scale(aSpan.paddingLeft), vertical(aSpan.paddingTop),
+                dpi_scale(aSpan.paddingRight), vertical(aSpan.paddingBottom) };
+            if (margin != neogfx::margin{})
+                result.paragraph().set_margin(margin);
+            if (padding != neogfx::padding{})
+                result.paragraph().set_padding(padding);
+            return result;
+        };
+
+        // one style per distinct span format; runs with no formatting use the default style
+        std::vector<rich_text::span_format const*> spans;
+        std::vector<style> styles;
+        std::vector<style const*> runStyles;
+        runStyles.reserve(document.runs.size());
+        styles.reserve(document.runs.size());
+        for (auto const& run : document.runs)
+        {
+            if (run.format == rich_text::span_format{})
+            {
+                runStyles.push_back(&default_style());
+                continue;
+            }
+            auto existing = std::find_if(spans.begin(), spans.end(), [&](auto const* aSpan) { return *aSpan == run.format; });
+            if (existing == spans.end())
+            {
+                spans.push_back(&run.format);
+                styles.push_back(to_style(run.format));
+                existing = std::prev(spans.end());
+            }
+            runStyles.push_back(&styles[std::distance(spans.begin(), existing)]);
+        }
+
+        auto run_at = [&](std::ptrdiff_t aOffset)
+        {
+            return static_cast<std::size_t>(std::distance(document.runs.begin(), std::upper_bound(document.runs.begin(), document.runs.end(), static_cast<std::size_t>(aOffset),
+                [](std::size_t aValue, rich_text::run const& aRun) { return aValue < aRun.end; })));
+        };
+
+        // links are tags created on first use (after any clear), each opening its URI when clicked
+        static uuid const sLinkTagTtid{ 0x8d2a4b7e, 0x3c1f, 0x4e95, 0xa0d6, { 0x51, 0x2b, 0x9e, 0x07, 0xc4, 0x3a } };
+        std::vector<tag_ptr> runTags(document.runs.size());
+        auto link_tag = [&](std::string const& aUri)
+        {
+            auto const [tagPtr, created] = create_tag(sLinkTagTtid, aUri);
+            if (created)
+            {
+                auto& linkTag = *tagPtr;
+                linkTag.mouse_event()([this, &linkTag](const neogfx::mouse_event& aEvent)
+                {
+                    if (aEvent.type() != mouse_event_type::ButtonReleased || !aEvent.is_left_button())
+                        return;
+                    if (!read_only() && (aEvent.key_modifiers() & key_modifier::CTRL) == key_modifier::None)
+                        return;
+                    linkTag.mouse_event().accept();
+                    std::string const uri{ *static_cast<std::string const*>(linkTag.data()) };
+                    if (UriClicked.trigger(string{ uri }) != trigger_result::Accepted && !service<i_basic_services>().open_uri(uri))
+                        service<i_basic_services>().system_beep();
+                });
+                linkTag.query_mouse_cursor()([this](neogfx::mouse_cursor& aCursor)
+                {
+                    aCursor = (read_only() || (service<i_keyboard>().modifiers() & key_modifier::CTRL) != key_modifier::None) ?
+                        mouse_system_cursor::Hand : mouse_system_cursor::IBeam;
+                });
+            }
+            return tagPtr;
+        };
+
+        format richFormat;
+        richFormat.style = style_callback{ [&](std::ptrdiff_t aOffset) -> std::tuple<style const&, std::ptrdiff_t>
+        {
+            auto const runIndex = run_at(aOffset);
+            return { *runStyles[runIndex], static_cast<std::ptrdiff_t>(document.runs[runIndex].end) };
+        } };
+        if (!iInlineObjects && std::any_of(document.runs.begin(), document.runs.end(), [](auto const& aRun) { return aRun.format.object.has_value(); }))
+            iInlineObjects = std::make_unique<inline_objects>(*this);
+        richFormat.tag = tag_ptr_callback{ [&](std::ptrdiff_t aOffset) -> std::tuple<tag_ptr, std::ptrdiff_t>
+        {
+            auto const runIndex = run_at(aOffset);
+            auto const& run = document.runs[runIndex];
+            if (run.format.object)
+            {
+                // math and images: the run's text is U+FFFC; the tag carries the object
+                if (!runTags[runIndex])
+                    runTags[runIndex] = create_tag(inline_object_ttid(), *run.format.object).first;
+                return { runTags[runIndex], static_cast<std::ptrdiff_t>(run.end) };
+            }
+            if (run.format.listMarker)
+            {
+                if (!runTags[runIndex])
+                    runTags[runIndex] = create_tag(list_marker_ttid(), std::string{}).first;
+                return { runTags[runIndex], static_cast<std::ptrdiff_t>(run.end) };
+            }
+            if (!run.format.link)
+                return { tag_ptr{}, static_cast<std::ptrdiff_t>(run.end) };
+            if (!runTags[runIndex])
+                runTags[runIndex] = link_tag(*run.format.link);
+            return { runTags[runIndex], static_cast<std::ptrdiff_t>(run.end) };
+        } };
+
+        auto const result = do_insert_text(aPosition, string{ document.text }, richFormat, aMoveCursor, aClearFirst);
+
+        // rich text is inset by its <body style> margin and padding (clear() forgets them, so a document replaces them; pasted
+        // HTML only supplies them if there are none yet), else by CSS defaults (see padding())
+        auto const previousPadding = padding();
+        iRichText = true;
+        if (document.body && !iMarkupPadding)
+        {
+            auto const length = [&](rich_text::css_length const& aLength) { return std::round(dpi_scale(aLength.px) + aLength.em * em); };
+            iMarkupPadding = neogfx::padding{ length(document.body->left), length(document.body->top), length(document.body->right), length(document.body->bottom) };
+        }
+        if (padding() != previousPadding)
+            refresh_columns();
+        return result;
     }
 
     void text_edit::delete_any_selection()
@@ -2944,6 +4022,8 @@ namespace neogfx
                 paragraphBuffer.assign(nextParagraph, std::next(iterChar));
                 scoped_tab_stops sts{ gc, tab_stops() };
                 auto gt = service<i_font_manager>().glyph_text_factory().to_glyph_text(gc, std::u32string_view{ paragraphBuffer.begin(), paragraphBuffer.end() }, fs, false);
+                if (paragraphBuffer.find(ObjectReplacementCharacter) != std::u32string::npos)
+                    inline_objects::lay_out(*this, gc, nextParagraph, gt, fs);
                 if (gt.cbegin() != gt.cend())
                 {
                     auto const paragraphGlyphs = glyphs().insert(glyphsInsertPos, gt.cbegin(), gt.cend());
@@ -3071,6 +4151,7 @@ namespace neogfx
             
             std::uint32_t pass = 1;
             dimension yposParagraph = 0.0;
+            dimension previousMarginBottom = 0.0;
 
             for (auto iterParagraph = iGlyphParagraphs.begin(); iterParagraph != iGlyphParagraphs.end();)
             {
@@ -3078,6 +4159,7 @@ namespace neogfx
 
                 paragraph.ypos = yposParagraph;
                 dimension yColumn = 0.0;
+                dimension marginBottom = 0.0;
 
                 for (auto& column : iGlyphColumns)
                 {
@@ -3139,6 +4221,67 @@ namespace neogfx
 
                     auto const& paragraphStyle = glyph_style(paragraph.glyph_begin(), iColumns[columnIndex]);
 
+                    // a line is also tall enough for the descent of any inline objects (math, images)
+                    auto const line_height = [&](auto aFirst, auto aLast, auto const& aAlignment) -> float
+                    {
+                        float result = aAlignment.yExtent;
+                        if (!iInlineObjects)
+                            return result;
+                        for (auto g = aFirst; g != aLast; ++g)
+                            if (is_inline_object(*g))
+                                if (auto const* object = inline_objects::object_at(*this, paragraph.span.textFirst + g->clusters.first))
+                                    if (auto const* m = iInlineObjects->cached_metrics(*object, glyphs().glyph_font(*g)))
+                                        result = std::max(result, aAlignment.baseline + static_cast<float>(m->descent));
+                        return result;
+                    };
+
+                    // left and right margins and padding indent the paragraph (lists, block quotes); a list item's marker hangs into the left
+                    auto const paragraphPadding = paragraphStyle.paragraph().padding() ? paragraphStyle.paragraph().padding().value() : neogfx::padding{};
+                    auto const paragraphMargin = paragraphStyle.paragraph().margin() ? paragraphStyle.paragraph().margin().value() : neogfx::margin{};
+                    dimension const indentLeft = std::max(0.0, paragraphMargin.left + paragraphPadding.left);
+                    dimension const indentRight = std::max(0.0, paragraphMargin.right + paragraphPadding.right);
+                    dimension const lineAvailableWidth = std::max(0.0, columnAvailableWidth - indentLeft - indentRight);
+                    dimension hangingIndent = 0.0;
+                    if (segmentIndex == 0 && indentLeft > 0.0)
+                    {
+                        auto is_list_marker = [&](glyph_char const& aGlyph)
+                        {
+                            auto const textIndex = static_cast<std::size_t>(paragraph.span.textFirst + aGlyph.clusters.first);
+                            if (textIndex >= iText.size() || iText[textIndex].tag == neolib::invalid_cookie<tag_cookie>)
+                                return false;
+                            auto const existing = iTagMap.find(iText[textIndex].tag);
+                            return existing != iTagMap.end() && (**existing).ttid() == list_marker_ttid();
+                        };
+                        for (auto g = std::next(glyphs().begin(), paragraph.span.glyphsFirst); g != std::next(glyphs().begin(), paragraph.span.glyphsLast) && is_list_marker(*g); ++g)
+                            hangingIndent += g->cell_extents().x;
+                        hangingIndent = std::min(hangingIndent, indentLeft);
+                    }
+                    auto const hang = [&](auto aLineStart) -> dimension
+                    {
+                        return (aLineStart - glyphs().begin() == paragraph.span.glyphsFirst) ? hangingIndent : 0.0;
+                    };
+                    auto const line_x = [&](auto aLineStart, auto aLineEnd, dimension aLineWidth) -> dimension
+                    {
+                        dimension const width = lineAvailableWidth + hang(aLineStart);
+                        dimension result = indentLeft - hang(aLineStart);
+                        auto const textDirection = glyph_text_direction(aLineStart, aLineEnd);
+                        auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(alignment());
+                        if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
+                            ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
+                            result += (width - aLineWidth);
+                        else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
+                            result += std::ceil(std::max(width - aLineWidth, 0.0) / 2.0);
+                        return result;
+                    };
+                    auto const line_extent_x = [&](auto aLineStart, dimension aLineWidth) -> dimension
+                    {
+                        return columnOffsetX + indentLeft - hang(aLineStart) + aLineWidth + indentRight;
+                    };
+
+                    // where paragraphs meet, the larger of their margins separates them (CSS margin collapsing)
+                    yLine += std::max(previousMarginBottom, paragraphMargin.top);
+                    marginBottom = std::max(marginBottom, paragraphMargin.bottom);
+
                     if (paragraphStyle.paragraph().padding())
                         yLine += paragraphStyle.paragraph().padding().value().top;
 
@@ -3186,18 +4329,9 @@ namespace neogfx
 
                             size const lineExtents{
                                     lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f,
-                                    alignBaselinesResult.yExtent };
+                                    line_height(lineStart, lineEnd, alignBaselinesResult) };
 
-                            dimension xLine = 0.0;
-
-                            auto textDirection = glyph_text_direction(lineStart, lineEnd);
-                            auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(alignment());
-
-                            if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
-                                ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
-                                xLine += (columnAvailableWidth - lineExtents.cx);
-                            else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
-                                xLine += std::ceil(std::max(columnAvailableWidth - lineExtents.cx, 0.0) / 2.0);
+                            dimension const xLine = line_x(lineStart, lineEnd, lineExtents.cx);
 
                             lines.emplace_back(
                                 this,
@@ -3210,10 +4344,10 @@ namespace neogfx
                                 alignBaselinesResult.baseline);
 
                             yLine += lines.back().extents.cy;
-                            iTextExtents->cx = std::max(iTextExtents->cx, columnOffsetX + lines.back().extents.cx);
+                            iTextExtents->cx = std::max(iTextExtents->cx, line_extent_x(lineStart, lines.back().extents.cx));
                         }
                         else if (WordWrap && static_cast<coordinate>((paragraphLineEnd - 1)->cell[0].x) + static_cast<coordinate>((paragraphLineEnd - 1)->cell_extents().x) - 
-                            static_cast<coordinate>(paragraphLineStart->cell[0].x) > columnAvailableWidth)
+                            static_cast<coordinate>(paragraphLineStart->cell[0].x) > lineAvailableWidth + hang(paragraphLineStart))
                         {
                             auto add_line = [&](auto first, auto last)
                             {
@@ -3243,18 +4377,9 @@ namespace neogfx
 
                                 size const lineExtents{
                                     last != first ? (last - 1)->cell[1].x - (first)->cell[0].x : 0.0f,
-                                    alignBaselinesResult.yExtent };
+                                    line_height(first, last, alignBaselinesResult) };
 
-                                dimension xLine = 0.0;
-
-                                auto textDirection = glyph_text_direction(first, last);
-                                auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(alignment());
-
-                                if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
-                                    ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
-                                    xLine += (columnAvailableWidth - lineExtents.cx);
-                                else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
-                                    xLine += std::ceil(std::max(columnAvailableWidth - lineExtents.cx, 0.0) / 2.0);
+                                dimension const xLine = line_x(first, last, lineExtents.cx);
 
                                 lines.emplace_back(
                                     this,
@@ -3267,7 +4392,7 @@ namespace neogfx
                                     alignBaselinesResult.baseline);
 
                                 yLine += lines.back().extents.cy;
-                                iTextExtents->cx = std::max(iTextExtents->cx, columnOffsetX + lines.back().extents.cx);
+                                iTextExtents->cx = std::max(iTextExtents->cx, line_extent_x(first, lines.back().extents.cx));
                             };
 
                             if (glyph_text_direction(paragraphLineStart, paragraphLineEnd) == text_direction::LTR)
@@ -3275,10 +4400,10 @@ namespace neogfx
                                 auto next = paragraphLineStart;
                                 auto lineStart = next;
                                 auto lineEnd = paragraphLineEnd;
-                                coordinate offset = (lineEnd != lineStart ? lineStart->cell[0].x : 0.0);
+                                coordinate offset = (lineEnd != lineStart ? lineStart->cell[0].x + hang(lineStart) : 0.0);
                                 while (next != paragraphLineEnd)
                                 {
-                                    glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset + columnAvailableWidth, 0.0 }.as<float>(), vec2{offset + columnAvailableWidth, 0.0}.as<float>()}, {}};
+                                    glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset + lineAvailableWidth, 0.0 }.as<float>(), vec2{offset + lineAvailableWidth, 0.0}.as<float>()}, {}};
                                     auto split = std::lower_bound(next, paragraphLineEnd, key, [](auto const& lhs, auto const& rhs) { return lhs.cell[0].x < rhs.cell[0].x; });
                                     if (split != next)
                                     {
@@ -3289,7 +4414,7 @@ namespace neogfx
                                             auto const& previousChar = *(split - 1);
                                             auto const xPrevious = static_cast<coordinate>(previousChar.cell[0].x);
                                             auto const cxPrevious = static_cast<coordinate>(previousChar.cell_extents().x);
-                                            if (xPrevious + cxPrevious >= offset + columnAvailableWidth)
+                                            if (xPrevious + cxPrevious >= offset + lineAvailableWidth)
                                                 --split;
                                         }
                                     }
@@ -3298,6 +4423,8 @@ namespace neogfx
                                     if (split != paragraphLineEnd)
                                     {
                                         auto wordBreak = word_break(lineStart, split, paragraphLineEnd);
+                                        if (wordBreak.first != wordBreak.second && is_inline_object(*wordBreak.first))
+                                            wordBreak.second = wordBreak.first; // an object starts the next line rather than being the break's space
                                         if (wordBreak.first != lineStart)
                                         {
                                             lineEnd = wordBreak.first;
@@ -3324,15 +4451,17 @@ namespace neogfx
                                 coordinate offset = rightmost;
                                 while (next != std::reverse_iterator{ paragraphLineStart })
                                 {
-                                    glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset - columnAvailableWidth, 0.0 }.as<float>() }, {}};
+                                    glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset - lineAvailableWidth, 0.0 }.as<float>() }, {}};
                                     auto split = std::lower_bound(next, std::reverse_iterator{ paragraphLineStart }, key, [=](auto const& lhs, auto const& rhs) { return offset - lhs.cell[0].x < offset - rhs.cell[0].x; });
-                                    if (split != next && (split != std::reverse_iterator{ paragraphLineStart } || static_cast<coordinate>((split - 1)->cell[0].x) + static_cast<coordinate>((split - 1)->cell_extents().x) >= rightmost - offset + columnAvailableWidth))
+                                    if (split != next && (split != std::reverse_iterator{ paragraphLineStart } || static_cast<coordinate>((split - 1)->cell[0].x) + static_cast<coordinate>((split - 1)->cell_extents().x) >= rightmost - offset + lineAvailableWidth))
                                         --split;
                                     if (split == next)
                                         ++split;
                                     if (split != std::reverse_iterator{ paragraphLineStart })
                                     {
                                         auto wordBreak = word_break(lineStart, split, std::reverse_iterator{ paragraphLineStart });
+                                        if (wordBreak.first != wordBreak.second && is_inline_object(*wordBreak.first))
+                                            wordBreak.second = wordBreak.first; // an object starts the next line rather than being the break's space
                                         if (wordBreak.first != lineStart)
                                         {
                                             lineEnd = wordBreak.first;
@@ -3381,18 +4510,9 @@ namespace neogfx
 
                             size const lineExtents{
                                     lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f,
-                                    alignBaselinesResult.yExtent };
+                                    line_height(lineStart, lineEnd, alignBaselinesResult) };
 
-                            dimension xLine = 0.0;
-
-                            auto textDirection = glyph_text_direction(lineStart, lineEnd);
-                            auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(alignment());
-
-                            if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
-                                ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
-                                xLine += (columnAvailableWidth - lineExtents.cx);
-                            else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
-                                xLine += std::ceil(std::max(columnAvailableWidth - lineExtents.cx, 0.0) / 2.0);
+                            dimension const xLine = line_x(lineStart, lineEnd, lineExtents.cx);
 
                             lines.emplace_back(
                                 this,
@@ -3405,16 +4525,19 @@ namespace neogfx
                                 alignBaselinesResult.baseline);
                             
                             yLine += lines.back().extents.cy;
-                            iTextExtents->cx = std::max(iTextExtents->cx, columnOffsetX + lines.back().extents.cx);
+                            iTextExtents->cx = std::max(iTextExtents->cx, line_extent_x(lineStart, lines.back().extents.cx));
                         }
                     }
 
                     if (paragraphStyle.paragraph().padding())
                         yLine += paragraphStyle.paragraph().padding().value().bottom;
+                    if (std::next(iterParagraph) == iGlyphParagraphs.end())
+                        yLine += paragraphMargin.bottom; // nothing after it to collapse with
 
                     yColumn = std::max(yColumn, yLine);
                 }
 
+                previousMarginBottom = marginBottom;
                 yposParagraph += yColumn;
                 iTextExtents->cy = std::max(iTextExtents->cy, yposParagraph);
 
@@ -3425,6 +4548,7 @@ namespace neogfx
                             for (auto& c : iGlyphColumns)
                                 c.lines.clear();
                             yposParagraph = 0.0;
+                            previousMarginBottom = 0.0;
                             iTextExtents = size{};
                             iterParagraph = iGlyphParagraphs.begin();
                             ++pass;
@@ -3612,6 +4736,36 @@ namespace neogfx
             aGc.draw_glyph_text(textPos, lineGlyphs, segmentStart, lineGlyphs.cend(), textAppearance.value());
         }
 
+        if (iInlineObjects)
+        {
+            // inline objects (math, images) are painted over their glyphs' cells, on the line's baseline
+            auto objectGlyph = lineStart;
+            for (auto g = lineGlyphs.cbegin(); g != lineGlyphs.cend(); ++g, ++objectGlyph)
+            {
+                if (!is_inline_object(*g))
+                    continue;
+                auto const textPosition = from_glyph(objectGlyph);
+                auto const* object = inline_objects::object_at(*this, textPosition.first);
+                if (!object)
+                    continue;
+                bool const selected = cursor().position() != cursor().anchor() && has_focus() &&
+                    static_cast<cursor::position_type>(textPosition.second) > std::min(cursor().position(), cursor().anchor()) &&
+                    static_cast<cursor::position_type>(textPosition.first) < std::max(cursor().position(), cursor().anchor());
+                auto const& style = glyph_style(objectGlyph, iColumns[aColumn.index()]);
+                color_or_gradient const ink = selected ?
+                    color_or_gradient{ service<i_app>().current_style().palette().color(color_role::SelectedText) } :
+                    style.character().text_color() != neolib::none ? style.character().text_color() : color_or_gradient{ default_text_color() };
+                // the paragraph's line area: aPosition is the line's position, which includes its indent and alignment
+                auto const& paragraph = style.paragraph();
+                auto const indentLeft = (paragraph.margin() ? paragraph.margin()->left : 0.0) + (paragraph.padding() ? paragraph.padding()->left : 0.0);
+                auto const indentRight = (paragraph.margin() ? paragraph.margin()->right : 0.0) + (paragraph.padding() ? paragraph.padding()->right : 0.0);
+                auto const columnLeft = aPosition.x - aLine->xpos();
+                iInlineObjects->draw(aGc, *object, glyphs().glyph_font(*objectGlyph),
+                    point{ textPos.x + g->cell[0].x, aPosition.y + aLine->baseline }, ink,
+                    columnLeft + indentLeft, columnLeft + column_rect(aColumn.index()).width() - indentRight);
+            }
+        }
+
         if (hasAnimations)
             iHasAnimations = true;
     }
@@ -3746,20 +4900,20 @@ namespace neogfx
         {
             auto const& currentStyle = current_style();
             yHeight = currentStyle.character().font().value().height();
-            if (currentStyle.paragraph().padding())
+            if (currentStyle.paragraph().padding() || currentStyle.paragraph().margin())
             {
+                auto padding_of = [](paragraph_style const& aStyle) { return aStyle.padding() ? aStyle.padding().value() : neogfx::padding{}; };
+                auto margin_of = [](paragraph_style const& aStyle) { return aStyle.margin() ? aStyle.margin().value() : neogfx::margin{}; };
+                auto const& current = currentStyle.paragraph();
                 if (iText.empty())
-                    yOffset = currentStyle.paragraph().padding()->top;
+                    yOffset = margin_of(current).top + padding_of(current).top;
                 else
                 {
                     auto previousPos = glyph_position(to_glyph(std::prev(iText.begin() + cursor().position())) - glyphs().begin(), true);
-                    if (previousPos.glyph && previousPos.column)
-                    {
-                        auto const& previousStyle = glyph_style(previousPos.glyph.value(), iColumns.at(previousPos.column_index()));
-                        yOffset = previousStyle.paragraph().padding()->bottom + currentStyle.paragraph().padding()->top;
-                    }
-                    else
-                        yOffset = currentStyle.paragraph().padding()->bottom + currentStyle.paragraph().padding()->top;
+                    auto const previousStyle = (previousPos.glyph && previousPos.column) ?
+                        glyph_style(previousPos.glyph.value(), iColumns.at(previousPos.column_index())) : currentStyle;
+                    auto const& previous = previousStyle.paragraph();
+                    yOffset = std::max(margin_of(previous).bottom, margin_of(current).top) + padding_of(previous).bottom + padding_of(current).top;
                 }
             }
         }

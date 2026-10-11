@@ -235,6 +235,9 @@
     <ClCompile Include="..\..\..\..\src\gui\widget\terminal.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\gui\widget\rich_text_parser.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\gui\widget\text_edit.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
@@ -584,6 +587,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\text_edit.hpp">
       <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\gui\widget\rich_text_parser.hpp">
+      <Filter>Source Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\text_edit_bits.hpp">
       <Filter>Header Files\gui</Filter>

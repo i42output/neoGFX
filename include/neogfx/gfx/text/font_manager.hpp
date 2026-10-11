@@ -92,6 +92,9 @@ namespace neogfx
     public:
         i_glyph_text_factory& glyph_text_factory() const final;
     public:
+        using i_font_manager::typeset_math;
+        math_metrics typeset_math(font const& aMathFont, i_string const& aLatex, bool aDisplay, i_vector<math_glyph>& aGlyphs, i_vector<math_rule>& aRules) const final;
+    public:
         const i_texture_atlas& glyph_atlas() const final;
         i_texture_atlas& glyph_atlas() final;
         const i_emoji_atlas& emoji_atlas() const final;

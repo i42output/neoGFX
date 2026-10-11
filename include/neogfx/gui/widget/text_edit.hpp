@@ -130,6 +130,8 @@ namespace neogfx
             paragraph_style& set_alignment(optional_alignment const& aALignment = {});
             optional_padding const& padding() const;
             paragraph_style& set_padding(optional_padding const& aPadding = {});
+            optional_margin const& margin() const; // outside the padding; vertical margins of adjacent paragraphs collapse
+            paragraph_style& set_margin(optional_margin const& aMargin = {});
             optional<double> const& line_spacing() const;
             paragraph_style& set_line_spacing(optional<double> const& aLineSpacing = {});
         public:
@@ -142,6 +144,7 @@ namespace neogfx
             optional_alignment iAlignment;
             optional_padding iPadding;
             optional<double> iLineSpacing;
+            optional_margin iMargin;
         };
 
         class style
@@ -590,6 +593,7 @@ namespace neogfx
 
     private:
         class dragger;
+        struct inline_objects; // math and images imported from rich text
 
     public:
         using position_type = document_text::difference_type;
@@ -809,6 +813,7 @@ namespace neogfx
         document_glyphs const& glyphs() const;
         document_glyphs& glyphs();
         std::size_t do_insert_text(position_type aPosition, i_string const& aText, format const& aFormat, bool aMoveCursor, bool aClearFirst);
+        std::size_t do_insert_rich_text(position_type aPosition, i_string const& aRichText, rich_text_format aFormat, bool aMoveCursor, bool aClearFirst);
         void delete_any_selection();
         void notify_text_changed();
         bool same_paragraph(position_type aFirstGlyphPos, position_type aSecondGlyphPos) const;
@@ -878,6 +883,9 @@ namespace neogfx
         std::optional<password_bits> iPasswordBits;
         std::vector<position_type> iBookmarks;
         texture iBookmarkIcon;
+        std::unique_ptr<inline_objects> iInlineObjects;
+        bool iRichText = false; // rich text has been imported: its markup padding (below, else CSS defaults) adds to padding()
+        std::optional<neogfx::padding> iMarkupPadding; // the imported HTML's <body style> margin plus padding
         bool iOutOfMemory;
     public:
         define_property(property_category::other, bool, ReadOnly, read_only, false)

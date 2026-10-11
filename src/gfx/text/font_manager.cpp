@@ -53,6 +53,7 @@
 #include <neogfx/gfx/text/glyph_text.ipp>
 #include "../../gfx/text/native/native_font_face.hpp"
 #include "../../gfx/text/native/native_font.hpp"
+#include "math_layout.hpp"
 
 template <>
 neogfx::i_font_manager& services::start_service<neogfx::i_font_manager>()
@@ -730,6 +731,8 @@ namespace neogfx
                     catch (...) { newGlyph.type.category = text_category::FontEmoji; }
                 if ((selectedFont.style() & font_style::Underline) == font_style::Underline)
                     set_underline(newGlyph, true);
+                if ((selectedFont.style() & font_style::Strike) == font_style::Strike)
+                    set_strike(newGlyph, true);
                 if ((selectedFont.style() & font_style::Superscript) == font_style::Superscript)
                     set_superscript(newGlyph, true, (selectedFont.style() & font_style::BelowAscenderLine) == font_style::BelowAscenderLine);
                 if ((selectedFont.style() & font_style::Subscript) == font_style::Subscript)
@@ -981,6 +984,11 @@ namespace neogfx
                         {
                             auto font = iNativeFonts.emplace(iNativeFonts.end(), iFontLib, file->path().string());
                             iFontFamilies[font->family_name()].push_back(font);
+                            for (auto const& otherFamily : font->other_families())
+                            {
+                                auto otherFont = iNativeFonts.emplace(iNativeFonts.end(), iFontLib, file->path().string(), otherFamily);
+                                iFontFamilies[otherFont->family_name()].push_back(otherFont);
+                            }
                         }
                     }
                     catch (native_font::failed_to_load_font&)
@@ -1156,6 +1164,11 @@ namespace neogfx
         auto font = iNativeFonts.emplace(iNativeFonts.end(), iFontLib, aData, aSizeInBytes);
         iFontFamilies[font->family_name()].push_back(font);
         aFamilyName = font->family_name();
+        for (auto const& otherFamily : font->other_families())
+        {
+            auto otherFont = iNativeFonts.emplace(iNativeFonts.end(), iFontLib, aData, aSizeInBytes, otherFamily);
+            iFontFamilies[otherFont->family_name()].push_back(otherFont);
+        }
     }
 
     std::uint32_t font_manager::font_family_count() const
@@ -1223,6 +1236,19 @@ namespace neogfx
     i_glyph_text_factory& font_manager::glyph_text_factory() const
     {
         return *iGlyphTextFactory;
+    }
+
+    math_metrics font_manager::typeset_math(font const& aMathFont, i_string const& aLatex, bool aDisplay, i_vector<math_glyph>& aGlyphs, i_vector<math_rule>& aRules) const
+    {
+        auto const layout = math_layout::typeset(static_cast<font_face_handle*>(aMathFont.native_font_face().handle())->harfbuzzFont,
+            aLatex.to_std_string_view(), aDisplay);
+        aGlyphs.clear();
+        for (auto const& g : layout.glyphs)
+            aGlyphs.push_back(math_glyph{ g.glyph, g.scale, g.x, g.y });
+        aRules.clear();
+        for (auto const& r : layout.rules)
+            aRules.push_back(math_rule{ r.x, r.y, r.width, r.height });
+        return math_metrics{ layout.width, layout.ascent, layout.descent, layout.error };
     }
 
     const i_texture_atlas& font_manager::glyph_atlas() const

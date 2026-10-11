@@ -66,7 +66,7 @@ Button                          | 100     |
 Table View                      | 98      |     Selection
 Tree View                       | 95      |
 List View                       | 95      |
-Text Edit                       | 95      |     Rich text (HTML); undo/redo
+Text Edit                       | 98      |     Undo/redo
 Line Edit                       | 100     |     
 Spin Box                        | 100     |
 Slider                          | 90      |     Keyboard

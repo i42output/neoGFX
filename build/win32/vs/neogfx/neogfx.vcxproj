@@ -510,6 +510,7 @@
     <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_texture.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\native\windows_renderer.hpp" />
+    <ClInclude Include="..\..\..\..\src\gfx\text\math_layout.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\text\native\i_native_font.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\text\native\i_native_font_face.hpp" />
     <ClInclude Include="..\..\..\..\src\gfx\text\native\native_font.hpp" />
@@ -624,6 +625,7 @@
     <ClCompile Include="..\..\..\..\src\gfx\text\font_manager.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\text\glyph.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\text\glyph_text.cpp" />
+    <ClCompile Include="..\..\..\..\src\gfx\text\math_layout.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\text\native\native_font.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\text\native\native_font_face.cpp" />
     <ClCompile Include="..\..\..\..\src\gfx\utility.cpp" />

@@ -27,7 +27,8 @@ namespace neogfx
 {
     enum class rich_text_format
     {
-        Html
+        Html,
+        Markdown
     };
 
     class i_text_document : public i_document

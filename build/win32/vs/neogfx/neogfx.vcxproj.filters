@@ -962,6 +962,9 @@
     <ClInclude Include="..\..\..\..\src\gfx\text\native\i_native_font_face.hpp">
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\gfx\text\math_layout.hpp">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\src\gfx\text\native\native_font.hpp">
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
@@ -1363,6 +1366,9 @@
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\text\glyph_text.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\gfx\text\math_layout.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gfx\text\native\native_font.cpp">

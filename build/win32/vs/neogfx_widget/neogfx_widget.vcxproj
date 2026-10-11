@@ -272,6 +272,7 @@
     <ClCompile Include="..\..\..\..\src\gui\widget\progress_bar.cpp" />
     <ClCompile Include="..\..\..\..\src\gui\widget\push_button.cpp" />
     <ClCompile Include="..\..\..\..\src\gui\widget\radio_button.cpp" />
+    <ClCompile Include="..\..\..\..\src\gui\widget\rich_text_parser.cpp" />
     <ClCompile Include="..\..\..\..\src\gui\widget\scrollable_widget.cpp" />
     <ClCompile Include="..\..\..\..\src\gui\widget\scrollbar.cpp" />
     <ClCompile Include="..\..\..\..\src\gui\widget\skin_manager.cpp" />
@@ -408,6 +409,7 @@
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\terminal.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\text_edit.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\text_edit_bits.hpp" />
+    <ClInclude Include="..\..\..\..\src\gui\widget\rich_text_parser.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\text_field.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\text_field_bits.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\text_widget.hpp" />

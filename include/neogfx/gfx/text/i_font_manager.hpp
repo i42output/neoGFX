@@ -46,6 +46,43 @@ namespace neogfx
         Widget
     };
 
+    // A LaTeX math expression typeset by i_font_manager::typeset_math. Positions are in pixels relative to the
+    // formula's origin on its baseline, with y positive downwards.
+    struct math_glyph
+    {
+        std::uint32_t glyph;    // glyph index in the math font
+        float scale;            // font size relative to the math font (script levels)
+        float x;                // pen position of the glyph origin
+        float y;                // baseline
+
+        auto operator<=>(math_glyph const&) const = default;
+    };
+
+    struct math_rule
+    {
+        float x;
+        float y;                // top edge
+        float width;
+        float height;
+
+        auto operator<=>(math_rule const&) const = default;
+    };
+
+    struct math_metrics
+    {
+        float width;
+        float ascent;           // extent above the baseline
+        float descent;          // extent below the baseline
+        bool error;             // the expression could not be fully parsed; the layout shows what could be
+    };
+
+    struct math_formula
+    {
+        math_metrics metrics = {};
+        vector<math_glyph> glyphs;
+        vector<math_rule> rules;
+    };
+
     class i_fallback_font_info
     {
     public:
@@ -93,11 +130,21 @@ namespace neogfx
     public:
         virtual i_glyph_text_factory& glyph_text_factory() const = 0;
     public:
+        // typesets a LaTeX math expression with an OpenType MATH font (e.g. Cambria Math); fonts without a MATH
+        // table work using approximate TeX default constants
+        virtual math_metrics typeset_math(font const& aMathFont, i_string const& aLatex, bool aDisplay, i_vector<math_glyph>& aGlyphs, i_vector<math_rule>& aRules) const = 0;
+    public:
         virtual const i_texture_atlas& glyph_atlas() const = 0;
         virtual i_texture_atlas& glyph_atlas() = 0;
         virtual const i_emoji_atlas& emoji_atlas() const = 0;
         virtual i_emoji_atlas& emoji_atlas() = 0;
     public:
+        math_formula typeset_math(font const& aMathFont, std::string_view aLatex, bool aDisplay) const
+        {
+            math_formula result;
+            result.metrics = typeset_math(aMathFont, string{ aLatex }, aDisplay, result.glyphs, result.rules);
+            return result;
+        }
         bool has_font(std::string const& aFamily, std::string const& aStyle) const
         {
             for (std::uint32_t familyIndex = 0; familyIndex < font_family_count(); ++familyIndex)

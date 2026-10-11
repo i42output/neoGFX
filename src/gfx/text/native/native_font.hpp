@@ -48,10 +48,13 @@ namespace neogfx
         struct no_matching_style_found : std::runtime_error { no_matching_style_found() : std::runtime_error("neogfx::native_font::no_matching_style_found") {} };
     public:
         native_font(FT_Library aFontLib, const std::string aFileName);
+        native_font(FT_Library aFontLib, const std::string aFileName, std::string const& aFamilyName);
         native_font(FT_Library aFontLib, const void* aData, std::size_t aSizeInBytes);
+        native_font(FT_Library aFontLib, const void* aData, std::size_t aSizeInBytes, std::string const& aFamilyName);
         ~native_font();
     public:
         i_string const& family_name() const final;
+        std::vector<std::string> const& other_families() const;
         bool has_style(font_style aStyle) const final;
         std::uint32_t style_count() const final;
         font_style style(std::uint32_t aStyle) const final;
@@ -75,6 +78,7 @@ namespace neogfx
         hb_blob_t* iHarfbuzzBlob = nullptr;
         string iFamilyName;
         FT_Long iFaceCount;
+        std::vector<std::string> iOtherFamilies;
         style_map iStyleMap;
         face_map iFaces;
     };

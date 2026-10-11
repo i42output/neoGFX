@@ -138,9 +138,9 @@ namespace neogfx
                             if (moreBits.size() == 3)
                             {
                                 *this = sRGB_color{
-                                    std::stoul(moreBits[0]),
-                                    std::stoul(moreBits[1]),
-                                    std::stoul(moreBits[2]) };
+                                    static_cast<std::uint32_t>(std::stoul(moreBits[0])),
+                                    static_cast<std::uint32_t>(std::stoul(moreBits[1])),
+                                    static_cast<std::uint32_t>(std::stoul(moreBits[2])) };
                             }
                         }
                         else if (bits[0] == "rgba")
@@ -150,9 +150,9 @@ namespace neogfx
                             if (moreBits.size() == 4)
                             {
                                 *this = sRGB_color{
-                                    std::stoul(moreBits[0]),
-                                    std::stoul(moreBits[1]),
-                                    std::stoul(moreBits[2]),
+                                    static_cast<std::uint32_t>(std::stoul(moreBits[0])),
+                                    static_cast<std::uint32_t>(std::stoul(moreBits[1])),
+                                    static_cast<std::uint32_t>(std::stoul(moreBits[2])),
                                     static_cast<std::uint32_t>(std::stod(moreBits[3]) * 255.0) };
                             }
                         }
