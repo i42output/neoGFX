@@ -356,10 +356,13 @@ namespace neogfx
         if (iText != aText)
         {
             size const oldSize = minimum_size();
+            bool const wasEmpty = iText.empty();
             iText = aText;
             reset_cache();
             TextChanged();
-            if (oldSize != minimum_size())
+            // (an elided (or cut off or faded) text widget's minimum size doesn't depend on its text so going to or from
+            // empty must also count as a geometry change: a label's placement of its text and image depends on it)
+            if (oldSize != minimum_size() || wasEmpty != iText.empty())
             {
                 TextGeometryChanged();
                 if (visible() || effective_size_policy().ignore_visibility())

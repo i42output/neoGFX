@@ -25,6 +25,32 @@
 
 namespace neogfx
 {
+    namespace
+    {
+        // WCAG 2.x relative luminance (linear light, Rec. 709 primaries)
+        scalar relative_luminance(color const& aColor)
+        {
+            auto const linear = aColor.to_linear();
+            return 0.2126 * linear.x + 0.7152 * linear.y + 0.0722 * linear.z;
+        }
+
+        // WCAG 2.x contrast ratio (1:1 to 21:1)
+        scalar contrast_ratio(color const& aLhs, color const& aRhs)
+        {
+            auto const lhs = relative_luminance(aLhs);
+            auto const rhs = relative_luminance(aRhs);
+            return (std::max(lhs, rhs) + 0.05) / (std::min(lhs, rhs) + 0.05);
+        }
+
+        // light text is used on any backdrop where it reaches this contrast (the WCAG minimum for large text); WCAG's
+        // luminance contrast overstates the legibility of dark text on mid-tones so a symmetric "pick the higher
+        // contrast" test chooses black where white reads better (e.g. black on the default selection colour)
+        constexpr scalar LightTextMinimumContrast = 3.0;
+        // the palette's own text colour is kept if it has the chosen polarity and reaches this contrast (the WCAG
+        // AA minimum for normal text) or at least the contrast of black/white text if that is lower
+        constexpr scalar DefaultTextMinimumContrast = 4.5;
+    }
+
     palette::palette()
     {
     }
@@ -367,31 +393,49 @@ namespace neogfx
 
     color palette::default_text_color_for_widget(const i_widget& aWidget) const
     {
-        optional_color textColor;
-        const i_widget* w = nullptr;
-        do
+        // work out the colour the text is actually drawn on: translucent widget colours are composited (front to back)
+        // over those of their ancestors until an opaque colour is reached
+        bool foundColor = false;
+        scalar backdropRed = 0.0, backdropGreen = 0.0, backdropBlue = 0.0, coverage = 0.0;
+        auto const add_layer = [&](neogfx::color const& aColor, scalar aAlpha)
         {
-            if (w == nullptr)
-                w = &aWidget;
-            else
-                w = &w->parent();
+            auto const weight = (1.0 - coverage) * aAlpha;
+            backdropRed += weight * aColor.red<scalar>();
+            backdropGreen += weight * aColor.green<scalar>();
+            backdropBlue += weight * aColor.blue<scalar>();
+            coverage += weight;
+        };
+        for (i_widget const* w = &aWidget; w != nullptr && coverage < 1.0; w = w->has_parent() ? &w->parent() : nullptr)
+        {
             // (a widget's base colour (e.g. a push button's face, a text edit's text area) is what its text is drawn on so it takes 
             // precedence over its background colour)
             if (w->has_base_color())
             {
-                textColor = w->base_color().brightness() >= 0.509 ? color::Black : color::White;
-                break;
+                auto const baseColor = w->base_color();
+                add_layer(baseColor, baseColor.alpha<scalar>());
+                foundColor = true;
             }
             else if (w->has_background_color())
             {
-                textColor = w->background_color().brightness() >= 0.509 ? color::Black : color::White;
-                break;
+                // (as painted by widget::paint_non_client)
+                auto const backgroundColor = w->background_color();
+                add_layer(backgroundColor, backgroundColor.alpha<scalar>() * (w->has_background_opacity() ? w->background_opacity() : 1.0));
+                foundColor = true;
             }
-        } while (w->has_parent());
-        auto defaultTextColor = color(color_role::Text);
-        if (textColor == std::nullopt || textColor->similar_intensity(defaultTextColor))
-            textColor = defaultTextColor;
-        return *textColor;
+        }
+        auto const defaultTextColor = color(color_role::Text);
+        if (!foundColor)
+            return defaultTextColor;
+        add_layer(color(color_role::Background), 1.0);
+        neogfx::color const backdrop{ backdropRed, backdropGreen, backdropBlue, 1.0 };
+
+        bool const lightText = contrast_ratio(neogfx::color::White, backdrop) >= LightTextMinimumContrast;
+        neogfx::color const textColor = lightText ? neogfx::color::White : neogfx::color::Black;
+        bool const defaultTextIsLight = relative_luminance(defaultTextColor) > relative_luminance(backdrop);
+        if (defaultTextIsLight == lightText &&
+            contrast_ratio(defaultTextColor, backdrop) >= std::min(DefaultTextMinimumContrast, contrast_ratio(textColor, backdrop)))
+            return defaultTextColor;
+        return textColor;
     }
 
     bool palette::has_proxy() const
