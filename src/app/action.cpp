@@ -31,27 +31,35 @@ namespace neogfx
     }
 
     action::action(string const& aText) :
-        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iText{ aText }
+        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }
     {
         Triggered.set_trigger_type(trigger_type::Asynchronous);
+        iText = aText;
+        iText.track(aText);
     }
 
     action::action(string const& aText, string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
-        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iText{ aText }, iImage{ neogfx::image{ aImageUri, aDpiScaleFactor, aSampling } }
+        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iImage{ neogfx::image{ aImageUri, aDpiScaleFactor, aSampling } }
     {
         Triggered.set_trigger_type(trigger_type::Asynchronous);
+        iText = aText;
+        iText.track(aText);
     }
 
     action::action(string const& aText, const i_texture& aImage) :
-        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iText{ aText }, iImage{ aImage }
+        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iImage{ aImage }
     {
         Triggered.set_trigger_type(trigger_type::Asynchronous);
+        iText = aText;
+        iText.track(aText);
     }
 
     action::action(string const& aText, const i_image& aImage) :
-        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iText{ aText }, iImage{ aImage }
+        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iImage{ aImage }
     {
         Triggered.set_trigger_type(trigger_type::Asynchronous);
+        iText = aText;
+        iText.track(aText);
     }
 
     action::action(i_action_container& aContainer) :
@@ -260,6 +268,7 @@ namespace neogfx
 
     i_action& action::set_text(i_optional<i_string> const& aText)
     {
+        iText.track(aText);
         if (iText != aText)
         {
             iText = aText;
@@ -270,8 +279,16 @@ namespace neogfx
         return *this;
     }
 
+    i_action& action::set_text(i_string const& aText)
+    {
+        set_text(optional_text{ aText });
+        iText.track(aText);
+        return *this;
+    }
+
     i_action& action::set_menu_text(i_optional<i_string> const& aMenuText)
     {
+        iMenuText.track(aMenuText);
         if (iMenuText != aMenuText)
         {
             iMenuText = aMenuText;
@@ -284,6 +301,7 @@ namespace neogfx
 
     i_action& action::set_button_text(i_optional<i_string> const& aButtonText)
     {
+        iButtonText.track(aButtonText);
         if (iButtonText != aButtonText)
         {
             iButtonText = aButtonText;
@@ -296,6 +314,7 @@ namespace neogfx
 
     i_action& action::set_tool_tip_text(i_optional<i_string> const& aToolTipText)
     {
+        iToolTipText.track(aToolTipText);
         if (iToolTipText != aToolTipText)
         {
             iToolTipText = aToolTipText;
@@ -308,6 +327,7 @@ namespace neogfx
 
     i_action& action::set_help_text(i_optional<i_string> const& aHelpText)
     {
+        iHelpText.track(aHelpText);
         if (iHelpText != aHelpText)
         {
             iHelpText = aHelpText;
@@ -315,6 +335,34 @@ namespace neogfx
                 iSeparator = false;
             Changed();
         }
+        return *this;
+    }
+
+    i_action& action::set_menu_text(i_string const& aMenuText)
+    {
+        set_menu_text(optional_text{ aMenuText });
+        iMenuText.track(aMenuText);
+        return *this;
+    }
+
+    i_action& action::set_button_text(i_string const& aButtonText)
+    {
+        set_button_text(optional_text{ aButtonText });
+        iButtonText.track(aButtonText);
+        return *this;
+    }
+
+    i_action& action::set_tool_tip_text(i_string const& aToolTipText)
+    {
+        set_tool_tip_text(optional_text{ aToolTipText });
+        iToolTipText.track(aToolTipText);
+        return *this;
+    }
+
+    i_action& action::set_help_text(i_string const& aHelpText)
+    {
+        set_help_text(optional_text{ aHelpText });
+        iHelpText.track(aHelpText);
         return *this;
     }
 

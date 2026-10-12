@@ -29,6 +29,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/dockable.hpp>
 #include <neogfx/gui/widget/table_view.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
+#include <neogfx/gui/widget/tab_page_container.hpp>
+#include <neogfx/gui/widget/tab_page.hpp>
+#include <neogfx/gui/widget/drop_list.hpp>
+#include <neogfx/gui/widget/line_edit.hpp>
+#include <neogfx/gui/widget/item_model.hpp>
+#include <neogfx/gui/widget/item_presentation_model.hpp>
+#include <neogfx/app/action.hpp>
 #include <neogfx/core/style_sheet.hpp>
 #include <neogfx/gui/dialog/settings_dialog.hpp>
 #include <neogfx/app/file_dialog.hpp>
@@ -93,16 +100,21 @@ namespace neogfx::DesignStudio
         void select_all() override;
     private:
         void init_view_actions(main_app& aApp, settings& aSettings);
+        void init_language_menu();
         void init_docks();
         void init_appearance();
         void init_tool_views();
         void init_object_explorer();
         void init_properties();
+        void init_translations();
         void init_workspace(main_app& aApp);
         void init_file_actions(main_app& aApp, settings& aSettings, project_manager& aProjectManager);
     private:
         void paint_workspace(ng::i_graphics_context& aGc);
         void update_properties();
+        std::optional<std::pair<i_project const*, std::uint32_t>> translation_file() const;
+        void update_translations();
+        void add_translation_row(ng::string const& aSource = {}, ng::string const& aTarget = {}, ng::string const& aContext = {}, ng::string const& aPlurality = {});
         std::optional<std::string> property_attribute(i_property const& aProperty) const;
         std::optional<std::string> property_component_member(i_property const& aProperty, std::uint32_t aComponent) const;
         std::optional<std::string> property_member(i_property const& aProperty) const;
@@ -120,7 +132,17 @@ namespace neogfx::DesignStudio
         ng::dockable iToolbox;
         ng::dockable iWorkflow;
         ng::dockable iObjects;
-        ng::dockable iProperties;
+        ng::dockable iProperties; // (tabs: Properties (the property table) and Translations (the translation table))
+        ng::tab_page iPropertiesTab;
+        ng::vertical_layout iPropertiesTabLayout;
+        ng::table_view iPropertyTable;
+        ng::tab_page iTranslationsTab;
+        ng::vertical_layout iTranslationsTabLayout;
+        ng::horizontal_layout iTranslationLanguageLayout;
+        ng::drop_list iTranslationLanguage;
+        ng::line_edit iNewTranslationLanguage;
+        ng::push_button iAddTranslationLanguage;
+        ng::table_view iTranslationTable;
         ng::horizontal_layout iWorkspaceLayout;
         ng::mvc::scrollable_view_container iWorkspace;
         ng::texture iBackgroundTexture1;
@@ -151,6 +173,16 @@ namespace neogfx::DesignStudio
         bool iObjectColumnsResized = false;
         bool iObjectColumnsDistributed = false;
         std::unordered_map<i_property const*, std::string> iPropertyMembers; // the member element (e.g. ".text_widget") whose widget a property shown is a property of (if it isn't the element's own)
+        ng::item_model iTranslationModel; // (columns: source, translation, context, plurality; the last row is for a new translation)
+        ng::item_presentation_model iTranslationPresentationModel;
+        std::optional<std::pair<i_project const*, std::uint32_t>> iTranslationFile; // the .nrc file whose translations are shown (the selected element's)
+        std::vector<ng::string> iTranslationLanguages; // (the language drop list's)
+        std::optional<ng::string> iTranslationLanguageChosen; // (shown if the file has translations into it)
+        std::optional<ng::string> iTranslationLanguageShown; // (the language whose translations the table shows)
+        bool iUpdatingTranslations = false;
+        bool iTranslationsNeedUpdate = false;
+        bool iTranslationRowNeeded = false;
+        std::vector<std::pair<ng::string, std::unique_ptr<ng::action>>> iLanguageActions; // (View | Language)
         std::set<i_property const*> iChangedProperties; // changed since their rows were last updated (a batch update every 20ms: see iPropertiesUpdater); emptied if their object is destroyed before then
     };
 }

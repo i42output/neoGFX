@@ -41,7 +41,7 @@ namespace neogfx
     public:
         typedef i_dockable abstract_type;
     public:
-        dockable(std::shared_ptr<i_widget> aDockableWidget, std::string const& aTitle = "", dock_area aAcceptableDocks = dock_area::Any);
+        dockable(std::shared_ptr<i_widget> aDockableWidget, string const& aTitle = string{}, dock_area aAcceptableDocks = dock_area::Any);
     public:
         const neolib::string& title() const override;
     public:
@@ -70,19 +70,19 @@ namespace neogfx
             return static_cast<WidgetType&>(docked_widget());
         }
     private:
-        neolib::string iTitle;
+        translatable<string> iTitle; // (the title bar keeps its own up to date)
         dock_area iAcceptableDocks;
         std::shared_ptr<i_widget> iDockedWidget;
         i_dock* iDock;
     };
 
     template <typename WidgetType, typename... Args>
-    inline dockable make_dockable(std::string const& aTitle = "", dock_area aAcceptableDocks = dock_area::Any, Args&&... aArgs)
+    inline dockable make_dockable(string const& aTitle = string{}, dock_area aAcceptableDocks = dock_area::Any, Args&&... aArgs)
     {
         return dockable{ std::make_shared<WidgetType>(std::forward<Args>(aArgs)...), aTitle, aAcceptableDocks };
     }
     template <typename WidgetType, typename... Args>
-    static std::shared_ptr<i_dockable> make_shared_dockable(std::string const& aTitle = "", dock_area aAcceptableDocks = dock_area::Any, Args&&... aArgs)
+    static std::shared_ptr<i_dockable> make_shared_dockable(string const& aTitle = string{}, dock_area aAcceptableDocks = dock_area::Any, Args&&... aArgs)
     {
         return std::make_shared<dockable>(std::make_shared<WidgetType>(std::forward<Args>(aArgs)...), aTitle, aAcceptableDocks);
     }

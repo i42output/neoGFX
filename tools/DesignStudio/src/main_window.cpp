@@ -25,6 +25,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/dialog/color_dialog.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>
 #include <neogfx/gui/dialog/gradient_dialog.hpp>
+#include <cctype>
+#include <algorithm>
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -228,7 +231,17 @@ namespace neogfx::DesignStudio
         iToolbox{ ng::make_dockable<ng::tree_view>("Toolbox"_t, ng::dock_area::Left, true, ng::frame_style::NoFrame) },
         iWorkflow{ ng::make_dockable<ng::list_view>("Workflow"_t, ng::dock_area::Left, true, ng::frame_style::NoFrame) },
         iObjects{ ng::make_dockable<ng::table_view>("Object Explorer"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame) },
-        iProperties{ ng::make_dockable<ng::table_view>("Properties"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame) },
+        iProperties{ ng::make_dockable<ng::tab_page_container<>>("Properties"_t, ng::dock_area::Right) },
+        iPropertiesTab{ iProperties.docked_widget<ng::tab_page_container<>>(), "Properties"_t },
+        iPropertiesTabLayout{ iPropertiesTab },
+        iPropertyTable{ iPropertiesTabLayout, true, ng::frame_style::NoFrame },
+        iTranslationsTab{ iProperties.docked_widget<ng::tab_page_container<>>(), "Translations"_t },
+        iTranslationsTabLayout{ iTranslationsTab },
+        iTranslationLanguageLayout{ iTranslationsTabLayout },
+        iTranslationLanguage{ iTranslationLanguageLayout },
+        iNewTranslationLanguage{ iTranslationLanguageLayout },
+        iAddTranslationLanguage{ iTranslationLanguageLayout, "Add Language"_t },
+        iTranslationTable{ iTranslationsTabLayout, true, ng::frame_style::NoFrame },
         iWorkspaceLayout{ client_layout() },
         iWorkspace{ iWorkspaceLayout },
         iBackgroundTexture1{ ng::image{ ":/neogfx/DesignStudio/resources/neoGFX.png" } },
@@ -241,11 +254,13 @@ namespace neogfx::DesignStudio
         hide();
 
         init_view_actions(aApp, aSettings);
+        init_language_menu();
         init_docks();
         init_appearance();
         init_tool_views();
         init_object_explorer();
         init_properties();
+        init_translations();
         init_workspace(aApp);
         init_file_actions(aApp, aSettings, aProjectManager);
 
@@ -270,6 +285,46 @@ namespace neogfx::DesignStudio
         };
         showLayoutIcons.changing(showLayoutIconsChanged);
         showLayoutIcons.changed(showLayoutIconsChanged);
+    }
+
+    // View | Language: Design Studio's language (one it has translations (.xneol files beside it) into, or untranslated), changed at once
+    void main_window_ex::init_language_menu()
+    {
+        // (the language translated into: the app's language or, failing that, its primary language (e.g. "de" for "de-AT"))
+        auto update_checks = [this]()
+        {
+            std::string const current = ng::service<ng::i_app>().language().to_std_string();
+            ng::action* checked = iLanguageActions[0].second.get();
+            for (auto const& candidate : { current, current.substr(0, current.find('-')) })
+            {
+                auto const match = std::find_if(iLanguageActions.begin(), iLanguageActions.end(), [&](auto const& aLanguageAction)
+                    { return !aLanguageAction.first.empty() && boost::iequals(aLanguageAction.first.to_std_string(), candidate); });
+                if (match != iLanguageActions.end())
+                {
+                    checked = match->second.get();
+                    break;
+                }
+            }
+            for (auto& languageAction : iLanguageActions)
+                languageAction.second->set_checked(languageAction.second.get() == checked);
+        };
+        auto add_language = [&](ng::string const& aLanguage, ng::string const& aText)
+        {
+            auto& languageAction = *iLanguageActions.emplace_back(aLanguage, std::make_unique<ng::action>(aText)).second;
+            languageAction.set_checkable(true);
+            menuLanguage.add_action(languageAction);
+            iSink += languageAction.triggered([aLanguage, update_checks]()
+            {
+                ng::service<ng::i_app>().set_language(aLanguage);
+                ng::service<ng::i_app>().save_language();
+                update_checks();
+            });
+        };
+        add_language(ng::string{}, "Untranslated"_t);
+        for (auto const& language : ng::service<ng::i_app>().languages())
+            add_language(ng::string{ language }, ng::string{ ng::language_name(language).to_std_string() + " [" + language.to_std_string() + "]" });
+        iSink += ng::service<ng::i_app>().language_changed(update_checks);
+        update_checks();
     }
 
     // the window's size and position, the docks and their dockables (with their sizes/weights saved in the settings)
@@ -795,7 +850,8 @@ namespace neogfx::DesignStudio
         iPropertyModel.set_column_name(1u, "Value"_t);
         iPropertyPresentationModel.set_item_model(iPropertyModel);
         iPropertyPresentationModel.set_alternating_row_color(true);
-        auto& propertyTable = iProperties.docked_widget<ng::table_view>();
+        iPropertiesTabLayout.set_padding(ng::padding{});
+        auto& propertyTable = iPropertyTable;
         propertyTable.set_minimum_size(ng::size{ 128_dip, 128_dip });
         propertyTable.set_presentation_model(iPropertyPresentationModel);
         propertyTable.column_header().set_expand_last_column(ng::last_column_expansion::ExpandToFitView);
@@ -1030,6 +1086,17 @@ namespace neogfx::DesignStudio
                     iPropertyPresentationModel.sync_cell_widgets(*property);
                 iChangedProperties.clear();
             }
+            // the Translations tab: the translations of the .nrc file the selected element is in (see update_translations)
+            if (iTranslationsNeedUpdate || translation_file() != iTranslationFile)
+            {
+                iTranslationsNeedUpdate = false;
+                update_translations();
+            }
+            else if (iTranslationRowNeeded)
+            {
+                iTranslationRowNeeded = false;
+                add_translation_row();
+            }
             // show a "..." button before the in-place editor of a color property's (or palette colour's) row being edited or, as a font 
             // property's row can't be edited (its components are), before the text of the current row if it is a font property's (its cell 
             // makes room for it: see property_presentation_model::cell_image_size)
@@ -1092,6 +1159,177 @@ namespace neogfx::DesignStudio
                 button->bring_to_front();
             }
         }, std::chrono::milliseconds{ 20 });
+    }
+
+    // Properties toolbox's Translations tab: the translation tables of the .nrc file the selected element is in (the project's primary 
+    // file if none is selected) ("<.nrc file stem>.<language>.xneol" files: see i_project), i.e. translations of the translatable strings 
+    // (as in "foo"_t) of the user interface it defines into the language chosen; the last row is for adding a translation (one without a 
+    // source is removed when the project is saved); a language is added by its IETF language tag (e.g. "de" or "de-DE")
+    void main_window_ex::init_translations()
+    {
+        iTranslationsTabLayout.set_padding(ng::padding{});
+        iTranslationLanguage.set_size_policy(ng::size_constraint::Expanding, ng::size_constraint::Minimum);
+        iNewTranslationLanguage.set_size_hint(ng::size_hint{ "de-DE-xxx" });
+        iNewTranslationLanguage.set_size_policy(ng::size_constraint::Minimum);
+        iAddTranslationLanguage.disable();
+
+        iTranslationModel.set_column_name(0u, "Source"_t);
+        iTranslationModel.set_column_name(1u, "Translation"_t);
+        iTranslationModel.set_column_name(2u, "Context"_t);
+        iTranslationModel.set_column_name(3u, "Plurality"_t);
+        iTranslationPresentationModel.set_item_model(iTranslationModel);
+        iTranslationPresentationModel.set_alternating_row_color(true);
+        iTranslationTable.set_minimum_size(ng::size{ 128_dip, 128_dip });
+        iTranslationTable.set_presentation_model(iTranslationPresentationModel);
+        iTranslationTable.column_header().set_expand_last_column(ng::last_column_expansion::ExpandToFitView);
+
+        iSink += iTranslationLanguage.SelectionChanged([this](ng::optional_item_model_index const& aSelection)
+        {
+            if (iUpdatingTranslations || !aSelection || aSelection->row() >= iTranslationLanguages.size() || 
+                iTranslationLanguages[aSelection->row()] == iTranslationLanguageShown)
+                return; // (n.b. also (asynchronously) when update_translations selects the language shown)
+            iTranslationLanguageChosen = iTranslationLanguages[aSelection->row()];
+            iTranslationsNeedUpdate = true;
+        });
+        iSink += iNewTranslationLanguage.TextChanged([this]()
+        {
+            iAddTranslationLanguage.enable(!iNewTranslationLanguage.text().empty() && iTranslationFile.has_value());
+        });
+        iSink += iAddTranslationLanguage.Clicked([this]()
+        {
+            auto const file = translation_file();
+            if (!file)
+                return;
+            // (letters, digits and hyphens (an underscore is taken to be a hyphen))
+            std::string language = iNewTranslationLanguage.text().to_std_string();
+            language.erase(0u, std::min(language.find_first_not_of(" \t"), language.size()));
+            language.erase(std::min(language.find_last_not_of(" \t") + 1u, language.size()));
+            std::replace(language.begin(), language.end(), '_', '-');
+            bool const valid = !language.empty() && language.front() != '-' && language.back() != '-' &&
+                std::all_of(language.begin(), language.end(), [](char ch) { return std::isalnum(static_cast<unsigned char>(ch)) || ch == '-'; });
+            if (!valid)
+            {
+                ng::service<ng::i_surface_manager>().display_error_message("Add Language"_t, 
+                    ng::string{ "Not a language tag (e.g. \"de\" or \"de-DE\"): "_t.to_std_string() + language });
+                return;
+            }
+            iProjectManager.active_project().add_translation_language(file->second, ng::string{ language });
+            iTranslationLanguageChosen = ng::string{ language };
+            iNewTranslationLanguage.set_text(ng::string{});
+            iTranslationsNeedUpdate = true;
+        });
+        iSink += iTranslationModel.item_changed([this](ng::item_model_index const& aIndex)
+        {
+            if (iUpdatingTranslations || !iTranslationFile || !iTranslationLanguageShown || !iProjectManager.project_active() ||
+                &iProjectManager.active_project() != iTranslationFile->first)
+                return;
+            auto& project = iProjectManager.active_project();
+            auto const file = iTranslationFile->second;
+            auto const& language = *iTranslationLanguageShown;
+            bool fileHasLanguage = false;
+            for (std::uint32_t i = 0u; !fileHasLanguage && i < project.translation_language_count(file); ++i)
+                fileHasLanguage = (project.translation_language(file, i) == language);
+            if (!fileHasLanguage)
+                return; // (the table is about to be updated: see iPropertiesUpdater)
+            auto const row = aIndex.row();
+            auto const count = project.translation_count(file, language);
+            if (row > count)
+                return;
+            auto cell_text = [&](std::uint32_t aColumn)
+            {
+                auto const& cellData = iTranslationModel.cell_data(ng::item_model_index{ row, aColumn });
+                return std::holds_alternative<ng::string>(cellData) ? std::get<ng::string>(cellData) : ng::string{};
+            };
+            auto const source = cell_text(0u);
+            auto const target = cell_text(1u);
+            auto const context = cell_text(2u);
+            auto const plurality = cell_text(3u);
+            if (row == count && source.empty() && target.empty() && context.empty() && plurality.empty())
+                return; // (the row for a new translation, still empty)
+            project.set_translation(file, language, row, source, context, plurality, target);
+            if (row == count)
+                iTranslationRowNeeded = true; // (a row for another new translation: see iPropertiesUpdater)
+        });
+        iSink += iProjectManager.ProjectRemoved([this](i_project&) { iTranslationsNeedUpdate = true; });
+        iSink += iProjectManager.ProjectActivated([this](i_project&) { iTranslationsNeedUpdate = true; });
+
+        update_translations();
+    }
+
+    // the .nrc file whose translations the Translations tab shows: the selected element's (or the project's primary file)
+    std::optional<std::pair<i_project const*, std::uint32_t>> main_window_ex::translation_file() const
+    {
+        if (!iProjectManager.project_active())
+            return {};
+        auto const& project = iProjectManager.active_project();
+        return std::make_pair(&project, iPropertyElement.valid() ? project.element_file(*iPropertyElement) : 0u);
+    }
+
+    // the Translations tab: the languages (translation tables) of the translation file and the translations into the language chosen
+    void main_window_ex::update_translations()
+    {
+        neolib::scoped_flag sf{ iUpdatingTranslations };
+        iTranslationFile = translation_file();
+        std::vector<ng::string> languages;
+        if (iTranslationFile)
+        {
+            auto const& [project, file] = *iTranslationFile;
+            for (std::uint32_t i = 0u; i < project->translation_language_count(file); ++i)
+                languages.push_back(ng::string{ project->translation_language(file, i) });
+        }
+        if (languages != iTranslationLanguages)
+        {
+            iTranslationLanguages = languages;
+            iTranslationLanguage.model().clear();
+            for (std::uint32_t row = 0u; row < languages.size(); ++row)
+                iTranslationLanguage.model().insert_item(ng::item_model_index{ row },
+                    ng::string{ ng::language_name(languages[row]).to_std_string() + " [" + languages[row].to_std_string() + "]" });
+        }
+        // (the language chosen if the file has translations into it, otherwise its first)
+        auto shown = iTranslationLanguageChosen ? std::find(languages.begin(), languages.end(), *iTranslationLanguageChosen) : languages.end();
+        if (shown == languages.end() && !languages.empty())
+            shown = languages.begin();
+        if (shown != languages.end())
+        {
+            iTranslationLanguageShown = *shown;
+            iTranslationLanguage.selection_model().set_current_index(iTranslationLanguage.presentation_model().from_item_model_index(
+                ng::item_model_index{ static_cast<std::uint32_t>(std::distance(languages.begin(), shown)) }));
+            iTranslationLanguage.accept_selection();
+        }
+        else
+        {
+            iTranslationLanguageShown = std::nullopt;
+            iTranslationLanguage.input_widget().set_text(ng::string{});
+        }
+        iTranslationLanguage.enable(!languages.empty());
+        iNewTranslationLanguage.enable(iTranslationFile.has_value());
+        iAddTranslationLanguage.enable(iTranslationFile.has_value() && !iNewTranslationLanguage.text().empty());
+        iTranslationModel.clear();
+        iTranslationRowNeeded = false;
+        iTranslationTable.enable(iTranslationFile.has_value() && shown != languages.end());
+        if (!iTranslationFile || shown == languages.end())
+            return;
+        auto const& [project, file] = *iTranslationFile;
+        ng::string source;
+        ng::string context;
+        ng::string plurality;
+        ng::string target;
+        for (std::uint32_t i = 0u; i < project->translation_count(file, *shown); ++i)
+        {
+            project->translation(file, *shown, i, source, context, plurality, target);
+            add_translation_row(source, target, context, plurality);
+        }
+        add_translation_row(); // (for a new translation)
+    }
+
+    void main_window_ex::add_translation_row(ng::string const& aSource, ng::string const& aTarget, ng::string const& aContext, ng::string const& aPlurality)
+    {
+        neolib::scoped_flag sf{ iUpdatingTranslations };
+        auto const row = iTranslationModel.rows();
+        iTranslationModel.insert_item(ng::item_model_index{ row }, aSource);
+        iTranslationModel.insert_cell_data(ng::item_model_index{ row, 1u }, aTarget);
+        iTranslationModel.insert_cell_data(ng::item_model_index{ row, 2u }, aContext);
+        iTranslationModel.insert_cell_data(ng::item_model_index{ row, 3u }, aPlurality);
     }
 
     // the workspace (design surface): drops, painting, rubber band selection, context menu, keyboard, preview and display ids
@@ -1338,6 +1576,7 @@ namespace neogfx::DesignStudio
             {
                 ng::service<ng::i_surface_manager>().display_error_message("Save Project"_t, ng::string{ e.what() });
             }
+            iTranslationsNeedUpdate = true; // (translations without a source aren't saved)
             update_ui();
         });
 
@@ -1408,6 +1647,7 @@ namespace neogfx::DesignStudio
                 }
             }
             create_caddies(project, iWorkspace.view_stack()); // (only for elements that don't already have one)
+            iTranslationsNeedUpdate = true; // (the added files' translations)
             // elements already shown may use resources from the added files so apply their attributes again
             project.root().visit([](i_element& aElement) { aElement.apply_attributes(show_ids()); });
         });

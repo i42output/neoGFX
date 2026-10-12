@@ -157,11 +157,13 @@ namespace neogfx
     window::window(const window_placement& aPlacement, string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ nullptr, aPlacement, aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
+        iTitleText.track(aWindowTitle);
     }
 
     window::window(string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ nullptr, window_placement::default_placement(), aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
+        iTitleText.track(aWindowTitle);
     }
 
     window::window(i_widget& aParent, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
@@ -177,11 +179,13 @@ namespace neogfx
     window::window(i_widget& aParent, const window_placement& aPlacement, string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ &aParent, aPlacement, aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
+        iTitleText.track(aWindowTitle);
     }
 
     window::window(i_widget& aParent, string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ &aParent, window_placement::default_placement(), aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
+        iTitleText.track(aWindowTitle);
     }
 
     window::~window()
@@ -224,7 +228,6 @@ namespace neogfx
         iCentering{ false },
         iClosed{ false },
         iReadyToRender{ (aStyle & window_style::InitiallyRenderable) == window_style::InitiallyRenderable },
-        iTitleText{ aWindowTitle ? *aWindowTitle : service<i_app>().name() },
         iStyle{ aStyle },
         iCountedEnable{ 0 },
         iHandlingMouseEntered{ false },
@@ -233,6 +236,8 @@ namespace neogfx
         iFocusedWidget{ nullptr },
         iDismissingChildren{ false }
     {
+        iTitleText = aWindowTitle ? *aWindowTitle : string{ service<i_app>().name() };
+
         if ((iStyle & window_style::Nested) == window_style::Nested)
             iStyle &= ~window_style::MinimizeBox;
 
@@ -933,6 +938,7 @@ namespace neogfx
 
     void window::set_title_text(i_string const& aTitleText)
     {
+        iTitleText.track(aTitleText);
         if (iTitleText != aTitleText)
         {
             iTitleText = aTitleText;

@@ -79,6 +79,9 @@
     <ClCompile Include="..\..\..\..\src\gui\dialog\message_box.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\gui\dialog\language_dialog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\gui\dialog\paragraph_dialog.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
@@ -316,6 +319,9 @@
       <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\dialog\message_box.hpp">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\dialog\language_dialog.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\dialog\paragraph_dialog.hpp">

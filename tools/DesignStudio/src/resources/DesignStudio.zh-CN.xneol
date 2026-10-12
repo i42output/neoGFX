@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xneol xmlns="https://neogfx.org/xneol" version="1.0"
+	srcLang="en-GB" trgLang="zh-CN">
+	<text>
+		<source>&amp;Edit</source>
+		<target>编辑(&amp;E)</target>
+	</text>
+	<text>
+		<source>&amp;File</source>
+		<target>文件(&amp;F)</target>
+	</text>
+	<text>
+		<source>&amp;Help</source>
+		<target>帮助(&amp;H)</target>
+	</text>
+	<text>
+		<source>&amp;Settings...</source>
+		<target>设置(&amp;S)...</target>
+	</text>
+	<text>
+		<source>&amp;Tools</source>
+		<target>工具(&amp;T)</target>
+	</text>
+	<text>
+		<source>&amp;View</source>
+		<target>视图(&amp;V)</target>
+	</text>
+	<text>
+		<source>2.5D (isometric) game</source>
+		<target>2.5D（等距）游戏</target>
+	</text>
+	<text>
+		<source>2D game</source>
+		<target>2D 游戏</target>
+	</text>
+	<text>
+		<source>3D game</source>
+		<target>3D 游戏</target>
+	</text>
+	<text>
+		<source>Abnormal Program Termination</source>
+		<target>程序异常终止</target>
+	</text>
+	<text>
+		<source>Abnormal Program Termination - </source>
+		<target>程序异常终止 - </target>
+	</text>
+	<text>
+		<source>About neoGFX Design Studio</source>
+		<target>关于 neoGFX Design Studio</target>
+	</text>
+	<text>
+		<source>Accounts and Licensing</source>
+		<target>帐户和许可</target>
+	</text>
+	<text>
+		<source>Add .nrc File to Project</source>
+		<target>将 .nrc 文件添加到项目</target>
+	</text>
+	<text>
+		<source>Add .nrc File to Project...</source>
+		<target>将 .nrc 文件添加到项目...</target>
+	</text>
+	<text>
+		<source>Add Language</source>
+		<target>添加语言</target>
+	</text>
+	<text>
+		<source>Advanced</source>
+		<target>高级</target>
+	</text>
+	<text>
+		<source>App</source>
+		<target>应用程序</target>
+	</text>
+	<text>
+		<source>Autoscale docks: %?%</source>
+		<target>自动缩放停靠区：%?%</target>
+	</text>
+	<text>
+		<source>Bring To Front</source>
+		<target>置于顶层</target>
+	</text>
+	<text>
+		<source>Console font: %?%</source>
+		<target>控制台字体：%?%</target>
+	</text>
+	<text>
+		<source>Context</source>
+		<target>上下文</target>
+	</text>
+	<text>
+		<source>Debugging</source>
+		<target>调试</target>
+	</text>
+	<text>
+		<source>Delete All Breakpoints</source>
+		<target>删除所有断点</target>
+	</text>
+	<text>
+		<source>Dialog app</source>
+		<target>对话框应用程序</target>
+	</text>
+	<text>
+		<source>Disable All Breakpoints</source>
+		<target>禁用所有断点</target>
+	</text>
+	<text>
+		<source>Display IDs</source>
+		<target>显示 ID</target>
+	</text>
+	<text>
+		<source>Documents</source>
+		<target>文档</target>
+	</text>
+	<text>
+		<source>Edit Scripting Language...</source>
+		<target>编辑脚本语言...</target>
+	</text>
+	<text>
+		<source>Editor font: %?%</source>
+		<target>编辑器字体：%?%</target>
+	</text>
+	<text>
+		<source>Empty project</source>
+		<target>空项目</target>
+	</text>
+	<text>
+		<source>Environment</source>
+		<target>环境</target>
+	</text>
+	<text>
+		<source>Font...</source>
+		<target>字体...</target>
+	</text>
+	<text>
+		<source>Fonts and Colors</source>
+		<target>字体和颜色</target>
+	</text>
+	<text>
+		<source>General</source>
+		<target>常规</target>
+	</text>
+	<text>
+		<source>Grid color: %?%</source>
+		<target>网格颜色：%?%</target>
+	</text>
+	<text>
+		<source>Grid type: %?%&#10;Grid size: %environment.workspace.grid_size:?%&#10;Grid subdivisions: %environment.workspace.grid_subdivisions:?%</source>
+		<target>网格类型：%?%&#10;网格大小：%environment.workspace.grid_size:?%&#10;网格细分：%environment.workspace.grid_subdivisions:?%</target>
+	</text>
+	<text>
+		<source>Icon size: %?%</source>
+		<target>图标大小：%?%</target>
+	</text>
+	<text>
+		<source>Import Scripting Language...</source>
+		<target>导入脚本语言...</target>
+	</text>
+	<text>
+		<source>Import and Export Settings...</source>
+		<target>导入和导出设置...</target>
+	</text>
+	<text>
+		<source>Keyboard</source>
+		<target>键盘</target>
+	</text>
+	<text>
+		<source>Language</source>
+		<target>语言</target>
+	</text>
+	<text>
+		<source>Location:</source>
+		<target>位置：</target>
+	</text>
+	<text>
+		<source>Lower camel case</source>
+		<target>小驼峰式</target>
+	</text>
+	<text>
+		<source>Lower case with underscores</source>
+		<target>小写加下划线</target>
+	</text>
+	<text>
+		<source>MVC (model-view-controller) app</source>
+		<target>MVC（模型-视图-控制器）应用程序</target>
+	</text>
+	<text>
+		<source>Mixed case with underscores</source>
+		<target>大小写混合加下划线</target>
+	</text>
+	<text>
+		<source>Name:</source>
+		<target>名称：</target>
+	</text>
+	<text>
+		<source>Namespace:</source>
+		<target>命名空间：</target>
+	</text>
+	<text>
+		<source>New Breakpoint</source>
+		<target>新建断点</target>
+	</text>
+	<text>
+		<source>New Project</source>
+		<target>新建项目</target>
+	</text>
+	<text>
+		<source>New Script...</source>
+		<target>新建脚本...</target>
+	</text>
+	<text>
+		<source>Node</source>
+		<target>节点</target>
+	</text>
+	<text>
+		<source>Node Editor</source>
+		<target>节点编辑器</target>
+	</text>
+	<text>
+		<source>Not a language tag (e.g. &quot;de&quot; or &quot;de-DE&quot;): </source>
+		<target>不是有效的语言标记（例如 &quot;de&quot; 或 &quot;de-DE&quot;）：</target>
+	</text>
+	<text>
+		<source>Object</source>
+		<target>对象</target>
+	</text>
+	<text>
+		<source>Object Explorer</source>
+		<target>对象资源管理器</target>
+	</text>
+	<text>
+		<source>Open Project</source>
+		<target>打开项目</target>
+	</text>
+	<text>
+		<source>Paragraph...</source>
+		<target>段落...</target>
+	</text>
+	<text>
+		<source>Plugins</source>
+		<target>插件</target>
+	</text>
+	<text>
+		<source>Plurality</source>
+		<target>复数</target>
+	</text>
+	<text>
+		<source>Preview</source>
+		<target>预览</target>
+	</text>
+	<text>
+		<source>Project</source>
+		<target>项目</target>
+	</text>
+	<text>
+		<source>Project Details</source>
+		<target>项目详细信息</target>
+	</text>
+	<text>
+		<source>Project Location</source>
+		<target>项目位置</target>
+	</text>
+	<text>
+		<source>Project Type</source>
+		<target>项目类型</target>
+	</text>
+	<text>
+		<source>Projects</source>
+		<target>项目</target>
+	</text>
+	<text>
+		<source>Properties</source>
+		<target>属性</target>
+	</text>
+	<text>
+		<source>Property</source>
+		<target>属性</target>
+	</text>
+	<text>
+		<source>Save Project</source>
+		<target>保存项目</target>
+	</text>
+	<text>
+		<source>Script</source>
+		<target>脚本</target>
+	</text>
+	<text>
+		<source>Scripting</source>
+		<target>脚本</target>
+	</text>
+	<text>
+		<source>Select Color...</source>
+		<target>选择颜色...</target>
+	</text>
+	<text>
+		<source>Select Gradient...</source>
+		<target>选择渐变...</target>
+	</text>
+	<text>
+		<source>Send To Back</source>
+		<target>置于底层</target>
+	</text>
+	<text>
+		<source>Show Layout Icons</source>
+		<target>显示布局图标</target>
+	</text>
+	<text>
+		<source>Show layout icons: %?%</source>
+		<target>显示布局图标：%?%</target>
+	</text>
+	<text>
+		<source>Source</source>
+		<target>源文本</target>
+	</text>
+	<text>
+		<source>Source Code Naming Convention</source>
+		<target>源代码命名约定</target>
+	</text>
+	<text>
+		<source>Source Control</source>
+		<target>源代码管理</target>
+	</text>
+	<text>
+		<source>Standard</source>
+		<target>标准</target>
+	</text>
+	<text>
+		<source>Start Debugging</source>
+		<target>开始调试</target>
+	</text>
+	<text>
+		<source>Start Without Debugging</source>
+		<target>开始执行（不调试）</target>
+	</text>
+	<text>
+		<source>Status Bar</source>
+		<target>状态栏</target>
+	</text>
+	<text>
+		<source>Step Into</source>
+		<target>单步执行</target>
+	</text>
+	<text>
+		<source>Step Over</source>
+		<target>单步跳过</target>
+	</text>
+	<text>
+		<source>Subpixel text rendering: %?%</source>
+		<target>子像素文本渲染：%?%</target>
+	</text>
+	<text>
+		<source>Syntax Highlighting</source>
+		<target>语法高亮</target>
+	</text>
+	<text>
+		<source>Tabs and Indentation</source>
+		<target>制表符和缩进</target>
+	</text>
+	<text>
+		<source>Team</source>
+		<target>团队</target>
+	</text>
+	<text>
+		<source>Text Editor</source>
+		<target>文本编辑器</target>
+	</text>
+	<text>
+		<source>Theme color: %?%</source>
+		<target>主题颜色：%?%</target>
+	</text>
+	<text>
+		<source>Toggle Breakpoint</source>
+		<target>切换断点</target>
+	</text>
+	<text>
+		<source>Toolbars</source>
+		<target>工具栏</target>
+	</text>
+	<text>
+		<source>Toolbox</source>
+		<target>工具箱</target>
+	</text>
+	<text>
+		<source>Translation</source>
+		<target>译文</target>
+	</text>
+	<text>
+		<source>Translations</source>
+		<target>翻译</target>
+	</text>
+	<text>
+		<source>Type</source>
+		<target>类型</target>
+	</text>
+	<text>
+		<source>Untranslated</source>
+		<target>未翻译</target>
+	</text>
+	<text>
+		<source>Upper camel case</source>
+		<target>大驼峰式</target>
+	</text>
+	<text>
+		<source>User Interface</source>
+		<target>用户界面</target>
+	</text>
+	<text>
+		<source>Value</source>
+		<target>值</target>
+	</text>
+	<text>
+		<source>Windows and Tabs</source>
+		<target>窗口和选项卡</target>
+	</text>
+	<text>
+		<source>Workflow</source>
+		<target>工作流</target>
+	</text>
+	<text>
+		<source>Workspace</source>
+		<target>工作区</target>
+	</text>
+	<text>
+		<source>Workspace font: %?%</source>
+		<target>工作区字体：%?%</target>
+	</text>
+	<text>
+		<source>main: terminating with exception: </source>
+		<target>main：因异常而终止：</target>
+	</text>
+	<text>
+		<source>main: terminating with unknown exception</source>
+		<target>main：因未知异常而终止</target>
+	</text>
+	<text>
+		<source>neoGFX (Symbianesque)</source>
+		<target>neoGFX（Symbian 风格）</target>
+	</text>
+</xneol>

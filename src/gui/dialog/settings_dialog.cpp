@@ -676,8 +676,16 @@ namespace neogfx
                 gridRow = arrayIndex + 1u;
                 gridWidgetColumn = arrayField + 1u;
                 auto fieldTitle = take_leading_label();
-                while (!fieldTitle.empty() && (fieldTitle.back() == ':' || std::isspace(static_cast<unsigned char>(fieldTitle.back()))))
-                    fieldTitle.pop_back();
+                // (without a trailing colon: ASCII or (e.g. Chinese) fullwidth (U+FF1A))
+                while (!fieldTitle.empty())
+                {
+                    if (fieldTitle.back() == ':' || std::isspace(static_cast<unsigned char>(fieldTitle.back())))
+                        fieldTitle.pop_back();
+                    else if (fieldTitle.ends_with("\xEF\xBC\x9A"))
+                        fieldTitle.resize(fieldTitle.size() - 3u);
+                    else
+                        break;
+                }
                 if (arrayIndex == 0u)
                     grid->add_item_at_position(0u, gridWidgetColumn, make_ref<label>(translate(fieldTitle)));
                 auto& rows = iArrayRows[key];

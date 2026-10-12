@@ -105,7 +105,7 @@ namespace neogfx
         i_menu* iParent;
         menu_type iType;
         uuid iGroup;
-        string iTitle;
+        translatable<string> iTitle{ [this](i_string const& aTitle) { set_title(aTitle); } };
         texture iImage;
         item_list iItems;
         action iSeparator;

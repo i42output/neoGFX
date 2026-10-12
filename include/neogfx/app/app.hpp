@@ -22,6 +22,10 @@
 #include <neogfx/neogfx.hpp>
 
 #include <map>
+#include <set>
+#include <unordered_map>
+#include <tuple>
+#include <mutex>
 #include <optional>
 
 #include <neolib/core/map.hpp>
@@ -78,6 +82,7 @@ namespace neogfx
         define_declared_event(QuitRequested, quit_requested, int)
         define_declared_event(NameChanged, name_changed)
         define_declared_event(CurrentStyleChanged, current_style_changed, style_aspect)
+        define_declared_event(LanguageChanged, language_changed)
     private:
         class loader
         {
@@ -128,10 +133,19 @@ namespace neogfx
         i_style& change_style(i_string const& aStyleName) override;
         i_style& register_style(const i_style& aStyle) override;
     public:
-        void clear_translations();
+        i_string const& language() const override;
+        using i_app::set_language;
+        void set_language(i_string const& aLanguage) override;
+        void save_language() override;
+        neolib::vector<string> const& languages() const override;
+        void clear_translations() override;
         void load_translations();
+        void load_translations(i_string const& aTranslationFile) override;
         void load_translations(std::filesystem::path const& aTranslationFile);
         i_string const& translate(i_string const& aTranslatableString, i_string const& aContext = string{}, std::int64_t aPlurality = 1) const override;
+        void register_translatable(i_string const& aTranslatable, i_string const& aTranslatableString, i_string const& aContext, std::int64_t aPlurality) override;
+        void unregister_translatable(i_string const& aTranslatable) override;
+        bool is_translatable(i_string const& aText, i_string& aTranslatableString, i_string& aContext, std::int64_t& aPlurality) const override;
     public:
         i_action& action_file_new() override;
         i_action& action_file_open() override;
@@ -169,12 +183,28 @@ namespace neogfx
         bool discover(const uuid& aId, void*& aObject) override;
     private:
         bool do_process_events();
+        void load_embedded_translations();
+        void add_translations(string const& aLanguage, translation_list const& aTranslations);
+        void update_current_translations();
+        void notify_language_changed();
+        std::filesystem::path language_file() const;
+        std::optional<string> saved_language() const;
     private:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
         bool text_input(i_string const& aText) override;
         bool sys_text_input(i_string const& aText) override;
     private:
+        // (translations first: translatable strings can be created as soon as the app exists)
+        using translation_table = std::map<std::pair<string, string>, std::map<std::pair<std::int64_t, std::int64_t>, string>>; // (source, context) -> plurality range -> target
+        mutable std::recursive_mutex iTranslationMutex;
+        std::map<string, translation_table> iTranslations; // by language
+        string iLanguage;
+        translation_table const* iCurrentTranslations = nullptr; // iLanguage's (or its primary language's) translations
+        neolib::vector<string> iLanguages;
+        mutable std::mutex iTranslatablesMutex;
+        std::unordered_map<i_string const*, std::tuple<string, string, std::int64_t>> iTranslatables; // translatable_string objects that exist
+        std::set<string> iEmbeddedTranslations; // (the .xneol resources loaded: see load_embedded_translations)
         std::unique_ptr<app_thread> iThread;
         neogfx::program_options iProgramOptions;
         std::unique_ptr<loader> iLoader;
@@ -191,7 +221,6 @@ namespace neogfx
         neogfx::event_processing_context iAppContext;
         std::vector<std::pair<key_code_e, key_modifier>> iKeySequence;
         mutable std::unique_ptr<i_help> iHelp;
-        std::map<string, std::map<string, std::map<std::pair<std::int64_t, std::int64_t>, string>>> iTranslations;
         // standard actions
     public:
         action actionFileNew;

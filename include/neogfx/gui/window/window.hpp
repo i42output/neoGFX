@@ -230,7 +230,7 @@ namespace neogfx
         sink iSink;
         ref_ptr<i_surface_window> iSurfaceWindow;
         bool iReadyToRender;
-        string iTitleText;
+        translatable<string> iTitleText{ [this](i_string const& aTitleText) { set_title_text(aTitleText); } };
         window_style iStyle;
         std::int32_t iCountedEnable;
         i_widget* iEnteredWidget;

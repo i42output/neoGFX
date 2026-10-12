@@ -23,6 +23,7 @@
 #include <filesystem>
 #include <vector>
 #include <string>
+#include <optional>
 #include <neogfx/gui/mvc/model.hpp>
 #include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
@@ -49,6 +50,14 @@ namespace neogfx::DesignStudio
         void save(const i_string& aPath) override;
         void add_file(const i_string& aPath) override;
         std::uint32_t file_count() const override;
+        std::uint32_t element_file(i_element const& aElement) const override;
+    public:
+        std::uint32_t translation_language_count(std::uint32_t aFile) const override;
+        i_string const& translation_language(std::uint32_t aFile, std::uint32_t aLanguageIndex) const override;
+        void add_translation_language(std::uint32_t aFile, i_string const& aLanguage) override;
+        std::uint32_t translation_count(std::uint32_t aFile, i_string const& aLanguage) const override;
+        void translation(std::uint32_t aFile, i_string const& aLanguage, std::uint32_t aIndex, i_string& aSource, i_string& aContext, i_string& aPlurality, i_string& aTarget) const override;
+        void set_translation(std::uint32_t aFile, i_string const& aLanguage, std::uint32_t aIndex, i_string const& aSource, i_string const& aContext, i_string const& aPlurality, i_string const& aTarget) override;
     public:
         bool has_path() const override;
         const i_string& path() const override;
@@ -68,13 +77,27 @@ namespace neogfx::DesignStudio
             std::vector<neolib::pair<string, string>> attributes; // top level items other than ui (in order; "#ui": where ui goes)
             std::string saved; // contents when last loaded/saved (unchanged files aren't rewritten)
         };
+        struct translation_table
+        {
+            string language;
+            translation_list translations;
+            std::optional<translation_list> saved; // translations when last loaded/saved (unchanged files aren't rewritten)
+        };
+        using translation_tables = std::vector<translation_table>; // (a .nrc file's, one per language)
     private:
         void load_nrc(std::filesystem::path const& aPath);
         std::size_t file_of(i_element const& aTopLevelElement) const;
         std::string generate_nrc(std::size_t aFile) const;
+        void load_translations(std::size_t aFile);
+        void save_translations(std::size_t aFile);
+        translation_tables& file_translations(std::uint32_t aFile);
+        translation_tables const& file_translations(std::uint32_t aFile) const;
+        translation_table& language_translations(std::uint32_t aFile, i_string const& aLanguage);
+        translation_table const& language_translations(std::uint32_t aFile, i_string const& aLanguage) const;
     private:
         i_project_manager& iManager;
         std::vector<nrc_file> iFiles;
+        std::vector<translation_tables> iTranslations; // (by file: the primary file's can exist before it does (a new project))
         ref_ptr<i_element> iRoot;
         string iName;
         string iNamespace;

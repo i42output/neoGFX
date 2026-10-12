@@ -38,7 +38,7 @@ namespace neogfx
         define_declared_event(Selected, selected)
         define_declared_event(Deselected, deselected)
     public:
-        tab_page(i_tab_page_container& aContainer, std::string const& aTabText = {}, void* aData = nullptr);
+        tab_page(i_tab_page_container& aContainer, string const& aTabText = {}, void* aData = nullptr);
         tab_page(i_tab_page_container& aContainer, i_tab& aTab, void* aData = nullptr);
         tab_page(i_widget& aParent, i_tab& aTab, void* aData = nullptr);
         tab_page(i_layout& aLayout, i_tab& aTab, void* aData = nullptr);

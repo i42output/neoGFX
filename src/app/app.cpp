@@ -22,7 +22,10 @@
 #include <string>
 #include <atomic>
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 #include <boost/locale.hpp> 
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <neolib/file/file.hpp>
 #include <neolib/file/xml.hpp>
@@ -46,6 +49,7 @@
 #include <neogfx/core/i_transition_animator.hpp>
 #include <neogfx/gui/window/i_native_window.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
+#include <neogfx/gui/dialog/language_dialog.hpp>
 
 template<> neolib::i_async_task& services::start_service<neolib::i_async_task>()
 {
@@ -158,6 +162,27 @@ namespace neogfx
     namespace
     {
         std::atomic<app*> sFirstInstance;
+    }
+
+    namespace
+    {
+        // the user's language (e.g. "en-GB" for an "en_GB.UTF-8" system locale)
+        std::string system_language()
+        {
+            try
+            {
+                std::string locale = boost::locale::util::get_system_locale();
+                locale = locale.substr(0, locale.find_first_of(".@"));
+                std::replace(locale.begin(), locale.end(), '_', '-');
+                if (locale == "C" || locale == "POSIX")
+                    return {};
+                return locale;
+            }
+            catch (...)
+            {
+                return {};
+            }
+        }
     }
 
     app::loader::loader(const neogfx::program_options& aProgramOptions, app& aApp) : iApp(aApp)
@@ -334,10 +359,19 @@ namespace neogfx
         actionSelectAll.triggered([this]() { service<i_clipboard>().select_all(); });
     
         load_translations();
+        if (auto const savedLanguage = saved_language())
+            set_language(*savedLanguage);
+        else
+            set_language(system_language());
 
         plugin_manager().plugin_load_failure([](i_string const& reason)
         {
             service<i_basic_services>().display_error_dialog("Plugin Load Failure"_t, reason);
+        });
+        // (a plugin's embedded translations: its resources are merged into ours by its entry point)
+        plugin_manager().plugin_loaded([this](neolib::i_plugin&)
+        {
+            load_embedded_translations();
         });
     }
     catch (std::exception& e)
@@ -395,6 +429,14 @@ namespace neogfx
         {
             service<i_surface_manager>().layout_surfaces();
             service<i_surface_manager>().invalidate_surfaces();
+            // the language of the user interface: chosen once (if there is a choice) and saved (see save_language)
+            if (!saved_language() && !languages().empty())
+            {
+                neolib::scoped_flag sfQuit{ iQuitWhenLastWindowClosed, false };
+                language_dialog dialog;
+                if (dialog.exec() == dialog_result::Accepted)
+                    save_language();
+            }
             iQuitWhenLastWindowClosed = aQuitWhenLastWindowClosed;
             ExecutionStarted();
             while (iQuitResultCode == std::nullopt)
@@ -511,76 +553,208 @@ namespace neogfx
         return newStyle->second;
     }
 
+    i_string const& app::language() const
+    {
+        std::scoped_lock lock{ iTranslationMutex };
+        return iLanguage;
+    }
+
+    void app::set_language(i_string const& aLanguage)
+    {
+        {
+            std::scoped_lock lock{ iTranslationMutex };
+            if (iLanguage == aLanguage)
+                return;
+            iLanguage = aLanguage;
+            update_current_translations();
+        }
+        notify_language_changed();
+    }
+
+    void app::save_language()
+    {
+        auto const file = language_file();
+        std::error_code ec;
+        std::filesystem::create_directories(file.parent_path(), ec);
+        std::ofstream output{ file, std::ios::out | std::ios::binary | std::ios::trunc };
+        output << language().to_std_string();
+    }
+
+    neolib::vector<string> const& app::languages() const
+    {
+        return iLanguages;
+    }
+
     void app::clear_translations()
     {
-        iTranslations.clear();
+        {
+            std::scoped_lock lock{ iTranslationMutex };
+            iTranslations.clear();
+            iLanguages.clear();
+            update_current_translations();
+        }
+        if (!language().empty())
+            notify_language_changed();
     }
 
     void app::load_translations()
     {
+        // .xneol files beside the program and those embedded in it (resources)
         for (auto const& file : std::filesystem::directory_iterator{ std::filesystem::path{ neolib::program_directory() } })
             if (file.path().extension() == ".xneol")
                 load_translations(file.path());
+        load_embedded_translations();
+    }
+
+    // .xneol resources not yet loaded (e.g. a plugin's, once merged into ours)
+    void app::load_embedded_translations()
+    {
+        std::vector<std::string> embedded;
+        for (auto const& resource : service<i_resource_manager>().resources())
+            if (resource.first().to_std_string_view().ends_with(".xneol") && iEmbeddedTranslations.insert(string{ resource.first() }).second)
+                embedded.push_back(resource.first().to_std_string());
+        for (auto const& uri : embedded)
+        {
+            auto const resource = service<i_resource_manager>().load_resource(uri);
+            std::istringstream input{ std::string{ static_cast<char const*>(resource->data()), resource->size() } };
+            string fileLanguage;
+            translation_list translations;
+            read_translation_file(input, fileLanguage, translations);
+            add_translations(fileLanguage, translations);
+        }
+    }
+
+    void app::load_translations(i_string const& aTranslationFile)
+    {
+        auto const path = aTranslationFile.to_std_string();
+        load_translations(std::filesystem::path{ std::u8string{ path.begin(), path.end() } });
     }
 
     void app::load_translations(std::filesystem::path const& aTranslationFile)
     {
-        neolib::xml translationFile{ aTranslationFile.generic_string() };
-        if (translationFile.root().name() == "xneol")
+        string fileLanguage;
+        translation_list translations;
+        read_translation_file(aTranslationFile, fileLanguage, translations);
+        add_translations(fileLanguage, translations);
+    }
+
+    void app::add_translations(string const& aLanguage, translation_list const& aTranslations)
+    {
+        if (aLanguage.empty())
+            return; // (not a translation file)
         {
-            auto const& language = translationFile.root().attribute_value("trgLang").to_std_string();
-            for (auto const& item : translationFile.root())
-            {
-                if (item.name() == "text")
-                {
-                    std::optional<string> source;
-                    std::vector<std::pair<std::pair<std::int64_t, std::int64_t>, string>> targets;
-                    for (auto const& part : item)
-                    {
-                        if (part.name() == "source")
-                            source = part.text();
-                        else if (part.name() == "target")
-                        {
-                            auto plurality = std::make_pair(std::numeric_limits<std::int64_t>::min(), std::numeric_limits<std::int64_t>::max());
-                            if (part.has_attribute("n"))
-                            {
-                                auto const& n = part.attribute_value("n").to_std_string();
-                                neolib::vecarray<string, 2> bits;
-                                neolib::tokens(n, ".."s, bits, 2, false, true);
-                                if (bits.size() == 1)
-                                    plurality.second = (plurality.first = boost::lexical_cast<std::int64_t>(bits[0]));
-                                else if (bits.size() == 2)
-                                {
-                                    if (!bits[0].empty())
-                                        plurality.first = boost::lexical_cast<std::int64_t>(bits[0]);
-                                    if (!bits[1].empty())
-                                        plurality.second = boost::lexical_cast<std::int64_t>(bits[1]);
-                                }
-                            }
-                            targets.push_back(std::make_pair(plurality, part.text()));
-                        }
-                    }
-                    if (source)
-                        for (auto const& target : targets)
-                            iTranslations[language][source.value()][target.first] = target.second;
-                }
-            }
+            std::scoped_lock lock{ iTranslationMutex };
+            auto& table = iTranslations[aLanguage];
+            for (auto const& translation : aTranslations)
+                table[std::make_pair(translation.source, translation.context)][plurality_range(translation.plurality)] = translation.target;
+            iLanguages.clear();
+            for (auto const& languageTranslations : iTranslations)
+                iLanguages.push_back(languageTranslations.first);
+            update_current_translations();
         }
+        if (!language().empty())
+            notify_language_changed();
     }
 
     i_string const& app::translate(i_string const& aTranslatableString, i_string const& aContext, std::int64_t aPlurality) const
     {
-        if (iTranslations.empty())
+        std::scoped_lock lock{ iTranslationMutex };
+        if (iCurrentTranslations == nullptr)
             return aTranslatableString;
-        /// @todo select language
-        /// @todo context
-        auto existing = iTranslations.begin()->second.find(aTranslatableString);
-        if (existing == iTranslations.begin()->second.end())
+        auto existing = iCurrentTranslations->find(std::make_pair(string{ aTranslatableString }, string{ aContext }));
+        if (existing == iCurrentTranslations->end() && !aContext.empty())
+            existing = iCurrentTranslations->find(std::make_pair(string{ aTranslatableString }, string{}));
+        if (existing == iCurrentTranslations->end() || existing->second.empty())
             return aTranslatableString;
+        // the target of the narrowest plurality range that includes aPlurality
+        string const* result = nullptr;
+        std::uint64_t resultWidth = 0u;
         for (auto const& target : existing->second)
             if (aPlurality >= target.first.first && aPlurality <= target.first.second)
-                return target.second;
-        return existing->second.begin()->second;
+            {
+                auto const width = static_cast<std::uint64_t>(target.first.second) - static_cast<std::uint64_t>(target.first.first);
+                if (result == nullptr || width < resultWidth)
+                {
+                    result = &target.second;
+                    resultWidth = width;
+                }
+            }
+        if (result == nullptr)
+            result = &existing->second.begin()->second;
+        if (result->empty())
+            return aTranslatableString; // (not yet translated)
+        return *result;
+    }
+
+    void app::register_translatable(i_string const& aTranslatable, i_string const& aTranslatableString, i_string const& aContext, std::int64_t aPlurality)
+    {
+        std::scoped_lock lock{ iTranslatablesMutex };
+        iTranslatables[&aTranslatable] = std::make_tuple(string{ aTranslatableString }, string{ aContext }, aPlurality);
+    }
+
+    void app::unregister_translatable(i_string const& aTranslatable)
+    {
+        std::scoped_lock lock{ iTranslatablesMutex };
+        iTranslatables.erase(&aTranslatable);
+    }
+
+    bool app::is_translatable(i_string const& aText, i_string& aTranslatableString, i_string& aContext, std::int64_t& aPlurality) const
+    {
+        {
+            std::scoped_lock lock{ iTranslatablesMutex };
+            auto existing = iTranslatables.find(&aText);
+            if (existing == iTranslatables.end())
+                return false;
+            aTranslatableString = std::get<0>(existing->second);
+            aContext = std::get<1>(existing->second);
+            aPlurality = std::get<2>(existing->second);
+        }
+        // (not if it has been changed since it was translated)
+        return aText == translate(aTranslatableString, aContext, aPlurality);
+    }
+
+    void app::update_current_translations()
+    {
+        iCurrentTranslations = nullptr;
+        std::string const language = iLanguage.to_std_string();
+        if (language.empty())
+            return;
+        // the language's translations or, failing that, its primary language's (e.g. "de" for "de-AT")
+        std::string const primaryLanguage = language.substr(0, language.find('-'));
+        for (auto const& candidate : { language, primaryLanguage })
+            for (auto const& languageTranslations : iTranslations)
+                if (boost::iequals(languageTranslations.first.to_std_string(), candidate))
+                {
+                    iCurrentTranslations = &languageTranslations.second;
+                    return;
+                }
+    }
+
+    // the language saved (see save_language): a file in the app's settings folder
+    std::filesystem::path app::language_file() const
+    {
+        auto const settingsFolder = info().settings_folder().to_std_string();
+        return std::filesystem::path{ std::u8string{ settingsFolder.begin(), settingsFolder.end() } } / "language";
+    }
+
+    std::optional<string> app::saved_language() const
+    {
+        std::error_code ec;
+        auto const file = language_file();
+        if (!std::filesystem::exists(file, ec))
+            return {};
+        std::ifstream input{ file, std::ios::in | std::ios::binary };
+        std::string language;
+        std::getline(input, language);
+        language.erase(std::min(language.find_last_not_of(" \t\r") + 1u, language.size()));
+        return string{ language };
+    }
+
+    void app::notify_language_changed()
+    {
+        LanguageChanged();
+        service<i_surface_manager>().layout_surfaces();
+        service<i_surface_manager>().invalidate_surfaces();
     }
 
     i_action& app::action_file_new()
@@ -667,25 +841,33 @@ namespace neogfx
 
     i_action& app::add_action(i_string const& aText)
     {
-        auto& a = iActions.emplace(aText, make_ref<action>(aText));
+        auto newAction = make_ref<action>(aText);
+        newAction->set_text(aText); // (aText itself: a translatable string's translation is kept up to date)
+        auto& a = iActions.emplace(aText, newAction);
         return *a.second();
     }
 
     i_action& app::add_action(i_string const& aText, i_string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling)
     {
-        auto& a = iActions.emplace(aText, make_ref<action>(aText, aImageUri, aDpiScaleFactor, aSampling));
+        auto newAction = make_ref<action>(aText, aImageUri, aDpiScaleFactor, aSampling);
+        newAction->set_text(aText); // (aText itself: a translatable string's translation is kept up to date)
+        auto& a = iActions.emplace(aText, newAction);
         return *a.second();
     }
 
     i_action& app::add_action(i_string const& aText, const i_texture& aImage)
     {
-        auto& a = iActions.emplace(aText, make_ref<action>(aText, aImage));
+        auto newAction = make_ref<action>(aText, aImage);
+        newAction->set_text(aText); // (aText itself: a translatable string's translation is kept up to date)
+        auto& a = iActions.emplace(aText, newAction);
         return *a.second();
     }
 
     i_action& app::add_action(i_string const& aText, const i_image& aImage)
     {
-        auto& a = iActions.emplace(aText, make_ref<action>(aText, aImage));
+        auto newAction = make_ref<action>(aText, aImage);
+        newAction->set_text(aText); // (aText itself: a translatable string's translation is kept up to date)
+        auto& a = iActions.emplace(aText, newAction);
         return *a.second();
     }
 

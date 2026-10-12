@@ -74,6 +74,7 @@ namespace neogfx
         declare_event(quit_requested, int)
         declare_event(name_changed)
         declare_event(current_style_changed, style_aspect)
+        declare_event(language_changed)
     public:
         struct main_window_closed_prematurely : std::runtime_error { main_window_closed_prematurely() : std::runtime_error("Main window closed prematurely!") {} };
         struct unknown_standard_menu : std::logic_error { unknown_standard_menu() : std::logic_error("neogfx::i_app::unknown_standard_menu") {} };
@@ -97,8 +98,21 @@ namespace neogfx
         virtual i_style& change_style(i_string const& aStyleName) = 0;
         virtual i_style& register_style(const i_style& aStyle) = 0;
     public:
+        // translations (.xneol files: see read_translation_file), by language (an IETF language tag, e.g. "de" or "de-DE"; the empty 
+        // language is untranslated (the source strings)); the language can be changed at any time (language_changed is then triggered: 
+        // see translatable<>)
+        virtual i_string const& language() const = 0;
+        virtual void set_language(i_string const& aLanguage) = 0;
+        virtual void save_language() = 0; // (the language is restored next time; until it has been saved the user is asked to choose one (see language_dialog))
+        virtual neolib::i_vector<i_string> const& languages() const = 0; // the languages translations have been loaded for
+        virtual void clear_translations() = 0;
+        virtual void load_translations(i_string const& aTranslationFile) = 0;
         /// @todo add support for multiple plurals in a string
         virtual i_string const& translate(i_string const& aTranslatableString, i_string const& aContext = string{}, std::int64_t aPlurality = 1) const = 0;
+        // translatable strings (translatable_string objects) that exist (their translatable string, context and plurality)
+        virtual void register_translatable(i_string const& aTranslatable, i_string const& aTranslatableString, i_string const& aContext, std::int64_t aPlurality) = 0;
+        virtual void unregister_translatable(i_string const& aTranslatable) = 0;
+        virtual bool is_translatable(i_string const& aText, i_string& aTranslatableString, i_string& aContext, std::int64_t& aPlurality) const = 0;
     public:
         virtual i_action& action_file_new() = 0;
         virtual i_action& action_file_open() = 0;
@@ -136,6 +150,10 @@ namespace neogfx
         void set_name(std::string const& aName)
         {
             set_name(string{ aName });
+        }
+        void set_language(std::string const& aLanguage)
+        {
+            set_language(string{ aLanguage });
         }
         i_style& change_style(std::string const& aStyleName)
         {

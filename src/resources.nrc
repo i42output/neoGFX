@@ -8,5 +8,6 @@
         file: resources/language-subtag-registry.txt
         file: resources/gamecontrollerdb.txt
         file: resources/emoticon.json
+        file: resources/neogfx.zh-CN.xneol
     }
 }

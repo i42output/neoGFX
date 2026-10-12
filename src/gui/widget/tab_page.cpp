@@ -23,8 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    tab_page::tab_page(i_tab_page_container& aContainer, std::string const& aTabText, void* aData) :
-        tab_page{ aContainer, aContainer.add_tab(string{ aTabText }), aData }
+    tab_page::tab_page(i_tab_page_container& aContainer, string const& aTabText, void* aData) :
+        tab_page{ aContainer, aContainer.add_tab(aTabText), aData }
     {
     }
 

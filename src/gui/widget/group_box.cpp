@@ -153,19 +153,19 @@ namespace neogfx
         return iOwner.palette_color(aColorRole);
     }
 
-    group_box::group_box(std::string const& aText) : 
+    group_box::group_box(string const& aText) : 
         widget(), iLayout{ *this }, iTitleLayout{ make_ref<group_box_title_layout>(*this) }, iTitle{ std::make_unique<neogfx::label>(title_layout(), aText)}, iBoxLayout{ iLayout }, iBox{*this}
     {
         init();
     }
 
-    group_box::group_box(i_widget& aParent, std::string const& aText) :
+    group_box::group_box(i_widget& aParent, string const& aText) :
         widget(aParent), iLayout{ *this }, iTitleLayout{ make_ref<group_box_title_layout>(*this) }, iTitle{ std::make_unique<neogfx::label>(title_layout(), aText) }, iBoxLayout{ iLayout }, iBox{ *this }
     {
         init();
     }
 
-    group_box::group_box(i_layout& aLayout, std::string const& aText) :
+    group_box::group_box(i_layout& aLayout, string const& aText) :
         widget(aLayout), iLayout{ *this }, iTitleLayout{ make_ref<group_box_title_layout>(*this) }, iTitle{ std::make_unique<neogfx::label>(title_layout(), aText) }, iBoxLayout{ iLayout }, iBox{ *this }
     {
         init();

@@ -28,6 +28,7 @@
 #include <iterator>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 
 #include <neolib/file/json.hpp>
@@ -240,6 +241,7 @@ namespace neogfx::DesignStudio
     {
         iName = aName;
         iNamespace = aNamespace;
+        iTranslations.clear();
         iRoot = manager().library("project"_s).create_element(*this, "project", aName.to_std_string());
     }
 
@@ -248,6 +250,7 @@ namespace neogfx::DesignStudio
         // a project is either a single .nrc file or a project file (.dsproj) listing the .nrc files it consists of
         std::filesystem::path const projectFileName{ std::filesystem::absolute(std::filesystem::path{ aPath.to_std_string() }) };
         iFiles.clear();
+        iTranslations.clear();
         iPath = aPath;
         iName = projectFileName.stem().string();
         iRoot = manager().library("project"_s).create_element(*this, "project", projectFileName.stem().string());
@@ -264,6 +267,8 @@ namespace neogfx::DesignStudio
             load_nrc(projectFileName);
         for (auto& file : iFiles)
             file.saved = generate_nrc(static_cast<std::size_t>(std::distance(&iFiles[0], &file)));
+        for (std::size_t i = 0u; i < iFiles.size(); ++i)
+            load_translations(i);
         set_clean();
     }
 
@@ -277,12 +282,74 @@ namespace neogfx::DesignStudio
                 return; // already in the project
         load_nrc(fileName);
         iFiles.back().saved = generate_nrc(iFiles.size() - 1u);
+        load_translations(iFiles.size() - 1u);
         set_dirty(); // (the project file needs to list it)
     }
 
     std::uint32_t project::file_count() const
     {
         return static_cast<std::uint32_t>(iFiles.size());
+    }
+
+    std::uint32_t project::element_file(i_element const& aElement) const
+    {
+        // (its top level element's)
+        if (!iRoot)
+            return 0u;
+        i_element const* topLevel = &aElement;
+        while (topLevel->has_parent() && &topLevel->parent() != &*iRoot && topLevel->parent().group() != element_group::UserInterface)
+            topLevel = &topLevel->parent();
+        return static_cast<std::uint32_t>(file_of(*topLevel));
+    }
+
+    std::uint32_t project::translation_language_count(std::uint32_t aFile) const
+    {
+        return static_cast<std::uint32_t>(file_translations(aFile).size());
+    }
+
+    i_string const& project::translation_language(std::uint32_t aFile, std::uint32_t aLanguageIndex) const
+    {
+        return file_translations(aFile).at(aLanguageIndex).language;
+    }
+
+    void project::add_translation_language(std::uint32_t aFile, i_string const& aLanguage)
+    {
+        auto& tables = file_translations(aFile);
+        for (auto const& table : tables)
+            if (table.language == aLanguage)
+                return;
+        tables.push_back(translation_table{ string{ aLanguage } });
+        set_dirty();
+    }
+
+    std::uint32_t project::translation_count(std::uint32_t aFile, i_string const& aLanguage) const
+    {
+        for (auto const& table : file_translations(aFile))
+            if (table.language == aLanguage)
+                return static_cast<std::uint32_t>(table.translations.size());
+        return 0u;
+    }
+
+    void project::translation(std::uint32_t aFile, i_string const& aLanguage, std::uint32_t aIndex, i_string& aSource, i_string& aContext, i_string& aPlurality, i_string& aTarget) const
+    {
+        auto const& translation = language_translations(aFile, aLanguage).translations.at(aIndex);
+        aSource = translation.source;
+        aContext = translation.context;
+        aPlurality = translation.plurality;
+        aTarget = translation.target;
+    }
+
+    void project::set_translation(std::uint32_t aFile, i_string const& aLanguage, std::uint32_t aIndex, i_string const& aSource, i_string const& aContext, i_string const& aPlurality, i_string const& aTarget)
+    {
+        auto& translations = language_translations(aFile, aLanguage).translations;
+        translation_entry const translation{ string{ aSource }, string{ aContext }, string{ aPlurality }, string{ aTarget } };
+        if (aIndex == translations.size())
+            translations.push_back(translation);
+        else if (translations.at(aIndex) != translation)
+            translations[aIndex] = translation;
+        else
+            return;
+        set_dirty();
     }
 
     void project::load_nrc(std::filesystem::path const& aPath)
@@ -417,6 +484,87 @@ namespace neogfx::DesignStudio
         return 0u;
     }
 
+    // a .nrc file's translation tables: "<.nrc file stem>.<language>.xneol" files alongside it (any it already has (a new project's 
+    // primary file's) are kept)
+    void project::load_translations(std::size_t aFile)
+    {
+        auto& tables = file_translations(static_cast<std::uint32_t>(aFile));
+        auto const& nrcPath = iFiles[aFile].path;
+        std::string const prefix = nrcPath.stem().string() + ".";
+        std::string const extension = ".xneol";
+        std::error_code ec;
+        for (auto const& entry : std::filesystem::directory_iterator{ nrcPath.parent_path(), ec })
+        {
+            auto const fileName = entry.path().filename().string();
+            if (entry.path().extension() != extension || !fileName.starts_with(prefix))
+                continue;
+            auto const fileLanguage = fileName.substr(prefix.size(), fileName.size() - prefix.size() - extension.size());
+            if (fileLanguage.empty() || fileLanguage.find('.') != std::string::npos)
+                continue; // (another .nrc file's (e.g. "foo.bar.de.xneol" is "foo.bar.nrc"'s))
+            if (std::any_of(tables.begin(), tables.end(), [&](translation_table const& aTable) { return aTable.language == string{ fileLanguage }; }))
+                continue;
+            // (its language is the one in its name (which it is saved as), whatever its trgLang)
+            translation_table table;
+            string fileTargetLanguage;
+            try
+            {
+                read_translation_file(entry.path(), fileTargetLanguage, table.translations);
+            }
+            catch (std::exception const& e)
+            {
+                throw invalid_project_file("bad translation file: " + entry.path().string() + ": " + e.what());
+            }
+            table.language = string{ fileLanguage };
+            table.saved = (fileTargetLanguage == table.language ? std::optional<translation_list>{ table.translations } : std::nullopt);
+            tables.push_back(std::move(table));
+        }
+        std::sort(tables.begin(), tables.end(), [](translation_table const& lhs, translation_table const& rhs) { return lhs.language < rhs.language; });
+    }
+
+    void project::save_translations(std::size_t aFile)
+    {
+        auto const& nrcPath = iFiles[aFile].path;
+        for (auto& table : file_translations(static_cast<std::uint32_t>(aFile)))
+        {
+            // (a translation of an empty string is removed)
+            std::erase_if(table.translations, [](translation_entry const& aTranslation) { return aTranslation.source.empty(); });
+            auto const path = nrcPath.parent_path() / (nrcPath.stem().string() + "." + table.language.to_std_string() + ".xneol");
+            if (table.saved != table.translations || !std::filesystem::exists(path))
+            {
+                write_translation_file(path, table.language, table.translations);
+                table.saved = table.translations;
+            }
+        }
+    }
+
+    project::translation_tables& project::file_translations(std::uint32_t aFile)
+    {
+        if (iTranslations.size() < aFile + 1u)
+            iTranslations.resize(aFile + 1u);
+        return iTranslations[aFile];
+    }
+
+    project::translation_tables const& project::file_translations(std::uint32_t aFile) const
+    {
+        if (aFile < iTranslations.size())
+            return iTranslations[aFile];
+        static translation_tables const sNone;
+        return sNone;
+    }
+
+    project::translation_table& project::language_translations(std::uint32_t aFile, i_string const& aLanguage)
+    {
+        return const_cast<translation_table&>(to_const(*this).language_translations(aFile, aLanguage));
+    }
+
+    project::translation_table const& project::language_translations(std::uint32_t aFile, i_string const& aLanguage) const
+    {
+        for (auto const& table : file_translations(aFile))
+            if (table.language == aLanguage)
+                return table;
+        throw std::logic_error{ "neogfx::DesignStudio::project: no translation table for language: " + aLanguage.to_std_string() };
+    }
+
     std::string project::generate_nrc(std::size_t aFile) const
     {
         std::ostringstream output;
@@ -514,6 +662,7 @@ namespace neogfx::DesignStudio
                 write(iFiles[i].path, contents);
                 iFiles[i].saved = contents;
             }
+            save_translations(i);
         }
         // project file listing them (paths relative to it)
         if (isProjectFile)

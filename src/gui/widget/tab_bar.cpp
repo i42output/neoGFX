@@ -206,6 +206,7 @@ namespace neogfx
     i_tab& tab_bar::add_tab(i_string const& aTabText)
     {
         iTabs.push_back(std::make_unique<tab_button>(layout(), *this, aTabText, iClosableTabs));
+        iTabs.back()->set_text(aTabText); // (aTabText itself: a translatable string's translation is kept up to date)
         iTabs.back()->set_image_extents(iIconSize);
         return *iTabs.back();
     }
@@ -213,6 +214,7 @@ namespace neogfx
     i_tab& tab_bar::insert_tab(tab_index aTabIndex, i_string const& aTabText)
     {
         auto result = iTabs.insert(iTabs.begin() + aTabIndex, std::make_unique<tab_button>(layout(), *this, aTabText, iClosableTabs));
+        (**result).set_text(aTabText); // (aTabText itself: a translatable string's translation is kept up to date)
         (**result).set_image_extents(iIconSize);
         return **result;
     }

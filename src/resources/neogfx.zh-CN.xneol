@@ -1,0 +1,636 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xneol xmlns="https://neogfx.org/xneol" version="1.0"
+	srcLang="en-GB" trgLang="zh-CN">
+	<text>
+		<source>&amp;Add to Custom Colors</source>
+		<target>添加到自定义颜色(&amp;A)</target>
+	</text>
+	<text>
+		<source>&amp;Alpha:</source>
+		<target>Alpha(&amp;A)：</target>
+	</text>
+	<text>
+		<source>&amp;Blue:</source>
+		<target>蓝(&amp;B)：</target>
+	</text>
+	<text>
+		<source>&amp;Close</source>
+		<target>关闭(&amp;C)</target>
+	</text>
+	<text>
+		<source>&amp;Custom colors</source>
+		<target>自定义颜色(&amp;C)</target>
+	</text>
+	<text>
+		<source>&amp;Delete</source>
+		<target>删除(&amp;D)</target>
+	</text>
+	<text>
+		<source>&amp;Edit</source>
+		<target>编辑(&amp;E)</target>
+	</text>
+	<text>
+		<source>&amp;File</source>
+		<target>文件(&amp;F)</target>
+	</text>
+	<text>
+		<source>&amp;Green:</source>
+		<target>绿(&amp;G)：</target>
+	</text>
+	<text>
+		<source>&amp;Hue:</source>
+		<target>色调(&amp;H)：</target>
+	</text>
+	<text>
+		<source>&amp;Import...</source>
+		<target>导入(&amp;I)...</target>
+	</text>
+	<text>
+		<source>&amp;New...</source>
+		<target>新建(&amp;N)...</target>
+	</text>
+	<text>
+		<source>&amp;Open...</source>
+		<target>打开(&amp;O)...</target>
+	</text>
+	<text>
+		<source>&amp;Red:</source>
+		<target>红(&amp;R)：</target>
+	</text>
+	<text>
+		<source>&amp;Sat:</source>
+		<target>饱和度(&amp;S)：</target>
+	</text>
+	<text>
+		<source>&amp;Save</source>
+		<target>保存(&amp;S)</target>
+	</text>
+	<text>
+		<source>&amp;Val:</source>
+		<target>明度(&amp;V)：</target>
+	</text>
+	<text>
+		<source>+Emoji</source>
+		<target>+表情符号</target>
+	</text>
+	<text>
+		<source>Abnormal Program Termination</source>
+		<target>程序异常终止</target>
+	</text>
+	<text>
+		<source>Abnormal Program Termination - </source>
+		<target>程序异常终止 - </target>
+	</text>
+	<text>
+		<source>Abort</source>
+		<target>中止</target>
+	</text>
+	<text>
+		<source>Above baseline</source>
+		<target>高于基线</target>
+	</text>
+	<text>
+		<source>Add to Swa&amp;tch</source>
+		<target>添加到色板(&amp;T)</target>
+	</text>
+	<text>
+		<source>Add to Swatch</source>
+		<target>添加到色板</target>
+	</text>
+	<text>
+		<source>Advanced Effects</source>
+		<target>高级效果</target>
+	</text>
+	<text>
+		<source>Aligned</source>
+		<target>对齐</target>
+	</text>
+	<text>
+		<source>Angle:</source>
+		<target>角度：</target>
+	</text>
+	<text>
+		<source>Apply</source>
+		<target>应用</target>
+	</text>
+	<text>
+		<source>Apply Sort</source>
+		<target>应用排序</target>
+	</text>
+	<text>
+		<source>At a specific angle</source>
+		<target>指定角度</target>
+	</text>
+	<text>
+		<source>Below ascender</source>
+		<target>低于上伸部</target>
+	</text>
+	<text>
+		<source>Blink</source>
+		<target>闪动</target>
+	</text>
+	<text>
+		<source>Bottom left corner</source>
+		<target>左下角</target>
+	</text>
+	<text>
+		<source>Bottom right corner</source>
+		<target>右下角</target>
+	</text>
+	<text>
+		<source>Browse...</source>
+		<target>浏览...</target>
+	</text>
+	<text>
+		<source>Button Mappings</source>
+		<target>按钮映射</target>
+	</text>
+	<text>
+		<source>Calibrate</source>
+		<target>校准</target>
+	</text>
+	<text>
+		<source>Cancel</source>
+		<target>取消</target>
+	</text>
+	<text>
+		<source>Center</source>
+		<target>中心</target>
+	</text>
+	<text>
+		<source>Choose the language of the user interface:</source>
+		<target>选择用户界面语言：</target>
+	</text>
+	<text>
+		<source>Circle</source>
+		<target>圆形</target>
+	</text>
+	<text>
+		<source>Close</source>
+		<target>关闭</target>
+	</text>
+	<text>
+		<source>Close All</source>
+		<target>全部关闭</target>
+	</text>
+	<text>
+		<source>Close IME</source>
+		<target>关闭输入法</target>
+	</text>
+	<text>
+		<source>Closest corner</source>
+		<target>最近角</target>
+	</text>
+	<text>
+		<source>Closest side</source>
+		<target>最近边</target>
+	</text>
+	<text>
+		<source>Color</source>
+		<target>颜色</target>
+	</text>
+	<text>
+		<source>Copy</source>
+		<target>复制</target>
+	</text>
+	<text>
+		<source>Cut</source>
+		<target>剪切</target>
+	</text>
+	<text>
+		<source>Delete</source>
+		<target>删除</target>
+	</text>
+	<text>
+		<source>Delete stop</source>
+		<target>删除色标</target>
+	</text>
+	<text>
+		<source>Diagonal</source>
+		<target>对角</target>
+	</text>
+	<text>
+		<source>Direction</source>
+		<target>方向</target>
+	</text>
+	<text>
+		<source>Discard</source>
+		<target>放弃</target>
+	</text>
+	<text>
+		<source>E&amp;xit</source>
+		<target>退出(&amp;X)</target>
+	</text>
+	<text>
+		<source>ERROR: Web browser unavailable</source>
+		<target>错误：网页浏览器不可用</target>
+	</text>
+	<text>
+		<source>Edit Math</source>
+		<target>编辑公式</target>
+	</text>
+	<text>
+		<source>Effects</source>
+		<target>效果</target>
+	</text>
+	<text>
+		<source>Ellipse</source>
+		<target>椭圆</target>
+	</text>
+	<text>
+		<source>English</source>
+		<target>English</target>
+	</text>
+	<text>
+		<source>Exponents</source>
+		<target>指数</target>
+	</text>
+	<text>
+		<source>Family:</source>
+		<target>字体系列：</target>
+	</text>
+	<text>
+		<source>Farthest corner</source>
+		<target>最远角</target>
+	</text>
+	<text>
+		<source>Farthest side</source>
+		<target>最远边</target>
+	</text>
+	<text>
+		<source>Flash</source>
+		<target>闪烁</target>
+	</text>
+	<text>
+		<source>Flash/Blink</source>
+		<target>闪烁/闪动</target>
+	</text>
+	<text>
+		<source>Frequency (Hz)</source>
+		<target>频率（Hz）</target>
+	</text>
+	<text>
+		<source>Game Controller Settings</source>
+		<target>游戏控制器设置</target>
+	</text>
+	<text>
+		<source>Glow</source>
+		<target>发光</target>
+	</text>
+	<text>
+		<source>Gradient</source>
+		<target>渐变</target>
+	</text>
+	<text>
+		<source>Height:</source>
+		<target>高度：</target>
+	</text>
+	<text>
+		<source>Help</source>
+		<target>帮助</target>
+	</text>
+	<text>
+		<source>Horizontal</source>
+		<target>水平</target>
+	</text>
+	<text>
+		<source>Ignore</source>
+		<target>忽略</target>
+	</text>
+	<text>
+		<source>Import...</source>
+		<target>导入...</target>
+	</text>
+	<text>
+		<source>Ink</source>
+		<target>墨色</target>
+	</text>
+	<text>
+		<source>Installed Game Controllers</source>
+		<target>已安装的游戏控制器</target>
+	</text>
+	<text>
+		<source>Language</source>
+		<target>语言</target>
+	</text>
+	<text>
+		<source>Linked</source>
+		<target>链接</target>
+	</text>
+	<text>
+		<source>More...</source>
+		<target>更多...</target>
+	</text>
+	<text>
+		<source>New...</source>
+		<target>新建...</target>
+	</text>
+	<text>
+		<source>No</source>
+		<target>否</target>
+	</text>
+	<text>
+		<source>No To All</source>
+		<target>全部否</target>
+	</text>
+	<text>
+		<source>OK</source>
+		<target>确定</target>
+	</text>
+	<text>
+		<source>Open</source>
+		<target>打开</target>
+	</text>
+	<text>
+		<source>Open IME</source>
+		<target>打开输入法</target>
+	</text>
+	<text>
+		<source>Orientation</source>
+		<target>方向</target>
+	</text>
+	<text>
+		<source>Outline</source>
+		<target>轮廓</target>
+	</text>
+	<text>
+		<source>Paper</source>
+		<target>底色</target>
+	</text>
+	<text>
+		<source>Paragraph Format</source>
+		<target>段落格式</target>
+	</text>
+	<text>
+		<source>Paste</source>
+		<target>粘贴</target>
+	</text>
+	<text>
+		<source>Paste As</source>
+		<target>粘贴为</target>
+	</text>
+	<text>
+		<source>Plain Text</source>
+		<target>纯文本</target>
+	</text>
+	<text>
+		<source>Plugin Load Failure</source>
+		<target>插件加载失败</target>
+	</text>
+	<text>
+		<source>Preview</source>
+		<target>预览</target>
+	</text>
+	<text>
+		<source>Radial</source>
+		<target>径向</target>
+	</text>
+	<text>
+		<source>Re&amp;move from Swatch</source>
+		<target>从色板中移除(&amp;M)</target>
+	</text>
+	<text>
+		<source>Rectangular</source>
+		<target>矩形</target>
+	</text>
+	<text>
+		<source>Redo</source>
+		<target>重做</target>
+	</text>
+	<text>
+		<source>Remove from Swatch</source>
+		<target>从色板中移除</target>
+	</text>
+	<text>
+		<source>Reset</source>
+		<target>重置</target>
+	</text>
+	<text>
+		<source>Reset Sort</source>
+		<target>重置排序</target>
+	</text>
+	<text>
+		<source>Restore Default</source>
+		<target>恢复默认值</target>
+	</text>
+	<text>
+		<source>Restore Defaults</source>
+		<target>恢复默认值</target>
+	</text>
+	<text>
+		<source>Retry</source>
+		<target>重试</target>
+	</text>
+	<text>
+		<source>Rich Text (HTML)</source>
+		<target>富文本（HTML）</target>
+	</text>
+	<text>
+		<source>Rich Text (Markdown)</source>
+		<target>富文本（Markdown）</target>
+	</text>
+	<text>
+		<source>S&amp;watches</source>
+		<target>色板(&amp;W)</target>
+	</text>
+	<text>
+		<source>Sample</source>
+		<target>示例</target>
+	</text>
+	<text>
+		<source>Save</source>
+		<target>保存</target>
+	</text>
+	<text>
+		<source>Save A&amp;ll</source>
+		<target>全部保存(&amp;L)</target>
+	</text>
+	<text>
+		<source>Save All</source>
+		<target>全部保存</target>
+	</text>
+	<text>
+		<source>Select All</source>
+		<target>全选</target>
+	</text>
+	<text>
+		<source>Select Color</source>
+		<target>选择颜色</target>
+	</text>
+	<text>
+		<source>Select Font</source>
+		<target>选择字体</target>
+	</text>
+	<text>
+		<source>Select Gradient</source>
+		<target>选择渐变</target>
+	</text>
+	<text>
+		<source>Select stop alpha (opacity level)...</source>
+		<target>选择色标 Alpha（不透明度）...</target>
+	</text>
+	<text>
+		<source>Select stop color...</source>
+		<target>选择色标颜色...</target>
+	</text>
+	<text>
+		<source>Shadow</source>
+		<target>阴影</target>
+	</text>
+	<text>
+		<source>Shape</source>
+		<target>形状</target>
+	</text>
+	<text>
+		<source>Size</source>
+		<target>大小</target>
+	</text>
+	<text>
+		<source>Size:</source>
+		<target>大小：</target>
+	</text>
+	<text>
+		<source>Smart</source>
+		<target>智能</target>
+	</text>
+	<text>
+		<source>Smooth (%)</source>
+		<target>平滑（%）</target>
+	</text>
+	<text>
+		<source>Sorry, this neoGFX feature (subpixel rendering settings dialog) has yet to be implemented.</source>
+		<target>抱歉，此 neoGFX 功能（子像素渲染设置对话框）尚未实现。</target>
+	</text>
+	<text>
+		<source>Sort Ascending</source>
+		<target>升序排序</target>
+	</text>
+	<text>
+		<source>Sort Descending</source>
+		<target>降序排序</target>
+	</text>
+	<text>
+		<source>Split stop</source>
+		<target>拆分色标</target>
+	</text>
+	<text>
+		<source>Starting From</source>
+		<target>起始位置</target>
+	</text>
+	<text>
+		<source>Style:</source>
+		<target>样式：</target>
+	</text>
+	<text>
+		<source>Subpixel Rendering...</source>
+		<target>子像素渲染...</target>
+	</text>
+	<text>
+		<source>Subscript</source>
+		<target>下标</target>
+	</text>
+	<text>
+		<source>Superscript</source>
+		<target>上标</target>
+	</text>
+	<text>
+		<source>Swatches</source>
+		<target>色板</target>
+	</text>
+	<text>
+		<source>Test</source>
+		<target>测试</target>
+	</text>
+	<text>
+		<source>Tile</source>
+		<target>平铺</target>
+	</text>
+	<text>
+		<source>Top left corner</source>
+		<target>左上角</target>
+	</text>
+	<text>
+		<source>Top right corner</source>
+		<target>右上角</target>
+	</text>
+	<text>
+		<source>Type</source>
+		<target>类型</target>
+	</text>
+	<text>
+		<source>Underline</source>
+		<target>下划线</target>
+	</text>
+	<text>
+		<source>Undo</source>
+		<target>撤销</target>
+	</text>
+	<text>
+		<source>Vertical</source>
+		<target>垂直</target>
+	</text>
+	<text>
+		<source>Width</source>
+		<target>宽度</target>
+	</text>
+	<text>
+		<source>Width:</source>
+		<target>宽度：</target>
+	</text>
+	<text>
+		<source>X:</source>
+		<target>X：</target>
+	</text>
+	<text>
+		<source>Y:</source>
+		<target>Y：</target>
+	</text>
+	<text>
+		<source>Yes</source>
+		<target>是</target>
+	</text>
+	<text>
+		<source>Yes To All</source>
+		<target>全部是</target>
+	</text>
+	<text>
+		<source>m:</source>
+		<target>m：</target>
+	</text>
+	<text>
+		<source>main: terminating with exception: </source>
+		<target>main：因异常而终止：</target>
+	</text>
+	<text>
+		<source>main: terminating with unknown exception</source>
+		<target>main：因未知异常而终止</target>
+	</text>
+	<text>
+		<source>n:</source>
+		<target>n：</target>
+	</text>
+	<text>
+		<source>neoGFX Feature</source>
+		<target>neoGFX 功能</target>
+	</text>
+	<text>
+		<source>neogfx::app::exec: terminating with exception: </source>
+		<target>neogfx::app::exec：因异常而终止：</target>
+	</text>
+	<text>
+		<source>neogfx::app::exec: terminating with unknown exception</source>
+		<target>neogfx::app::exec：因未知异常而终止</target>
+	</text>
+	<text>
+		<source>neogfx::app::process_events: terminating with exception: </source>
+		<target>neogfx::app::process_events：因异常而终止：</target>
+	</text>
+	<text>
+		<source>neogfx::app::process_events: terminating with unknown exception</source>
+		<target>neogfx::app::process_events：因未知异常而终止</target>
+	</text>
+	<text>
+		<source>Chinese (China)</source>
+		<target>中文（中国）</target>
+	</text>
+</xneol>

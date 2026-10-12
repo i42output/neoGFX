@@ -46,6 +46,17 @@ namespace neogfx::DesignStudio
         virtual void save(const i_string& aPath) = 0;
         virtual void add_file(const i_string& aPath) = 0; // add an .nrc file to the project (which is then saved as a project file (.dsproj) listing them)
         virtual std::uint32_t file_count() const = 0; // the number of .nrc files in the project
+        virtual std::uint32_t element_file(i_element const& aElement) const = 0; // the .nrc file an element is in
+    public:
+        // translation tables (one per language): "<.nrc file stem>.<language>.xneol" files alongside the project's .nrc files (loaded 
+        // with them and saved with the project); each translation is of a translatable string (as in "foo"_t) in a context (optional) 
+        // for a plurality (optional) (see neogfx::read_translation_file); setting a translation at translation_count adds one
+        virtual std::uint32_t translation_language_count(std::uint32_t aFile) const = 0;
+        virtual i_string const& translation_language(std::uint32_t aFile, std::uint32_t aLanguageIndex) const = 0;
+        virtual void add_translation_language(std::uint32_t aFile, i_string const& aLanguage) = 0;
+        virtual std::uint32_t translation_count(std::uint32_t aFile, i_string const& aLanguage) const = 0;
+        virtual void translation(std::uint32_t aFile, i_string const& aLanguage, std::uint32_t aIndex, i_string& aSource, i_string& aContext, i_string& aPlurality, i_string& aTarget) const = 0;
+        virtual void set_translation(std::uint32_t aFile, i_string const& aLanguage, std::uint32_t aIndex, i_string const& aSource, i_string const& aContext, i_string const& aPlurality, i_string const& aTarget) = 0;
     public:
         virtual bool has_path() const = 0;
         virtual const i_string& path() const = 0;

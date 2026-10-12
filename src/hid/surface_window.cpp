@@ -904,7 +904,9 @@ namespace neogfx
 
     void surface_window::native_window_title_text_changed(i_string const& aTitleText)
     {
-        as_window().set_title_text(aTitleText);
+        // (not the window's own title echoed back (e.g. WM_SETTEXT): setting it again would end the title's live translation)
+        if (as_window().title_text() != aTitleText)
+            as_window().set_title_text(aTitleText);
     }
 
     const i_window& surface_window::as_window() const

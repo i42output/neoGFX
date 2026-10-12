@@ -86,7 +86,7 @@ namespace neogfx
         gradient fade_gradient(point const& aTextPosition, size const& aTextSize) const;
         void reset_cache();
     private:
-        string iText;
+        translatable<string> iText{ [this](i_string const& aText) { set_text(aText); } };
         mutable glyph_text_t iGlyphText;
         mutable std::optional<texture> iCacheTexture;
         mutable optional_size iTextExtent;

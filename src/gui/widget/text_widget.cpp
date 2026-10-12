@@ -32,7 +32,7 @@
 namespace neogfx
 {
     text_widget::text_widget(string const& aText, text_widget_type aType, text_widget_flags aFlags) :
-        widget{}, iText{ aText }, iType{ aType },
+        widget{}, iType{ aType },
         iAnimator{ *this, [this](widget_timer&)
         {
             iAnimator.again();
@@ -40,12 +40,14 @@ namespace neogfx
                 update();
         }, std::chrono::milliseconds{ 16 } }
     {
+        iText = aText;
+        iText.track(aText);
         Flags.assign(aFlags, false);
         init();
     }
 
     text_widget::text_widget(i_widget& aParent, string const& aText, text_widget_type aType, text_widget_flags aFlags) :
-        widget{ aParent }, iText{ aText }, iType{ aType },
+        widget{ aParent }, iType{ aType },
         iAnimator{ *this, [this](widget_timer&)
         {
             iAnimator.again();
@@ -53,12 +55,14 @@ namespace neogfx
                 update();
         }, std::chrono::milliseconds{ 16 } }
     {
+        iText = aText;
+        iText.track(aText);
         Flags.assign(aFlags, false);
         init();
     }
 
     text_widget::text_widget(i_layout& aLayout, string const& aText, text_widget_type aType, text_widget_flags aFlags) :
-        widget{ aLayout }, iText{ aText }, iType{ aType },
+        widget{ aLayout }, iType{ aType },
         iAnimator{ *this, [this](widget_timer&)
         {
             iAnimator.again();
@@ -66,6 +70,8 @@ namespace neogfx
                 update();
         }, std::chrono::milliseconds{ 16 } }
     {
+        iText = aText;
+        iText.track(aText);
         Flags.assign(aFlags, false);
         init();
     }
@@ -346,6 +352,7 @@ namespace neogfx
 
     void text_widget::set_text(i_string const& aText)
     {
+        iText.track(aText);
         if (iText != aText)
         {
             size const oldSize = minimum_size();

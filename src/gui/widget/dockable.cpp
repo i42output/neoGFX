@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-    dockable::dockable(std::shared_ptr<i_widget> aDockableWidget, std::string const& aTitle, dock_area aAcceptableDocks) :
+    dockable::dockable(std::shared_ptr<i_widget> aDockableWidget, string const& aTitle, dock_area aAcceptableDocks) :
         base_type{ neogfx::decoration_style::Tool },
         iTitle{ aTitle },
         iAcceptableDocks{ aAcceptableDocks },
@@ -32,7 +32,8 @@ namespace neogfx
     {
         set_weight(size{ 1.0 });
         create_title_bar();
-        title_bar().set_title(string{ aTitle });
+        title_bar().set_title(aTitle);
+        iTitle.track(aTitle);
         set_client(docked_widget());
         set_padding(neogfx::padding{});
     }

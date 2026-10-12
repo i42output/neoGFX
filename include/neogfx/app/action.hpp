@@ -82,10 +82,15 @@ namespace neogfx
         i_action& set_shortcut(i_string const& aShortcut) override;
     public:
         using i_action::set_text;
+        i_action& set_text(i_string const& aText); // (a translatable string's translation is kept up to date: see translatable<>)
         using i_action::set_menu_text;
+        i_action& set_menu_text(i_string const& aMenuText);
         using i_action::set_button_text;
+        i_action& set_button_text(i_string const& aButtonText);
         using i_action::set_tool_tip_text;
+        i_action& set_tool_tip_text(i_string const& aToolTipText);
         using i_action::set_help_text;
+        i_action& set_help_text(i_string const& aHelpText);
         using i_action::set_image;
         using i_action::set_checked_image;
         using i_action::set_shortcut;
@@ -95,11 +100,11 @@ namespace neogfx
         bool iChecked;
         uuid iGroup;
         bool iSeparator;
-        optional_text iText;
-        optional_text iMenuText;
-        optional_text iButtonText;
-        optional_text iToolTipText;
-        optional_text iHelpText;
+        translatable<optional_text> iText{ [this](i_string const& aText) { set_text(optional_text{ aText }); } };
+        translatable<optional_text> iMenuText{ [this](i_string const& aMenuText) { set_menu_text(optional_text{ aMenuText }); } };
+        translatable<optional_text> iButtonText{ [this](i_string const& aButtonText) { set_button_text(optional_text{ aButtonText }); } };
+        translatable<optional_text> iToolTipText{ [this](i_string const& aToolTipText) { set_tool_tip_text(optional_text{ aToolTipText }); } };
+        translatable<optional_text> iHelpText{ [this](i_string const& aHelpText) { set_help_text(optional_text{ aHelpText }); } };
         texture iImage;
         texture iCheckedImage;
         optional_key_sequence iShortcut;

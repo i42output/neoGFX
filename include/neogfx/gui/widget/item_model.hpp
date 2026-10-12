@@ -23,6 +23,7 @@
 
 #include <vector>
 #include <deque>
+#include <map>
 
 #include <neolib/core/vecarray.hpp>
 #include <neolib/core/segmented_array.hpp>
@@ -275,6 +276,11 @@ namespace neogfx
         using i_item_model::set_column_name;
         void set_column_name(item_model_index::value_type aColumnIndex, i_string const& aName) final
         {
+            auto columnNameTranslation = iColumnNameTranslations.find(aColumnIndex);
+            if (columnNameTranslation == iColumnNameTranslations.end())
+                columnNameTranslation = iColumnNameTranslations.try_emplace(aColumnIndex, 
+                    [this, aColumnIndex](i_string const& aName) { set_column_name(aColumnIndex, aName); }).first;
+            columnNameTranslation->second.track(aName);
             if (iColumns.size() < aColumnIndex + 1u)
                 iColumns.resize(aColumnIndex + 1u);
             iColumns[aColumnIndex].name = aName;
@@ -711,6 +717,7 @@ namespace neogfx
     private:
         container_type iItems;
         column_info_array iColumns;
+        std::map<item_model_index::value_type, translatable_base> iColumnNameTranslations; // (the names are in iColumns)
     };
 
     typedef basic_item_model<void*> item_model;

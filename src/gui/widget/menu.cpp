@@ -29,20 +29,22 @@ namespace neogfx
         iParent{ nullptr }, 
         iType{ aType }, 
         iGroup{},
-        iTitle{ aTitle }, 
         iOpenCount{ 0 }, 
         iModal{ false }
     {
+        iTitle = aTitle;
+        iTitle.track(aTitle);
     }
 
     menu::menu(i_menu& aParent, string const& aTitle, menu_type aType) :
         iParent{ &aParent }, 
         iType{ aType }, 
         iGroup{},
-        iTitle{ aTitle },
         iOpenCount{ 0 }, 
         iModal{ false }
     {
+        iTitle = aTitle;
+        iTitle.track(aTitle);
         aParent.add_sub_menu(*this);
     }
 
@@ -99,6 +101,7 @@ namespace neogfx
 
     void menu::set_title(i_string const& aTitle)
     {
+        iTitle.track(aTitle);
         iTitle = aTitle;
         MenuChanged();
     }
@@ -195,6 +198,7 @@ namespace neogfx
         auto& newItem = **iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(aSubMenuTitle)));
         newItem.sub_menu().set_parent(*this);
         newItem.sub_menu().set_group(aGroup);
+        newItem.sub_menu().set_title(aSubMenuTitle); // (aSubMenuTitle itself: a translatable string's translation is kept up to date)
         aItemIndex = update_grouping_separators(aItemIndex);
         ItemAdded(aItemIndex);
         return newItem.sub_menu();
