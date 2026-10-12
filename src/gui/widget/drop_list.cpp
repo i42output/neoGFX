@@ -478,6 +478,9 @@ namespace neogfx
                 push_button{ aLayout, push_button_style::DropList }
             {
                 image_widget().set_padding(neogfx::padding{});
+                // (the label's image and text widgets take the label's (expanding) size policy unless they have their own so the image
+                // would otherwise share the room with the text)
+                image_widget().set_size_policy(size_constraint::Minimum);
                 text_widget().set_padding(neogfx::padding{});
                 // (its text fills the room it has (up to the drop list's arrow) and is elided if it doesn't fit, e.g. when the drop list is 
                 // narrower than its widest item)

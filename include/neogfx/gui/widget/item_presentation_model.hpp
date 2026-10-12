@@ -102,6 +102,7 @@ namespace neogfx
             mutable item_model_index::optional_column_type modelColumn;
             item_cell_flags flags = item_cell_flags::Default;
             mutable std::map<dimension, std::uint32_t> cellWidths;
+            mutable std::uint32_t cellWidthCount = 0u;
             mutable std::optional<string> headingText;
             mutable font headingFont;
             mutable optional_size headingExtents;
@@ -110,12 +111,14 @@ namespace neogfx
             void add_cell_width(dimension aWidth) const
             {
                 ++cellWidths[aWidth];
+                ++cellWidthCount;
             }
             void remove_cell_width(dimension aWidth) const
             {
                 auto existing = cellWidths.find(aWidth);
                 if (existing != cellWidths.end())
                 {
+                    --cellWidthCount;
                     if (--existing->second == 0)
                         cellWidths.erase(existing);
                 }
@@ -314,10 +317,10 @@ namespace neogfx
             if (rows() == 0 || columns() < aColumnIndex + 1u)
                 return 0.0;
             auto& cellWidths = column(aColumnIndex).cellWidths;
-            if (!cellWidths.empty())
-                return units_converter(aUnitsContext).from_device_units(cellWidths.rbegin()->first) + (aExtendIntoPadding ? cell_padding(aUnitsContext).size().cx : 0.0);
-            for (item_presentation_model_index::row_type row = 0u; row < rows(); ++row)
-                cell_extents(item_presentation_model_index{ row, aColumnIndex }, aUnitsContext);
+            // (the widest cell measured so far is only the widest cell if every cell has been measured)
+            if (column(aColumnIndex).cellWidthCount < rows())
+                for (item_presentation_model_index::row_type row = 0u; row < rows(); ++row)
+                    cell_extents(item_presentation_model_index{ row, aColumnIndex }, aUnitsContext);
             return units_converter(aUnitsContext).from_device_units(cellWidths.rbegin()->first) + (aExtendIntoPadding ? cell_padding(aUnitsContext).size().cx : 0.0);
         }
         i_string const& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const override
@@ -1403,6 +1406,9 @@ namespace neogfx
                 if (aColumn != std::nullopt && col != *aColumn)
                     continue;
                 column(col).headingExtents = std::nullopt;
+                // (cell meta is reset first so any widths left are those of cells that no longer exist, e.g. after the item model is cleared)
+                column(col).cellWidths.clear();
+                column(col).cellWidthCount = 0u;
             }
         }
         void reset_position_meta(item_presentation_model_index::row_type aFromRow) const
