@@ -434,21 +434,7 @@ namespace neogfx
             {
                 neolib::scoped_flag sfQuit{ iQuitWhenLastWindowClosed, false };
                 // (owned by the main window (if there is one yet) which is activated again when the dialog is dismissed)
-                i_window* mainWindow = nullptr;
-                auto& windowManager = service<i_window_manager>();
-                for (std::size_t i = 0u; i < windowManager.window_count(); ++i)
-                {
-                    auto& candidate = windowManager.window(i);
-                    if (candidate.has_parent_window())
-                        continue;
-                    if ((candidate.style() & window_style::Main) == window_style::Main)
-                    {
-                        mainWindow = &candidate;
-                        break;
-                    }
-                    if (mainWindow == nullptr && (candidate.style() & (window_style::Dialog | window_style::Popup | window_style::Tool)) == window_style::Invalid)
-                        mainWindow = &candidate;
-                }
+                i_window* const mainWindow = find_main_window();
                 std::optional<language_dialog> dialog;
                 if (mainWindow != nullptr)
                     dialog.emplace(*mainWindow);

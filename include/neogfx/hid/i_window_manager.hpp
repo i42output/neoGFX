@@ -74,6 +74,10 @@ namespace neogfx
         static uuid const& iid() { static uuid const sIid{ 0x6246e0a9, 0x85d7, 0x4feb, 0xa273, { 0x7d, 0xb1, 0x4d, 0xed, 0x12, 0x12 } }; return sIid; }
     };
 
+    // the app's main window: the first top level window with window_style::Main or, failing that, the first other than a dialog, popup 
+    // or tool window; nullptr if there isn't one (yet)
+    i_window* find_main_window(i_window_manager const& aWindowManager = service<i_window_manager>());
+
     class scoped_mouse_cursor
     {
     public:

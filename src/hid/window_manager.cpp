@@ -187,4 +187,20 @@ namespace neogfx
     {
         return (aButton & service<i_mouse>().button_state()) != mouse_button::None;
     }
+
+    i_window* find_main_window(i_window_manager const& aWindowManager)
+    {
+        i_window* result = nullptr;
+        for (std::size_t i = 0u; i < aWindowManager.window_count(); ++i)
+        {
+            auto& candidate = aWindowManager.window(i);
+            if (candidate.has_parent_window())
+                continue;
+            if ((candidate.style() & window_style::Main) == window_style::Main)
+                return &candidate;
+            if (result == nullptr && (candidate.style() & (window_style::Dialog | window_style::Popup | window_style::Tool)) == window_style::Invalid)
+                result = &candidate;
+        }
+        return result;
+    }
 }
