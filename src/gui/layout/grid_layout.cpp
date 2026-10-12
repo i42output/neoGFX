@@ -459,8 +459,8 @@ namespace neogfx
         // each row layout: rows are laid out independently so an expanding cell in a row whose other cells are 
         // narrow would claim width that another row's wider cells need, making the grid overflow its extents.
         {
-            thread_local std::vector<bool> expandingColumn(iDimensions.cx, false);
-            expandingColumn.clear();
+            thread_local std::vector<bool> expandingColumn;
+            expandingColumn.assign(iDimensions.cx, false);
             size::dimension_type used = 0.0;
             std::uint32_t visibleColumnCount = 0u;
             for (cell_coordinate col = 0; col < iDimensions.cx; ++col)
