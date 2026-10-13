@@ -1968,7 +1968,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline bool widget<Interface>::set_focus(focus_reason aFocusReason)
     {
-        if (!has_focus() && effectively_enabled() && effectively_visible())
+        if (widget::has_root() && !has_focus() && effectively_enabled() && effectively_visible())
         {
             widget::root().set_focused_widget(*this, aFocusReason);
             return true;
