@@ -60,6 +60,11 @@ namespace neogfx
 		void start() final;
 		void stop() final;
 	public:
+		std::optional<float> master_gain() const final;
+		void set_master_gain(std::optional<float> const& aMasterGain) final;
+		bool soft_clip() const final;
+		void set_soft_clip(bool aSoftClip) final;
+	public:
 		using i_audio_device::play;
 		audio_playback_id play(i_audio_bitstream& aBitstream, audio_frame_index aFrom, std::optional<std::chrono::duration<double>> const& aDuration, float aGain) final;
 		void stop(audio_playback_id aPlayback) final;
@@ -80,5 +85,8 @@ namespace neogfx
 		};
 		std::vector<source> iSources;
 		audio_playback_id iNextPlaybackId = 1ULL;
+		// both read by the audio callback under iMutex
+		std::optional<float> iMasterGain;
+		bool iSoftClip = true;
 	};
 }

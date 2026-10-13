@@ -27,78 +27,115 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/dialog/gradient_dialog.hpp>
 #include <cctype>
 #include <algorithm>
+#include <sstream>
 #include <boost/algorithm/string/predicate.hpp>
 
 namespace neogfx::DesignStudio
 {
     namespace
     {
-        // a two column table's columns' widths as its header's section buttons are (they are resized (e.g. by the user dragging a 
-        // separator) before the sections' widths are: see header_view::panes_resized); the first includes half the cell spacing (see 
-        // header_view::section_width)
-        ng::size column_widths(ng::table_view& aTable)
+        // a table's columns' widths as its header's section buttons are (they are resized (e.g. by the user dragging a separator) before 
+        // the sections' widths are: see header_view::panes_resized); the first includes half the cell spacing (see header_view::section_width)
+        std::vector<ng::dimension> column_widths(ng::table_view& aTable)
         {
             auto& header = aTable.column_header();
-            auto button_width = [&](std::uint32_t aSection)
+            std::vector<ng::dimension> result;
+            for (std::uint32_t section = 0u; section < header.section_count() && section < header.layout().count(); ++section)
             {
-                auto const& button = header.layout().get_widget_at(aSection);
-                return button.has_fixed_size() ? button.fixed_size().cx : button.extents().cx;
-            };
-            return ng::size{ button_width(0u) - aTable.presentation_model().cell_spacing(aTable).cx / 2.0, button_width(1u) };
+                auto const& button = header.layout().get_widget_at(section);
+                result.push_back(button.has_fixed_size() ? button.fixed_size().cx : button.extents().cx);
+            }
+            if (!result.empty())
+                result[0] -= aTable.presentation_model().cell_spacing(aTable).cx / 2.0;
+            return result;
         }
 
-        // whether a two column table's columns have been resized by the user since they were given the same width (aWidth)
+        // a table's columns' widths as saved: a two column table's as a size (the Properties toolbox's and Object Explorer's), others' as 
+        // text (the widths separated by spaces, e.g. the Translations tab's)
+        void save_column_widths(neolib::i_setting& aSaved, std::vector<ng::dimension> const& aWidths)
+        {
+            if (aWidths.size() == 2u)
+                aSaved.set_value(ng::size{ aWidths[0], aWidths[1] });
+            else
+            {
+                std::ostringstream text;
+                for (std::size_t col = 0u; col < aWidths.size(); ++col)
+                    text << (col != 0u ? " " : "") << aWidths[col];
+                aSaved.set_value(ng::string{ text.str() });
+            }
+        }
+
+        std::vector<ng::dimension> saved_column_widths(neolib::i_setting& aSaved, std::uint32_t aColumns)
+        {
+            if (aColumns == 2u)
+            {
+                auto const saved = aSaved.value<ng::size>();
+                return { saved.cx, saved.cy };
+            }
+            std::vector<ng::dimension> result;
+            std::istringstream text{ aSaved.value<ng::string>().to_std_string() };
+            for (ng::dimension width; text >> width;)
+                result.push_back(width);
+            return result;
+        }
+
+        // whether a table's columns have been resized by the user since they were given the same width (aWidth)
         bool columns_resized(ng::table_view& aTable, std::optional<ng::dimension> const& aWidth)
         {
-            auto const widths = column_widths(aTable);
-            return aWidth && (std::abs(widths.cx - *aWidth) > 1.0 || std::abs(widths.cy - *aWidth) > 1.0);
+            if (!aWidth)
+                return false;
+            for (auto const width : column_widths(aTable))
+                if (std::abs(width - *aWidth) > 1.0)
+                    return true;
+            return false;
         }
 
-        // set while a two column table's columns are given their widths (see distribute_columns): not resized by the user
+        // set while a table's columns are given their widths (see distribute_columns): not resized by the user
         thread_local bool tDistributingColumns = false;
 
-        // a two column table's column widths, once the user has resized them, saved (hidden setting) for the next session as they change 
+        // a table's column widths, once the user has resized them, saved (hidden setting) for the next session as they change 
         // (see distribute_columns)
         void save_columns(ng::table_view& aTable, std::optional<ng::dimension> const& aWidth, bool& aResized, neolib::i_setting& aSaved)
         {
             if (tDistributingColumns || aTable.column_header().section_count() < 2u || (!aResized && !columns_resized(aTable, aWidth)))
                 return;
             aResized = true;
-            aSaved.set_value(column_widths(aTable));
+            save_column_widths(aSaved, column_widths(aTable));
         }
 
-        // a two column table's columns are given their initial widths, once (when the table has been laid out: false until then): as the 
-        // user last left them (aSaved, see save_columns) or the same width (whatever the width of their contents) sharing the table's 
+        // a table's columns are given their initial widths, once (when the table has been laid out and is visible: false until then): as 
+        // the user last left them (aSaved, see save_columns) or the same width (whatever the width of their contents) sharing the table's 
         // width; their widths are then saved as the user resizes them (aWidth: the width given them; aResized: set once the user has 
         // resized them (or they are as the user left them); aSink: their header's sections' buttons' sizes are watched)
         bool distribute_columns(ng::table_view& aTable, std::optional<ng::dimension>& aWidth, bool& aResized, neolib::i_setting& aSaved, 
             ng::sink& aSink)
         {
             auto& header = aTable.column_header();
-            if (header.section_count() < 2u || header.layout().count() < 2u)
+            auto const columns = header.section_count();
+            if (!aTable.effectively_visible() || columns < 2u || header.layout().count() < columns)
                 return false;
             // (the header's total width (see header_view::total_width) is the columns' widths plus half a separator before the first 
-            // column and a separator between the two)
-            auto const width = std::floor((aTable.client_rect(false).cx - header.separator_width() * 1.5) / 2.0);
+            // column and a separator between each two)
+            auto const width = std::floor((aTable.client_rect(false).cx - header.separator_width() * (columns - 0.5)) / columns);
             if (width <= 0.0)
                 return false;
             {
                 neolib::scoped_flag sf{ tDistributingColumns };
                 if (!aSaved.is_default())
                 {
-                    auto const saved = aSaved.value<ng::size>();
+                    auto const saved = saved_column_widths(aSaved, columns);
                     aResized = true;
-                    header.set_section_width(0u, std::floor(saved.cx));
-                    header.set_section_width(1u, std::floor(saved.cy));
+                    for (std::uint32_t col = 0u; col < columns && col < saved.size(); ++col)
+                        header.set_section_width(col, std::floor(saved[col]));
                 }
                 else
                 {
                     aWidth = width;
-                    header.set_section_width(0u, width);
-                    header.set_section_width(1u, width);
+                    for (std::uint32_t col = 0u; col < columns; ++col)
+                        header.set_section_width(col, width);
                 }
             }
-            for (std::uint32_t col = 0u; col < 2u; ++col)
+            for (std::uint32_t col = 0u; col < columns; ++col)
                 aSink += ng::get_property(header.layout().get_widget_at(col), "FixedSize").property_changed(
                     [&aTable, &aWidth, &aResized, &aSaved](ng::property_variant const&) { save_columns(aTable, aWidth, aResized, aSaved); });
             return true;
@@ -217,6 +254,7 @@ namespace neogfx::DesignStudio
         rightDockWeight{ aSettings.setting("environment.windows_and_tabs.right_dock_weight"_s) },
         propertyColumnWidths{ aSettings.setting("environment.windows_and_tabs.property_column_widths"_s) },
         objectColumnWidths{ aSettings.setting("environment.windows_and_tabs.object_column_widths"_s) },
+        translationColumnWidths{ aSettings.setting("environment.windows_and_tabs.translation_column_widths"_s) },
         workspaceFont{ aSettings.setting("environment.fonts_and_colors.workspace_font"_s) },
         subpixelRendering{ aSettings.setting("environment.fonts_and_colors.subpixel"_s) },
         toolbarIconSize{ aSettings.setting("environment.toolbars.icon_size"_s) },
@@ -231,7 +269,7 @@ namespace neogfx::DesignStudio
         iToolbox{ ng::make_dockable<ng::tree_view>("Toolbox"_t, ng::dock_area::Left, true, ng::frame_style::NoFrame) },
         iWorkflow{ ng::make_dockable<ng::list_view>("Workflow"_t, ng::dock_area::Left, true, ng::frame_style::NoFrame) },
         iObjects{ ng::make_dockable<ng::table_view>("Object Explorer"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame) },
-        iProperties{ ng::make_dockable<ng::tab_page_container<>>("Properties"_t, ng::dock_area::Right) },
+        iProperties{ ng::make_dockable<ng::tab_page_container<>>("Properties"_t, ng::dock_area::Right, false, ng::tab_container_style::TabAlignmentBottom) },
         iPropertiesTab{ iProperties.docked_widget<ng::tab_page_container<>>(), "Properties"_t },
         iPropertiesTabLayout{ iPropertiesTab },
         iPropertyTable{ iPropertiesTabLayout, true, ng::frame_style::NoFrame },
@@ -1063,6 +1101,8 @@ namespace neogfx::DesignStudio
                 iPropertyColumnsDistributed = distribute_columns(propertyTable, iPropertyColumnWidth, iPropertyColumnsResized, propertyColumnWidths, iSink);
             if (!iObjectColumnsDistributed)
                 iObjectColumnsDistributed = distribute_columns(iObjects.docked_widget<ng::table_view>(), iObjectColumnWidth, iObjectColumnsResized, objectColumnWidths, iSink);
+            if (!iTranslationColumnsDistributed)
+                iTranslationColumnsDistributed = distribute_columns(iTranslationTable, iTranslationColumnWidth, iTranslationColumnsResized, translationColumnWidths, iSink);
             if (iPropertiesNeedUpdate || (!iPropertyElement.valid() && iPropertyModel.rows() != 0u))
             {
                 iPropertiesNeedUpdate = false;
@@ -1085,6 +1125,14 @@ namespace neogfx::DesignStudio
                 for (auto property : iChangedProperties)
                     iPropertyPresentationModel.sync_cell_widgets(*property);
                 iChangedProperties.clear();
+            }
+            // the design surface's texts in the design language once it (or a translation) has changed: on a later tick than the change 
+            // (e.g. not while the language drop list's selection is being handled)
+            if (iDesignSurfaceNeedsUpdate)
+            {
+                iDesignSurfaceNeedsUpdate = false;
+                if (iProjectManager.project_active())
+                    iProjectManager.active_project().root().visit([](i_element& aElement) { aElement.apply_attributes(show_ids()); });
             }
             // the Translations tab: the translations of the .nrc file the selected element is in (see update_translations)
             if (iTranslationsNeedUpdate || translation_file() != iTranslationFile)
@@ -1164,7 +1212,8 @@ namespace neogfx::DesignStudio
     // Properties toolbox's Translations tab: the translation tables of the .nrc file the selected element is in (the project's primary 
     // file if none is selected) ("<.nrc file stem>.<language>.xneol" files: see i_project), i.e. translations of the translatable strings 
     // (as in "foo"_t) of the user interface it defines into the language chosen; the last row is for adding a translation (one without a 
-    // source is removed when the project is saved); a language is added by its IETF language tag (e.g. "de" or "de-DE")
+    // source is removed when the project is saved); a language is added by its IETF language tag (e.g. "de" or "de-DE"); the language 
+    // chosen is also the one the design surface shows the user interface in ("(default)": untranslated)
     void main_window_ex::init_translations()
     {
         iTranslationsTabLayout.set_padding(ng::padding{});
@@ -1185,10 +1234,13 @@ namespace neogfx::DesignStudio
 
         iSink += iTranslationLanguage.SelectionChanged([this](ng::optional_item_model_index const& aSelection)
         {
-            if (iUpdatingTranslations || !aSelection || aSelection->row() >= iTranslationLanguages.size() || 
-                iTranslationLanguages[aSelection->row()] == iTranslationLanguageShown)
+            // (the first row is "(default)": the user interface untranslated)
+            if (iUpdatingTranslations || !aSelection || aSelection->row() > iTranslationLanguages.size())
+                return;
+            auto const selected = aSelection->row() == 0u ? std::optional<ng::string>{} : std::optional<ng::string>{ iTranslationLanguages[aSelection->row() - 1u] };
+            if (selected == iTranslationLanguageShown)
                 return; // (n.b. also (asynchronously) when update_translations selects the language shown)
-            iTranslationLanguageChosen = iTranslationLanguages[aSelection->row()];
+            iTranslationLanguageChosen = selected.value_or(ng::string{}); // (an empty language: the default)
             iTranslationsNeedUpdate = true;
         });
         iSink += iNewTranslationLanguage.TextChanged([this]()
@@ -1247,6 +1299,12 @@ namespace neogfx::DesignStudio
             if (row == count && source.empty() && target.empty() && context.empty() && plurality.empty())
                 return; // (the row for a new translation, still empty)
             project.set_translation(file, language, row, source, context, plurality, target);
+            // (the design surface shows the translation (asynchronously: see iPropertiesUpdater) if its language's table is this one or, failing 
+            // that, its primary language's (e.g. "de" for "de-AT"), as project::design_translation looks them up)
+            std::string const designLanguage = project.design_language().to_std_string();
+            if (!designLanguage.empty() && (boost::iequals(language.to_std_string(), designLanguage) || 
+                boost::iequals(language.to_std_string(), designLanguage.substr(0, designLanguage.find('-')))))
+                iDesignSurfaceNeedsUpdate = true;
             if (row == count)
                 iTranslationRowNeeded = true; // (a row for another new translation: see iPropertiesUpdater)
         });
@@ -1277,29 +1335,35 @@ namespace neogfx::DesignStudio
             for (std::uint32_t i = 0u; i < project->translation_language_count(file); ++i)
                 languages.push_back(ng::string{ project->translation_language(file, i) });
         }
-        if (languages != iTranslationLanguages)
+        if (languages != iTranslationLanguages || iTranslationLanguage.model().rows() == 0u)
         {
             iTranslationLanguages = languages;
             iTranslationLanguage.model().clear();
+            iTranslationLanguage.model().insert_item(ng::item_model_index{ 0u }, ng::string{ "(default)"_t }); // (the user interface untranslated)
             for (std::uint32_t row = 0u; row < languages.size(); ++row)
-                iTranslationLanguage.model().insert_item(ng::item_model_index{ row },
+                iTranslationLanguage.model().insert_item(ng::item_model_index{ row + 1u },
                     ng::string{ ng::language_name(languages[row]).to_std_string() + " [" + languages[row].to_std_string() + "]" });
         }
-        // (the language chosen if the file has translations into it, otherwise its first)
+        // (the language chosen if the file has translations into it, otherwise its first, unless the default has been chosen (it is 
+        // until a language is chosen))
+        bool const defaultChosen = !iTranslationLanguageChosen || iTranslationLanguageChosen->empty();
         auto shown = iTranslationLanguageChosen ? std::find(languages.begin(), languages.end(), *iTranslationLanguageChosen) : languages.end();
-        if (shown == languages.end() && !languages.empty())
+        if (shown == languages.end() && !languages.empty() && !defaultChosen)
             shown = languages.begin();
-        if (shown != languages.end())
+        iTranslationLanguageShown = shown != languages.end() ? std::optional<ng::string>{ *shown } : std::nullopt;
+        iTranslationLanguage.selection_model().set_current_index(iTranslationLanguage.presentation_model().from_item_model_index(
+            ng::item_model_index{ shown != languages.end() ? static_cast<std::uint32_t>(std::distance(languages.begin(), shown)) + 1u : 0u }));
+        iTranslationLanguage.accept_selection();
+        // the design surface shows the user interface in the language chosen (or, if none has been, the one shown)
+        if (iProjectManager.project_active())
         {
-            iTranslationLanguageShown = *shown;
-            iTranslationLanguage.selection_model().set_current_index(iTranslationLanguage.presentation_model().from_item_model_index(
-                ng::item_model_index{ static_cast<std::uint32_t>(std::distance(languages.begin(), shown)) }));
-            iTranslationLanguage.accept_selection();
-        }
-        else
-        {
-            iTranslationLanguageShown = std::nullopt;
-            iTranslationLanguage.input_widget().set_text(ng::string{});
+            auto& project = iProjectManager.active_project();
+            ng::string const designLanguage = iTranslationLanguageChosen ? *iTranslationLanguageChosen : iTranslationLanguageShown.value_or(ng::string{});
+            if (project.design_language().to_std_string_view() != designLanguage.to_std_string_view())
+            {
+                project.set_design_language(designLanguage);
+                iDesignSurfaceNeedsUpdate = true; // (asynchronously: see iPropertiesUpdater)
+            }
         }
         iTranslationLanguage.enable(!languages.empty());
         iNewTranslationLanguage.enable(iTranslationFile.has_value());

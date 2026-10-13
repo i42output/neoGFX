@@ -12,6 +12,16 @@
             resources/orca.png
             resources/explosion.png
             resources/icon.png
+            resources/test.en-GB.xneol
+            resources/test.uk.xneol
+            resources/test.sv.xneol
+            resources/test.nb.xneol
+            resources/test.da.xneol
+            resources/test.fr.xneol
+            resources/test.de.xneol
+            resources/test.zh-CN.xneol
+            resources/test.ja.xneol
+            resources/test.ko.xneol
         ]
     }
     

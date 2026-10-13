@@ -58,6 +58,9 @@ namespace neogfx::DesignStudio
         std::uint32_t translation_count(std::uint32_t aFile, i_string const& aLanguage) const override;
         void translation(std::uint32_t aFile, i_string const& aLanguage, std::uint32_t aIndex, i_string& aSource, i_string& aContext, i_string& aPlurality, i_string& aTarget) const override;
         void set_translation(std::uint32_t aFile, i_string const& aLanguage, std::uint32_t aIndex, i_string const& aSource, i_string const& aContext, i_string const& aPlurality, i_string const& aTarget) override;
+        i_string const& design_language() const override;
+        void set_design_language(i_string const& aLanguage) override;
+        void design_translation(i_element const& aElement, i_string const& aString, i_string& aResult) const override;
     public:
         bool has_path() const override;
         const i_string& path() const override;
@@ -98,6 +101,7 @@ namespace neogfx::DesignStudio
         i_project_manager& iManager;
         std::vector<nrc_file> iFiles;
         std::vector<translation_tables> iTranslations; // (by file: the primary file's can exist before it does (a new project))
+        string iDesignLanguage;
         ref_ptr<i_element> iRoot;
         string iName;
         string iNamespace;

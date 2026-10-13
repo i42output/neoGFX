@@ -30,6 +30,7 @@
 #include <vector>
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <neolib/file/json.hpp>
 #include <neogfx/app/i_resource_manager.hpp>
@@ -352,6 +353,59 @@ namespace neogfx::DesignStudio
         set_dirty();
     }
 
+    i_string const& project::design_language() const
+    {
+        return iDesignLanguage;
+    }
+
+    void project::set_design_language(i_string const& aLanguage)
+    {
+        iDesignLanguage = aLanguage;
+    }
+
+    void project::design_translation(i_element const& aElement, i_string const& aString, i_string& aResult) const
+    {
+        // as at runtime (see neogfx::app::translate): the language's table or, failing that, its primary language's (e.g. "de" for 
+        // "de-AT"); the translatable strings nrc generates have no context and a plurality of 1; an empty target is a string not yet translated
+        string const source{ aString };
+        aResult = source;
+        std::string const language = iDesignLanguage.to_std_string();
+        if (language.empty() || source.empty())
+            return;
+        auto const& tables = file_translations(element_file(aElement));
+        std::string const primaryLanguage = language.substr(0, language.find('-'));
+        for (auto const& candidate : { language, primaryLanguage })
+            for (auto const& table : tables)
+                if (boost::iequals(table.language.to_std_string(), candidate))
+                {
+                    // the target of the narrowest plurality range that includes 1 (otherwise the first)
+                    string const* result = nullptr;
+                    string const* first = nullptr;
+                    std::uint64_t resultWidth = 0u;
+                    for (auto const& translation : table.translations)
+                    {
+                        if (translation.source != source || !translation.context.empty())
+                            continue;
+                        if (first == nullptr)
+                            first = &translation.target;
+                        auto const range = plurality_range(translation.plurality);
+                        if (range.first > 1 || range.second < 1)
+                            continue;
+                        auto const width = static_cast<std::uint64_t>(range.second) - static_cast<std::uint64_t>(range.first);
+                        if (result == nullptr || width < resultWidth)
+                        {
+                            result = &translation.target;
+                            resultWidth = width;
+                        }
+                    }
+                    if (result == nullptr)
+                        result = first;
+                    if (result != nullptr && !result->empty())
+                        aResult = *result;
+                    return;
+                }
+    }
+
     void project::load_nrc(std::filesystem::path const& aPath)
     {
         std::filesystem::path const inputFileName{ std::filesystem::absolute(aPath).lexically_normal() };
@@ -484,8 +538,8 @@ namespace neogfx::DesignStudio
         return 0u;
     }
 
-    // a .nrc file's translation tables: "<.nrc file stem>.<language>.xneol" files alongside it (any it already has (a new project's 
-    // primary file's) are kept)
+    // a .nrc file's translation tables: "<.nrc file stem>.<language>.xneol" files in the "resources" sub-directory of its directory (any 
+    // it already has (a new project's primary file's) are kept)
     void project::load_translations(std::size_t aFile)
     {
         auto& tables = file_translations(static_cast<std::uint32_t>(aFile));
@@ -493,7 +547,7 @@ namespace neogfx::DesignStudio
         std::string const prefix = nrcPath.stem().string() + ".";
         std::string const extension = ".xneol";
         std::error_code ec;
-        for (auto const& entry : std::filesystem::directory_iterator{ nrcPath.parent_path(), ec })
+        for (auto const& entry : std::filesystem::directory_iterator{ nrcPath.parent_path() / "resources", ec })
         {
             auto const fileName = entry.path().filename().string();
             if (entry.path().extension() != extension || !fileName.starts_with(prefix))
@@ -528,9 +582,11 @@ namespace neogfx::DesignStudio
         {
             // (a translation of an empty string is removed)
             std::erase_if(table.translations, [](translation_entry const& aTranslation) { return aTranslation.source.empty(); });
-            auto const path = nrcPath.parent_path() / (nrcPath.stem().string() + "." + table.language.to_std_string() + ".xneol");
+            auto const path = nrcPath.parent_path() / "resources" / (nrcPath.stem().string() + "." + table.language.to_std_string() + ".xneol");
             if (table.saved != table.translations || !std::filesystem::exists(path))
             {
+                std::error_code ec;
+                std::filesystem::create_directories(path.parent_path(), ec); // (if it fails writing the file reports the error)
                 write_translation_file(path, table.language, table.translations);
                 table.saved = table.translations;
             }

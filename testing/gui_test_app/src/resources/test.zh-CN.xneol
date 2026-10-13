@@ -1,0 +1,605 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xneol xmlns="https://neogfx.org/xneol" version="1.0" trgLang="zh-CN">
+    <text>
+        <source>Show/Hide Status Bar</source>
+        <target>显示/隐藏状态栏</target>
+    </text>
+    <text>
+        <source>Game Controller Calibration</source>
+        <target>游戏控制器校准</target>
+    </text>
+    <text>
+        <source>Goldenrod Style</source>
+        <target>秋麒麟色样式</target>
+    </text>
+    <text>
+        <source>&amp;Contacts...</source>
+        <target>联系人(&amp;C)...</target>
+    </text>
+    <text>
+        <source>Add Favourite...</source>
+        <target>添加收藏...</target>
+    </text>
+    <text>
+        <source>Organize Favourites...</source>
+        <target>整理收藏...</target>
+    </text>
+    <text>
+        <source>Toggle Green/Turbo mode</source>
+        <target>切换绿色/涡轮模式</target>
+    </text>
+    <text>
+        <source>Mute/&amp;Unmute Sound</source>
+        <target>静音/取消静音(&amp;U)</target>
+    </text>
+    <text>
+        <source>Paste and Go</source>
+        <target>粘贴并转到</target>
+    </text>
+    <text>
+        <source>Next Tab</source>
+        <target>下一个标签页</target>
+    </text>
+    <text>
+        <source>Previous Tab</source>
+        <target>上一个标签页</target>
+    </text>
+    <text>
+        <source>Emacs style sequence #1</source>
+        <target>Emacs 风格序列 #1</target>
+    </text>
+    <text>
+        <source>Emacs style sequence #2</source>
+        <target>Emacs 风格序列 #2</target>
+    </text>
+    <text>
+        <source>Color Dialog...</source>
+        <target>颜色对话框...</target>
+    </text>
+    <text>
+        <source>Manage Plugins...</source>
+        <target>管理插件...</target>
+    </text>
+    <text>
+        <source>Check for Updates...</source>
+        <target>检查更新...</target>
+    </text>
+    <text>
+        <source>&amp;File</source>
+        <target>文件(&amp;F)</target>
+    </text>
+    <text>
+        <source>&amp;Edit</source>
+        <target>编辑(&amp;E)</target>
+    </text>
+    <text>
+        <source>&amp;View</source>
+        <target>视图(&amp;V)</target>
+    </text>
+    <text>
+        <source>F&amp;avourites</source>
+        <target>收藏夹(&amp;A)</target>
+    </text>
+    <text>
+        <source>Silent Running Drones</source>
+        <target>《Silent Running》中的无人机</target>
+    </text>
+    <text>
+        <source>DC (TM) Characters</source>
+        <target>DC (TM) 角色</target>
+    </text>
+    <text>
+        <source>Marvel (TM) Characters</source>
+        <target>Marvel (TM) 角色</target>
+    </text>
+    <text>
+        <source>&amp;Xyzzy...</source>
+        <target>Xyzzy(&amp;X)...</target>
+    </text>
+    <text>
+        <source>&amp;Test</source>
+        <target>测试(&amp;T)</target>
+    </text>
+    <text>
+        <source>&amp;Window</source>
+        <target>窗口(&amp;W)</target>
+    </text>
+    <text>
+        <source>&amp;Help</source>
+        <target>帮助(&amp;H)</target>
+    </text>
+    <text>
+        <source>Keywords...</source>
+        <target>关键字...</target>
+    </text>
+    <text>
+        <source>Buttons</source>
+        <target>按钮</target>
+    </text>
+    <text>
+        <source>This is the neoGFX test application.</source>
+        <target>这是 neoGFX 测试应用程序。</target>
+    </text>
+    <text>
+        <source>the,,, quick brown fox jumps over the lazy dog.
+Change tab bar placement.</source>
+        <target>那只,,,敏捷的棕色狐狸跳过了懒狗。
+更改标签栏位置。</target>
+    </text>
+    <text>
+        <source>&amp;Generate UUID</source>
+        <target>生成 UUID(&amp;G)</target>
+    </text>
+    <text>
+        <source>Toggle Editable</source>
+        <target>切换可编辑</target>
+    </text>
+    <text>
+        <source>First field:</source>
+        <target>第一个字段：</target>
+    </text>
+    <text>
+        <source>Enter text</source>
+        <target>输入文本</target>
+    </text>
+    <text>
+        <source>Second field:</source>
+        <target>第二个字段：</target>
+    </text>
+    <text>
+        <source>Third field (label above)</source>
+        <target>第三个字段（标签在上方）</target>
+    </text>
+    <text>
+        <source>Fourth field (label above)</source>
+        <target>第四个字段（标签在上方）</target>
+    </text>
+    <text>
+        <source>Label 1:</source>
+        <target>标签 1：</target>
+    </text>
+    <text>
+        <source>RGB &lt;-&gt; HSV
+color space
+conversion test
+
+
+Z͕̰̦̼͖ͦ͆ͬ̍̋̓̚
+
+</source>
+        <target>RGB &lt;-&gt; HSV
+颜色空间
+转换测试
+
+
+Z͕̰̦̼͖ͦ͆ͬ̍̋̓̚
+
+</target>
+    </text>
+    <text>
+        <source>Toggle arcade mode.</source>
+        <target>切换街机模式。</target>
+    </text>
+    <text>
+        <source>Toggle &amp;mute.</source>
+        <target>切换静音(&amp;M)。</target>
+    </text>
+    <text>
+        <source>Enable/disable
+contacts action.</source>
+        <target>启用/禁用
+联系人操作。</target>
+    </text>
+    <text>
+        <source>Group Box</source>
+        <target>分组框</target>
+    </text>
+    <text>
+        <source>Tristate checkbo&amp;x</source>
+        <target>三态复选框(&amp;X)</target>
+    </text>
+    <text>
+        <source>Editor word wrap</source>
+        <target>编辑器自动换行</target>
+    </text>
+    <text>
+        <source>Password / Invalidation Method</source>
+        <target>密码 / 失效方法</target>
+    </text>
+    <text>
+        <source>Columns / Render Queue Optimisation</source>
+        <target>列 / 渲染队列优化</target>
+    </text>
+    <text>
+        <source>Group Box Checkable</source>
+        <target>可勾选的分组框</target>
+    </text>
+    <text>
+        <source>kern</source>
+        <target>字距</target>
+    </text>
+    <text>
+        <source>subpix</source>
+        <target>子像素</target>
+    </text>
+    <text>
+        <source>theme</source>
+        <target>主题</target>
+    </text>
+    <text>
+        <source>font</source>
+        <target>字体</target>
+    </text>
+    <text>
+        <source>edit</source>
+        <target>编辑</target>
+    </text>
+    <text>
+        <source>normal</source>
+        <target>正常</target>
+    </text>
+    <text>
+        <source>outline</source>
+        <target>轮廓</target>
+    </text>
+    <text>
+        <source>glow</source>
+        <target>发光</target>
+    </text>
+    <text>
+        <source>shadow</source>
+        <target>阴影</target>
+    </text>
+    <text>
+        <source>Radio 1</source>
+        <target>单选 1</target>
+    </text>
+    <text>
+        <source>Slider changes
+font size</source>
+        <target>滑块更改
+字体大小</target>
+    </text>
+    <text>
+        <source>Radio 3</source>
+        <target>单选 3</target>
+    </text>
+    <text>
+        <source>Slider changes
+theme color</source>
+        <target>滑块更改
+主题颜色</target>
+    </text>
+    <text>
+        <source>Default/Slate
+Style</source>
+        <target>默认/石板
+样式</target>
+    </text>
+    <text>
+        <source>Message Boxes</source>
+        <target>消息框</target>
+    </text>
+    <text>
+        <source>Icons</source>
+        <target>图标</target>
+    </text>
+    <text>
+        <source>Information</source>
+        <target>信息</target>
+    </text>
+    <text>
+        <source>Question</source>
+        <target>问题</target>
+    </text>
+    <text>
+        <source>Stop</source>
+        <target>停止</target>
+    </text>
+    <text>
+        <source>Warning</source>
+        <target>警告</target>
+    </text>
+    <text>
+        <source>Error</source>
+        <target>错误</target>
+    </text>
+    <text>
+        <source>Text</source>
+        <target>文本</target>
+    </text>
+    <text>
+        <source>Title:</source>
+        <target>标题：</target>
+    </text>
+    <text>
+        <source>neoGFX Message Box Test</source>
+        <target>neoGFX 消息框测试</target>
+    </text>
+    <text>
+        <source>Text:</source>
+        <target>文本：</target>
+    </text>
+    <text>
+        <source>This is a test of the neoGFX message box.
+This is a line of text.
+
+This is a line of text after a blank line</source>
+        <target>这是 neoGFX 消息框的测试。
+这是一行文本。
+
+这是空行之后的一行文本</target>
+    </text>
+    <text>
+        <source>Detailed Text:</source>
+        <target>详细文本：</target>
+    </text>
+    <text>
+        <source>This is where optional informative text usually goes.
+This is a line of text.
+
+The previous line was intentionally left blank.</source>
+        <target>这里通常放置可选的说明性文本。
+这是一行文本。
+
+上一行特意留空。</target>
+    </text>
+    <text>
+        <source>Open Message Box</source>
+        <target>打开消息框</target>
+    </text>
+    <text>
+        <source>Item Views</source>
+        <target>项视图</target>
+    </text>
+    <text>
+        <source>Toggle List
+Header View</source>
+        <target>切换列表
+标题视图</target>
+    </text>
+    <text>
+        <source>Table View Model</source>
+        <target>表视图模型</target>
+    </text>
+    <text>
+        <source>Checkable</source>
+        <target>可勾选</target>
+    </text>
+    <text>
+        <source>TriState Checkable</source>
+        <target>三态可勾选</target>
+    </text>
+    <text>
+        <source>Column Five</source>
+        <target>第五列</target>
+    </text>
+    <text>
+        <source>Read only</source>
+        <target>只读</target>
+    </text>
+    <text>
+        <source>Unselectable</source>
+        <target>不可选择</target>
+    </text>
+    <text>
+        <source>Upper Table View</source>
+        <target>上方表视图</target>
+    </text>
+    <text>
+        <source>Images</source>
+        <target>图像</target>
+    </text>
+    <text>
+        <source>Easing:</source>
+        <target>缓动：</target>
+    </text>
+    <text>
+        <source>Monochrome text</source>
+        <target>单色文本</target>
+    </text>
+    <text>
+        <source>Colored text</source>
+        <target>彩色文本</target>
+    </text>
+    <text>
+        <source>Colored cells</source>
+        <target>彩色单元格</target>
+    </text>
+    <text>
+        <source>Lower Table View</source>
+        <target>下方表视图</target>
+    </text>
+    <text>
+        <source>Selection</source>
+        <target>选择</target>
+    </text>
+    <text>
+        <source>No selection</source>
+        <target>无选择</target>
+    </text>
+    <text>
+        <source>Single selection</source>
+        <target>单选</target>
+    </text>
+    <text>
+        <source>Multiple selection</source>
+        <target>多选</target>
+    </text>
+    <text>
+        <source>Extended selection</source>
+        <target>扩展选择</target>
+    </text>
+    <text>
+        <source>Lots</source>
+        <target>大量</target>
+    </text>
+    <text>
+        <source>Game</source>
+        <target>游戏</target>
+    </text>
+    <text>
+        <source>Timestep:</source>
+        <target>时间步长：</target>
+    </text>
+    <text>
+        <source>Timestep Growth:</source>
+        <target>时间步长增长：</target>
+    </text>
+    <text>
+        <source>Maximum Timestep:</source>
+        <target>最大时间步长：</target>
+    </text>
+    <text>
+        <source>Yield After (ms):</source>
+        <target>让出间隔（毫秒）：</target>
+    </text>
+    <text>
+        <source>Collision Detection</source>
+        <target>碰撞检测</target>
+    </text>
+    <text>
+        <source>Drawing</source>
+        <target>绘图</target>
+    </text>
+    <text>
+        <source>Editor</source>
+        <target>编辑器</target>
+    </text>
+    <text>
+        <source>Style 1</source>
+        <target>样式 1</target>
+    </text>
+    <text>
+        <source>Style 2</source>
+        <target>样式 2</target>
+    </text>
+    <text>
+        <source>Web Browser</source>
+        <target>网页浏览器</target>
+    </text>
+    <text>
+        <source>Instancing</source>
+        <target>实例化</target>
+    </text>
+    <text>
+        <source>Rendering Scheme</source>
+        <target>渲染方案</target>
+    </text>
+    <text>
+        <source>Off</source>
+        <target>关闭</target>
+    </text>
+    <text>
+        <source>Immediate (Batching)</source>
+        <target>即时（批处理）</target>
+    </text>
+    <text>
+        <source>ECS (Batching)</source>
+        <target>ECS（批处理）</target>
+    </text>
+    <text>
+        <source>ECS (Instancing)</source>
+        <target>ECS（实例化）</target>
+    </text>
+    <text>
+        <source>Mesh Shape</source>
+        <target>网格形状</target>
+    </text>
+    <text>
+        <source>Quad</source>
+        <target>四边形</target>
+    </text>
+    <text>
+        <source>Circle</source>
+        <target>圆形</target>
+    </text>
+    <text>
+        <source>Outline</source>
+        <target>轮廓</target>
+    </text>
+    <text>
+        <source>Fill</source>
+        <target>填充</target>
+    </text>
+    <text>
+        <source>Size:</source>
+        <target>大小：</target>
+    </text>
+    <text>
+        <source>Count:</source>
+        <target>数量：</target>
+    </text>
+    <text>
+        <source>Pause Animation</source>
+        <target>暂停动画</target>
+    </text>
+    <text>
+        <source>Pause Transformations</source>
+        <target>暂停变换</target>
+    </text>
+    <text>
+        <source>Use SIMD</source>
+        <target>使用 SIMD</target>
+    </text>
+    <text>
+        <source>Use Thread Pool</source>
+        <target>使用线程池</target>
+    </text>
+    <text>
+        <source>Scene Graph (3D)</source>
+        <target>场景图（3D）</target>
+    </text>
+    <text>
+        <source>Animate</source>
+        <target>动画</target>
+    </text>
+    <text>
+        <source>Lighting</source>
+        <target>光照</target>
+    </text>
+    <text>
+        <source>Shadows</source>
+        <target>阴影</target>
+    </text>
+    <text>
+        <source>Save glTF...</source>
+        <target>保存 glTF...</target>
+    </text>
+    <text>
+        <source>Load glTF...</source>
+        <target>加载 glTF...</target>
+    </text>
+    <text>
+        <source>Load Environment...</source>
+        <target>加载环境...</target>
+    </text>
+    <text>
+        <source>Background</source>
+        <target>背景</target>
+    </text>
+    <text>
+        <source>Own texture</source>
+        <target>自有纹理</target>
+    </text>
+    <text>
+        <source>Blur</source>
+        <target>模糊</target>
+    </text>
+    <text>
+        <source>Drag: orbit; right drag: pan; wheel: zoom; double click: reset view</source>
+        <target>拖动：环绕；右键拖动：平移；滚轮：缩放；双击：重置视图</target>
+    </text>
+    <text>
+        <source>Scene Graph (2D)</source>
+        <target>场景图（2D）</target>
+    </text>
+    <text>
+        <source>An electronic circuit: a scene graph of 48 dip square tiles, each with a symbol generated from inline SVG. Click a switch to toggle it; drag a variable resistor along its length to change its resistance, and so the brightness of the LEDs.</source>
+        <target>一个电子电路：由 48 dip 见方的图块组成的场景图，每个图块都带有一个由内联 SVG 生成的符号。单击开关可切换其状态；沿可变电阻器的长度方向拖动可改变其阻值，从而改变 LED 的亮度。</target>
+    </text>
+    <text>
+        <source>Text Widget Cutoffs</source>
+        <target>文本控件截断</target>
+    </text>
+</xneol>

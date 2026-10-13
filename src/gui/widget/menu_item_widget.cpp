@@ -332,11 +332,15 @@ namespace neogfx
 
         auto text_updated = [this]()
             {
-                auto m = mnemonic_from_text(iText.text());
-                if (!m.empty())
-                    service<i_app>().add_mnemonic(*this);
-                else
+                // (only if the text's mnemonic has changed: not, e.g., when only the rest of the text has)
+                auto const m = mnemonic_from_text(iText.text());
+                if (m == iMnemonic)
+                    return;
+                if (!iMnemonic.empty())
                     service<i_app>().remove_mnemonic(*this);
+                iMnemonic = m;
+                if (!iMnemonic.empty())
+                    service<i_app>().add_mnemonic(*this);
             };
         iSink += iText.TextChanged(text_updated);
         text_updated();

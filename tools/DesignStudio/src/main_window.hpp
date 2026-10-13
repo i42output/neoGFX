@@ -68,6 +68,7 @@ namespace neogfx::DesignStudio
         neolib::i_setting& rightDockWeight;
         neolib::i_setting& propertyColumnWidths;
         neolib::i_setting& objectColumnWidths;
+        neolib::i_setting& translationColumnWidths;
         neolib::i_setting& workspaceFont;
         neolib::i_setting& subpixelRendering;
         neolib::i_setting& toolbarIconSize;
@@ -172,6 +173,9 @@ namespace neogfx::DesignStudio
         std::optional<ng::dimension> iObjectColumnWidth; // Object Explorer's columns' width when evenly distributed (see distribute_columns)
         bool iObjectColumnsResized = false;
         bool iObjectColumnsDistributed = false;
+        std::optional<ng::dimension> iTranslationColumnWidth; // the Translations tab's columns' width when evenly distributed (see distribute_columns)
+        bool iTranslationColumnsResized = false;
+        bool iTranslationColumnsDistributed = false;
         std::unordered_map<i_property const*, std::string> iPropertyMembers; // the member element (e.g. ".text_widget") whose widget a property shown is a property of (if it isn't the element's own)
         ng::item_model iTranslationModel; // (columns: source, translation, context, plurality; the last row is for a new translation)
         ng::item_presentation_model iTranslationPresentationModel;
@@ -182,6 +186,7 @@ namespace neogfx::DesignStudio
         bool iUpdatingTranslations = false;
         bool iTranslationsNeedUpdate = false;
         bool iTranslationRowNeeded = false;
+        bool iDesignSurfaceNeedsUpdate = false; // (its texts in the project's design language: see update_translations)
         std::vector<std::pair<ng::string, std::unique_ptr<ng::action>>> iLanguageActions; // (View | Language)
         std::set<i_property const*> iChangedProperties; // changed since their rows were last updated (a batch update every 20ms: see iPropertiesUpdater); emptied if their object is destroyed before then
     };

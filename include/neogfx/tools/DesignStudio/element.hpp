@@ -827,32 +827,34 @@ namespace neogfx::DesignStudio
             aResult += "}";
         }
 
-        inline ref_ptr<i_action> make_action(attributes_t const& aAttributes)
+        inline ref_ptr<i_action> make_action(i_element const& aActionElement)
         {
-            auto const text = attribute(aAttributes, "text");
-            auto const image = attribute(aAttributes, "image");
+            auto const attributes = attributes_of(aActionElement);
+            string text; // (in the design language)
+            aActionElement.project().design_translation(aActionElement, string{ attribute(attributes, "text") }, text);
+            auto const image = attribute(attributes, "image");
             ref_ptr<i_action> result;
             try
             {
                 if (!image.empty())
-                    result = make_ref<action>(string{ text }, neogfx::image{ string{ image } });
+                    result = make_ref<action>(text, neogfx::image{ string{ image } });
             }
             catch (std::exception const& e)
             {
                 std::cerr << "DesignStudio: cannot load action image '" << image << "': " << e.what() << std::endl;
             }
             if (!result)
-                result = make_ref<action>(string{ text });
-            auto const checkable = attribute(aAttributes, "checkable");
+                result = make_ref<action>(text);
+            auto const checkable = attribute(attributes, "checkable");
             if (checkable == "true")
                 result->set_checkable(true);
-            if (attribute(aAttributes, "checked") == "true")
+            if (attribute(attributes, "checked") == "true")
                 result->set_checked(true);
             return result;
         }
 
-        // an action referenced by e.g. "appTest.actionFileSave": an action element of the project or one of the standard (app) actions
-        inline ref_ptr<i_action> referenced_action(i_project& aProject, std::string const& aReference)
+        // the action element of the project referenced by e.g. "appTest.actionContacts" (if any)
+        inline i_element* referenced_action_element(i_project& aProject, std::string const& aReference)
         {
             auto const dot = aReference.rfind('.');
             auto const id = dot == std::string::npos ? aReference : aReference.substr(dot + 1u);
@@ -862,8 +864,16 @@ namespace neogfx::DesignStudio
                 if (actionElement == nullptr && aElement.group() == element_group::Action && aElement.id().to_std_string() == id)
                     actionElement = &aElement;
             });
-            if (actionElement != nullptr)
-                return make_action(attributes_of(*actionElement));
+            return actionElement;
+        }
+
+        // an action referenced by e.g. "appTest.actionFileSave": an action element of the project or one of the standard (app) actions
+        inline ref_ptr<i_action> referenced_action(i_project& aProject, std::string const& aReference)
+        {
+            auto const dot = aReference.rfind('.');
+            auto const id = dot == std::string::npos ? aReference : aReference.substr(dot + 1u);
+            if (auto const actionElement = referenced_action_element(aProject, aReference))
+                return make_action(*actionElement);
             static std::vector<std::pair<std::string, i_action& (i_app::*)()>> const sStandardActions =
             {
                 { "actionFileNew", &i_app::action_file_new },
@@ -904,13 +914,57 @@ namespace neogfx::DesignStudio
                             aMenu.insert_action_at(aMenu.count(), referenced_action(aMenuElement.project(), item.reference));
                     }
                     else if (item.element->type().to_std_string() == "menu")
-                        populate_menu(aMenu.add_sub_menu(string{ attribute(attributes_of(*item.element), "title") }), *item.element);
+                    {
+                        string title; // (in the design language)
+                        aMenuElement.project().design_translation(*item.element, string{ attribute(attributes_of(*item.element), "title") }, title);
+                        populate_menu(aMenu.add_sub_menu(title), *item.element);
+                    }
                     else if (item.element->group() == element_group::Action)
-                        aMenu.insert_action_at(aMenu.count(), make_action(attributes_of(*item.element)));
+                        aMenu.insert_action_at(aMenu.count(), make_action(*item.element));
                 }
                 catch (std::exception const& e)
                 {
                     std::cerr << "DesignStudio: cannot add menu item: " << e.what() << std::endl;
+                }
+            }
+        }
+
+        // the texts (in the design language) of the items of a menu populated by populate_menu, updated in place rather than by rebuilding 
+        // it (e.g. when the design language changes); stops at an item that isn't as populate_menu adds it (the menu is rebuilt when its 
+        // structure changes: see element::apply_attributes)
+        inline void update_menu_texts(i_menu& aMenu, i_element& aMenuElement)
+        {
+            auto& project = aMenuElement.project();
+            i_menu::item_index index = 0u;
+            for (auto const& item : items_of(aMenuElement))
+            {
+                bool const separator = (item.element == nullptr && item.reference == "separator");
+                i_element* const element = (item.element != nullptr ? item.element :
+                    separator ? nullptr : referenced_action_element(project, item.reference));
+                bool const subMenu = (item.element != nullptr && item.element->type().to_std_string() == "menu");
+                if (item.element != nullptr && !subMenu && item.element->group() != element_group::Action)
+                    continue; // (not added by populate_menu)
+                if (index >= aMenu.count())
+                    return;
+                auto& menuItem = aMenu.item_at(index++);
+                bool const itemIsSeparator = (menuItem.type() == menu_item_type::Action && menuItem.action().is_separator());
+                if (separator != itemIsSeparator || subMenu != (menuItem.type() == menu_item_type::SubMenu))
+                    return;
+                if (separator || element == nullptr)
+                    continue; // (a standard (app) action's text is the app's)
+                string text;
+                if (subMenu)
+                {
+                    project.design_translation(*element, string{ attribute(attributes_of(*element), "title") }, text);
+                    if (menuItem.sub_menu().title() != text)
+                        menuItem.sub_menu().set_title(text);
+                    update_menu_texts(menuItem.sub_menu(), *element);
+                }
+                else
+                {
+                    project.design_translation(*element, string{ attribute(attributes_of(*element), "text") }, text);
+                    if (menuItem.action().text() != text)
+                        menuItem.action().set_text(i_action::optional_text{ text });
                 }
             }
         }
@@ -929,7 +983,7 @@ namespace neogfx::DesignStudio
                             aToolbar.add_action(referenced_action(aToolbarElement.project(), item.reference));
                     }
                     else if (item.element->group() == element_group::Action)
-                        aToolbar.add_action(make_action(attributes_of(*item.element)));
+                        aToolbar.add_action(make_action(*item.element));
                 }
                 catch (std::exception const& e)
                 {
@@ -1402,7 +1456,7 @@ namespace neogfx::DesignStudio
         }
         void apply_attributes(bool aShowIds) override
         {
-            // show the element's text (as in a running application) or, if requested, its id
+            // show the element's text (as in a running application, in the project's design language) or, if requested, its id
             if (!has_layout_item())
                 return;
             // visual attributes (colours, images, sizes, etc.); only when they have changed (e.g. not on every in-place text edit)
@@ -1475,11 +1529,18 @@ namespace neogfx::DesignStudio
                         nrc_items::populate_toolbar(widget, *this);
                     }
                 }
+                else if constexpr (std::is_base_of_v<i_menu, Type>)
+                {
+                    // (the same items: only their texts (in the design language) can have changed)
+                    nrc_items::update_menu_texts(static_cast<Type&>(layout_item().as_widget()), *this);
+                }
             }
             if constexpr (std::is_base_of_v<i_widget, Type>)
             {
                 auto& widget = static_cast<Type&>(layout_item().as_widget());
-                string const text{ aShowIds ? iId.to_std_string() : design_text() };
+                string text{ iId };
+                if (!aShowIds)
+                    project().design_translation(*this, string{ design_text() }, text);
                 if constexpr (std::is_base_of_v<i_tab_page, Type>)
                     widget.tab().set_text(text);
                 else if constexpr (requires(Type& aWidget, string const& aText) { aWidget.set_title_text(aText); })

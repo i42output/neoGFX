@@ -1,0 +1,605 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xneol xmlns="https://neogfx.org/xneol" version="1.0" trgLang="ja">
+    <text>
+        <source>Show/Hide Status Bar</source>
+        <target>ステータス バーの表示/非表示</target>
+    </text>
+    <text>
+        <source>Game Controller Calibration</source>
+        <target>ゲーム コントローラーの調整</target>
+    </text>
+    <text>
+        <source>Goldenrod Style</source>
+        <target>ゴールデンロッド スタイル</target>
+    </text>
+    <text>
+        <source>&amp;Contacts...</source>
+        <target>連絡先(&amp;C)...</target>
+    </text>
+    <text>
+        <source>Add Favourite...</source>
+        <target>お気に入りに追加...</target>
+    </text>
+    <text>
+        <source>Organize Favourites...</source>
+        <target>お気に入りの整理...</target>
+    </text>
+    <text>
+        <source>Toggle Green/Turbo mode</source>
+        <target>グリーン/ターボ モードの切り替え</target>
+    </text>
+    <text>
+        <source>Mute/&amp;Unmute Sound</source>
+        <target>ミュート/ミュート解除(&amp;U)</target>
+    </text>
+    <text>
+        <source>Paste and Go</source>
+        <target>貼り付けて移動</target>
+    </text>
+    <text>
+        <source>Next Tab</source>
+        <target>次のタブ</target>
+    </text>
+    <text>
+        <source>Previous Tab</source>
+        <target>前のタブ</target>
+    </text>
+    <text>
+        <source>Emacs style sequence #1</source>
+        <target>Emacs スタイルのシーケンス #1</target>
+    </text>
+    <text>
+        <source>Emacs style sequence #2</source>
+        <target>Emacs スタイルのシーケンス #2</target>
+    </text>
+    <text>
+        <source>Color Dialog...</source>
+        <target>色の設定ダイアログ...</target>
+    </text>
+    <text>
+        <source>Manage Plugins...</source>
+        <target>プラグインの管理...</target>
+    </text>
+    <text>
+        <source>Check for Updates...</source>
+        <target>更新の確認...</target>
+    </text>
+    <text>
+        <source>&amp;File</source>
+        <target>ファイル(&amp;F)</target>
+    </text>
+    <text>
+        <source>&amp;Edit</source>
+        <target>編集(&amp;E)</target>
+    </text>
+    <text>
+        <source>&amp;View</source>
+        <target>表示(&amp;V)</target>
+    </text>
+    <text>
+        <source>F&amp;avourites</source>
+        <target>お気に入り(&amp;A)</target>
+    </text>
+    <text>
+        <source>Silent Running Drones</source>
+        <target>『サイレント・ランニング』のドローン</target>
+    </text>
+    <text>
+        <source>DC (TM) Characters</source>
+        <target>DC (TM) キャラクター</target>
+    </text>
+    <text>
+        <source>Marvel (TM) Characters</source>
+        <target>Marvel (TM) キャラクター</target>
+    </text>
+    <text>
+        <source>&amp;Xyzzy...</source>
+        <target>Xyzzy(&amp;X)...</target>
+    </text>
+    <text>
+        <source>&amp;Test</source>
+        <target>テスト(&amp;T)</target>
+    </text>
+    <text>
+        <source>&amp;Window</source>
+        <target>ウィンドウ(&amp;W)</target>
+    </text>
+    <text>
+        <source>&amp;Help</source>
+        <target>ヘルプ(&amp;H)</target>
+    </text>
+    <text>
+        <source>Keywords...</source>
+        <target>キーワード...</target>
+    </text>
+    <text>
+        <source>Buttons</source>
+        <target>ボタン</target>
+    </text>
+    <text>
+        <source>This is the neoGFX test application.</source>
+        <target>これは neoGFX テスト アプリケーションです。</target>
+    </text>
+    <text>
+        <source>the,,, quick brown fox jumps over the lazy dog.
+Change tab bar placement.</source>
+        <target>素早い,,,茶色の狐がのろまな犬を飛び越える。
+タブ バーの位置を変更。</target>
+    </text>
+    <text>
+        <source>&amp;Generate UUID</source>
+        <target>UUID の生成(&amp;G)</target>
+    </text>
+    <text>
+        <source>Toggle Editable</source>
+        <target>編集可能の切り替え</target>
+    </text>
+    <text>
+        <source>First field:</source>
+        <target>1 番目のフィールド:</target>
+    </text>
+    <text>
+        <source>Enter text</source>
+        <target>テキストを入力</target>
+    </text>
+    <text>
+        <source>Second field:</source>
+        <target>2 番目のフィールド:</target>
+    </text>
+    <text>
+        <source>Third field (label above)</source>
+        <target>3 番目のフィールド (ラベルは上)</target>
+    </text>
+    <text>
+        <source>Fourth field (label above)</source>
+        <target>4 番目のフィールド (ラベルは上)</target>
+    </text>
+    <text>
+        <source>Label 1:</source>
+        <target>ラベル 1:</target>
+    </text>
+    <text>
+        <source>RGB &lt;-&gt; HSV
+color space
+conversion test
+
+
+Z͕̰̦̼͖ͦ͆ͬ̍̋̓̚
+
+</source>
+        <target>RGB &lt;-&gt; HSV
+色空間
+変換テスト
+
+
+Z͕̰̦̼͖ͦ͆ͬ̍̋̓̚
+
+</target>
+    </text>
+    <text>
+        <source>Toggle arcade mode.</source>
+        <target>アーケード モードを切り替えます。</target>
+    </text>
+    <text>
+        <source>Toggle &amp;mute.</source>
+        <target>ミュートの切り替え(&amp;M)。</target>
+    </text>
+    <text>
+        <source>Enable/disable
+contacts action.</source>
+        <target>連絡先アクションの
+有効化/無効化。</target>
+    </text>
+    <text>
+        <source>Group Box</source>
+        <target>グループ ボックス</target>
+    </text>
+    <text>
+        <source>Tristate checkbo&amp;x</source>
+        <target>3 状態チェック ボックス(&amp;X)</target>
+    </text>
+    <text>
+        <source>Editor word wrap</source>
+        <target>エディターの折り返し</target>
+    </text>
+    <text>
+        <source>Password / Invalidation Method</source>
+        <target>パスワード / 無効化方法</target>
+    </text>
+    <text>
+        <source>Columns / Render Queue Optimisation</source>
+        <target>列 / レンダー キューの最適化</target>
+    </text>
+    <text>
+        <source>Group Box Checkable</source>
+        <target>チェック可能なグループ ボックス</target>
+    </text>
+    <text>
+        <source>kern</source>
+        <target>カーニング</target>
+    </text>
+    <text>
+        <source>subpix</source>
+        <target>サブピクセル</target>
+    </text>
+    <text>
+        <source>theme</source>
+        <target>テーマ</target>
+    </text>
+    <text>
+        <source>font</source>
+        <target>フォント</target>
+    </text>
+    <text>
+        <source>edit</source>
+        <target>編集</target>
+    </text>
+    <text>
+        <source>normal</source>
+        <target>標準</target>
+    </text>
+    <text>
+        <source>outline</source>
+        <target>アウトライン</target>
+    </text>
+    <text>
+        <source>glow</source>
+        <target>グロー</target>
+    </text>
+    <text>
+        <source>shadow</source>
+        <target>影</target>
+    </text>
+    <text>
+        <source>Radio 1</source>
+        <target>ラジオ 1</target>
+    </text>
+    <text>
+        <source>Slider changes
+font size</source>
+        <target>スライダーで
+フォント サイズを変更</target>
+    </text>
+    <text>
+        <source>Radio 3</source>
+        <target>ラジオ 3</target>
+    </text>
+    <text>
+        <source>Slider changes
+theme color</source>
+        <target>スライダーで
+テーマの色を変更</target>
+    </text>
+    <text>
+        <source>Default/Slate
+Style</source>
+        <target>デフォルト/スレート
+スタイル</target>
+    </text>
+    <text>
+        <source>Message Boxes</source>
+        <target>メッセージ ボックス</target>
+    </text>
+    <text>
+        <source>Icons</source>
+        <target>アイコン</target>
+    </text>
+    <text>
+        <source>Information</source>
+        <target>情報</target>
+    </text>
+    <text>
+        <source>Question</source>
+        <target>質問</target>
+    </text>
+    <text>
+        <source>Stop</source>
+        <target>停止</target>
+    </text>
+    <text>
+        <source>Warning</source>
+        <target>警告</target>
+    </text>
+    <text>
+        <source>Error</source>
+        <target>エラー</target>
+    </text>
+    <text>
+        <source>Text</source>
+        <target>テキスト</target>
+    </text>
+    <text>
+        <source>Title:</source>
+        <target>タイトル:</target>
+    </text>
+    <text>
+        <source>neoGFX Message Box Test</source>
+        <target>neoGFX メッセージ ボックスのテスト</target>
+    </text>
+    <text>
+        <source>Text:</source>
+        <target>テキスト:</target>
+    </text>
+    <text>
+        <source>This is a test of the neoGFX message box.
+This is a line of text.
+
+This is a line of text after a blank line</source>
+        <target>これは neoGFX メッセージ ボックスのテストです。
+これはテキストの行です。
+
+これは空行の後のテキストの行です</target>
+    </text>
+    <text>
+        <source>Detailed Text:</source>
+        <target>詳細テキスト:</target>
+    </text>
+    <text>
+        <source>This is where optional informative text usually goes.
+This is a line of text.
+
+The previous line was intentionally left blank.</source>
+        <target>通常、ここには省略可能な説明テキストが入ります。
+これはテキストの行です。
+
+前の行は意図的に空白にしてあります。</target>
+    </text>
+    <text>
+        <source>Open Message Box</source>
+        <target>メッセージ ボックスを開く</target>
+    </text>
+    <text>
+        <source>Item Views</source>
+        <target>アイテム ビュー</target>
+    </text>
+    <text>
+        <source>Toggle List
+Header View</source>
+        <target>リストのヘッダー
+ビューの切り替え</target>
+    </text>
+    <text>
+        <source>Table View Model</source>
+        <target>テーブル ビュー モデル</target>
+    </text>
+    <text>
+        <source>Checkable</source>
+        <target>チェック可能</target>
+    </text>
+    <text>
+        <source>TriState Checkable</source>
+        <target>3 状態チェック可能</target>
+    </text>
+    <text>
+        <source>Column Five</source>
+        <target>5 列目</target>
+    </text>
+    <text>
+        <source>Read only</source>
+        <target>読み取り専用</target>
+    </text>
+    <text>
+        <source>Unselectable</source>
+        <target>選択不可</target>
+    </text>
+    <text>
+        <source>Upper Table View</source>
+        <target>上のテーブル ビュー</target>
+    </text>
+    <text>
+        <source>Images</source>
+        <target>画像</target>
+    </text>
+    <text>
+        <source>Easing:</source>
+        <target>イージング:</target>
+    </text>
+    <text>
+        <source>Monochrome text</source>
+        <target>モノクロ テキスト</target>
+    </text>
+    <text>
+        <source>Colored text</source>
+        <target>カラー テキスト</target>
+    </text>
+    <text>
+        <source>Colored cells</source>
+        <target>カラー セル</target>
+    </text>
+    <text>
+        <source>Lower Table View</source>
+        <target>下のテーブル ビュー</target>
+    </text>
+    <text>
+        <source>Selection</source>
+        <target>選択</target>
+    </text>
+    <text>
+        <source>No selection</source>
+        <target>選択なし</target>
+    </text>
+    <text>
+        <source>Single selection</source>
+        <target>単一選択</target>
+    </text>
+    <text>
+        <source>Multiple selection</source>
+        <target>複数選択</target>
+    </text>
+    <text>
+        <source>Extended selection</source>
+        <target>拡張選択</target>
+    </text>
+    <text>
+        <source>Lots</source>
+        <target>大量</target>
+    </text>
+    <text>
+        <source>Game</source>
+        <target>ゲーム</target>
+    </text>
+    <text>
+        <source>Timestep:</source>
+        <target>タイムステップ:</target>
+    </text>
+    <text>
+        <source>Timestep Growth:</source>
+        <target>タイムステップの増加:</target>
+    </text>
+    <text>
+        <source>Maximum Timestep:</source>
+        <target>最大タイムステップ:</target>
+    </text>
+    <text>
+        <source>Yield After (ms):</source>
+        <target>イールドまでの時間 (ms):</target>
+    </text>
+    <text>
+        <source>Collision Detection</source>
+        <target>衝突検出</target>
+    </text>
+    <text>
+        <source>Drawing</source>
+        <target>描画</target>
+    </text>
+    <text>
+        <source>Editor</source>
+        <target>エディター</target>
+    </text>
+    <text>
+        <source>Style 1</source>
+        <target>スタイル 1</target>
+    </text>
+    <text>
+        <source>Style 2</source>
+        <target>スタイル 2</target>
+    </text>
+    <text>
+        <source>Web Browser</source>
+        <target>Web ブラウザー</target>
+    </text>
+    <text>
+        <source>Instancing</source>
+        <target>インスタンシング</target>
+    </text>
+    <text>
+        <source>Rendering Scheme</source>
+        <target>レンダリング方式</target>
+    </text>
+    <text>
+        <source>Off</source>
+        <target>オフ</target>
+    </text>
+    <text>
+        <source>Immediate (Batching)</source>
+        <target>即時 (バッチ処理)</target>
+    </text>
+    <text>
+        <source>ECS (Batching)</source>
+        <target>ECS (バッチ処理)</target>
+    </text>
+    <text>
+        <source>ECS (Instancing)</source>
+        <target>ECS (インスタンシング)</target>
+    </text>
+    <text>
+        <source>Mesh Shape</source>
+        <target>メッシュの形状</target>
+    </text>
+    <text>
+        <source>Quad</source>
+        <target>四角形</target>
+    </text>
+    <text>
+        <source>Circle</source>
+        <target>円</target>
+    </text>
+    <text>
+        <source>Outline</source>
+        <target>輪郭</target>
+    </text>
+    <text>
+        <source>Fill</source>
+        <target>塗りつぶし</target>
+    </text>
+    <text>
+        <source>Size:</source>
+        <target>サイズ:</target>
+    </text>
+    <text>
+        <source>Count:</source>
+        <target>個数:</target>
+    </text>
+    <text>
+        <source>Pause Animation</source>
+        <target>アニメーションを一時停止</target>
+    </text>
+    <text>
+        <source>Pause Transformations</source>
+        <target>変換を一時停止</target>
+    </text>
+    <text>
+        <source>Use SIMD</source>
+        <target>SIMD を使用</target>
+    </text>
+    <text>
+        <source>Use Thread Pool</source>
+        <target>スレッド プールを使用</target>
+    </text>
+    <text>
+        <source>Scene Graph (3D)</source>
+        <target>シーン グラフ (3D)</target>
+    </text>
+    <text>
+        <source>Animate</source>
+        <target>アニメーション</target>
+    </text>
+    <text>
+        <source>Lighting</source>
+        <target>ライティング</target>
+    </text>
+    <text>
+        <source>Shadows</source>
+        <target>影</target>
+    </text>
+    <text>
+        <source>Save glTF...</source>
+        <target>glTF を保存...</target>
+    </text>
+    <text>
+        <source>Load glTF...</source>
+        <target>glTF を読み込み...</target>
+    </text>
+    <text>
+        <source>Load Environment...</source>
+        <target>環境を読み込み...</target>
+    </text>
+    <text>
+        <source>Background</source>
+        <target>背景</target>
+    </text>
+    <text>
+        <source>Own texture</source>
+        <target>独自のテクスチャ</target>
+    </text>
+    <text>
+        <source>Blur</source>
+        <target>ぼかし</target>
+    </text>
+    <text>
+        <source>Drag: orbit; right drag: pan; wheel: zoom; double click: reset view</source>
+        <target>ドラッグ: 周回、右ドラッグ: パン、ホイール: ズーム、ダブルクリック: ビューをリセット</target>
+    </text>
+    <text>
+        <source>Scene Graph (2D)</source>
+        <target>シーン グラフ (2D)</target>
+    </text>
+    <text>
+        <source>An electronic circuit: a scene graph of 48 dip square tiles, each with a symbol generated from inline SVG. Click a switch to toggle it; drag a variable resistor along its length to change its resistance, and so the brightness of the LEDs.</source>
+        <target>電子回路: 48 dip 四方のタイルで構成されたシーン グラフで、各タイルにはインライン SVG から生成された記号が描かれています。スイッチをクリックすると切り替わります。可変抵抗器をその長さに沿ってドラッグすると抵抗値が変わり、それに応じて LED の明るさが変わります。</target>
+    </text>
+    <text>
+        <source>Text Widget Cutoffs</source>
+        <target>テキスト ウィジェットの切り捨て</target>
+    </text>
+</xneol>

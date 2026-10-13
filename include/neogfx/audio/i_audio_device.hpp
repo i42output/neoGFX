@@ -71,6 +71,15 @@ namespace neogfx
 		virtual void start() = 0;
 		virtual void stop() = 0;
 	public:
+		// the gain applied to the sum of all playing sources; std::nullopt (the default) means 1/sqrt(N)
+		// where N is the number of sources contributing to the buffer being mixed
+		virtual std::optional<float> master_gain() const = 0;
+		virtual void set_master_gain(std::optional<float> const& aMasterGain) = 0;
+		// when enabled (the default) the mix is soft clipped (tanh) after the master gain rather than
+		// being left to the hard clip at full scale
+		virtual bool soft_clip() const = 0;
+		virtual void set_soft_clip(bool aSoftClip) = 0;
+	public:
 		// a duration of std::nullopt plays until stopped; aGain scales this playback only, leaving
 		// the bitstream's own amplitude alone, so one bitstream can play at several volumes at once
 		virtual audio_playback_id play(i_audio_bitstream& aBitstream, audio_frame_index aFrom, std::optional<std::chrono::duration<double>> const& aDuration, float aGain) = 0;

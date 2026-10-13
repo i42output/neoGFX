@@ -26,6 +26,10 @@
 		<target>视图(&amp;V)</target>
 	</text>
 	<text>
+		<source>(default)</source>
+		<target>（默认）</target>
+	</text>
+	<text>
 		<source>2.5D (isometric) game</source>
 		<target>2.5D（等距）游戏</target>
 	</text>

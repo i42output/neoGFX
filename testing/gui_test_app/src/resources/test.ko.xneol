@@ -1,0 +1,605 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xneol xmlns="https://neogfx.org/xneol" version="1.0" trgLang="ko">
+    <text>
+        <source>Show/Hide Status Bar</source>
+        <target>상태 표시줄 표시/숨기기</target>
+    </text>
+    <text>
+        <source>Game Controller Calibration</source>
+        <target>게임 컨트롤러 보정</target>
+    </text>
+    <text>
+        <source>Goldenrod Style</source>
+        <target>골든로드 스타일</target>
+    </text>
+    <text>
+        <source>&amp;Contacts...</source>
+        <target>연락처(&amp;C)...</target>
+    </text>
+    <text>
+        <source>Add Favourite...</source>
+        <target>즐겨찾기 추가...</target>
+    </text>
+    <text>
+        <source>Organize Favourites...</source>
+        <target>즐겨찾기 정리...</target>
+    </text>
+    <text>
+        <source>Toggle Green/Turbo mode</source>
+        <target>그린/터보 모드 전환</target>
+    </text>
+    <text>
+        <source>Mute/&amp;Unmute Sound</source>
+        <target>음소거/음소거 해제(&amp;U)</target>
+    </text>
+    <text>
+        <source>Paste and Go</source>
+        <target>붙여넣기 및 이동</target>
+    </text>
+    <text>
+        <source>Next Tab</source>
+        <target>다음 탭</target>
+    </text>
+    <text>
+        <source>Previous Tab</source>
+        <target>이전 탭</target>
+    </text>
+    <text>
+        <source>Emacs style sequence #1</source>
+        <target>Emacs 스타일 시퀀스 #1</target>
+    </text>
+    <text>
+        <source>Emacs style sequence #2</source>
+        <target>Emacs 스타일 시퀀스 #2</target>
+    </text>
+    <text>
+        <source>Color Dialog...</source>
+        <target>색 대화 상자...</target>
+    </text>
+    <text>
+        <source>Manage Plugins...</source>
+        <target>플러그인 관리...</target>
+    </text>
+    <text>
+        <source>Check for Updates...</source>
+        <target>업데이트 확인...</target>
+    </text>
+    <text>
+        <source>&amp;File</source>
+        <target>파일(&amp;F)</target>
+    </text>
+    <text>
+        <source>&amp;Edit</source>
+        <target>편집(&amp;E)</target>
+    </text>
+    <text>
+        <source>&amp;View</source>
+        <target>보기(&amp;V)</target>
+    </text>
+    <text>
+        <source>F&amp;avourites</source>
+        <target>즐겨찾기(&amp;A)</target>
+    </text>
+    <text>
+        <source>Silent Running Drones</source>
+        <target>사일런트 러닝 드론</target>
+    </text>
+    <text>
+        <source>DC (TM) Characters</source>
+        <target>DC (TM) 캐릭터</target>
+    </text>
+    <text>
+        <source>Marvel (TM) Characters</source>
+        <target>Marvel (TM) 캐릭터</target>
+    </text>
+    <text>
+        <source>&amp;Xyzzy...</source>
+        <target>Xyzzy(&amp;X)...</target>
+    </text>
+    <text>
+        <source>&amp;Test</source>
+        <target>테스트(&amp;T)</target>
+    </text>
+    <text>
+        <source>&amp;Window</source>
+        <target>창(&amp;W)</target>
+    </text>
+    <text>
+        <source>&amp;Help</source>
+        <target>도움말(&amp;H)</target>
+    </text>
+    <text>
+        <source>Keywords...</source>
+        <target>키워드...</target>
+    </text>
+    <text>
+        <source>Buttons</source>
+        <target>버튼</target>
+    </text>
+    <text>
+        <source>This is the neoGFX test application.</source>
+        <target>neoGFX 테스트 애플리케이션입니다.</target>
+    </text>
+    <text>
+        <source>the,,, quick brown fox jumps over the lazy dog.
+Change tab bar placement.</source>
+        <target>날쌘,,, 갈색 여우가 게으른 개를 뛰어넘는다.
+탭 표시줄 위치 변경.</target>
+    </text>
+    <text>
+        <source>&amp;Generate UUID</source>
+        <target>UUID 생성(&amp;G)</target>
+    </text>
+    <text>
+        <source>Toggle Editable</source>
+        <target>편집 가능 전환</target>
+    </text>
+    <text>
+        <source>First field:</source>
+        <target>첫 번째 필드:</target>
+    </text>
+    <text>
+        <source>Enter text</source>
+        <target>텍스트 입력</target>
+    </text>
+    <text>
+        <source>Second field:</source>
+        <target>두 번째 필드:</target>
+    </text>
+    <text>
+        <source>Third field (label above)</source>
+        <target>세 번째 필드(레이블 위)</target>
+    </text>
+    <text>
+        <source>Fourth field (label above)</source>
+        <target>네 번째 필드(레이블 위)</target>
+    </text>
+    <text>
+        <source>Label 1:</source>
+        <target>레이블 1:</target>
+    </text>
+    <text>
+        <source>RGB &lt;-&gt; HSV
+color space
+conversion test
+
+
+Z͕̰̦̼͖ͦ͆ͬ̍̋̓̚
+
+</source>
+        <target>RGB &lt;-&gt; HSV
+색 공간
+변환 테스트
+
+
+Z͕̰̦̼͖ͦ͆ͬ̍̋̓̚
+
+</target>
+    </text>
+    <text>
+        <source>Toggle arcade mode.</source>
+        <target>아케이드 모드 전환.</target>
+    </text>
+    <text>
+        <source>Toggle &amp;mute.</source>
+        <target>음소거 전환(&amp;M).</target>
+    </text>
+    <text>
+        <source>Enable/disable
+contacts action.</source>
+        <target>연락처 작업
+사용/사용 안 함.</target>
+    </text>
+    <text>
+        <source>Group Box</source>
+        <target>그룹 상자</target>
+    </text>
+    <text>
+        <source>Tristate checkbo&amp;x</source>
+        <target>3상태 확인란(&amp;X)</target>
+    </text>
+    <text>
+        <source>Editor word wrap</source>
+        <target>편집기 자동 줄 바꿈</target>
+    </text>
+    <text>
+        <source>Password / Invalidation Method</source>
+        <target>암호 / 무효화 방법</target>
+    </text>
+    <text>
+        <source>Columns / Render Queue Optimisation</source>
+        <target>열 / 렌더 큐 최적화</target>
+    </text>
+    <text>
+        <source>Group Box Checkable</source>
+        <target>선택 가능한 그룹 상자</target>
+    </text>
+    <text>
+        <source>kern</source>
+        <target>커닝</target>
+    </text>
+    <text>
+        <source>subpix</source>
+        <target>서브픽셀</target>
+    </text>
+    <text>
+        <source>theme</source>
+        <target>테마</target>
+    </text>
+    <text>
+        <source>font</source>
+        <target>글꼴</target>
+    </text>
+    <text>
+        <source>edit</source>
+        <target>편집</target>
+    </text>
+    <text>
+        <source>normal</source>
+        <target>보통</target>
+    </text>
+    <text>
+        <source>outline</source>
+        <target>윤곽선</target>
+    </text>
+    <text>
+        <source>glow</source>
+        <target>글로우</target>
+    </text>
+    <text>
+        <source>shadow</source>
+        <target>그림자</target>
+    </text>
+    <text>
+        <source>Radio 1</source>
+        <target>라디오 1</target>
+    </text>
+    <text>
+        <source>Slider changes
+font size</source>
+        <target>슬라이더로
+글꼴 크기 변경</target>
+    </text>
+    <text>
+        <source>Radio 3</source>
+        <target>라디오 3</target>
+    </text>
+    <text>
+        <source>Slider changes
+theme color</source>
+        <target>슬라이더로
+테마 색 변경</target>
+    </text>
+    <text>
+        <source>Default/Slate
+Style</source>
+        <target>기본/슬레이트
+스타일</target>
+    </text>
+    <text>
+        <source>Message Boxes</source>
+        <target>메시지 상자</target>
+    </text>
+    <text>
+        <source>Icons</source>
+        <target>아이콘</target>
+    </text>
+    <text>
+        <source>Information</source>
+        <target>정보</target>
+    </text>
+    <text>
+        <source>Question</source>
+        <target>질문</target>
+    </text>
+    <text>
+        <source>Stop</source>
+        <target>중지</target>
+    </text>
+    <text>
+        <source>Warning</source>
+        <target>경고</target>
+    </text>
+    <text>
+        <source>Error</source>
+        <target>오류</target>
+    </text>
+    <text>
+        <source>Text</source>
+        <target>텍스트</target>
+    </text>
+    <text>
+        <source>Title:</source>
+        <target>제목:</target>
+    </text>
+    <text>
+        <source>neoGFX Message Box Test</source>
+        <target>neoGFX 메시지 상자 테스트</target>
+    </text>
+    <text>
+        <source>Text:</source>
+        <target>텍스트:</target>
+    </text>
+    <text>
+        <source>This is a test of the neoGFX message box.
+This is a line of text.
+
+This is a line of text after a blank line</source>
+        <target>neoGFX 메시지 상자 테스트입니다.
+텍스트 한 줄입니다.
+
+빈 줄 다음의 텍스트 한 줄입니다</target>
+    </text>
+    <text>
+        <source>Detailed Text:</source>
+        <target>자세한 텍스트:</target>
+    </text>
+    <text>
+        <source>This is where optional informative text usually goes.
+This is a line of text.
+
+The previous line was intentionally left blank.</source>
+        <target>일반적으로 선택적인 정보 텍스트가 여기에 표시됩니다.
+텍스트 한 줄입니다.
+
+이전 줄은 의도적으로 비워 두었습니다.</target>
+    </text>
+    <text>
+        <source>Open Message Box</source>
+        <target>메시지 상자 열기</target>
+    </text>
+    <text>
+        <source>Item Views</source>
+        <target>항목 보기</target>
+    </text>
+    <text>
+        <source>Toggle List
+Header View</source>
+        <target>목록 헤더
+보기 전환</target>
+    </text>
+    <text>
+        <source>Table View Model</source>
+        <target>테이블 보기 모델</target>
+    </text>
+    <text>
+        <source>Checkable</source>
+        <target>선택 가능</target>
+    </text>
+    <text>
+        <source>TriState Checkable</source>
+        <target>3상태 선택 가능</target>
+    </text>
+    <text>
+        <source>Column Five</source>
+        <target>다섯 번째 열</target>
+    </text>
+    <text>
+        <source>Read only</source>
+        <target>읽기 전용</target>
+    </text>
+    <text>
+        <source>Unselectable</source>
+        <target>선택 불가</target>
+    </text>
+    <text>
+        <source>Upper Table View</source>
+        <target>위쪽 테이블 보기</target>
+    </text>
+    <text>
+        <source>Images</source>
+        <target>이미지</target>
+    </text>
+    <text>
+        <source>Easing:</source>
+        <target>이징:</target>
+    </text>
+    <text>
+        <source>Monochrome text</source>
+        <target>단색 텍스트</target>
+    </text>
+    <text>
+        <source>Colored text</source>
+        <target>컬러 텍스트</target>
+    </text>
+    <text>
+        <source>Colored cells</source>
+        <target>컬러 셀</target>
+    </text>
+    <text>
+        <source>Lower Table View</source>
+        <target>아래쪽 테이블 보기</target>
+    </text>
+    <text>
+        <source>Selection</source>
+        <target>선택</target>
+    </text>
+    <text>
+        <source>No selection</source>
+        <target>선택 안 함</target>
+    </text>
+    <text>
+        <source>Single selection</source>
+        <target>단일 선택</target>
+    </text>
+    <text>
+        <source>Multiple selection</source>
+        <target>다중 선택</target>
+    </text>
+    <text>
+        <source>Extended selection</source>
+        <target>확장 선택</target>
+    </text>
+    <text>
+        <source>Lots</source>
+        <target>많이</target>
+    </text>
+    <text>
+        <source>Game</source>
+        <target>게임</target>
+    </text>
+    <text>
+        <source>Timestep:</source>
+        <target>시간 단계:</target>
+    </text>
+    <text>
+        <source>Timestep Growth:</source>
+        <target>시간 단계 증가:</target>
+    </text>
+    <text>
+        <source>Maximum Timestep:</source>
+        <target>최대 시간 단계:</target>
+    </text>
+    <text>
+        <source>Yield After (ms):</source>
+        <target>양보 간격(ms):</target>
+    </text>
+    <text>
+        <source>Collision Detection</source>
+        <target>충돌 감지</target>
+    </text>
+    <text>
+        <source>Drawing</source>
+        <target>그리기</target>
+    </text>
+    <text>
+        <source>Editor</source>
+        <target>편집기</target>
+    </text>
+    <text>
+        <source>Style 1</source>
+        <target>스타일 1</target>
+    </text>
+    <text>
+        <source>Style 2</source>
+        <target>스타일 2</target>
+    </text>
+    <text>
+        <source>Web Browser</source>
+        <target>웹 브라우저</target>
+    </text>
+    <text>
+        <source>Instancing</source>
+        <target>인스턴싱</target>
+    </text>
+    <text>
+        <source>Rendering Scheme</source>
+        <target>렌더링 방식</target>
+    </text>
+    <text>
+        <source>Off</source>
+        <target>끄기</target>
+    </text>
+    <text>
+        <source>Immediate (Batching)</source>
+        <target>즉시(일괄 처리)</target>
+    </text>
+    <text>
+        <source>ECS (Batching)</source>
+        <target>ECS(일괄 처리)</target>
+    </text>
+    <text>
+        <source>ECS (Instancing)</source>
+        <target>ECS(인스턴싱)</target>
+    </text>
+    <text>
+        <source>Mesh Shape</source>
+        <target>메시 모양</target>
+    </text>
+    <text>
+        <source>Quad</source>
+        <target>사각형</target>
+    </text>
+    <text>
+        <source>Circle</source>
+        <target>원</target>
+    </text>
+    <text>
+        <source>Outline</source>
+        <target>윤곽선</target>
+    </text>
+    <text>
+        <source>Fill</source>
+        <target>채우기</target>
+    </text>
+    <text>
+        <source>Size:</source>
+        <target>크기:</target>
+    </text>
+    <text>
+        <source>Count:</source>
+        <target>개수:</target>
+    </text>
+    <text>
+        <source>Pause Animation</source>
+        <target>애니메이션 일시 중지</target>
+    </text>
+    <text>
+        <source>Pause Transformations</source>
+        <target>변환 일시 중지</target>
+    </text>
+    <text>
+        <source>Use SIMD</source>
+        <target>SIMD 사용</target>
+    </text>
+    <text>
+        <source>Use Thread Pool</source>
+        <target>스레드 풀 사용</target>
+    </text>
+    <text>
+        <source>Scene Graph (3D)</source>
+        <target>장면 그래프(3D)</target>
+    </text>
+    <text>
+        <source>Animate</source>
+        <target>애니메이션</target>
+    </text>
+    <text>
+        <source>Lighting</source>
+        <target>조명</target>
+    </text>
+    <text>
+        <source>Shadows</source>
+        <target>그림자</target>
+    </text>
+    <text>
+        <source>Save glTF...</source>
+        <target>glTF 저장...</target>
+    </text>
+    <text>
+        <source>Load glTF...</source>
+        <target>glTF 불러오기...</target>
+    </text>
+    <text>
+        <source>Load Environment...</source>
+        <target>환경 불러오기...</target>
+    </text>
+    <text>
+        <source>Background</source>
+        <target>배경</target>
+    </text>
+    <text>
+        <source>Own texture</source>
+        <target>자체 텍스처</target>
+    </text>
+    <text>
+        <source>Blur</source>
+        <target>흐림</target>
+    </text>
+    <text>
+        <source>Drag: orbit; right drag: pan; wheel: zoom; double click: reset view</source>
+        <target>드래그: 궤도 회전, 오른쪽 드래그: 이동, 휠: 확대/축소, 두 번 클릭: 보기 초기화</target>
+    </text>
+    <text>
+        <source>Scene Graph (2D)</source>
+        <target>장면 그래프(2D)</target>
+    </text>
+    <text>
+        <source>An electronic circuit: a scene graph of 48 dip square tiles, each with a symbol generated from inline SVG. Click a switch to toggle it; drag a variable resistor along its length to change its resistance, and so the brightness of the LEDs.</source>
+        <target>전자 회로: 48 dip 정사각형 타일로 이루어진 장면 그래프이며, 각 타일에는 인라인 SVG에서 생성된 기호가 있습니다. 스위치를 클릭하면 전환되고, 가변 저항기를 길이 방향으로 드래그하면 저항값이 바뀌어 LED의 밝기가 달라집니다.</target>
+    </text>
+    <text>
+        <source>Text Widget Cutoffs</source>
+        <target>텍스트 위젯 잘림</target>
+    </text>
+</xneol>

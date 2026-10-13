@@ -1,0 +1,601 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xneol xmlns="https://neogfx.org/xneol" version="1.0" trgLang="uk">
+    <text>
+        <source>Show/Hide Status Bar</source>
+        <target>Показати/приховати рядок стану</target>
+    </text>
+    <text>
+        <source>Game Controller Calibration</source>
+        <target>Калібрування ігрового контролера</target>
+    </text>
+    <text>
+        <source>Goldenrod Style</source>
+        <target>Стиль «Золотарник»</target>
+    </text>
+    <text>
+        <source>&amp;Contacts...</source>
+        <target>&amp;Контакти...</target>
+    </text>
+    <text>
+        <source>Add Favourite...</source>
+        <target>Додати до обраного...</target>
+    </text>
+    <text>
+        <source>Organize Favourites...</source>
+        <target>Упорядкувати обране...</target>
+    </text>
+    <text>
+        <source>Toggle Green/Turbo mode</source>
+        <target>Перемкнути режим «Зелений»/«Турбо»</target>
+    </text>
+    <text>
+        <source>Mute/&amp;Unmute Sound</source>
+        <target>Вимкнути/&amp;увімкнути звук</target>
+    </text>
+    <text>
+        <source>Paste and Go</source>
+        <target>Вставити та перейти</target>
+    </text>
+    <text>
+        <source>Next Tab</source>
+        <target>Наступна вкладка</target>
+    </text>
+    <text>
+        <source>Previous Tab</source>
+        <target>Попередня вкладка</target>
+    </text>
+    <text>
+        <source>Emacs style sequence #1</source>
+        <target>Послідовність у стилі Emacs №1</target>
+    </text>
+    <text>
+        <source>Emacs style sequence #2</source>
+        <target>Послідовність у стилі Emacs №2</target>
+    </text>
+    <text>
+        <source>Color Dialog...</source>
+        <target>Діалог вибору кольору...</target>
+    </text>
+    <text>
+        <source>Manage Plugins...</source>
+        <target>Керування плагінами...</target>
+    </text>
+    <text>
+        <source>Check for Updates...</source>
+        <target>Перевірити наявність оновлень...</target>
+    </text>
+    <text>
+        <source>&amp;File</source>
+        <target>&amp;Файл</target>
+    </text>
+    <text>
+        <source>&amp;Edit</source>
+        <target>&amp;Редагування</target>
+    </text>
+    <text>
+        <source>&amp;View</source>
+        <target>В&amp;игляд</target>
+    </text>
+    <text>
+        <source>F&amp;avourites</source>
+        <target>&amp;Обране</target>
+    </text>
+    <text>
+        <source>Silent Running Drones</source>
+        <target>Дрони з «Silent Running»</target>
+    </text>
+    <text>
+        <source>DC (TM) Characters</source>
+        <target>Персонажі DC (TM)</target>
+    </text>
+    <text>
+        <source>Marvel (TM) Characters</source>
+        <target>Персонажі Marvel (TM)</target>
+    </text>
+    <text>
+        <source>&amp;Test</source>
+        <target>&amp;Тест</target>
+    </text>
+    <text>
+        <source>&amp;Window</source>
+        <target>&amp;Вікно</target>
+    </text>
+    <text>
+        <source>&amp;Help</source>
+        <target>&amp;Довідка</target>
+    </text>
+    <text>
+        <source>Keywords...</source>
+        <target>Ключові слова...</target>
+    </text>
+    <text>
+        <source>Buttons</source>
+        <target>Кнопки</target>
+    </text>
+    <text>
+        <source>This is the neoGFX test application.</source>
+        <target>Це тестова програма neoGFX.</target>
+    </text>
+    <text>
+        <source>the,,, quick brown fox jumps over the lazy dog.
+Change tab bar placement.</source>
+        <target>швидка,,, руда лисиця перестрибує через ледачого пса.
+Змінити розташування панелі вкладок.</target>
+    </text>
+    <text>
+        <source>&amp;Generate UUID</source>
+        <target>&amp;Згенерувати UUID</target>
+    </text>
+    <text>
+        <source>Toggle Editable</source>
+        <target>Перемкнути можливість редагування</target>
+    </text>
+    <text>
+        <source>First field:</source>
+        <target>Перше поле:</target>
+    </text>
+    <text>
+        <source>Enter text</source>
+        <target>Введіть текст</target>
+    </text>
+    <text>
+        <source>Second field:</source>
+        <target>Друге поле:</target>
+    </text>
+    <text>
+        <source>Third field (label above)</source>
+        <target>Третє поле (мітка зверху)</target>
+    </text>
+    <text>
+        <source>Fourth field (label above)</source>
+        <target>Четверте поле (мітка зверху)</target>
+    </text>
+    <text>
+        <source>Label 1:</source>
+        <target>Мітка 1:</target>
+    </text>
+    <text>
+        <source>RGB &lt;-&gt; HSV
+color space
+conversion test
+
+
+Z͕̰̦̼͖ͦ͆ͬ̍̋̓̚
+
+</source>
+        <target>RGB &lt;-&gt; HSV
+тест перетворення
+колірного простору
+
+
+Z͕̰̦̼͖ͦ͆ͬ̍̋̓̚
+
+</target>
+    </text>
+    <text>
+        <source>Toggle arcade mode.</source>
+        <target>Перемкнути аркадний режим.</target>
+    </text>
+    <text>
+        <source>Toggle &amp;mute.</source>
+        <target>Перемкнути &amp;вимкнення звуку.</target>
+    </text>
+    <text>
+        <source>Enable/disable
+contacts action.</source>
+        <target>Увімкнути/вимкнути
+дію «Контакти».</target>
+    </text>
+    <text>
+        <source>Group Box</source>
+        <target>Групове поле</target>
+    </text>
+    <text>
+        <source>Tristate checkbo&amp;x</source>
+        <target>Прапорець із трьома &amp;станами</target>
+    </text>
+    <text>
+        <source>Editor word wrap</source>
+        <target>Перенесення слів у редакторі</target>
+    </text>
+    <text>
+        <source>Password / Invalidation Method</source>
+        <target>Пароль / Метод інвалідації</target>
+    </text>
+    <text>
+        <source>Columns / Render Queue Optimisation</source>
+        <target>Стовпці / Оптимізація черги рендерингу</target>
+    </text>
+    <text>
+        <source>Group Box Checkable</source>
+        <target>Групове поле з прапорцем</target>
+    </text>
+    <text>
+        <source>kern</source>
+        <target>кернінг</target>
+    </text>
+    <text>
+        <source>subpix</source>
+        <target>субпіксель</target>
+    </text>
+    <text>
+        <source>theme</source>
+        <target>тема</target>
+    </text>
+    <text>
+        <source>font</source>
+        <target>шрифт</target>
+    </text>
+    <text>
+        <source>edit</source>
+        <target>редактор</target>
+    </text>
+    <text>
+        <source>normal</source>
+        <target>звичайний</target>
+    </text>
+    <text>
+        <source>outline</source>
+        <target>контур</target>
+    </text>
+    <text>
+        <source>glow</source>
+        <target>світіння</target>
+    </text>
+    <text>
+        <source>shadow</source>
+        <target>тінь</target>
+    </text>
+    <text>
+        <source>Radio 1</source>
+        <target>Перемикач 1</target>
+    </text>
+    <text>
+        <source>Slider changes
+font size</source>
+        <target>Повзунок змінює
+розмір шрифту</target>
+    </text>
+    <text>
+        <source>Radio 3</source>
+        <target>Перемикач 3</target>
+    </text>
+    <text>
+        <source>Slider changes
+theme color</source>
+        <target>Повзунок змінює
+колір теми</target>
+    </text>
+    <text>
+        <source>Default/Slate
+Style</source>
+        <target>Стиль
+Стандартний/Сланцевий</target>
+    </text>
+    <text>
+        <source>Message Boxes</source>
+        <target>Вікна повідомлень</target>
+    </text>
+    <text>
+        <source>Icons</source>
+        <target>Значки</target>
+    </text>
+    <text>
+        <source>Information</source>
+        <target>Інформація</target>
+    </text>
+    <text>
+        <source>Question</source>
+        <target>Запитання</target>
+    </text>
+    <text>
+        <source>Stop</source>
+        <target>Стоп</target>
+    </text>
+    <text>
+        <source>Warning</source>
+        <target>Попередження</target>
+    </text>
+    <text>
+        <source>Error</source>
+        <target>Помилка</target>
+    </text>
+    <text>
+        <source>Text</source>
+        <target>Текст</target>
+    </text>
+    <text>
+        <source>Title:</source>
+        <target>Заголовок:</target>
+    </text>
+    <text>
+        <source>neoGFX Message Box Test</source>
+        <target>Тест вікна повідомлення neoGFX</target>
+    </text>
+    <text>
+        <source>Text:</source>
+        <target>Текст:</target>
+    </text>
+    <text>
+        <source>This is a test of the neoGFX message box.
+This is a line of text.
+
+This is a line of text after a blank line</source>
+        <target>Це тест вікна повідомлення neoGFX.
+Це рядок тексту.
+
+Це рядок тексту після порожнього рядка</target>
+    </text>
+    <text>
+        <source>Detailed Text:</source>
+        <target>Докладний текст:</target>
+    </text>
+    <text>
+        <source>This is where optional informative text usually goes.
+This is a line of text.
+
+The previous line was intentionally left blank.</source>
+        <target>Тут зазвичай розміщується необов'язковий інформаційний текст.
+Це рядок тексту.
+
+Попередній рядок навмисно залишено порожнім.</target>
+    </text>
+    <text>
+        <source>Open Message Box</source>
+        <target>Відкрити вікно повідомлення</target>
+    </text>
+    <text>
+        <source>Item Views</source>
+        <target>Подання елементів</target>
+    </text>
+    <text>
+        <source>Toggle List
+Header View</source>
+        <target>Перемкнути заголовок
+списку</target>
+    </text>
+    <text>
+        <source>Table View Model</source>
+        <target>Модель табличного подання</target>
+    </text>
+    <text>
+        <source>Checkable</source>
+        <target>З прапорцями</target>
+    </text>
+    <text>
+        <source>TriState Checkable</source>
+        <target>З прапорцями на три стани</target>
+    </text>
+    <text>
+        <source>Column Five</source>
+        <target>П'ятий стовпець</target>
+    </text>
+    <text>
+        <source>Read only</source>
+        <target>Лише читання</target>
+    </text>
+    <text>
+        <source>Unselectable</source>
+        <target>Без вибору</target>
+    </text>
+    <text>
+        <source>Upper Table View</source>
+        <target>Верхнє табличне подання</target>
+    </text>
+    <text>
+        <source>Images</source>
+        <target>Зображення</target>
+    </text>
+    <text>
+        <source>Easing:</source>
+        <target>Пом'якшення:</target>
+    </text>
+    <text>
+        <source>Monochrome text</source>
+        <target>Монохромний текст</target>
+    </text>
+    <text>
+        <source>Colored text</source>
+        <target>Кольоровий текст</target>
+    </text>
+    <text>
+        <source>Colored cells</source>
+        <target>Кольорові клітинки</target>
+    </text>
+    <text>
+        <source>Lower Table View</source>
+        <target>Нижнє табличне подання</target>
+    </text>
+    <text>
+        <source>Selection</source>
+        <target>Виділення</target>
+    </text>
+    <text>
+        <source>No selection</source>
+        <target>Без виділення</target>
+    </text>
+    <text>
+        <source>Single selection</source>
+        <target>Одиночне виділення</target>
+    </text>
+    <text>
+        <source>Multiple selection</source>
+        <target>Множинне виділення</target>
+    </text>
+    <text>
+        <source>Extended selection</source>
+        <target>Розширене виділення</target>
+    </text>
+    <text>
+        <source>Lots</source>
+        <target>Багато</target>
+    </text>
+    <text>
+        <source>Game</source>
+        <target>Гра</target>
+    </text>
+    <text>
+        <source>Timestep:</source>
+        <target>Крок часу:</target>
+    </text>
+    <text>
+        <source>Timestep Growth:</source>
+        <target>Зростання кроку часу:</target>
+    </text>
+    <text>
+        <source>Maximum Timestep:</source>
+        <target>Максимальний крок часу:</target>
+    </text>
+    <text>
+        <source>Yield After (ms):</source>
+        <target>Поступитися після (мс):</target>
+    </text>
+    <text>
+        <source>Collision Detection</source>
+        <target>Виявлення зіткнень</target>
+    </text>
+    <text>
+        <source>Drawing</source>
+        <target>Малювання</target>
+    </text>
+    <text>
+        <source>Editor</source>
+        <target>Редактор</target>
+    </text>
+    <text>
+        <source>Style 1</source>
+        <target>Стиль 1</target>
+    </text>
+    <text>
+        <source>Style 2</source>
+        <target>Стиль 2</target>
+    </text>
+    <text>
+        <source>Web Browser</source>
+        <target>Веб-браузер</target>
+    </text>
+    <text>
+        <source>Instancing</source>
+        <target>Інстансинг</target>
+    </text>
+    <text>
+        <source>Rendering Scheme</source>
+        <target>Схема рендерингу</target>
+    </text>
+    <text>
+        <source>Off</source>
+        <target>Вимкнено</target>
+    </text>
+    <text>
+        <source>Immediate (Batching)</source>
+        <target>Негайний (пакетування)</target>
+    </text>
+    <text>
+        <source>ECS (Batching)</source>
+        <target>ECS (пакетування)</target>
+    </text>
+    <text>
+        <source>ECS (Instancing)</source>
+        <target>ECS (інстансинг)</target>
+    </text>
+    <text>
+        <source>Mesh Shape</source>
+        <target>Форма сітки</target>
+    </text>
+    <text>
+        <source>Quad</source>
+        <target>Чотирикутник</target>
+    </text>
+    <text>
+        <source>Circle</source>
+        <target>Коло</target>
+    </text>
+    <text>
+        <source>Outline</source>
+        <target>Контур</target>
+    </text>
+    <text>
+        <source>Fill</source>
+        <target>Заливка</target>
+    </text>
+    <text>
+        <source>Size:</source>
+        <target>Розмір:</target>
+    </text>
+    <text>
+        <source>Count:</source>
+        <target>Кількість:</target>
+    </text>
+    <text>
+        <source>Pause Animation</source>
+        <target>Призупинити анімацію</target>
+    </text>
+    <text>
+        <source>Pause Transformations</source>
+        <target>Призупинити перетворення</target>
+    </text>
+    <text>
+        <source>Use SIMD</source>
+        <target>Використовувати SIMD</target>
+    </text>
+    <text>
+        <source>Use Thread Pool</source>
+        <target>Використовувати пул потоків</target>
+    </text>
+    <text>
+        <source>Scene Graph (3D)</source>
+        <target>Граф сцени (3D)</target>
+    </text>
+    <text>
+        <source>Animate</source>
+        <target>Анімувати</target>
+    </text>
+    <text>
+        <source>Lighting</source>
+        <target>Освітлення</target>
+    </text>
+    <text>
+        <source>Shadows</source>
+        <target>Тіні</target>
+    </text>
+    <text>
+        <source>Save glTF...</source>
+        <target>Зберегти glTF...</target>
+    </text>
+    <text>
+        <source>Load glTF...</source>
+        <target>Завантажити glTF...</target>
+    </text>
+    <text>
+        <source>Load Environment...</source>
+        <target>Завантажити оточення...</target>
+    </text>
+    <text>
+        <source>Background</source>
+        <target>Тло</target>
+    </text>
+    <text>
+        <source>Own texture</source>
+        <target>Власна текстура</target>
+    </text>
+    <text>
+        <source>Blur</source>
+        <target>Розмиття</target>
+    </text>
+    <text>
+        <source>Drag: orbit; right drag: pan; wheel: zoom; double click: reset view</source>
+        <target>Перетягування: обертання; перетягування правою кнопкою: панорамування; коліщатко: масштаб; подвійне клацання: скинути вигляд</target>
+    </text>
+    <text>
+        <source>Scene Graph (2D)</source>
+        <target>Граф сцени (2D)</target>
+    </text>
+    <text>
+        <source>An electronic circuit: a scene graph of 48 dip square tiles, each with a symbol generated from inline SVG. Click a switch to toggle it; drag a variable resistor along its length to change its resistance, and so the brightness of the LEDs.</source>
+        <target>Електронна схема: граф сцени з квадратних плиток розміром 48 dip, кожна з символом, згенерованим із вбудованого SVG. Клацніть перемикач, щоб перемкнути його; перетягуйте змінний резистор уздовж нього, щоб змінити його опір, а отже, і яскравість світлодіодів.</target>
+    </text>
+    <text>
+        <source>Text Widget Cutoffs</source>
+        <target>Обрізання текстових віджетів</target>
+    </text>
+</xneol>

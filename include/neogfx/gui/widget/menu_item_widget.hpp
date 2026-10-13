@@ -90,6 +90,7 @@ namespace neogfx
         text_widget iText;
         horizontal_spacer iSpacer;
         text_widget iShortcutText;
+        string iMnemonic; // (the mnemonic added to the app for the text, if it has one)
         std::optional<std::unique_ptr<widget_timer>> iSubMenuOpener;
         mutable std::optional<std::pair<color, texture>> iSubMenuArrow;
     };

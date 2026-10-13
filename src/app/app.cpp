@@ -655,7 +655,12 @@ namespace neogfx
             std::scoped_lock lock{ iTranslationMutex };
             auto& table = iTranslations[aLanguage];
             for (auto const& translation : aTranslations)
-                table[std::make_pair(translation.source, translation.context)][plurality_range(translation.plurality)] = translation.target;
+            {
+                // (an empty target is a string not yet translated: it doesn't replace a translation of it (e.g. another file's))
+                auto& target = table[std::make_pair(translation.source, translation.context)][plurality_range(translation.plurality)];
+                if (!translation.target.empty() || target.empty())
+                    target = translation.target;
+            }
             iLanguages.clear();
             for (auto const& languageTranslations : iTranslations)
                 iLanguages.push_back(languageTranslations.first);
@@ -900,7 +905,9 @@ namespace neogfx
 
     void app::add_mnemonic(i_mnemonic& aMnemonic)
     {
-        iMnemonics.push_back(&aMnemonic);
+        // (once: e.g. a menu item adds its mnemonic whenever its text changes and removes it once, when it is destroyed)
+        if (std::find(iMnemonics.begin(), iMnemonics.end(), &aMnemonic) == iMnemonics.end())
+            iMnemonics.push_back(&aMnemonic);
     }
 
     void app::remove_mnemonic(i_mnemonic& aMnemonic)
@@ -1197,12 +1204,17 @@ namespace neogfx
     {
         static boost::locale::generator gen;
         static std::locale loc = gen("en_US.UTF-8");
-        std::sort(iMnemonics.begin(), iMnemonics.end(), mnemonic_sorter());
+        // the mnemonics that can be used: not those of a window that isn't active or of a widget that ignores mouse events (one that 
+        // isn't operable, e.g. a menu item of a menu bar being designed in Design Studio, so neither is its mnemonic); sorted as a copy 
+        // (the mnemonics added stay as they are)
+        std::vector<i_mnemonic*> mnemonics;
+        for (auto m : iMnemonics)
+            if (!(m->mnemonic_widget().has_root() && !m->mnemonic_widget().root().is_active()) && !m->mnemonic_widget().ignore_mouse_events())
+                mnemonics.push_back(m);
+        std::sort(mnemonics.begin(), mnemonics.end(), mnemonic_sorter());
         i_surface* lastWindowSurface = nullptr;
-        for (auto& m : iMnemonics)
+        for (auto& m : mnemonics)
         {
-            if (m->mnemonic_widget().has_root() && !m->mnemonic_widget().root().is_active())
-                continue;
             if (m->mnemonic_widget().has_surface() && m->mnemonic_widget().surface().surface_type() == surface_type::Window)
             {
                 if (lastWindowSurface == nullptr)

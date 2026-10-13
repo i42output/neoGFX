@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <bit>
+#include <cmath>
 
 #include <neogfx/audio/audio_device.hpp>
 
@@ -131,6 +132,7 @@ namespace neogfx
 				auto const output = static_cast<float*>(pOutput);
 				std::fill(output, output + frameCount * channel_count(channels), 0.0f);
 				std::unique_lock lock{ device.iMutex };
+				std::size_t contributing = 0u;
 				for (auto& source : device.iSources)
 				{
 					// a source without an expiry time plays until it is stopped
@@ -138,6 +140,20 @@ namespace neogfx
 						continue;
 					source.bitstream->generate_from(channels, source.cursor, frameCount, source.gain, output);
 					source.cursor += frameCount;
+					++contributing;
+				}
+				if (contributing == 0u)
+					return;
+				auto const masterGain = device.iMasterGain.value_or(1.0f / std::sqrt(static_cast<float>(contributing)));
+				auto const softClip = device.iSoftClip;
+				if (masterGain == 1.0f && !softClip)
+					return;
+				// with soft clipping off, anything still above full scale is hard clipped by miniaudio afterwards
+				for (auto sample = output; sample != output + frameCount * channel_count(channels); ++sample)
+				{
+					*sample *= masterGain;
+					if (softClip)
+						*sample = std::tanh(*sample);
 				}
 			};
 
@@ -181,6 +197,30 @@ namespace neogfx
 		ma_device_stop(std::any_cast<ma_device>(&iHandle));
 		std::unique_lock lock{ iMutex };
 		iSources.clear();
+	}
+
+	std::optional<float> audio_device::master_gain() const
+	{
+		std::unique_lock lock{ iMutex };
+		return iMasterGain;
+	}
+
+	void audio_device::set_master_gain(std::optional<float> const& aMasterGain)
+	{
+		std::unique_lock lock{ iMutex };
+		iMasterGain = aMasterGain;
+	}
+
+	bool audio_device::soft_clip() const
+	{
+		std::unique_lock lock{ iMutex };
+		return iSoftClip;
+	}
+
+	void audio_device::set_soft_clip(bool aSoftClip)
+	{
+		std::unique_lock lock{ iMutex };
+		iSoftClip = aSoftClip;
 	}
 
 	audio_playback_id audio_device::play(i_audio_bitstream& aBitstream, audio_frame_index aFrom, std::optional<std::chrono::duration<double>> const& aDuration, float aGain)

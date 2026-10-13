@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xneol xmlns="https://neogfx.org/xneol" version="1.0" trgLang="en-GB">
+    <text>
+        <source>Organize Favourites...</source>
+        <target>Organise Favourites...</target>
+    </text>
+    <text>
+        <source>Color Dialog...</source>
+        <target>Colour Dialog...</target>
+    </text>
+    <text>
+        <source>RGB &lt;-&gt; HSV
+color space
+conversion test
+
+
+Z͕̰̦̼͖ͦ͆ͬ̍̋̓̚
+
+</source>
+        <target>RGB &lt;-&gt; HSV
+colour space
+conversion test
+
+
+Z͕̰̦̼͖ͦ͆ͬ̍̋̓̚
+
+</target>
+    </text>
+    <text>
+        <source>Slider changes
+theme color</source>
+        <target>Slider changes
+theme colour</target>
+    </text>
+    <text>
+        <source>Colored text</source>
+        <target>Coloured text</target>
+    </text>
+    <text>
+        <source>Colored cells</source>
+        <target>Coloured cells</target>
+    </text>
+</xneol>

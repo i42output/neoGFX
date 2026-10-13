@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xneol xmlns="https://neogfx.org/xneol" version="1.0" trgLang="sv">
+    <text>
+        <source>Show/Hide Status Bar</source>
+        <target>Visa/dölj statusfältet</target>
+    </text>
+    <text>
+        <source>Game Controller Calibration</source>
+        <target>Kalibrering av spelkontroll</target>
+    </text>
+    <text>
+        <source>Goldenrod Style</source>
+        <target>Gullrisstil</target>
+    </text>
+    <text>
+        <source>&amp;Contacts...</source>
+        <target>&amp;Kontakter...</target>
+    </text>
+    <text>
+        <source>Add Favourite...</source>
+        <target>Lägg till favorit...</target>
+    </text>
+    <text>
+        <source>Organize Favourites...</source>
+        <target>Ordna favoriter...</target>
+    </text>
+    <text>
+        <source>Toggle Green/Turbo mode</source>
+        <target>Växla grönt läge/turboläge</target>
+    </text>
+    <text>
+        <source>Mute/&amp;Unmute Sound</source>
+        <target>&amp;Ljud av/på</target>
+    </text>
+    <text>
+        <source>Paste and Go</source>
+        <target>Klistra in och gå</target>
+    </text>
+    <text>
+        <source>Next Tab</source>
+        <target>Nästa flik</target>
+    </text>
+    <text>
+        <source>Previous Tab</source>
+        <target>Föregående flik</target>
+    </text>
+    <text>
+        <source>Emacs style sequence #1</source>
+        <target>Sekvens i Emacs-stil nr 1</target>
+    </text>
+    <text>
+        <source>Emacs style sequence #2</source>
+        <target>Sekvens i Emacs-stil nr 2</target>
+    </text>
+    <text>
+        <source>Color Dialog...</source>
+        <target>Färgdialog...</target>
+    </text>
+    <text>
+        <source>Manage Plugins...</source>
+        <target>Hantera insticksprogram...</target>
+    </text>
+    <text>
+        <source>Check for Updates...</source>
+        <target>Sök efter uppdateringar...</target>
+    </text>
+    <text>
+        <source>&amp;File</source>
+        <target>&amp;Arkiv</target>
+    </text>
+    <text>
+        <source>&amp;Edit</source>
+        <target>&amp;Redigera</target>
+    </text>
+    <text>
+        <source>&amp;View</source>
+        <target>&amp;Visa</target>
+    </text>
+    <text>
+        <source>F&amp;avourites</source>
+        <target>Fav&amp;oriter</target>
+    </text>
+    <text>
+        <source>Silent Running Drones</source>
+        <target>Drönare från Silent Running</target>
+    </text>
+    <text>
+        <source>DC (TM) Characters</source>
+        <target>DC (TM)-figurer</target>
+    </text>
+    <text>
+        <source>Marvel (TM) Characters</source>
+        <target>Marvel (TM)-figurer</target>
+    </text>
+    <text>
+        <source>&amp;Window</source>
+        <target>&amp;Fönster</target>
+    </text>
+    <text>
+        <source>&amp;Help</source>
+        <target>&amp;Hjälp</target>
+    </text>
+    <text>
+        <source>Keywords...</source>
+        <target>Nyckelord...</target>
+    </text>
+    <text>
+        <source>Buttons</source>
+        <target>Knappar</target>
+    </text>
+    <text>
+        <source>This is the neoGFX test application.</source>
+        <target>Det här är testprogrammet för neoGFX.</target>
+    </text>
+    <text>
+        <source>the,,, quick brown fox jumps over the lazy dog.
+Change tab bar placement.</source>
+        <target>den,,, snabba bruna räven hoppar över den lata hunden.
+Ändra flikfältets placering.</target>
+    </text>
+    <text>
+        <source>&amp;Generate UUID</source>
+        <target>&amp;Generera UUID</target>
+    </text>
+    <text>
+        <source>Toggle Editable</source>
+        <target>Växla redigerbar</target>
+    </text>
+    <text>
+        <source>First field:</source>
+        <target>Första fältet:</target>
+    </text>
+    <text>
+        <source>Enter text</source>
+        <target>Skriv text</target>
+    </text>
+    <text>
+        <source>Second field:</source>
+        <target>Andra fältet:</target>
+    </text>
+    <text>
+        <source>Third field (label above)</source>
+        <target>Tredje fältet (etikett ovanför)</target>
+    </text>
+    <text>
+        <source>Fourth field (label above)</source>
+        <target>Fjärde fältet (etikett ovanför)</target>
+    </text>
+    <text>
+        <source>Label 1:</source>
+        <target>Etikett 1:</target>
+    </text>
+    <text>
+        <source>RGB &lt;-&gt; HSV
+color space
+conversion test
+
+
+Z͕̰̦̼͖ͦ͆ͬ̍̋̓̚
+
+</source>
+        <target>RGB &lt;-&gt; HSV
+test av
+färgrymdskonvertering
+
+
+Z͕̰̦̼͖ͦ͆ͬ̍̋̓̚
+
+</target>
+    </text>
+    <text>
+        <source>Toggle arcade mode.</source>
+        <target>Växla arkadläge.</target>
+    </text>
+    <text>
+        <source>Toggle &amp;mute.</source>
+        <target>Växla &amp;tyst läge.</target>
+    </text>
+    <text>
+        <source>Enable/disable
+contacts action.</source>
+        <target>Aktivera/inaktivera
+kontaktåtgärden.</target>
+    </text>
+    <text>
+        <source>Group Box</source>
+        <target>Gruppruta</target>
+    </text>
+    <text>
+        <source>Tristate checkbo&amp;x</source>
+        <target>Kryssruta med tre &amp;lägen</target>
+    </text>
+    <text>
+        <source>Editor word wrap</source>
+        <target>Radbrytning i redigeraren</target>
+    </text>
+    <text>
+        <source>Password / Invalidation Method</source>
+        <target>Lösenord / Ogiltigförklaringsmetod</target>
+    </text>
+    <text>
+        <source>Columns / Render Queue Optimisation</source>
+        <target>Kolumner / Optimering av renderingskö</target>
+    </text>
+    <text>
+        <source>Group Box Checkable</source>
+        <target>Kryssbar gruppruta</target>
+    </text>
+    <text>
+        <source>kern</source>
+        <target>kerning</target>
+    </text>
+    <text>
+        <source>subpix</source>
+        <target>subpixel</target>
+    </text>
+    <text>
+        <source>theme</source>
+        <target>tema</target>
+    </text>
+    <text>
+        <source>font</source>
+        <target>teckensnitt</target>
+    </text>
+    <text>
+        <source>edit</source>
+        <target>redigering</target>
+    </text>
+    <text>
+        <source>outline</source>
+        <target>kontur</target>
+    </text>
+    <text>
+        <source>glow</source>
+        <target>glöd</target>
+    </text>
+    <text>
+        <source>shadow</source>
+        <target>skugga</target>
+    </text>
+    <text>
+        <source>Radio 1</source>
+        <target>Alternativ 1</target>
+    </text>
+    <text>
+        <source>Slider changes
+font size</source>
+        <target>Skjutreglaget ändrar
+teckenstorlek</target>
+    </text>
+    <text>
+        <source>Radio 3</source>
+        <target>Alternativ 3</target>
+    </text>
+    <text>
+        <source>Slider changes
+theme color</source>
+        <target>Skjutreglaget ändrar
+temafärg</target>
+    </text>
+    <text>
+        <source>Default/Slate
+Style</source>
+        <target>Stil
+Standard/Skiffer</target>
+    </text>
+    <text>
+        <source>Message Boxes</source>
+        <target>Meddelanderutor</target>
+    </text>
+    <text>
+        <source>Icons</source>
+        <target>Ikoner</target>
+    </text>
+    <text>
+        <source>Question</source>
+        <target>Fråga</target>
+    </text>
+    <text>
+        <source>Stop</source>
+        <target>Stopp</target>
+    </text>
+    <text>
+        <source>Warning</source>
+        <target>Varning</target>
+    </text>
+    <text>
+        <source>Error</source>
+        <target>Fel</target>
+    </text>
+    <text>
+        <source>Title:</source>
+        <target>Rubrik:</target>
+    </text>
+    <text>
+        <source>neoGFX Message Box Test</source>
+        <target>Test av meddelanderuta i neoGFX</target>
+    </text>
+    <text>
+        <source>This is a test of the neoGFX message box.
+This is a line of text.
+
+This is a line of text after a blank line</source>
+        <target>Det här är ett test av meddelanderutan i neoGFX.
+Det här är en textrad.
+
+Det här är en textrad efter en tom rad</target>
+    </text>
+    <text>
+        <source>Detailed Text:</source>
+        <target>Detaljerad text:</target>
+    </text>
+    <text>
+        <source>This is where optional informative text usually goes.
+This is a line of text.
+
+The previous line was intentionally left blank.</source>
+        <target>Här brukar valfri informativ text stå.
+Det här är en textrad.
+
+Föregående rad lämnades avsiktligt tom.</target>
+    </text>
+    <text>
+        <source>Open Message Box</source>
+        <target>Öppna meddelanderuta</target>
+    </text>
+    <text>
+        <source>Item Views</source>
+        <target>Objektvyer</target>
+    </text>
+    <text>
+        <source>Toggle List
+Header View</source>
+        <target>Växla listans
+rubrikvy</target>
+    </text>
+    <text>
+        <source>Table View Model</source>
+        <target>Tabellvyns modell</target>
+    </text>
+    <text>
+        <source>Checkable</source>
+        <target>Kryssbar</target>
+    </text>
+    <text>
+        <source>TriState Checkable</source>
+        <target>Kryssbar med tre lägen</target>
+    </text>
+    <text>
+        <source>Column Five</source>
+        <target>Kolumn fem</target>
+    </text>
+    <text>
+        <source>Read only</source>
+        <target>Skrivskyddad</target>
+    </text>
+    <text>
+        <source>Unselectable</source>
+        <target>Ej valbar</target>
+    </text>
+    <text>
+        <source>Upper Table View</source>
+        <target>Övre tabellvy</target>
+    </text>
+    <text>
+        <source>Images</source>
+        <target>Bilder</target>
+    </text>
+    <text>
+        <source>Monochrome text</source>
+        <target>Monokrom text</target>
+    </text>
+    <text>
+        <source>Colored text</source>
+        <target>Färgad text</target>
+    </text>
+    <text>
+        <source>Colored cells</source>
+        <target>Färgade celler</target>
+    </text>
+    <text>
+        <source>Lower Table View</source>
+        <target>Nedre tabellvy</target>
+    </text>
+    <text>
+        <source>Selection</source>
+        <target>Markering</target>
+    </text>
+    <text>
+        <source>No selection</source>
+        <target>Ingen markering</target>
+    </text>
+    <text>
+        <source>Single selection</source>
+        <target>Enkel markering</target>
+    </text>
+    <text>
+        <source>Multiple selection</source>
+        <target>Multimarkering</target>
+    </text>
+    <text>
+        <source>Extended selection</source>
+        <target>Utökad markering</target>
+    </text>
+    <text>
+        <source>Lots</source>
+        <target>Massor</target>
+    </text>
+    <text>
+        <source>Game</source>
+        <target>Spel</target>
+    </text>
+    <text>
+        <source>Timestep:</source>
+        <target>Tidssteg:</target>
+    </text>
+    <text>
+        <source>Timestep Growth:</source>
+        <target>Tidsstegets tillväxt:</target>
+    </text>
+    <text>
+        <source>Maximum Timestep:</source>
+        <target>Största tidssteg:</target>
+    </text>
+    <text>
+        <source>Yield After (ms):</source>
+        <target>Släpp efter (ms):</target>
+    </text>
+    <text>
+        <source>Collision Detection</source>
+        <target>Kollisionsdetektering</target>
+    </text>
+    <text>
+        <source>Drawing</source>
+        <target>Ritning</target>
+    </text>
+    <text>
+        <source>Editor</source>
+        <target>Redigerare</target>
+    </text>
+    <text>
+        <source>Style 1</source>
+        <target>Stil 1</target>
+    </text>
+    <text>
+        <source>Style 2</source>
+        <target>Stil 2</target>
+    </text>
+    <text>
+        <source>Web Browser</source>
+        <target>Webbläsare</target>
+    </text>
+    <text>
+        <source>Instancing</source>
+        <target>Instansiering</target>
+    </text>
+    <text>
+        <source>Rendering Scheme</source>
+        <target>Renderingsschema</target>
+    </text>
+    <text>
+        <source>Off</source>
+        <target>Av</target>
+    </text>
+    <text>
+        <source>Immediate (Batching)</source>
+        <target>Omedelbar (batchning)</target>
+    </text>
+    <text>
+        <source>ECS (Batching)</source>
+        <target>ECS (batchning)</target>
+    </text>
+    <text>
+        <source>ECS (Instancing)</source>
+        <target>ECS (instansiering)</target>
+    </text>
+    <text>
+        <source>Mesh Shape</source>
+        <target>Nätform</target>
+    </text>
+    <text>
+        <source>Quad</source>
+        <target>Fyrhörning</target>
+    </text>
+    <text>
+        <source>Circle</source>
+        <target>Cirkel</target>
+    </text>
+    <text>
+        <source>Outline</source>
+        <target>Kontur</target>
+    </text>
+    <text>
+        <source>Fill</source>
+        <target>Fyllning</target>
+    </text>
+    <text>
+        <source>Size:</source>
+        <target>Storlek:</target>
+    </text>
+    <text>
+        <source>Count:</source>
+        <target>Antal:</target>
+    </text>
+    <text>
+        <source>Pause Animation</source>
+        <target>Pausa animering</target>
+    </text>
+    <text>
+        <source>Pause Transformations</source>
+        <target>Pausa transformationer</target>
+    </text>
+    <text>
+        <source>Use SIMD</source>
+        <target>Använd SIMD</target>
+    </text>
+    <text>
+        <source>Use Thread Pool</source>
+        <target>Använd trådpool</target>
+    </text>
+    <text>
+        <source>Scene Graph (3D)</source>
+        <target>Scengraf (3D)</target>
+    </text>
+    <text>
+        <source>Animate</source>
+        <target>Animera</target>
+    </text>
+    <text>
+        <source>Lighting</source>
+        <target>Belysning</target>
+    </text>
+    <text>
+        <source>Shadows</source>
+        <target>Skuggor</target>
+    </text>
+    <text>
+        <source>Save glTF...</source>
+        <target>Spara glTF...</target>
+    </text>
+    <text>
+        <source>Load glTF...</source>
+        <target>Läs in glTF...</target>
+    </text>
+    <text>
+        <source>Load Environment...</source>
+        <target>Läs in miljö...</target>
+    </text>
+    <text>
+        <source>Background</source>
+        <target>Bakgrund</target>
+    </text>
+    <text>
+        <source>Own texture</source>
+        <target>Egen textur</target>
+    </text>
+    <text>
+        <source>Blur</source>
+        <target>Oskärpa</target>
+    </text>
+    <text>
+        <source>Drag: orbit; right drag: pan; wheel: zoom; double click: reset view</source>
+        <target>Dra: rotera; högerdra: panorera; hjul: zooma; dubbelklick: återställ vy</target>
+    </text>
+    <text>
+        <source>Scene Graph (2D)</source>
+        <target>Scengraf (2D)</target>
+    </text>
+    <text>
+        <source>An electronic circuit: a scene graph of 48 dip square tiles, each with a symbol generated from inline SVG. Click a switch to toggle it; drag a variable resistor along its length to change its resistance, and so the brightness of the LEDs.</source>
+        <target>En elektronisk krets: en scengraf med kvadratiska plattor på 48 dip, var och en med en symbol som genererats från inbäddad SVG. Klicka på en strömbrytare för att växla den; dra ett variabelt motstånd längs dess längd för att ändra dess resistans och därmed lysdiodernas ljusstyrka.</target>
+    </text>
+    <text>
+        <source>Text Widget Cutoffs</source>
+        <target>Avklippning i textwidgetar</target>
+    </text>
+</xneol>

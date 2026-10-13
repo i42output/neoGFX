@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xneol xmlns="https://neogfx.org/xneol" version="1.0" trgLang="da">
+    <text>
+        <source>Show/Hide Status Bar</source>
+        <target>Vis/skjul statuslinjen</target>
+    </text>
+    <text>
+        <source>Game Controller Calibration</source>
+        <target>Kalibrering af spilcontroller</target>
+    </text>
+    <text>
+        <source>Goldenrod Style</source>
+        <target>Gyldenrisstil</target>
+    </text>
+    <text>
+        <source>&amp;Contacts...</source>
+        <target>&amp;Kontakter...</target>
+    </text>
+    <text>
+        <source>Add Favourite...</source>
+        <target>Tilføj favorit...</target>
+    </text>
+    <text>
+        <source>Organize Favourites...</source>
+        <target>Organiser favoritter...</target>
+    </text>
+    <text>
+        <source>Toggle Green/Turbo mode</source>
+        <target>Skift mellem grøn tilstand/turbotilstand</target>
+    </text>
+    <text>
+        <source>Mute/&amp;Unmute Sound</source>
+        <target>&amp;Lyd fra/til</target>
+    </text>
+    <text>
+        <source>Paste and Go</source>
+        <target>Indsæt og gå</target>
+    </text>
+    <text>
+        <source>Next Tab</source>
+        <target>Næste fane</target>
+    </text>
+    <text>
+        <source>Previous Tab</source>
+        <target>Forrige fane</target>
+    </text>
+    <text>
+        <source>Emacs style sequence #1</source>
+        <target>Sekvens i Emacs-stil nr. 1</target>
+    </text>
+    <text>
+        <source>Emacs style sequence #2</source>
+        <target>Sekvens i Emacs-stil nr. 2</target>
+    </text>
+    <text>
+        <source>Color Dialog...</source>
+        <target>Farvedialog...</target>
+    </text>
+    <text>
+        <source>Manage Plugins...</source>
+        <target>Administrer plugins...</target>
+    </text>
+    <text>
+        <source>Check for Updates...</source>
+        <target>Søg efter opdateringer...</target>
+    </text>
+    <text>
+        <source>&amp;File</source>
+        <target>&amp;Filer</target>
+    </text>
+    <text>
+        <source>&amp;Edit</source>
+        <target>&amp;Rediger</target>
+    </text>
+    <text>
+        <source>&amp;View</source>
+        <target>&amp;Vis</target>
+    </text>
+    <text>
+        <source>F&amp;avourites</source>
+        <target>F&amp;avoritter</target>
+    </text>
+    <text>
+        <source>Silent Running Drones</source>
+        <target>Droner fra Silent Running</target>
+    </text>
+    <text>
+        <source>DC (TM) Characters</source>
+        <target>DC (TM)-figurer</target>
+    </text>
+    <text>
+        <source>Marvel (TM) Characters</source>
+        <target>Marvel (TM)-figurer</target>
+    </text>
+    <text>
+        <source>&amp;Window</source>
+        <target>Vi&amp;ndue</target>
+    </text>
+    <text>
+        <source>&amp;Help</source>
+        <target>&amp;Hjælp</target>
+    </text>
+    <text>
+        <source>Keywords...</source>
+        <target>Nøgleord...</target>
+    </text>
+    <text>
+        <source>Buttons</source>
+        <target>Knapper</target>
+    </text>
+    <text>
+        <source>This is the neoGFX test application.</source>
+        <target>Dette er testprogrammet til neoGFX.</target>
+    </text>
+    <text>
+        <source>the,,, quick brown fox jumps over the lazy dog.
+Change tab bar placement.</source>
+        <target>den,,, hurtige brune ræv springer over den dovne hund.
+Skift placering af fanelinjen.</target>
+    </text>
+    <text>
+        <source>&amp;Generate UUID</source>
+        <target>&amp;Generer UUID</target>
+    </text>
+    <text>
+        <source>Toggle Editable</source>
+        <target>Skift redigerbar</target>
+    </text>
+    <text>
+        <source>First field:</source>
+        <target>Første felt:</target>
+    </text>
+    <text>
+        <source>Enter text</source>
+        <target>Indtast tekst</target>
+    </text>
+    <text>
+        <source>Second field:</source>
+        <target>Andet felt:</target>
+    </text>
+    <text>
+        <source>Third field (label above)</source>
+        <target>Tredje felt (etiket over)</target>
+    </text>
+    <text>
+        <source>Fourth field (label above)</source>
+        <target>Fjerde felt (etiket over)</target>
+    </text>
+    <text>
+        <source>Label 1:</source>
+        <target>Etiket 1:</target>
+    </text>
+    <text>
+        <source>RGB &lt;-&gt; HSV
+color space
+conversion test
+
+
+Z͕̰̦̼͖ͦ͆ͬ̍̋̓̚
+
+</source>
+        <target>RGB &lt;-&gt; HSV
+test af
+farverumskonvertering
+
+
+Z͕̰̦̼͖ͦ͆ͬ̍̋̓̚
+
+</target>
+    </text>
+    <text>
+        <source>Toggle arcade mode.</source>
+        <target>Skift arkadetilstand.</target>
+    </text>
+    <text>
+        <source>Toggle &amp;mute.</source>
+        <target>Slå &amp;lyd fra/til.</target>
+    </text>
+    <text>
+        <source>Enable/disable
+contacts action.</source>
+        <target>Aktivér/deaktivér
+kontakthandlingen.</target>
+    </text>
+    <text>
+        <source>Group Box</source>
+        <target>Gruppefelt</target>
+    </text>
+    <text>
+        <source>Tristate checkbo&amp;x</source>
+        <target>Afkrydsningsfelt med tre &amp;tilstande</target>
+    </text>
+    <text>
+        <source>Editor word wrap</source>
+        <target>Ombrydning i editoren</target>
+    </text>
+    <text>
+        <source>Password / Invalidation Method</source>
+        <target>Adgangskode / Ugyldiggørelsesmetode</target>
+    </text>
+    <text>
+        <source>Columns / Render Queue Optimisation</source>
+        <target>Kolonner / Optimering af renderingskø</target>
+    </text>
+    <text>
+        <source>Group Box Checkable</source>
+        <target>Afkrydseligt gruppefelt</target>
+    </text>
+    <text>
+        <source>kern</source>
+        <target>kerning</target>
+    </text>
+    <text>
+        <source>subpix</source>
+        <target>subpixel</target>
+    </text>
+    <text>
+        <source>theme</source>
+        <target>tema</target>
+    </text>
+    <text>
+        <source>font</source>
+        <target>skrifttype</target>
+    </text>
+    <text>
+        <source>edit</source>
+        <target>redigering</target>
+    </text>
+    <text>
+        <source>outline</source>
+        <target>kontur</target>
+    </text>
+    <text>
+        <source>glow</source>
+        <target>glød</target>
+    </text>
+    <text>
+        <source>shadow</source>
+        <target>skygge</target>
+    </text>
+    <text>
+        <source>Radio 1</source>
+        <target>Mulighed 1</target>
+    </text>
+    <text>
+        <source>Slider changes
+font size</source>
+        <target>Skyderen ændrer
+skriftstørrelse</target>
+    </text>
+    <text>
+        <source>Radio 3</source>
+        <target>Mulighed 3</target>
+    </text>
+    <text>
+        <source>Slider changes
+theme color</source>
+        <target>Skyderen ændrer
+temafarve</target>
+    </text>
+    <text>
+        <source>Default/Slate
+Style</source>
+        <target>Stil
+Standard/Skifer</target>
+    </text>
+    <text>
+        <source>Message Boxes</source>
+        <target>Meddelelsesbokse</target>
+    </text>
+    <text>
+        <source>Icons</source>
+        <target>Ikoner</target>
+    </text>
+    <text>
+        <source>Question</source>
+        <target>Spørgsmål</target>
+    </text>
+    <text>
+        <source>Warning</source>
+        <target>Advarsel</target>
+    </text>
+    <text>
+        <source>Error</source>
+        <target>Fejl</target>
+    </text>
+    <text>
+        <source>Text</source>
+        <target>Tekst</target>
+    </text>
+    <text>
+        <source>Title:</source>
+        <target>Titel:</target>
+    </text>
+    <text>
+        <source>neoGFX Message Box Test</source>
+        <target>Test af meddelelsesboks i neoGFX</target>
+    </text>
+    <text>
+        <source>Text:</source>
+        <target>Tekst:</target>
+    </text>
+    <text>
+        <source>This is a test of the neoGFX message box.
+This is a line of text.
+
+This is a line of text after a blank line</source>
+        <target>Dette er en test af meddelelsesboksen i neoGFX.
+Dette er en tekstlinje.
+
+Dette er en tekstlinje efter en tom linje</target>
+    </text>
+    <text>
+        <source>Detailed Text:</source>
+        <target>Detaljeret tekst:</target>
+    </text>
+    <text>
+        <source>This is where optional informative text usually goes.
+This is a line of text.
+
+The previous line was intentionally left blank.</source>
+        <target>Her står der normalt valgfri informativ tekst.
+Dette er en tekstlinje.
+
+Den forrige linje er med vilje efterladt tom.</target>
+    </text>
+    <text>
+        <source>Open Message Box</source>
+        <target>Åbn meddelelsesboks</target>
+    </text>
+    <text>
+        <source>Item Views</source>
+        <target>Elementvisninger</target>
+    </text>
+    <text>
+        <source>Toggle List
+Header View</source>
+        <target>Skift listens
+overskriftsvisning</target>
+    </text>
+    <text>
+        <source>Table View Model</source>
+        <target>Model for tabelvisning</target>
+    </text>
+    <text>
+        <source>Checkable</source>
+        <target>Afkrydselig</target>
+    </text>
+    <text>
+        <source>TriState Checkable</source>
+        <target>Afkrydselig med tre tilstande</target>
+    </text>
+    <text>
+        <source>Column Five</source>
+        <target>Kolonne fem</target>
+    </text>
+    <text>
+        <source>Read only</source>
+        <target>Skrivebeskyttet</target>
+    </text>
+    <text>
+        <source>Unselectable</source>
+        <target>Kan ikke vælges</target>
+    </text>
+    <text>
+        <source>Upper Table View</source>
+        <target>Øverste tabelvisning</target>
+    </text>
+    <text>
+        <source>Images</source>
+        <target>Billeder</target>
+    </text>
+    <text>
+        <source>Monochrome text</source>
+        <target>Monokrom tekst</target>
+    </text>
+    <text>
+        <source>Colored text</source>
+        <target>Farvet tekst</target>
+    </text>
+    <text>
+        <source>Colored cells</source>
+        <target>Farvede celler</target>
+    </text>
+    <text>
+        <source>Lower Table View</source>
+        <target>Nederste tabelvisning</target>
+    </text>
+    <text>
+        <source>Selection</source>
+        <target>Markering</target>
+    </text>
+    <text>
+        <source>No selection</source>
+        <target>Ingen markering</target>
+    </text>
+    <text>
+        <source>Single selection</source>
+        <target>Enkeltmarkering</target>
+    </text>
+    <text>
+        <source>Multiple selection</source>
+        <target>Flermarkering</target>
+    </text>
+    <text>
+        <source>Extended selection</source>
+        <target>Udvidet markering</target>
+    </text>
+    <text>
+        <source>Lots</source>
+        <target>Masser</target>
+    </text>
+    <text>
+        <source>Game</source>
+        <target>Spil</target>
+    </text>
+    <text>
+        <source>Timestep:</source>
+        <target>Tidstrin:</target>
+    </text>
+    <text>
+        <source>Timestep Growth:</source>
+        <target>Tidstrinsvækst:</target>
+    </text>
+    <text>
+        <source>Maximum Timestep:</source>
+        <target>Maksimalt tidstrin:</target>
+    </text>
+    <text>
+        <source>Yield After (ms):</source>
+        <target>Afgiv efter (ms):</target>
+    </text>
+    <text>
+        <source>Collision Detection</source>
+        <target>Kollisionsdetektering</target>
+    </text>
+    <text>
+        <source>Drawing</source>
+        <target>Tegning</target>
+    </text>
+    <text>
+        <source>Style 1</source>
+        <target>Stil 1</target>
+    </text>
+    <text>
+        <source>Style 2</source>
+        <target>Stil 2</target>
+    </text>
+    <text>
+        <source>Web Browser</source>
+        <target>Webbrowser</target>
+    </text>
+    <text>
+        <source>Instancing</source>
+        <target>Instansiering</target>
+    </text>
+    <text>
+        <source>Rendering Scheme</source>
+        <target>Renderingsskema</target>
+    </text>
+    <text>
+        <source>Off</source>
+        <target>Fra</target>
+    </text>
+    <text>
+        <source>Immediate (Batching)</source>
+        <target>Øjeblikkelig (batching)</target>
+    </text>
+    <text>
+        <source>ECS (Batching)</source>
+        <target>ECS (batching)</target>
+    </text>
+    <text>
+        <source>ECS (Instancing)</source>
+        <target>ECS (instansiering)</target>
+    </text>
+    <text>
+        <source>Mesh Shape</source>
+        <target>Netform</target>
+    </text>
+    <text>
+        <source>Quad</source>
+        <target>Firkant</target>
+    </text>
+    <text>
+        <source>Circle</source>
+        <target>Cirkel</target>
+    </text>
+    <text>
+        <source>Outline</source>
+        <target>Kontur</target>
+    </text>
+    <text>
+        <source>Fill</source>
+        <target>Udfyldning</target>
+    </text>
+    <text>
+        <source>Size:</source>
+        <target>Størrelse:</target>
+    </text>
+    <text>
+        <source>Count:</source>
+        <target>Antal:</target>
+    </text>
+    <text>
+        <source>Pause Animation</source>
+        <target>Sæt animation på pause</target>
+    </text>
+    <text>
+        <source>Pause Transformations</source>
+        <target>Sæt transformationer på pause</target>
+    </text>
+    <text>
+        <source>Use SIMD</source>
+        <target>Brug SIMD</target>
+    </text>
+    <text>
+        <source>Use Thread Pool</source>
+        <target>Brug trådpulje</target>
+    </text>
+    <text>
+        <source>Scene Graph (3D)</source>
+        <target>Scenegraf (3D)</target>
+    </text>
+    <text>
+        <source>Animate</source>
+        <target>Animér</target>
+    </text>
+    <text>
+        <source>Lighting</source>
+        <target>Belysning</target>
+    </text>
+    <text>
+        <source>Shadows</source>
+        <target>Skygger</target>
+    </text>
+    <text>
+        <source>Save glTF...</source>
+        <target>Gem glTF...</target>
+    </text>
+    <text>
+        <source>Load glTF...</source>
+        <target>Indlæs glTF...</target>
+    </text>
+    <text>
+        <source>Load Environment...</source>
+        <target>Indlæs miljø...</target>
+    </text>
+    <text>
+        <source>Background</source>
+        <target>Baggrund</target>
+    </text>
+    <text>
+        <source>Own texture</source>
+        <target>Egen tekstur</target>
+    </text>
+    <text>
+        <source>Blur</source>
+        <target>Sløring</target>
+    </text>
+    <text>
+        <source>Drag: orbit; right drag: pan; wheel: zoom; double click: reset view</source>
+        <target>Træk: rotér; højretræk: panorér; hjul: zoom; dobbeltklik: nulstil visning</target>
+    </text>
+    <text>
+        <source>Scene Graph (2D)</source>
+        <target>Scenegraf (2D)</target>
+    </text>
+    <text>
+        <source>An electronic circuit: a scene graph of 48 dip square tiles, each with a symbol generated from inline SVG. Click a switch to toggle it; drag a variable resistor along its length to change its resistance, and so the brightness of the LEDs.</source>
+        <target>Et elektronisk kredsløb: en scenegraf med kvadratiske fliser på 48 dip, hver med et symbol genereret fra indlejret SVG. Klik på en kontakt for at skifte den; træk en variabel modstand langs dens længde for at ændre dens modstand og dermed lysdiodernes lysstyrke.</target>
+    </text>
+    <text>
+        <source>Text Widget Cutoffs</source>
+        <target>Afskæring i tekstwidgets</target>
+    </text>
+</xneol>
