@@ -47,7 +47,8 @@ namespace neogfx
     {
         if (aWidget.has_root())
         {
-            if (!exists(aWidget))
+            // (a widget being processed may already have been laid out this pass so it is queued again rather than its processing entry invalidated)
+            if (!pending(aWidget))
                 iPending.emplace_back(aWidget, &aWidget);
             else
                 invalidate(aWidget);

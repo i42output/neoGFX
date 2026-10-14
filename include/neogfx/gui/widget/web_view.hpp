@@ -41,6 +41,7 @@ namespace neogfx
         using base_type = widget<i_web_view>;
         // construction
     public:
+        web_view();
         web_view(i_widget& aParent, bool aTransparent = false);
         web_view(i_layout& aLayout, bool aTransparent = false);
         ~web_view();

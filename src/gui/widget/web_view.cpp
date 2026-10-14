@@ -28,6 +28,14 @@ namespace neogfx
 {
     template class widget<i_web_view>;
 
+    web_view::web_view() :
+        base_type{},
+        iLayout{ *this }
+    {
+        set_background_opacity(1.0);
+        init();
+    }
+
     web_view::web_view(i_widget& aParent, bool aTransparent) :
         base_type{ aParent },
         iLayout{ *this }

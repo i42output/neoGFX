@@ -40,67 +40,106 @@ namespace neogfx::DesignStudio
 {
     namespace
     {
-        bool sPreviewMode = false;
-        neolib::event<> sPreviewModeChanged;
-        bool sDisplayIds = false;
-        neolib::event<> sDisplayIdsChanged;
-        bool sDesignDragActive = false;
-        neolib::event<> sDesignDragActiveChanged;
-        std::function<bool(i_element& aElement, point const& aPosition)> sExternalElementDrop;
-        std::function<void(i_element& aElement, optional_point const& aPosition)> sExternalElementDrag;
+        bool& preview_mode_state()
+        {
+            static bool sPreviewMode = false;
+            return sPreviewMode;
+        }
+
+        neolib::event<>& preview_mode_changed_event()
+        {
+            static neolib::event<> sPreviewModeChanged;
+            return sPreviewModeChanged;
+        }
+
+        bool& display_ids_state()
+        {
+            static bool sDisplayIds = false;
+            return sDisplayIds;
+        }
+
+        neolib::event<>& display_ids_changed_event()
+        {
+            static neolib::event<> sDisplayIdsChanged;
+            return sDisplayIdsChanged;
+        }
+
+        bool& design_drag_active_state()
+        {
+            static bool sDesignDragActive = false;
+            return sDesignDragActive;
+        }
+
+        neolib::event<>& design_drag_active_changed_event()
+        {
+            static neolib::event<> sDesignDragActiveChanged;
+            return sDesignDragActiveChanged;
+        }
+
+        std::function<bool(i_element& aElement, point const& aPosition)>& external_element_drop_handler()
+        {
+            static std::function<bool(i_element& aElement, point const& aPosition)> sExternalElementDrop;
+            return sExternalElementDrop;
+        }
+
+        std::function<void(i_element& aElement, optional_point const& aPosition)>& external_element_drag_handler()
+        {
+            static std::function<void(i_element& aElement, optional_point const& aPosition)> sExternalElementDrag;
+            return sExternalElementDrag;
+        }
     }
 
     void set_external_element_drop(std::function<bool(i_element& aElement, point const& aPosition)> aHandler)
     {
-        sExternalElementDrop = aHandler;
+        external_element_drop_handler() = aHandler;
     }
 
     void set_external_element_drag(std::function<void(i_element& aElement, optional_point const& aPosition)> aHandler)
     {
-        sExternalElementDrag = aHandler;
+        external_element_drag_handler() = aHandler;
     }
 
     bool design_drag_active()
     {
-        return sDesignDragActive;
+        return design_drag_active_state();
     }
 
     void set_design_drag_active(bool aActive)
     {
-        if (sDesignDragActive != aActive)
+        if (design_drag_active_state() != aActive)
         {
-            sDesignDragActive = aActive;
-            sDesignDragActiveChanged();
+            design_drag_active_state() = aActive;
+            design_drag_active_changed_event()();
         }
     }
 
     neolib::i_event<> const& design_drag_active_changed()
     {
-        return sDesignDragActiveChanged;
+        return design_drag_active_changed_event();
     }
 
     bool display_ids()
     {
-        return sDisplayIds;
+        return display_ids_state();
     }
 
     void set_display_ids(bool aDisplayIds)
     {
-        if (sDisplayIds != aDisplayIds)
+        if (display_ids_state() != aDisplayIds)
         {
-            sDisplayIds = aDisplayIds;
-            sDisplayIdsChanged();
+            display_ids_state() = aDisplayIds;
+            display_ids_changed_event()();
         }
     }
 
     neolib::i_event<> const& display_ids_changed()
     {
-        return sDisplayIdsChanged;
+        return display_ids_changed_event();
     }
 
     bool show_ids()
     {
-        return sDisplayIds && !sPreviewMode;
+        return display_ids_state() && !preview_mode_state();
     }
 
     void set_text_attribute(i_element& aElement, std::string const& aText)
@@ -297,21 +336,21 @@ namespace neogfx::DesignStudio
 
     bool preview_mode()
     {
-        return sPreviewMode;
+        return preview_mode_state();
     }
 
     void set_preview_mode(bool aPreview)
     {
-        if (sPreviewMode != aPreview)
+        if (preview_mode_state() != aPreview)
         {
-            sPreviewMode = aPreview;
-            sPreviewModeChanged();
+            preview_mode_state() = aPreview;
+            preview_mode_changed_event()();
         }
     }
 
     neolib::i_event<> const& preview_mode_changed()
     {
-        return sPreviewModeChanged;
+        return preview_mode_changed_event();
     }
 
     widget_caddy::widget_caddy(i_project& aProject, i_element& aElement, i_widget& aParent, const point& aPosition) :
@@ -1309,8 +1348,8 @@ namespace neogfx::DesignStudio
                 iDropCandidate = true;
                 set_design_drag_active(true);
                 update_drop_target(aPosition);
-                if (sExternalElementDrag)
-                    sExternalElementDrag(element(), to_window_coordinates(aPosition) + root().window_position());
+                if (external_element_drag_handler())
+                    external_element_drag_handler()(element(), to_window_coordinates(aPosition) + root().window_position());
             }
         }
         if (nested())
@@ -1404,15 +1443,15 @@ namespace neogfx::DesignStudio
             iProject.set_dirty();
             element().ev_attributes_changed().trigger();
         }
-        if (wasMoved && sExternalElementDrag && has_element())
-            sExternalElementDrag(element(), std::nullopt); // (the drag has ended)
-        if (wasMoved && sExternalElementDrop && can_be_dropped())
+        if (wasMoved && external_element_drag_handler() && has_element())
+            external_element_drag_handler()(element(), std::nullopt); // (the drag has ended)
+        if (wasMoved && external_element_drop_handler() && can_be_dropped())
         {
             // released outside the design surface (e.g. over Object Explorer)?
             bool external = false;
             try
             {
-                external = sExternalElementDrop(element(), root().mouse_position() + root().window_position());
+                external = external_element_drop_handler()(element(), root().mouse_position() + root().window_position());
             }
             catch (...)
             {

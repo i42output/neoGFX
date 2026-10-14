@@ -47,9 +47,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/group_box.hpp>
 #include <neogfx/gui/widget/slider.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
+#include <neogfx/gui/widget/slider_box.hpp>
 #include <neogfx/gui/widget/progress_bar.hpp>
 #include <neogfx/gui/widget/gradient_widget.hpp>
 #include <neogfx/gui/widget/terminal.hpp>
+#include <neogfx/gui/widget/web_view.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/grid_layout.hpp>
@@ -100,6 +102,7 @@ namespace neogfx::DesignStudio
         { "menu_bar" },
         { "toolbar" },
         { "status_bar" },
+        { "separator" },
         { "tab_page_container" },
         { "tab_page" },
         { "canvas" },
@@ -118,8 +121,11 @@ namespace neogfx::DesignStudio
         { "double_slider" },
         { "spin_box" },
         { "double_spin_box" },
+        { "slider_box" },
+        { "double_slider_box" },
         { "progress_bar" },
         { "gradient_widget" },
+        { "web_view" },
         { "vertical_layout" },
         { "horizontal_layout" },
         { "grid_layout" },
@@ -203,6 +209,7 @@ namespace neogfx::DesignStudio
             MAKE_ELEMENT_FACTORY_FUNCTION(text_widget)
             MAKE_ELEMENT_FACTORY_FUNCTION(image_widget)
             MAKE_ELEMENT_FACTORY_FUNCTION(status_bar)
+            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(separator, status_bar::separator) // (nrc's "status_bar::separator": a status bar's "separator")
             MAKE_ELEMENT_FACTORY_FUNCTION(menu_bar)
             MAKE_ELEMENT_FACTORY_FUNCTION(menu)
             MAKE_ELEMENT_FACTORY_FUNCTION(toolbar)
@@ -224,8 +231,11 @@ namespace neogfx::DesignStudio
             MAKE_ELEMENT_FACTORY_FUNCTION(double_slider)
             MAKE_ELEMENT_FACTORY_FUNCTION(spin_box)
             MAKE_ELEMENT_FACTORY_FUNCTION(double_spin_box)
+            MAKE_ELEMENT_FACTORY_FUNCTION(slider_box)
+            MAKE_ELEMENT_FACTORY_FUNCTION(double_slider_box)
             MAKE_ELEMENT_FACTORY_FUNCTION(progress_bar)
             MAKE_ELEMENT_FACTORY_FUNCTION(gradient_widget)
+            MAKE_ELEMENT_FACTORY_FUNCTION(web_view)
             MAKE_ELEMENT_FACTORY_FUNCTION(vertical_layout)
             MAKE_ELEMENT_FACTORY_FUNCTION(horizontal_layout)
             MAKE_ELEMENT_FACTORY_FUNCTION(grid_layout)
@@ -272,6 +282,7 @@ namespace neogfx::DesignStudio
             { "text_widget", DesignStudio::element_group::Widget },
             { "image_widget", DesignStudio::element_group::Widget },
             { "status_bar", DesignStudio::element_group::Widget },
+            { "separator", DesignStudio::element_group::Widget },
             { "menu_bar", DesignStudio::element_group::Menu },
             { "menu", DesignStudio::element_group::Menu },
             { "toolbar", DesignStudio::element_group::Widget },
@@ -293,8 +304,11 @@ namespace neogfx::DesignStudio
             { "double_slider", DesignStudio::element_group::Widget },
             { "spin_box", DesignStudio::element_group::Widget },
             { "double_spin_box", DesignStudio::element_group::Widget },
+            { "slider_box", DesignStudio::element_group::Widget },
+            { "double_slider_box", DesignStudio::element_group::Widget },
             { "progress_bar", DesignStudio::element_group::Widget },
             { "gradient_widget", DesignStudio::element_group::Widget },
+            { "web_view", DesignStudio::element_group::Widget },
             { "vertical_layout", DesignStudio::element_group::Layout },
             { "horizontal_layout", DesignStudio::element_group::Layout },
             { "grid_layout", DesignStudio::element_group::Layout },
@@ -628,6 +642,20 @@ namespace neogfx::DesignStudio
             },
             {
                 "double_slider",
+                [](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/slider.png" });
+                }
+            },
+            {
+                "slider_box",
+                [](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/slider.png" });
+                }
+            },
+            {
+                "double_slider_box",
                 [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/slider.png" });

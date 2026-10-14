@@ -58,6 +58,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/tab_button.hpp>
 #include <neogfx/gui/widget/toolbar.hpp>
 #include <neogfx/gui/widget/menu_bar.hpp>
+#include <neogfx/gui/widget/status_bar.hpp>
 #include <neogfx/gui/widget/i_tab_page_container.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
@@ -1198,6 +1199,12 @@ namespace neogfx::DesignStudio
                 {
                     if constexpr (std::is_base_of_v<menu_bar, Type>)
                         iLayoutItem = make_ref<Type>(aParent); // (a menu bar needs a root when constructed)
+                    else if constexpr (std::is_same_v<Type, status_bar::separator>)
+                    {
+                        // a status bar's separator: for its status bar (its parent element's widget, whose colours it is drawn in)
+                        if (has_parent() && parent().has_layout_item() && parent().layout_item().is_widget())
+                            iLayoutItem = make_ref<Type>(parent().layout_item().as_widget());
+                    }
                     else if constexpr (std::is_constructible_v<Type, i_element&>)
                         iLayoutItem = make_ref<Type>(*this);
                     else if constexpr (std::is_constructible_v<Type, i_widget&, window_style>)
