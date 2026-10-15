@@ -122,7 +122,8 @@ namespace neogfx
             if (service<i_debug>().layout_item() == &next)
                 service<debug::logger>() << neolib::logger::severity::Debug << typeid(next).name() << ": async_layout::process()" << std::endl;
 #endif
-            if (next.root().has_native_window())
+            // n.b. may have been detached from its root since being queued
+            if (next.has_root() && next.root().has_native_window())
             {
                 neolib::scoped_optional_if soi{ next.layout_reason(), layout_reason::Async };
                 next.layout_items();

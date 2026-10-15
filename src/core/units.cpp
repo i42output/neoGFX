@@ -34,9 +34,15 @@ namespace neogfx
             return tCurrentContext;
         }
 
+        thread_local bool tScopesDestroyed = false;
+
         neolib::i_vector<scoped_units_context*>& scopes_for_this_thread()
         {
             shared_thread_local(neolib::vector<scoped_units_context*>, neogfx::scopes_for_this_thread, tScopes);
+            // n.b. thread locals are destroyed at thread exit which, for the main thread, is before statics are destroyed
+            // (e.g. displays owned by a service); this sentinel is constructed after (and so destroyed before) tScopes
+            struct scopes_sentinel { ~scopes_sentinel() { tScopesDestroyed = true; } };
+            thread_local scopes_sentinel tScopesSentinel;
             return tScopes;
         }
     }
@@ -67,6 +73,8 @@ namespace neogfx
     
     void scoped_units_context::context_destroyed(i_units_context const& aContext)
     {
+        if (tScopesDestroyed)
+            return;
         for (auto& s : scopes_for_this_thread())
             if (s->iSavedContext == &aContext)
                 s->iSavedContext = nullptr;

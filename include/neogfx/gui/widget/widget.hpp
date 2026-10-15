@@ -109,6 +109,7 @@ namespace neogfx
         const i_window& root() const final;
         i_window& root() final;
         void set_root(i_window& aRoot) final;
+        void reset_root() final;
         bool is_surface() const override;
         bool has_surface() const override;
         const i_surface& surface() const override;

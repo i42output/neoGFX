@@ -22,6 +22,7 @@
 #include <typeindex>
 #include <neolib/core/scoped.hpp>
 #include <neolib/app/i_shared_thread_local.hpp>
+#include <neolib/core/thread_local.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/widget/widget.hpp>
@@ -206,6 +207,8 @@ namespace neogfx
             if (iSingular)
             {
                 iParent = nullptr;
+                // n.b. detached so cached root of this subtree may no longer be valid (e.g. destroyed before us)
+                widget::reset_root();
             }
         }
     }
@@ -264,6 +267,16 @@ namespace neogfx
                 DeviceMetricsUpdated(*this);
             }
         }
+    }
+
+    template <WidgetInterface Interface>
+    inline void widget<Interface>::reset_root()
+    {
+        if (widget::is_root())
+            return;
+        iRoot = std::nullopt;
+        for (auto& child : iChildren)
+            child->reset_root();
     }
 
     template <WidgetInterface Interface>
@@ -1390,14 +1403,13 @@ namespace neogfx
         PaintingChildren(aGc);
 
         using widget_layers_t = neolib::map<std::int32_t, neolib::vector<i_widget const*>>;
-        shared_thread_local(neolib::vector<neolib::ref_ptr<widget_layers_t>>, neogfx::widget::render, widgetLayersStack);
+        // n.b. module (not shared) thread local so each layer map is destroyed by the module that created it (a shared
+        // thread local is destroyed at exit, after plugins have been unloaded); a given depth is only ever used by one
+        // render frame so per-module stacks keep frames distinct even when rendering recurses across modules
+        thread_local neolib::variable_stack<widget_layers_t> tWidgetLayersStack;
+        neolib::variable_stack_context<widget_layers_t> widgetLayersContext{ tWidgetLayersStack };
 
-        shared_thread_local(std::size_t, neogfx::widget::render, stack);
-        neolib::scoped_counter<std::size_t> stackCounter{ stack };
-        if (widgetLayersStack.size() < stack)
-            widgetLayersStack.push_back(neolib::make_ref<widget_layers_t>());
-
-        auto& widgetLayers = *widgetLayersStack[stack - 1];
+        auto& widgetLayers = tWidgetLayersStack.current();
 
         for (auto& layer : widgetLayers)
             layer.second().clear();

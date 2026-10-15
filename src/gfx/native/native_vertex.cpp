@@ -191,14 +191,14 @@ namespace neogfx
 
     native_vertex_array::native_vertex_array()
     {
-        iPreviousVertexArrayBindingHandle = graphics_backend().bound_vertex_array();
         iHandle = graphics_backend().create_vertex_array();
         bind();
     }
 
     native_vertex_array::~native_vertex_array()
     {
-        graphics_backend().bind_vertex_array(iPreviousVertexArrayBindingHandle);
+        // n.b. the binding in place when we were created is not restored as that vertex array may since have been
+        // destroyed (vertex arrays are not destroyed in LIFO order); deleting a bound vertex array unbinds it
         graphics_backend().destroy_vertex_array(iHandle);
     }
 

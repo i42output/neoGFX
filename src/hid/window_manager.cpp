@@ -38,7 +38,8 @@ namespace neogfx
     {
         iWindows.insert(iWindows.begin(), &aWindow);
         std::stable_sort(iWindows.begin(), iWindows.end(), window_sorter{});
-        iSink += aWindow.activated([&]()
+        auto& windowSink = iWindowSinks[&aWindow];
+        windowSink += aWindow.activated([&]()
         {
             if (iActiveWindow && iActiveWindow != &aWindow)
             {
@@ -52,7 +53,7 @@ namespace neogfx
             iWindows.insert(iWindows.begin(), &aWindow);
             std::stable_sort(iWindows.begin(), iWindows.end(), window_sorter{});
         });
-        iSink += aWindow.deactivated([&]()
+        windowSink += aWindow.deactivated([&]()
         {
             if (iActiveWindow == &aWindow)
                 iActiveWindow = nullptr;
@@ -67,6 +68,9 @@ namespace neogfx
         if (existing == iWindows.end())
             throw window_not_found();
         iWindows.erase(existing);
+        // n.b. disconnect while the window (and its events) still exist; a window's events may have been created by a
+        // plugin that will have been unloaded by the time we (a static) are destroyed
+        iWindowSinks.erase(&aWindow);
     }
 
     bool window_manager::has_window(i_window& aWindow) const

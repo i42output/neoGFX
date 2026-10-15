@@ -21,6 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <unordered_map>
+
 #include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/gui/window/i_window.hpp>
 
@@ -64,7 +66,7 @@ namespace neogfx
         point mouse_position(const i_window& aWindow) const final;
         bool is_mouse_button_clicked(mouse_button aButton) const final;
     private:
-        sink iSink;
+        std::unordered_map<i_window*, sink> iWindowSinks;
         window_list iWindows;
         i_window* iActiveWindow = nullptr;
     };

@@ -51,7 +51,10 @@ namespace neogfx
             }
             ~standard_batching()
             {
-                service<i_rendering_engine>().deallocate_vertex_buffer(*this);
+                // n.b. these are function-local statics so can outlive the rendering engine's teardown (which replaces
+                // the engine instance and its vertex buffer registry) hence check registration before deallocating
+                if (service<i_rendering_engine>().vertex_buffer_allocated(*this))
+                    service<i_rendering_engine>().deallocate_vertex_buffer(*this);
             }
         public:
             bool cacheable() const final

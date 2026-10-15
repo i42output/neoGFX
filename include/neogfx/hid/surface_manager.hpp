@@ -21,6 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <unordered_map>
+
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
@@ -90,6 +92,7 @@ namespace neogfx
         surface_list iSurfaces;
         bool iRenderingSurfaces;
         sink iSink;
+        std::unordered_map<i_surface*, sink> iSurfaceSinks;
         mutable std::vector<std::unique_ptr<i_nest>> iNests;
         std::vector<i_nest*> iActiveNest;
     };

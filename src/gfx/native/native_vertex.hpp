@@ -44,7 +44,6 @@ namespace neogfx
     public:
         void bind();
     private:
-        gpu_vertex_array iPreviousVertexArrayBindingHandle;
         gpu_vertex_array iHandle;
     };
 

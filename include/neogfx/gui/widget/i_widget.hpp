@@ -104,6 +104,7 @@ namespace neogfx
         virtual const i_window& root() const = 0;
         virtual i_window& root() = 0;
         virtual void set_root(i_window& aRoot) = 0;
+        virtual void reset_root() = 0;
         virtual bool has_surface() const = 0;
         virtual bool is_surface() const = 0;
         virtual const i_surface& surface() const = 0;

@@ -578,7 +578,7 @@ namespace neogfx
     template <typename PushButtonInterface>
     inline void basic_push_button<PushButtonInterface>::animate()
     {
-        if (!this->root().has_native_surface())
+        if (!this->has_root() || !this->root().has_native_surface())
             return;
 
         if (this->entered() && this->enabled())

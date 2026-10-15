@@ -70,7 +70,7 @@ namespace neogfx
         std::sort(iSurfaces.begin(), iSurfaces.end(), surface_sorter{});
         if (aSurface.is_window())
         {
-            iSink += aSurface.as_surface_window().as_window().activated([&]()
+            iSurfaceSinks[&aSurface] += aSurface.as_surface_window().as_window().activated([&]()
             {
                 std::sort(iSurfaces.begin(), iSurfaces.end(), surface_sorter{});
             });
@@ -83,6 +83,9 @@ namespace neogfx
         if (existingSurface != iSurfaces.end())
         {
             iSurfaces.erase(existingSurface);
+            // n.b. disconnect while the surface (and its events) still exist; a surface's events may have been created by
+            // a plugin that will have been unloaded by the time we (a static) are destroyed
+            iSurfaceSinks.erase(&aSurface);
             for (auto s = iSurfaces.begin(); s != iSurfaces.end();)
             {
                 if (aSurface.is_owner_of(**s))

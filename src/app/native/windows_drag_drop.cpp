@@ -44,6 +44,7 @@ namespace neogfx
             if (aTarget.is_widget() && aTarget.as_widget().root().has_native_surface())
             {
                 HWND hwndTarget = static_cast<HWND>(aTarget.as_widget().root().native_window().native_handle());
+                iTargetWindows[&aTarget] = hwndTarget;
                 if (++iNativeDragDropTargets[hwndTarget].second == 1)
                 {
                     iNativeDragDropTargets[hwndTarget].first.emplace(aTarget.as_widget().root().native_window());
@@ -56,9 +57,12 @@ namespace neogfx
 
         void drag_drop::unregister_target(i_drag_drop_target& aTarget)
         {
-            if (aTarget.is_widget() && aTarget.as_widget().root().has_native_surface())
+            // n.b. use the window registered with as the target may since have been detached from its root
+            auto existingTarget = iTargetWindows.find(&aTarget);
+            if (existingTarget != iTargetWindows.end())
             {
-                HWND hwndTarget = static_cast<HWND>(aTarget.as_widget().root().native_window().native_handle());
+                HWND hwndTarget = existingTarget->second;
+                iTargetWindows.erase(existingTarget);
                 auto existing = iNativeDragDropTargets.find(hwndTarget);
                 if (existing != iNativeDragDropTargets.end())
                 {
