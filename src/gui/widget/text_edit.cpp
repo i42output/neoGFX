@@ -260,10 +260,12 @@ namespace neogfx
         struct link_help : i_help_source
         {
             string text;
+            i_widget const* widget = nullptr;
 
             bool help_active() const override { return true; }
             neogfx::help_type help_type() const override { return neogfx::help_type::Action; }
             i_string const& help_text() const override { return text; }
+            i_widget const* help_widget() const override { return widget; }
         };
         std::optional<std::string> hoveredLink;
         link_help linkHelp;
@@ -486,6 +488,7 @@ namespace neogfx
             if (hoveredLink)
             {
                 linkHelp.text = string{ *hoveredLink };
+                linkHelp.widget = &owner;
                 service<i_app>().help().activate(linkHelp);
                 linkHelpActive = true;
             }
@@ -2836,11 +2839,57 @@ namespace neogfx
 
     void text_edit::apply_style(position_type aStart, position_type aEnd, style const& aStyle)
     {
-        // todo: optimize this (by changing style in-place)
-        std::u32string part;
-        part.assign(iText.begin() + aStart, iText.begin() + aEnd);
-        delete_text(aStart, aEnd);
-        insert_text(aStart, string{ neolib::utf32_to_utf8(part) }, { aStyle });
+        if (aStart >= aEnd)
+            return;
+        // a style that sets a font (or that replaces one that does) changes the shapes of the glyphs: the text is inserted again (so its 
+        // paragraphs are refreshed); otherwise (e.g. colours, as syntax highlighting sets) the characters' styles are changed in place, as 
+        // the glyphs' colours and effects are looked up when they are drawn: the text does not change (and is not notified as changed)
+        auto sets_font = [&](style_cookie aCookie)
+        {
+            auto const existingStyle = iStyleMap.find(aCookie);
+            return existingStyle != iStyleMap.end() && (**existingStyle).character().font() != std::nullopt;
+        };
+        bool reinsert = aStyle.character().font() != std::nullopt;
+        for (auto i = aStart; !reinsert && i < aEnd; ++i)
+            reinsert = sets_font(iText[i].style);
+        if (reinsert)
+        {
+            std::u32string part;
+            part.assign(iText.begin() + aStart, iText.begin() + aEnd);
+            delete_text(aStart, aEnd);
+            insert_text(aStart, string{ neolib::utf32_to_utf8(part) }, { aStyle });
+            return;
+        }
+        // (the style's cookie, as inserting text with it would give it (the default style: none, unless it is persisted))
+        style const* newStyle = nullptr;
+        if (&aStyle != &iDefaultStyle || iPersistDefaultStyle)
+        {
+            style key = aStyle;
+            auto existingStyle = iStyles.find(style_ptr{ style_ptr{}, &key });
+            if (existingStyle == iStyles.end())
+                existingStyle = iStyles.insert(std::make_shared<style>(*this, aStyle)).first;
+            if (!(**existingStyle).has_cookie())
+                (**existingStyle).set_cookie(iStyleMap.insert(*existingStyle));
+            newStyle = &**existingStyle;
+        }
+        auto const newCookie = newStyle != nullptr ? newStyle->cookie() : neolib::invalid_cookie<style_cookie>;
+        bool changed = false;
+        for (auto i = aStart; i < aEnd; ++i)
+        {
+            auto& ch = iText[i];
+            if (ch.style == newCookie)
+                continue;
+            // (the new style is referenced before the old one is released: releasing a style's last reference removes it)
+            if (newStyle != nullptr)
+                newStyle->add_ref();
+            auto const existingStyle = iStyleMap.find(ch.style);
+            if (existingStyle != iStyleMap.end())
+                (**existingStyle).release();
+            ch.style = newCookie;
+            changed = true;
+        }
+        if (changed)
+            update();
     }
 
     text_edit::style text_edit::next_style() const

@@ -21,6 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <memory>
+
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/core/vector.hpp>
 #include <neolib/core/set.hpp>
@@ -37,6 +39,8 @@
 
 namespace neogfx::DesignStudio
 {
+    class neos_script_highlighter;
+
     class neos_element_library : public neolib::reference_counted<i_element_library>
     {
         // types
@@ -80,6 +84,7 @@ namespace neogfx::DesignStudio
         neolib::i_application& iApplication;
         std::string iPluginPath;
         ref_ptr<i_console_client_manager> iClientManager;
+        std::unique_ptr<neos_script_highlighter> iScriptHighlighter;
         elements_ordered_t iElementsOrdered;
         elements_t iElements;
         mutable std::map<color, std::map<string, texture>> iIcons;

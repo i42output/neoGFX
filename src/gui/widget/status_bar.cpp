@@ -24,9 +24,28 @@
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/status_bar.hpp>
 #include <neogfx/gui/window/window.hpp>
+#include <neogfx/gui/window/popup_menu.hpp>
 
 namespace neogfx
 {
+    namespace
+    {
+        // (whether the active help is shown by a status bar: help for a widget is shown only by its window's (the window whose menu 
+        // it is in, if it is in a popup menu))
+        bool shows_help(i_widget const& aStatusBar)
+        {
+            if (!service<i_app>().help().help_active())
+                return false;
+            auto const* const widget = service<i_app>().help().active_help().help_widget();
+            if (widget == nullptr)
+                return true;
+            i_window const* window = &widget->root();
+            while (dynamic_cast<popup_menu const*>(window) != nullptr && window->has_parent_window())
+                window = &window->parent_window();
+            return window == &aStatusBar.root();
+        }
+    }
+
     status_bar::separator::separator(i_widget& aStatusBar) :
         widget{}, iStatusBar{ aStatusBar }
     {
@@ -150,12 +169,12 @@ namespace neogfx
 
     bool status_bar::have_message() const
     {
-        return iMessage != std::nullopt || service<i_app>().help().help_active();
+        return iMessage != std::nullopt || shows_help(*this);
     }
 
     i_string const& status_bar::message() const
     {
-        if (service<i_app>().help().help_active())
+        if (shows_help(*this))
             return service<i_app>().help().active_help().help_text();
         else if (iMessage != std::nullopt)
             return *iMessage;
@@ -425,4 +444,4 @@ namespace neogfx
         iKeyboardLockStatus.show((iStyle & style::DisplayKeyboardLocks) == style::DisplayKeyboardLocks);
         iSizeGrip.show((iStyle & style::DisplaySizeGrip) == style::DisplaySizeGrip);
     }
-}
+}

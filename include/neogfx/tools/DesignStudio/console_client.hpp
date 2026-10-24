@@ -29,6 +29,7 @@ namespace neogfx::DesignStudio
     {
     public:
         define_declared_event(Output, output, std::string const&)
+        define_declared_event(Closed, closed)
     };
 
     class console : public console_client

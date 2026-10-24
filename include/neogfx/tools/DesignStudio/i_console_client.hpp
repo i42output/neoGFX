@@ -31,6 +31,7 @@ namespace neogfx::DesignStudio
         typedef i_console_client abstract_type;
     public:
         declare_event(output, std::string const&)
+        declare_event(closed)   ///< (the client's session has ended: the console returns to its own commands)
     public:
         virtual ~i_console_client() = default;
     public:

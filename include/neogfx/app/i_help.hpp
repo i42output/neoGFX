@@ -24,6 +24,8 @@
 
 namespace neogfx
 {
+    class i_widget;
+
     enum class help_type
     {
         Action
@@ -37,6 +39,9 @@ namespace neogfx
         virtual bool help_active() const = 0;
         virtual neogfx::help_type help_type() const = 0;
         virtual i_string const& help_text() const = 0;
+        // (the widget that the help is for (e.g. a menu item), if any: only the status bar of its window (the window whose menu it 
+        // is in, if it is in a popup menu) shows it)
+        virtual i_widget const* help_widget() const = 0;
     };
 
     class i_help
@@ -57,4 +62,4 @@ namespace neogfx
         virtual void activate(const i_help_source& aHelpSource) = 0;
         virtual void deactivate(const i_help_source& aHelpSource) = 0;
     };
-}
+}

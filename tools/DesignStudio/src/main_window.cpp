@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/tools/DesignStudio/context_menu.hpp>
 #include <neogfx/tools/DesignStudio/i_node.hpp>
+#include <neogfx/tools/DesignStudio/i_script_highlighter.hpp>
 #include "main_window.hpp"
 #include "widget_caddy.hpp"
 #include <neogfx/gui/dialog/color_dialog.hpp>
@@ -1588,6 +1589,7 @@ namespace neogfx::DesignStudio
         {
             aApp.actionFileClose.enable(aProjectManager.project_active());
             aApp.actionFileAddNrc.enable(aProjectManager.project_active());
+            aApp.actionFileOpenScript.enable(aProjectManager.project_active());
             aApp.actionFileSave.enable(aProjectManager.project_active() && aProjectManager.active_project().dirty());
             iLeftDock.show(aProjectManager.project_active());
             iRightDock.show(aProjectManager.project_active());
@@ -1714,6 +1716,54 @@ namespace neogfx::DesignStudio
             iTranslationsNeedUpdate = true; // (the added files' translations)
             // elements already shown may use resources from the added files so apply their attributes again
             project.root().visit([](i_element& aElement) { aElement.apply_attributes(show_ids()); });
+        });
+
+        // opening script files into the active project: each in a script editor (a nested window on the workspace), highlighted if 
+        // there is a script highlighter for its language (e.g. the neos element library's)
+        aApp.actionFileOpenScript.triggered([&]()
+        {
+            if (!aProjectManager.project_active())
+                return;
+            // (the files of the languages that can be highlighted (if any), else any)
+            ng::filter_patterns patterns;
+            if (neolib::services::get_service_provider().service_registered(i_script_highlighter::iid()))
+            {
+                neolib::vector<neolib::string> extensions;
+                neolib::services::get_service_provider().service<i_script_highlighter>().extensions(extensions);
+                for (auto const& extension : extensions)
+                    patterns.push_back("*" + extension.to_std_string());
+            }
+            if (patterns.empty())
+                patterns.push_back("*.*");
+            auto files = ng::open_file_dialog(mainWindow, ng::file_dialog_spec{ "Open Script", {}, patterns, "Script Files" }, true);
+            if (!files)
+                return;
+            auto& project = aProjectManager.active_project();
+            ng::point position{ 32.0_dip, 32.0_dip };
+            for (auto const& file : files.value())
+            {
+                try
+                {
+                    auto& element = project.create_element(project.root(), "script"_s, ng::string{ file });
+                    // (as a window dropped on the workspace from the toolbox: its window is made for a scratch parent (whose caddy nest it 
+                    // is added to, which would make it follow the scratch's geometry: gone with it) and then nested (MDI) in the workspace)
+                    auto scratch = ng::make_ref<ng::widget<>>(iWorkspace.view_stack().root().as_widget());
+                    element.create_layout_item(*scratch);
+                    if (element.has_layout_item() && element.layout_item().is_widget())
+                    {
+                        auto script = ng::ref_ptr<ng::i_widget>{ element.layout_item().as_widget() };
+                        iWorkspace.view_stack().add(script);
+                        if (script->is_root() && script->root().is_nested())
+                            ng::service<ng::i_surface_manager>().nest_for(iWorkspace.view_stack(), ng::nest_type::MDI).add(script->root().native_window());
+                        script->move(position);
+                        position += ng::point{ 32.0_dip, 32.0_dip };
+                    }
+                }
+                catch (std::exception const& e)
+                {
+                    ng::service<ng::i_surface_manager>().display_error_message("Open Script"_t, ng::string{ e.what() });
+                }
+            }
         });
 
         aApp.action_file_new().triggered([&]()

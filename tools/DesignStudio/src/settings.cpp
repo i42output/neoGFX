@@ -19,6 +19,7 @@
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gfx/text/i_font_manager.hpp>
 #include <neogfx/tools/DesignStudio/Settings.hpp>
 
 namespace neogfx::DesignStudio
@@ -67,6 +68,19 @@ namespace neogfx::DesignStudio
         register_setting<color>("environment.fonts_and_colors.theme"_s, service<i_app>().current_style().palette().color(color_role::Theme), "Theme color: %?%"_t);
         register_setting<font_info>("environment.fonts_and_colors.workspace_font"_s, service<i_app>().current_style().font_info(), "Workspace font: %?%"_t);
         register_setting<extended_font>("environment.fonts_and_colors.editor_font"_s, extended_font{ service<i_app>().current_style().font_info(), text_format{} }, "Editor font: %?%"_t);
+        // (the coding font (the script editors'): by default a monospaced family that is installed (else the workspace's), the 
+        // workspace's size)
+        auto const default_coding_font = []() -> font_info
+        {
+            auto const& workspaceFont = service<i_app>().current_style().font_info();
+            auto const& fontManager = service<i_font_manager>();
+            for (auto const candidate : { "Consolas", "Cascadia Mono", "DejaVu Sans Mono", "Liberation Mono", "Menlo", "Courier New" })
+                for (std::uint32_t familyIndex = 0; familyIndex < fontManager.font_family_count(); ++familyIndex)
+                    if (fontManager.font_family(familyIndex).to_std_string_view() == candidate)
+                        return font_info{ string{ candidate }, font_style::Normal, workspaceFont.size() };
+            return workspaceFont;
+        };
+        register_setting<font_info>("environment.fonts_and_colors.coding_font"_s, default_coding_font(), "Coding font: %?%"_t);
         register_setting<extended_font>("environment.fonts_and_colors.console_font"_s, extended_font{ service<i_app>().current_style().font_info(), text_format{} }, "Console font: %?%"_t);
         register_setting<bool>("environment.fonts_and_colors.subpixel"_s, false, "Subpixel text rendering: %?%"_t);
         register_setting<workspace_grid>("environment.workspace.grid_type"_s, workspace_grid::Lines, "Grid type: %?%\nGrid size: %environment.workspace.grid_size:?%\nGrid subdivisions: %environment.workspace.grid_subdivisions:?%"_t);

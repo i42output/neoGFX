@@ -86,6 +86,10 @@
 		<target>置于顶层</target>
 	</text>
 	<text>
+		<source>Coding font: %?%</source>
+		<target>代码字体：%?%</target>
+	</text>
+	<text>
 		<source>Console font: %?%</source>
 		<target>控制台字体：%?%</target>
 	</text>
@@ -238,6 +242,14 @@
 		<target>打开项目</target>
 	</text>
 	<text>
+		<source>Open Script</source>
+		<target>打开脚本</target>
+	</text>
+	<text>
+		<source>Open Script...</source>
+		<target>打开脚本...</target>
+	</text>
+	<text>
 		<source>Paragraph...</source>
 		<target>段落...</target>
 	</text>
@@ -284,6 +296,10 @@
 	<text>
 		<source>Save Project</source>
 		<target>保存项目</target>
+	</text>
+	<text>
+		<source>Save Script</source>
+		<target>保存脚本</target>
 	</text>
 	<text>
 		<source>Script</source>

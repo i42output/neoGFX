@@ -73,6 +73,7 @@ namespace neogfx
         bool help_active() const override;
         neogfx::help_type help_type() const override;
         i_string const& help_text() const override;
+        i_widget const* help_widget() const override;
     public:
         point sub_menu_position() const;
     private:
@@ -94,4 +95,4 @@ namespace neogfx
         std::optional<std::unique_ptr<widget_timer>> iSubMenuOpener;
         mutable std::optional<std::pair<color, texture>> iSubMenuArrow;
     };
-}
+}

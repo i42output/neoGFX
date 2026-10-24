@@ -301,6 +301,11 @@ namespace neogfx
             return empty_string;
     }
 
+    i_widget const* menu_item_widget::help_widget() const
+    {
+        return this;
+    }
+
     point menu_item_widget::sub_menu_position() const
     {
         if (menu().type() == menu_type::MenuBar)
@@ -525,4 +530,4 @@ namespace neogfx
         else if (menuToClose->type() == menu_type::Popup && menuToClose->is_open())
             menuToClose->close();
     }
-}
+}

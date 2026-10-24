@@ -186,6 +186,8 @@ namespace neogfx
             {
                 thread_local text_format_spans attributes;
                 attributes.clear();
+                // (a span is of glyphs (their indices in the glyph text), not of characters: a glyph can be of more than one character)
+                std::ptrdiff_t glyphIndex = 0;
                 for (auto& g : *line.glyphs)
                 {
                     auto ink = line.attributes[g.clusters.first].ink;
@@ -220,7 +222,7 @@ namespace neogfx
                             }
                         }
                     }
-                    attributes.add(g.clusters.first, ink, paper, effect);
+                    attributes.add(glyphIndex++, ink, paper, effect);
                 }
                 aGc.draw_glyphs(tl + point{ 0, y }, *line.glyphs, attributes);
             }

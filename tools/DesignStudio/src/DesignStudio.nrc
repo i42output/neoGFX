@@ -23,6 +23,10 @@
                     text: "Add .nrc File to Project..."
                 }
                 action: {
+                    id: actionFileOpenScript
+                    text: "Open Script..."
+                }
+                action: {
                     id: actionShowLayoutIcons
                     text: "Show Layout Icons"
                     checkable: true
@@ -72,6 +76,7 @@
                         action: mainApp.actionFileNew
                         action: mainApp.actionFileOpen
                         action: mainApp.actionFileAddNrc
+                        action: mainApp.actionFileOpenScript
                         action: separator
                         action: mainApp.actionFileClose
                         action: separator

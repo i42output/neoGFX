@@ -125,7 +125,13 @@ namespace neogfx::DesignStudio
                         ref_ptr<i_console_client> newConsole;
                         iClientManager->start_console_client_session()(iTerminal, string{ aCommand }, newConsole);
                         if (newConsole)
+                        {
+                            newConsole->closed([&]()
+                                {
+                                    create_console<>();
+                                });
                             attach_console(newConsole);
+                        }
                     });
 
             return newConsole;

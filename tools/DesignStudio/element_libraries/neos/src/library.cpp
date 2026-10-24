@@ -19,174 +19,528 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 
+#include <memory>
+#include <mutex>
+#include <condition_variable>
+#include <thread>
+#include <streambuf>
+#include <istream>
+#include <ostream>
+#include <optional>
+#include <utility>
+#include <map>
+#include <vector>
+#include <string_view>
+#include <filesystem>
+#include <cctype>
+#include <algorithm>
+
 #include <boost/lexical_cast.hpp>
 
 #include <neolib/core/string_ci.hpp>
+#include <neolib/core/service.hpp>
+#include <neolib/task/timer.hpp>
 
+#include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/utility.hpp>
 #include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
 #include <neogfx/tools/DesignStudio/console_client.hpp>
+#include <neogfx/tools/DesignStudio/i_script_highlighter.hpp>
 #include <neos/context.hpp>
+#include <neos/console.hpp>
+#include <neos/language/schema.hpp>
 #include "library.hpp"
 
 namespace neogfx::DesignStudio
 {
-    class neos_session : public console
+    // a neos session in a console window (the "neos" command): the neos console's commands (see neos::process_command) on a neos
+    // context whose standard streams are the window's (the output of the context and of the programs it runs goes to the window; 
+    // what is typed into the window while a command runs is its programs' input). Commands run on a worker thread (each session 
+    // has its own, and its own context), so the GUI thread never blocks: it only exchanges data with the worker through 
+    // shared_state (under a mutex held only for brief copies) and polls for the worker's output with a timer (as the ssh client).
+    class neos_session : public console_client
     {
-    public:
-        neos_session(neolib::i_service_provider& aServiceProvider) :
-            console{ "neos" },
-            iContext{ cout, aServiceProvider }
-        {
-            command([&](std::string const& aCommand)
-            {
-                process_command(aCommand);
-            });
-        }
     private:
-        bool process_command(std::string const& aCommand)
+        struct shared_state
         {
-            auto output_compilation_time = [&]()
+            // (the context's output and error streams: to the window (output, below), in the order written, from any thread)
+            class output_buffer : public std::streambuf
             {
-                cout << "Compilation time: "s <<
-                    std::chrono::duration_cast<std::chrono::microseconds>(iContext.compiler().end_time() - 
-                        iContext.compiler().start_time()).count() / 1000.0 << "ms" << std::endl;
+            public:
+                output_buffer(shared_state& aShared) : iShared{ aShared } {}
+            protected:
+                int_type overflow(int_type aCharacter) override
+                {
+                    if (!traits_type::eq_int_type(aCharacter, traits_type::eof()))
+                    {
+                        std::lock_guard<std::mutex> lock{ iShared.mutex };
+                        iShared.output.push_back(traits_type::to_char_type(aCharacter));
+                    }
+                    return traits_type::not_eof(aCharacter);
+                }
+                std::streamsize xsputn(char const* aText, std::streamsize aCount) override
+                {
+                    std::lock_guard<std::mutex> lock{ iShared.mutex };
+                    iShared.output.append(aText, static_cast<std::size_t>(aCount));
+                    return aCount;
+                }
+            private:
+                shared_state& iShared;
+            };
+            // (the context's input stream: the lines typed into the window while a command runs (input, below); a read waits for 
+            // one; the end of input (Ctrl+Z or Ctrl+D) is read once)
+            class input_buffer : public std::streambuf
+            {
+            public:
+                input_buffer(shared_state& aShared) : iShared{ aShared } {}
+            public:
+                void reset()
+                {
+                    iBuffer.clear();
+                    setg(nullptr, nullptr, nullptr);
+                }
+            protected:
+                int_type underflow() override
+                {
+                    if (gptr() < egptr())
+                        return traits_type::to_int_type(*gptr());
+                    std::unique_lock<std::mutex> lock{ iShared.mutex };
+                    iShared.wake.wait(lock, [&]() { return !iShared.input.empty() || iShared.endOfInput || iShared.cancelled; });
+                    if (iShared.input.empty())
+                    {
+                        iShared.endOfInput = false;
+                        return traits_type::eof();
+                    }
+                    // (the last character read is kept, so that it can be put back)
+                    bool const kept = eback() != nullptr && gptr() > eback();
+                    char const last = kept ? gptr()[-1] : '\0';
+                    iBuffer.assign(kept ? 1u : 0u, last);
+                    iBuffer += iShared.input;
+                    iShared.input.clear();
+                    setg(iBuffer.data(), iBuffer.data() + (kept ? 1 : 0), iBuffer.data() + iBuffer.size());
+                    return traits_type::to_int_type(*gptr());
+                }
+            private:
+                shared_state& iShared;
+                std::string iBuffer;
             };
 
-            auto previousCurrentPath = std::filesystem::current_path();
-            std::filesystem::current_path(std::filesystem::path{ std::getenv("DevDirNeos") } / "languages");
-            std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> words;
-            const std::string delimeters{ " " };
-            neolib::tokens(aCommand.cbegin(), aCommand.cend(), delimeters.cbegin(), delimeters.cend(), words);
-            if (words.empty())
-                return true;
-            const std::string command{ words[0].first, words[0].second };
-            if (command.empty())
-                return true;
-            std::string parameters{ words.size() > 1 ? words[1].first : aCommand.cend(), aCommand.cend() };
+            std::mutex mutex;
+            std::condition_variable wake;
+            bool cancelled = false;
+            // GUI thread -> worker thread
+            std::optional<std::string> command;
+            std::string input;
+            bool endOfInput = false;
+            // worker thread -> GUI thread
+            std::string output;
+            std::string prompt;
+            bool busy = false;      ///< (a command is running: lines typed are its programs' input)
+            bool closed = false;
+            // (the context's standard streams (destroyed after it))
+            output_buffer outputBuffer{ *this };
+            input_buffer inputBuffer{ *this };
+            std::ostream out{ &outputBuffer };
+            std::istream in{ &inputBuffer };
+            std::optional<neos::context> context;
+        };
+    public:
+        neos_session(neolib::i_service_provider& aServiceProvider) :
+            iShared{ std::make_shared<shared_state>() }
+        {
             try
             {
-                if (iInteractive)
-                    iContext.evaluate(aCommand);
-                else if (command == "?" || command == "h" || command == "help")
+                iShared->in.tie(&iShared->out);
+                iShared->context.emplace(iShared->in, iShared->out, iShared->out, aServiceProvider);
+                // The worker thread is detached and never joined (a program it is running may not end); it owns everything it 
+                // touches (via shared_state) and exits once its command has finished if the session has been closed.
+                std::thread{ [shared = iShared]() { run(shared); } }.detach();
+            }
+            catch (std::exception const& e)
+            {
+                iShared->output = std::string{ "neos: " } + e.what() + "\n";
+                iShared->closed = true;
+            }
+        }
+        ~neos_session()
+        {
+            {
+                std::lock_guard<std::mutex> lock{ iShared->mutex };
+                iShared->cancelled = true;
+            }
+            iShared->wake.notify_all();
+        }
+    public:
+        void start() final
+        {
+            iPoller.emplace(neolib::service<neolib::i_async_task>(), [this](neolib::callback_timer& aTimer)
+            {
+                destroyed_flag destroyed{ *this };
+                poll();
+                if (!destroyed && !iClosed)
+                    aTimer.again();
+            }, std::chrono::milliseconds{ 10 });
+        }
+        void resize_window(std::uint16_t aWidth, std::uint16_t aHeight) final
+        {
+        }
+        void input(std::string const& aText) final
+        {
+            if (iClosed || aText.empty() || aText[0] == '\x1B') // (escape sequences (e.g. the cursor keys) are not edited)
+                return;
+            destroyed_flag destroyed{ *this };
+            std::string echo;
+            for (char ch : aText)
+            {
+                // (the terminal sends "\n" after "\r" for Enter)
+                if (ch == '\n' && iLastInputWasCR)
                 {
-                    cout << "h(elp)\n"
-                        << "s(chema) <path to language schema>       Load language schema\n"
-                        << "l(oad) <path to program>                 Load program\n"
-                        << "list                                     List program\n"
-                        << "c(ompile)                                Compile program\n"
-                        << "r(un)                                    Run program\n"
-                        << "![<expression>]                          Evaluate expression (enter interactive mode if expression omitted)\n"
-                        << ":<input>                                 Input (as stdin)\n"
-                        << "q(uit)                                   Quit neos\n"
-                        << "lc                                       List loaded concept libraries\n"
-                        << "t(race) <0|1|2|3|4|5> [<filter>]         Compiler trace\n"
-                        << "m(etrics)                                Display metrics for running programs\n"
-                        << std::flush;
+                    iLastInputWasCR = false;
+                    continue;
                 }
-                else if (command == "s" || command == "schema")
+                iLastInputWasCR = ch == '\r';
+                bool const repeatedTab = ch == '\t' && iLastInputWasTab;
+                iLastInputWasTab = ch == '\t';
+                if (ch == '\r' || ch == '\n')
                 {
-                    iContext.load_schema(parameters);
-                    cout << "Language: " << iContext.schema().meta().description + "\nVersion: " + iContext.schema().meta().version << std::endl;
-                    if (!iContext.schema().meta().copyright.empty())
-                        cout << iContext.schema().meta().copyright << std::endl;
+                    Output(echo + "\r\n");
+                    echo.clear();
+                    enter(std::exchange(iLine, {}));
                 }
-                else if (command == "l" || command == "load")
+                else if (ch == '\x7F' || ch == '\b')
                 {
-                    iContext.load_program(parameters);
-                    cout << "Program: " << parameters << std::endl;
-                }
-                else if (command == "c" || command == "compile")
-                {
-                    iContext.compile_program();
-                    output_compilation_time();
-                }
-                else if (command == "list")
-                {
-                    for (auto const& tu : iContext.program().translationUnits)
-                        for (auto const& f : tu.fragments)
-                        {
-                            if (f.source_file_path() != std::nullopt)
-                                cout << "File '" << *f.source_file_path() << "':" << std::endl;
-                            cout << f.source() << std::endl;
-                        }
-                }
-                else if (command == "r" || command == "run")
-                    iContext.run();
-                else if (command[0] == '!')
-                {
-                    if (!iContext.schema_loaded())
-                        throw std::runtime_error("no schema loaded");
-                    std::string expression(std::next(words[0].first), aCommand.cend());
-                    if (!expression.empty())
+                    if (!iLine.empty())
                     {
-                        iContext.evaluate(expression);
-                        output_compilation_time();
+                        // (a character: a UTF-8 sequence)
+                        while (iLine.size() > 1u && (static_cast<unsigned char>(iLine.back()) & 0xC0u) == 0x80u)
+                            iLine.pop_back();
+                        iLine.pop_back();
+                        echo += "\b\x1B[K";
                     }
-                    else
-                        iInteractive = true;
                 }
-                else if (command == "lc")
+                else if (ch == '\t')
+                    echo += complete(repeatedTab);
+                else if (ch == '\x03') // (Ctrl+C: the line is discarded (a running program is not interrupted))
                 {
-                    auto print_concept_library = [&](auto const& self, const neos::language::i_concept_library& aConceptLibrary, std::uint32_t aDepth = 0) -> void
+                    iLine.clear();
+                    std::lock_guard<std::mutex> lock{ iShared->mutex };
+                    echo += "^C\r\n" + (iShared->busy ? std::string{} : iShared->prompt);
+                }
+                else if ((ch == '\x04' || ch == '\x1A') && iLine.empty()) // (Ctrl+D or Ctrl+Z: the end of input (no command running: the end of the session))
+                {
+                    Output(echo + "\r\n");
+                    echo.clear();
+                    bool busy = false;
                     {
-                        cout << std::string(aDepth * 2, ' ') << "[" << aConceptLibrary.name() << "]";
-                        if (aDepth == 0)
-                            cout << " (" << aConceptLibrary.uri() << ")";
-                        cout << std::endl;
-                        for (auto const& conceptLibrary : aConceptLibrary.sublibraries())
-                            self(self, *conceptLibrary.second(), aDepth + 1);
-                    };
-                    for (auto const& conceptLibrary : iContext.concept_libraries())
-                        if (conceptLibrary.second()->depth() == 0)
-                            print_concept_library(print_concept_library, *conceptLibrary.second());
+                        std::lock_guard<std::mutex> lock{ iShared->mutex };
+                        busy = iShared->busy;
+                        if (busy)
+                            iShared->endOfInput = true;
+                        else
+                            iShared->cancelled = true;
+                    }
+                    iShared->wake.notify_all();
+                    if (!busy)
+                    {
+                        iClosed = true;
+                        Closed();
+                        return; // *this may no longer exist
+                    }
                 }
-                else if (command == "t" || command == "trace")
+                else if (static_cast<unsigned char>(ch) >= 0x20u)
                 {
-                    if (words.size() >= 2)
-                        iContext.compiler().set_trace(
-                            boost::lexical_cast<std::uint32_t>(std::string{ words[1].first, words[1].second }),
-                            words.size() > 2 ? std::string{ words[2].first, words[2].second } : std::optional<std::string>{});
-                    else
-                        throw std::runtime_error("invalid command argument(s)");
+                    iLine.push_back(ch);
+                    echo.push_back(ch);
                 }
-                else if (command == "m" || command == "metrics")
-                    cout << iContext.metrics();
-                else if (command == "q" || command == "quit")
-                    return false;
-                else if (command == "cls" || command == "clear")
-                    cout << "\x1B[3J";
+            }
+            if (!destroyed && !echo.empty())
+                Output(echo);
+        }
+    private:
+        // GUI thread: a line typed: a command, or the input of the command running
+        void enter(std::string const& aLine)
+        {
+            std::string prompt;
+            {
+                std::lock_guard<std::mutex> lock{ iShared->mutex };
+                if (iShared->busy)
+                    iShared->input += aLine + "\n";
+                else if (!aLine.empty())
+                {
+                    iShared->command = aLine;
+                    iShared->busy = true;
+                }
                 else
-                    throw std::runtime_error("unknown command '" + command + "'");
+                    prompt = iShared->prompt;
             }
-            catch (const neos::context::warning& e)
+            iShared->wake.notify_all();
+            if (!prompt.empty())
+                Output(prompt);
+        }
+        // GUI thread: Tab (no command running): the path being typed (the line's last word, or what follows an unclosed quote) 
+        // completed as far as the names of the files and directories that it may be the start of allow (one name: a directory's is 
+        // followed by a separator, a quoted file's by its closing quote); a beep if there are none (or several and it is already as far as they allow: 
+        // a second Tab lists them); the text to echo
+        std::string complete(bool aList)
+        {
+            std::string prompt;
             {
-                output_compilation_time();
-                cerr << "Warning: " << e.what() << std::endl;
+                std::lock_guard<std::mutex> lock{ iShared->mutex };
+                if (iShared->busy)
+                    return {};
+                prompt = iShared->prompt;
             }
-            catch (const std::exception& e)
+#ifdef _WIN32
+            char const* const separators = "/\\";
+            bool const hidingDotNames = false;
+            auto const same = [](char a, char b) { return std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b)); };
+#else
+            char const* const separators = "/";
+            bool const hidingDotNames = true;
+            auto const same = [](char a, char b) { return a == b; };
+#endif
+            bool const quoted = std::count(iLine.begin(), iLine.end(), '"') % 2 == 1;
+            auto const wordStart = quoted ? iLine.rfind('"') + 1u : iLine.find_last_of(' ') == std::string::npos ? 0u : iLine.find_last_of(' ') + 1u;
+            std::string const word = iLine.substr(wordStart);
+            auto const lastSeparator = word.find_last_of(separators);
+            std::string const directory = lastSeparator == std::string::npos ? std::string{} : word.substr(0u, lastSeparator + 1u);
+            std::string const prefix = word.substr(directory.size());
+            char const separator = lastSeparator != std::string::npos ? word[lastSeparator] : static_cast<char>(std::filesystem::path::preferred_separator);
+            auto const utf8 = [](std::filesystem::path const& aPath) { auto const name = aPath.u8string(); return std::string{ name.begin(), name.end() }; };
+            // (the names that the prefix may be of: those that start with it (not those that start with "." unless it does, except on 
+            // Windows))
+            std::vector<std::pair<std::string, bool>> matches;
+            std::error_code ec;
+            std::filesystem::path const searched = directory.empty() ? std::filesystem::path{ "." } : 
+                std::filesystem::path{ std::u8string{ directory.begin(), directory.end() } };
+            for (std::filesystem::directory_iterator entry{ searched, ec }, end; !ec && entry != end; entry.increment(ec))
             {
-                cerr << "Error: " << e.what() << std::endl;
+                auto const name = utf8(entry->path().filename());
+                if (name.size() >= prefix.size() && std::equal(prefix.begin(), prefix.end(), name.begin(), same) && (!hidingDotNames || name[0] != '.' || (!prefix.empty() && prefix[0] == '.')))
+                {
+                    std::error_code isDirectoryError;
+                    matches.emplace_back(name, entry->is_directory(isDirectoryError));
+                }
+            }
+            if (matches.empty())
+            {
+                service<i_basic_services>().system_beep();
+                return {};
+            }
+            // (as far as the names allow: their common prefix)
+            std::string completion = matches[0].first;
+            for (auto const& match : matches)
+                completion.erase(static_cast<std::size_t>(std::mismatch(completion.begin(), completion.end(), match.first.begin(), match.first.end(), same).first - completion.begin()));
+            if (matches.size() > 1u && completion.size() == prefix.size())
+            {
+                service<i_basic_services>().system_beep();
+                if (!aList)
+                    return {};
+                std::sort(matches.begin(), matches.end());
+                std::string list = "\r\n";
+                for (auto const& match : matches)
+                    list += match.first + (match.second ? std::string(1u, separator) : std::string{}) + "  ";
+                return list + "\r\n" + prompt + iLine;
+            }
+            // (a name with a space in it is quoted)
+            bool const quote = !quoted && completion.find(' ') != std::string::npos;
+            if (matches.size() == 1u)
+                completion += matches[0].second ? std::string(1u, separator) : quoted || quote ? "\"" : "";
+            std::string const completed = (quote ? "\"" : "") + directory + completion;
+            // (the word typed replaced (its case may differ from the name's) unless it is the start of it)
+            std::string echo;
+            if (completed.compare(0u, word.size(), word) == 0)
+                echo = completed.substr(word.size());
+            else
+            {
+                for (char ch : word)
+                    if ((static_cast<unsigned char>(ch) & 0xC0u) != 0x80u)
+                        echo += "\b";
+                echo += "\x1B[K" + completed;
+            }
+            iLine = iLine.substr(0u, wordStart) + completed;
+            return echo;
+        }
+        // GUI thread: collect the worker's output; never waits on the worker
+        void poll()
+        {
+            std::string output;
+            bool closed = false;
+            {
+                std::lock_guard<std::mutex> lock{ iShared->mutex };
+                output.swap(iShared->output);
+                closed = iShared->closed;
+            }
+            if (!output.empty())
+            {
+                // (the terminal's line ending: "\r\n")
+                std::string text;
+                text.reserve(output.size() + output.size() / 8u);
+                for (char ch : output)
+                {
+                    if (ch == '\n' && !iLastOutputWasCR)
+                        text.push_back('\r');
+                    text.push_back(ch);
+                    iLastOutputWasCR = ch == '\r';
+                }
+                destroyed_flag destroyed{ *this };
+                Output(text);
+                if (destroyed)
+                    return;
+            }
+            if (closed)
+            {
+                iClosed = true;
+                Closed();
+                return; // *this may no longer exist
+            }
+        }
+        // the worker thread: the session's commands, until it is closed (the quit command, or the session is cancelled)
+        static void run(std::shared_ptr<shared_state> aShared)
+        {
+            auto& shared = *aShared;
+            auto& context = *shared.context;
+            bool interactive = false;
+            auto end_command = [&](bool aClosed)
+            {
+                shared.out.flush();
+                shared.inputBuffer.reset();
+                shared.in.clear();
+                auto const prompt = aClosed ? std::string{} : neos::console_prompt(context, interactive);
+                std::lock_guard<std::mutex> lock{ shared.mutex };
+                // (input that the command's programs did not read is discarded)
+                shared.input.clear();
+                shared.endOfInput = false;
+                shared.output += prompt;
+                shared.prompt = prompt;
+                shared.busy = false;
+                shared.closed = shared.closed || aClosed;
+            };
+            try
+            {
+                shared.out << "neos " << neos::NEOS_VERSION << std::endl;
+                end_command(false);
+                for (;;)
+                {
+                    std::string command;
+                    {
+                        std::unique_lock<std::mutex> lock{ shared.mutex };
+                        shared.wake.wait(lock, [&]() { return shared.command || shared.cancelled; });
+                        if (shared.cancelled)
+                            return;
+                        command = std::move(*shared.command);
+                        shared.command.reset();
+                    }
+                    bool more = true;
+                    if (!interactive && (command == "cls" || command == "clear"))
+                        shared.out << "\x1B[3J";
+                    else
+                        more = neos::process_command(context, interactive, command, true);
+                    end_command(!more);
+                    if (!more)
+                        return;
+                }
+            }
+            catch (std::exception const& e)
+            {
+                shared.out << "neos: " << e.what() << std::endl;
+                end_command(true);
             }
             catch (...)
             {
-                cerr << "Unknown error" << std::endl;
+                shared.out << "neos: unknown error" << std::endl;
+                end_command(true);
             }
-            output()(boost::replace_all_copy(cout.str(), "\n", "\r\n"));
-            output()(boost::replace_all_copy(cerr.str(), "\n", "\r\n"));
-            cout.str({});
-            cerr.str({});
-            std::filesystem::current_path(previousCurrentPath);
-
-            return true;
         }
     private:
-        std::ostringstream cout;
-        std::ostringstream cerr;
-        neos::context iContext;
-        bool iInteractive;
+        std::shared_ptr<shared_state> iShared;
+        std::optional<neolib::callback_timer> iPoller;
+        std::string iLine;
+        bool iLastInputWasCR = false;
+        bool iLastInputWasTab = false;
+        bool iLastOutputWasCR = false;
+        bool iClosed = false;
+    };
+
+    // the syntax highlighting of scripts (see i_script_highlighter) in the languages that neos has (installed) schemas for (see 
+    // neos::context::highlight). Calls are serialized (the neos context, for its concept libraries, compiler and the schemas' parsers, is 
+    // used by one thread at a time).
+    class neos_script_highlighter : public i_script_highlighter
+    {
+    public:
+        bool can_highlight(neolib::i_string const& aExtension) const final
+        {
+            return schema_path(aExtension.to_std_string()).has_value();
+        }
+        void extensions(neolib::i_vector<neolib::i_string>& aExtensions) const final
+        {
+            aExtensions.clear();
+            for (auto const& schema : neos::language::schema::installed())
+                if (std::find_if(aExtensions.begin(), aExtensions.end(), [&](neolib::i_string const& e) { return e.to_std_string_view() == schema.first; }) == aExtensions.end())
+                    aExtensions.push_back(neolib::string{ schema.first });
+        }
+        void colours(neolib::i_string const& aExtension, neolib::i_string const& aTheme, neolib::i_vector<neolib::i_string>& aColours) const final
+        {
+            aColours.clear();
+            if (auto const path = schema_path(aExtension.to_std_string()))
+                for (auto const& colour : neos::context::highlight_colours(*path, aTheme.to_std_string()))
+                    aColours.push_back(neolib::string{ colour });
+        }
+        bool highlight(neolib::i_string const& aExtension, neolib::i_string const& aScript, neolib::i_vector<span>& aSpans) const final
+        {
+            aSpans.clear();
+            auto const path = schema_path(aExtension.to_std_string());
+            if (!path)
+                return false;
+            std::lock_guard<std::mutex> lock{ iMutex };
+            try
+            {
+                if (!iContext)
+                    iContext.emplace(iInput, iOutput, iOutput, neolib::get_service_provider());
+                std::string_view const source = aScript.to_std_string_view();
+                // (the code point of each byte (spans are of code points, as the text_edit's positions are))
+                std::vector<std::uint32_t> codePoints(source.size() + 1u);
+                std::uint32_t codePoint = 0u;
+                for (std::size_t i = 0u; i < source.size(); ++i)
+                {
+                    if ((static_cast<unsigned char>(source[i]) & 0xC0u) != 0x80u)
+                        codePoints[i] = codePoint++;
+                    else
+                        codePoints[i] = codePoint - 1u;
+                }
+                codePoints[source.size()] = codePoint;
+                // (neos's categories are i_script_highlighter's)
+                static_assert(static_cast<std::uint32_t>(neos::context::highlight_category::Parameter) == static_cast<std::uint32_t>(category::Parameter));
+                for (auto const& s : iContext->highlight(*path, source))
+                    aSpans.push_back(span{ codePoints[s.first], codePoints[s.last], static_cast<category>(s.category) });
+                return true;
+            }
+            catch (...)
+            {
+                aSpans.clear();
+                return false;
+            }
+        }
+    private:
+        // (the installed schema for a file extension: neos's (see neos::home))
+        std::optional<std::string> const& schema_path(std::string const& aExtension) const
+        {
+            std::lock_guard<std::mutex> lock{ iPathMutex };
+            auto existing = iPaths.find(aExtension);
+            if (existing == iPaths.end())
+                existing = iPaths.emplace(aExtension, aExtension.empty() ? std::optional<std::string>{} : neos::language::schema::find(aExtension)).first;
+            return existing->second;
+        }
+    private:
+        mutable std::mutex iMutex;
+        mutable std::mutex iPathMutex;
+        mutable std::map<std::string, std::optional<std::string>> iPaths;
+        // (the context and its standard streams (unused))
+        mutable std::istream iInput{ nullptr };
+        mutable std::ostream iOutput{ nullptr };
+        mutable std::optional<neos::context> iContext;
     };
 
     neos_element_library::neos_element_library(neolib::i_application& aApplication, std::string const& aPluginPath) :
@@ -225,6 +579,13 @@ namespace neogfx::DesignStudio
         iEditScriptingLanguage.set_group(library_id());
 
         iScriptMenu.set_group(library_id());
+
+        // (neos's concept libraries, compiler plugins, runtime plugins and languages: the installed neos's, not this program's folder's)
+        neos::set_home(neos::installed_home());
+
+        // (the syntax highlighting of scripts: a service, for the script editors of other libraries)
+        iScriptHighlighter = std::make_unique<neos_script_highlighter>();
+        neolib::services::register_service<i_script_highlighter>(*iScriptHighlighter);
         iScriptMenu.add_action(iNewScript);
         iScriptMenu.add_action(iSeparator);
         iScriptMenu.add_action(iStartDebugging);
@@ -257,6 +618,7 @@ namespace neogfx::DesignStudio
 
     neos_element_library::~neos_element_library()
     {
+        neolib::services::unregister_service<i_script_highlighter>(*iScriptHighlighter);
     }
 
     neolib::i_application& neos_element_library::application() const
