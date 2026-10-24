@@ -42,7 +42,8 @@ namespace neogfx::DesignStudio
             Constant,
             Type,
             Function,
-            Parameter
+            Parameter,
+            Variable        ///< (a local variable (or one of the script's))
         };
         // (a run of a script's text: its code points [first, last))
         struct span
@@ -62,7 +63,9 @@ namespace neogfx::DesignStudio
             Loop,
             Branch,
             Return,
-            Statement
+            Statement,
+            Alternative,    ///< (of the branch that it is in: e.g. an else, an elif, an except)
+            Jump            ///< (a break, a continue or a throw (a return is Return))
         };
         struct outline_node
         {

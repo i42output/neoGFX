@@ -38,6 +38,9 @@ namespace neogfx::DesignStudio
         virtual void start() = 0;
         virtual void resize_window(std::uint16_t aWidth, std::uint16_t aHeight) = 0;
         virtual void input(std::string const& aText) = 0;
+        // a command executed as if typed at the client's prompt (e.g. by an editor's Run button): false if it cannot be (the client 
+        // has no prompt, or is running a command)
+        virtual bool execute(std::string const& aCommand) = 0;
     };
 
     class i_console_client_manager : public i_reference_counted

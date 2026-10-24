@@ -43,13 +43,15 @@ namespace neogfx::DesignStudio
 {
     // a script's node graph: the outline of its structure (see i_script_highlighter::outline) as nodes, flowing left to right (as Unreal's
     // Blueprints): a statement whose body has statements (a function, a loop, a branch) contains them, its parameters (a function's) before
-    // them; the statements of a body are joined, in order, by its flow (white arrows), and a function's parameters to the statements that
-    // use them (wires in the parameters' colour); nodes are in the colours of their syntax highlighting categories. The graph is zoomed by
+    // them, a branch's alternatives (e.g. its else) below them, each on a lane of its own; the statements of a body are joined, in order, 
+    // by its flow (white arrows), and a function's parameters to the statements that use them (wires in the parameters' colour); nodes 
+    // are in the colours of their syntax highlighting categories. The graph is zoomed by
     // the mouse wheel (initially to fit) and panned by dragging it. A node is dragged (with its contents) to where it is dropped (within its
     // container, which encloses it). It edits the script: a node's code is edited in place (double click or F2; Return accepts, Escape 
     // cancels), a statement is inserted after a node (Insert), a node is deleted (Delete) or duplicated (Ctrl+D), and a statement dragged 
-    // past another statement of the same body is moved before or after it; each edit is of the script's text (see ScriptEdit), whose 
-    // outline the graph then shows.
+    // past another statement of the same body is moved before or after it; a parameter or a variable renamed in it has a button (in 
+    // its node's header) that renames its uses too; each edit is of the script's text (see ScriptEdit), whose outline the graph then shows (the script's 
+    // changes are told it (see script_changed)).
     class script_graph : public widget<>
     {
         typedef widget<> base_type;
@@ -84,6 +86,7 @@ namespace neogfx::DesignStudio
             outline_node outline;
             std::vector<std::uint32_t> parameters;
             std::vector<std::uint32_t> children;            ///< (the statements of its body, in order)
+            std::vector<std::uint32_t> alternatives;        ///< (a branch's alternatives (e.g. its else), in order: each on a lane of its own, below its body)
             std::u32string header;                          ///< (its header's code, on one line)
             std::vector<std::optional<category>> headerCategories;
             std::vector<run> runs;                          ///< (its header's runs, measured when laid out: painting only draws them)
@@ -113,6 +116,15 @@ namespace neogfx::DesignStudio
             point from;
             point offset;
         };
+        // (a parameter or a variable renamed in the graph (a header that starts with its name edited): the uses of its old name, which 
+        // can be renamed too (propagated))
+        struct pending_rename
+        {
+            position_type definition;                       ///< (where it is (as renamed))
+            std::u32string from;
+            std::u32string to;
+            std::vector<position_type> uses;                ///< (where its old name is used (in the script as renamed), in order)
+        };
         struct inline_edit
         {
             std::uint32_t node;
@@ -125,6 +137,8 @@ namespace neogfx::DesignStudio
             set_focus_policy(neogfx::focus_policy::StrongFocus);
             set_size_policy(size_constraint::Expanding);
             set_padding(neogfx::padding{});
+            // (its labels (translated) laid out again in the app's language when it changes)
+            iSink += service<i_app>().language_changed([this]() { refresh_layout(); });
         }
         ~script_graph()
         {
@@ -155,6 +169,8 @@ namespace neogfx::DesignStudio
                 {
                     if (o.kind == outline_kind::Parameter)
                         iNodes[o.parent].parameters.push_back(static_cast<std::uint32_t>(iNodes.size() - 1u));
+                    else if (o.kind == outline_kind::Alternative)
+                        iNodes[o.parent].alternatives.push_back(static_cast<std::uint32_t>(iNodes.size() - 1u));
                     else
                         iNodes[o.parent].children.push_back(static_cast<std::uint32_t>(iNodes.size() - 1u));
                 }
@@ -172,6 +188,23 @@ namespace neogfx::DesignStudio
                 for (std::uint32_t i = 0u; i < iNodes.size(); ++i)
                     if (iNodes[i].outline.first == selected->first && iNodes[i].outline.kind == selected->second)
                         iSelected = i;
+            // (a parameter or a variable renamed in the graph: its node, if it is still where it was, as renamed, and its old name still is 
+            // where it was used (else its uses are no longer known: its rename cannot be propagated))
+            iRenameNode = NoNode;
+            if (iRename)
+            {
+                for (std::uint32_t i = 0u; i < iNodes.size(); ++i)
+                    if (iNodes[i].outline.first == iRename->definition && leading_name(iNodes[i].header) == iRename->to)
+                        iRenameNode = i;
+                bool const valid = iRenameNode != NoNode && std::all_of(iRename->uses.begin(), iRename->uses.end(), [&](position_type aUse)
+                    { return aUse + iRename->from.size() <= iText.size() && iText.compare(aUse, iRename->from.size(), iRename->from) == 0; });
+                if (!valid)
+                {
+                    iRename = std::nullopt;
+                    iRenameNode = NoNode;
+                }
+            }
+            iScriptStale = false;
             iDrag = std::nullopt;
             iLayoutPending = true;
             if (!iUserView)
@@ -206,6 +239,15 @@ namespace neogfx::DesignStudio
             if (!iUserView)
                 iFitPending = true;
             update();
+        }
+        // (the script has changed: its outline (see set_script) is out of date until it is outlined again)
+        void script_changed()
+        {
+            if (!iScriptStale)
+            {
+                iScriptStale = true;
+                update();
+            }
         }
         // (the automatic layout: nodes that have been dragged put back in their places, and zoomed to fit (as when first shown))
         void reset_layout()
@@ -279,7 +321,7 @@ namespace neogfx::DesignStudio
             }
             if (iNodes.empty())
             {
-                auto const message = string{ "The script's structure is shown here once it parses." };
+                string const message = "The script's structure is shown here once it parses."_t;
                 auto const extents = aGc.text_extent(message, font());
                 aGc.draw_text(point{ (cr.cx - extents.cx) / 2.0, (cr.cy - extents.cy) / 2.0 }.floor(), message, font(),
                     text_format{ text_colour().with_alpha(0.6) });
@@ -304,8 +346,14 @@ namespace neogfx::DesignStudio
                 bool const selected = (i == iSelected);
                 aGc.draw_rounded_rect(r, radius,
                     pen{ selected ? accent : accent.with_alpha(0.55), selected ? 2.0 : 1.0, n.outline.kind == outline_kind::Module ? line_style::Dash : line_style::Solid });
+                // (a renamed parameter or variable: its button that propagates its rename to its uses)
+                bool const renamed = (i == iRenameNode && !iScriptStale);
                 if (zoomedFont.height() < MinTextHeight)
+                {
+                    if (renamed)
+                        draw_propagate(aGc, propagate_rect(n), accent);
                     return;
+                }
                 // (its code, in the colours of its syntax highlighting (its runs as measured when laid out))
                 scoped_scissor ss{ aGc, header.deflated(size{ 2.0 }).intersection(cr) };
                 point const textPos{ header.x + padding_x() * iZoom, header.y + (header.cy - zoomedFont.height()) / 2.0 };
@@ -314,6 +362,8 @@ namespace neogfx::DesignStudio
                 if (zoomedLabelFont.height() >= MinTextHeight)
                     aGc.draw_text(point{ header.right() - (padding_x() + n.labelWidth) * iZoom, header.y + (header.cy - zoomedLabelFont.height()) / 2.0 },
                         n.label, zoomedLabelFont, text_format{ text_colour().with_alpha(0.55) });
+                if (renamed)
+                    draw_propagate(aGc, propagate_rect(n), accent);
             };
             // (a node being dragged (and its contents) over the others)
             auto const dragged = iDrag && iDrag->dragging ? iDrag->node : NoNode;
@@ -327,6 +377,14 @@ namespace neogfx::DesignStudio
             auto const flowColour = mix(text_colour(), color::White, 0.5);
             for (auto const& n : iNodes)
             {
+                // (each alternative entered on its own lane (the flow does not pass from the body to it))
+                for (auto const a : n.alternatives)
+                {
+                    auto const& alternative = iNodes[a];
+                    auto const entry = to_screen(point{ alternative.bounds.x - 18.0, flow_y(alternative) });
+                    aGc.fill_circle(entry, 3.0 * iZoom, flowColour);
+                    draw_flow(aGc, entry, to_screen(point{ alternative.bounds.x, flow_y(alternative) }), flowColour);
+                }
                 if (n.children.empty())
                     continue;
                 auto const& first = iNodes[n.children.front()];
@@ -413,6 +471,11 @@ namespace neogfx::DesignStudio
             if (aButton != mouse_button::Left)
                 return;
             set_focus();
+            if (iRenameNode != NoNode && !iScriptStale && propagate_rect(iNodes[iRenameNode]).contains(aPosition))
+            {
+                propagate();
+                return;
+            }
             auto const n = node_at(aPosition);
             if (n != NoNode && n != 0u)
             {
@@ -638,7 +701,7 @@ namespace neogfx::DesignStudio
                     textWidth += aGc.text_extent(r.text, font()).cx;
                     first = last;
                 }
-                n.label = string{ kind_label(n) };
+                n.label = kind_label(n);
                 n.labelWidth = aGc.text_extent(n.label, labelFont).cx;
                 n.headerWidth = textWidth + n.labelWidth + padding * 3.0;
             }
@@ -666,8 +729,19 @@ namespace neogfx::DesignStudio
                     lane.cy = std::max(lane.cy, child.offset.y + child.extents.cy);
                     slotX += child.extents.cx + gap();
                 }
+                // (its alternatives below its body, each on a lane of its own)
+                size content = lane;
+                dimension alternativeY = n.children.empty() ? 0.0 : lane.cy + gap() / 2.0;
+                for (auto a : n.alternatives)
+                {
+                    auto& alternative = iNodes[a];
+                    alternative.offset = moved_offset(alternative, point{ 0.0, alternativeY });
+                    content.cx = std::max(content.cx, alternative.offset.x + alternative.extents.cx);
+                    content.cy = std::max(content.cy, alternativeY + alternative.offset.y + alternative.extents.cy);
+                    alternativeY += alternative.extents.cy + gap() / 2.0;
+                }
                 // (its parameters below its body's statements: their wires pass beneath the statements before the ones that use them)
-                n.parametersTop = n.children.empty() ? 0.0 : lane.cy + gap() / 2.0;
+                n.parametersTop = n.children.empty() && n.alternatives.empty() ? 0.0 : content.cy + gap() / 2.0;
                 size parameters;
                 dimension slotY = n.parametersTop;
                 for (auto p : n.parameters)
@@ -681,11 +755,11 @@ namespace neogfx::DesignStudio
                 n.parametersWidth = parameters.cx;
                 n.laneExtents = lane;
                 n.extents = size{ std::max(n.headerWidth, 80.0), header_height() };
-                if (!n.parameters.empty() || !n.children.empty())
+                if (!n.parameters.empty() || !n.children.empty() || !n.alternatives.empty())
                 {
                     auto const laneStart = padding + (n.parameters.empty() ? 24.0 : parameters.cx + 48.0);
-                    n.extents.cx = std::max(n.extents.cx, laneStart + lane.cx + padding + (n.outline.kind == outline_kind::Loop ? 12.0 : 0.0));
-                    n.extents.cy += padding + std::max(parameters.cy, lane.cy) + padding + (n.outline.kind == outline_kind::Loop ? 10.0 : 0.0);
+                    n.extents.cx = std::max(n.extents.cx, laneStart + content.cx + padding + (n.outline.kind == outline_kind::Loop ? 12.0 : 0.0));
+                    n.extents.cy += padding + std::max(parameters.cy, content.cy) + padding + (n.outline.kind == outline_kind::Loop ? 10.0 : 0.0);
                 }
             }
             // (top down: a node's position is its container's)
@@ -707,6 +781,12 @@ namespace neogfx::DesignStudio
                     p.x += iNodes[i].extents.cx + gap();
                 }
                 n.lane = rect{ point{ laneStart, top }, n.laneExtents };
+                p = point{ laneStart, top + (n.children.empty() ? 0.0 : n.laneExtents.cy + gap() / 2.0) };
+                for (auto i : n.alternatives)
+                {
+                    iNodes[i].bounds = rect{ p + iNodes[i].offset, iNodes[i].extents };
+                    p.y += iNodes[i].extents.cy + gap() / 2.0;
+                }
             }
         }
         // (where a node has been dragged to, from its place (its offset from its container's first): not before its container's first)
@@ -722,7 +802,7 @@ namespace neogfx::DesignStudio
         std::optional<std::size_t> drop_index(std::uint32_t aNode) const
         {
             auto const& n = iNodes[aNode];
-            if (n.outline.kind == outline_kind::Parameter)
+            if (n.outline.kind == outline_kind::Parameter || n.outline.kind == outline_kind::Alternative)
                 return std::nullopt;
             auto const& siblings = iNodes[n.outline.parent].children;
             auto const current = static_cast<std::size_t>(std::find(siblings.begin(), siblings.end(), aNode) - siblings.begin());
@@ -822,7 +902,9 @@ namespace neogfx::DesignStudio
                 return category_colour(category::Parameter);
             case outline_kind::Loop:
             case outline_kind::Branch:
+            case outline_kind::Alternative:
             case outline_kind::Return:
+            case outline_kind::Jump:
                 return category_colour(category::Keyword);
             default:
                 return text_colour();
@@ -834,26 +916,31 @@ namespace neogfx::DesignStudio
                 return mix(background_colour(), text_colour(), 0.02);
             return mix(background_colour(), text_colour(), 0.05);
         }
-        std::string kind_label(node const& aNode) const
+        // (a node's kind, as its label shows it (translated))
+        string kind_label(node const& aNode) const
         {
             switch (aNode.outline.kind)
             {
             case outline_kind::Module:
-                return "module";
+                return "module"_t;
             case outline_kind::Function:
-                return "function";
+                return "function"_t;
             case outline_kind::Class:
-                return "class";
+                return "class"_t;
             case outline_kind::Parameter:
-                return "parameter";
+                return "parameter"_t;
             case outline_kind::Loop:
-                return "loop";
+                return "loop"_t;
             case outline_kind::Branch:
-                return "branch";
+                return "branch"_t;
+            case outline_kind::Alternative:
+                return "alternative"_t;
             case outline_kind::Return:
-                return aNode.header.starts_with(U"return") ? "return" : "jump";
+                return "return"_t;
+            case outline_kind::Jump:
+                return "jump"_t;
             default:
-                return "statement";
+                return "statement"_t;
             }
         }
     private:
@@ -958,12 +1045,13 @@ namespace neogfx::DesignStudio
             editRect.cy = header_height() * iZoom;
             if (aInsert)
                 editRect.y += aNode == 0u ? header_height() * iZoom : editRect.cy + 4.0;
-            editRect.cx = std::max(editRect.cx, 280.0);
+            editRect.cx = std::max(editRect.cx, 280.0 * std::max(iZoom, 1.0));
             auto editor = make_ref<text_edit>(*this, text_edit_caps::SingleLine, frame_style::SolidFrame);
-            editor->set_font(font());
+            // (in the font as zoomed: as the node's text is)
+            editor->set_font(zoomed_font());
             editor->set_focus_policy(editor->focus_policy() | neogfx::focus_policy::ConsumeReturnKey | neogfx::focus_policy::ConsumeEscapeKey);
             editor->move(editRect.top_left());
-            editor->resize(size{ editRect.cx, std::max(editRect.cy, std::ceil(font().height()) + 8.0) });
+            editor->resize(size{ editRect.cx, std::max(editRect.cy, std::ceil(zoomed_font().height()) + 8.0) });
             if (!aInsert)
             {
                 auto end = std::max(n.outline.first, n.outline.headerLast);
@@ -1015,6 +1103,7 @@ namespace neogfx::DesignStudio
             iEditing = std::nullopt;
             iEndEdit = std::nullopt;
             iInlineEditor = nullptr;
+            update(); // (where the editor was)
             set_focus();
             if (!aAccept || editing.node >= iNodes.size())
                 return;
@@ -1025,7 +1114,10 @@ namespace neogfx::DesignStudio
                 while (end > n.outline.first && is_space(iText[end - 1u]))
                     --end;
                 if (text != iText.substr(n.outline.first, end - n.outline.first))
+                {
+                    begin_rename(editing.node, end, text);
                     edit(n.outline.first, end, text);
+                }
                 return;
             }
             if (text.empty())
@@ -1043,6 +1135,83 @@ namespace neogfx::DesignStudio
                     indentation_of(editing.node) + text + U"\n");
             else
                 edit(n.outline.last, n.outline.last, U" " + text);
+        }
+        // (the name that a text starts with)
+        static std::u32string leading_name(std::u32string const& aText)
+        {
+            std::size_t length = 0u;
+            while (length < aText.size() && is_name(aText[length]))
+                ++length;
+            return aText.substr(0u, length);
+        }
+        // (a node's header [its first, aEnd) about to be edited (to aText): if it starts with a parameter's or a variable's name (as 
+        // highlighted) and its name changes, the uses of its old name (the names so highlighted where it is: in its function (a 
+        // parameter's, or a variable's if it is in one), else in the script; as they will be once it is edited) can be renamed too (see 
+        // propagate))
+        void begin_rename(std::uint32_t aNode, position_type aEnd, std::u32string const& aText)
+        {
+            iRename = std::nullopt;
+            iRenameNode = NoNode;
+            auto const& n = iNodes[aNode];
+            if (n.outline.first >= iCategories.size() || 
+                (iCategories[n.outline.first] != category::Parameter && iCategories[n.outline.first] != category::Variable))
+                return;
+            auto const kind = *iCategories[n.outline.first];
+            auto const from = leading_name(iText.substr(n.outline.first, aEnd - n.outline.first));
+            auto const to = leading_name(aText);
+            if (from.empty() || to.empty() || from == to || n.outline.parent == outline_node::NoParent)
+                return;
+            auto const delta = static_cast<std::ptrdiff_t>(aText.size()) - static_cast<std::ptrdiff_t>(aEnd - n.outline.first);
+            auto scope = n.outline.parent;
+            if (kind == category::Variable)
+                while (scope != 0u && iNodes[scope].outline.kind != outline_kind::Function)
+                    scope = iNodes[scope].outline.parent;
+            auto const& within = iNodes[scope];
+            pending_rename rename{ n.outline.first, from, to, {} };
+            for (auto p = within.outline.first; p + from.size() <= std::min<std::size_t>(within.outline.last, iText.size()); ++p)
+                if ((p < n.outline.first || p >= aEnd) && iCategories[p] == kind && iText.compare(p, from.size(), from) == 0 &&
+                    (p == 0u || !is_name(iText[p - 1u])) && (p + from.size() == iText.size() || !is_name(iText[p + from.size()])))
+                    rename.uses.push_back(p >= aEnd ? static_cast<position_type>(static_cast<std::ptrdiff_t>(p) + delta) : p);
+            if (!rename.uses.empty())
+                iRename = rename;
+        }
+        // (a renamed parameter's or variable's uses renamed too (the last first: the positions of those before it are unchanged))
+        void propagate()
+        {
+            if (!iRename || iScriptStale)
+            {
+                service<i_basic_services>().system_beep();
+                return;
+            }
+            auto const rename = *iRename;
+            iRename = std::nullopt;
+            iRenameNode = NoNode;
+            for (auto use = rename.uses.rbegin(); use != rename.uses.rend(); ++use)
+                edit(*use, static_cast<position_type>(*use + rename.from.size()), rename.to);
+            update();
+        }
+        // (where a rename's propagate button is: in its node's header, before its label)
+        rect propagate_rect(node const& aNode) const
+        {
+            auto const r = to_screen(aNode.bounds);
+            auto const headerHeight = header_height() * iZoom;
+            auto const extent = std::max(std::floor(headerHeight * 0.75), 8.0);
+            return rect{ point{ r.right() - (padding_x() * 2.0 + aNode.labelWidth) * iZoom - extent, r.y + (headerHeight - extent) / 2.0 }, 
+                neogfx::size{ extent } };
+        }
+        // (the propagate button: one name fanning out to its uses)
+        void draw_propagate(i_graphics_context& aGc, rect const& aRect, color const& aColour) const
+        {
+            aGc.fill_rounded_rect(aRect, aRect.cx * 0.2, mix(background_colour(), aColour, 0.35));
+            aGc.draw_rounded_rect(aRect, aRect.cx * 0.2, pen{ aColour, 1.0 });
+            point const from{ aRect.x + aRect.cx * 0.28, aRect.center().y };
+            aGc.fill_circle(from, std::max(aRect.cx * 0.1, 1.5), aColour);
+            for (auto const dy : { -0.26, 0.0, 0.26 })
+            {
+                point const to{ aRect.x + aRect.cx * 0.76, aRect.center().y + aRect.cy * dy };
+                aGc.draw_line(from, to, pen{ aColour, std::max(aRect.cx * 0.08, 1.0) });
+                aGc.fill_circle(to, std::max(aRect.cx * 0.07, 1.0), aColour);
+            }
         }
     private:
         std::u32string iText;
@@ -1064,8 +1233,12 @@ namespace neogfx::DesignStudio
         std::optional<drag> iDrag;
         std::optional<pan> iPan;
         std::optional<inline_edit> iEditing;
+        std::optional<pending_rename> iRename;
+        std::uint32_t iRenameNode = NoNode;         ///< (the node whose header was renamed (see pending_rename))
+        bool iScriptStale = false;                  ///< (the script has changed since it was last outlined)
         std::optional<bool> iEndEdit;
         ref_ptr<text_edit> iInlineEditor;
         std::optional<neolib::callback_timer> iEditEnder;
+        sink iSink;
     };
 }

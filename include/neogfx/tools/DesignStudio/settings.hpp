@@ -36,6 +36,7 @@ namespace neogfx::DesignStudio
 
     enum class toolbar_icon_size : std::int32_t
     {
+        Size8x8   = -1,         ///< (the others' values are as they were: the enumerators are listed in the order of their values)
         Size16x16 = 0x00000000,
         Size24x24 = 0x00000001,
         Size32x32 = 0x00000002,
@@ -52,6 +53,7 @@ declare_enum_string(neogfx::DesignStudio::workspace_grid, Points)
 end_declare_enum(neogfx::DesignStudio::workspace_grid)
 
 begin_declare_enum(neogfx::DesignStudio::toolbar_icon_size)
+declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size8x8)
 declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size16x16)
 declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size24x24)
 declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size32x32)

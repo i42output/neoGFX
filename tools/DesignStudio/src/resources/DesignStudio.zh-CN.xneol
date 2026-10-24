@@ -306,6 +306,14 @@
 		<target>将节点图重置为自动布局</target>
 	</text>
 	<text>
+		<source>Run</source>
+		<target>运行</target>
+	</text>
+	<text>
+		<source>Run the script in a neos console</source>
+		<target>在 neos 控制台中运行脚本</target>
+	</text>
+	<text>
 		<source>Save Project</source>
 		<target>保存项目</target>
 	</text>
@@ -406,6 +414,10 @@
 		<target>文本编辑器</target>
 	</text>
 	<text>
+		<source>The script's structure is shown here once it parses.</source>
+		<target>脚本解析后，其结构将显示在此处。</target>
+	</text>
+	<text>
 		<source>Theme color: %?%</source>
 		<target>主题颜色：%?%</target>
 	</text>
@@ -474,6 +486,30 @@
 		<target>缩放以适应</target>
 	</text>
 	<text>
+		<source>alternative</source>
+		<target>备选分支</target>
+	</text>
+	<text>
+		<source>branch</source>
+		<target>分支</target>
+	</text>
+	<text>
+		<source>class</source>
+		<target>类</target>
+	</text>
+	<text>
+		<source>function</source>
+		<target>函数</target>
+	</text>
+	<text>
+		<source>jump</source>
+		<target>跳转</target>
+	</text>
+	<text>
+		<source>loop</source>
+		<target>循环</target>
+	</text>
+	<text>
 		<source>main: terminating with exception: </source>
 		<target>main：因异常而终止：</target>
 	</text>
@@ -482,7 +518,23 @@
 		<target>main：因未知异常而终止</target>
 	</text>
 	<text>
+		<source>module</source>
+		<target>模块</target>
+	</text>
+	<text>
 		<source>neoGFX (Symbianesque)</source>
 		<target>neoGFX（Symbian 风格）</target>
+	</text>
+	<text>
+		<source>parameter</source>
+		<target>参数</target>
+	</text>
+	<text>
+		<source>return</source>
+		<target>返回</target>
+	</text>
+	<text>
+		<source>statement</source>
+		<target>语句</target>
 	</text>
 </xneol>

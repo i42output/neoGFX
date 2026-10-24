@@ -37,6 +37,7 @@
 #include <neolib/task/timer.hpp>
 
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/app/i_resource_manager.hpp>
 #include <neogfx/app/settings.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/window/window.hpp>
@@ -51,6 +52,7 @@
 #include <neogfx/tools/DesignStudio/i_script_highlighter.hpp>
 #include <neogfx/tools/DesignStudio/settings.hpp>
 #include "script_graph.hpp"
+#include "console_widget.hpp"
 
 namespace neogfx::DesignStudio
 {
@@ -78,10 +80,12 @@ namespace neogfx::DesignStudio
     public:
         script_widget(i_element& aElement, i_widget& aParent, window_style aStyle) :
             window{ aParent, window_placement{ rect{ point{}, is_file(aElement.id().to_std_string()) ? size{ 1024.0_dip, 600.0_dip } : size{ 256.0_dip, 160.0_dip } } }, aStyle },
+            iElement{ aElement },
             iToolbar{ client_layout() },
             iSplitter{ client_layout(), splitter_style::Horizontal | splitter_style::DrawGrip },
             iEditor{ iSplitter.layout() },
             iGraph{ iSplitter.layout() },
+            iRun{ "Run"_t, run_image() },
             iShowGraph{ "Node Graph"_t, toolbar_image(sNodeGraphImagePattern) },
             iFitGraph{ "Zoom to Fit"_t, toolbar_image(sZoomToFitImagePattern) },
             iResetGraph{ "Reset Layout"_t, toolbar_image(sResetLayoutImagePattern) }
@@ -134,12 +138,17 @@ namespace neogfx::DesignStudio
             iSplitter.set_size_policy(size_constraint::Expanding); // (a horizontal splitter's height is otherwise its minimum)
             iEditor.set_weight(size{ 2.0, 1.0 });
             iGraph.set_weight(size{ 3.0, 1.0 });
+            iToolbar.add_action(iRun);
+            iToolbar.add_separator();
             iToolbar.add_action(iShowGraph);
             iToolbar.add_action(iFitGraph);
             iToolbar.add_action(iResetGraph);
             iShowGraph.set_checkable(true);
             iShowGraph.set_checked(true);
             iShowGraph.set_tool_tip_text("Show or hide the script's node graph"_t);
+            iRun.set_tool_tip_text("Run the script in a neos console"_t);
+            iRun.set_enabled(false); // (until the script has been checked: it can be run only if it has no syntax errors (see poll_highlighting))
+            iSink += iRun.triggered([this]() { run(); });
             iFitGraph.set_tool_tip_text("Zoom the node graph to fit"_t);
             iResetGraph.set_tool_tip_text("Reset the node graph to its automatic layout"_t);
             iSink += iShowGraph.checked([this]() { iGraph.show(); iFitGraph.enable(); iResetGraph.enable(); });
@@ -191,6 +200,9 @@ namespace neogfx::DesignStudio
             {
                 switch (iconSize.value<toolbar_icon_size>(true))
                 {
+                case toolbar_icon_size::Size8x8:
+                    iToolbar.set_button_image_extents(size{ 8.0_dip, 8.0_dip });
+                    break;
                 case toolbar_icon_size::Size16x16:
                 default:
                     iToolbar.set_button_image_extents(size{ 16.0_dip, 16.0_dip });
@@ -277,12 +289,56 @@ namespace neogfx::DesignStudio
             {
                 ++iVersion;
                 iLastEdit = std::chrono::steady_clock::now();
+                iRun.set_enabled(false); // (until the text as changed has been checked)
+                iGraph.script_changed();
             });
             iHighlightPoller.emplace(neolib::service<neolib::i_async_task>(), [this](neolib::callback_timer& aTimer)
             {
                 poll_highlighting();
                 aTimer.again();
             }, HighlightPoll);
+        }
+        // (the script (saved, if it has changed) run in a neos console: the one that it was last run in, if it is still open (its 
+        // neos session reused if it has one), else a new one (opened in the workspace as a console dropped on it is); a beep if it 
+        // cannot be (e.g. the script is still running))
+        void run()
+        {
+            if (iPath.empty() || !has_parent())
+            {
+                service<i_basic_services>().system_beep();
+                return;
+            }
+            save_file();
+            if (!iConsole)
+                open_console();
+            // (a neos session that only runs programs (only the script's input and output is shown in the console))
+            if (!iConsole || !(iConsole->has_session() ? iConsole->execute("run " + iPath) : iConsole->start_session("neos " + iPath)))
+            {
+                service<i_basic_services>().system_beep();
+                return;
+            }
+            iConsole->activate_console();
+        }
+        // (a console opened in the workspace (its view stack: our parent) beside us, as a window opened in it is (see the main window's 
+        // Open Script))
+        void open_console()
+        {
+            auto& workspace = parent();
+            auto& project = iElement.project();
+            auto& element = project.create_element(project.root(), "console"_s);
+            auto scratch = make_ref<widget<>>(workspace.root().as_widget());
+            element.create_layout_item(*scratch);
+            if (!element.has_layout_item() || !element.layout_item().is_widget())
+                return;
+            auto consoleWindow = ref_ptr<i_widget>{ element.layout_item().as_widget() };
+            workspace.add(consoleWindow);
+            if (consoleWindow->is_root() && consoleWindow->root().is_nested())
+                service<i_surface_manager>().nest_for(workspace, nest_type::MDI).add(consoleWindow->root().native_window());
+            consoleWindow->move(position() + point{ 48.0_dip, 48.0_dip });
+            iConsole = dynamic_cast<console_widget*>(&*consoleWindow);
+            iConsoleSink.clear();
+            if (iConsole)
+                iConsoleSink += iConsole->destroying([this]() { iConsole = nullptr; });
         }
         void update_title()
         {
@@ -324,6 +380,8 @@ namespace neogfx::DesignStudio
                     iHighlightedVersion = iVersion;
                     if (done->spans)
                         apply_highlighting(*done->spans);
+                    // (the script can be run only if it has no syntax errors: if it parses (it has an outline))
+                    iRun.set_enabled(done->outline.has_value());
                     // (the graph shows the last outline (the script may not parse as it is being edited))
                     if (done->outline)
                         iGraph.set_script(neolib::utf8_to_utf32(iEditor.plain_text().to_std_string()), done->spans ? *done->spans : std::vector<span>{}, *done->outline);
@@ -377,7 +435,7 @@ namespace neogfx::DesignStudio
                 iScriptHighlighter->colours(string{ iExtension }, string{ iEditor.default_text_color().light() ? "dark" : "light" }, colours);
                 iCategoryStyles.emplace();
                 std::vector<std::optional<color>> graphColours;
-                for (std::uint32_t c = 0u; c <= static_cast<std::uint32_t>(i_script_highlighter::category::Parameter); ++c)
+                for (std::uint32_t c = 0u; c <= static_cast<std::uint32_t>(i_script_highlighter::category::Variable); ++c)
                 {
                     iCategoryStyles->push_back(c < colours.size() && !colours[c].empty() ? 
                         text_edit::style{ text_edit::character_style{}.set_text_color(color{ colours[c].to_std_string() }) } : iEditor.default_style());
@@ -404,6 +462,21 @@ namespace neogfx::DesignStudio
         {
             return image{ string{ aPattern }, { { "paper", color{} }, { "ink1", service<i_app>().current_style().palette().color(color_role::Text) } } };
         }
+        // (the Run button's image: a light green outlined play triangle, its corners slightly rounded (an SVG, a resource of its own: 
+        // rasterised larger than the largest toolbar icon size, so that it is sharp at any))
+        static image run_image()
+        {
+            static string const sUri{ ":/neogfx/DesignStudio/default_nel/resources/script_run.svg" };
+            static bool const sAdded = (service<i_resource_manager>().add_resource(sUri, sRunImage, std::char_traits<char>::length(sRunImage)), true);
+            (void)sAdded;
+            return image{ sUri };
+        }
+        static constexpr char const* sRunImage
+        {
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"64\" height=\"64\" viewBox=\"0 0 24 24\">"
+            "<path d=\"M6.5 6 Q6.5 4.5 7.82 5.21 L19.18 11.29 Q20.5 12 19.18 12.71 L7.82 18.79 Q6.5 19.5 6.5 18 Z\" fill=\"none\" stroke=\"#94F591\" stroke-width=\"2\" stroke-linejoin=\"round\"/>"
+            "</svg>"
+        };
         static constexpr char const* sNodeGraphImagePattern
         {
             "[16,16]"
@@ -474,10 +547,12 @@ namespace neogfx::DesignStudio
             "0000000000000000"
         };
     private:
+        i_element& iElement;
         neogfx::toolbar iToolbar;
         splitter iSplitter;
         text_edit iEditor;
         script_graph iGraph;
+        neogfx::action iRun;
         neogfx::action iShowGraph;
         neogfx::action iFitGraph;
         neogfx::action iResetGraph;
@@ -497,6 +572,8 @@ namespace neogfx::DesignStudio
         std::thread iHighlighter;
         std::optional<std::vector<text_edit::style>> iCategoryStyles;
         std::optional<neolib::callback_timer> iHighlightPoller;
+        console_widget* iConsole = nullptr;             ///< (the console that the script was last run in (while it is open))
+        sink iConsoleSink;
         sink iSink;
     };
 

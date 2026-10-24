@@ -461,6 +461,9 @@ namespace neogfx::DesignStudio
         {
             switch (toolbarIconSize.value<toolbar_icon_size>(true))
             {
+            case toolbar_icon_size::Size8x8:
+                standardToolbar.set_button_image_extents(ng::size{ 8.0_dip, 8.0_dip });
+                break;
             case toolbar_icon_size::Size16x16:
                 standardToolbar.set_button_image_extents(ng::size{ 16.0_dip, 16.0_dip });
                 break;

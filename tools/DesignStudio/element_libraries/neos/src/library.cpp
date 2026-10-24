@@ -139,6 +139,7 @@ namespace neogfx::DesignStudio
             std::string prompt;
             bool busy = false;      ///< (a command is running: lines typed are its programs' input)
             bool closed = false;
+            bool runOnly = false;   ///< (programs are run (each command is a program's path): only their input and output is shown)
             // (the context's standard streams (destroyed after it))
             output_buffer outputBuffer{ *this };
             input_buffer inputBuffer{ *this };
@@ -147,9 +148,17 @@ namespace neogfx::DesignStudio
             std::optional<neos::context> context;
         };
     public:
-        neos_session(neolib::i_service_provider& aServiceProvider) :
+        // (a program, if any: the session only runs programs (it and those that it is asked to run (see execute)), showing only 
+        // their input and output: it has no prompt, and nothing typed while none is running is a command (the "neos <program>" command))
+        neos_session(neolib::i_service_provider& aServiceProvider, std::string const& aProgram = {}) :
             iShared{ std::make_shared<shared_state>() }
         {
+            if (!aProgram.empty())
+            {
+                iShared->runOnly = true;
+                iShared->command = aProgram;
+                iShared->busy = true;
+            }
             try
             {
                 iShared->in.tie(&iShared->out);
@@ -186,10 +195,47 @@ namespace neogfx::DesignStudio
         void resize_window(std::uint16_t aWidth, std::uint16_t aHeight) final
         {
         }
+        bool execute(std::string const& aCommand) final
+        {
+            if (iClosed)
+                return false;
+            std::string prompt;
+            {
+                std::lock_guard<std::mutex> lock{ iShared->mutex };
+                if (iShared->busy)
+                    return false;
+                if (iShared->runOnly)
+                {
+                    // ("run <program>": the program run (as the session's first was))
+                    if (aCommand.rfind("run ", 0u) != 0u)
+                        return false;
+                    iShared->command = aCommand.substr(4u);
+                    iShared->busy = true;
+                }
+                prompt = iShared->prompt;
+            }
+            if (iShared->runOnly)
+            {
+                iLine.clear();
+                iShared->wake.notify_all();
+                return true;
+            }
+            // (as typed (a line partly typed is discarded))
+            Output((iLine.empty() ? std::string{} : "^C\r\n" + prompt) + aCommand + "\r\n");
+            iLine.clear();
+            enter(aCommand);
+            return true;
+        }
         void input(std::string const& aText) final
         {
             if (iClosed || aText.empty() || aText[0] == '\x1B') // (escape sequences (e.g. the cursor keys) are not edited)
                 return;
+            {
+                // (a session that only runs programs: what is typed while none is running is ignored)
+                std::lock_guard<std::mutex> lock{ iShared->mutex };
+                if (iShared->runOnly && !iShared->busy)
+                    return;
+            }
             destroyed_flag destroyed{ *this };
             std::string echo;
             for (char ch : aText)
@@ -408,7 +454,7 @@ namespace neogfx::DesignStudio
                 shared.out.flush();
                 shared.inputBuffer.reset();
                 shared.in.clear();
-                auto const prompt = aClosed ? std::string{} : neos::console_prompt(context, interactive);
+                auto const prompt = aClosed || shared.runOnly ? std::string{} : neos::console_prompt(context, interactive);
                 std::lock_guard<std::mutex> lock{ shared.mutex };
                 // (input that the command's programs did not read is discarded)
                 shared.input.clear();
@@ -420,8 +466,11 @@ namespace neogfx::DesignStudio
             };
             try
             {
-                shared.out << "neos " << neos::NEOS_VERSION << std::endl;
-                end_command(false);
+                if (!shared.runOnly)
+                {
+                    shared.out << "neos " << neos::NEOS_VERSION << std::endl;
+                    end_command(false);
+                }
                 for (;;)
                 {
                     std::string command;
@@ -434,7 +483,22 @@ namespace neogfx::DesignStudio
                         shared.command.reset();
                     }
                     bool more = true;
-                    if (!interactive && (command == "cls" || command == "clear"))
+                    if (shared.runOnly)
+                    {
+                        // (the program (cleared: only its input and output shown), and its errors)
+                        shared.out << "\x1B[3J" << std::flush;
+                        try
+                        {
+                            context.load_program(command);
+                            context.compile_program();
+                            context.run();
+                        }
+                        catch (std::exception const& e)
+                        {
+                            shared.out << (std::string_view{ e.what() }.find("error:") == std::string_view::npos ? "Error: " : "") << e.what() << std::endl;
+                        }
+                    }
+                    else if (!interactive && (command == "cls" || command == "clear"))
                         shared.out << "\x1B[3J";
                     else
                         more = neos::process_command(context, interactive, command, true);
@@ -502,7 +566,7 @@ namespace neogfx::DesignStudio
                 std::string_view const source = aScript.to_std_string_view();
                 auto const codePoints = code_points(source);
                 // (neos's categories are i_script_highlighter's)
-                static_assert(static_cast<std::uint32_t>(neos::context::highlight_category::Parameter) == static_cast<std::uint32_t>(category::Parameter));
+                static_assert(static_cast<std::uint32_t>(neos::context::highlight_category::Variable) == static_cast<std::uint32_t>(category::Variable));
                 for (auto const& s : iContext->highlight(*path, source))
                     aSpans.push_back(span{ codePoints[s.first], codePoints[s.last], static_cast<category>(s.category) });
                 return true;
@@ -642,7 +706,11 @@ namespace neogfx::DesignStudio
                 {
                     if (bits[0] == "neos")
                     {
-                        aClient = make_ref<neos_session>(neolib::get_service_provider());
+                        // ("neos <program>": a session that only runs programs (see neos_session))
+                        auto const command = aCommand.to_std_string();
+                        auto const program = command.find_first_not_of(' ', command.find("neos") + 4u);
+                        aClient = make_ref<neos_session>(neolib::get_service_provider(), 
+                            program == std::string::npos ? std::string{} : command.substr(program));
                     }
                 }
             });

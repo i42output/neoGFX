@@ -30,6 +30,11 @@ namespace neogfx::DesignStudio
     public:
         define_declared_event(Output, output, std::string const&)
         define_declared_event(Closed, closed)
+    public:
+        bool execute(std::string const& aCommand) override
+        {
+            return false;
+        }
     };
 
     class console : public console_client
@@ -48,6 +53,17 @@ namespace neogfx::DesignStudio
         }
         void resize_window(std::uint16_t aWidth, std::uint16_t aHeight) final
         {
+        }
+        bool execute(std::string const& aCommand) final
+        {
+            // (as typed (a line partly typed is discarded))
+            if (!iBuffer.empty())
+            {
+                iBuffer.clear();
+                output()("\r\n" + iName + ">");
+            }
+            input(aCommand + "\r\n");
+            return true; // *this may no longer exist (the command may have started another client)
         }
         void input(std::string const& aText) final
         {

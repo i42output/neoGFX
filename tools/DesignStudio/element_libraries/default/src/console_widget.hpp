@@ -107,6 +107,39 @@ namespace neogfx::DesignStudio
         {
         }
     public:
+        // (whether a session (e.g. neos's) has been started in it (else its own commands are typed at its prompt))
+        bool has_session() const
+        {
+            return iConsole && dynamic_cast<console const*>(iConsole.ptr()) == nullptr;
+        }
+        // a session started (as if its command (e.g. "neos <program>") had been typed at its prompt, but not echoed): false if no 
+        // client starts one for the command
+        bool start_session(std::string const& aCommand)
+        {
+            ref_ptr<i_console_client> newConsole;
+            iClientManager->start_console_client_session()(iTerminal, string{ aCommand }, newConsole);
+            if (!newConsole)
+                return false;
+            newConsole->closed([&]()
+                {
+                    create_console<>();
+                });
+            attach_console(newConsole);
+            return true;
+        }
+        // (its window activated and its terminal given the focus (e.g. when a script is run in it: its input is typed there))
+        void activate_console()
+        {
+            root().activate();
+            iTerminal.set_focus();
+        }
+        // a command executed as if typed at its prompt (see i_console_client::execute): false if it cannot be
+        bool execute(std::string const& aCommand)
+        {
+            auto client = iConsole; // (the command may start a session: the client replaced (and destroyed))
+            return client && client->execute(aCommand);
+        }
+    public:
         void resized() override
         {
             window::resized();
