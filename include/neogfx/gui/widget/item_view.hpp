@@ -95,6 +95,8 @@ namespace neogfx
         void set_use_ellipsis(bool aUseEllipsis);
         bool extend_row_background() const; ///< Rows' backgrounds extend past the last column to the right of the view (default: off)
         void set_extend_row_background(bool aExtendRowBackground);
+        bool click_edits_read_only_cells() const; ///< Clicking/double-clicking a read-only cell opens a read-only editor (for clipboard copy) (default: off; on for table_view)
+        void set_click_edits_read_only_cells(bool aClickEditsReadOnlyCells);
         bool is_valid(item_presentation_model_index const& aItemIndex) const;
         bool is_visible(item_presentation_model_index const& aItemIndex, bool aPartiallyVisible = false) const;
         bool make_visible(item_presentation_model_index const& aItemIndex);
@@ -205,6 +207,7 @@ namespace neogfx
         bool iReadOnly;
         bool iUseEllipsis = true;
         bool iExtendRowBackground = false;
+        bool iClickEditsReadOnlyCells = false;
         struct elided_cell_text
         {
             dimension availableWidth;

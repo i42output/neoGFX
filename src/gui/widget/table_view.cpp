@@ -33,6 +33,7 @@ namespace neogfx
         iSpacer{ iLayout }
     {
         layout().set_padding(neogfx::padding{});
+        set_click_edits_read_only_cells(true);
         if (aCreateDefaultModels)
         {
             set_selection_model(make_ref<item_selection_model>());
@@ -48,6 +49,7 @@ namespace neogfx
         iSpacer{ iLayout }
     {
         layout().set_padding(neogfx::padding{});
+        set_click_edits_read_only_cells(true);
         if (aCreateDefaultModels)
         {
             set_selection_model(make_ref<item_selection_model>());
@@ -63,6 +65,7 @@ namespace neogfx
         iSpacer{ iLayout }
     {
         layout().set_padding(neogfx::padding{});
+        set_click_edits_read_only_cells(true);
         if (aCreateDefaultModels)
         {
             set_selection_model(make_ref<item_selection_model>());

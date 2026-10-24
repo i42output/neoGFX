@@ -595,7 +595,8 @@ namespace neogfx
                     if (itemWasCurrent && itemIsCurrent)
                         iClickedItem = item;
                     if (aKeyModifier == key_modifier::None && !iClickedCheckBox && itemIsCurrent &&
-                        cell_edit_when_focused(presentation_model(), *item))
+                        cell_edit_when_focused(presentation_model(), *item) &&
+                        (presentation_model().cell_editable(*item) || click_edits_read_only_cells()))
                         edit(*item);
                 }
                 else
@@ -673,7 +674,8 @@ namespace neogfx
                     actioned = true;
                 }
                 bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
-                if (!actioned && itemIsCurrent && aKeyModifier == key_modifier::None)
+                if (!actioned && itemIsCurrent && aKeyModifier == key_modifier::None &&
+                    (presentation_model().cell_editable(*item) || click_edits_read_only_cells()))
                 {
                     if (cell_edit_when_focused(presentation_model(), *item) ||
                         (itemWasCurrent && cell_edit_on_input_event(presentation_model(), *item)))
@@ -698,7 +700,8 @@ namespace neogfx
                 CellClick.trigger(*item);
             bool doCheck = (item == iClickedItem && cell_rect(*item, cell_part::Text).contains(aPosition));
             iClickedItem = std::nullopt;
-            if (doCheck && cell_edit_on_input_event(presentation_model(), *item))
+            if (doCheck && cell_edit_on_input_event(presentation_model(), *item) &&
+                (presentation_model().cell_editable(*item) || click_edits_read_only_cells()))
                 edit(*item);
         }
         if (iClickedCheckBox != std::nullopt)
@@ -1082,7 +1085,8 @@ namespace neogfx
             {
                 if (aPreviousIndex != std::nullopt)
                 {
-                    if (editing() && cell_edit_when_focused(presentation_model(), *aCurrentIndex) && editing() != aCurrentIndex && iSavedModelIndex == std::nullopt)
+                    if (editing() && cell_edit_when_focused(presentation_model(), *aCurrentIndex) && editing() != aCurrentIndex && iSavedModelIndex == std::nullopt &&
+                        (presentation_model().cell_editable(*aCurrentIndex) || click_edits_read_only_cells()))
                         edit(*aCurrentIndex);
                     else if (editing())
                         end_edit(true);
@@ -1145,6 +1149,16 @@ namespace neogfx
             iExtendRowBackground = aExtendRowBackground;
             update();
         }
+    }
+
+    bool item_view::click_edits_read_only_cells() const
+    {
+        return iClickEditsReadOnlyCells;
+    }
+
+    void item_view::set_click_edits_read_only_cells(bool aClickEditsReadOnlyCells)
+    {
+        iClickEditsReadOnlyCells = aClickEditsReadOnlyCells;
     }
 
     void item_view::set_use_ellipsis(bool aUseEllipsis)
