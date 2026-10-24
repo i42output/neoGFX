@@ -55,6 +55,12 @@ namespace neogfx::DesignStudio
         register_friendly_text(toolbarIconSize, "Size32x32"_s, "32dp x 32dp"_s);
         register_friendly_text(toolbarIconSize, "Size48x48"_s, "48dp x 48dp"_s);
         register_friendly_text(toolbarIconSize, "Size64x64"_s, "64dp x 64dp"_s);
+        auto& scriptEditorIconSize = register_setting<toolbar_icon_size>("environment.toolbars.script_editor_icon_size"_s, toolbar_icon_size::Size16x16, "Script editor icon size: %?%"_t);
+        register_friendly_text(scriptEditorIconSize, "Size16x16"_s, "16dp x 16dp"_s);
+        register_friendly_text(scriptEditorIconSize, "Size24x24"_s, "24dp x 24dp"_s);
+        register_friendly_text(scriptEditorIconSize, "Size32x32"_s, "32dp x 32dp"_s);
+        register_friendly_text(scriptEditorIconSize, "Size48x48"_s, "48dp x 48dp"_s);
+        register_friendly_text(scriptEditorIconSize, "Size64x64"_s, "64dp x 64dp"_s);
         register_setting<bool>("environment.windows_and_tabs.autoscale_docks"_s, false, "Autoscale docks: %?%"_t);
         register_setting<ng::size>("environment.windows_and_tabs.workspace_size"_s, {});
         register_setting<ng::point>("environment.windows_and_tabs.workspace_position"_s, {});

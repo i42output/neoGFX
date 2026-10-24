@@ -41,18 +41,24 @@
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
+#include <neogfx/gui/widget/splitter.hpp>
+#include <neogfx/gui/widget/toolbar.hpp>
+#include <neogfx/app/action.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
 #include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
 #include <neogfx/tools/DesignStudio/script.hpp>
 #include <neogfx/tools/DesignStudio/i_script_highlighter.hpp>
+#include <neogfx/tools/DesignStudio/settings.hpp>
+#include "script_graph.hpp"
 
 namespace neogfx::DesignStudio
 {
     // a script's editor; a script file (the element's id is its path) is opened in it and, if there is a script highlighter for its 
-    // language (see i_script_highlighter), syntax highlighted: on a worker thread once typing has paused, the highlighting being applied 
-    // only if the text has not changed since; a script that has changed (its title is marked "*") is saved when the project is (File|Save: 
-    // the project is modified when it is)
+    // language (see i_script_highlighter), syntax highlighted and outlined (its node graph, beside the code (see script_graph), shown or 
+    // hidden by the toolbar's Node Graph button): on a worker thread once typing has paused, the highlighting being applied only if the 
+    // text has not changed since; a script that has changed (its title is marked "*") is saved when the project is (File|Save: the project 
+    // is modified when it is)
     class script_widget : public window
     {
         typedef window base_type;
@@ -61,16 +67,24 @@ namespace neogfx::DesignStudio
         static constexpr std::chrono::milliseconds HighlightDelay{ 400 };
         static constexpr std::chrono::milliseconds HighlightPoll{ 50 };
         using span = i_script_highlighter::span;
-        // (the highlighting that the worker thread has done: of the text's version)
+        using outline_node = i_script_highlighter::outline_node;
+        // (the highlighting (and outlining) that the worker thread has done: of the text's version)
         struct highlighting
         {
             std::uint64_t version = 0u;
-            std::optional<std::vector<span>> spans;  ///< (none: the script could not be highlighted)
+            std::optional<std::vector<span>> spans;             ///< (none: the script could not be highlighted)
+            std::optional<std::vector<outline_node>> outline;   ///< (none: the script could not be outlined (e.g. it does not parse))
         };
     public:
         script_widget(i_element& aElement, i_widget& aParent, window_style aStyle) :
-            window{ aParent, window_placement{ rect{ point{}, is_file(aElement.id().to_std_string()) ? size{ 640.0_dip, 480.0_dip } : size{ 256.0_dip, 160.0_dip } } }, aStyle },
-            iEditor{ client_layout() }
+            window{ aParent, window_placement{ rect{ point{}, is_file(aElement.id().to_std_string()) ? size{ 1024.0_dip, 600.0_dip } : size{ 256.0_dip, 160.0_dip } } }, aStyle },
+            iToolbar{ client_layout() },
+            iSplitter{ client_layout(), splitter_style::Horizontal | splitter_style::DrawGrip },
+            iEditor{ iSplitter.layout() },
+            iGraph{ iSplitter.layout() },
+            iShowGraph{ "Node Graph"_t, toolbar_image(sNodeGraphImagePattern) },
+            iFitGraph{ "Zoom to Fit"_t, toolbar_image(sZoomToFitImagePattern) },
+            iResetGraph{ "Reset Layout"_t, toolbar_image(sResetLayoutImagePattern) }
         {
             set_minimum_size(size{ 256.0_dip, 160.0_dip });
             title_bar().set_icon(aElement.library().element_icon(aElement.type()));
@@ -115,17 +129,96 @@ namespace neogfx::DesignStudio
             };
             iEditor.cursor().PositionChanged(position_changed); 
             iEditor.set_word_wrap(false);
+            // (the code and its node graph, side by side (the code narrower); the graph's node selected as the code's cursor moves, and the 
+            // code of the graph's node selected selected; the graph's edits of the script are the editor's)
+            iSplitter.set_size_policy(size_constraint::Expanding); // (a horizontal splitter's height is otherwise its minimum)
+            iEditor.set_weight(size{ 2.0, 1.0 });
+            iGraph.set_weight(size{ 3.0, 1.0 });
+            iToolbar.add_action(iShowGraph);
+            iToolbar.add_action(iFitGraph);
+            iToolbar.add_action(iResetGraph);
+            iShowGraph.set_checkable(true);
+            iShowGraph.set_checked(true);
+            iShowGraph.set_tool_tip_text("Show or hide the script's node graph"_t);
+            iFitGraph.set_tool_tip_text("Zoom the node graph to fit"_t);
+            iResetGraph.set_tool_tip_text("Reset the node graph to its automatic layout"_t);
+            iSink += iShowGraph.checked([this]() { iGraph.show(); iFitGraph.enable(); iResetGraph.enable(); });
+            iSink += iShowGraph.unchecked([this]() { iGraph.hide(); iFitGraph.disable(); iResetGraph.disable(); });
+            iSink += iFitGraph.triggered([this]() { iGraph.zoom_to_fit(); });
+            iSink += iResetGraph.triggered([this]() { iGraph.reset_layout(); });
+            iSink += iEditor.cursor().PositionChanged([this]()
+            {
+                if (!iSelectingFromGraph)
+                    iGraph.select_at(static_cast<script_graph::position_type>(iEditor.cursor().position()));
+            });
+            iSink += iGraph.NodeSelected([this](script_graph::position_type aFirst, script_graph::position_type aLast)
+            {
+                iSelectingFromGraph = true;
+                iEditor.cursor().set_position(aLast);
+                iEditor.cursor().set_position(aFirst, false);
+                iSelectingFromGraph = false;
+            });
+            iSink += iGraph.ScriptEdit([this](script_graph::position_type aFirst, script_graph::position_type aLast, i_string const& aText)
+            {
+                iEditor.delete_text(aFirst, aLast);
+                if (!aText.empty())
+                    iEditor.insert_text(static_cast<text_edit::position_type>(aFirst), aText);
+            });
             // (the script in the coding font (a setting))
             ref_ptr<i_settings> settings{ aElement.library().application() };
             auto& codingFont = settings->setting("environment.fonts_and_colors.coding_font"_s);
             auto coding_font_changed = [this, &codingFont]()
             {
                 iEditor.set_font(neogfx::font{ codingFont.value<font_info>(true) });
+                iGraph.set_font(neogfx::font{ codingFont.value<font_info>(true) });
+                iGraph.refresh_layout();
             };
             iSink += codingFont.changing(coding_font_changed);
             iSink += codingFont.changed(coding_font_changed);
             coding_font_changed();
+            // (the graph's grid in the workspace's grid colour (a setting))
+            auto& gridColour = settings->setting("environment.workspace.grid_color"_s);
+            auto grid_colour_changed = [this, &gridColour]()
+            {
+                iGraph.set_grid_colour(gridColour.value<neogfx::gradient>(true));
+            };
+            iSink += gridColour.changing(grid_colour_changed);
+            iSink += gridColour.changed(grid_colour_changed);
+            grid_colour_changed();
+            // (the toolbar's icons in the script editors' icon size (a setting))
+            auto& iconSize = settings->setting("environment.toolbars.script_editor_icon_size"_s);
+            auto icon_size_changed = [this, &iconSize]()
+            {
+                switch (iconSize.value<toolbar_icon_size>(true))
+                {
+                case toolbar_icon_size::Size16x16:
+                default:
+                    iToolbar.set_button_image_extents(size{ 16.0_dip, 16.0_dip });
+                    break;
+                case toolbar_icon_size::Size24x24:
+                    iToolbar.set_button_image_extents(size{ 24.0_dip, 24.0_dip });
+                    break;
+                case toolbar_icon_size::Size32x32:
+                    iToolbar.set_button_image_extents(size{ 32.0_dip, 32.0_dip });
+                    break;
+                case toolbar_icon_size::Size48x48:
+                    iToolbar.set_button_image_extents(size{ 48.0_dip, 48.0_dip });
+                    break;
+                case toolbar_icon_size::Size64x64:
+                    iToolbar.set_button_image_extents(size{ 64.0_dip, 64.0_dip });
+                    break;
+                }
+            };
+            iSink += iconSize.changing(icon_size_changed);
+            iSink += iconSize.changed(icon_size_changed);
+            icon_size_changed();
             open_file(aElement.id().to_std_string());
+            if (!iScriptHighlighter)
+            {
+                // (a script that is not highlighted (nor outlined) has no node graph)
+                iToolbar.hide();
+                iGraph.hide();
+            }
             text_changed();
             position_changed();
             if (!iPath.empty())
@@ -231,6 +324,9 @@ namespace neogfx::DesignStudio
                     iHighlightedVersion = iVersion;
                     if (done->spans)
                         apply_highlighting(*done->spans);
+                    // (the graph shows the last outline (the script may not parse as it is being edited))
+                    if (done->outline)
+                        iGraph.set_script(neolib::utf8_to_utf32(iEditor.plain_text().to_std_string()), done->spans ? *done->spans : std::vector<span>{}, *done->outline);
                 }
             }
             if (iHighlighting || iHighlightedVersion == iVersion || std::chrono::steady_clock::now() - iLastEdit < HighlightDelay)
@@ -248,6 +344,9 @@ namespace neogfx::DesignStudio
                         for (auto const& s : spans)
                             result.spans->push_back(s);
                     }
+                    neolib::vector<outline_node> outline;
+                    if (highlighter->outline(string{ extension }, string{ script }, outline))
+                        result.outline.emplace(outline.begin(), outline.end());
                 }
                 catch (...)
                 {
@@ -277,9 +376,17 @@ namespace neogfx::DesignStudio
                 neolib::vector<neolib::string> colours;
                 iScriptHighlighter->colours(string{ iExtension }, string{ iEditor.default_text_color().light() ? "dark" : "light" }, colours);
                 iCategoryStyles.emplace();
+                std::vector<std::optional<color>> graphColours;
                 for (std::uint32_t c = 0u; c <= static_cast<std::uint32_t>(i_script_highlighter::category::Parameter); ++c)
+                {
                     iCategoryStyles->push_back(c < colours.size() && !colours[c].empty() ? 
                         text_edit::style{ text_edit::character_style{}.set_text_color(color{ colours[c].to_std_string() }) } : iEditor.default_style());
+                    graphColours.push_back(c < colours.size() && !colours[c].empty() ? std::optional<color>{ color{ colours[c].to_std_string() } } : std::nullopt);
+                }
+                // (the graph's background the editor's: its paper colour, else its background colour)
+                auto const& paper = iEditor.default_style().character().paper_color();
+                iGraph.set_colours(graphColours, iEditor.default_text_color(), 
+                    std::holds_alternative<color>(paper) ? std::get<color>(paper) : iEditor.background_color());
             }
             for (std::size_t first = 0u; first < length;)
             {
@@ -292,7 +399,89 @@ namespace neogfx::DesignStudio
             }
         }
     private:
+        // (the toolbar's buttons' images: an image of a pattern in the text's colour)
+        static image toolbar_image(char const* aPattern)
+        {
+            return image{ string{ aPattern }, { { "paper", color{} }, { "ink1", service<i_app>().current_style().palette().color(color_role::Text) } } };
+        }
+        static constexpr char const* sNodeGraphImagePattern
+        {
+            "[16,16]"
+            "{0,paper}"
+            "{1,ink1}"
+
+            "0000000000000000"
+            "0111110000000000"
+            "0100010000000000"
+            "0100011111100000"
+            "0100010000100000"
+            "0111110000100000"
+            "0000000000100000"
+            "0000000000100000"
+            "0000000000100000"
+            "0000000001111100"
+            "0000000001000100"
+            "0000000001000100"
+            "0000000001000100"
+            "0000000001111100"
+            "0000000000000000"
+            "0000000000000000"
+        };
+        static constexpr char const* sZoomToFitImagePattern
+        {
+            "[16,16]"
+            "{0,paper}"
+            "{1,ink1}"
+
+            "0000000000000000"
+            "0111100000011110"
+            "0100000000000010"
+            "0100000000000010"
+            "0100000000000010"
+            "0000000000000000"
+            "0000000000000000"
+            "0000000000000000"
+            "0000000000000000"
+            "0000000000000000"
+            "0000000000000000"
+            "0100000000000010"
+            "0100000000000010"
+            "0100000000000010"
+            "0111100000011110"
+            "0000000000000000"
+        };
+        static constexpr char const* sResetLayoutImagePattern
+        {
+            "[16,16]"
+            "{0,paper}"
+            "{1,ink1}"
+
+            "0000000000000000"
+            "0111110001111100"
+            "0100010001000100"
+            "0100010001000100"
+            "0100010001000100"
+            "0111110001111100"
+            "0000000000000000"
+            "0000000000000000"
+            "0000000000000000"
+            "0000000000000000"
+            "0111110001111100"
+            "0100010001000100"
+            "0100010001000100"
+            "0100010001000100"
+            "0111110001111100"
+            "0000000000000000"
+        };
+    private:
+        neogfx::toolbar iToolbar;
+        splitter iSplitter;
         text_edit iEditor;
+        script_graph iGraph;
+        neogfx::action iShowGraph;
+        neogfx::action iFitGraph;
+        neogfx::action iResetGraph;
+        bool iSelectingFromGraph = false;
         ref_ptr<text_widget> iDocInfo;
         ref_ptr<text_widget> iCursorInfo;
         std::string iPath;

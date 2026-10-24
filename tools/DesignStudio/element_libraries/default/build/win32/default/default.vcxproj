@@ -242,6 +242,7 @@
     <ClInclude Include="..\..\..\src\console_widget.hpp" />
     <ClInclude Include="..\..\..\src\library.hpp" />
     <ClInclude Include="..\..\..\src\node_widget.hpp" />
+    <ClInclude Include="..\..\..\src\script_graph.hpp" />
     <ClInclude Include="..\..\..\src\script_widget.hpp" />
     <ClInclude Include="..\..\..\src\ssh.hpp" />
     <ClInclude Include="..\..\..\src\sticky_note.hpp" />
@@ -263,4 +264,4 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-</Project>
+</Project>

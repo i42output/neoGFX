@@ -50,6 +50,9 @@
     <ClInclude Include="..\..\..\src\node_widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\script_graph.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\script_widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -68,4 +71,4 @@
       <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>
-</Project>
+</Project>

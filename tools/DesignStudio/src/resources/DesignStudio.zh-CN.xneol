@@ -226,6 +226,10 @@
 		<target>节点编辑器</target>
 	</text>
 	<text>
+		<source>Node Graph</source>
+		<target>节点图</target>
+	</text>
+	<text>
 		<source>Not a language tag (e.g. &quot;de&quot; or &quot;de-DE&quot;): </source>
 		<target>不是有效的语言标记（例如 &quot;de&quot; 或 &quot;de-DE&quot;）：</target>
 	</text>
@@ -294,6 +298,14 @@
 		<target>属性</target>
 	</text>
 	<text>
+		<source>Reset Layout</source>
+		<target>重置布局</target>
+	</text>
+	<text>
+		<source>Reset the node graph to its automatic layout</source>
+		<target>将节点图重置为自动布局</target>
+	</text>
+	<text>
 		<source>Save Project</source>
 		<target>保存项目</target>
 	</text>
@@ -304,6 +316,10 @@
 	<text>
 		<source>Script</source>
 		<target>脚本</target>
+	</text>
+	<text>
+		<source>Script editor icon size: %?%</source>
+		<target>脚本编辑器图标大小：%?%</target>
 	</text>
 	<text>
 		<source>Scripting</source>
@@ -328,6 +344,10 @@
 	<text>
 		<source>Show layout icons: %?%</source>
 		<target>显示布局图标：%?%</target>
+	</text>
+	<text>
+		<source>Show or hide the script's node graph</source>
+		<target>显示或隐藏脚本的节点图</target>
 	</text>
 	<text>
 		<source>Source</source>
@@ -444,6 +464,14 @@
 	<text>
 		<source>Workspace font: %?%</source>
 		<target>工作区字体：%?%</target>
+	</text>
+	<text>
+		<source>Zoom the node graph to fit</source>
+		<target>缩放节点图以适应窗口</target>
+	</text>
+	<text>
+		<source>Zoom to Fit</source>
+		<target>缩放以适应</target>
 	</text>
 	<text>
 		<source>main: terminating with exception: </source>

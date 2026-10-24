@@ -51,6 +51,28 @@ namespace neogfx::DesignStudio
             std::uint32_t last;
             category kind;
         };
+        // (the outline of a script's structure (see outline): its statements, each in the one whose body it is in (and the parameters of 
+        // its functions))
+        enum class outline_kind : std::uint32_t
+        {
+            Module,
+            Function,
+            Class,
+            Parameter,
+            Loop,
+            Branch,
+            Return,
+            Statement
+        };
+        struct outline_node
+        {
+            static constexpr std::uint32_t NoParent = ~std::uint32_t{};
+            std::uint32_t parent;       ///< (the node that it is in (before it): NoParent for the module)
+            outline_kind kind;
+            std::uint32_t first;        ///< (its text: the script's code points [first, last))
+            std::uint32_t last;
+            std::uint32_t headerLast;   ///< (the end of its header: before its body (if it has one), else last)
+        };
     public:
         virtual ~i_script_highlighter() = default;
     public:
@@ -64,6 +86,9 @@ namespace neogfx::DesignStudio
         // the runs of the script aScript (of a file with the extension aExtension) to highlight; it may take a while so it is called on 
         // a thread other than the GUI's (calls are serialized); false if the script cannot be highlighted (e.g. no schema)
         virtual bool highlight(neolib::i_string const& aExtension, neolib::i_string const& aScript, neolib::i_vector<span>& aSpans) const = 0;
+        // the outline of the script aScript (of a file with the extension aExtension): its nodes, each after the node that it is in (the 
+        // module, the first); called as highlight is; false if the script cannot be outlined (e.g. it does not parse)
+        virtual bool outline(neolib::i_string const& aExtension, neolib::i_string const& aScript, neolib::i_vector<outline_node>& aOutline) const = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x140bbee0, 0xbdef, 0x4232, 0x95d9, { 0xe0, 0xa7, 0x68, 0xdd, 0x83, 0x44 } }; return sIid; }
     };

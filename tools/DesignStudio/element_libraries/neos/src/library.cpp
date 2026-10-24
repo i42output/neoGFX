@@ -500,17 +500,7 @@ namespace neogfx::DesignStudio
                 if (!iContext)
                     iContext.emplace(iInput, iOutput, iOutput, neolib::get_service_provider());
                 std::string_view const source = aScript.to_std_string_view();
-                // (the code point of each byte (spans are of code points, as the text_edit's positions are))
-                std::vector<std::uint32_t> codePoints(source.size() + 1u);
-                std::uint32_t codePoint = 0u;
-                for (std::size_t i = 0u; i < source.size(); ++i)
-                {
-                    if ((static_cast<unsigned char>(source[i]) & 0xC0u) != 0x80u)
-                        codePoints[i] = codePoint++;
-                    else
-                        codePoints[i] = codePoint - 1u;
-                }
-                codePoints[source.size()] = codePoint;
+                auto const codePoints = code_points(source);
                 // (neos's categories are i_script_highlighter's)
                 static_assert(static_cast<std::uint32_t>(neos::context::highlight_category::Parameter) == static_cast<std::uint32_t>(category::Parameter));
                 for (auto const& s : iContext->highlight(*path, source))
@@ -523,7 +513,49 @@ namespace neogfx::DesignStudio
                 return false;
             }
         }
+        bool outline(neolib::i_string const& aExtension, neolib::i_string const& aScript, neolib::i_vector<outline_node>& aOutline) const final
+        {
+            aOutline.clear();
+            auto const path = schema_path(aExtension.to_std_string());
+            if (!path)
+                return false;
+            std::lock_guard<std::mutex> lock{ iMutex };
+            try
+            {
+                if (!iContext)
+                    iContext.emplace(iInput, iOutput, iOutput, neolib::get_service_provider());
+                std::string_view const source = aScript.to_std_string_view();
+                auto const codePoints = code_points(source);
+                // (neos's kinds are i_script_highlighter's)
+                static_assert(static_cast<std::uint32_t>(neos::context::outline_kind::Statement) == static_cast<std::uint32_t>(outline_kind::Statement));
+                static_assert(neos::context::outline_node::NoParent == outline_node::NoParent);
+                auto const at = [&](std::size_t aByte) { return codePoints[std::min(aByte, source.size())]; };
+                for (auto const& n : iContext->outline(*path, source))
+                    aOutline.push_back(outline_node{ n.parent, static_cast<outline_kind>(n.kind), at(n.first), at(n.last), at(n.headerLast) });
+                return !aOutline.empty();
+            }
+            catch (...)
+            {
+                aOutline.clear();
+                return false;
+            }
+        }
     private:
+        // (the code point of each byte of a source (and of its end): spans and outlines are of code points, as the text_edit's positions are)
+        static std::vector<std::uint32_t> code_points(std::string_view aSource)
+        {
+            std::vector<std::uint32_t> result(aSource.size() + 1u);
+            std::uint32_t codePoint = 0u;
+            for (std::size_t i = 0u; i < aSource.size(); ++i)
+            {
+                if ((static_cast<unsigned char>(aSource[i]) & 0xC0u) != 0x80u)
+                    result[i] = codePoint++;
+                else
+                    result[i] = codePoint - 1u;
+            }
+            result[aSource.size()] = codePoint;
+            return result;
+        }
         // (the installed schema for a file extension: neos's (see neos::home))
         std::optional<std::string> const& schema_path(std::string const& aExtension) const
         {

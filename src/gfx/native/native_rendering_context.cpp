@@ -960,10 +960,12 @@ namespace neogfx
         if (aScissorRect)
         {
             auto const& sr = *aScissorRect;
+            // (the pixels wholly within it: its far edges rounded down (rounding its extents up as well as its position could add a 
+            // pixel beyond its far edges (at a fractional scale) that is its parent's, which is not repainted when it is))
             std::int32_t x = static_cast<std::int32_t>(std::ceil(sr.x));
             std::int32_t y = static_cast<std::int32_t>(std::ceil(sr.y));
-            std::int32_t cx = static_cast<std::int32_t>(std::ceil(sr.cx));
-            std::int32_t cy = static_cast<std::int32_t>(std::ceil(sr.cy));
+            std::int32_t cx = std::max(static_cast<std::int32_t>(std::floor(sr.x + sr.cx)) - x, 0);
+            std::int32_t cy = std::max(static_cast<std::int32_t>(std::floor(sr.y + sr.cy)) - y, 0);
             graphics_backend().set_scissor(x, y, cx, cy);
             scissor_on();
         }
