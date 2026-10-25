@@ -128,7 +128,10 @@ void draw_cubic_bezier(inout vec4 color, inout vec4 function1, inout vec4 functi
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
 
     float d0 = bezier_udBezier(function1.xy, function1.zw, function2.xy, function2.zw, fragPos.xy);
-    float a = spot_alpha(1.0 - smoothstep(function3.y == 0.0 ? 0.5 : 0.0, function3.w / 2.0, abs(d0)), function3.y);
+    // (smoothstep's edges must be in order (else its result is undefined: e.g. the whole of the curve's bounding rect drawn): a curve 
+    // thinner than a pixel is drawn a pixel wide, as faint as it is thin)
+    float edge0 = function3.y == 0.0 ? 0.5 : 0.0;
+    float a = spot_alpha(1.0 - smoothstep(edge0, max(function3.w / 2.0, edge0 + 0.5), abs(d0)), function3.y) * min(function3.w, 1.0);
     color = vec4(color.xyz, color.a * a);
 }
 
