@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/scoped.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
 
 namespace neogfx
@@ -403,8 +404,11 @@ namespace neogfx
     }
 
     template <Widget Base>
-    inline scrolling_disposition scrollable_widget<Base>::scrolling_disposition(const i_widget&) const
+    inline scrolling_disposition scrollable_widget<Base>::scrolling_disposition(const i_widget& aChildWidget) const
     {
+        // a maximized or iconized nested window is placed (within our visible area) by its nest so doesn't scroll
+        if (aChildWidget.is_root() && aChildWidget.root().is_nested() && (aChildWidget.root().is_maximized() || aChildWidget.root().is_iconic()))
+            return neogfx::scrolling_disposition::DontScrollChildWidget;
         return neogfx::scrolling_disposition::ScrollChildWidgetVertically | neogfx::scrolling_disposition::ScrollChildWidgetHorizontally;
     }
 

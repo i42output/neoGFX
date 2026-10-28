@@ -83,6 +83,8 @@ namespace neogfx
         i_nest& active_nest() const override;
         void activate_nest(i_nest& aNest) override;
         void deactivate_nest(i_nest& aNest) override;
+        std::size_t nest_count() const override;
+        i_nest& nest_at(std::size_t aIndex) const override;
     public:
         bool is_surface_attached(void* aNativeSurfaceHandle) const override;
         i_surface& attached_surface(void* aNativeSurfaceHandle) override;

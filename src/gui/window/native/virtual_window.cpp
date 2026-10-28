@@ -19,11 +19,13 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neolib/core/scoped.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/window/i_window.hpp>
+#include <neogfx/gui/widget/i_title_bar.hpp>
 #include "../../../gfx/native/native_rendering_context.hpp"
 #include "virtual_window.hpp"
 
@@ -179,7 +181,8 @@ namespace neogfx
 
     bool virtual_window::resizing_or_moving() const
     {
-        return surface_window().as_window().tracking_mouse();
+        // (n.b. includes our own maximizing, iconizing and restoring: window::resized() mustn't re-center the window then)
+        return surface_window().as_window().tracking_mouse() || iSettingGeometry;
     }
 
     bool virtual_window::can_render() const
@@ -298,12 +301,41 @@ namespace neogfx
 
     void virtual_window::iconize()
     {
-        if (iState != window_state::Iconized)
+        // (also called by the nest to re-place an iconized window when the nest's geometry changes)
+        auto& windowNest = service<i_surface_manager>().find_nest(*this);
+        auto const nestRect = windowNest.widget().client_rect(false);
+        i_standard_layout_container const& window = surface_window().as_window();
+        // (the title bar itself rather than its layout: it is hidden while merged into its host's menu bar (see normal_title_bar))
+        auto const titleBarHeight = window.has_layout(standard_layout::TitleBar) ? window.title_bar().minimum_size().cy : 0.0;
+        auto const borderThickness = border_thickness();
+        size const iconicExtents{ titleBarHeight * 8.0 + borderThickness.left + borderThickness.right, titleBarHeight + borderThickness.top + borderThickness.bottom };
+        std::size_t const columns = iconicExtents.cx > 0.0 ? std::max<std::size_t>(1u, static_cast<std::size_t>(nestRect.cx / iconicExtents.cx)) : 1u;
+        auto slot_position = [&](std::size_t aSlot)
         {
-            attachment().invalidate(rect{ surface_position(), surface_extents() });
-            iState = window_state::Iconized;
-            attachment().invalidate(rect{ surface_position(), surface_extents() });
+            return point{ nestRect.x + (aSlot % columns) * iconicExtents.cx, nestRect.bottom() - (aSlot / columns + 1) * iconicExtents.cy };
+        };
+        if (!iIconSlot)
+        {
+            // as with classic MDI, iconized windows are placed along the bottom of the nest, in the first free slot
+            for (iIconSlot = 0u;; ++*iIconSlot)
+            {
+                bool taken = false;
+                for (std::size_t i = 0; i < windowNest.nested_window_count() && !taken; ++i)
+                {
+                    auto const& other = windowNest.nested_window(i);
+                    taken = (&other != this && other.is_iconic() && other.surface_window().as_widget().position() == slot_position(*iIconSlot));
+                }
+                if (!taken)
+                    break;
+            }
         }
+        bool const changed = (iState != window_state::Iconized);
+        if (iState == window_state::Normal)
+            iNormalGeometry = rect{ iPosition, iExtents };
+        iState = window_state::Iconized;
+        set_geometry(rect{ slot_position(*iIconSlot), iconicExtents });
+        if (changed)
+            handle_event(window_event{ window_event_type::Iconized });
     }
 
     bool virtual_window::is_maximized() const
@@ -313,12 +345,15 @@ namespace neogfx
 
     void virtual_window::maximize()
     {
-        if (iState != window_state::Maximized)
-        {
-            attachment().invalidate(rect{ surface_position(), surface_extents() });
-            iState = window_state::Maximized;
-            attachment().invalidate(rect{ surface_position(), surface_extents() });
-        }
+        // (also called by the nest to refit a maximized window when the nest's geometry changes)
+        bool const changed = (iState != window_state::Maximized);
+        if (iState == window_state::Normal)
+            iNormalGeometry = rect{ iPosition, iExtents };
+        iState = window_state::Maximized;
+        iIconSlot = std::nullopt;
+        set_geometry(service<i_surface_manager>().find_nest(*this).widget().client_rect(false));
+        if (changed)
+            handle_event(window_event{ window_event_type::Maximized });
     }
 
     bool virtual_window::is_restored() const
@@ -328,12 +363,19 @@ namespace neogfx
 
     void virtual_window::restore()
     {
-        if (iState != window_state::Normal)
+        if (iState == window_state::Normal)
+            return;
+        iState = window_state::Normal;
+        iIconSlot = std::nullopt;
+        if (iNormalGeometry)
         {
-            attachment().invalidate(rect{ surface_position(), surface_extents() });
-            iState = window_state::Normal;
-            attachment().invalidate(rect{ surface_position(), surface_extents() });
+            auto const normalGeometry = *iNormalGeometry;
+            iNormalGeometry = std::nullopt;
+            set_geometry(normalGeometry);
         }
+        // (n.b. state change events are handled synchronously so that, e.g., when activating another window in an MDI nest 
+        // moves the maximized state to it, the previously maximized window's title bar is unmerged before the other's is merged)
+        handle_event(window_event{ window_event_type::Restored });
     }
 
     bool virtual_window::is_fullscreen() const
@@ -437,6 +479,19 @@ namespace neogfx
     i_widget& virtual_window::as_widget()
     {
         return iSurfaceWindow.as_widget();
+    }
+
+    void virtual_window::set_geometry(rect const& aGeometry)
+    {
+        // (the window's widget's position and extents are the surface's (see widget<>::moved() and widget<>::resized()))
+        // (not re-entered: e.g. our resizing causes the nest to lay out which refits us; or a window resizing itself when resized)
+        if (iSettingGeometry)
+            return;
+        neolib::scoped_flag sf{ iSettingGeometry };
+        attachment().invalidate(rect{ surface_position(), surface_extents() });
+        as_widget().move(aGeometry.top_left());
+        as_widget().resize(aGeometry.extents());
+        attachment().invalidate(rect{ surface_position(), surface_extents() });
     }
 
     void virtual_window::debug_message(std::string const& aMessage)

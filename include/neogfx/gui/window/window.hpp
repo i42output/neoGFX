@@ -122,6 +122,7 @@ namespace neogfx
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
     public:
+        neogfx::widget_type widget_type() const override;
         layer_t layer() const override;
     public:
         widget_part hit_test(const point& aPosition) const override;

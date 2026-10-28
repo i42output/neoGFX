@@ -44,5 +44,7 @@ namespace neogfx
         virtual bool has(i_native_window const& aNestedWindow) const = 0;
         virtual void add(i_native_window& aNestedWindow) = 0;
         virtual void remove(i_native_window& aNestedWindow) = 0;
+        virtual std::size_t nested_window_count() const = 0;
+        virtual i_native_window& nested_window(std::size_t aIndex) const = 0;
     };
 }

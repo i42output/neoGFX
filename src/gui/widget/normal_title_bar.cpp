@@ -25,6 +25,111 @@
 
 namespace neogfx
 {
+    namespace
+    {
+        // the window a maximized nested window's title bar is merged into (see normal_title_bar::merged_title_bar), and its menu bar: 
+        // the window hosting the nested window's MDI nest provided it is the only MDI nest (with windows) the window hosts and the 
+        // window has a (visible) menu bar
+        i_window* mdi_merge_host(i_window& aNestedWindow, i_widget*& aMenuBar)
+        {
+            auto& surfaceManager = service<i_surface_manager>();
+            auto& windowNest = surfaceManager.find_nest(aNestedWindow.native_window());
+            if (windowNest.type() != nest_type::MDI || !aNestedWindow.has_parent_window() || !windowNest.widget().has_root())
+                return nullptr;
+            auto& host = aNestedWindow.parent_window();
+            if (&windowNest.widget().root() != &host)
+                return nullptr;
+            for (std::size_t n = 0; n < surfaceManager.nest_count(); ++n)
+            {
+                auto const& otherNest = surfaceManager.nest_at(n);
+                if (&otherNest != &windowNest && otherNest.type() == nest_type::MDI && otherNest.nested_window_count() > 0 &&
+                    otherNest.widget().has_root() && &otherNest.widget().root() == &host)
+                    return nullptr;
+            }
+            i_standard_layout_container& hostContainer = host;
+            if (!hostContainer.has_layout(standard_layout::Menu))
+                return nullptr;
+            auto& menuLayout = hostContainer.menu_layout();
+            for (layout_item_index i = 0; i < menuLayout.count(); ++i)
+                if (menuLayout.is_widget_at(i) && menuLayout.get_widget_at(i).object_type() == object_type::MenuBar && menuLayout.get_widget_at(i).visible())
+                {
+                    aMenuBar = &menuLayout.get_widget_at(i);
+                    return &host;
+                }
+            return nullptr;
+        }
+    }
+
+    normal_title_bar::merged_title_bar::merged_title_bar(i_window& aHost, i_widget& aMenuBar, i_texture const& aIcon, i_string const& aTitle) :
+        host{ aHost },
+        menuBar{ aMenuBar },
+        hostDestroyed{ aHost },
+        menuBarDestroyed{ aMenuBar },
+        originalMenuBarLayoutPadding{ aMenuBar.layout().has_padding() ? optional_padding{ aMenuBar.layout().padding() } : optional_padding{} },
+        menuBarLayoutPadding{ aMenuBar.layout().padding() },
+        originalMenuBarSizePolicy{ aMenuBar.has_size_policy() ? optional_size_policy{ aMenuBar.size_policy() } : optional_size_policy{} },
+        hostTitle{ aHost.title_text() },
+        icon{ aMenuBar, aIcon },
+        spacer{ aMenuBar.layout() },
+        minimizeButton{ aMenuBar.layout(), push_button_style::TitleBar },
+        restoreButton{ aMenuBar.layout(), push_button_style::TitleBar },
+        closeButton{ aMenuBar.layout(), push_button_style::TitleBar }
+    {
+        // the buttons go at the end of the menu bar's row, not just after its items
+        menuBar.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, menuBar.size_policy().vertical_constraint() });
+        set_title(aTitle);
+        sinks += menuBar.size_changed([this]() { update_geometry(); });
+        update_geometry();
+    }
+
+    normal_title_bar::merged_title_bar::~merged_title_bar()
+    {
+        if (!menuBarDestroyed)
+        {
+            menuBar.layout().set_padding(originalMenuBarLayoutPadding);
+            menuBar.set_size_policy(originalMenuBarSizePolicy);
+        }
+        // (the host's title is left alone if its owner has changed it since)
+        if (!hostDestroyed && host.title_text().to_std_string_view() == mergedTitle.to_std_string_view())
+            host.set_title_text(hostTitle);
+    }
+
+    void normal_title_bar::merged_title_bar::set_title(i_string const& aTitle)
+    {
+        if (hostDestroyed)
+            return;
+        if (!mergedTitle.to_std_string_view().empty() && host.title_text().to_std_string_view() != mergedTitle.to_std_string_view())
+            hostTitle = string{ host.title_text() }; // (its owner has changed the host's title since merging)
+        if (aTitle.to_std_string_view().empty())
+            mergedTitle = hostTitle;
+        else
+            mergedTitle = string{ hostTitle.to_std_string() + " - [" + aTitle.to_std_string() + "]" };
+        host.set_title_text(mergedTitle);
+    }
+
+    void normal_title_bar::merged_title_bar::update_geometry()
+    {
+        if (menuBarDestroyed)
+            return;
+        auto const menuBarRect = menuBar.client_rect(false);
+        auto const height = menuBarRect.cy;
+        if (height <= 0.0)
+            return;
+        size const buttonExtents{ std::ceil(height * 4.0 / 3.0), height };
+        minimizeButton.set_fixed_size(buttonExtents);
+        restoreButton.set_fixed_size(buttonExtents);
+        closeButton.set_fixed_size(buttonExtents);
+        icon.move(menuBarRect.top_left());
+        icon.resize(size{ height, height });
+        // the menu bar's items are kept clear of the icon (which isn't in the menu bar's layout as the layout's items are 
+        // indexed by menu item)
+        neogfx::padding const mergedPadding{ 
+            menuBarLayoutPadding.left + std::ceil(height * 1.25), menuBarLayoutPadding.top, 
+            menuBarLayoutPadding.right, menuBarLayoutPadding.bottom };
+        if (menuBar.layout().padding() != mergedPadding)
+            menuBar.layout().set_padding(mergedPadding);
+    }
+
     normal_title_bar::normal_title_bar(i_standard_layout_container& aContainer, std::string const& aTitle) :
         widget{ aContainer.title_bar_layout() },
         iOuterLayout{ *this },
@@ -86,6 +191,8 @@ namespace neogfx
     void normal_title_bar::set_title(i_string const& aTitle)
     {
         iTitle.set_text(aTitle);
+        if (iMerged)
+            iMerged->set_title(aTitle);
     }
 
     const image_widget& normal_title_bar::icon_widget() const
@@ -161,6 +268,30 @@ namespace neogfx
         title_widget().set_alignment(alignment::Left | alignment::VCenter);
         title_widget().set_font_role(neogfx::font_role::Caption);
 
+        // a top-level window's title bar buttons are handled by the native window's non-client hit testing; a nested 
+        // window has no native non-client area so its title bar buttons are ordinary button clicks
+        auto nested = [this]() { return root().has_native_window() && root().native_window().is_nested(); };
+        iMinimizeButton.clicked([this, nested]()
+        {
+            if (nested())
+                root().iconize();
+        });
+        iMaximizeButton.clicked([this, nested]()
+        {
+            if (nested())
+                root().maximize();
+        });
+        iRestoreButton.clicked([this, nested]()
+        {
+            if (nested())
+                root().restore();
+        });
+        iCloseButton.clicked([this, nested]()
+        {
+            if (nested() && root().can_close())
+                root().close();
+        });
+
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect) 
         { 
             if ((aAspect & style_aspect::Color) == style_aspect::Color) 
@@ -229,6 +360,7 @@ namespace neogfx
             case window_event_type::Maximized:
             case window_event_type::Restored:
                 update_widgets(true);
+                update_merge();
                 break;
             default:
                 break;
@@ -463,6 +595,12 @@ namespace neogfx
         iMaximizeButton.set_image(iTextures[TextureMaximize]->second);
         iRestoreButton.set_image(iTextures[TextureRestore]->second);
         iCloseButton.set_image(iTextures[TextureClose]->second);
+        if (iMerged)
+        {
+            iMerged->minimizeButton.set_image(iTextures[TextureMinimize]->second);
+            iMerged->restoreButton.set_image(iTextures[TextureRestore]->second);
+            iMerged->closeButton.set_image(iTextures[TextureClose]->second);
+        }
         if (dpi_scale_factor() >= 1.5)
         {
             scoped_units su{ *this, units::Pixels };
@@ -472,6 +610,56 @@ namespace neogfx
             iMaximizeButton.image_widget().set_minimum_size(idealSize);
             iRestoreButton.image_widget().set_minimum_size(idealSize);
             iCloseButton.image_widget().set_minimum_size(idealSize);
+            if (iMerged)
+            {
+                iMerged->minimizeButton.image_widget().set_minimum_size(idealSize);
+                iMerged->restoreButton.image_widget().set_minimum_size(idealSize);
+                iMerged->closeButton.image_widget().set_minimum_size(idealSize);
+            }
         }
+        if (iMerged)
+            iMerged->update_geometry();
+    }
+
+    void normal_title_bar::update_merge()
+    {
+        i_window* host = nullptr;
+        i_widget* menuBar = nullptr;
+        if (root().has_native_window() && root().native_window().is_nested() && root().is_maximized())
+            host = mdi_merge_host(root(), menuBar);
+        if (iMerged && (host == nullptr || &iMerged->host != host || &iMerged->menuBar != menuBar))
+        {
+            iMerged.reset();
+            show();
+        }
+        if (host == nullptr || iMerged)
+            return;
+        iMerged = std::make_unique<merged_title_bar>(*host, *menuBar, icon_widget().image(), title());
+        iMerged->minimizeButton.show((root().style() & window_style::MinimizeBox) == window_style::MinimizeBox);
+        iMerged->closeButton.show((root().style() & window_style::Close) != window_style::Invalid);
+        iMerged->closeButton.enable(root().can_close());
+        // (unmerging first, so the window's own title bar is back when its geometry is changed, destroys the button that was clicked)
+        iMerged->minimizeButton.clicked([this]()
+        {
+            auto& self = *this;
+            self.iMerged.reset();
+            self.show();
+            self.root().iconize();
+        });
+        iMerged->restoreButton.clicked([this]()
+        {
+            auto& self = *this;
+            self.iMerged.reset();
+            self.show();
+            self.root().restore();
+        });
+        iMerged->closeButton.clicked([this]()
+        {
+            if (root().can_close())
+                root().close();
+        });
+        iMerged->update_geometry();
+        update_textures();
+        hide();
     }
 }

@@ -54,12 +54,13 @@ namespace neogfx
 
     bool nest::has(i_native_window const& aNestedWindow) const
     {
-        return iNestedWindows.find(&aNestedWindow) != iNestedWindows.end();
+        return std::find(iNestedWindows.begin(), iNestedWindows.end(), &aNestedWindow) != iNestedWindows.end();
     }
 
     void nest::add(i_native_window& aNestedWindow)
     {
-        iNestedWindows.insert(&aNestedWindow);
+        if (!has(aNestedWindow))
+            iNestedWindows.push_back(&aNestedWindow);
         widget().bring_child_to_front(aNestedWindow.surface_window().as_widget());
         iSink += aNestedWindow.destroyed([&]()
         {
@@ -69,6 +70,34 @@ namespace neogfx
         {
             widget().bring_child_to_front(aNestedWindow.surface_window().as_widget());
         });
+        if (type() == nest_type::MDI)
+        {
+            iSink += aNestedWindow.surface_window().as_window().activated([&]()
+            {
+                // as with classic MDI at most one window is maximized: activating another window maximizes it in its place
+                for (auto other : iNestedWindows)
+                    if (other != &aNestedWindow && other->is_maximized())
+                    {
+                        other->restore();
+                        aNestedWindow.maximize();
+                        break;
+                    }
+            });
+            auto refit = [&]()
+            {
+                // (n.b. this sink outlives the nested window)
+                if (!has(aNestedWindow))
+                    return;
+                if (aNestedWindow.is_maximized())
+                    aNestedWindow.maximize();
+                else if (aNestedWindow.is_iconic())
+                    aNestedWindow.iconize();
+            };
+            iSink += widget().position_changed(refit);
+            iSink += widget().size_changed(refit);
+            // (the nest's client area can change without it being resized, e.g. a scrollbar appearing)
+            iSink += widget().layout_completed(refit);
+        }
         if (type() == nest_type::Caddy)
         {
             iSink += widget().position_changed([&]()
@@ -89,6 +118,16 @@ namespace neogfx
 
     void nest::remove(i_native_window& aNestedWindow)
     {
-        iNestedWindows.erase(&aNestedWindow);
+        std::erase(iNestedWindows, &aNestedWindow);
+    }
+
+    std::size_t nest::nested_window_count() const
+    {
+        return iNestedWindows.size();
+    }
+
+    i_native_window& nest::nested_window(std::size_t aIndex) const
+    {
+        return *iNestedWindows.at(aIndex);
     }
 }

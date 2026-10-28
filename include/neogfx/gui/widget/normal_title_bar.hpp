@@ -57,6 +57,33 @@ namespace neogfx
                 return false;
             };
         };
+        // a maximized nested window's title bar merged into the menu bar of the window hosting its nest, as with classic MDI 
+        // (its icon at the start of the menu bar, its buttons at the end (after the menu bar's items in its layout, pushed to 
+        // the end by a spacer) and its title appended to the host's)
+        struct merged_title_bar
+        {
+            i_window& host;
+            i_widget& menuBar;
+            destroyed_flag hostDestroyed;
+            destroyed_flag menuBarDestroyed;
+            optional_padding originalMenuBarLayoutPadding;
+            neogfx::padding menuBarLayoutPadding;
+            optional_size_policy originalMenuBarSizePolicy;
+            string hostTitle;
+            string mergedTitle;
+            image_widget icon;
+            horizontal_spacer spacer;
+            push_button minimizeButton;
+            push_button restoreButton;
+            push_button closeButton;
+            sink sinks;
+
+            merged_title_bar(i_window& aHost, i_widget& aMenuBar, i_texture const& aIcon, i_string const& aTitle);
+            ~merged_title_bar();
+
+            void set_title(i_string const& aTitle);
+            void update_geometry();
+        };
     private:
         enum texture_index_e
         {
@@ -88,6 +115,7 @@ namespace neogfx
     private:
         void init();
         void update_textures();
+        void update_merge();
     private:
         horizontal_layout iOuterLayout;
         horizontal_layout iInnerLayout;
@@ -101,6 +129,7 @@ namespace neogfx
         non_client_item<push_button, widget_part::CloseButton> iCloseButton;
         sink iSink;
         mutable std::optional<std::pair<color, texture>> iTextures[4];
+        std::unique_ptr<merged_title_bar> iMerged;
     };
 
     template <>

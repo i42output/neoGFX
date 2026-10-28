@@ -195,6 +195,18 @@ namespace neogfx
         iActiveNest.pop_back();
     }
 
+    std::size_t surface_manager::nest_count() const
+    {
+        return iNests.size();
+    }
+
+    i_nest& surface_manager::nest_at(std::size_t aIndex) const
+    {
+        if (aIndex >= iNests.size())
+            throw nest_not_found();
+        return *iNests[aIndex];
+    }
+
     bool surface_manager::is_surface_attached(void* aNativeSurfaceHandle) const
     {
         for (auto s : iSurfaces)

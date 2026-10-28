@@ -143,7 +143,9 @@ namespace neogfx::DesignStudio
         void resized() override
         {
             window::resized();
-            resize(transformed_ideal_size());
+            // (a maximized or iconized console is sized by its nest)
+            if (!is_maximized() && !is_iconic())
+                resize(transformed_ideal_size());
         }
     private:
         template <typename ConsoleT = console>

@@ -615,6 +615,16 @@ namespace neogfx
         return base_type::device_metrics();
     }
 
+    neogfx::widget_type window::widget_type() const
+    {
+        // a nested window floats in its nest: its parent is told when it is moved or resized (see widget<>::moved() and 
+        // widget<>::resized()) so that, e.g., a scrollable nest's scrollbars are updated
+        // (n.b. base_type::widget_type names a type)
+        if (is_nested())
+            return neogfx::widget<i_window>::widget_type() | neogfx::widget_type::Floating;
+        return neogfx::widget<i_window>::widget_type();
+    }
+
     layer_t window::layer() const
     {
         return (!is_nested() ? LayerWidget : LayerNestedWindow) + base_type::layer();

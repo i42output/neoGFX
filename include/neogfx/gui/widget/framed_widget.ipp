@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/framed_widget.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 
 namespace neogfx
 {
@@ -42,6 +43,11 @@ namespace neogfx
 
         if (!has_frame_radius())
             base_type::paint_non_client(aGc);
+
+        // a maximized nested window fills its nest so has no frame
+        auto const& self = base_type::as_widget();
+        if (self.is_root() && self.root().is_nested() && self.root().is_maximized())
+            return;
 
         switch (iStyle)
         {
@@ -163,6 +169,10 @@ namespace neogfx
     template <Widget Base>
     inline dimension framed_widget<Base>::effective_frame_width() const
     {
+        // a maximized nested window fills its nest so has no frame
+        auto const& self = base_type::as_widget();
+        if (self.is_root() && self.root().is_nested() && self.root().is_maximized())
+            return 0.0;
         switch (iStyle)
         {
         case frame_style::NoFrame:

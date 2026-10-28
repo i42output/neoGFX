@@ -39,6 +39,7 @@
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/surface_manager.hpp>
 #include <neogfx/hid/i_window_manager.hpp>
+#include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/hid/i_hid_devices.hpp>
 #include <neogfx/app/resource_manager.hpp>
 #include <neogfx/gui/window/window.hpp>
@@ -1132,6 +1133,36 @@ namespace neogfx
         if (aScanCode == ScanCode_LALT)
             for (auto& m : iMnemonics)
                 m->mnemonic_widget().update();
+        if (aScanCode == ScanCode_TAB && iKeySequence.empty() &&
+            (aKeyModifier & key_modifier::CTRL) != key_modifier::None && (aKeyModifier & key_modifier::ALT) == key_modifier::None)
+        {
+            // Ctrl+Tab / Ctrl+Shift+Tab: when a nested window is active cycle activation between the windows of its nest; this 
+            // takes precedence over action shortcuts which only see the key if there is no other nested window to activate
+            auto& wm = service<i_window_manager>();
+            if (wm.window_activated() && wm.active_window().has_native_window() && wm.active_window().native_window().is_nested())
+            {
+                auto& activeNativeWindow = wm.active_window().native_window();
+                auto& windowNest = service<i_surface_manager>().find_nest(activeNativeWindow);
+                auto const count = windowNest.nested_window_count();
+                std::size_t current = 0;
+                while (current < count && &windowNest.nested_window(current) != &activeNativeWindow)
+                    ++current;
+                if (current < count)
+                {
+                    bool const forward = (aKeyModifier & key_modifier::SHIFT) == key_modifier::None;
+                    for (std::size_t step = 1; step < count; ++step)
+                    {
+                        auto& candidate = windowNest.nested_window((forward ? current + step : current + count - step) % count);
+                        if (candidate.visible() && candidate.enabled() &&
+                            (candidate.surface_window().style() & window_style::NoActivate) != window_style::NoActivate)
+                        {
+                            candidate.surface_window().native_window_focus_gained();
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
         bool partialMatches = false;
         iKeySequence.push_back(std::make_pair(aKeyCode, aKeyModifier));
         for (auto& a : iActions)

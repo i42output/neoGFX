@@ -61,6 +61,11 @@ namespace neogfx
         remove_all();
     }
 
+    neogfx::object_type menu_bar::object_type() const
+    {
+        return object_type::MenuBar;
+    }
+
     const i_widget& menu_bar::as_widget() const
     {
         return *this;

@@ -283,6 +283,10 @@ namespace neogfx
     public:
         bool part_active(widget_part aPart) const override
         {
+            auto& self = widget_type::as_widget();
+
+            // a maximized or iconized nested window is placed by its nest so can't be moved or resized
+            bool const placedByNest = self.is_root() && self.root().is_nested() && (self.root().is_maximized() || self.root().is_iconic());
             switch (aPart.part)
             {
             case widget_part::Border:
@@ -294,9 +298,10 @@ namespace neogfx
             case widget_part::BorderBottomRight:
             case widget_part::BorderBottom:
             case widget_part::BorderBottomLeft:
-                return (decoration_style() & neogfx::decoration_style::Resizable) == neogfx::decoration_style::Resizable &&
+                return !placedByNest && (decoration_style() & neogfx::decoration_style::Resizable) == neogfx::decoration_style::Resizable &&
                     (decoration() & neogfx::decoration::Border) == neogfx::decoration::Border;
             case widget_part::TitleBar:
+                return !placedByNest;
             case widget_part::Grab:
                 return true;
                 // todo: the rest
@@ -315,7 +320,7 @@ namespace neogfx
             auto result = widget_type::part(aPosition);
             if (result.part == widget_part::Client || result.part == widget_part::NonClient)
             {
-                if (iTitleBar != nullptr && self.to_client_coordinates(iTitleBar->to_window_coordinates(iTitleBar->client_rect())).contains(aPosition))
+                if (iTitleBar != nullptr && iTitleBar->visible() && self.to_client_coordinates(iTitleBar->to_window_coordinates(iTitleBar->client_rect())).contains(aPosition))
                     result.part = widget_part::TitleBar;
                 else if (has_layout(standard_layout::Menu) && rect { layout(standard_layout::Menu).origin(), layout(standard_layout::Menu).extents() }.contains(aPosition))
                     result.part = widget_part::Grab;
@@ -486,6 +491,22 @@ namespace neogfx
                     if (self.has_root())
                         self.root().window_manager().update_mouse_cursor(self.root());
                 }
+            }
+        }
+        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override
+        {
+            auto& self = widget_type::as_widget();
+
+            widget_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
+            // as with a top-level window (whose title bar is handled natively) double clicking a nested window's title bar 
+            // maximizes or restores it
+            if (aButton == mouse_button::Left && self.is_root() && self.root().is_nested() && part(aPosition).part == widget_part::TitleBar)
+            {
+                auto& window = self.root();
+                if (window.is_maximized() || window.is_iconic())
+                    window.restore();
+                else if ((window.style() & window_style::MaximizeBox) == window_style::MaximizeBox)
+                    window.maximize();
             }
         }
         void mouse_moved(const point& aPosition, key_modifier aKeyModifier) override

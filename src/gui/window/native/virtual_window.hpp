@@ -94,6 +94,7 @@ namespace neogfx
     private:
         i_widget const& as_widget() const;
         i_widget& as_widget();
+        void set_geometry(rect const& aGeometry);
     private:
         void debug_message(std::string const& aMessage);
     private:
@@ -108,6 +109,9 @@ namespace neogfx
         double iOpacity;
         bool iActive;
         window_state iState;
+        std::optional<rect> iNormalGeometry;
+        std::optional<std::size_t> iIconSlot;
+        bool iSettingGeometry = false;
         bool iMouseEntered;
         bool iCapturingMouse;
         bool iNonClientCapturing;

@@ -21,7 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 
-#include <set>
+#include <vector>
+#include <algorithm>
 
 #include <neogfx/core/event.hpp>
 #include <neogfx/hid/i_nest.hpp>
@@ -40,10 +41,12 @@ namespace neogfx
         bool has(i_native_window const& aNestedWindow) const override;
         void add(i_native_window& aNestedWindow) override;
         void remove(i_native_window& aNestedWindow) override;
+        std::size_t nested_window_count() const override;
+        i_native_window& nested_window(std::size_t aIndex) const override;
     private:
         i_widget& iWidget;
         nest_type iType;
-        std::set<i_native_window const*> iNestedWindows;
+        std::vector<i_native_window*> iNestedWindows;
         sink iSink;
     };
 }
