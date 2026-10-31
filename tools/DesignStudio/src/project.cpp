@@ -457,25 +457,53 @@ namespace neogfx::DesignStudio
             }
         };
         std::map<std::string, std::uint32_t> counters;
+        // whether an .nrc object node is an element
+        auto is_element_node = [](neolib::fjson_value const& aNode)
+        {
+            std::string const type{ aNode.name().begin(), aNode.name().end() };
+            if (!type.empty() && type[0] == '.')
+                return false; // (a member of its parent (e.g. a label's .text_widget), not an element: kept as an attribute)
+            if (!type.empty() && std::isupper(static_cast<unsigned char>(type[0])))
+                return false; // (a composite property's components (e.g. "Palette: { Base: Red }"), not an element: kept as an attribute)
+            return true;
+        };
+        // (progress: the elements created so far of those in the file)
+        std::uint32_t elementsLoaded = 0u;
+        std::uint32_t elementCount = 0u;
+        std::function<void(neolib::fjson_value const&)> count_elements = [&](neolib::fjson_value const& aNode)
+        {
+            for (auto const& child : aNode)
+                if (child.type() == neolib::json_type::Object && is_element_node(child))
+                {
+                    ++elementCount;
+                    count_elements(child);
+                }
+        };
+        for (auto const& item : input.root())
+            if (item.name() == "ui" && item.type() == neolib::json_type::Object)
+                for (auto const& fragment : item)
+                    if (fragment.type() == neolib::json_type::Object)
+                        count_elements(fragment);
         // create an element for an .nrc object node; returns nullptr if the node isn't a known element type
         auto create_node_element = [&](i_element& aParent, neolib::fjson_value const& aNode) -> i_element*
         {
+            i_element* result = nullptr;
             try
             {
+                if (!is_element_node(aNode))
+                    return nullptr;
                 std::string const type{ aNode.name().begin(), aNode.name().end() };
-                if (!type.empty() && type[0] == '.')
-                    return nullptr; // (a member of its parent (e.g. a label's .text_widget), not an element: kept as an attribute)
-                if (!type.empty() && std::isupper(static_cast<unsigned char>(type[0])))
-                    return nullptr; // (a composite property's components (e.g. "Palette: { Base: Red }"), not an element: kept as an attribute)
                 std::string const id = aNode.as<neolib::fjson_object>().has("id") ? 
                     std::string{ aNode.as<neolib::fjson_object>().at("id").text().begin(), aNode.as<neolib::fjson_object>().at("id").text().end() } :
                     type + boost::lexical_cast<std::string>(++counters[type]);
-                return &create_element(aParent, string{ type }, string{ id });
+                result = &create_element(aParent, string{ type }, string{ id });
             }
             catch (...)
             {
             }
-            return nullptr;
+            if (result != nullptr)
+                manager().project_loading().trigger(*this, ++elementsLoaded, elementCount); // (outside the try: not a failure to create it)
+            return result;
         };
         // element attributes (and unknown object nodes) are preserved in document order so the file round trips
         std::function<void(i_element&, neolib::fjson_value const&)> add_node = [&](i_element& aElement, neolib::fjson_value const& aNode)

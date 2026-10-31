@@ -33,6 +33,7 @@ namespace neogfx::DesignStudio
         define_declared_event(ProjectRemoved, project_removed, i_project&)
         define_declared_event(ProjectActivated, project_activated, i_project&)
         define_declared_event(ProjectDeactivated, project_deactivated, i_project&)
+        define_declared_event(ProjectLoading, project_loading, i_project&, std::uint32_t, std::uint32_t)
     public:
         using project_list = neolib::vector<ng::ref_ptr<project>>;
     public:

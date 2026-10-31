@@ -26,6 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/dialog/color_dialog.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>
 #include <neogfx/gui/dialog/gradient_dialog.hpp>
+#include <neogfx/gui/widget/progress_bar.hpp>
+#include <neogfx/app/event_processing_context.hpp>
 #include <cctype>
 #include <algorithm>
 #include <sstream>
@@ -35,6 +37,45 @@ namespace neogfx::DesignStudio
 {
     namespace
     {
+        // loading .nrc files can take a while: a wait cursor and a splash showing progress whilst loading (it is modal (the rest of the 
+        // user interface can't be used meanwhile) and events are processed as elements are loaded so that it is shown); the bar is a 
+        // fixed width and the splash is sized to fit it and its text and kept centred
+        class loading_popup
+        {
+        public:
+            loading_popup(ng::i_window& aParent, i_project_manager& aProjectManager) :
+                iCursor{ aParent, ng::mouse_system_cursor::Wait },
+                iPopup{ aParent, ng::window_style::SplashScreen | ng::window_style::Modal },
+                iProgress{ iPopup.client_layout() },
+                iEpc{ "neogfx::DesignStudio::loading_popup" },
+                iLastProcessed{ std::chrono::steady_clock::now() }
+            {
+                iPopup.client_layout().set_padding(ng::padding{ 16.0_dip });
+                iProgress.set_text("Loading %pct%%%"_t);
+                iProgress.text_label().set_size_hint(ng::size_hint{ "Loading 100%"_t }); // (so that the bar doesn't change size as the value does)
+                iProgress.bar_widget().set_minimum_width(320.0_dip);
+                iPopup.center_on_parent();
+                iEpc.process_events();
+                iSink = aProjectManager.project_loading([this](i_project&, std::uint32_t aElementsLoaded, std::uint32_t aElementCount)
+                {
+                    iProgress.set_value(std::round(aElementsLoaded * 100.0 / std::max(aElementCount, 1u)));
+                    if (std::chrono::steady_clock::now() - iLastProcessed >= std::chrono::milliseconds{ 50 })
+                    {
+                        iPopup.center_on_parent(); // (sized to fit (e.g. its text being wider) and centred)
+                        iEpc.process_events();
+                        iLastProcessed = std::chrono::steady_clock::now();
+                    }
+                });
+            }
+        private:
+            ng::scoped_mouse_cursor iCursor;
+            ng::window iPopup;
+            ng::progress_bar iProgress;
+            ng::event_processing_context iEpc;
+            std::chrono::steady_clock::time_point iLastProcessed;
+            ng::sink iSink;
+        };
+
         // a table's columns' widths as its header's section buttons are (they are resized (e.g. by the user dragging a separator) before 
         // the sections' widths are: see header_view::panes_resized); the first includes half the cell spacing (see header_view::section_width)
         std::vector<ng::dimension> column_widths(ng::table_view& aTable)
@@ -1654,6 +1695,7 @@ namespace neogfx::DesignStudio
             auto files = ng::open_file_dialog(mainWindow, ng::file_dialog_spec{ "Open Project", {}, { "*.dsproj", "*.nrc" }, "Project Files" });
             if (files)
             {
+                loading_popup loadingPopup{ mainWindow, aProjectManager };
                 // .nrc files opened together form one project (the first being its primary file); a project file (.dsproj) lists them
                 i_project* nrcProject = nullptr;
                 for (auto const& file : files.value())
@@ -1703,6 +1745,7 @@ namespace neogfx::DesignStudio
             auto files = ng::open_file_dialog(mainWindow, ng::file_dialog_spec{ "Add .nrc File to Project", {}, { "*.nrc" }, "Resource Files" });
             if (!files)
                 return;
+            loading_popup loadingPopup{ mainWindow, aProjectManager };
             auto& project = aProjectManager.active_project();
             for (auto const& file : files.value())
             {

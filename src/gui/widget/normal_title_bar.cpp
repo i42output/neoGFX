@@ -19,6 +19,8 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <unordered_map>
+
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/normal_title_bar.hpp>
@@ -27,6 +29,14 @@ namespace neogfx
 {
     namespace
     {
+        // the title bar merged into each menu bar (see normal_title_bar::merged_title_bar): the windows of a nest are maximized 
+        // together but only the one in front has its title bar merged
+        std::unordered_map<i_widget const*, normal_title_bar*>& merged_title_bars()
+        {
+            static std::unordered_map<i_widget const*, normal_title_bar*> sMergedTitleBars;
+            return sMergedTitleBars;
+        }
+
         // the window a maximized nested window's title bar is merged into (see normal_title_bar::merged_title_bar), and its menu bar: 
         // the window hosting the nested window's MDI nest provided it is the only MDI nest (with windows) the window hosts and the 
         // window has a (visible) menu bar
@@ -39,6 +49,14 @@ namespace neogfx
             auto& host = aNestedWindow.parent_window();
             if (&windowNest.widget().root() != &host)
                 return nullptr;
+            // only the window in front of the nest's windows (the nest widget's first child that is one) is merged
+            for (auto const& child : windowNest.widget().children())
+                if (child->is_root() && child->root().is_nested() && child->root().has_native_window() && windowNest.has(child->root().native_window()))
+                {
+                    if (&child->root() != &aNestedWindow)
+                        return nullptr;
+                    break;
+                }
             for (std::size_t n = 0; n < surfaceManager.nest_count(); ++n)
             {
                 auto const& otherNest = surfaceManager.nest_at(n);
@@ -60,7 +78,8 @@ namespace neogfx
         }
     }
 
-    normal_title_bar::merged_title_bar::merged_title_bar(i_window& aHost, i_widget& aMenuBar, i_texture const& aIcon, i_string const& aTitle) :
+    normal_title_bar::merged_title_bar::merged_title_bar(normal_title_bar& aOwner, i_window& aHost, i_widget& aMenuBar, i_texture const& aIcon, i_string const& aTitle) :
+        owner{ aOwner },
         host{ aHost },
         menuBar{ aMenuBar },
         hostDestroyed{ aHost },
@@ -80,10 +99,14 @@ namespace neogfx
         set_title(aTitle);
         sinks += menuBar.size_changed([this]() { update_geometry(); });
         update_geometry();
+        merged_title_bars()[&menuBar] = &owner;
     }
 
     normal_title_bar::merged_title_bar::~merged_title_bar()
     {
+        auto existing = merged_title_bars().find(&menuBar);
+        if (existing != merged_title_bars().end() && existing->second == &owner)
+            merged_title_bars().erase(existing);
         if (!menuBarDestroyed)
         {
             menuBar.layout().set_padding(originalMenuBarLayoutPadding);
@@ -367,7 +390,7 @@ namespace neogfx
             }
         });
 
-        iSink += root().activated([this, update_widgets]() { update_widgets(); });
+        iSink += root().activated([this, update_widgets]() { update_widgets(); update_merge(); });
         iSink += root().deactivated([this, update_widgets]() { update_widgets(); });
         iSink += service<i_surface_manager>().dpi_changed([this, update_widgets](i_surface&) { update_widgets(); });
         
@@ -634,7 +657,15 @@ namespace neogfx
         }
         if (host == nullptr || iMerged)
             return;
-        iMerged = std::make_unique<merged_title_bar>(*host, *menuBar, icon_widget().image(), title());
+        // (another maximized window's title bar merged into the menu bar is unmerged first so the menu bar is as it was)
+        auto existing = merged_title_bars().find(menuBar);
+        if (existing != merged_title_bars().end() && existing->second != this)
+        {
+            auto& other = *existing->second;
+            other.iMerged.reset();
+            other.show();
+        }
+        iMerged = std::make_unique<merged_title_bar>(*this, *host, *menuBar, icon_widget().image(), title());
         iMerged->minimizeButton.show((root().style() & window_style::MinimizeBox) == window_style::MinimizeBox);
         iMerged->closeButton.show((root().style() & window_style::Close) != window_style::Invalid);
         iMerged->closeButton.enable(root().can_close());

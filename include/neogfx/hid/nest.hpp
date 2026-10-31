@@ -47,6 +47,7 @@ namespace neogfx
         i_widget& iWidget;
         nest_type iType;
         std::vector<i_native_window*> iNestedWindows;
+        bool iPropagatingState = false;
         sink iSink;
     };
 }

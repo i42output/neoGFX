@@ -38,6 +38,8 @@ namespace neogfx
         virtual void set_style(progress_bar_style aStyle) = 0;
         virtual i_string const& text() const = 0;
         virtual void set_text(i_string const& aText) = 0;
+        virtual std::uint32_t decimal_places() const = 0; // (of the percentage "%pct%" in the text is replaced with)
+        virtual void set_decimal_places(std::uint32_t aDecimalPlaces) = 0;
     public:
         virtual scalar value() const = 0;
         virtual void set_value(scalar aValue) = 0;

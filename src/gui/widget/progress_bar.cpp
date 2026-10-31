@@ -19,6 +19,8 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <sstream>
+#include <iomanip>
 #include <boost/algorithm/string.hpp>
 
 #include <neogfx/gui/layout/spacer.hpp>
@@ -100,6 +102,20 @@ namespace neogfx
 		iText = aText;
 	}
 
+	std::uint32_t progress_bar::decimal_places() const
+	{
+		return iDecimalPlaces;
+	}
+
+	void progress_bar::set_decimal_places(std::uint32_t aDecimalPlaces)
+	{
+		if (iDecimalPlaces != aDecimalPlaces)
+		{
+			iDecimalPlaces = aDecimalPlaces;
+			changed();
+		}
+	}
+
 	scalar progress_bar::value() const
 	{
 		return iValue;
@@ -162,6 +178,16 @@ namespace neogfx
 		return iValueAsText;
 	} 
 
+	i_widget const& progress_bar::bar_widget() const
+	{
+		return iBar;
+	}
+
+	i_widget& progress_bar::bar_widget()
+	{
+		return iBar;
+	}
+
 	void progress_bar::init()
 	{
 		iLabel.text_widget().set_size_hint(size_hint{ "100%" });
@@ -178,7 +204,9 @@ namespace neogfx
 	void progress_bar::changed()
 	{
 		std::string updatedText = text().to_std_string();
-		boost::replace_all(updatedText, "%pct%", boost::lexical_cast<std::string>(value() / (maximum() - minimum()) * 100.0));
+		std::ostringstream percentage;
+		percentage << std::fixed << std::setprecision(decimal_places()) << (value() - minimum()) / (maximum() - minimum()) * 100.0;
+		boost::replace_all(updatedText, "%pct%", percentage.str());
 		boost::replace_all(updatedText, "%%", "%");
 		iValueAsText = updatedText;
 

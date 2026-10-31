@@ -1552,15 +1552,19 @@ namespace neogfx::DesignStudio
                     widget.tab().set_text(text);
                 else if constexpr (requires(Type& aWidget, string const& aText) { aWidget.set_title_text(aText); })
                 {
-                    // (as at runtime: a window without a title is captioned with the app's name)
-                    string title = text;
-                    if (title.empty() && !aShowIds)
-                        project().root().visit([&](i_element& aElement)
-                        {
-                            if (title.empty() && aElement.group() == element_group::App)
-                                title = string{ nrc_items::attribute(nrc_items::attributes_of(aElement), "name") };
-                        });
-                    widget.set_title_text(title);
+                    // (only a designed window: other windows (e.g. a script's or a console's) caption themselves)
+                    if (group() == element_group::Widget)
+                    {
+                        // (as at runtime: a window without a title is captioned with the app's name)
+                        string title = text;
+                        if (title.empty() && !aShowIds)
+                            project().root().visit([&](i_element& aElement)
+                            {
+                                if (title.empty() && aElement.group() == element_group::App)
+                                    title = string{ nrc_items::attribute(nrc_items::attributes_of(aElement), "name") };
+                            });
+                        widget.set_title_text(title);
+                    }
                 }
                 else if constexpr (requires(Type& aWidget, string const& aText) { aWidget.set_text(aText); })
                     widget.set_text(text);

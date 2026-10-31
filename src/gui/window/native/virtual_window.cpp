@@ -156,6 +156,17 @@ namespace neogfx
 
     void virtual_window::move_surface(const point& aPosition)
     {
+        if (iState != window_state::Normal && !iSettingGeometry)
+        {
+            // a maximized or iconized window is placed by its nest: being moved sets where it is restored to
+            if (iNormalGeometry)
+            {
+                iNormalGeometry->x = aPosition.x;
+                iNormalGeometry->y = aPosition.y;
+            }
+            set_geometry(rect{ iPosition, iExtents });
+            return;
+        }
         if (!initialising())
             surface_window().native_surface().invalidate(rect{ surface_position(), surface_extents()});
         iPosition = aPosition;
@@ -171,6 +182,17 @@ namespace neogfx
 
     void virtual_window::resize_surface(const size& aExtents)
     {
+        if (iState != window_state::Normal && !iSettingGeometry)
+        {
+            // a maximized or iconized window is sized by its nest: being resized sets the size it is restored to
+            if (iNormalGeometry)
+            {
+                iNormalGeometry->cx = aExtents.cx;
+                iNormalGeometry->cy = aExtents.cy;
+            }
+            set_geometry(rect{ iPosition, iExtents });
+            return;
+        }
         if (!initialising())
             surface_window().native_surface().invalidate(rect{ surface_position(), surface_extents() });
         iExtents = aExtents;
@@ -281,6 +303,9 @@ namespace neogfx
             return;
 
         iActive = true;
+        // (brought to the front of its nest before anything is told it is activated: e.g. its title bar (see normal_title_bar))
+        if (as_widget().has_parent())
+            as_widget().parent().bring_child_to_front(as_widget());
         surface_window().as_window().activated()();
         parentWindow.surface_window().as_widget().update(true);
         surface_window().as_widget().update(true);

@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neolib/core/scoped.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/hid/nest.hpp>
@@ -59,6 +60,11 @@ namespace neogfx
 
     void nest::add(i_native_window& aNestedWindow)
     {
+        // a window is in one nest at a time (e.g. one made in one place (a caddy) then nested in another (MDI))
+        auto& surfaceManager = service<i_surface_manager>();
+        for (std::size_t n = 0; n < surfaceManager.nest_count(); ++n)
+            if (auto& otherNest = surfaceManager.nest_at(n); &otherNest != this && otherNest.has(aNestedWindow))
+                otherNest.remove(aNestedWindow);
         if (!has(aNestedWindow))
             iNestedWindows.push_back(&aNestedWindow);
         widget().bring_child_to_front(aNestedWindow.surface_window().as_widget());
@@ -72,17 +78,6 @@ namespace neogfx
         });
         if (type() == nest_type::MDI)
         {
-            iSink += aNestedWindow.surface_window().as_window().activated([&]()
-            {
-                // as with classic MDI at most one window is maximized: activating another window maximizes it in its place
-                for (auto other : iNestedWindows)
-                    if (other != &aNestedWindow && other->is_maximized())
-                    {
-                        other->restore();
-                        aNestedWindow.maximize();
-                        break;
-                    }
-            });
             auto refit = [&]()
             {
                 // (n.b. this sink outlives the nested window)
@@ -97,20 +92,47 @@ namespace neogfx
             iSink += widget().size_changed(refit);
             // (the nest's client area can change without it being resized, e.g. a scrollbar appearing)
             iSink += widget().layout_completed(refit);
+            iSink += aNestedWindow.surface_window().as_window().window_event([&](neogfx::window_event& aEvent)
+            {
+                // the windows of an MDI nest are maximized together and restored together
+                if (iPropagatingState || !has(aNestedWindow))
+                    return;
+                if (aEvent.type() != window_event_type::Maximized && aEvent.type() != window_event_type::Restored)
+                    return;
+                neolib::scoped_flag sf{ iPropagatingState };
+                auto const others = iNestedWindows;
+                for (auto other : others)
+                {
+                    if (other == &aNestedWindow || !has(*other))
+                        continue;
+                    if (aEvent.type() == window_event_type::Maximized && !other->is_maximized())
+                        other->maximize();
+                    else if (aEvent.type() == window_event_type::Restored && other->is_maximized())
+                        other->restore();
+                }
+            });
+            // a window is created maximized unless there is already a window that isn't
+            if (std::none_of(iNestedWindows.begin(), iNestedWindows.end(), 
+                [&](i_native_window* aOther) { return aOther != &aNestedWindow && !aOther->is_maximized(); }))
+                aNestedWindow.maximize();
         }
         if (type() == nest_type::Caddy)
         {
+            // (n.b. these sinks outlive the nested window's membership of the nest)
             iSink += widget().position_changed([&]()
             {
-                aNestedWindow.surface_window().as_widget().move(widget().client_rect(false).top_left());
+                if (has(aNestedWindow))
+                    aNestedWindow.surface_window().as_widget().move(widget().client_rect(false).top_left());
             });
             iSink += widget().parent_position_changed([&]()
             {
-                aNestedWindow.surface_window().as_widget().move(widget().client_rect(false).top_left());
+                if (has(aNestedWindow))
+                    aNestedWindow.surface_window().as_widget().move(widget().client_rect(false).top_left());
             });
             iSink += widget().size_changed([&]()
             {
-                aNestedWindow.surface_window().as_widget().resize(widget().client_rect(false).extents());
+                if (has(aNestedWindow))
+                    aNestedWindow.surface_window().as_widget().resize(widget().client_rect(false).extents());
             });
         }
         aNestedWindow.ev_added_to_nest()();

@@ -62,6 +62,7 @@ namespace neogfx
         // the end by a spacer) and its title appended to the host's)
         struct merged_title_bar
         {
+            normal_title_bar& owner;
             i_window& host;
             i_widget& menuBar;
             destroyed_flag hostDestroyed;
@@ -78,7 +79,7 @@ namespace neogfx
             push_button closeButton;
             sink sinks;
 
-            merged_title_bar(i_window& aHost, i_widget& aMenuBar, i_texture const& aIcon, i_string const& aTitle);
+            merged_title_bar(normal_title_bar& aOwner, i_window& aHost, i_widget& aMenuBar, i_texture const& aIcon, i_string const& aTitle);
             ~merged_title_bar();
 
             void set_title(i_string const& aTitle);

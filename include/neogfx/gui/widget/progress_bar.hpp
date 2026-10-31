@@ -53,6 +53,8 @@ namespace neogfx
         void set_style(progress_bar_style aStyle) override;
         i_string const& text() const override;
         void set_text(i_string const& aText) override;
+        std::uint32_t decimal_places() const override;
+        void set_decimal_places(std::uint32_t aDecimalPlaces) override;
     public:
         scalar value() const override;
         void set_value(scalar aValue) override;
@@ -65,6 +67,9 @@ namespace neogfx
         i_text_widget const& text_label() const override;
         i_text_widget& text_label() override;
         i_string const& value_as_text() const override;
+    public:
+        i_widget const& bar_widget() const;
+        i_widget& bar_widget();
     private:
         void init();
         void placement_changed();
@@ -76,6 +81,7 @@ namespace neogfx
         bar iBar;
         label iLabel;
         string iText = "%pct%%%";
+        std::uint32_t iDecimalPlaces = 0u;
         scalar iValue = 0.0;
         scalar iMinimum = 0.0;
         scalar iMaximum = 100.0;

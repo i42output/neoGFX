@@ -1201,16 +1201,23 @@ namespace neogfx
                 iRows.push_back(row_type{ aItemIndex.row() });
             else
             {
+                // (placed among its siblings as it is in the item model (it may have been inserted before some of them); 
+                // a sorted model is sorted afterwards)
                 if (!item_model().has_parent(aItemIndex))
                 {
-                    auto const pos = iRows.csend();
+                    auto pos = iRows.csbegin();
+                    while (pos != iRows.csend() && pos->value < aItemIndex.row())
+                        ++pos;
                     iRows.insert(pos, row_type{ aItemIndex.row() });
                 }
                 else
                 {
                     auto const parentIndex = from_item_model_index(item_model().parent(aItemIndex));
-                    auto const pos = const_sibling_iterator{ std::next(iRows.cbegin(), parentIndex.row()) };
-                    iRows.insert(pos.end(), row_type{ aItemIndex.row() });
+                    auto const parent = const_sibling_iterator{ std::next(iRows.cbegin(), parentIndex.row()) };
+                    auto pos = parent.begin();
+                    while (pos != parent.end() && pos->value < aItemIndex.row())
+                        ++pos;
+                    iRows.insert(pos, row_type{ aItemIndex.row() });
                 }
             }
 

@@ -617,12 +617,19 @@ namespace neogfx
 
     neogfx::widget_type window::widget_type() const
     {
-        // a nested window floats in its nest: its parent is told when it is moved or resized (see widget<>::moved() and 
-        // widget<>::resized()) so that, e.g., a scrollable nest's scrollbars are updated
+        // a window nested in an MDI nest floats in it: its parent (the nest's widget) is told when it is moved or resized (see 
+        // widget<>::moved() and widget<>::resized()) so that, e.g., a scrollable nest's scrollbars are updated; a window nested 
+        // elsewhere (e.g. a caddy) is placed by what it is nested in
         // (n.b. base_type::widget_type names a type)
-        if (is_nested())
-            return neogfx::widget<i_window>::widget_type() | neogfx::widget_type::Floating;
-        return neogfx::widget<i_window>::widget_type();
+        auto const result = neogfx::widget<i_window>::widget_type();
+        if (is_nested() && has_native_window())
+        {
+            auto const& surfaceManager = service<i_surface_manager>();
+            for (std::size_t n = 0; n < surfaceManager.nest_count(); ++n)
+                if (auto const& windowNest = surfaceManager.nest_at(n); windowNest.type() == nest_type::MDI && windowNest.has(native_window()))
+                    return result | neogfx::widget_type::Floating;
+        }
+        return result;
     }
 
     layer_t window::layer() const

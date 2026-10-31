@@ -33,6 +33,7 @@ namespace neogfx::DesignStudio
         declare_event(project_removed, i_project&)
         declare_event(project_activated, i_project&)
         declare_event(project_deactivated, i_project&)
+        declare_event(project_loading, i_project&, std::uint32_t /* aElementsLoaded */, std::uint32_t /* aElementCount */) // (as an .nrc file's elements are loaded)
     public:
         struct project_not_found : std::logic_error { project_not_found() : std::logic_error{ "neogfx::DesignStudio::i_project_manager::project_not_found" } {} };
         struct no_active_project : std::logic_error { no_active_project() : std::logic_error{ "neogfx::DesignStudio::i_project_manager::no_active_project" } {} };
