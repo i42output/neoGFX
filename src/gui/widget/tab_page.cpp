@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/widget/tab_page.hpp>
 
 namespace neogfx
@@ -76,31 +77,7 @@ namespace neogfx
     void tab_page::paint_non_client_after(i_graphics_context& aGc) const
     {
         if (iTab.is_selected() && iTab.container().as_widget().effectively_visible())
-        {
-            switch (iTab.container().tab_container_style() & tab_container_style::TabAlignmentMask)
-            {
-            case tab_container_style::TabAlignmentTop:
-            case tab_container_style::TabAlignmentBottom:
-                {
-                    auto hole = to_client_coordinates(iTab.as_widget().non_client_rect().inflate(size{ -effective_frame_width() / 2.0, effective_frame_width() }).intersection(non_client_rect()));
-                    hole = hole.intersection(to_client_coordinates(non_client_rect().deflate(size{ effective_frame_width() / 2.0, 0.0 })));
-                    aGc.fill_rect(hole, inner_frame_color());
-                    hole.deflate(size{ effective_frame_width() / 2.0, 0.0 });
-                    aGc.fill_rect(hole, background_color());
-                }
-                break;
-            case tab_container_style::TabAlignmentLeft:
-            case tab_container_style::TabAlignmentRight:
-                {
-                    auto hole = to_client_coordinates(iTab.as_widget().non_client_rect().inflate(size{ effective_frame_width(), -effective_frame_width() / 2.0 }).intersection(non_client_rect()));
-                    hole = hole.intersection(to_client_coordinates(non_client_rect().deflate(size{ 0.0, effective_frame_width() / 2.0 })));
-                    aGc.fill_rect(hole, inner_frame_color());
-                    hole.deflate(size{ 0.0, effective_frame_width() / 2.0 });
-                    aGc.fill_rect(hole, background_color());
-                }
-                break;
-            }
-        }
+            service<i_skin_manager>().active_skin().draw_tab_page_join(aGc, *this, *this, effective_frame_width(), inner_frame_color());
         framed_scrollable_widget::paint_non_client_after(aGc);
     }
 

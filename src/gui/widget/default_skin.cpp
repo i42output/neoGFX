@@ -24,6 +24,7 @@
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/gradient.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/widget/i_tab_container.hpp>
 #include <neogfx/gui/widget/default_skin.hpp>
 
 namespace neogfx
@@ -38,7 +39,7 @@ namespace neogfx
 
     std::string const& default_skin::name() const
     {
-        static const std::string sName = "Default";
+        static const std::string sName = "Lunar";
         return sName;
     }
 
@@ -79,6 +80,16 @@ namespace neogfx
     {
         // (a default button's frame is the same width: its thicker inner frame is drawn by draw_push_button)
         return aBorderWidth;
+    }
+
+    dimension default_skin::window_frame_width(const i_skinnable_item&, dimension aFrameWidth) const
+    {
+        return aFrameWidth;
+    }
+
+    void default_skin::adjust_title_bar_appearance(const i_skinnable_item&, title_bar_appearance&) const
+    {
+        // (the title bar's usual appearance)
     }
 
     void default_skin::draw_push_button(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_push_button& aButton, const push_button_appearance& aAppearance) const
@@ -439,6 +450,61 @@ namespace neogfx
                     aGc.fill_rect(rect{ s, size{ 1.0_dip, 1.0_dip } }, ink2);
                 }
             }
+        }
+    }
+
+    void default_skin::draw_window_frame(i_graphics_context& aGc, const i_skinnable_item&, const rect& aFrameRect, dimension aFrameWidth, const color& aFrameColor) const
+    {
+        aGc.draw_rect(aFrameRect, pen{ aFrameColor, aFrameWidth, false });
+    }
+
+    void default_skin::draw_title_bar(i_graphics_context&, const i_skinnable_item&, const title_bar_appearance&) const
+    {
+        // (just the title bar's background)
+    }
+
+    void default_skin::draw_title_bar_button(i_graphics_context&, const i_skinnable_item&, widget_part_e, const title_bar_appearance&) const
+    {
+        // (the button's image is its glyph)
+    }
+
+    void default_skin::draw_container_frame(i_graphics_context& aGc, const i_skinnable_item&, const rect& aFrameRect, dimension aFrameWidth, const color& aFrameColor, const color& aInnerFrameColor) const
+    {
+        auto const lineWidth = aFrameWidth / 2.0;
+        rect rectBorder{ aFrameRect };
+        rectBorder.deflate(lineWidth, lineWidth);
+        aGc.draw_rect(rectBorder, pen{ aInnerFrameColor, lineWidth, false });
+        rectBorder.inflate(lineWidth, lineWidth);
+        aGc.draw_rect(rectBorder, pen{ aFrameColor, lineWidth, false });
+    }
+
+    void default_skin::draw_tab_page_join(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_tab_page& aPage, dimension aFrameWidth, const color& aInnerFrameColor) const
+    {
+        // a hole in the page's frame the width of the tab, edged with the frame's inner colour
+        auto const& page = aItem.as_widget();
+        auto const& tab = aPage.tab();
+        switch (tab.container().tab_container_style() & tab_container_style::TabAlignmentMask)
+        {
+        case tab_container_style::TabAlignmentTop:
+        case tab_container_style::TabAlignmentBottom:
+            {
+                auto hole = page.to_client_coordinates(tab.as_widget().non_client_rect().inflate(size{ -aFrameWidth / 2.0, aFrameWidth }).intersection(page.non_client_rect()));
+                hole = hole.intersection(page.to_client_coordinates(page.non_client_rect().deflate(size{ aFrameWidth / 2.0, 0.0 })));
+                aGc.fill_rect(hole, aInnerFrameColor);
+                hole.deflate(size{ aFrameWidth / 2.0, 0.0 });
+                aGc.fill_rect(hole, page.background_color());
+            }
+            break;
+        case tab_container_style::TabAlignmentLeft:
+        case tab_container_style::TabAlignmentRight:
+            {
+                auto hole = page.to_client_coordinates(tab.as_widget().non_client_rect().inflate(size{ aFrameWidth, -aFrameWidth / 2.0 }).intersection(page.non_client_rect()));
+                hole = hole.intersection(page.to_client_coordinates(page.non_client_rect().deflate(size{ 0.0, aFrameWidth / 2.0 })));
+                aGc.fill_rect(hole, aInnerFrameColor);
+                hole.deflate(size{ 0.0, aFrameWidth / 2.0 });
+                aGc.fill_rect(hole, page.background_color());
+            }
+            break;
         }
     }
 }

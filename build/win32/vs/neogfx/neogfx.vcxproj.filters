@@ -743,6 +743,9 @@
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_tool.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\neotif_skin.hpp">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\skin.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>

@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/framed_widget.hpp>
 #include <neogfx/gui/window/i_window.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 
 namespace neogfx
 {
@@ -59,8 +60,16 @@ namespace neogfx
             break;
         case frame_style::DashedFrame:
             break;
-        case frame_style::SolidFrame:
         case frame_style::WindowFrame:
+            if (!has_frame_radius())
+            {
+                scoped_units su{ self, units::Pixels };
+                service<i_skin_manager>().active_skin().draw_window_frame(aGc, self, 
+                    rect{ point{}, self.non_client_rect().extents() }, effective_frame_width(), frame_color());
+                break;
+            }
+            [[fallthrough]];
+        case frame_style::SolidFrame:
             {
                 bool const hasBackgroundColor = base_type::as_widget().has_background_color();
                 bool const backgroundIsTransparent = base_type::as_widget().background_is_transparent();
@@ -76,13 +85,7 @@ namespace neogfx
             }
             break;
         case frame_style::ContainerFrame:
-            {
-                rect rectBorder{ frameRect };
-                rectBorder.deflate(line_width(), line_width());
-                aGc.draw_rect(rectBorder, pen{ inner_frame_color(), line_width(), false });
-                rectBorder.inflate(line_width(), line_width());
-                aGc.draw_rect(rectBorder, pen{ frame_color(), line_width(), false });
-            }
+            service<i_skin_manager>().active_skin().draw_container_frame(aGc, self, frameRect, effective_frame_width(), frame_color(), inner_frame_color());
             break;
         case frame_style::DoubleFrame:
             break;
@@ -183,6 +186,7 @@ namespace neogfx
         case frame_style::SolidFrame:
             return line_width();
         case frame_style::WindowFrame:
+            return units_converter{ *this }.from_device_units(service<i_skin_manager>().active_skin().window_frame_width(self, iLineWidth * 2.0));
         case frame_style::ContainerFrame:
             return line_width() * 2.0;
         case frame_style::DoubleFrame:

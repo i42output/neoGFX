@@ -55,6 +55,8 @@ namespace neogfx
         public:
             size preferred_size(skin_element aElement, optional_size const& aDesiredSize = {}) const override;
             dimension push_button_border_width(const i_skinnable_item& aItem, bool aDefaultButton, dimension aBorderWidth) const override;
+            dimension window_frame_width(const i_skinnable_item& aItem, dimension aFrameWidth) const override;
+            void adjust_title_bar_appearance(const i_skinnable_item& aItem, title_bar_appearance& aAppearance) const override;
         public:
             void draw_push_button(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_push_button& aButton, const push_button_appearance& aAppearance) const override;
             void push_button_text_color(const i_skinnable_item& aItem, const i_push_button& aButton, const push_button_appearance& aAppearance, i_optional<color>& aTextColor) const override;
@@ -66,6 +68,11 @@ namespace neogfx
             void draw_slider(i_graphics_context& aGc, const i_skinnable_item& aItem, slider_orientation aOrientation, double aNormalizedValue, bool aDragging, i_optional<color_or_gradient::abstract_type> const& aBarColor) const override;
             void draw_progress_bar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_progress_bar& aProgressBar) const override;
             void draw_separators(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_layout& aLayout) const override;
+            void draw_window_frame(i_graphics_context& aGc, const i_skinnable_item& aItem, const rect& aFrameRect, dimension aFrameWidth, const color& aFrameColor) const override;
+            void draw_title_bar(i_graphics_context& aGc, const i_skinnable_item& aItem, const title_bar_appearance& aAppearance) const override;
+            void draw_title_bar_button(i_graphics_context& aGc, const i_skinnable_item& aItem, widget_part_e aButton, const title_bar_appearance& aAppearance) const override;
+            void draw_container_frame(i_graphics_context& aGc, const i_skinnable_item& aItem, const rect& aFrameRect, dimension aFrameWidth, const color& aFrameColor, const color& aInnerFrameColor) const override;
+            void draw_tab_page_join(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_tab_page& aPage, dimension aFrameWidth, const color& aInnerFrameColor) const override;
         private:
             HTHEME theme(std::wstring const& aClassList, std::uint32_t aDpi) const;
             HTHEME push_button_theme(const i_skinnable_item& aItem, const i_push_button& aButton, const push_button_appearance& aAppearance) const;

@@ -1187,9 +1187,18 @@ namespace neogfx
     border window::window_border() const
     {
         // todo: for win32 desktop windows we need a transparent window behind for resizing
-        auto const result = is_surface() ? 
+        auto result = is_surface() ? 
             native_window().border_thickness() :
             neogfx::border{ 4.0, 4.0, 4.0, 4.0 };
+        // all of a resizable window's frame is a resize border (the active skin's frame can be wider than the native border)
+        if (!is_maximized() && (style() & window_style::Resize) == window_style::Resize)
+        {
+            auto const frameWidth = effective_frame_width();
+            result.left = std::max(result.left, frameWidth);
+            result.top = std::max(result.top, frameWidth);
+            result.right = std::max(result.right, frameWidth);
+            result.bottom = std::max(result.bottom, frameWidth);
+        }
         return result;
     }
 

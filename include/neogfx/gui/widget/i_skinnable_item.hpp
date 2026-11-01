@@ -52,6 +52,8 @@ namespace neogfx
         TreeExpander,
         ProgressBar,
         Separator,
+        TitleBarIcon,
+        TitleBarTitle,
         Custom1,
         Custom2,
         Custom3,

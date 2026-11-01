@@ -25,6 +25,7 @@
 
 #include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/widget/default_skin.hpp>
+#include <neogfx/gui/widget/neotif_skin.hpp>
 
 namespace neogfx
 {
@@ -55,5 +56,6 @@ namespace neogfx
         skin_list iSkins;
         i_skin* iActiveSkin;
         default_skin iDefaultSkin;
+        neotif_skin iNeotifSkin;
     };
 }

@@ -23,6 +23,7 @@
 
 #include <neolib/core/optional.hpp>
 
+#include <neogfx/core/alignment.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gfx/path.hpp>
 #include <neogfx/gfx/pen.hpp>
@@ -37,6 +38,8 @@
 
 namespace neogfx
 {
+    class i_tab_page;
+
     // How a push button wants to look: computed by the button (so that subclasses can customize it) 
     // and drawn by the active skin.  Units are pixels.
     struct push_button_appearance
@@ -52,6 +55,20 @@ namespace neogfx
         bool spotColor = false;
         bool defaultButton = false;
         bool customized = false; // face, border or shape set explicitly (property, palette, style sheet or subclass)
+    };
+
+    // How a title bar wants to be laid out and to look: initialized by the title bar with its usual values and 
+    // adjusted by the active skin.  Units are pixels.
+    struct title_bar_appearance
+    {
+        neogfx::padding padding; // around the icon and the title
+        size spacing; // between the icon and the title
+        size iconSize;
+        size buttonSize;
+        dimension titleHeight = 0.0; // (for information: the height of the title's text)
+        neogfx::alignment titleAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter;
+        std::optional<color> backgroundColor; // (no value: the title bar's usual background)
+        bool buttonImages = true; // (false: the buttons have no images, the skin draws their glyphs (draw_title_bar_button))
     };
 
     class i_skin
@@ -70,6 +87,8 @@ namespace neogfx
     public:
         virtual size preferred_size(skin_element aElement, optional_size const& aDesiredSize = {}) const = 0;
         virtual dimension push_button_border_width(const i_skinnable_item& aItem, bool aDefaultButton, dimension aBorderWidth) const = 0;
+        virtual dimension window_frame_width(const i_skinnable_item& aItem, dimension aFrameWidth) const = 0; ///< (aItem: the window; aFrameWidth: the window's usual frame width; units are pixels)
+        virtual void adjust_title_bar_appearance(const i_skinnable_item& aItem, title_bar_appearance& aAppearance) const = 0; ///< (aItem: the title bar)
     public:
         virtual void draw_push_button(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_push_button& aButton, const push_button_appearance& aAppearance) const = 0;
         virtual void push_button_text_color(const i_skinnable_item& aItem, const i_push_button& aButton, const push_button_appearance& aAppearance, i_optional<color>& aTextColor) const = 0; ///< (no value: the button's usual text color)
@@ -80,6 +99,11 @@ namespace neogfx
         virtual void draw_slider(i_graphics_context& aGc, const i_skinnable_item& aItem, slider_orientation aOrientation, double aNormalizedValue, bool aDragging, i_optional<color_or_gradient::abstract_type> const& aBarColor) const = 0; ///< (track and thumb: the item's SliderTrack and SliderThumb element rects)
         virtual void draw_progress_bar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_progress_bar& aProgressBar) const = 0;
         virtual void draw_separators(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_layout& aLayout) const = 0;
+        virtual void draw_window_frame(i_graphics_context& aGc, const i_skinnable_item& aItem, const rect& aFrameRect, dimension aFrameWidth, const color& aFrameColor) const = 0; ///< (aItem: the window; units are pixels)
+        virtual void draw_title_bar(i_graphics_context& aGc, const i_skinnable_item& aItem, const title_bar_appearance& aAppearance) const = 0; ///< (aItem: the title bar; drawn over its background and under its icon, title and buttons; icon and title areas: the item's TitleBarIcon and TitleBarTitle element rects)
+        virtual void draw_title_bar_button(i_graphics_context& aGc, const i_skinnable_item& aItem, widget_part_e aButton, const title_bar_appearance& aAppearance) const = 0; ///< (aItem: the button; drawn over its face (draw_push_button) and under its image)
+        virtual void draw_container_frame(i_graphics_context& aGc, const i_skinnable_item& aItem, const rect& aFrameRect, dimension aFrameWidth, const color& aFrameColor, const color& aInnerFrameColor) const = 0; ///< (frame_style::ContainerFrame, e.g. a tab page's)
+        virtual void draw_tab_page_join(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_tab_page& aPage, dimension aFrameWidth, const color& aInnerFrameColor) const = 0; ///< (aItem: the page of the selected tab; where the tab meets the page's frame, drawn over that frame)
         // helpers
     public:
         neolib::optional<color> push_button_text_color(const i_skinnable_item& aItem, const i_push_button& aButton, const push_button_appearance& aAppearance) const

@@ -321,6 +321,7 @@
     <ClCompile Include="..\..\..\..\src\gui\widget\menu_bar.cpp" />
     <ClCompile Include="..\..\..\..\src\gui\widget\menu_item.cpp" />
     <ClCompile Include="..\..\..\..\src\gui\widget\menu_item_widget.cpp" />
+    <ClCompile Include="..\..\..\..\src\gui\widget\neotif_skin.cpp" />
     <ClCompile Include="..\..\..\..\src\gui\widget\progress_bar.cpp" />
     <ClCompile Include="..\..\..\..\src\gui\widget\push_button.cpp" />
     <ClCompile Include="..\..\..\..\src\gui\widget\radio_button.cpp" />

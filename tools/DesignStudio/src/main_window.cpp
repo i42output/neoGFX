@@ -540,7 +540,8 @@ namespace neogfx::DesignStudio
 
         auto widgetSkinChanged = [&]()
         {
-            std::string const skinName = widgetSkin.value<widget_skin>(true) == widget_skin::Native ? "Native" : "Default";
+            auto const skin = widgetSkin.value<widget_skin>(true);
+            std::string const skinName = skin == widget_skin::Native ? "Native" : skin == widget_skin::Neotif ? "Neotif" : "Lunar";
             auto& skinManager = ng::service<ng::i_skin_manager>();
             for (std::uint32_t skinIndex = 0u; skinIndex < skinManager.skin_count(); ++skinIndex)
                 if (skinManager.skin(skinIndex).name() == skinName)
@@ -2604,4 +2605,3 @@ namespace neogfx::DesignStudio
         }
     }
 }
-

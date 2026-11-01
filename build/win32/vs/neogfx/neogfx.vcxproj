@@ -487,6 +487,7 @@
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_progress_bar.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_text_document.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\i_tool.hpp" />
+    <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\neotif_skin.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\skin.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\skin_manager.hpp" />
     <ClInclude Include="..\..\..\..\include\neogfx\gui\widget\slider.hpp" />

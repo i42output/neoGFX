@@ -192,6 +192,17 @@ namespace neogfx
             return iFallback.push_button_border_width(aItem, aDefaultButton, aBorderWidth);
         }
 
+        dimension skin::window_frame_width(const i_skinnable_item& aItem, dimension aFrameWidth) const
+        {
+            // Window frames and title bars are drawn by neoGFX itself, so keep their appearance consistent with it.
+            return iFallback.window_frame_width(aItem, aFrameWidth);
+        }
+
+        void skin::adjust_title_bar_appearance(const i_skinnable_item& aItem, title_bar_appearance& aAppearance) const
+        {
+            iFallback.adjust_title_bar_appearance(aItem, aAppearance);
+        }
+
         void skin::draw_push_button(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_push_button& aButton, const push_button_appearance& aAppearance) const
         {
             HTHEME const buttonTheme = push_button_theme(aItem, aButton, aAppearance);
@@ -375,7 +386,21 @@ namespace neogfx
             else if (widget.has_focus())
                 thumbState = TUS_FOCUSED;
             // (TUVS_* (the vertical thumb's states) have the same values as TUS_*)
-            draw_part_true_size(aGc, trackbarTheme, vertical ? TKP_THUMBVERT : TKP_THUMB, thumbState, thumb);
+            int const thumbPart = vertical ? TKP_THUMBVERT : TKP_THUMB;
+            SIZE thumbSize{};
+            if (FAILED(::GetThemePartSize(trackbarTheme, nullptr, thumbPart, thumbState, nullptr, TS_TRUE, &thumbSize)) || thumbSize.cx <= 0 || thumbSize.cy <= 0)
+            {
+                draw_part(aGc, trackbarTheme, thumbPart, thumbState, thumb);
+                return;
+            }
+            // some themes (e.g. Windows 11's) give the vertical thumb the horizontal thumb's (tall) size rather than a wide one
+            if (vertical && thumbSize.cx < thumbSize.cy)
+                std::swap(thumbSize.cx, thumbSize.cy);
+            size const thumbExtents{ static_cast<dimension>(thumbSize.cx), static_cast<dimension>(thumbSize.cy) };
+            point const thumbPosition{ 
+                std::floor(thumb.x + (thumb.cx - thumbExtents.cx) / 2.0), 
+                std::floor(thumb.y + (thumb.cy - thumbExtents.cy) / 2.0) };
+            draw_part(aGc, trackbarTheme, thumbPart, thumbState, rect{ thumbPosition, thumbExtents });
         }
 
         void skin::draw_progress_bar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_progress_bar& aProgressBar) const
@@ -407,6 +432,31 @@ namespace neogfx
         {
             // Windows has no themed splitter grip, so use the default skin's.
             iFallback.draw_separators(aGc, aItem, aLayout);
+        }
+
+        void skin::draw_window_frame(i_graphics_context& aGc, const i_skinnable_item& aItem, const rect& aFrameRect, dimension aFrameWidth, const color& aFrameColor) const
+        {
+            iFallback.draw_window_frame(aGc, aItem, aFrameRect, aFrameWidth, aFrameColor);
+        }
+
+        void skin::draw_title_bar(i_graphics_context& aGc, const i_skinnable_item& aItem, const title_bar_appearance& aAppearance) const
+        {
+            iFallback.draw_title_bar(aGc, aItem, aAppearance);
+        }
+
+        void skin::draw_title_bar_button(i_graphics_context& aGc, const i_skinnable_item& aItem, widget_part_e aButton, const title_bar_appearance& aAppearance) const
+        {
+            iFallback.draw_title_bar_button(aGc, aItem, aButton, aAppearance);
+        }
+
+        void skin::draw_container_frame(i_graphics_context& aGc, const i_skinnable_item& aItem, const rect& aFrameRect, dimension aFrameWidth, const color& aFrameColor, const color& aInnerFrameColor) const
+        {
+            iFallback.draw_container_frame(aGc, aItem, aFrameRect, aFrameWidth, aFrameColor, aInnerFrameColor);
+        }
+
+        void skin::draw_tab_page_join(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_tab_page& aPage, dimension aFrameWidth, const color& aInnerFrameColor) const
+        {
+            iFallback.draw_tab_page_join(aGc, aItem, aPage, aFrameWidth, aInnerFrameColor);
         }
 
         HTHEME skin::theme(std::wstring const& aClassList, std::uint32_t aDpi) const

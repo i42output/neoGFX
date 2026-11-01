@@ -190,6 +190,9 @@
     <ClCompile Include="..\..\..\..\src\gui\widget\menu_item_widget.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\gui\widget\neotif_skin.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\gui\widget\progress_bar.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>

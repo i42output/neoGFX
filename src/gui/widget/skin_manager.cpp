@@ -32,6 +32,7 @@ namespace neogfx
     {
         register_skin(iDefaultSkin);
         register_skin(native::native_skin());
+        register_skin(iNeotifSkin);
         activate_skin(iDefaultSkin);
     }
 

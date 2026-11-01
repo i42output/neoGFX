@@ -47,7 +47,8 @@ namespace neogfx::DesignStudio
     enum class widget_skin : std::int32_t
     {
         Default = 0x00000000,
-        Native  = 0x00000001
+        Native  = 0x00000001,
+        Neotif  = 0x00000002
     };
 }
 
@@ -70,6 +71,7 @@ end_declare_enum(neogfx::DesignStudio::toolbar_icon_size)
 begin_declare_enum(neogfx::DesignStudio::widget_skin)
 declare_enum_string(neogfx::DesignStudio::widget_skin, Default)
 declare_enum_string(neogfx::DesignStudio::widget_skin, Native)
+declare_enum_string(neogfx::DesignStudio::widget_skin, Neotif)
 end_declare_enum(neogfx::DesignStudio::widget_skin)
 
 namespace neogfx::DesignStudio

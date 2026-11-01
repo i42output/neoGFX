@@ -464,10 +464,11 @@ namespace neogfx
                     max->y += ourLayout.internal_spacing().bottom;
             }
       
-            if (max->x > cr.right() - 1.0 - self.internal_spacing().right)
-                max->x += self.internal_spacing().right;
-            if (max->y > cr.bottom() - 1.0 - self.internal_spacing().bottom)
-                max->y += self.internal_spacing().bottom;
+            // (cr is already inside the border so only the padding is added: the border isn't scrollable content)
+            if (max->x > cr.right() - 1.0 - self.padding().right)
+                max->x += self.padding().right;
+            if (max->y > cr.bottom() - 1.0 - self.padding().bottom)
+                max->y += self.padding().bottom;
 
             min = min->min(cr.top_left());
             max = max->max(cr.bottom_right()) - point{ 1.0, 1.0 };

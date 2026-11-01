@@ -23,6 +23,7 @@
 
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/widget/normal_title_bar.hpp>
 
 namespace neogfx
@@ -258,10 +259,34 @@ namespace neogfx
         return widget_part{ root().as_widget(), widget_part::TitleBar };
     }
 
+    rect normal_title_bar::element_rect(skin_element aElement) const
+    {
+        switch (aElement)
+        {
+        case skin_element::TitleBarIcon:
+        case skin_element::TitleBarTitle:
+            {
+                // the icon area extends from the start of the title bar to half way across the spacing between the icon 
+                // and the title; the title area from there to the buttons
+                auto const clientRect = client_rect();
+                coordinate const split = icon_widget().visible() ? 
+                    std::floor(icon_widget().position().x + icon_widget().extents().cx + iAppearance.spacing.cx / 2.0) : clientRect.left();
+                coordinate const buttons = std::max(split, std::min(clientRect.right(), iButtonLayout.position().x));
+                if (aElement == skin_element::TitleBarIcon)
+                    return rect{ clientRect.top_left(), size{ split - clientRect.left(), clientRect.height() } };
+                return rect{ point{ split, clientRect.top() }, size{ buttons - split, clientRect.height() } };
+            }
+        default:
+            return base_type::element_rect(aElement);
+        }
+    }
+
     color normal_title_bar::palette_color(color_role aColorRole) const
     {
         std::optional<color> result;
-        if (has_palette_color(aColorRole) || !root().is_active())
+        if (aColorRole == color_role::Background && !has_palette_color(aColorRole) && iAppearance.backgroundColor.has_value())
+            result = iAppearance.backgroundColor.value();
+        else if (has_palette_color(aColorRole) || !root().is_active())
             result = base_type::palette_color(aColorRole);
         else if (aColorRole == color_role::Background)
             result = palette_color(color_role::Base);
@@ -273,6 +298,12 @@ namespace neogfx
         return result.value_or(base_type::palette_color(aColorRole));
     }
 
+    void normal_title_bar::paint(i_graphics_context& aGc) const
+    {
+        base_type::paint(aGc);
+        service<i_skin_manager>().active_skin().draw_title_bar(aGc, *this, iAppearance);
+    }
+
     void normal_title_bar::init()
     {
         set_background_opacity(1.0);
@@ -280,8 +311,6 @@ namespace neogfx
         set_padding(neogfx::padding{});
         iOuterLayout.set_padding(neogfx::padding{});
         iOuterLayout.set_spacing(size{});
-        iInnerLayout.set_padding(neogfx::padding{ 8.0_dip, 4.0_dip, 8.0_dip, 4.0_dip });
-        iInnerLayout.set_spacing(size{ 8.0_dip });
         iButtonLayout.set_padding(neogfx::padding{});
         iButtonLayout.set_spacing(size{});
         iButtonLayout.set_alignment(alignment::Right | alignment::Top);
@@ -315,26 +344,42 @@ namespace neogfx
                 root().close();
         });
 
-        iSink += service<i_app>().current_style_changed([this](style_aspect aAspect) 
-        { 
-            if ((aAspect & style_aspect::Color) == style_aspect::Color) 
-                update_textures(); 
-        });
-        
+        // the active skin draws the buttons' glyphs if it doesn't want them to have images (see title_bar_appearance::buttonImages)
+        iSink += iMinimizeButton.painting_children([this](i_graphics_context& aGc)
+            { service<i_skin_manager>().active_skin().draw_title_bar_button(aGc, iMinimizeButton, widget_part::MinimizeButton, iAppearance); });
+        iSink += iMaximizeButton.painting_children([this](i_graphics_context& aGc)
+            { service<i_skin_manager>().active_skin().draw_title_bar_button(aGc, iMaximizeButton, widget_part::MaximizeButton, iAppearance); });
+        iSink += iRestoreButton.painting_children([this](i_graphics_context& aGc)
+            { service<i_skin_manager>().active_skin().draw_title_bar_button(aGc, iRestoreButton, widget_part::RestoreButton, iAppearance); });
+        iSink += iCloseButton.painting_children([this](i_graphics_context& aGc)
+            { service<i_skin_manager>().active_skin().draw_title_bar_button(aGc, iCloseButton, widget_part::CloseButton, iAppearance); });
+
         auto update_widgets = [this](bool aUpdateLayout = false)
         {
             scoped_units su{ *this, units::Pixels };
 
+            // the title bar's usual appearance, as adjusted by the active skin
             auto const idealIconSize = size{ title_widget().font().height(), title_widget().font().height() }.ceil();
-            if (icon_widget().image().is_empty())
-                icon_widget().set_fixed_size(idealIconSize);
-            else
-                icon_widget().set_fixed_size(idealIconSize.min(icon_widget().image().extents()));
-            auto const idealButtonSize = size{ 12.0_mm, 9.0_mm }.ceil();
-            iMinimizeButton.set_fixed_size(idealButtonSize);
-            iMaximizeButton.set_fixed_size(idealButtonSize);
-            iRestoreButton.set_fixed_size(idealButtonSize);
-            iCloseButton.set_fixed_size(idealButtonSize);
+            title_bar_appearance appearance;
+            appearance.padding = neogfx::padding{ 8.0_dip, 4.0_dip, 8.0_dip, 4.0_dip };
+            appearance.spacing = size{ 8.0_dip };
+            appearance.iconSize = icon_widget().image().is_empty() ? idealIconSize : idealIconSize.min(icon_widget().image().extents());
+            appearance.buttonSize = size{ 12.0_mm, 9.0_mm }.ceil();
+            appearance.titleHeight = std::ceil(title_widget().font().height());
+            service<i_skin_manager>().active_skin().adjust_title_bar_appearance(*this, appearance);
+            iAppearance = appearance;
+
+            if (iInnerLayout.padding() != iAppearance.padding)
+                iInnerLayout.set_padding(iAppearance.padding);
+            if (iInnerLayout.spacing() != iAppearance.spacing)
+                iInnerLayout.set_spacing(iAppearance.spacing);
+            if (title_widget().alignment() != iAppearance.titleAlignment)
+                title_widget().set_alignment(iAppearance.titleAlignment);
+            icon_widget().set_fixed_size(iAppearance.iconSize);
+            iMinimizeButton.set_fixed_size(iAppearance.buttonSize);
+            iMaximizeButton.set_fixed_size(iAppearance.buttonSize);
+            iRestoreButton.set_fixed_size(iAppearance.buttonSize);
+            iCloseButton.set_fixed_size(iAppearance.buttonSize);
             icon_widget().set_size_policy(size_constraint::Fixed);
             iMinimizeButton.set_size_policy(size_constraint::Fixed);
             iMaximizeButton.set_size_policy(size_constraint::Fixed);
@@ -367,6 +412,17 @@ namespace neogfx
         iSink += service<i_app>().execution_started([this, update_widgets]()
         {
             update_widgets();
+        });
+
+        iSink += service<i_app>().current_style_changed([this, update_widgets](style_aspect aAspect) 
+        { 
+            if ((aAspect & style_aspect::Color) == style_aspect::Color) 
+                update_widgets(); // (the skin's title bar appearance can depend on the style's colors)
+        });
+
+        iSink += service<i_skin_manager>().skin_activated([this, update_widgets](i_skin&)
+        {
+            update_widgets(true);
         });
 
         iSink += root().window_event([this, update_widgets](neogfx::window_event& e)
@@ -614,15 +670,20 @@ namespace neogfx
                     dpi_select("neogfx::normal_title_bar::iTextures[TextureClose]::"s, "neogfx::normal_title_bar::iTextures[HighDpiTextureClose]::"s) + ink.to_string(),
                     dpi_select(sCloseTexturePattern, sCloseHighDpiTexturePattern), { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, dpi_select(1.0, 2.0) });
         }
-        iMinimizeButton.set_image(iTextures[TextureMinimize]->second);
-        iMaximizeButton.set_image(iTextures[TextureMaximize]->second);
-        iRestoreButton.set_image(iTextures[TextureRestore]->second);
-        iCloseButton.set_image(iTextures[TextureClose]->second);
+        texture const noImage;
+        auto const& minimizeImage = iAppearance.buttonImages ? iTextures[TextureMinimize]->second : noImage;
+        auto const& maximizeImage = iAppearance.buttonImages ? iTextures[TextureMaximize]->second : noImage;
+        auto const& restoreImage = iAppearance.buttonImages ? iTextures[TextureRestore]->second : noImage;
+        auto const& closeImage = iAppearance.buttonImages ? iTextures[TextureClose]->second : noImage;
+        iMinimizeButton.set_image(minimizeImage);
+        iMaximizeButton.set_image(maximizeImage);
+        iRestoreButton.set_image(restoreImage);
+        iCloseButton.set_image(closeImage);
         if (iMerged)
         {
-            iMerged->minimizeButton.set_image(iTextures[TextureMinimize]->second);
-            iMerged->restoreButton.set_image(iTextures[TextureRestore]->second);
-            iMerged->closeButton.set_image(iTextures[TextureClose]->second);
+            iMerged->minimizeButton.set_image(minimizeImage);
+            iMerged->restoreButton.set_image(restoreImage);
+            iMerged->closeButton.set_image(closeImage);
         }
         if (dpi_scale_factor() >= 1.5)
         {
@@ -689,6 +750,12 @@ namespace neogfx
             if (root().can_close())
                 root().close();
         });
+        iMerged->sinks += iMerged->minimizeButton.painting_children([this, &button = iMerged->minimizeButton](i_graphics_context& aGc)
+            { service<i_skin_manager>().active_skin().draw_title_bar_button(aGc, button, widget_part::MinimizeButton, iAppearance); });
+        iMerged->sinks += iMerged->restoreButton.painting_children([this, &button = iMerged->restoreButton](i_graphics_context& aGc)
+            { service<i_skin_manager>().active_skin().draw_title_bar_button(aGc, button, widget_part::RestoreButton, iAppearance); });
+        iMerged->sinks += iMerged->closeButton.painting_children([this, &button = iMerged->closeButton](i_graphics_context& aGc)
+            { service<i_skin_manager>().active_skin().draw_title_bar_button(aGc, button, widget_part::CloseButton, iAppearance); });
         iMerged->update_geometry();
         update_textures();
         hide();

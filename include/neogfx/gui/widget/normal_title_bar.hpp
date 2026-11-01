@@ -27,6 +27,7 @@
 #include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
 #include <neogfx/gui/widget/i_title_bar.hpp>
+#include <neogfx/gui/widget/i_skin.hpp>
 
 namespace neogfx
 {
@@ -112,7 +113,11 @@ namespace neogfx
         neogfx::widget_type widget_type() const override;
         widget_part part(const point&) const override;
     public:
+        rect element_rect(skin_element aElement) const override;
+    public:
         color palette_color(color_role aColorRole) const override;
+    public:
+        void paint(i_graphics_context& aGc) const override;
     private:
         void init();
         void update_textures();
@@ -130,6 +135,7 @@ namespace neogfx
         non_client_item<push_button, widget_part::CloseButton> iCloseButton;
         sink iSink;
         mutable std::optional<std::pair<color, texture>> iTextures[4];
+        title_bar_appearance iAppearance;
         std::unique_ptr<merged_title_bar> iMerged;
     };
 
