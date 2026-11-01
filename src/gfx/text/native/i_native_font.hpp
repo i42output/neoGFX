@@ -41,6 +41,7 @@ namespace neogfx
         // operations
     public:
         virtual i_string const& family_name() const = 0;
+        virtual bool is_monospace() const = 0;
         virtual bool has_style(font_style aStyle) const = 0;
         virtual std::uint32_t style_count() const = 0;
         virtual font_style style(std::uint32_t aStyleIndex) const = 0;

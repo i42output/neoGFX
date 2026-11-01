@@ -24,6 +24,7 @@
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/pen.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
 
 namespace neogfx
@@ -292,16 +293,12 @@ namespace neogfx
     template <typename PushButtonInterface>
     inline void basic_push_button<PushButtonInterface>::paint(i_graphics_context& aGc) const
     {
-        // todo: move to default skin
-
-        color faceColor = effective_face_color();
-        color colorStart = faceColor.lighter(0x0A);
-        color colorEnd = faceColor;
-        color outerBorderColor = outer_border_color();
-        color innerBorderColor = border_color();    
-        std::optional<line_style> lineStyle;
-
         scoped_units su{ *this, units::Pixels };
+
+        push_button_appearance appearance;
+        appearance.faceColor = effective_face_color();
+        appearance.outerBorderColor = outer_border_color();
+        appearance.innerBorderColor = border_color();
 
         auto const& borderRadii = this->style_sheet_value("." + this->class_name(), "border-radius", border_radius());
         auto const& border = this->style_sheet_value("." + this->class_name(), "border", std::tuple<std::optional<color>, std::optional<length>, std::optional<border_style>>{});
@@ -309,15 +306,15 @@ namespace neogfx
 
         if (std::get<0>(border).has_value())
         {
-            outerBorderColor = std::get<0>(border).value();
-            innerBorderColor = outerBorderColor;
+            appearance.outerBorderColor = std::get<0>(border).value();
+            appearance.innerBorderColor = appearance.outerBorderColor;
         }
         
         if (borderStyle.has_value())
-            lineStyle = to_line_style(borderStyle.value());
+            appearance.lineStyle = to_line_style(borderStyle.value());
 
         if (std::get<2>(border).has_value())
-            lineStyle = to_line_style(std::get<2>(border).value());
+            appearance.lineStyle = to_line_style(std::get<2>(border).value());
 
         if (borderRadii.has_value())
         {
@@ -327,64 +324,23 @@ namespace neogfx
                 basic_length<vec2> ly{ vec2{ 0.0, l[1].unconverted_value(), }, l[1].units() };
                 return vec2{ lx.value().x, ly.value().y };
             };
-            pen outline{ outerBorderColor, pen_width(), lineStyle.value_or(line_style::Solid) };
-            if (outerBorderColor != innerBorderColor)
-                outline.set_secondary_color(innerBorderColor);
-            aGc.draw_ellipse_rect(
-                path_bounding_rect().inflate(pen_width() / 2.0),
+            appearance.borderRadii.emplace(
                 vec4{ to_vec2(borderRadii.value()[0]).x, to_vec2(borderRadii.value()[1]).x, to_vec2(borderRadii.value()[2]).x, to_vec2(borderRadii.value()[3]).x },
-                vec4{ to_vec2(borderRadii.value()[0]).y, to_vec2(borderRadii.value()[1]).y, to_vec2(borderRadii.value()[2]).y, to_vec2(borderRadii.value()[3]).y },
-                outline,
-                !spot_color() ? 
-                    brush{ gradient{ colorStart, colorEnd } } :
-                    brush{ faceColor });
+                vec4{ to_vec2(borderRadii.value()[0]).y, to_vec2(borderRadii.value()[1]).y, to_vec2(borderRadii.value()[2]).y, to_vec2(borderRadii.value()[3]).y });
         }
         else
-        {
-            neogfx::path outlinePath = path();
+            appearance.outline = path();
 
-            switch (iStyle)
-            {
-            case push_button_style::Normal:
-            case push_button_style::ButtonBox:
-            case push_button_style::Tab:
-            case push_button_style::DropList:
-            case push_button_style::SpinBox:
-                if (outerBorderColor != innerBorderColor)
-                    aGc.draw_path(
-                        outlinePath, 
-                        pen{ outerBorderColor, pen_width(), lineStyle.value_or(line_style::Solid), false }.set_secondary_color(innerBorderColor),
-                        !spot_color() ? brush{ gradient{ colorStart, colorEnd } } : brush{ faceColor });
-                else
-                    aGc.draw_path(
-                        outlinePath, 
-                        pen{ outerBorderColor, pen_width(), lineStyle.value_or(line_style::Solid), false },
-                        !spot_color() ? brush{ gradient{ colorStart, colorEnd } } : brush{ faceColor });
-                break;
-            }
-            switch (iStyle)
-            {
-            case push_button_style::Toolbar:
-            case push_button_style::TitleBar:
-                if (!spot_color())
-                    aGc.fill_path(outlinePath, gradient{ colorStart.with_lightness(colorStart.to_hsl().lightness() + 0.1), colorEnd });
-                else
-                    aGc.fill_path(outlinePath, faceColor);
-                break;
-            case push_button_style::ItemViewHeader:
-                if (!spot_color())
-                    aGc.fill_path(outlinePath, gradient{ colorStart, colorEnd });
-                else
-                    aGc.fill_path(outlinePath, faceColor);
-                break;
-            }
-        }
-        if (this->has_focus())
-        {
-            rect focusRect = path_bounding_rect();
-            focusRect.deflate(2.0, 2.0);
-            aGc.draw_focus_rect(focusRect);
-        }
+        appearance.boundingRect = path_bounding_rect();
+        appearance.borderWidth = pen_width();
+        appearance.spotColor = spot_color();
+        appearance.defaultButton = iDefaultButton;
+        appearance.customized = has_face_color() || face_color() != this->base_color() || 
+            has_border_color() || has_outer_border_color() || appearance.spotColor || borderRadii.has_value() || 
+            std::get<0>(border).has_value() || std::get<1>(border).has_value() || std::get<2>(border).has_value() || borderStyle.has_value();
+
+        service<i_skin_manager>().active_skin().draw_push_button(aGc, *this, *this, appearance);
+        update_skin_text_color(appearance);
     }
 
     template <typename PushButtonInterface>
@@ -576,6 +532,23 @@ namespace neogfx
     }
 
     template <typename PushButtonInterface>
+    inline bool basic_push_button<PushButtonInterface>::is_default_button() const
+    {
+        return iDefaultButton;
+    }
+
+    template <typename PushButtonInterface>
+    inline void basic_push_button<PushButtonInterface>::set_default_button(bool aDefaultButton)
+    {
+        if (iDefaultButton != aDefaultButton)
+        {
+            iDefaultButton = aDefaultButton;
+            iPenWidth = std::nullopt;
+            this->update();
+        }
+    }
+
+    template <typename PushButtonInterface>
     inline void basic_push_button<PushButtonInterface>::animate()
     {
         if (!this->has_root() || !this->root().has_native_surface())
@@ -642,6 +615,7 @@ namespace neogfx
     {
         iSink += this->StyleSheetChanged([&](auto const&) { iPenWidth = std::nullopt; iStyleSheetFaceColor.reset(); iStyleSheetBorderColor.reset(); });
         iSink += this->Palette.Changed([&](auto const&) { iPenWidth = std::nullopt; });
+        iSink += service<i_skin_manager>().skin_activated([&](auto const&) { iPenWidth = std::nullopt; this->update(); });
         iSink += service<i_app>().current_style_changed([&](auto const&)
             { iSink2 = service<i_app>().current_style().changed([&](auto const&)
                 { iPenWidth = std::nullopt; }); });
@@ -671,6 +645,35 @@ namespace neogfx
     }
 
     template <typename PushButtonInterface>
+    inline void basic_push_button<PushButtonInterface>::update_skin_text_color(push_button_appearance const& aAppearance) const
+    {
+        // A skin that draws the button face itself may need the label text drawn in its own color; the label
+        // is painted after the face so applying it here takes effect for this paint.  A text color set by
+        // anyone else is left alone, and the skin's color is removed again when it no longer supplies one.
+        auto const skinTextColor = service<i_skin_manager>().active_skin().push_button_text_color(*this, *this, aAppearance);
+        auto& textWidget = const_cast<basic_push_button&>(*this).text_widget();
+        bool const ours = iSkinTextColor.has_value() && textWidget.has_text_color() && textWidget.text_color() == iSkinTextColor.value();
+        if (textWidget.has_text_color() && !ours)
+        {
+            iSkinTextColor = std::nullopt;
+            return;
+        }
+        if (skinTextColor.has_value())
+        {
+            if (!ours || iSkinTextColor.value() != skinTextColor.value())
+            {
+                iSkinTextColor = skinTextColor.value();
+                textWidget.set_text_color(skinTextColor.value());
+            }
+        }
+        else if (ours)
+        {
+            iSkinTextColor = std::nullopt;
+            textWidget.set_text_color(optional_color{});
+        }
+    }
+
+    template <typename PushButtonInterface>
     inline scalar basic_push_button<PushButtonInterface>::pen_width() const
     {
         if (!iPenWidth.has_value())
@@ -693,6 +696,7 @@ namespace neogfx
                         iPenWidth = 2.0;
                     if (!iPenWidth.has_value())
                         iPenWidth = outerBorderColor != innerBorderColor ? 2.0 : 1.0;
+                    iPenWidth = service<i_skin_manager>().active_skin().push_button_border_width(*this, iDefaultButton, iPenWidth.value());
                 }
                 break;
             default:

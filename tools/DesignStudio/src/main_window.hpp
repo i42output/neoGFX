@@ -73,6 +73,7 @@ namespace neogfx::DesignStudio
         neolib::i_setting& subpixelRendering;
         neolib::i_setting& toolbarIconSize;
         neolib::i_setting& themeColor;
+        neolib::i_setting& widgetSkin;
         neolib::i_setting& workspaceGridType;
         neolib::i_setting& workspaceGridSize;
         neolib::i_setting& workspaceGridSubdivisions;

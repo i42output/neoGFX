@@ -22,6 +22,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <neolib/core/scoped.hpp>
+#include <neolib/core/string_ci.hpp>
 
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/i_basic_services.hpp>
@@ -58,32 +59,41 @@ namespace neogfx
         class family_picker_presentation_model : public picker_presentation_model
         {
         public:
+            family_picker_presentation_model(std::vector<std::uint32_t> const& aFamilyIndices) :
+                iFamilyIndices{ aFamilyIndices }
+            {
+            }
+        public:
             optional_font cell_font(item_presentation_model_index const& aIndex) const override
             {
                 auto modelRow = to_item_model_index(aIndex).row();
-                if (iFonts.size() <= modelRow)
-                    iFonts.resize(modelRow + 1);
-                if (iFonts[modelRow] == std::nullopt)
+                if (iFamilyIndices.size() <= modelRow)
+                    return optional_font{};
+                auto const familyIndex = iFamilyIndices[modelRow];
+                if (iFonts.size() <= familyIndex)
+                    iFonts.resize(familyIndex + 1);
+                if (iFonts[familyIndex] == std::nullopt)
                 {
                     auto& fm = service<i_font_manager>();
                     auto const pointSize = std::max(service<i_app>().current_style().font_info().size(), 12.0);
-                    iFonts[modelRow] = font{ 
-                        fm.font_family(modelRow), 
+                    iFonts[familyIndex] = font{ 
+                        fm.font_family(familyIndex), 
                         font_style::Normal, 
                         -service<i_app>().current_style().font().with_size(pointSize).height() 
                     };
                 }
-                return iFonts[modelRow];
+                return iFonts[familyIndex];
             }
         private:
+            std::vector<std::uint32_t> const& iFamilyIndices;
             mutable std::vector<optional_font> iFonts;
         };
 
         class style_picker_presentation_model : public picker_presentation_model
         {
         public:
-            style_picker_presentation_model(i_item_selection_model& aOurSelectionModel, i_item_selection_model& aFamilyPickerSelectionModel) :
-                iOurSelectionModel{ aOurSelectionModel }, iFamilyPickerSelectionModel { aFamilyPickerSelectionModel }
+            style_picker_presentation_model(i_item_selection_model& aOurSelectionModel, i_item_selection_model& aFamilyPickerSelectionModel, std::vector<std::uint32_t> const& aFamilyIndices) :
+                iOurSelectionModel{ aOurSelectionModel }, iFamilyPickerSelectionModel { aFamilyPickerSelectionModel }, iFamilyIndices{ aFamilyIndices }
             {
                 iSink += iFamilyPickerSelectionModel.current_index_changed([this](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& /*aPreviousIndex*/)
                 {
@@ -94,7 +104,7 @@ namespace neogfx
                     iFonts.clear();
                     if (aCurrentIndex != std::nullopt)
                     {
-                        auto fontFamilyIndex = iFamilyPickerSelectionModel.presentation_model().to_item_model_index(*aCurrentIndex).row();
+                        auto fontFamilyIndex = iFamilyIndices[iFamilyPickerSelectionModel.presentation_model().to_item_model_index(*aCurrentIndex).row()];
                         auto& fm = service<i_font_manager>();
                         auto styleCount = fm.font_style_count(fontFamilyIndex);
                         std::optional<std::uint32_t> matchingStyle;
@@ -116,7 +126,7 @@ namespace neogfx
             {
                 if (!iFamilyPickerSelectionModel.has_current_index())
                     return optional_font{};
-                auto familyModelRow = iFamilyPickerSelectionModel.presentation_model().to_item_model_index(iFamilyPickerSelectionModel.current_index()).row();
+                auto familyIndex = iFamilyIndices[iFamilyPickerSelectionModel.presentation_model().to_item_model_index(iFamilyPickerSelectionModel.current_index()).row()];
                 auto modelRow = to_item_model_index(aIndex).row();
                 if (iFonts.size() <= modelRow)
                     iFonts.resize(modelRow + 1);
@@ -125,7 +135,7 @@ namespace neogfx
                     auto& fm = service<i_font_manager>();
                     auto const pointSize = std::max(service<i_app>().current_style().font_info().size(), 12.0);
                     iFonts[modelRow] = font{
-                        fm.font_family(familyModelRow), 
+                        fm.font_family(familyIndex), 
                         static_variant_cast<string const&>(item_model().cell_data(to_item_model_index(aIndex))), 
                         -service<i_app>().current_style().font().with_size(pointSize).height() 
                     };
@@ -135,6 +145,7 @@ namespace neogfx
         private:
             i_item_selection_model& iOurSelectionModel;
             i_item_selection_model& iFamilyPickerSelectionModel;
+            std::vector<std::uint32_t> const& iFamilyIndices;
             sink iSink;
             mutable std::vector<optional_font> iFonts;
         };
@@ -252,13 +263,16 @@ namespace neogfx
         iSizeLabel{ iLayout5, "Size:"_t },
         iSizePicker{ iLayout5, drop_list_style::Editable | drop_list_style::ListAlwaysVisible | drop_list_style::NoFilter },
         iLayoutEffects{ client_layout(), neogfx::alignment::Top },
-        iEffectsBox{ iLayoutEffects, "Effects"_t, },
+        iLayoutEffectsAndFilter{ iLayoutEffects, neogfx::alignment::Left | neogfx::alignment::Top },
+        iEffectsBox{ iLayoutEffectsAndFilter, "Effects"_t, },
         iUnderline{ iEffectsBox.with_item_layout<vertical_layout>(), "Underline"_t },
         iSuperscript{ iEffectsBox.item_layout(), "Superscript"_t },
         iSubscript{ iEffectsBox.item_layout(), "Subscript"_t },
         iBelowAscenderLine{ iEffectsBox.item_layout(), "Below ascender"_t },
         iUnderlineBox{ iEffectsBox.item_layout(), "Underline"_t },
         iSmartUnderline{ iUnderlineBox.with_item_layout<vertical_layout>(), "Smart"_t },
+        iFilterBox{ iLayoutEffectsAndFilter, "Filter"_t },
+        iMonospace{ iFilterBox.with_item_layout<vertical_layout>(), "Monospace"_t },
         iTextFormatContainer{ iLayoutEffects },
         iLayoutTextFormat{ iTextFormatContainer, neogfx::alignment::Top },
         iInkBox{ iLayoutTextFormat, "Ink"_t },
@@ -309,13 +323,16 @@ namespace neogfx
         iSizeLabel{ iLayout5, "Size:"_t },
         iSizePicker{ iLayout5, drop_list_style::Editable | drop_list_style::ListAlwaysVisible | drop_list_style::NoFilter },
         iLayoutEffects{ client_layout(), neogfx::alignment::Top },
-        iEffectsBox{ iLayoutEffects, "Effects"_t, },
+        iLayoutEffectsAndFilter{ iLayoutEffects, neogfx::alignment::Left | neogfx::alignment::Top },
+        iEffectsBox{ iLayoutEffectsAndFilter, "Effects"_t, },
         iUnderline{ iEffectsBox.with_item_layout<vertical_layout>(), "Underline"_t },
         iSuperscript{ iEffectsBox.item_layout(), "Superscript"_t },
         iSubscript{ iEffectsBox.item_layout(), "Subscript"_t },
         iBelowAscenderLine{ iEffectsBox.item_layout(), "Below ascender"_t },
         iUnderlineBox{ iEffectsBox.item_layout(), "Underline"_t },
         iSmartUnderline{ iUnderlineBox.with_item_layout<vertical_layout>(), "Smart"_t },
+        iFilterBox{ iLayoutEffectsAndFilter, "Filter"_t },
+        iMonospace{ iFilterBox.with_item_layout<vertical_layout>(), "Monospace"_t },
         iTextFormatContainer{ iLayoutEffects },
         iLayoutTextFormat{ iTextFormatContainer, neogfx::alignment::Top },
         iInkBox{ iLayoutTextFormat, "Ink"_t },
@@ -386,6 +403,27 @@ namespace neogfx
         iDefaultPaper = aColor;
     }
 
+    font_dialog_filter font_dialog::filter() const
+    {
+        return iFilter;
+    }
+
+    void font_dialog::set_filter(font_dialog_filter aFilter)
+    {
+        if (iFilter == aFilter)
+            return;
+        iFilter = aFilter;
+        iMonospace.set_checked((iFilter & font_dialog_filter::Monospace) == font_dialog_filter::Monospace);
+        update_families();
+        auto& fm = service<i_font_manager>();
+        auto const selectedFamily = neolib::make_ci_string(iSelectedFont.family_name().to_std_string());
+        if (std::any_of(iFamilyIndices.begin(), iFamilyIndices.end(), [&](std::uint32_t aFamilyIndex)
+            { return neolib::make_ci_string(fm.font_family(aFamilyIndex).to_std_string()) == selectedFamily; }))
+            update_selected_font(*this);
+        else if (!iFamilyIndices.empty())
+            iFamilyPicker.selection_model().set_current_index(item_presentation_model_index{ 0u, 0u });
+    }
+
     size font_dialog::minimum_size(optional_size const& aAvailableSpace) const
     {
         auto result = dialog::minimum_size(aAvailableSpace);
@@ -406,6 +444,7 @@ namespace neogfx
         iPaperBox.set_checkable(true, true);
         iAdvancedEffectsBox.set_checkable(true, true);
         iAnimationFlashingBox.set_checkable(true, true);
+        iLayoutEffectsAndFilter.set_size_policy(size_constraint::Minimum);
 
         auto easingItemModel = make_ref<basic_item_model<easing>>();
         for (auto i = 0; i < animation_easings().size(); ++i)
@@ -427,6 +466,7 @@ namespace neogfx
         iSink += iSubscript.Toggled([&]() { if (iSubscript.is_checked()) { iSuperscript.uncheck(); iBelowAscenderLine.set_text("Above baseline"_t); } update_selected_font(iSubscript); });
         iSink += iBelowAscenderLine.Toggled([&]() { update_selected_font(iBelowAscenderLine); });
         iSink += iSmartUnderline.Toggled([&]() { update_selected_format(iSmartUnderline); });
+        iSink += iMonospace.Toggled([&]() { set_filter(iMonospace.is_checked() ? iFilter | font_dialog_filter::Monospace : iFilter & ~font_dialog_filter::Monospace); });
         iSink += iInkBox.check_box().Checked([&]() { update_selected_format(iInkBox); });
         iSink += iInkBox.check_box().Unchecked([&]() { update_selected_format(iInkBox); });
         iSink += iPaperBox.check_box().Checked([&]() { update_selected_format(iPaperBox); });
@@ -474,7 +514,10 @@ namespace neogfx
         iLayout4.set_weight(neogfx::size{ 3.0, 1.0 });
         iLayout5.set_weight(neogfx::size{ 1.0, 1.0 });
 
-        iSampleBox.set_size_policy(size_constraint::Expanding);
+        // (the sample fills the width (no spacer beside the content box) and its box is only as tall as the sample: any extra height
+        // goes to the pickers)
+        iSampleBox.set_stretch_content_to_title_width(true);
+        iSampleBox.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iSample.set_size_policy(size_constraint::Expanding);
         iSample.set_minimum_size(size{ 192.0_dip, 48.0_dip });
         iSample.set_maximum_size(size{ size::max_dimension(), 48.0_dip });
@@ -482,8 +525,8 @@ namespace neogfx
         button_box().add_button(standard_button::Ok);
         button_box().add_button(standard_button::Cancel);
 
-        iFamilyPicker.set_presentation_model(make_ref<family_picker_presentation_model>());
-        iStylePicker.set_presentation_model(make_ref<style_picker_presentation_model>(iStylePicker.selection_model(), iFamilyPicker.selection_model()));
+        iFamilyPicker.set_presentation_model(make_ref<family_picker_presentation_model>(iFamilyIndices));
+        iStylePicker.set_presentation_model(make_ref<style_picker_presentation_model>(iStylePicker.selection_model(), iFamilyPicker.selection_model(), iFamilyIndices));
         iSizePicker.set_presentation_model(make_ref<picker_presentation_model>());
 
         iFamilyPicker.selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
@@ -517,15 +560,29 @@ namespace neogfx
             update_selected_font(iSizePicker);
         });
 
-        auto& fm = service<i_font_manager>();
-
-        for (std::uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
-            iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi));
+        update_families();
 
         center_on_parent();
         update_selected_font(*this);
         update_selected_format(*this);
         set_ready_to_render(true);
+    }
+
+    void font_dialog::update_families()
+    {
+        neolib::scoped_flag sf{ iUpdating };
+
+        auto& fm = service<i_font_manager>();
+        bool const monospaceOnly = (iFilter & font_dialog_filter::Monospace) == font_dialog_filter::Monospace;
+        iFamilyPicker.selection_model().clear_current_index();
+        iFamilyPicker.model().clear();
+        iFamilyIndices.clear();
+        for (std::uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
+            if (!monospaceOnly || fm.is_font_family_monospace(fi))
+            {
+                iFamilyIndices.push_back(fi);
+                iFamilyPicker.model().insert_item(item_model_index{ static_cast<std::uint32_t>(iFamilyIndices.size() - 1u) }, fm.font_family(fi));
+            }
     }
 
     void font_dialog::update_selected_font(const i_widget& aUpdatingWidget)
@@ -567,7 +624,7 @@ namespace neogfx
         }
         else if (iFamilyPicker.selection_model().has_current_index() && iStylePicker.selection_model().has_current_index())
         {
-            auto fontFamilyIndex = iFamilyPicker.presentation_model().to_item_model_index(iFamilyPicker.selection_model().current_index()).row();
+            auto fontFamilyIndex = iFamilyIndices[iFamilyPicker.presentation_model().to_item_model_index(iFamilyPicker.selection_model().current_index()).row()];
             auto fontStyleIndex = iStylePicker.presentation_model().to_item_model_index(iStylePicker.selection_model().current_index()).row();
             auto fontSize = iSelectedFont.size();
             try { fontSize = boost::lexical_cast<double>(iSizePicker.input_widget().text()); } catch (...) {}

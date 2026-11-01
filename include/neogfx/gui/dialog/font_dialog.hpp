@@ -34,6 +34,27 @@
 
 namespace neogfx
 {
+    enum class font_dialog_filter : std::uint32_t
+    {
+        None        = 0x0000,
+        Monospace   = 0x0001
+    };
+
+    inline font_dialog_filter operator|(font_dialog_filter aLhs, font_dialog_filter aRhs)
+    {
+        return static_cast<font_dialog_filter>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
+    }
+
+    inline font_dialog_filter operator&(font_dialog_filter aLhs, font_dialog_filter aRhs)
+    {
+        return static_cast<font_dialog_filter>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
+    }
+
+    inline font_dialog_filter operator~(font_dialog_filter aLhs)
+    {
+        return static_cast<font_dialog_filter>(~static_cast<std::uint32_t>(aLhs));
+    }
+
     class font_dialog : public dialog
     {
         meta_object(dialog)
@@ -51,16 +72,21 @@ namespace neogfx
         void select_font(neogfx::font const& aFont);
         void set_default_ink(const optional<color>& aColor);
         void set_default_paper(const optional<color>& aColor);
+        font_dialog_filter filter() const;
+        void set_filter(font_dialog_filter aFilter);
     protected:
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     private:
         void init();
+        void update_families();
         void update_selected_font(i_widget const& aUpdatingWidget);
         void update_selected_format(i_widget const& aUpdatingWidget);
         void update_widgets();
     private:
         sink iSink;
         bool iUpdating;
+        font_dialog_filter iFilter = font_dialog_filter::None;
+        std::vector<std::uint32_t> iFamilyIndices;
         neogfx::font iCurrentFont;
         neogfx::font iSelectedFont;
         optional<text_format> iCurrentTextFormat;
@@ -80,6 +106,7 @@ namespace neogfx
         label iSizeLabel;
         drop_list iSizePicker;
         horizontal_layout iLayoutEffects;
+        vertical_layout iLayoutEffectsAndFilter;
         group_box iEffectsBox;
         check_box iUnderline;
         check_box iSuperscript;
@@ -87,6 +114,8 @@ namespace neogfx
         check_box iBelowAscenderLine;
         group_box iUnderlineBox;
         check_box iSmartUnderline;
+        group_box iFilterBox;
+        check_box iMonospace;
         widget<> iTextFormatContainer;
         horizontal_layout iLayoutTextFormat;
         group_box iInkBox;

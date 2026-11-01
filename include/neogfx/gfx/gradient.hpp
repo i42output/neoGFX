@@ -54,7 +54,7 @@ namespace neogfx
         basic_gradient(const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops, gradient_direction aDirection = gradient_direction::Vertical);
         basic_gradient(const basic_gradient& aOther, const abstract_color_stop_list& aColorStops);
         basic_gradient(const basic_gradient& aOther, const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops);
-        basic_gradient(const neolib::i_vector<sRGB_color::abstract_type>& aColors, gradient_direction aDirection = gradient_direction::Vertical);
+        basic_gradient(const neolib::i_vector<sRGB_color>& aColors, gradient_direction aDirection = gradient_direction::Vertical);
         basic_gradient(const std::initializer_list<sRGB_color>& aColors, gradient_direction aDirection = gradient_direction::Vertical);
     public:
         basic_gradient& operator=(const i_gradient& aOther) override;

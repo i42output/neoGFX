@@ -571,6 +571,8 @@
     <ClInclude Include="..\..\..\..\src\gui\window\native\virtual_surface.hpp" />
     <ClInclude Include="..\..\..\..\src\gui\window\native\virtual_window.hpp" />
     <ClInclude Include="..\..\..\..\src\gui\window\native\windows_window.hpp" />
+    <ClInclude Include="..\..\..\..\src\gui\widget\native\native_skin.hpp" />
+    <ClInclude Include="..\..\..\..\src\gui\widget\native\windows_skin.hpp" />
     <ClInclude Include="..\..\..\..\src\hid\native\windows_directinput_controller.hpp" />
     <ClInclude Include="..\..\..\..\src\hid\native\windows_display.hpp" />
     <ClInclude Include="..\..\..\..\src\hid\native\windows_game_controllers.hpp" />
@@ -688,6 +690,7 @@
     <ClCompile Include="..\..\..\..\src\gui\window\native\virtual_surface.cpp" />
     <ClCompile Include="..\..\..\..\src\gui\window\native\virtual_window.cpp" />
     <ClCompile Include="..\..\..\..\src\gui\window\native\windows_window.cpp" />
+    <ClCompile Include="..\..\..\..\src\gui\widget\native\windows_skin.cpp" />
     <ClCompile Include="..\..\..\..\src\hid\display.cpp" />
     <ClCompile Include="..\..\..\..\src\hid\game_controller.cpp" />
     <ClCompile Include="..\..\..\..\src\hid\game_controllers.cpp" />

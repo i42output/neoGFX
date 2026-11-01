@@ -53,11 +53,11 @@ v1.20   | WID + 12 months | macOS support
 Feature                         | % done  |     TODO
 --------------------------------|---------|-------------------------------------------------------------------------------
 Window                          | 95      |     Drop shadow
-Dialog                          | 90      |     Default button
+Dialog                          | 100     |
 Message Box                     | 100     |
 Menu                            | 100     | 
-Nested windows                  | 90      |     
-MDI                             | 0       |
+Nested windows                  | 95      |     
+MDI                             | 80      |
 Tabs                            | 100     |
 Toolbars                        | 90      |     Drop-down button support
 Layout Managers                 | 100     |
@@ -78,7 +78,7 @@ Tool Tips                       | 100     |
 Status Bar                      | 100     |
 Progress Bar                    | 95      |
 Docks							| 75      |
-Font Picker                     | 99      |     Monospace filter
+Font Picker                     | 100     |
 Colour Gradient Selector        | 100     |
 Colour Picker                   | 100     |     
 Date/Time                       | 0       |
@@ -91,7 +91,7 @@ l10n                            | 0       |
 HID: Game Controllers           | 80      |     Calibration/settings UI; DirectInput button mapping
 Multi-monitor					| 50      |     DPI changes when changing or dragging between monitors
 Scene Graph						| 90      |		
-Skins                           | 40      |
+Skins                           | 60      |
 
 
 

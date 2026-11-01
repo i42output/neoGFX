@@ -19,7 +19,9 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/skin_manager.hpp>
+#include "native/native_skin.hpp"
 
 template<> neogfx::i_skin_manager& services::start_service<neogfx::i_skin_manager>() { return neogfx::skin_manager::instance(); }
 
@@ -29,6 +31,7 @@ namespace neogfx
         iActiveSkin{ nullptr }
     {
         register_skin(iDefaultSkin);
+        register_skin(native::native_skin());
         activate_skin(iDefaultSkin);
     }
 
@@ -94,9 +97,19 @@ namespace neogfx
 
     void skin_manager::activate_skin(i_skin& aSkin)
     {
-        if (skin_active())
+        bool const changingSkin = skin_active();
+        if (changingSkin && iActiveSkin == &aSkin)
+            return;
+        if (changingSkin)
             active_skin().deactivate();
         iActiveSkin = &aSkin;
         active_skin().activate();
+        SkinActivated(active_skin());
+        if (changingSkin)
+        {
+            // skin metrics (e.g. check box size) may differ so relayout as well as repaint
+            service<i_surface_manager>().layout_surfaces();
+            service<i_surface_manager>().invalidate_surfaces();
+        }
     }
 }

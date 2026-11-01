@@ -44,8 +44,11 @@ namespace neogfx
         neogfx::size_policy size_policy() const override;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
+        rect element_rect(skin_element aElement) const override;
+    public:
         void paint(i_graphics_context& aGc) const override;
     public:
+        void mouse_left() override;
         void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
         void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
         void mouse_button_released(mouse_button aButton, const point& aPosition) override;

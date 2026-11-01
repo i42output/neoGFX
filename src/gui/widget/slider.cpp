@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/widget/slider.hpp>
 #include <neogfx/gui/widget/slider.ipp>
 
@@ -100,42 +101,29 @@ namespace neogfx
         return iOrientation == slider_orientation::Horizontal ? size{ 80_dip, 22_dip } : size{ 22_dip, 80_dip };
     }
 
-    void slider_impl::paint(i_graphics_context& aGc) const
+    rect slider_impl::element_rect(skin_element aElement) const
     {
         scoped_units su{ *this, units::Pixels };
-        rect rectBarBox = bar_box();
-        color ink = background_color().shaded(0x80);
-        aGc.fill_rounded_rect(rectBarBox, 2.0, to_brush(iBarColor ? *iBarColor : ink));
-        rectBarBox.inflate(size{ 1.0, 1.0 });
-        aGc.fill_rounded_rect(rectBarBox, 2.0, to_brush(iBarColor ? *iBarColor : ink.mid(background_color())));
-        rectBarBox.deflate(size{ 1.0, 1.0 });
-        point selection = normalized_value_to_position(normalized_value());
-        rect selectionRect = rectBarBox;
-        if (iOrientation == slider_orientation::Horizontal)
-            selectionRect.cx = selection.x - selectionRect.x;
-        else
+        switch (aElement)
         {
-            selectionRect.cy = selectionRect.bottom() - selection.y;
-            selectionRect.y = selection.y;
+        case skin_element::SliderTrack:
+            return bar_box();
+        case skin_element::SliderThumb:
+            return indicator_box();
+        default:
+            return widget::element_rect(aElement);
         }
-        {
-            scoped_scissor ss{ aGc, selectionRect };
-            if (normalized_value() > 0.0)
-                aGc.fill_rounded_rect(rectBarBox, 2.0, to_brush(iBarColor ? *iBarColor : service<i_app>().current_style().palette().color(color_role::Selection)));
-        }
-        rect rectIndicator = indicator_box();
-        color indicatorColor = base_color();
-        if (iDragOffset != std::nullopt)
-        {
-            if (indicatorColor.light(0x40))
-                indicatorColor.darken(0x40);
-            else
-                indicatorColor.lighten(0x40);
-        }
-        color indicatorBorderColor = indicatorColor.darker(0x40);
-        indicatorColor.lighten(0x40);
-        aGc.fill_circle(rectIndicator.center(), rectIndicator.width() / 2.0, indicatorBorderColor);
-        aGc.fill_circle(rectIndicator.center(), rectIndicator.width() / 2.0 - 1.0, indicatorColor);
+    }
+
+    void slider_impl::paint(i_graphics_context& aGc) const
+    {
+        service<i_skin_manager>().active_skin().draw_slider(aGc, *this, iOrientation, normalized_value(), iDragOffset != std::nullopt, iBarColor);
+    }
+
+    void slider_impl::mouse_left()
+    {
+        widget::mouse_left();
+        update(); // (the thumb's hover state)
     }
 
     void slider_impl::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
@@ -201,6 +189,8 @@ namespace neogfx
             else
                 set_normalized_value(normalized_value_from_position(point{ aPosition.x, aPosition.y - iDragOffset->y }));
         }
+        else
+            update(); // (the thumb's hover state)
     }
 
     void slider_impl::set_normalized_value(double aValue)

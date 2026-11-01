@@ -123,6 +123,7 @@ namespace neogfx
         virtual std::uint32_t font_style_count(std::uint32_t aFamilyIndex) const = 0;
         virtual neogfx::font_style font_style(std::uint32_t aFamilyIndex, std::uint32_t aStyleIndex) const = 0;
         virtual i_string const& font_style_name(std::uint32_t aFamilyIndex, std::uint32_t aStyleIndex) const = 0;
+        virtual bool is_font_family_monospace(std::uint32_t aFamilyIndex) const = 0;
     private:
         virtual font_id allocate_font_id() = 0;
     public:

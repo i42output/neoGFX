@@ -85,6 +85,7 @@ namespace neogfx
         std::uint32_t font_style_count(std::uint32_t aFamilyIndex) const final;
         neogfx::font_style font_style(std::uint32_t aFamilyIndex, std::uint32_t aStyleIndex) const final;
         i_string const& font_style_name(std::uint32_t aFamilyIndex, std::uint32_t aStyleIndex) const final;
+        bool is_font_family_monospace(std::uint32_t aFamilyIndex) const final;
     private:
         font_id allocate_font_id() final;
     public:

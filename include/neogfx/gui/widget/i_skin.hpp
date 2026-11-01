@@ -21,15 +21,39 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neolib/core/optional.hpp>
+
 #include <neogfx/gfx/i_graphics_context.hpp>
+#include <neogfx/gfx/path.hpp>
+#include <neogfx/gfx/pen.hpp>
+#include <neogfx/gfx/gradient.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
 #include <neogfx/gui/widget/i_scrollbar.hpp>
 #include <neogfx/gui/widget/i_button.hpp>
+#include <neogfx/gui/widget/i_push_button.hpp>
 #include <neogfx/gui/widget/i_progress_bar.hpp>
+#include <neogfx/gui/widget/slider_bits.hpp>
 
 namespace neogfx
 {
+    // How a push button wants to look: computed by the button (so that subclasses can customize it) 
+    // and drawn by the active skin.  Units are pixels.
+    struct push_button_appearance
+    {
+        rect boundingRect;
+        neogfx::path outline;
+        dimension borderWidth = 0.0;
+        color faceColor;
+        color outerBorderColor;
+        color innerBorderColor;
+        std::optional<line_style> lineStyle;
+        std::optional<std::pair<vec4, vec4>> borderRadii; // (x radii, y radii)
+        bool spotColor = false;
+        bool defaultButton = false;
+        bool customized = false; // face, border or shape set explicitly (property, palette, style sheet or subclass)
+    };
+
     class i_skin
     {
     public:
@@ -45,13 +69,25 @@ namespace neogfx
         virtual void deactivate() = 0;
     public:
         virtual size preferred_size(skin_element aElement, optional_size const& aDesiredSize = {}) const = 0;
+        virtual dimension push_button_border_width(const i_skinnable_item& aItem, bool aDefaultButton, dimension aBorderWidth) const = 0;
     public:
+        virtual void draw_push_button(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_push_button& aButton, const push_button_appearance& aAppearance) const = 0;
+        virtual void push_button_text_color(const i_skinnable_item& aItem, const i_push_button& aButton, const push_button_appearance& aAppearance, i_optional<color>& aTextColor) const = 0; ///< (no value: the button's usual text color)
         virtual void draw_scrollbar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_scrollbar& aScrollbar) const = 0;
         virtual void draw_check_box(i_graphics_context& aGc, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const = 0;
         virtual void draw_radio_button(i_graphics_context& aGc, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const = 0;
         virtual void draw_tree_expander(i_graphics_context& aGc, const i_skinnable_item& aItem, bool aExpandedState) const = 0;
+        virtual void draw_slider(i_graphics_context& aGc, const i_skinnable_item& aItem, slider_orientation aOrientation, double aNormalizedValue, bool aDragging, i_optional<color_or_gradient::abstract_type> const& aBarColor) const = 0; ///< (track and thumb: the item's SliderTrack and SliderThumb element rects)
         virtual void draw_progress_bar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_progress_bar& aProgressBar) const = 0;
         virtual void draw_separators(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_layout& aLayout) const = 0;
+        // helpers
+    public:
+        neolib::optional<color> push_button_text_color(const i_skinnable_item& aItem, const i_push_button& aButton, const push_button_appearance& aAppearance) const
+        {
+            neolib::optional<color> result;
+            push_button_text_color(aItem, aButton, aAppearance, result);
+            return result;
+        }
     };
 
     typedef std::pair<std::uint32_t, std::uint32_t> separator_index;

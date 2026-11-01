@@ -33,6 +33,7 @@ namespace neogfx
     public:
         define_declared_event(SkinRegistered, skin_registered, i_skin&)
         define_declared_event(SkinUnregistered, skin_unregistered, i_skin&)
+        define_declared_event(SkinActivated, skin_activated, i_skin&)
     private:
         typedef std::unordered_set<i_skin*> skin_list;
     public:

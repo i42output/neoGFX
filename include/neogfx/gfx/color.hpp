@@ -80,7 +80,6 @@ namespace neogfx
         using derived_type = Derived;
         // types
     public:
-        using abstract_type = base_type; // todo
         using base_component = BaseComponent;
         using view_component = ViewComponent;
         using return_type = typename color_return_type_cracker<basic_color, derived_type>::return_type;
@@ -178,7 +177,6 @@ namespace neogfx
     {
         using base_type = basic_color<ColorSpace, BaseComponent, ViewComponent, 3, Derived>;
     public:
-        using typename base_type::abstract_type;
         using typename base_type::base_component;
         using typename base_type::view_component;
         using typename base_type::return_type;
@@ -1047,7 +1045,7 @@ namespace neogfx
         using base_type::base_type;
         sRGB_color();
         sRGB_color(const sRGB_color& aOther);
-        sRGB_color(const abstract_type& aOther);
+        sRGB_color(const basic_vector<scalar, 4>& aOther);
         explicit sRGB_color(const base_type& aOther);
         explicit sRGB_color(const linear_color& aLinear);
         sRGB_color(std::string const& aTextValue);

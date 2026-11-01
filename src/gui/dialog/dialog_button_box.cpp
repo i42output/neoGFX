@@ -123,9 +123,18 @@ namespace neogfx
             newButton->second->clicked([this, newButton]() { Clicked(newButton->first.first); });
             break;
         }
+        newButton->second->focus_event([this, newButton](neogfx::focus_event aEvent, focus_reason)
+        {
+            if (aEvent == neogfx::focus_event::FocusGained)
+                iFocusedButton = newButton->first.first;
+            else if (iFocusedButton == newButton->first.first)
+                iFocusedButton = std::nullopt;
+            update_default_button();
+        });
         iStandardButtonLayout.remove_all();
         for (auto& button : iButtons)
             iStandardButtonLayout.add(*button.second);
+        update_default_button();
     }
 
     void dialog_button_box::add_buttons(standard_button aStandardButtons)
@@ -140,9 +149,26 @@ namespace neogfx
         }
     }
 
+    std::optional<standard_button> dialog_button_box::default_button() const
+    {
+        auto has_button = [&](standard_button aButton)
+        {
+            for (auto const& button : iButtons)
+                if (button.first.first == aButton)
+                    return true;
+            return false;
+        };
+        if (iDefaultButton && has_button(*iDefaultButton))
+            return iDefaultButton;
+        if (has_button(standard_button::Ok))
+            return standard_button::Ok;
+        return {};
+    }
+
     void dialog_button_box::set_default_button(standard_button aButton)
     {
         iDefaultButton = aButton;
+        update_default_button();
     }
 
     void dialog_button_box::clear()
@@ -150,6 +176,7 @@ namespace neogfx
         iStandardButtonLayout.remove_all();
         iButtons.clear();
         iDefaultButton = {};
+        iFocusedButton = {};
     }
 
     i_layout& dialog_button_box::option_layout()
@@ -216,10 +243,20 @@ namespace neogfx
                     if (!root().has_focused_widget() ||
                         !find_widget_with_focus_policy(root().focused_widget(), neogfx::focus_policy::ConsumeReturnKey))
                     {
-                        if (!iDefaultButton || similar_role(role_of_button(*iDefaultButton), button_role::Accept))
+                        auto const defaultButton = iFocusedButton ? iFocusedButton : default_button();
+                        if (!defaultButton)
                             Accepted();
-                        else if (similar_role(role_of_button(*iDefaultButton), button_role::Reject))
-                            Rejected();
+                        else if (!button(*defaultButton).enabled())
+                            service<i_basic_services>().system_beep();
+                        else
+                        {
+                            auto const defaultButtonRole = role_of_button(*defaultButton);
+                            Clicked(*defaultButton);
+                            if (similar_role(defaultButtonRole, button_role::Accept))
+                                Accepted();
+                            else if (similar_role(defaultButtonRole, button_role::Reject))
+                                Rejected();
+                        }
                     }
                     break;
                 case ScanCode_ESCAPE:
@@ -249,6 +286,13 @@ namespace neogfx
             if (similar_role(b.first.second, button_role::Reject))
                 return true;
         return false;
+    }
+
+    void dialog_button_box::update_default_button()
+    {
+        auto const defaultButton = iFocusedButton ? iFocusedButton : default_button();
+        for (auto& button : iButtons)
+            button.second->set_default_button(defaultButton == button.first.first);
     }
 
     bool dialog_button_box::similar_role(button_role aButtonRole1, button_role aButtonRole2)

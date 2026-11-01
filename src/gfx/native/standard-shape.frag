@@ -29,7 +29,13 @@ float spot_alpha(float a, float aliasThreshold)
     return a;
 }
 
-vec4 shape_color(float d0, vec4 color, float outlineCount, float outlineWidth, float aliasThreshold, vec4 outerColor, vec4 innerColor)
+// the width of a two color outline's inner (secondary color) part: the outline's (pen's) width if not specified
+float inner_outline_width(vec4 function3)
+{
+    return function3.x == 2.0 && function3.z != 0.0 ? function3.z : function3.w;
+}
+
+vec4 shape_color(float d0, vec4 color, float outlineCount, float outlineWidth, float innerOutlineWidth, float aliasThreshold, vec4 outerColor, vec4 innerColor)
 {
     float a = spot_alpha(1.0 - smoothstep(-0.5, 0.5, d0), aliasThreshold);
     color = vec4(color.xyz, color.a * a);
@@ -53,6 +59,10 @@ vec4 shape_color(float d0, vec4 color, float outlineCount, float outlineWidth, f
     }
     else if (outlineCount == 2.0)
     {
+        // (the inner part is half the inner (secondary color) width: its distances are scaled to the outline's so that both parts are 
+        // as when they are the same width)
+        if (d0 < 0.0 && innerOutlineWidth > 0.0)
+            d0 *= outlineWidth / innerOutlineWidth;
         if (aliasThreshold != 0.0)
         {
             float a = spot_alpha(1.0 - smoothstep(-(outlineWidth / 2.0 + aliasThreshold), outlineWidth / 2.0 + aliasThreshold, d0), aliasThreshold);
@@ -83,7 +93,7 @@ void draw_line(inout vec4 color, inout vec4 function1, inout vec4 function2, ino
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
 
     float d0 = sdSegment(fragPos, function1.xy, function1.zw);
-    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
         discard;
     else
     {
@@ -155,10 +165,10 @@ void draw_triangle(inout vec4 color, inout vec4 function1, inout vec4 function2,
 
     float d0 = sdTriangle(fragPos.xy, function1.xy, function1.zw, function2.xy);
     color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
-    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
         discard;
     else
-        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
+        color = shape_color(d0, color, function3.x, function3.w, inner_outline_width(function3), function3.y, function4, function5);
 }
 
 float sdBox(vec2 p, vec2 b)
@@ -172,10 +182,10 @@ void draw_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, ino
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
 
     float d0 = sdBox(fragPos.xy - function1.xy, function1.zw * 0.5);
-    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
         discard;
     else
-        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
+        color = shape_color(d0, color, function3.x, function3.w, inner_outline_width(function3), function3.y, function4, function5);
 }
 
 float sdCircle(vec2 p, float r)
@@ -188,10 +198,10 @@ void draw_circle(inout vec4 color, inout vec4 function1, inout vec4 function2, i
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
 
     float d0 = sdCircle(fragPos.xy - function1.xy, function1.z);
-    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
         discard;
     else
-        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
+        color = shape_color(d0, color, function3.x, function3.w, inner_outline_width(function3), function3.y, function4, function5);
 }
 
 float sdEllipse(vec2 p, vec2 ab)
@@ -236,10 +246,10 @@ void draw_ellipse(inout vec4 color, inout vec4 function1, inout vec4 function2, 
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
 
     float d0 = sdEllipse(fragPos.xy - function1.xy, function1.zw);
-    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
         discard;
     else
-        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
+        color = shape_color(d0, color, function3.x, function3.w, inner_outline_width(function3), function3.y, function4, function5);
 }
 
 float sdPie(vec2 p, vec2 c, in float r)
@@ -258,10 +268,10 @@ void draw_pie(inout vec4 color, inout vec4 function1, inout vec4 function2, inou
     float a0 = PI * 0.5 + (function1.w + function2.x) * 0.5;
     vec2 p0 = (fragPos.xy - function1.xy) * mat2(cos(a0), -sin(a0), sin(a0), cos(a0));
     float d0 = sdPie(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);
-    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
         discard;
     else
-        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
+        color = shape_color(d0, color, function3.x, function3.w, inner_outline_width(function3), function3.y, function4, function5);
 }
 
 float sdArc(vec2 p, vec2 c, in float r)
@@ -283,10 +293,10 @@ void draw_arc(inout vec4 color, inout vec4 function1, inout vec4 function2, inou
     float a0 = PI * 0.5 + (function1.w + function2.x) * 0.5;
     vec2 p0 = (fragPos.xy - function1.xy) * mat2(cos(a0), -sin(a0), sin(a0), cos(a0));
     float d0 = sdArc(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);
-    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
         discard;
     else if (smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0)) != 1.0)
-        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
+        color = shape_color(d0, color, function3.x, function3.w, inner_outline_width(function3), function3.y, function4, function5);
 }
                 
 float sdRoundedBox(vec2 p, vec2 b, vec4 r)
@@ -303,10 +313,10 @@ void draw_rounded_rect(inout vec4 color, inout vec4 function1, inout vec4 functi
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
 
     float d0 = sdRoundedBox(fragPos.xy - function1.xy, function1.zw * 0.5, function2);
-    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
         discard;
     else
-        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
+        color = shape_color(d0, color, function3.x, function3.w, inner_outline_width(function3), function3.y, function4, function5);
 }
 
 float sdEllipseBox(vec2 f, vec2 c, vec2 b, vec4 rx, vec4 ry)
@@ -348,10 +358,10 @@ void draw_ellipse_rect(inout vec4 color, inout vec4 function1, inout vec4 functi
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
 
     float d0 = sdEllipseBox(fragPos.xy, function1.xy, function1.zw * 0.5, function2, function6);
-    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
         discard;
     else
-        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
+        color = shape_color(d0, color, function3.x, function3.w, inner_outline_width(function3), function3.y, function4, function5);
 }
 
 float sdPolygon(in vec2 p, in vec2 meta)
@@ -383,10 +393,10 @@ void draw_polygon(inout vec4 color, inout vec4 function1, inout vec4 function2, 
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
 
     float d0 = sdPolygon(fragPos - function2.xy, function1.xy);
-    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
         discard;
     else
-        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
+        color = shape_color(d0, color, function3.x, function3.w, inner_outline_width(function3), function3.y, function4, function5);
 }
 
 void draw_checkerboard(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
@@ -406,10 +416,10 @@ void draw_checkerboard(inout vec4 color, inout vec4 function1, inout vec4 functi
             discard;
     }
 
-    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
         discard;
     else
-        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
+        color = shape_color(d0, color, function3.x, function3.w, inner_outline_width(function3), function3.y, function4, function5);
 }
 
 void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)

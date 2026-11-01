@@ -137,6 +137,17 @@ namespace neogfx
             iSecondaryColor = aColor;
             return *this;
         }
+        /// The width of the secondary color: the inner part of a two color outline is half of it (the outer (primary color) part is 
+        /// half of the pen's width); the pen's width if not set.
+        dimension secondary_width() const
+        {
+            return iSecondaryWidth.value_or(iWidth);
+        }
+        pen& set_secondary_width(std::optional<dimension> const& aWidth)
+        {
+            iSecondaryWidth = aWidth;
+            return *this;
+        }
         bool anti_aliased() const 
         { 
             return iAntiAliased; 
@@ -154,6 +165,7 @@ namespace neogfx
         line_style iStyle;
         line_dash iCustomDash;
         std::optional<neogfx::color> iSecondaryColor;
+        std::optional<dimension> iSecondaryWidth;
         bool iAntiAliased;
     };
 

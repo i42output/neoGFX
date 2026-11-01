@@ -986,6 +986,12 @@
     <ClInclude Include="..\..\..\..\src\gui\window\native\windows_window.hpp">
       <Filter>Header Files\native\windows</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\gui\widget\native\native_skin.hpp">
+      <Filter>Header Files\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\gui\widget\native\windows_skin.hpp">
+      <Filter>Header Files\native\windows</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\src\hid\native\windows_directinput_controller.hpp">
       <Filter>Header Files\native\windows</Filter>
     </ClInclude>
@@ -1402,6 +1408,9 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\gui\window\native\windows_window.cpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\gui\widget\native\windows_skin.cpp">
       <Filter>Source Files\native\windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\hid\display.cpp">

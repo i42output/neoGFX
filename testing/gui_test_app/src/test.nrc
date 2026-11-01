@@ -608,6 +608,9 @@
                                             Base: Aquamarine
                                         }
                                     }
+                                    drop_list: {
+                                        id: dropListSkin
+                                    }
                                     grid_layout: {
                                         id: keypad
                                         rows: 4

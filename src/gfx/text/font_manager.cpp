@@ -1223,6 +1223,21 @@ namespace neogfx
         throw bad_font_family_index();
     }
 
+    bool font_manager::is_font_family_monospace(std::uint32_t aFamilyIndex) const
+    {
+        if (aFamilyIndex < font_family_count())
+        {
+            auto const& fonts = std::next(iFontFamilies.begin(), aFamilyIndex)->second;
+            if (fonts.empty())
+                return false;
+            for (auto const& font : fonts)
+                if (!font->is_monospace())
+                    return false;
+            return true;
+        }
+        throw bad_font_family_index();
+    }
+
     font_id font_manager::allocate_font_id()
     {
         return iIdCache.next_cookie();

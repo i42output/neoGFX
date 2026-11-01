@@ -26,6 +26,8 @@
 
 namespace neogfx
 {
+    struct push_button_appearance;
+
     extern template class widget<i_push_button>;
     extern template class button<i_push_button>;
 
@@ -77,6 +79,9 @@ namespace neogfx
         void set_border_radius(std::optional<border_radii> const& aBorderRadii = {});
         void set_border_radius(length const& aBorderRadius);
     public:
+        bool is_default_button() const;
+        void set_default_button(bool aDefaultButton = true);
+    public:
         virtual bool has_face_color() const;
         virtual color face_color() const;
         virtual void set_face_color(const optional_color& aFaceColor = {});
@@ -103,14 +108,17 @@ namespace neogfx
     private:
         void init();
         scalar pen_width() const;
+        void update_skin_text_color(push_button_appearance const& aAppearance) const;
     private:
         widget_timer iAnimator;
         std::uint32_t iAnimationFrame;
         push_button_style iStyle;
+        bool iDefaultButton = false;
         define_style_sheet_value(iStyleSheetFaceColor, color, "background-color", this->base_color())
         define_style_sheet_value(iStyleSheetBorderColor, color, "border-color", effective_border_color())
         mutable std::optional<std::pair<neogfx::font, size>> iStandardButtonWidth;
         mutable std::optional<dimension> iPenWidth;
+        mutable std::optional<color> iSkinTextColor; ///< (the label text color the skin last supplied, if it is still applied)
         sink iSink;
         sink iSink2;
     public:

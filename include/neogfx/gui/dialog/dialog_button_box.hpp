@@ -61,6 +61,7 @@ namespace neogfx
         void add_button(standard_button aStandardButton);
         void add_button(standard_button aStandardButton, button_role aButtonRole, std::string const& aButtonText);
         void add_buttons(standard_button aStandardButtons);
+        std::optional<standard_button> default_button() const;
         void set_default_button(standard_button aButton);
         void clear();
         i_layout& option_layout();
@@ -70,6 +71,7 @@ namespace neogfx
     private:
         void init();
         bool can_reject() const;
+        void update_default_button();
     private:
         static bool similar_role(button_role aButtonRole1, button_role aButtonRole2);
     private:
@@ -80,5 +82,6 @@ namespace neogfx
         horizontal_layout iStandardButtonLayout;
         button_list iButtons;
         std::optional<standard_button> iDefaultButton;
+        std::optional<standard_button> iFocusedButton;
     };
 }

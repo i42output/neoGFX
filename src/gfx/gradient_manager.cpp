@@ -141,7 +141,7 @@ namespace neogfx
         {
             fix();
         }
-        gradient_object(gradient_id aId, const neolib::i_vector<sRGB_color::abstract_type>& aColors, gradient_direction aDirection) :
+        gradient_object(gradient_id aId, const neolib::i_vector<sRGB_color>& aColors, gradient_direction aDirection) :
             iId{ aId },
             iDirection{ aDirection }
         {
@@ -736,7 +736,7 @@ namespace neogfx
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aOther, aColorStops, aAlphaStops));
     }
 
-    void gradient_manager::do_create_gradient(neolib::i_vector<sRGB_color::abstract_type> const& aColors, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
+    void gradient_manager::do_create_gradient(neolib::i_vector<sRGB_color> const& aColors, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
     {
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aColors, aDirection));
     }

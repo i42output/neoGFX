@@ -55,6 +55,7 @@ namespace neogfx
     public:
         i_string const& family_name() const final;
         std::vector<std::string> const& other_families() const;
+        bool is_monospace() const final;
         bool has_style(font_style aStyle) const final;
         std::uint32_t style_count() const final;
         font_style style(std::uint32_t aStyle) const final;
@@ -79,6 +80,7 @@ namespace neogfx
         string iFamilyName;
         FT_Long iFaceCount;
         std::vector<std::string> iOtherFamilies;
+        bool iMonospace = true;
         style_map iStyleMap;
         face_map iFaces;
     };

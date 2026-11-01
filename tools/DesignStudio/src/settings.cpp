@@ -49,6 +49,9 @@ namespace neogfx::DesignStudio
         register_category("team"_s, "Team"_t);
         register_category("plugins"_s, "Plugins"_t);
 
+        auto& widgetSkin = register_setting<widget_skin>("environment.general.skin"_s, widget_skin::Default, "Widget skin: %?%"_t);
+        register_friendly_text(widgetSkin, "Default"_s, "Default"_s);
+        register_friendly_text(widgetSkin, "Native"_s, "Native (operating system)"_s);
         auto& toolbarIconSize = register_setting<toolbar_icon_size>("environment.toolbars.icon_size"_s, toolbar_icon_size::Size24x24, "Icon size: %?%"_t);
         register_friendly_text(toolbarIconSize, "Size8x8"_s, "8dp x 8dp"_s);
         register_friendly_text(toolbarIconSize, "Size16x16"_s, "16dp x 16dp"_s);

@@ -1387,7 +1387,7 @@ namespace neogfx
                                 drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
-                            0.0,
+                            drawOp.pen.secondary_width(),
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
                             static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iFastState.opacity).as<float>() :
@@ -1496,7 +1496,7 @@ namespace neogfx
                                 drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
-                            0.0,
+                            drawOp.pen.secondary_width(),
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
                             static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iFastState.opacity).as<float>() :
@@ -1550,7 +1550,7 @@ namespace neogfx
                                 drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
-                            0.0,
+                            drawOp.pen.secondary_width(),
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
                             static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iFastState.opacity).as<float>() :
@@ -1604,7 +1604,7 @@ namespace neogfx
                                 drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
-                            0.0,
+                            drawOp.pen.secondary_width(),
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
                             static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iFastState.opacity).as<float>() :
@@ -1667,7 +1667,7 @@ namespace neogfx
                                     drawOp.pen.anti_aliased() ?
                                         0.5 : 0.0 :
                                     0.0,
-                                0.0,
+                                drawOp.pen.secondary_width(),
                                 drawOp.pen.width() }.as<float>(),
                             std::holds_alternative<color>(drawOp.pen.color()) ?
                                 static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iFastState.opacity).as<float>() :
@@ -1724,7 +1724,7 @@ namespace neogfx
                                 drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
-                            0.0,
+                            drawOp.pen.secondary_width(),
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
                             static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iFastState.opacity).as<float>() :
@@ -1777,7 +1777,7 @@ namespace neogfx
                                 drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
-                            0.0,
+                            drawOp.pen.secondary_width(),
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
                             static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iFastState.opacity).as<float>() :
@@ -1830,7 +1830,7 @@ namespace neogfx
                                 drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
-                            0.0,
+                            drawOp.pen.secondary_width(),
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
                             static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iFastState.opacity).as<float>() :
@@ -1883,7 +1883,7 @@ namespace neogfx
                                 drawOp.pen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
-                            0.0,
+                            drawOp.pen.secondary_width(),
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
                             static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iFastState.opacity).as<float>() :
@@ -1969,7 +1969,7 @@ namespace neogfx
                                 aPen.anti_aliased() ?
                                     0.5 : 0.0 :
                                 0.0,
-                            0.0,
+                            aPen.secondary_width(),
                             aPen.width() }.as<float>(),
                         std::holds_alternative<color>(aPen.color()) ?
                             static_variant_cast<color>(aPen.color()).as<float>() :

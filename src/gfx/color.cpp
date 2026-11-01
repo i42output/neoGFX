@@ -64,7 +64,7 @@ namespace neogfx
     {
     }
 
-    sRGB_color::sRGB_color(const abstract_type& aOther) :
+    sRGB_color::sRGB_color(const basic_vector<scalar, 4>& aOther) :
         base_type{ aOther }
     {
     }

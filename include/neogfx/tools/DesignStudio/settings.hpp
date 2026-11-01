@@ -43,6 +43,12 @@ namespace neogfx::DesignStudio
         Size48x48 = 0x00000003,
         Size64x64 = 0x00000004
     };
+
+    enum class widget_skin : std::int32_t
+    {
+        Default = 0x00000000,
+        Native  = 0x00000001
+    };
 }
 
 begin_declare_enum(neogfx::DesignStudio::workspace_grid)
@@ -60,6 +66,11 @@ declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size32x32)
 declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size48x48)
 declare_enum_string(neogfx::DesignStudio::toolbar_icon_size, Size64x64)
 end_declare_enum(neogfx::DesignStudio::toolbar_icon_size)
+
+begin_declare_enum(neogfx::DesignStudio::widget_skin)
+declare_enum_string(neogfx::DesignStudio::widget_skin, Default)
+declare_enum_string(neogfx::DesignStudio::widget_skin, Native)
+end_declare_enum(neogfx::DesignStudio::widget_skin)
 
 namespace neogfx::DesignStudio
 {

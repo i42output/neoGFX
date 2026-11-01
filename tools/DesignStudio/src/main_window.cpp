@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/dialog/font_dialog.hpp>
 #include <neogfx/gui/dialog/gradient_dialog.hpp>
 #include <neogfx/gui/widget/progress_bar.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/app/event_processing_context.hpp>
 #include <cctype>
 #include <algorithm>
@@ -301,6 +302,7 @@ namespace neogfx::DesignStudio
         subpixelRendering{ aSettings.setting("environment.fonts_and_colors.subpixel"_s) },
         toolbarIconSize{ aSettings.setting("environment.toolbars.icon_size"_s) },
         themeColor{ aSettings.setting("environment.fonts_and_colors.theme"_s) },
+        widgetSkin{ aSettings.setting("environment.general.skin"_s) },
         workspaceGridType{ aSettings.setting("environment.workspace.grid_type"_s) },
         workspaceGridSize{ aSettings.setting("environment.workspace.grid_size"_s) },
         workspaceGridSubdivisions{ aSettings.setting("environment.workspace.grid_subdivisions"_s) },
@@ -536,6 +538,21 @@ namespace neogfx::DesignStudio
         themeColor.changed(themeColorChanged);
         themeColorChanged();
 
+        auto widgetSkinChanged = [&]()
+        {
+            std::string const skinName = widgetSkin.value<widget_skin>(true) == widget_skin::Native ? "Native" : "Default";
+            auto& skinManager = ng::service<ng::i_skin_manager>();
+            for (std::uint32_t skinIndex = 0u; skinIndex < skinManager.skin_count(); ++skinIndex)
+                if (skinManager.skin(skinIndex).name() == skinName)
+                {
+                    skinManager.activate_skin(skinManager.skin(skinIndex));
+                    break;
+                }
+        };
+        widgetSkin.changing(widgetSkinChanged);
+        widgetSkin.changed(widgetSkinChanged);
+        widgetSkinChanged();
+
         auto workspaceGridChanged = [&]()
         {
             iWorkspace.view_stack().update();
@@ -597,7 +614,11 @@ namespace neogfx::DesignStudio
             {
                 auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*aCurrentIndex));
                 element.set_mode(element_mode::Edit);
-                iPropertyElement = weak_ref_ptr<i_element>{ element };
+                // (sticky notes are workflow annotations, not objects with properties: they aren't shown in the property explorer)
+                if (element.type().to_std_string_view() != "sticky_note")
+                    iPropertyElement = weak_ref_ptr<i_element>{ element };
+                else
+                    iPropertyElement = weak_ref_ptr<i_element>{};
             }
             else 
             {

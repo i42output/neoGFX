@@ -13,6 +13,7 @@
 #include <neogfx/app/i_resource_manager.hpp>
 #include <neolib/io/http.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gfx/i_standard_shader_program.hpp>
 #include <sstream>
 #include <fstream>
@@ -708,6 +709,29 @@ int main(int argc, char* argv[])
                 app.change_style("Dark");
             else
                 app.change_style("Light");
+        });
+        for (std::uint32_t skinIndex = 0u; skinIndex < ng::service<ng::i_skin_manager>().skin_count(); ++skinIndex)
+        {
+            auto const& skin = ng::service<ng::i_skin_manager>().skin(skinIndex);
+            window.dropListSkin.model().insert_item(window.dropListSkin.model().end(), skin.name());
+            if (&skin == &ng::service<ng::i_skin_manager>().active_skin())
+            {
+                window.dropListSkin.selection_model().set_current_index(ng::item_presentation_model_index{ skinIndex });
+                window.dropListSkin.accept_selection();
+            }
+        }
+        window.dropListSkin.SelectionChanged([&](const ng::optional_item_model_index& aIndex)
+        {
+            if (aIndex == std::nullopt)
+                return;
+            auto const skinName = window.dropListSkin.model().cell_data(*aIndex).to_string();
+            auto& skinManager = ng::service<ng::i_skin_manager>();
+            for (std::uint32_t skinIndex = 0u; skinIndex < skinManager.skin_count(); ++skinIndex)
+                if (skinManager.skin(skinIndex).name() == skinName)
+                {
+                    skinManager.activate_skin(skinManager.skin(skinIndex));
+                    break;
+                }
         });
         for (std::uint32_t row = 0u; row < 3u; ++row)
             for (std::uint32_t col = 0u; col < 3u; ++col)

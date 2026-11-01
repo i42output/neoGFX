@@ -31,6 +31,7 @@ namespace neogfx
     public:
         declare_event(skin_registered, i_skin&)
         declare_event(skin_unregistered, i_skin&)
+        declare_event(skin_activated, i_skin&)
     public:
         struct skin_not_found : std::logic_error { skin_not_found() : std::logic_error{ "neogfx::i_skin_manager::skin_not_found" } {} };
         struct no_skin_active : std::logic_error { no_skin_active() : std::logic_error{ "neogfx::i_skin_manager::no_skin_active" } {} };

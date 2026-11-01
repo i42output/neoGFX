@@ -26,6 +26,7 @@
 #include <neogfx/gfx/text/i_font_manager.hpp>
 #include "native_font.hpp"
 #include "native_font_face.hpp"
+#include FT_ADVANCES_H
 
 namespace neogfx
 {
@@ -67,6 +68,11 @@ namespace neogfx
     std::vector<std::string> const& native_font::other_families() const
     {
         return iOtherFamilies;
+    }
+
+    bool native_font::is_monospace() const
+    {
+        return iMonospace;
     }
 
     bool native_font::has_style(font_style aStyle) const
@@ -123,6 +129,29 @@ namespace neogfx
                 test <<= 1;
             }
             return result;
+        }
+
+        bool face_is_monospace(FT_Face aFace)
+        {
+            if (FT_IS_FIXED_WIDTH(aFace))
+                return true;
+            // not all monospace fonts set the fixed pitch flag so also compare (unscaled) advances of glyphs whose
+            // widths differ in a proportional font
+            FT_Fixed referenceAdvance = 0;
+            for (FT_ULong const ch : { 'i', 'M', 'W', '.', '0' })
+            {
+                auto const glyphIndex = FT_Get_Char_Index(aFace, ch);
+                if (glyphIndex == 0)
+                    return false;
+                FT_Fixed advance = 0;
+                if (FT_Get_Advance(aFace, glyphIndex, FT_LOAD_NO_SCALE, &advance) != 0 || advance == 0)
+                    return false;
+                if (referenceAdvance == 0)
+                    referenceAdvance = advance;
+                else if (advance != referenceAdvance)
+                    return false;
+            }
+            return true;
         }
     }
 
@@ -220,6 +249,8 @@ namespace neogfx
                 close_face(face.first);
                 return;
             }
+            if (!face_is_monospace(face.first))
+                iMonospace = false;
             font_style style = font_style::Invalid;
             if (face.first->style_flags & FT_STYLE_FLAG_ITALIC)
                 style |= static_cast<font_style>(style | font_style::Italic);

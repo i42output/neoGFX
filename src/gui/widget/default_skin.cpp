@@ -22,6 +22,7 @@
 #include <neolib/task/thread.hpp>
 
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gfx/gradient.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/default_skin.hpp>
 
@@ -72,6 +73,94 @@ namespace neogfx
         default:
             return {};
         }
+    }
+
+    dimension default_skin::push_button_border_width(const i_skinnable_item&, bool, dimension aBorderWidth) const
+    {
+        // (a default button's frame is the same width: its thicker inner frame is drawn by draw_push_button)
+        return aBorderWidth;
+    }
+
+    void default_skin::draw_push_button(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_push_button& aButton, const push_button_appearance& aAppearance) const
+    {
+        scoped_units su{ aItem.as_widget(), units::Pixels };
+
+        color const& faceColor = aAppearance.faceColor;
+        color const colorStart = faceColor.lighter(0x0A);
+        color const colorEnd = faceColor;
+        color const& outerBorderColor = aAppearance.outerBorderColor;
+        color const& innerBorderColor = aAppearance.innerBorderColor;
+        auto const& lineStyle = aAppearance.lineStyle;
+        auto const penWidth = aAppearance.borderWidth;
+        bool const spotColor = aAppearance.spotColor;
+
+        if (aAppearance.borderRadii.has_value())
+        {
+            pen outline{ outerBorderColor, penWidth, lineStyle.value_or(line_style::Solid) };
+            if (outerBorderColor != innerBorderColor || aAppearance.defaultButton)
+                outline.set_secondary_color(innerBorderColor);
+            if (aAppearance.defaultButton)
+                outline.set_secondary_width(penWidth * 2.0); // (a default button: the same outer frame but an inner frame twice as thick)
+            rect outlineRect = aAppearance.boundingRect;
+            outlineRect.inflate(penWidth / 2.0);
+            aGc.draw_ellipse_rect(
+                outlineRect,
+                aAppearance.borderRadii.value().first,
+                aAppearance.borderRadii.value().second,
+                outline,
+                !spotColor ? 
+                    brush{ gradient{ colorStart, colorEnd } } :
+                    brush{ faceColor });
+        }
+        else
+        {
+            auto const& outlinePath = aAppearance.outline;
+
+            switch (aButton.style())
+            {
+            case push_button_style::Normal:
+            case push_button_style::ButtonBox:
+            case push_button_style::Tab:
+            case push_button_style::DropList:
+            case push_button_style::SpinBox:
+                {
+                    pen outline{ outerBorderColor, penWidth, lineStyle.value_or(line_style::Solid), false };
+                    if (outerBorderColor != innerBorderColor || aAppearance.defaultButton)
+                        outline.set_secondary_color(innerBorderColor);
+                    if (aAppearance.defaultButton)
+                        outline.set_secondary_width(penWidth * 2.0); // (a default button: the same outer frame but an inner frame twice as thick)
+                    aGc.draw_path(
+                        outlinePath, 
+                        outline,
+                        !spotColor ? brush{ gradient{ colorStart, colorEnd } } : brush{ faceColor });
+                }
+                break;
+            case push_button_style::Toolbar:
+            case push_button_style::TitleBar:
+                if (!spotColor)
+                    aGc.fill_path(outlinePath, gradient{ colorStart.with_lightness(colorStart.to_hsl().lightness() + 0.1), colorEnd });
+                else
+                    aGc.fill_path(outlinePath, faceColor);
+                break;
+            case push_button_style::ItemViewHeader:
+                if (!spotColor)
+                    aGc.fill_path(outlinePath, gradient{ colorStart, colorEnd });
+                else
+                    aGc.fill_path(outlinePath, faceColor);
+                break;
+            }
+        }
+        if (aItem.as_widget().has_focus())
+        {
+            rect focusRect = aAppearance.boundingRect;
+            focusRect.deflate(2.0, 2.0);
+            aGc.draw_focus_rect(focusRect);
+        }
+    }
+
+    void default_skin::push_button_text_color(const i_skinnable_item&, const i_push_button&, const push_button_appearance&, i_optional<color>& aTextColor) const
+    {
+        aTextColor.reset();
     }
 
     void default_skin::draw_scrollbar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_scrollbar& aScrollbar) const
@@ -258,6 +347,46 @@ namespace neogfx
             aGc.draw_shape(mesh, expanderRect.center().to_vec3(), expanderColor);
         else
             aGc.fill_shape(mesh, expanderRect.center().to_vec3(), expanderColor);
+    }
+
+    void default_skin::draw_slider(i_graphics_context& aGc, const i_skinnable_item& aItem, slider_orientation aOrientation, double aNormalizedValue, bool aDragging, i_optional<color_or_gradient::abstract_type> const& aBarColor) const
+    {
+        auto const& widget = aItem.as_widget();
+        scoped_units su{ widget, units::Pixels };
+        optional_color_or_gradient const barColor{ aBarColor };
+        rect rectBarBox = aItem.element_rect(skin_element::SliderTrack);
+        color ink = widget.background_color().shaded(0x80);
+        aGc.fill_rounded_rect(rectBarBox, 2.0, to_brush(barColor ? *barColor : ink));
+        rectBarBox.inflate(size{ 1.0, 1.0 });
+        aGc.fill_rounded_rect(rectBarBox, 2.0, to_brush(barColor ? *barColor : ink.mid(widget.background_color())));
+        rectBarBox.deflate(size{ 1.0, 1.0 });
+        rect const rectIndicator = aItem.element_rect(skin_element::SliderThumb);
+        point const selection = rectIndicator.center();
+        rect selectionRect = rectBarBox;
+        if (aOrientation == slider_orientation::Horizontal)
+            selectionRect.cx = selection.x - selectionRect.x;
+        else
+        {
+            selectionRect.cy = selectionRect.bottom() - selection.y;
+            selectionRect.y = selection.y;
+        }
+        {
+            scoped_scissor ss{ aGc, selectionRect };
+            if (aNormalizedValue > 0.0)
+                aGc.fill_rounded_rect(rectBarBox, 2.0, to_brush(barColor ? *barColor : service<i_app>().current_style().palette().color(color_role::Selection)));
+        }
+        color indicatorColor = widget.base_color();
+        if (aDragging)
+        {
+            if (indicatorColor.light(0x40))
+                indicatorColor.darken(0x40);
+            else
+                indicatorColor.lighten(0x40);
+        }
+        color indicatorBorderColor = indicatorColor.darker(0x40);
+        indicatorColor.lighten(0x40);
+        aGc.fill_circle(rectIndicator.center(), rectIndicator.width() / 2.0, indicatorBorderColor);
+        aGc.fill_circle(rectIndicator.center(), rectIndicator.width() / 2.0 - 1.0, indicatorColor);
     }
 
     void default_skin::draw_progress_bar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_progress_bar& aProgressBar) const
