@@ -46,18 +46,6 @@ namespace neogfx
             return std::max(1.0, std::round(static_cast<dimension>(1.0_dip)));
         }
 
-        // (units are pixels)
-        dimension button_bevel_width()
-        {
-            return std::max(1.0, std::round(static_cast<dimension>(2.0_dip)));
-        }
-
-        // (units are pixels)
-        dimension tab_bevel_width()
-        {
-            return std::max(1.0, std::round(button_bevel_width() / 2.0));
-        }
-
         // A bevel aWidth pixels wide just inside aRect; mitred, so the top right and bottom left
         // corners are split diagonally between the two colours.
         void draw_bevel(i_graphics_context& aGc, rect const& aRect, dimension aWidth, color const& aTopLeft, color const& aBottomRight)
@@ -88,6 +76,18 @@ namespace neogfx
             draw_bevel(aGc, aRect, aWidth, bottom_shadow(aFace), top_shadow(aFace));
         }
 
+        // A disk with an edge aWidth pixels wide, split diagonally: lit top left and shadowed bottom right if raised, 
+        // the other way round if sunken
+        void draw_disk(i_graphics_context& aGc, point const& aCenter, dimension aRadius, dimension aWidth, color const& aFace, bool aSunken, scalar aAlpha = 1.0)
+        {
+            auto const topLeft = (aSunken ? bottom_shadow(aFace) : top_shadow(aFace)).with_combined_alpha(aAlpha);
+            auto const bottomRight = (aSunken ? top_shadow(aFace) : bottom_shadow(aFace)).with_combined_alpha(aAlpha);
+            aGc.fill_circle(aCenter, aRadius, gradient{
+                gradient::color_stop_list{ { 0.0, topLeft }, { 0.5, topLeft }, { 0.5, bottomRight }, { 1.0, bottomRight } },
+                gradient_direction::Diagonal });
+            aGc.fill_circle(aCenter, aRadius - aWidth, aFace.with_combined_alpha(aAlpha));
+        }
+
         // the colour of a window's decoration (its frame and title bar), active or inactive
         color decoration_color(i_window const& aWindow)
         {
@@ -95,6 +95,51 @@ namespace neogfx
             if (aWindow.effectively_enabled() && aWindow.is_effectively_active())
                 return palette.color(!aWindow.is_nested() ? color_role::Selection : color_role::AlternateSelection);
             return palette.color(color_role::Theme).shaded(0x1C);
+        }
+
+        // A bevelled arrow (a triangle) pointing up, down, left or right, centred in aRect: lit on its upper and left edges, 
+        // shadowed on its lower and right edges (the other way round if sunken).  Drawn a row (or column) of pixels at a 
+        // time so the edges are crisp.
+        void draw_arrow(i_graphics_context& aGc, rect const& aRect, scrollbar_element aDirection, bool aVertical, dimension aBevel, color const& aFace, bool aSunken)
+        {
+            auto const light = aSunken ? bottom_shadow(aFace) : top_shadow(aFace);
+            auto const dark = aSunken ? top_shadow(aFace) : bottom_shadow(aFace);
+            auto const base = std::floor(std::min(aRect.cx, aRect.cy));
+            auto const length = std::round(base * 0.85); // (from base to point)
+            if (base < aBevel * 4.0 || length < aBevel * 2.0)
+                return;
+            bool const pointsBack = aDirection == scrollbar_element::UpButton; // (up or left)
+            // across: along the base; along: from base to point
+            auto const acrossStart = std::floor(aVertical ? aRect.x + (aRect.cx - base) / 2.0 : aRect.y + (aRect.cy - base) / 2.0);
+            auto const alongStart = std::floor(aVertical ? aRect.y + (aRect.cy - length) / 2.0 : aRect.x + (aRect.cx - length) / 2.0);
+            auto strip = [&](coordinate aAlong, coordinate aAcross, dimension aExtent, color const& aColor)
+            {
+                if (aExtent <= 0.0)
+                    return;
+                aGc.fill_rect(aVertical ? 
+                    rect{ point{ aAcross, aAlong }, size{ aExtent, 1.0 } } : 
+                    rect{ point{ aAlong, aAcross }, size{ 1.0, aExtent } }, aColor);
+            };
+            for (dimension i = 0.0; i < length; i += 1.0)
+            {
+                // i: distance from the point
+                auto const half = std::floor((i + 0.5) * (base / 2.0) / length);
+                auto const extent = half * 2.0 + 1.0;
+                auto const across = acrossStart + std::floor(base / 2.0) - half;
+                auto const along = pointsBack ? alongStart + i : alongStart + length - 1.0 - i;
+                bool const baseEdge = i >= length - aBevel;
+                if (baseEdge)
+                {
+                    // (the base: shadowed if it is below or right of the face, lit if above or left of it)
+                    strip(along, across, extent, pointsBack ? dark : light);
+                    continue;
+                }
+                strip(along, across, extent, aFace);
+                auto const edge = std::min(aBevel, std::ceil(extent / 2.0));
+                // the upper or left sloping edge is lit and the lower or right one shadowed
+                strip(along, across, edge, light);
+                strip(along, across + extent - edge, edge, dark);
+            }
         }
 
         // the face colour of a title bar button: that of what it is on (its title bar, or the menu bar a maximized
@@ -194,13 +239,13 @@ namespace neogfx
             return;
         case push_button_style::Tab:
             {
-                // a raised bevel half the thickness of a button's around the whole button; the button's bounding rect 
+                // a raised bevel (the window frame's) around the whole button; the button's bounding rect 
                 // runs on past the side facing the tab page, so that side is clipped away leaving the tab open to its 
                 // page (see draw_tab_page_join)
                 auto const tabRect = button.client_rect().combined(aAppearance.boundingRect).round();
                 auto const& face = aAppearance.faceColor;
                 aGc.fill_rect(tabRect, face);
-                draw_raised(aGc, tabRect, tab_bevel_width(), face);
+                draw_raised(aGc, tabRect, bevel_width(), face);
             }
             break;
         case push_button_style::Toolbar:
@@ -216,14 +261,8 @@ namespace neogfx
             break;
         default:
             {
-                auto const bevel = button_bevel_width();
-                if (aAppearance.defaultButton)
-                {
-                    // a default button sits in a sunken surround
-                    auto const surround = button.effective_background_color();
-                    draw_sunken(aGc, faceRect, bevel_width(), surround);
-                    faceRect.deflate(bevel_width() + bevel, bevel_width() + bevel);
-                }
+                // as thin as the window frame's; a default button's is 2dip
+                auto const bevel = !aAppearance.defaultButton ? bevel_width() : std::max(1.0, std::round(static_cast<dimension>(2.0_dip)));
                 auto const& face = aAppearance.faceColor;
                 aGc.fill_rect(faceRect, face);
                 if (sunken)
@@ -236,7 +275,8 @@ namespace neogfx
         if (button.has_focus())
         {
             rect focusRect = faceRect;
-            focusRect.deflate(button_bevel_width() + 1.0, button_bevel_width() + 1.0);
+            auto const focusInset = (aAppearance.defaultButton ? std::max(1.0, std::round(static_cast<dimension>(2.0_dip))) : bevel_width()) + 1.0;
+            focusRect.deflate(focusInset, focusInset);
             aGc.draw_focus_rect(focusRect);
         }
     }
@@ -248,17 +288,83 @@ namespace neogfx
 
     void neotif_skin::draw_scrollbar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_scrollbar& aScrollbar) const
     {
-        iFallback.draw_scrollbar(aGc, aItem, aScrollbar);
+        // (menu and scroller style scrollbars are drawn by the default skin)
+        if (aScrollbar.type() != scrollbar_style::Normal)
+        {
+            iFallback.draw_scrollbar(aGc, aItem, aScrollbar);
+            return;
+        }
+        if (!aScrollbar.visible() || aScrollbar.auto_hidden())
+            return;
+        scoped_units su{ aItem.as_widget(), units::Pixels };
+        // a sunken trough with bevelled arrow buttons at its ends and a raised thumb
+        bool const vertical = aScrollbar.orientation() == scrollbar_orientation::Vertical;
+        auto const bevel = bevel_width();
+        auto const face = aScrollbar.container().scrollbar_color(aScrollbar);
+        auto const trough = face.darker(0x20);
+        auto const troughRect = aItem.element_rect(skin_element::Scrollbar).round();
+        aGc.fill_rect(troughRect, trough);
+        draw_sunken(aGc, troughRect, bevel, face);
+        auto const inset = bevel + std::ceil(static_cast<dimension>(1.0_dip));
+        auto const deflate_across = [&](rect aRect)
+        {
+            return vertical ? aRect.deflated(inset, 0.0) : aRect.deflated(0.0, inset);
+        };
+        draw_arrow(aGc, deflate_across(aItem.element_rect(skin_element::ScrollbarUpArrow).round()), scrollbar_element::UpButton, vertical, bevel, face,
+            aScrollbar.clicked_element() == scrollbar_element::UpButton);
+        draw_arrow(aGc, deflate_across(aItem.element_rect(skin_element::ScrollbarDownArrow).round()), scrollbar_element::DownButton, vertical, bevel, face,
+            aScrollbar.clicked_element() == scrollbar_element::DownButton);
+        bool const noThumb = (aScrollbar.maximum() - aScrollbar.minimum() <= aScrollbar.page());
+        if (noThumb)
+            return;
+        auto const thumbRect = deflate_across(aItem.element_rect(skin_element::ScrollbarThumb).round());
+        if (thumbRect.cx <= bevel * 2.0 || thumbRect.cy <= bevel * 2.0)
+            return;
+        aGc.fill_rect(thumbRect, face);
+        draw_raised(aGc, thumbRect, bevel, face);
     }
 
     void neotif_skin::draw_check_box(i_graphics_context& aGc, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const
     {
-        iFallback.draw_check_box(aGc, aItem, aCheckedState);
+        // a sunken box with the window frame's bevel
+        auto const& widget = aItem.as_widget();
+        scoped_units su{ widget, units::Pixels };
+        auto const boxRect = aItem.element_rect(skin_element::CheckBox).round();
+        auto const alpha = widget.effectively_enabled() ? 1.0 : 0.25;
+        auto const bevel = bevel_width();
+        auto const face = widget.base_color();
+        bool const checked = aCheckedState != std::nullopt && *aCheckedState == true;
+        bool const indeterminate = aCheckedState == std::nullopt;
+        aGc.fill_rect(boxRect, face.with_combined_alpha(alpha));
+        draw_bevel(aGc, boxRect, bevel, bottom_shadow(face).with_combined_alpha(alpha), top_shadow(face).with_combined_alpha(alpha));
+        auto const markRect = boxRect.deflated(bevel + std::ceil(static_cast<dimension>(2.0_dip)), bevel + std::ceil(static_cast<dimension>(2.0_dip)));
+        auto const mark = service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(alpha);
+        if (checked)
+        {
+            scoped_snap_to_pixel snap{ aGc, false };
+            aGc.draw_line(markRect.top_left(), markRect.bottom_right(), pen{ mark, static_cast<dimension>(2.0_dip), false });
+            aGc.draw_line(markRect.bottom_left(), markRect.top_right(), pen{ mark, static_cast<dimension>(2.0_dip), false });
+        }
+        else if (indeterminate)
+            aGc.fill_rect(markRect, mark);
     }
 
     void neotif_skin::draw_radio_button(i_graphics_context& aGc, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const
     {
-        iFallback.draw_radio_button(aGc, aItem, aCheckedState);
+        // a sunken disk with the window frame's bevel
+        auto const& widget = aItem.as_widget();
+        scoped_units su{ widget, units::Pixels };
+        auto const discRect = aItem.element_rect(skin_element::RadioButton);
+        auto const radius = discRect.width() / 2.0;
+        auto const bevel = bevel_width();
+        if (radius <= bevel)
+            return;
+        auto const alpha = widget.effectively_enabled() ? 1.0 : 0.25;
+        bool const on = aCheckedState != std::nullopt && *aCheckedState == true;
+        draw_disk(aGc, discRect.center(), radius, bevel, widget.base_color(), true, alpha);
+        auto const dotRadius = radius - bevel - static_cast<dimension>(3.0_dip);
+        if (on && dotRadius > 0.0)
+            aGc.fill_circle(discRect.center(), dotRadius, service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(alpha));
     }
 
     void neotif_skin::draw_tree_expander(i_graphics_context& aGc, const i_skinnable_item& aItem, bool aExpandedState) const
@@ -279,13 +385,7 @@ namespace neogfx
         auto const bevel = bevel_width();
         if (radius <= bevel)
             return;
-        auto const face = widget.base_color().lighter(0x40);
-        auto const light = top_shadow(face);
-        auto const dark = bottom_shadow(face);
-        aGc.fill_circle(thumb.center(), radius, gradient{
-            gradient::color_stop_list{ { 0.0, aDragging ? dark : light }, { 0.5, aDragging ? dark : light }, { 0.5, aDragging ? light : dark }, { 1.0, aDragging ? light : dark } },
-            gradient_direction::Diagonal });
-        aGc.fill_circle(thumb.center(), radius - bevel, face);
+        draw_disk(aGc, thumb.center(), radius, bevel, widget.base_color().lighter(0x40), aDragging);
     }
 
     void neotif_skin::draw_progress_bar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_progress_bar& aProgressBar) const
@@ -382,7 +482,7 @@ namespace neogfx
         aGc.fill_rect(rect{ point{ outer.x, outer.y + outer.cy - width }, size{ outer.cx, width } }, face);
         aGc.fill_rect(rect{ point{ outer.x, outer.y + width }, size{ width, outer.cy - width * 2.0 } }, face);
         aGc.fill_rect(rect{ point{ outer.x + outer.cx - width, outer.y + width }, size{ width, outer.cy - width * 2.0 } }, face);
-        draw_raised(aGc, outer, std::min(tab_bevel_width(), width), face);
+        draw_raised(aGc, outer, std::min(bevel_width(), width), face);
     }
 
     void neotif_skin::draw_tab_page_join(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_tab_page& aPage, dimension aFrameWidth, const color&) const
@@ -396,7 +496,7 @@ namespace neogfx
         auto const across = std::round(aFrameWidth);
         if (across <= 0.0)
             return;
-        auto const bevel = std::min(tab_bevel_width(), across);
+        auto const bevel = std::min(bevel_width(), across);
         auto const face = page.background_color();
         auto const light = top_shadow(face);
         auto const dark = bottom_shadow(face);
