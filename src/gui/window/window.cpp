@@ -521,6 +521,10 @@ namespace neogfx
             iModalityRestored = true;
             update_modality(true);
         }
+        // release focus while the widget tree is still intact: widget_removed() only clears the focused widget if
+        // it is removed directly, so a focused descendant would otherwise be left focused but detached
+        if (has_focused_widget())
+            release_focused_widget(focused_widget(), focus_reason::Other);
         if (has_layout())
             layout().remove_all();
         remove_all();

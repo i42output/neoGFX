@@ -420,7 +420,16 @@ namespace neogfx
                 if (!keyboard.grabber().key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers()))
                 {
                     keyboard.key_pressed()(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
-                    surface_window().native_window_key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
+                    // a key_pressed subscriber (e.g. dialog_button_box on RETURN) can close the window (window::close()
+                    // removes all its widgets, leaving its focused widget detached), so the key must not be routed on
+                    if (destroyed)
+                    {
+                        keyboard.clear_event_modifiers();
+                        sc.ignore();
+                        return;
+                    }
+                    if (!surface_window().as_window().is_closed())
+                        surface_window().native_window_key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
                 }
                 keyboard.clear_event_modifiers();
                 break;
@@ -429,7 +438,14 @@ namespace neogfx
                 if (!keyboard.grabber().key_released(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers()))
                 {
                     keyboard.key_released()(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
-                    surface_window().native_window_key_released(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
+                    if (destroyed)
+                    {
+                        keyboard.clear_event_modifiers();
+                        sc.ignore();
+                        return;
+                    }
+                    if (!surface_window().as_window().is_closed())
+                        surface_window().native_window_key_released(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
                 }
                 keyboard.clear_event_modifiers();
                 break;
