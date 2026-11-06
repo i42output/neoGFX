@@ -261,7 +261,7 @@ int main(int argc, char* argv[])
                 int n = menuPrng(100);
                 for (int k = 1; k < n; ++k)
                 {
-                    auto& action = app.add_action(ng::string{ "More_" + boost::lexical_cast<std::string>(i) + "_" + boost::lexical_cast<std::string>(j) + "_" + boost::lexical_cast<std::string>(k) }, ":/closed/resources/caw_toolbar.zip#favourite.png"_s);
+                    auto& action = app.add_action(ng::string{ "More_" + boost::lexical_cast<std::string>(i) + "_" + boost::lexical_cast<std::string>(j) + "_" + boost::lexical_cast<std::string>(k) }, ":/test/resources/icons/bookmark.svg"_s);
                     sm2.add_action(action);
                     action.triggered([&]()
                     {
@@ -642,6 +642,10 @@ int main(int argc, char* argv[])
             ng::game_controller_dialog gameControllerDialog(window);
             gameControllerDialog.exec();
         });
+
+        window.themeColor.set_image_extents(ng::size{ 16_dip });
+        window.themeFont.set_image_extents(ng::size{ 16_dip });
+        window.editColor.set_image_extents(ng::size{ 16_dip });
 
         window.themeColor.clicked([&window]()
         {

@@ -22,6 +22,21 @@
             resources/test.zh-CN.xneol
             resources/test.ja.xneol
             resources/test.ko.xneol
+            resources/icons/bolt.svg
+            resources/icons/bookmark.svg
+            resources/icons/bookmark_add.svg
+            resources/icons/bookmarks.svg
+            resources/icons/contacts.svg
+            resources/icons/content_paste_go.svg
+            resources/icons/energy_savings_leaf.svg
+            resources/icons/extension.svg
+            resources/icons/folder.svg
+            resources/icons/font_download.svg
+            resources/icons/label.svg
+            resources/icons/palette.svg
+            resources/icons/update.svg
+            resources/icons/volume_off.svg
+            resources/icons/volume_up.svg
         ]
     }
     
@@ -49,38 +64,38 @@
                 action: {
                     id: actionContacts
                     text: "&Contacts..."
-                    image: ":/closed/resources/caw_toolbar.zip#contacts.png"
+                    image: ":/test/resources/icons/contacts.svg"
                     shortcut: "Alt+C"
                 }
                 action: {
                     id: actionAddFavourite
                     text: "Add Favourite..."
-                    image: ":/closed/resources/caw_toolbar.zip#add_favourite.png"
+                    image: ":/test/resources/icons/bookmark_add.svg"
                 }
                 action: {
                     id: actionOrganizeFavourites
                     text: "Organize Favourites..."
-                    image: ":/closed/resources/caw_toolbar.zip#organize_favourites.png"
+                    image: ":/test/resources/icons/bookmarks.svg"
                     shortcut: "Alt+C"
                 }
                 action: {
                     id: actionArcadeMode
                     text: "Toggle Green/Turbo mode"
-                    image: ":/closed/resources/caw_toolbar.zip#arcade_mode_off.png"
+                    image: ":/test/resources/icons/energy_savings_leaf.svg"
                     checkable: true
-                    checked_image: ":/closed/resources/caw_toolbar.zip#arcade_mode_on.png"
+                    checked_image: ":/test/resources/icons/bolt.svg"
                 }
                 action: {
                     id: actionMute
                     text: "Mute/&Unmute Sound"
-                    image: ":/closed/resources/caw_toolbar.zip#mute.png"
+                    image: ":/test/resources/icons/volume_up.svg"
                     checkable: true
-                    checked_image: ":/closed/resources/caw_toolbar.zip#unmute.png"
+                    checked_image: ":/test/resources/icons/volume_off.svg"
                 }
                 action: {
                     id: actionPasteAndGo
                     text: "Paste and Go"
-                    image: ":/closed/resources/caw_toolbar.zip#paste_and_go.png"
+                    image: ":/test/resources/icons/content_paste_go.svg"
                     shortcut: "Ctrl+Shift+V"
                 }
                 action: {
@@ -110,12 +125,12 @@
                 action: { 
                     id: actionManagePlugins 
                     text: "Manage Plugins..." 
-                    image: ":/closed/resources/caw_toolbar.zip#manage_plugins.png" 
+                    image: ":/test/resources/icons/extension.svg" 
                 }
                 action: { 
                     id: actionCheckForUpdates 
                     text: "Check for Updates..." 
-                    image: ":/closed/resources/caw_toolbar.zip#setup.png" 
+                    image: ":/test/resources/icons/update.svg" 
                 }
             }
         }
@@ -176,24 +191,24 @@
                         action: appTest.actionAddFavourite
                         action: appTest.actionOrganizeFavourites
                         action: separator
-                        action: { text: "Alice" image: ":/closed/resources/caw_toolbar.zip#favourite.png" }
-                        action: { text: "Bob" image: ":/closed/resources/caw_toolbar.zip#favourite.png" }
-                        action: { text: "Carlos" image: ":/closed/resources/caw_toolbar.zip#favourite.png" }
-                        action: { text: "Dave" image: ":/closed/resources/caw_toolbar.zip#favourite.png" }
+                        action: { text: "Alice" image: ":/test/resources/icons/bookmark.svg" }
+                        action: { text: "Bob" image: ":/test/resources/icons/bookmark.svg" }
+                        action: { text: "Carlos" image: ":/test/resources/icons/bookmark.svg" }
+                        action: { text: "Dave" image: ":/test/resources/icons/bookmark.svg" }
                         menu: {
                             title: "Silent Running Drones"
-                            image: ":/closed/resources/caw_toolbar.zip#folder.png"
-                            action: { text: "Dewey" image: ":/closed/resources/caw_toolbar.zip#favourite.png" }
-                            action: { text: "Huey" image: ":/closed/resources/caw_toolbar.zip#favourite.png" }
-                            action: { text: "Louie" image: ":/closed/resources/caw_toolbar.zip#favourite.png" }
+                            image: ":/test/resources/icons/folder.svg"
+                            action: { text: "Dewey" image: ":/test/resources/icons/bookmark.svg" }
+                            action: { text: "Huey" image: ":/test/resources/icons/bookmark.svg" }
+                            action: { text: "Louie" image: ":/test/resources/icons/bookmark.svg" }
                         }
                         menu: {
                             title: "DC (TM) Characters"
-                            image: ":/closed/resources/caw_toolbar.zip#folder.png"
+                            image: ":/test/resources/icons/folder.svg"
                         }
                         menu: {
                             title: "Marvel (TM) Characters"
-                            image: ":/closed/resources/caw_toolbar.zip#folder.png"
+                            image: ":/test/resources/icons/folder.svg"
                         }
                         action: separator
                     }
@@ -235,7 +250,7 @@
                     action: appTest.actionContacts
                     action: appTest.actionAddFavourite
                     action: appTest.actionOrganizeFavourites
-                    action: { text: "Keywords..." image: ":/closed/resources/caw_toolbar.zip#keyword.png" }
+                    action: { text: "Keywords..." image: ":/test/resources/icons/label.svg" }
                     action: appTest.actionArcadeMode
                     action: appTest.actionManagePlugins
                     action: appTest.actionMute
@@ -540,17 +555,17 @@
                                         push_button: {
                                             id: themeColor
                                             text: "theme"
-                                            image: ":/closed/resources/caw_toolbar.zip#colour.png"
+                                            image: ":/test/resources/icons/palette.svg"
                                         }
                                         push_button: {
                                             id: themeFont
                                             text: "font"
-                                            image: ":/closed/resources/caw_toolbar.zip#font.png"
+                                            image: ":/test/resources/icons/font_download.svg"
                                         }
                                         push_button: {
                                             id: editColor
                                             text: "edit"
-                                            image: ":/closed/resources/caw_toolbar.zip#colour.png"
+                                            image: ":/test/resources/icons/palette.svg"
                                         }
                                     }
                                     widget: {

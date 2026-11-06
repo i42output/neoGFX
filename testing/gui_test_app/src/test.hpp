@@ -87,9 +87,9 @@ public:
         base_type{ aModel, aSortable },
         iCellImages{ {
             ng::image{ ":/test/resources/icon.png" }, 
-            ng::image{ ":/closed/resources/caw_toolbar.zip#contacts.png" },
-            ng::image{ ":/closed/resources/caw_toolbar.zip#favourite.png" },
-            ng::image{ ":/closed/resources/caw_toolbar.zip#folder.png" },
+            ng::image{ ":/test/resources/icons/contacts.svg" },
+            ng::image{ ":/test/resources/icons/bookmark.svg" },
+            ng::image{ ":/test/resources/icons/folder.svg" },
             {}
         } }
     {

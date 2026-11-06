@@ -2,42 +2,34 @@
 Debug
 Release
 RelWithDebInfo
-**/x64/Tools
-**/x64/Tools_Debug
-**/x64/Tools - Debug
+MinSizeRel
 stage
-libjpeg-turbo-build
 *.obj
 *.pdb
 *.res
 *.lib
+*.exp
+*.ilk
 *.tlog
 *.recipe
 *.log
+
+# CMake build trees
+/out
+CMakeUserPresets.json
 
 # IDE files (anywhere)
 .vs
 *.user
 *.aps
 
-# build outputs
-/bin
-/lib
-/tools/bin
-/tools/glsl2hpp.exe
-/tools/src2string.exe
-/tools/nrc/build/win32/vs/test.res.cpp
-/tools/nrc/build/win32/vs/test.ui.hpp
-/testing/gui_test_app/build/win32/vs
-/testing/gui_test_app/build/win32/vs2019/obj
-/testing/gui_test_app/build/win32/vs2019/x64
-/build/plugin/web_view/win32/vs/x64/Foo
-/build/plugin/web_view/win32/vs/x64/ReleaseInDebug
+# documentation outputs
 /doxygen.zip
 /doxygen/html
 /doxygen/*.tmp
 
 # third party build outputs
+libjpeg-turbo-build
 /3rdparty/freetype/freetype-2.14.1-build
 /3rdparty/freetype/freetype-demos
 /3rdparty/glew/glew-2.1.0/glew.pc

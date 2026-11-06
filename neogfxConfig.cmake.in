@@ -1,0 +1,16 @@
+set(NEOGFX_VERSION @PROJECT_VERSION@)
+
+@PACKAGE_INIT@
+
+# (the dependencies that neoGFX's targets link to: found before the targets are imported)
+include("${CMAKE_CURRENT_LIST_DIR}/neogfxDependencies.cmake")
+if(DEFINED neogfx_FOUND AND NOT neogfx_FOUND)
+    return()
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/neogfxTargets.cmake")
+
+# neogfx_add_resources() (nrc) and neogfx_add_source_strings() (src2string)
+include("${CMAKE_CURRENT_LIST_DIR}/neogfxTools.cmake")
+
+check_required_components(neogfx)

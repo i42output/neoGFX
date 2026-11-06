@@ -1,16 +1,36 @@
-The "neoGFX" C++ app/game engine and development platform is dependent on the following 3rd party components which must be installed separately:
+The "neoGFX" C++ app/game engine and development platform is built with CMake (3.24 or later).
 
-* Boost (currently assumed to be in /usr/local)
-* OpenSSL (currently assumed to be in /usr/local)
-* zlib (currently assumed to be in /usr/local)
-* libjpeg-turbo (currently assumed to be in /usr/local; static library jpeg-static.lib, used by all configurations)
-* Freetype (set environment variable "DevDirFreetype" to point to directory root of library)
-* Glew (set environment variable "DevDirGlew" to point to directory root of library)
-* Harfbuzz (set environment variable "DevDirHarfBuzz" to point to directory root of library)
+neoGFX depends on the following, found by CMake in the install prefix (default /usr/local) or via CMAKE_PREFIX_PATH:
 
-neoGFX is also dependent on the following library:
+* neolib (CMake package; brings in Boost, OpenSSL and zlib)
+* FreeType (CMake package, or headers and library)
+* HarfBuzz (CMake package, or headers and library)
+* libjpeg-turbo (static library jpeg-static, else any libjpeg)
+* Vulkan SDK, including shaderc (found via the VULKAN_SDK environment variable set by the SDK installer); shaderc_shared.dll must be on PATH
+* GLEW and libpng: the prebuilt static libraries in 3rdparty/lib and the headers in 3rdparty
+* libssh (CMake package), for Design Studio's default element library
 
-* neolib (currently assumed to be in /usr/local)
+Build and install (Windows, from a Visual Studio developer prompt):
 
+  cmake -S . -B out
+  cmake --build out --config Release
+  cmake --install out --config Release
 
-Note when neoGFX 1.0 is released it will be provided with CMake build scripts (i.e. the current Visual Studio development projects will be removed).
+Windows builds use the static C runtime (/MT, /MTd), as neolib does.
+The install prefix defaults to /usr/local; set CMAKE_INSTALL_PREFIX to change it.
+Programs and the plugins they load (.nrl, .nel, .plg) are built into out/bin (out/bin/<config> with Visual Studio generators) and installed into <prefix>/bin.
+
+Options (default):
+
+* NEOGFX_BUILD_DESIGN_STUDIO (ON): neoGFX Design Studio and its default element library
+* NEOGFX_BUILD_NEOS_ELEMENT_LIBRARY (OFF): Design Studio's neos element library (needs neos: CMake package, or headers and library)
+* NEOGFX_BUILD_WEB_VIEW_PLUGIN (OFF): the web_view plugin and neogfx_cef (needs CEF)
+* NEOGFX_BUILD_TESTS (ON): the GUI test app
+* NEOGFX_BUILD_EXAMPLES (OFF): the example apps (video_poker, chess, mod_tracker)
+* NEOGFX_DEBUG (ON): defines NEOGFX_DEBUG
+
+Using an installed neoGFX:
+
+  find_package(neogfx REQUIRED)
+  target_link_libraries(myapp PRIVATE neogfx::neogfx)
+  neogfx_add_resources(myapp src/myapp.nrc)
