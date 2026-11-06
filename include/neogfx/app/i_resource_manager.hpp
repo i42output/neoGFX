@@ -42,6 +42,10 @@ namespace neogfx
         virtual neolib::i_map<i_string, neolib::i_variant<i_ref_ptr<i_resource>, i_weak_ref_ptr<i_resource>>> const& resources() = 0;
         virtual neolib::i_map<i_string, neolib::i_variant<i_ref_ptr<i_resource>, i_weak_ref_ptr<i_resource>>> const& resource_archives() = 0;
     public:
+        // query parameters given with module resources' URIs (e.g. "file: icons/save.svg?themable=true" in a .nrc file): resource URI -> query
+        virtual neolib::i_map<i_string, i_string> const& resource_parameters() const = 0;
+        virtual bool resource_parameter(i_string const& aUri, i_string const& aName, i_string& aValue) const = 0;
+    public:
         void add_resource(std::string const& aUri, const void* aResourceData, std::size_t aResourceSize)
         {
             add_resource(string{ aUri }, aResourceData, aResourceSize);

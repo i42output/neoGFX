@@ -49,6 +49,8 @@ namespace neogfx
             iResources.insert(r.first(), r.second());
         for (auto const& ra : aResourceManager.resource_archives())
             iResourceArchives.insert(ra.first(), ra.second());
+        for (auto const& rp : aResourceManager.resource_parameters())
+            iResourceParameters.insert(rp.first(), rp.second());
     }
 
     void resource_manager::add_resource(i_string const& aUri, const void* aResourceData, std::size_t aResourceSize)
@@ -58,7 +60,13 @@ namespace neogfx
 
     void resource_manager::add_module_resource(i_string const& aUri, const void* aResourceData, std::size_t aResourceSize)
     {
-        iResources.insert(aUri, decltype(iResources)::mapped_type{ make_ref<resource, i_resource>(*this, aUri, aResourceData, aResourceSize) });
+        // a module resource's URI can have query parameters (from its .nrc file): the resource is added without them
+        auto const uri = aUri.to_std_string_view();
+        auto const queryStart = uri.find('?');
+        string const resourceUri{ uri.substr(0, queryStart) };
+        if (queryStart != std::string_view::npos)
+            iResourceParameters[resourceUri] = string{ uri.substr(queryStart + 1) };
+        iResources.insert(resourceUri, decltype(iResources)::mapped_type{ make_ref<resource, i_resource>(*this, resourceUri, aResourceData, aResourceSize) });
     }
 
     void resource_manager::load_resource(i_string const& aUri, i_ref_ptr<i_resource>& aResult)
@@ -105,6 +113,7 @@ namespace neogfx
         resources.as_std_map().swap(iResources.as_std_map());
         decltype(iResourceArchives) resourceArchives;
         resourceArchives.as_std_map().swap(iResourceArchives.as_std_map());
+        iResourceParameters.as_std_map().clear();
     }
 
     neolib::i_map<i_string, neolib::i_variant<i_ref_ptr<i_resource>, i_weak_ref_ptr<i_resource>>> const& resource_manager::resources()
@@ -115,5 +124,35 @@ namespace neogfx
     neolib::i_map<i_string, neolib::i_variant<i_ref_ptr<i_resource>, i_weak_ref_ptr<i_resource>>> const& resource_manager::resource_archives()
     {
         return iResourceArchives;
+    }
+
+    neolib::i_map<i_string, i_string> const& resource_manager::resource_parameters() const
+    {
+        return iResourceParameters;
+    }
+
+    bool resource_manager::resource_parameter(i_string const& aUri, i_string const& aName, i_string& aValue) const
+    {
+        auto existing = iResourceParameters.as_std_map().find(aUri);
+        if (existing == iResourceParameters.as_std_map().end()) // (an archive's member has its archive's parameters)
+            existing = iResourceParameters.as_std_map().find(string{ aUri.to_std_string_view().substr(0, aUri.to_std_string_view().rfind('#')) });
+        if (existing == iResourceParameters.as_std_map().end())
+            return false;
+        std::string_view parameters = existing->second.second().to_std_string_view();
+        while (!parameters.empty())
+        {
+            auto const end = parameters.find('&');
+            auto const parameter = parameters.substr(0, end);
+            auto const separator = parameter.find('=');
+            if (parameter.substr(0, separator) == aName.to_std_string_view())
+            {
+                aValue = separator != std::string_view::npos ? parameter.substr(separator + 1) : std::string_view{};
+                return true;
+            }
+            if (end == std::string_view::npos)
+                break;
+            parameters.remove_prefix(end + 1);
+        }
+        return false;
     }
 }

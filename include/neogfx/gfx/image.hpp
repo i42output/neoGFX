@@ -30,6 +30,13 @@
 
 namespace neogfx
 {
+    // an image's parameters for neoGFX, given with its URI (its resource is loaded without them), e.g.
+    // ":/neogfx/resources/icons/cut.svg?themable=true&darken=0.0", or else with its resource (see i_resource_manager::resource_parameter):
+    //   themable=true: the image (e.g. a pastel icon) can be adjusted to suit the theme
+    //   darken=<level>: on light themes the themable image is darkened to <level> (0.0 is black, 1.0 is unchanged)
+    std::optional<std::string> image_uri_parameter(i_string const& aUri, std::string_view aName);
+    bool is_themable_uri(i_string const& aUri);
+
     class image : public reference_counted<i_image>
     {
     public:
@@ -92,6 +99,8 @@ namespace neogfx
     public:
         bool discard_background_matte() const final;
         void set_discard_background_matte(bool aDiscard) final;
+    public:
+        bool themable() const final;
     private:
         bool has_resource() const;
         const i_resource& resource() const;

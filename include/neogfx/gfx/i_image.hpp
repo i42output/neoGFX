@@ -56,5 +56,7 @@ namespace neogfx
     public:
         virtual bool discard_background_matte() const = 0;
         virtual void set_discard_background_matte(bool aDiscard) = 0;
+    public:
+        virtual bool themable() const = 0;
     };
 }

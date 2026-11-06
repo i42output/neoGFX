@@ -43,6 +43,7 @@
 
 #include <neolib/core/vecarray.hpp>
 #include <neolib/core/string_utils.hpp>
+#include <neolib/io/uri.hpp>
 
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/app/resource_manager.hpp>
@@ -55,6 +56,71 @@
 
 namespace neogfx
 {
+    namespace
+    {
+        bool is_neogfx_parameter(std::string_view aParameter)
+        {
+            auto const name = aParameter.substr(0, aParameter.find('='));
+            return name == "themable" || name == "darken";
+        }
+
+        // the resource is loaded without neoGFX's query parameters (keeping any others, and any fragment)
+        string resource_uri(string const& aUri)
+        {
+            std::string uri = aUri.to_std_string();
+            auto const fragmentStart = uri.find('#');
+            auto const queryStart = uri.find('?');
+            if (queryStart == std::string::npos || queryStart > fragmentStart)
+                return aUri;
+            auto const queryEnd = std::min(fragmentStart, uri.size());
+            std::string_view parameters{ uri.data() + queryStart + 1, queryEnd - queryStart - 1 };
+            std::string query;
+            bool removed = false;
+            for (;;)
+            {
+                auto const end = parameters.find('&');
+                auto const parameter = parameters.substr(0, end);
+                if (is_neogfx_parameter(parameter))
+                    removed = true;
+                else
+                    query += (query.empty() ? "?" : "&") + std::string{ parameter };
+                if (end == std::string_view::npos)
+                    break;
+                parameters.remove_prefix(end + 1);
+            }
+            if (!removed)
+                return aUri;
+            uri.replace(queryStart, queryEnd - queryStart, query);
+            return string{ uri };
+        }
+    }
+
+    std::optional<std::string> image_uri_parameter(i_string const& aUri, std::string_view aName)
+    {
+        neolib::uri const uri{ aUri.to_std_string() };
+        std::string_view parameters{ uri.query() };
+        while (!parameters.empty())
+        {
+            auto const end = parameters.find('&');
+            auto const parameter = parameters.substr(0, end);
+            auto const separator = parameter.find('=');
+            if (parameter.substr(0, separator) == aName)
+                return std::string{ separator != std::string_view::npos ? parameter.substr(separator + 1) : std::string_view{} };
+            if (end == std::string_view::npos)
+                break;
+            parameters.remove_prefix(end + 1);
+        }
+        string value;
+        if (service<i_resource_manager>().resource_parameter(resource_uri(string{ aUri }), string{ aName }, value))
+            return value.to_std_string();
+        return std::nullopt;
+    }
+
+    bool is_themable_uri(i_string const& aUri)
+    {
+        return image_uri_parameter(aUri, "themable") == "true";
+    }
+
     image::image(dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
         iDpiScaleFactor{ aDpiScaleFactor }, 
         iColorSpace{ aColorSpace },
@@ -76,7 +142,7 @@ namespace neogfx
     }
 
     image::image(string const& aUri, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
-        iResource{ service<i_resource_manager>().load_resource(aUri) },
+        iResource{ service<i_resource_manager>().load_resource(resource_uri(aUri)) },
         iUri{ aUri },
         iDpiScaleFactor{ aDpiScaleFactor },
         iColorSpace{ aColorSpace },
@@ -365,6 +431,11 @@ namespace neogfx
     void image::set_discard_background_matte(bool aDiscard)
     {
         iDiscardBackgroundMatte = aDiscard;
+    }
+
+    bool image::themable() const
+    {
+        return is_themable_uri(iUri);
     }
     bool image::has_resource() const
     {

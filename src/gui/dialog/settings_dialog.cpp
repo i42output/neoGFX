@@ -395,7 +395,7 @@ namespace neogfx
         iTree{ iLayout },
         iDetails{ iLayout },
         iDetailLayout{ iDetails },
-        iBackground{ aIcons != nullptr ? texture{ aIcons->default_icon() } : texture{ image{ ":/neogfx/resources/images/settings.png" } } }
+        iBackground{ aIcons != nullptr ? texture{ aIcons->default_icon() } : texture{ image{ ":/neogfx/resources/images/settings.svg" } } }
     {
         init();
     }
@@ -411,7 +411,7 @@ namespace neogfx
         iTree{ iLayout },
         iDetails{ iLayout },
         iDetailLayout{ iDetails },
-        iBackground{ aIcons != nullptr ? texture{ aIcons->default_icon()  } : texture{ image{ ":/neogfx/resources/images/settings.png" } } }
+        iBackground{ aIcons != nullptr ? texture{ aIcons->default_icon()  } : texture{ image{ ":/neogfx/resources/images/settings.svg" } } }
     {
         init();
     }
@@ -427,7 +427,7 @@ namespace neogfx
     public:
         settings_tree_presentation_model(ref_ptr<i_setting_icons> aIcons) :
             iIcons{ aIcons },
-            iDefaultIcon{ image{ ":/neogfx/resources/images/settings.png" } }
+            iDefaultIcon{ image{ ":/neogfx/resources/images/settings.svg" } }
         {
         }
     public:

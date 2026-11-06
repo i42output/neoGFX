@@ -50,7 +50,7 @@
                 action: {
                     id: actionSettings
                     text: "&Settings..."
-                    image: ":/neogfx/resources/icons/settings.png"
+                    image: ":/neogfx/resources/icons/settings.svg"
                 }
                 action: {
                     id: actionImportAndExportSettings
@@ -209,7 +209,7 @@
                                         id: browseProjectLocation
                                         SizePolicy: Fixed
                                         .image_widget: {
-                                            uri: ":/neogfx/resources/icons/openfolder.png"
+                                            uri: ":/neogfx/resources/icons/openfolder.svg"
                                             FixedSize: 16dip
                                         }
                                     }

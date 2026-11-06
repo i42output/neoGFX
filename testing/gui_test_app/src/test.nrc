@@ -22,21 +22,21 @@
             resources/test.zh-CN.xneol
             resources/test.ja.xneol
             resources/test.ko.xneol
-            resources/icons/bolt.svg
-            resources/icons/bookmark.svg
-            resources/icons/bookmark_add.svg
-            resources/icons/bookmarks.svg
-            resources/icons/contacts.svg
-            resources/icons/content_paste_go.svg
-            resources/icons/energy_savings_leaf.svg
-            resources/icons/extension.svg
-            resources/icons/folder.svg
-            resources/icons/font_download.svg
-            resources/icons/label.svg
-            resources/icons/palette.svg
-            resources/icons/update.svg
-            resources/icons/volume_off.svg
-            resources/icons/volume_up.svg
+            resources/icons/bolt.svg?themable=true
+            resources/icons/bookmark.svg?themable=true
+            resources/icons/bookmark_add.svg?themable=true
+            resources/icons/bookmarks.svg?themable=true
+            resources/icons/contacts.svg?themable=true
+            resources/icons/content_paste_go.svg?themable=true
+            resources/icons/energy_savings_leaf.svg?themable=true
+            resources/icons/extension.svg?themable=true
+            resources/icons/folder.svg?themable=true
+            resources/icons/font_download.svg?themable=true
+            resources/icons/label.svg?themable=true
+            resources/icons/palette.svg?themable=true
+            resources/icons/update.svg?themable=true
+            resources/icons/volume_off.svg?themable=true
+            resources/icons/volume_up.svg?themable=true
         ]
     }
     
@@ -54,7 +54,7 @@
                 action: {
                     id: actionGameControllerCalibration
                     text: "Game Controller Calibration"
-                    image: ":/neogfx/resources/icons/gamecontroller.png"
+                    image: ":/neogfx/resources/icons/gamecontroller.svg"
                 }
                 action: {
                     id: actionGoldenrodStyle
@@ -215,7 +215,7 @@
                     action: appTest.actionContacts
                     action: appTest.actionArcadeMode
                     action: appTest.actionMute
-                    action: { text: "&Xyzzy..." image: ":/neogfx/resources/icons/eyedropper.png" }
+                    action: { text: "&Xyzzy..." image: ":/neogfx/resources/icons/eyedropper.svg" }
                     menu: {
                         id: menuTest
                         title: "&Test"
@@ -655,7 +655,7 @@
                                 radio_button: {
                                     id: radioMessageBoxIconInformation
                                     text: "Information"
-                                    image: ":/neogfx/resources/icons/information.png"
+                                    image: ":/neogfx/resources/icons/information.svg"
                                     .image_widget: {
                                         FixedSize: 24dip
                                     }
@@ -663,7 +663,7 @@
                                 radio_button: {
                                     id: radioMessageBoxIconQuestion
                                     text: "Question"
-                                    image: ":/neogfx/resources/icons/question.png"
+                                    image: ":/neogfx/resources/icons/question.svg"
                                     .image_widget: {
                                         FixedSize: 24dip
                                     }
@@ -671,7 +671,7 @@
                                 radio_button: {
                                     id: radioMessageBoxIconStop
                                     text: "Stop"
-                                    image: ":/neogfx/resources/icons/stop.png"
+                                    image: ":/neogfx/resources/icons/stop.svg"
                                     .image_widget: {
                                         FixedSize: 24dip
                                     }
@@ -679,7 +679,7 @@
                                 radio_button: {
                                     id: radioMessageBoxIconWarning
                                     text: "Warning"
-                                    image: ":/neogfx/resources/icons/warning.png"
+                                    image: ":/neogfx/resources/icons/warning.svg"
                                     .image_widget: {
                                         FixedSize: 24dip
                                     }
@@ -687,7 +687,7 @@
                                 radio_button: {
                                     id: radioMessageBoxIconError
                                     text: "Error"
-                                    image: ":/neogfx/resources/icons/error.png"
+                                    image: ":/neogfx/resources/icons/error.svg"
                                     .image_widget: {
                                         FixedSize: 24dip
                                     }

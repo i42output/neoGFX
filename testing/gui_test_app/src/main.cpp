@@ -643,6 +643,7 @@ int main(int argc, char* argv[])
             gameControllerDialog.exec();
         });
 
+        window.toolbarTest.set_button_image_extents(ng::size{ 16_dip });
         window.themeColor.set_image_extents(ng::size{ 16_dip });
         window.themeFont.set_image_extents(ng::size{ 16_dip });
         window.editColor.set_image_extents(ng::size{ 16_dip });

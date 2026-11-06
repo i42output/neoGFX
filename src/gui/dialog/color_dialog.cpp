@@ -1358,7 +1358,7 @@ namespace neogfx
         iChannelLayout.set_spacing(standardSpacing / 2.0);
         iScreenPicker.set_checkable();
         iScreenPicker.set_size_policy(size_constraint::Minimum);
-        iScreenPicker.set_image(image{ ":/neogfx/resources/icons/eyedropper.png" });
+        iScreenPicker.set_image(image{ ":/neogfx/resources/icons/eyedropper.svg" });
         iScreenPicker.set_image_extents(size{ 16_dip });
         iScreenPicker.enable(service<i_clipboard>().has_image());
         iSink += service<i_clipboard>().updated([this]()
@@ -1367,13 +1367,13 @@ namespace neogfx
         });
         iSink += iScreenPicker.Checked([&, this]()
         {
-            iScreenPicker.set_image(image{ ":/neogfx/resources/icons/colour.png" });
+            iScreenPicker.set_image(image{ ":/neogfx/resources/icons/colour.svg" });
             iYZPicker.set_image(service<i_clipboard>().image());
             update_picker_mode();
         });
         iSink += iScreenPicker.Unchecked([&, this]()
         {
-            iScreenPicker.set_image(image{ ":/neogfx/resources/icons/eyedropper.png" });
+            iScreenPicker.set_image(image{ ":/neogfx/resources/icons/eyedropper.svg" });
             iYZPicker.clear_image();
             update_picker_mode();
         });

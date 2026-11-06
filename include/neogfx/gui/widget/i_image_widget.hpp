@@ -36,6 +36,8 @@ namespace neogfx
         virtual void set_image(const i_texture& aImage) = 0;
         virtual void set_image_size(const i_optional<size>& aImageSize) = 0;
         virtual void set_image_color(const color_or_gradient& aImageColor) = 0;
+        virtual scalar light_theme_darkening() const = 0;
+        virtual void set_light_theme_darkening(scalar aDarkening) = 0;
         virtual void set_aspect_ratio(neogfx::aspect_ratio aAspectRatio) = 0;
         virtual void set_placement(cardinal aPlacement) = 0;
         virtual angle rotation() const = 0;

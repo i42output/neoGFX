@@ -48,8 +48,12 @@ namespace neogfx
     public:
         neolib::i_map<i_string, neolib::i_variant<i_ref_ptr<i_resource>, i_weak_ref_ptr<i_resource>>> const& resources() override;
         neolib::i_map<i_string, neolib::i_variant<i_ref_ptr<i_resource>, i_weak_ref_ptr<i_resource>>> const& resource_archives() override;
+    public:
+        neolib::i_map<i_string, i_string> const& resource_parameters() const override;
+        bool resource_parameter(i_string const& aUri, i_string const& aName, i_string& aValue) const override;
     private:
         neolib::map<string, neolib::variant<ref_ptr<i_resource>, weak_ref_ptr<i_resource>>> iResources;
         neolib::map<string, neolib::variant<ref_ptr<i_resource>, weak_ref_ptr<i_resource>>> iResourceArchives;
+        neolib::map<string, string> iResourceParameters;
     };
 }

@@ -19,6 +19,9 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <algorithm>
+#include <charconv>
+
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
 
@@ -115,8 +118,29 @@ namespace neogfx
         std::optional<scoped_transform> rotate;
         if (Rotation.value() != 0.0)
             rotate.emplace(aGc, Rotation.value(), client_rect().center());
-        aGc.draw_texture(placement_rect(), iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : ImageColor.value(), 
-            effectively_disabled() ? shader_effect::Monochrome : ImageColor.value() != none ? shader_effect::Colorize : shader_effect::None);
+        color_or_gradient imageColor = ImageColor.value();
+        // (a themable image's URI, and so its texture's, has the query parameter "themable=true", and perhaps "darken=<level>")
+        if (iThemable == std::nullopt)
+        {
+            iThemable = !iTexture.is_empty() && is_themable_uri(iTexture.uri());
+            iDarkenLevel = std::nullopt;
+            if (*iThemable)
+                if (auto const darken = image_uri_parameter(iTexture.uri(), "darken"))
+                {
+                    scalar level = 1.0;
+                    if (std::from_chars(darken->data(), darken->data() + darken->size(), level).ec == std::errc{})
+                        iDarkenLevel = std::clamp(level, 0.0, 1.0);
+                }
+        }
+        scalar const level = iDarkenLevel ? *iDarkenLevel : 1.0 - std::min(LightThemeDarkening.value(), 1.0);
+        if (!effectively_disabled() && imageColor == none && *iThemable && level < 1.0 && palette_color(color_role::Theme).light())
+        {
+            // darken by multiplying the image by a grey
+            aGc.draw_texture(placement_rect(), iTexture, color{ level, level, level }, shader_effect::None);
+        }
+        else
+            aGc.draw_texture(placement_rect(), iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : imageColor, 
+                effectively_disabled() ? shader_effect::Monochrome : imageColor != none ? shader_effect::Colorize : shader_effect::None);
         if (service<i_debug>().layout_item() == this)
             aGc.flush();
     }
@@ -158,6 +182,7 @@ namespace neogfx
         size const oldSize = minimum_size();
         size const oldTextureSize = image().extents();
         iTexture = aTexture;
+        iThemable = std::nullopt;
         ImageChanged();
         if (oldSize != minimum_size() || oldTextureSize != image().extents())
         {
@@ -187,6 +212,20 @@ namespace neogfx
     void image_widget::set_image_color(const color_or_gradient& aImageColor)
     {
         ImageColor = aImageColor;
+    }
+
+    scalar image_widget::light_theme_darkening() const
+    {
+        return LightThemeDarkening;
+    }
+
+    void image_widget::set_light_theme_darkening(scalar aDarkening)
+    {
+        if (LightThemeDarkening.value() != aDarkening)
+        {
+            LightThemeDarkening = aDarkening;
+            update();
+        }
     }
 
     neogfx::aspect_ratio image_widget::aspect_ratio() const

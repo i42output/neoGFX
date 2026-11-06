@@ -844,7 +844,7 @@ namespace neogfx
     text_edit::password_bits::password_bits(text_edit& aParent) :
         parent{ aParent },
         previousPadding{ aParent.padding() },
-        showPassword{ aParent, image{ ":/neogfx/resources/icons/eye-outline.png" } }
+        showPassword{ aParent, image{ ":/neogfx/resources/icons/eye-outline.svg" } }
     {
         showPassword.set_size_policy(size_constraint::Minimum);
         showPassword.set_image_extents(size{ 16_dip, 16_dip });
@@ -1511,7 +1511,7 @@ namespace neogfx
         }, std::chrono::milliseconds{ 16 } },
         iSuppressTextChangedNotification{ 0u },
         iWantedToNotifyTextChanged{ 0u },
-        iBookmarkIcon{ image{ ":/neogfx/resources/icons/bookmark_small.png", 1.0, texture_sampling::Normal } },
+        iBookmarkIcon{ image{ ":/neogfx/resources/icons/bookmark_small.svg", 1.0, texture_sampling::Normal } },
         iOutOfMemory{ false }
     {
         init();
@@ -1536,7 +1536,7 @@ namespace neogfx
         }, std::chrono::milliseconds{ 16 } },
         iSuppressTextChangedNotification{ 0u },
         iWantedToNotifyTextChanged{ 0u },
-        iBookmarkIcon{ image{ ":/neogfx/resources/icons/bookmark_small.png", 1.0, texture_sampling::Normal } },
+        iBookmarkIcon{ image{ ":/neogfx/resources/icons/bookmark_small.svg", 1.0, texture_sampling::Normal } },
         iOutOfMemory{ false }
     {
         init();
@@ -1561,7 +1561,7 @@ namespace neogfx
         }, std::chrono::milliseconds{ 16 } },
         iSuppressTextChangedNotification{ 0u },
         iWantedToNotifyTextChanged{ 0u },
-        iBookmarkIcon{ image{ ":/neogfx/resources/icons/bookmark_small.png", 1.0, texture_sampling::Normal } },
+        iBookmarkIcon{ image{ ":/neogfx/resources/icons/bookmark_small.svg", 1.0, texture_sampling::Normal } },
         iOutOfMemory{ false }
     {
         init();

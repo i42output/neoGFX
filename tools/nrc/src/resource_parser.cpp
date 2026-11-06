@@ -60,14 +60,22 @@ namespace neogfx::nrc
 
         for (auto const& resourceItem : resource.contents())
         {
-            auto process_file = [&](const neolib::fjson_string& aInputFilename)
+            auto process_file = [&](const neolib::fjson_string& aItem)
             {
-                std::cout << "Processing " << aInputFilename << "..." << std::endl;
-                resourcePaths.push_back((!resourcePrefix.empty() ? resourcePrefix + "/" : "") + aInputFilename);
+                // a file can have query parameters for its resource (e.g. "icons/save.svg?themable=true"); the resource manager provides them
+                std::string const item{ aItem.to_std_string_view() };
+                auto const queryStart = item.find('?');
+                std::string const inputFilename = item.substr(0, queryStart);
+                std::string const query = queryStart != std::string::npos ? item.substr(queryStart) : std::string{};
+                std::cout << "Processing " << inputFilename << "..." << std::endl;
+                std::string resourceUri{ resourcePrefix };
+                if (!resourceUri.empty())
+                    resourceUri += "/";
+                resourcePaths.push_back(resourceUri + inputFilename + query);
                 std::string resourcePath = boost::filesystem::path(iInputFilename).parent_path().string();
                 if (!resourcePath.empty())
                     resourcePath += "/";
-                resourcePath += aInputFilename;
+                resourcePath += inputFilename;
                 std::ifstream resourceFile(resourcePath, std::ios_base::in | std::ios_base::binary);
                 iOutput << "\tconst unsigned char resource_" << nextResourceIndex << "_data[] =" << std::endl << "\t{" << std::endl;
                 const std::size_t kBufferSize = 32;

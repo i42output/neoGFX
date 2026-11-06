@@ -19,6 +19,7 @@ Build and install (Windows, from a Visual Studio developer prompt):
 Windows builds use the static C runtime (/MT, /MTd), as neolib does.
 The install prefix defaults to /usr/local; set CMAKE_INSTALL_PREFIX to change it.
 Programs and the plugins they load (.nrl, .nel, .plg) are built into out/bin (out/bin/<config> with Visual Studio generators) and installed into <prefix>/bin.
+The example apps are installed into <prefix>/share/neogfx/examples and the GUI test app into <prefix>/share/neogfx/test.
 
 Options (default):
 
@@ -28,6 +29,8 @@ Options (default):
 * NEOGFX_BUILD_TESTS (ON): the GUI test app
 * NEOGFX_BUILD_EXAMPLES (OFF): the example apps (video_poker, chess, mod_tracker)
 * NEOGFX_DEBUG (ON): defines NEOGFX_DEBUG
+* NEOGFX_BUILD_CORES (empty): number of cores for concurrent compilation; empty or 0 uses all cores
+  (Visual Studio: /MP<n>; Ninja: a compile job pool; Makefiles: use cmake --build -j <n>)
 
 Using an installed neoGFX:
 

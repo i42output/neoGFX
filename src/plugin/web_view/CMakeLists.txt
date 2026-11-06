@@ -18,7 +18,7 @@ neogfx_add_plugin(web_view web_view .plg
 if(WIN32)
     target_sources(web_view PRIVATE src/dllmain.cpp)
 endif()
-target_include_directories(web_view PRIVATE hdr ${_neogfx_cef_include_dirs})
+target_include_directories(web_view PRIVATE "${PROJECT_SOURCE_DIR}/include" hdr ${_neogfx_cef_include_dirs})
 target_compile_definitions(web_view PRIVATE NEOGFX_PLUGIN _SCL_SECURE_NO_WARNINGS DEFAULT_EXPORTS)
 target_link_libraries(web_view PRIVATE neogfx::neogfx "${NEOGFX_CEF_LIBRARY}" "${NEOGFX_CEF_WRAPPER_LIBRARY}")
 

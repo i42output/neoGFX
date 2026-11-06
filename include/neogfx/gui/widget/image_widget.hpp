@@ -60,6 +60,8 @@ namespace neogfx
         void set_image(const i_texture& aImage) override;
         void set_image_size(const i_optional<size>& aImageSize) override;
         void set_image_color(const color_or_gradient& aImageColor) override;
+        scalar light_theme_darkening() const override;
+        void set_light_theme_darkening(scalar aDarkening) override;
         neogfx::aspect_ratio aspect_ratio() const;
         void set_aspect_ratio(neogfx::aspect_ratio aAspectRatio) override;
         cardinal placement() const;
@@ -72,9 +74,12 @@ namespace neogfx
         rect placement_rect() const;
     private:
         texture iTexture;
+        mutable std::optional<bool> iThemable;
+        mutable std::optional<scalar> iDarkenLevel;
     public:
         define_property(property_category::other_appearance, optional_size, ImageSize, image_size)
         define_property(property_category::appearance, color_or_gradient, ImageColor, image_color)
+        define_property(property_category::appearance, scalar, LightThemeDarkening, light_theme_darkening, 0.5)
         define_property(property_category::other_appearance, neogfx::aspect_ratio, AspectRatio, aspect_ratio, neogfx::aspect_ratio::Keep)
         define_property(property_category::other_appearance, cardinal, Placement, placement, cardinal::Center)
         define_property(property_category::hard_geometry, angle, Rotation, rotation, 0.0)
