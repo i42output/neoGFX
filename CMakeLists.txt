@@ -374,9 +374,12 @@ target_include_directories(neogfx PUBLIC
 target_compile_definitions(neogfx PUBLIC NEOLIB_HOSTED_ENVIRONMENT $<$<BOOL:${NEOGFX_DEBUG}>:NEOGFX_DEBUG>)
 
 target_link_libraries(neogfx PUBLIC neolib::neolib Boost::program_options)
-# every neoGFX app (executable) reserves a 100MB stack
+# every neoGFX app (executable) reserves a 100MB stack and delay loads the Vulkan backend's DLLs, so that it runs
+# without them (with OpenGL); see vulkan_graphics_backend::initialize
 target_link_options(neogfx INTERFACE
-    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>>:/STACK:104857600>)
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>>:/STACK:104857600>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>>:/DELAYLOAD:vulkan-1.dll>
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>>:/DELAYLOAD:shaderc_shared.dll>)
 target_link_libraries(neogfx PRIVATE
     Freetype::Freetype
     harfbuzz::harfbuzz
@@ -389,7 +392,7 @@ target_link_libraries(neogfx PRIVATE
     Vulkan::Vulkan
     ${NEOGFX_SHADERC_LIBRARY})
 if(WIN32)
-    target_link_libraries(neogfx PRIVATE crypt32 imm32 version winmm d2d1 shcore uxtheme)
+    target_link_libraries(neogfx PRIVATE crypt32 imm32 version winmm d2d1 shcore uxtheme $<$<CXX_COMPILER_ID:MSVC>:delayimp>)
 endif()
 # neogfx and neogfx_widget use each other
 target_link_libraries(neogfx INTERFACE neogfx_widget)

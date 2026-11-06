@@ -37,6 +37,12 @@
 #include "vulkan_texture_manager.hpp"
 #include "vulkan_shader_program.hpp"
 #include "vulkan_graphics_backend.hpp"
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
 
 namespace neogfx
 {
@@ -575,6 +581,13 @@ namespace neogfx
         iStatistics.periodStart = std::chrono::steady_clock::now();
         if (iDevice != VK_NULL_HANDLE)
             return;
+#ifdef _WIN32
+        // n.b. these DLLs are delay loaded (see CMakeLists.txt), and a delay load failure is a structured exception rather than
+        // a C++ one, so their absence is reported here, as no Vulkan driver is (by vkCreateInstance); once loaded they stay loaded
+        for (auto const dll : { "vulkan-1.dll", "shaderc_shared.dll" })
+            if (::LoadLibraryA(dll) == nullptr)
+                throw failed_to_initialize(std::string{ dll } + " not found");
+#endif
         create_instance();
         create_device();
         create_defaults();

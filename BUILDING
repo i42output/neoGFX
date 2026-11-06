@@ -6,7 +6,7 @@ neoGFX depends on the following, found by CMake in the install prefix (default /
 * FreeType (CMake package, or headers and library)
 * HarfBuzz (CMake package, or headers and library)
 * libjpeg-turbo (static library jpeg-static, else any libjpeg)
-* Vulkan SDK, including shaderc (found via the VULKAN_SDK environment variable set by the SDK installer); shaderc_shared.dll must be on PATH
+* Vulkan SDK, including shaderc (found via the VULKAN_SDK environment variable set by the SDK installer); shaderc_shared.dll must be on PATH, or shipped next to the program, to use the Vulkan renderer (both it and vulkan-1.dll are delay loaded, so a program without them still runs with OpenGL)
 * GLEW and libpng: the prebuilt static libraries in 3rdparty/lib and the headers in 3rdparty
 * libssh (CMake package), for Design Studio's default element library
 
