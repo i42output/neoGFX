@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <charconv>
 
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
 
@@ -133,7 +134,9 @@ namespace neogfx
                 }
         }
         scalar const level = iDarkenLevel ? *iDarkenLevel : 1.0 - std::min(LightThemeDarkening.value(), 1.0);
-        if (!effectively_disabled() && imageColor == none && *iThemable && level < 1.0 && palette_color(color_role::Theme).light())
+        // (darkened when text would be dark: the same test as text widgets' default text colour, i.e. what the image is drawn on)
+        if (!effectively_disabled() && imageColor == none && *iThemable && level < 1.0 &&
+            service<i_app>().current_style().palette().default_text_color_for_widget(*this).dark())
         {
             // darken by multiplying the image by a grey
             aGc.draw_texture(placement_rect(), iTexture, color{ level, level, level }, shader_effect::None);
