@@ -378,13 +378,14 @@ namespace neogfx
     catch (std::exception& e)
     {
         service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::app: terminating with exception: " << e.what() << std::endl;
-        service<i_basic_services>().display_error_dialog(aAppInfo.name().empty() ? "Abnormal Program Termination"_t : "Abnormal Program Termination - "_t + aAppInfo.name(), "main: terminating with exception: "_t + e.what());
+        // (not translatable strings: the app, which translates them, no longer exists here)
+        service<i_basic_services>().display_error_dialog(aAppInfo.name().empty() ? string{ "Abnormal Program Termination" } : string{ "Abnormal Program Termination - " } + aAppInfo.name(), string{ "main: terminating with exception: " } + e.what());
         throw;
     }
     catch (...)
     {
         service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::app: terminating with unknown exception" << std::endl;
-        service<i_basic_services>().display_error_dialog(aAppInfo.name().empty() ? "Abnormal Program Termination"_t : "Abnormal Program Termination - "_t + aAppInfo.name(), "main: terminating with unknown exception"_t);
+        service<i_basic_services>().display_error_dialog(aAppInfo.name().empty() ? string{ "Abnormal Program Termination" } : string{ "Abnormal Program Termination - " } + aAppInfo.name(), string{ "main: terminating with unknown exception" });
         throw;
     }
 
