@@ -72,8 +72,8 @@ namespace neogfx
             ("fullscreen", boost::program_options::value<std::string>()->implicit_value(""s), "run full screen")
             ("dpi", boost::program_options::value<std::string>()->implicit_value(""s), "DPI override")
             ("nest", "display child windows nested within main window rather than using the main desktop")
-            ("gl", "use OpenGL renderer (default)")
-            ("vk", "use Vulkan renderer")
+            ("gl", "use OpenGL renderer")
+            ("vk", "use Vulkan renderer (default: without this option OpenGL is used if Vulkan is unavailable)")
             ("directx", "use DirectX (ANGLE) renderer")
             ("software", "use software renderer")
             ("turbo", "use turbo mode");
@@ -94,14 +94,14 @@ namespace neogfx
 
     neogfx::renderer program_options::renderer() const
     {
-        if (options().count("vk") == 1)
-            return neogfx::renderer::Vulkan;
+        if (options().count("gl") == 1)
+            return neogfx::renderer::OpenGL;
         else if (options().count("directx") == 1)
             return neogfx::renderer::DirectX;
         else if (options().count("software") == 1)
             return neogfx::renderer::Software;
         else
-            return neogfx::renderer::OpenGL;
+            return neogfx::renderer::Vulkan;
     }
 
     std::optional<size_u32> program_options::full_screen() const

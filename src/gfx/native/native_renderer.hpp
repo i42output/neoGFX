@@ -167,6 +167,8 @@ namespace neogfx
     public:
         i_graphics_backend& backend() const;
         std::uint64_t frame() const;
+    protected:
+        bool fall_back_to_opengl(std::exception const& aVulkanFailure);
     private:
         neogfx::renderer iRenderer;
         std::unique_ptr<i_graphics_backend> iBackend;

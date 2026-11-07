@@ -116,9 +116,23 @@ namespace neogfx
         {
             if (!iInitialized)
             {
+                if (vulkan())
+                {
+                    try
+                    {
+                        native_renderer::initialize();
+                    }
+                    catch (std::exception const& e)
+                    {
+                        if (!fall_back_to_opengl(e))
+                            throw;
+                    }
+                }
                 if (!vulkan())
+                {
                     init_egl();
-                native_renderer::initialize();
+                    native_renderer::initialize();
+                }
                 iInitialized = true;
             }
         }

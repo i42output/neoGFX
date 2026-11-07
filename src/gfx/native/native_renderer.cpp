@@ -33,6 +33,7 @@
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/app/i_basic_services.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 
 #include "native_renderer.hpp"
@@ -133,6 +134,20 @@ namespace neogfx
         backend().initialize();
 
         iDefaultShaderProgram = add_shader_program(backend().create_standard_shader_program()).as<i_standard_shader_program>();
+    }
+
+    bool native_renderer::fall_back_to_opengl(std::exception const& aVulkanFailure)
+    {
+        // (only when Vulkan is the default rather than asked for (--vk))
+        if (iRenderer != neogfx::renderer::Vulkan || service<i_app>().program_options().options().count("vk") != 0)
+            return false;
+        service<debug::logger>() << neolib::logger::severity::Debug << "Vulkan unavailable (" << aVulkanFailure.what() << "): using OpenGL" << std::endl;
+        iDefaultShaderProgram.reset();
+        iShaderPrograms.clear();
+        iTextureManager = nullptr;
+        iRenderer = neogfx::renderer::OpenGL;
+        iBackend = create_graphics_backend(iRenderer);
+        return true;
     }
 
     void native_renderer::cleanup()

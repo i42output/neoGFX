@@ -268,14 +268,26 @@ namespace neogfx
                 wc.lpszMenuName = NULL;
                 wc.lpszClassName = sWindowClassName.c_str();
                 ::RegisterClass(&wc);
+                if (vulkan())
+                {
+                    try
+                    {
+                        native_renderer::initialize();
+                    }
+                    catch (std::exception const& e)
+                    {
+                        if (!fall_back_to_opengl(e))
+                            throw;
+                    }
+                }
                 if (!vulkan())
                 {
                     init_opengl();
                     auto dow = allocate_offscreen_window(nullptr);
                     iDefaultOffscreenWindow = dow;
                     iContext = create_opengl_context(static_cast<HDC>(dow->device_handle()));
+                    native_renderer::initialize();
                 }
-                native_renderer::initialize();
                 iInitialized = true;
             }
         }
