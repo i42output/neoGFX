@@ -47,15 +47,19 @@ namespace neogfx::nrc
                 add_header("neogfx/gui/widget/radio_button.hpp");
                 break;
             }
-            add_data_names({ "checkable", "checked" });
+            add_data_names({ "checkable", "checked", "image_extents" });
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
+            if (aName == "image_extents")
+                iImageExtents.emplace(get_scalar<length>(aData));
             ui_element<>::parse(aName, aData);
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
+            if (aName == "image_extents")
+                emplace_2<length>("image_extents", iImageExtents);
             ui_element<>::parse(aName, aData);
         }
     protected:
@@ -78,6 +82,8 @@ namespace neogfx::nrc
                 emit("   %1%.set_checkable(%2%);\n", id(), enum_to_string("button_checkable", *iCheckable));
             if (iChecked)
                 emit("   %1%.set_checked(%2%);\n", id(), *iChecked);
+            if (iImageExtents)
+                emit("   %1%.set_image_extents(size{ %2%, %3% });\n", id(), iImageExtents->cx, iImageExtents->cy);
             ui_element<>::emit_body();
         }
     protected:
@@ -85,6 +91,7 @@ namespace neogfx::nrc
     private:
         neolib::optional<button_checkable> iCheckable;
         neolib::optional<bool> iChecked; // todo: tri-state
+        neolib::optional<basic_size<length>> iImageExtents;
     };
 
     typedef basic_button<ui_element_type::PushButton> push_button;

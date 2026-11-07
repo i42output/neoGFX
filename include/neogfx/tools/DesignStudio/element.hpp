@@ -59,6 +59,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/toolbar.hpp>
 #include <neogfx/gui/widget/menu_bar.hpp>
 #include <neogfx/gui/widget/status_bar.hpp>
+#include <neogfx/gui/widget/slider_bits.hpp>
 #include <neogfx/gui/widget/i_tab_page_container.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
@@ -466,6 +467,13 @@ namespace neogfx::DesignStudio
             if constexpr (requires(Target& aT) { aT.set_placement(neogfx::label_placement::ImageTextHorizontal); { aT.placement() } -> std::convertible_to<neogfx::label_placement>; } ||
                 requires(Target& aT) { aT.set_placement(neogfx::cardinal::Center); { aT.placement() } -> std::convertible_to<neogfx::cardinal>; })
                 result.push_back({ "Placement" });
+            if constexpr (requires(Target& aT) { aT.set_orientation(slider_orientation::Vertical); } ||
+                requires(Target& aT) { aT.slider().set_orientation(slider_orientation::Vertical); })
+                result.push_back({ "orientation" });
+            if constexpr (std::is_base_of_v<i_button, Target> && requires(Target& aT) { aT.set_image_extents(optional_size{}); })
+                result.push_back({ "image_extents" });
+            if constexpr (std::is_base_of_v<toolbar, Target>)
+                result.push_back({ "button_image_extents" });
             return result;
         }
 
@@ -755,6 +763,46 @@ namespace neogfx::DesignStudio
                                 aTarget.set_placement(*p);
                             }
                         }
+                    }
+                    else if (name == "orientation")
+                    {
+                        // (sliders on the design surface are created with the default orientation, Horizontal)
+                        if constexpr (requires(Target& aT) { aT.set_orientation(slider_orientation::Vertical); })
+                        {
+                            if (auto const o = to_enum<slider_orientation>(value))
+                            {
+                                remember(aRestorers, key("orientation"), [&aTarget]() { aTarget.set_orientation(slider_orientation::Horizontal); });
+                                aTarget.set_orientation(*o);
+                            }
+                        }
+                        else if constexpr (requires(Target& aT) { aT.slider().set_orientation(slider_orientation::Vertical); })
+                        {
+                            if (auto const o = to_enum<slider_orientation>(value))
+                            {
+                                remember(aRestorers, key("orientation"), [&aTarget]() { aTarget.slider().set_orientation(slider_orientation::Horizontal); });
+                                aTarget.slider().set_orientation(*o);
+                            }
+                        }
+                    }
+                    else if (name == "image_extents")
+                    {
+                        // (buttons on the design surface are created without image extents)
+                        if constexpr (std::is_base_of_v<i_button, Target> && requires(Target& aT) { aT.set_image_extents(optional_size{}); })
+                            if (auto const s = to_size(static_cast<i_geometry&>(aTarget), value))
+                            {
+                                remember(aRestorers, key("image_extents"), [&aTarget]() { aTarget.set_image_extents(optional_size{}); });
+                                aTarget.set_image_extents(optional_size{ *s });
+                            }
+                    }
+                    else if (name == "button_image_extents")
+                    {
+                        // (toolbars on the design surface are created without button image extents, i.e. the default)
+                        if constexpr (std::is_base_of_v<toolbar, Target>)
+                            if (auto const s = to_size(static_cast<i_geometry&>(aTarget), value))
+                            {
+                                remember(aRestorers, key("button_image_extents"), [&aTarget]() { aTarget.set_button_image_extents(optional_size{}); });
+                                aTarget.set_button_image_extents(optional_size{ *s });
+                            }
                     }
                 }
                 catch (std::exception const& e)

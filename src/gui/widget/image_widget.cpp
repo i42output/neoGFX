@@ -384,4 +384,4 @@ namespace neogfx
             placementRect.position() += clientRect.position();
         return floor_rasterized(placementRect);
     }
-}
+}

@@ -436,7 +436,10 @@ namespace neogfx::DesignStudio
                 prefix.replace(pos, 2u, "/");
             auto load_file = [&](std::string const& aFile)
             {
-                auto const filePath = std::filesystem::absolute(inputFileName).parent_path() / aFile;
+                // a file can have query parameters for its resource (e.g. "icons/save.svg?themable=true"): as nrc, the file is read without
+                // them and the resource manager is given them with the URI
+                auto const fileName = aFile.substr(0, aFile.find('?'));
+                auto const filePath = std::filesystem::absolute(inputFileName).parent_path() / fileName;
                 auto const uri = ":/" + (!prefix.empty() ? prefix + "/" : std::string{}) + aFile;
                 std::ifstream file{ filePath, std::ios::in | std::ios::binary };
                 if (!file)
@@ -445,7 +448,7 @@ namespace neogfx::DesignStudio
                     return; // (still preserved in the project)
                 }
                 std::vector<char> data{ std::istreambuf_iterator<char>{ file }, std::istreambuf_iterator<char>{} };
-                service<i_resource_manager>().add_resource(uri, data.data(), data.size());
+                service<i_resource_manager>().add_module_resource(uri, data.data(), data.size());
             };
             for (auto const& resourceItem : aResource)
             {

@@ -241,6 +241,7 @@
                 }
                 toolbar: {
                     id: toolbarTest
+                    button_image_extents: 16dip
                     action: appTest.actionFileNew
                     action: appTest.actionFileOpen
                     action: appTest.actionFileSave
@@ -556,16 +557,19 @@
                                             id: themeColor
                                             text: "theme"
                                             image: ":/test/resources/icons/palette.svg"
+                                            image_extents: 16dip
                                         }
                                         push_button: {
                                             id: themeFont
                                             text: "font"
                                             image: ":/test/resources/icons/font_download.svg"
+                                            image_extents: 16dip
                                         }
                                         push_button: {
                                             id: editColor
                                             text: "edit"
                                             image: ":/test/resources/icons/palette.svg"
+                                            image_extents: 16dip
                                         }
                                     }
                                     widget: {
