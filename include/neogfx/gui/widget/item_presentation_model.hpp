@@ -965,7 +965,7 @@ namespace neogfx
             else
             {
                 auto baseIter = typename item_model_type::const_base_iterator{ item_model().index_to_iterator(to_item_model_index(aIndex)) };
-                auto treeIter = baseIter.get<typename item_model_type::const_iterator, typename item_model_type::const_iterator,
+                auto treeIter = baseIter.template get<typename item_model_type::const_iterator, typename item_model_type::const_iterator,
                     typename item_model_type::iterator, typename item_model_type::const_sibling_iterator, typename item_model_type::sibling_iterator>();
                 return (treeIter.depth() + 1) * cell_tree_expander_size(aIndex, aUnitsContext)->cx;
             }
@@ -1059,7 +1059,7 @@ namespace neogfx
                 return optional_filter{};
         }
         void filter_by(item_presentation_model_index::column_type aColumnIndex, i_filter_search_key const& aFilterSearchKey, 
-            filter_search_type aFilterSearchType = filter_search_type::Value, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) final
+            filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) final
         {
             iFilters.push_back(filter{ aColumnIndex, aFilterSearchKey, aFilterSearchType, aCaseSensitivity });
             for (auto i = iFilters.begin(); i != std::prev(iFilters.end()); ++i)

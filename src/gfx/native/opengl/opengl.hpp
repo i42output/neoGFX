@@ -23,7 +23,7 @@
 
 #include <type_traits>
 #include <GL/glew.h>
-#include <GL/GL.h>
+#include <GL/gl.h>
 
 #include "opengl_error.hpp"
 

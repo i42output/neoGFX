@@ -152,14 +152,14 @@ namespace neogfx
             if constexpr (!neolib::is_optional_v<property_value_type>)
                 return true;
             else
-                return property().get<property_value_type>() != std::nullopt;
+                return property().template get<property_value_type>() != std::nullopt;
         }
         value_type const& property_value() const override
         {
             if constexpr (!neolib::is_optional_v<property_value_type>)
-                return property().get<property_value_type>();
+                return property().template get<property_value_type>();
             else if (property_set())
-                return *property().get<property_value_type>();
+                return *property().template get<property_value_type>();
             else
                 throw anchor_property_has_no_value();
         }
@@ -193,7 +193,7 @@ namespace neogfx
             else if (property_set())
                 return property_value();
             else
-                return property().calculate<context_type, calculator_function_type>(aArgs...);
+                return property().template calculate<context_type, calculator_function_type>(aArgs...);
         }
     private:
         destroying_flag iOwnerDestroying;
@@ -232,5 +232,5 @@ namespace neogfx
     using anchor_t = typename detail::anchor_callable_function_cracker<anchor, Context, PVT, Callable>::type;
 
     #define define_anchor( name ) neogfx::anchor_t<property_context_type, typename decltype(name)::value_type, typename decltype(name)::calculator_function_type> Anchor_##name = { *this, name };
-    #define define_anchor_ex( name, calculator_override ) neogfx::anchor_t<property_context_type, typename decltype(name)::value_type, typename decltype(name)::calculator_function_type> Anchor_##name = { *this, name, &property_context_type::##calculator_override };
+    #define define_anchor_ex( name, calculator_override ) neogfx::anchor_t<property_context_type, typename decltype(name)::value_type, typename decltype(name)::calculator_function_type> Anchor_##name = { *this, name, &property_context_type::calculator_override };
 }

@@ -485,7 +485,7 @@ namespace neogfx
     };
 
     constexpr std::size_t GLYPH_TEXT_SMALL_BUFFER_SIZE = 16;
-    using glyph_text_container = neolib::vecarray<glyph_char, GLYPH_TEXT_SMALL_BUFFER_SIZE, -1>;
+    using glyph_text_container = neolib::vecarray<glyph_char, GLYPH_TEXT_SMALL_BUFFER_SIZE, static_cast<std::size_t>(-1)>;
     extern template class basic_glyph_text_content<glyph_text_container, const glyph_char*, glyph_char*>;
     using glyph_text_content = basic_glyph_text_content<glyph_text_container, const glyph_char*, glyph_char*>;
 
@@ -583,7 +583,7 @@ namespace neogfx
             glyph_text::difference_type begin;
             glyph_text::difference_type end;
         };
-        typedef neolib::vecarray<line, 8, -1> lines_t;
+        typedef neolib::vecarray<line, 8, static_cast<std::size_t>(-1)> lines_t;
         lines_t lines;
     };
 

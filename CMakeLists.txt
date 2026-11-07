@@ -40,6 +40,10 @@ if(MSVC)
     endif()
     add_compile_definitions(UNICODE _UNICODE)
 endif()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # (neoGFX names members after their types, e.g. "neogfx::rect rect;", which GCC rejects by default)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wno-changes-meaning>)
+endif()
 if(_neogfx_build_cores AND CMAKE_GENERATOR MATCHES "Ninja")
     set_property(GLOBAL APPEND PROPERTY JOB_POOLS neogfx_compile=${_neogfx_build_cores})
     set(CMAKE_JOB_POOL_COMPILE neogfx_compile)
@@ -113,8 +117,15 @@ neogfx_find_library(NEOGFX_GLEW_LIBRARY
 # shaderc (shared, since neoGFX uses the static C runtime)
 get_filename_component(_neogfx_vulkan_libdir "${Vulkan_LIBRARY}" DIRECTORY)
 neogfx_find_library(NEOGFX_SHADERC_LIBRARY
-    NAMES shaderc_shared
+    NAMES shaderc_shared shaderc
     HINTS "${_neogfx_vulkan_libdir}" "$ENV{VULKAN_SDK}/Lib" "$ENV{VULKAN_SDK}/lib")
+
+# FFTS (included as <ffts/ffts.h>): an installed FFTS, else its header in 3rdparty
+find_path(NEOGFX_FFTS_INCLUDE_DIR ffts/ffts.h)
+if(NOT NEOGFX_FFTS_INCLUDE_DIR)
+    configure_file("${PROJECT_SOURCE_DIR}/3rdparty/ffts/include/ffts.h" "${PROJECT_BINARY_DIR}/neogfx_ffts/ffts/ffts.h" COPYONLY)
+    set(NEOGFX_FFTS_INCLUDE_DIR "${PROJECT_BINARY_DIR}/neogfx_ffts" CACHE PATH "Directory containing ffts/ffts.h" FORCE)
+endif()
 
 foreach(_dir IN ITEMS NEOGFX_PNG_INCLUDE_DIR NEOGFX_GLEW_INCLUDE_DIR)
     if(NOT ${_dir})
@@ -244,6 +255,29 @@ if(WIN32)
         src/hid/native/windows_mouse.cpp
         src/hid/native/windows_window_manager.cpp
         src/hid/native/windows_xinput_controller.cpp)
+elseif(UNIX AND NOT APPLE)
+    # Linux: Wayland (the default) and X11 (the fallback)
+    set(NEOGFX_LINUX_SOURCE_FILES
+        src/app/native/linux_accessibility.cpp
+        src/app/native/linux_basic_services.cpp
+        src/app/native/linux_display_server.cpp
+        src/app/native/linux_services.cpp
+        src/app/native/wayland_display_server.cpp
+        src/app/native/x11_display_server.cpp
+        src/gfx/native/linux_renderer.cpp
+        src/gui/widget/native/linux_skin.cpp
+        src/gui/window/native/linux_window.cpp
+        src/gui/window/native/wayland_window.cpp
+        src/gui/window/native/x11_window.cpp
+        src/hid/native/linux_display.cpp
+        src/hid/native/linux_game_controllers.cpp
+        src/hid/native/linux_hid_devices.cpp
+        src/hid/native/linux_keyboard.cpp
+        src/hid/native/linux_mouse.cpp
+        src/hid/native/linux_window_manager.cpp)
+    list(APPEND NEOGFX_SOURCE_FILES ${NEOGFX_LINUX_SOURCE_FILES})
+    # (the backend's namespace is neogfx::native::linux, and "linux" is a predefined macro in GNU C++)
+    set_source_files_properties(${NEOGFX_LINUX_SOURCE_FILES} PROPERTIES COMPILE_OPTIONS -Ulinux)
 endif()
 
 set(NEOGFX_WIDGET_SOURCE_FILES
@@ -363,7 +397,7 @@ foreach(_target IN ITEMS neogfx neogfx_widget)
     # (neoGFX's own headers first: an installed neoGFX may be in the dependencies' include directories)
     target_include_directories(${_target} BEFORE PRIVATE "${PROJECT_SOURCE_DIR}/include")
     target_include_directories(${_target} PRIVATE
-        "${NEOGFX_PNG_INCLUDE_DIR}" "${NEOGFX_GLEW_INCLUDE_DIR}" ${_neogfx_harfbuzz_parents})
+        "${NEOGFX_PNG_INCLUDE_DIR}" "${NEOGFX_GLEW_INCLUDE_DIR}" "${NEOGFX_FFTS_INCLUDE_DIR}" ${_neogfx_harfbuzz_parents})
     target_compile_definitions(${_target} PRIVATE GLEW_STATIC $<$<CONFIG:Debug>:DEBUG_HID>)
     target_compile_options(${_target} PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W4>)
 endforeach()
@@ -379,7 +413,9 @@ target_link_libraries(neogfx PUBLIC neolib::neolib Boost::program_options)
 target_link_options(neogfx INTERFACE
     $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>>:/STACK:104857600>
     $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>>:/DELAYLOAD:vulkan-1.dll>
-    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>>:/DELAYLOAD:shaderc_shared.dll>)
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>>:/DELAYLOAD:shaderc_shared.dll>
+    # (as app.hpp's #pragma comment(linker, "/include:...") does with MSVC: neoGFX's own embedded resources)
+    $<$<AND:$<NOT:$<CXX_COMPILER_ID:MSVC>>,$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>>:LINKER:--undefined=nrc_neogfx_icons,--undefined=nrc_neogfx_resources>)
 target_link_libraries(neogfx PRIVATE
     Freetype::Freetype
     harfbuzz::harfbuzz
@@ -393,6 +429,33 @@ target_link_libraries(neogfx PRIVATE
     ${NEOGFX_SHADERC_LIBRARY})
 if(WIN32)
     target_link_libraries(neogfx PRIVATE crypt32 imm32 version winmm d2d1 shcore uxtheme $<$<CXX_COMPILER_ID:MSVC>:delayimp>)
+elseif(UNIX AND NOT APPLE)
+    # the Wayland protocols' client code, generated from the protocols' XML (wayland-protocols)
+    find_program(NEOGFX_WAYLAND_SCANNER wayland-scanner REQUIRED)
+    pkg_get_variable(NEOGFX_WAYLAND_PROTOCOLS_DIR wayland-protocols pkgdatadir)
+    if(NOT NEOGFX_WAYLAND_PROTOCOLS_DIR)
+        message(FATAL_ERROR "neoGFX: wayland-protocols not found")
+    endif()
+    set(_neogfx_wayland_dir "${CMAKE_CURRENT_BINARY_DIR}/neogfx_wayland")
+    foreach(_protocol IN ITEMS stable/xdg-shell/xdg-shell.xml unstable/xdg-decoration/xdg-decoration-unstable-v1.xml)
+        get_filename_component(_name "${_protocol}" NAME_WE)
+        set(_xml "${NEOGFX_WAYLAND_PROTOCOLS_DIR}/${_protocol}")
+        add_custom_command(
+            OUTPUT "${_neogfx_wayland_dir}/${_name}-client-protocol.h" "${_neogfx_wayland_dir}/${_name}-protocol.c"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${_neogfx_wayland_dir}"
+            COMMAND "${NEOGFX_WAYLAND_SCANNER}" client-header "${_xml}" "${_neogfx_wayland_dir}/${_name}-client-protocol.h"
+            COMMAND "${NEOGFX_WAYLAND_SCANNER}" private-code "${_xml}" "${_neogfx_wayland_dir}/${_name}-protocol.c"
+            DEPENDS "${_xml}"
+            COMMENT "wayland-scanner ${_name}"
+            VERBATIM)
+        target_sources(neogfx PRIVATE "${_neogfx_wayland_dir}/${_name}-client-protocol.h" "${_neogfx_wayland_dir}/${_name}-protocol.c")
+    endforeach()
+    target_include_directories(neogfx PRIVATE "${_neogfx_wayland_dir}")
+    target_link_libraries(neogfx PRIVATE
+        PkgConfig::NEOGFX_WAYLAND
+        OpenGL::EGL
+        X11::X11 X11::Xrandr X11::Xcursor
+        ${CMAKE_DL_LIBS})
 endif()
 # neogfx and neogfx_widget use each other
 target_link_libraries(neogfx INTERFACE neogfx_widget)

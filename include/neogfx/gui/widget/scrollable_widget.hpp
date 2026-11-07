@@ -67,7 +67,7 @@ namespace neogfx
     public:
         template <typename... Args>
         scrollable_widget(Args&&... aArgs) :
-            scrollable_widget{ neogfx::scrollbar_style::Normal, std::forward<Args>(aArgs)... }
+            scrollable_widget( neogfx::scrollbar_style::Normal, std::forward<Args>(aArgs)... )
         {
         }
         template <typename... Args>
@@ -85,7 +85,7 @@ namespace neogfx
         }
         template <typename... Args>
         scrollable_widget(i_widget& aParent, Args&&... aArgs) :
-            scrollable_widget{ aParent, neogfx::scrollbar_style::Normal, std::forward<Args>(aArgs)... }
+            scrollable_widget( aParent, neogfx::scrollbar_style::Normal, std::forward<Args>(aArgs)... )
         {
         }
         template <typename... Args>
@@ -103,7 +103,7 @@ namespace neogfx
         }
         template <typename... Args>
         scrollable_widget(i_layout& aLayout, Args&&... aArgs) :
-            scrollable_widget{ aLayout, neogfx::scrollbar_style::Normal, std::forward<Args>(aArgs)... }
+            scrollable_widget( aLayout, neogfx::scrollbar_style::Normal, std::forward<Args>(aArgs)... )
         {
         }
         template <typename... Args>

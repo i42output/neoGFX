@@ -22,7 +22,8 @@ namespace neogfx
     template <typename PointType>
     inline void basic_path<PointType>::add_rect(const mesh_type& aRectangle)
     {
-        size_type const pixelSize = { 1px, 1px };
+        using namespace unit_literals;
+        size_type const pixelSize = { static_cast<coordinate_type>(1.0_px), static_cast<coordinate_type>(1.0_px) };
         move_to(aRectangle.left(), aRectangle.top());
         line_to(aRectangle.right() - pixelSize.cx, aRectangle.top());
         line_to(aRectangle.right() - pixelSize.cx, aRectangle.bottom() - pixelSize.cy);

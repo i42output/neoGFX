@@ -26,9 +26,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx::mvc
 {
     view::view(i_controller& aController, i_model& aModel) :
-        framed_scrollable_widget{
+        framed_scrollable_widget(
             aController.container().as_widget(),
-            aController.container().style() != view_container_style::MDI ? frame_style::NoFrame : frame_style::WindowFrame },
+            aController.container().style() != view_container_style::MDI ? frame_style::NoFrame : frame_style::WindowFrame ),
         iController(aController), iModel(aModel), iActive(false)
     {
     }

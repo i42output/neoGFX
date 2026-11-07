@@ -364,7 +364,7 @@ namespace neogfx
                     else if constexpr (std::is_same_v<try_type, neolib::none_t> || std::is_same_v<try_type, std::monostate>)
                     {
                         if constexpr (!neolib::is_optional_v<value_type>)
-                            iValue = {};
+                            iValue = value_type{};
                         else
                             iValue = std::nullopt;
                     }
@@ -433,23 +433,23 @@ namespace neogfx
         {
             return optional_proxy<property>{ *this };
         }
-        template <typename T>
-        bool operator==(const T& aRhs) const
+        template <typename T2>
+        bool operator==(const T2& aRhs) const
         {
             return value() == aRhs;
         }
-        template <typename T>
-        bool operator!=(const T& aRhs) const
+        template <typename T2>
+        bool operator!=(const T2& aRhs) const
         {
             return value() != aRhs;
         }
-        template <typename T>
-        bool operator==(const neolib::optional<T>& aRhs) const
+        template <typename T2>
+        bool operator==(const neolib::optional<T2>& aRhs) const
         {
             return value() == aRhs;
         }
-        template <typename T>
-        bool operator!=(const neolib::optional<T>& aRhs) const
+        template <typename T2>
+        bool operator!=(const neolib::optional<T2>& aRhs) const
         {
             return value() != aRhs;
         }
@@ -644,11 +644,11 @@ namespace neogfx
     // in a class template's specializations too)
     #define define_property( category, type, name, calculator, ... ) \
         static inline neogfx::property_registrar<property_context_type, type, category> name##Registrar{ #name }; \
-        neogfx::property<type, category, property_context_type, decltype(&property_context_type::##calculator)> name = { *this, (static_cast<void>(name##Registrar), #name ##s), &property_context_type::##calculator, __VA_ARGS__ };
+        neogfx::property<type, category, property_context_type, decltype(&property_context_type::calculator)> name = { *this, (static_cast<void>(name##Registrar), #name ##s), &property_context_type::calculator, __VA_ARGS__ };
     // a property with a secondary category too (e.g. a font: appearance, and hard_geometry as it affects size)
     #define define_property_ex( category, secondaryCategory, type, name, calculator, ... ) \
         static inline neogfx::property_registrar<property_context_type, type, neogfx::property_category::with_secondary<category, secondaryCategory>> name##Registrar{ #name }; \
-        neogfx::property<type, neogfx::property_category::with_secondary<category, secondaryCategory>, property_context_type, decltype(&property_context_type::##calculator)> name = { *this, (static_cast<void>(name##Registrar), #name ##s), &property_context_type::##calculator, __VA_ARGS__ };
+        neogfx::property<type, neogfx::property_category::with_secondary<category, secondaryCategory>, property_context_type, decltype(&property_context_type::calculator)> name = { *this, (static_cast<void>(name##Registrar), #name ##s), &property_context_type::calculator, __VA_ARGS__ };
 }
 
 #ifdef _MSC_VER

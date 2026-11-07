@@ -97,8 +97,16 @@ namespace neogfx
 
     std::optional<std::string> image_uri_parameter(i_string const& aUri, std::string_view aName)
     {
-        neolib::uri const uri{ aUri.to_std_string() };
-        std::string_view parameters{ uri.query() };
+        std::string query;
+        try
+        {
+            query = neolib::uri{ aUri.to_std_string() }.query();
+        }
+        catch (std::exception const&)
+        {
+            // not every image URI is one neolib::uri can parse (generated textures are named e.g. "neogfx:status_bar::...")
+        }
+        std::string_view parameters{ query };
         while (!parameters.empty())
         {
             auto const end = parameters.find('&');

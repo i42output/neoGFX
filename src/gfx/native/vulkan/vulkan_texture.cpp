@@ -399,7 +399,7 @@ namespace neogfx
             if (aPart)
                 iUvCalculator->offsetOrPart = *aPart;
             else if (std::holds_alternative<aabb_2df>(iUvCalculator->offsetOrPart))
-                iUvCalculator->offsetOrPart = to_game_rect(viewport(), extents().cy).bottom_left().to_vec2().as<float>();
+                iUvCalculator->offsetOrPart = to_game_rect(viewport(), extents().cy).bottom_left().to_vec2().template as<float>();
             return *iUvCalculator;
         }
 
@@ -409,14 +409,14 @@ namespace neogfx
         if (aPart)
             offsetOrPart = *aPart;
         else
-            offsetOrPart = logicalRect.bottom_left().to_vec2().as<float>();
+            offsetOrPart = logicalRect.bottom_left().to_vec2().template as<float>();
 
         std::optional<float> yFlip;
 
         iUvCalculator.emplace(
-            logicalRect.extents().to_vec2().as<float>(),
+            logicalRect.extents().to_vec2().template as<float>(),
             offsetOrPart,
-            1.0f / storage_extents().to_vec2().as<float>(),
+            1.0f / storage_extents().to_vec2().template as<float>(),
             yFlip);
 
         return *iUvCalculator;
@@ -767,8 +767,8 @@ namespace neogfx
                 viewport().top_right().as<scalar>().to_vec2() };
         case neogfx::logical_coordinate_system::AutomaticGame:
             return neogfx::logical_coordinates{
-                to_game_rect(viewport(), target_extents().cy).bottom_left().as<scalar>().to_vec2(),
-                to_game_rect(viewport(), target_extents().cy).top_right().as<scalar>().to_vec2() };
+                to_game_rect(viewport(), target_extents().cy).bottom_left().template as<scalar>().to_vec2(),
+                to_game_rect(viewport(), target_extents().cy).top_right().template as<scalar>().to_vec2() };
         }
         throw logical_coordinates_not_specified();
     }
@@ -803,7 +803,7 @@ namespace neogfx
         auto const currentViewport = backend().viewport();
         auto previousViewport = to_gui_rect(game_rect{ currentViewport.position(), currentViewport.extents() }, extents().cy);
 
-        auto const ourViewport = to_game_rect(viewport(), extents().cy).as<std::int32_t>();
+        auto const ourViewport = to_game_rect(viewport(), extents().cy).template as<std::int32_t>();
         backend().set_viewport(ourViewport.x, ourViewport.y, ourViewport.cx, ourViewport.cy);
 
         return neogfx::viewport{ previousViewport };

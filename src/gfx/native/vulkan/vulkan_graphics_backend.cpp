@@ -700,6 +700,17 @@ namespace neogfx
         std::vector<char const*> extensions = { VK_KHR_SURFACE_EXTENSION_NAME };
 #ifdef _WIN32
         extensions.push_back("VK_KHR_win32_surface");
+#elif defined(__linux__)
+        {
+            // (Wayland's or X11's (Xlib's), whichever the instance has: it is the display server's that is used)
+            std::uint32_t extensionCount = 0u;
+            vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+            std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+            vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, availableExtensions.data());
+            for (auto const& extension : availableExtensions)
+                if (std::strcmp(extension.extensionName, "VK_KHR_wayland_surface") == 0 || std::strcmp(extension.extensionName, "VK_KHR_xlib_surface") == 0)
+                    extensions.push_back(extension.extensionName == std::string_view{ "VK_KHR_wayland_surface" } ? "VK_KHR_wayland_surface" : "VK_KHR_xlib_surface");
+        }
 #endif
         std::vector<char const*> layers;
 

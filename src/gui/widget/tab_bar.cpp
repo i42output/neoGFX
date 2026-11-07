@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
     tab_bar::tab_bar(i_tab_container& aContainer, bool aClosableTabs, neogfx::tab_container_style aStyle) :
-        framed_scrollable_widget{ scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
+        framed_scrollable_widget( scrollbar_style::Scroller, frame_style::NoFrame ), iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
     {
         set_padding(neogfx::padding{});
         update_placement();
@@ -34,7 +34,7 @@ namespace neogfx
     }
 
     tab_bar::tab_bar(i_widget& aParent, i_tab_container& aContainer, bool aClosableTabs, neogfx::tab_container_style aStyle) :
-        framed_scrollable_widget{ aParent, scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
+        framed_scrollable_widget( aParent, scrollbar_style::Scroller, frame_style::NoFrame ), iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
     {
         set_padding(neogfx::padding{});
         update_placement();
@@ -42,7 +42,7 @@ namespace neogfx
     }
 
     tab_bar::tab_bar(i_layout& aLayout, i_tab_container& aContainer, bool aClosableTabs, neogfx::tab_container_style aStyle) :
-        framed_scrollable_widget{ aLayout, scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
+        framed_scrollable_widget( aLayout, scrollbar_style::Scroller, frame_style::NoFrame ), iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
     {
         set_padding(neogfx::padding{});
         update_placement();

@@ -193,7 +193,7 @@ namespace neogfx
         {
             return find_ancestor_layout<LayoutType>() != nullptr;
         }
-        template <typename LayoutType>
+        template <typename LayoutType, typename Layout = i_layout> // (Layout: i_layout is incomplete here)
         LayoutType* find_ancestor_layout()
         {
             if (has_parent_layout())
@@ -201,7 +201,7 @@ namespace neogfx
                 auto existing = dynamic_cast<LayoutType*>(&parent_layout());
                 if (existing != nullptr)
                     return existing;
-                return parent_layout().template find_ancestor_layout<LayoutType>();
+                return static_cast<Layout&>(parent_layout()).template find_ancestor_layout<LayoutType>();
             }
             return nullptr;
         }

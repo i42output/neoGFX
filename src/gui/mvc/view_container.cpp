@@ -24,5 +24,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx::mvc
 {
     template class view_container<>;
-    template class view_container<scrollable_widget<>>;
 }

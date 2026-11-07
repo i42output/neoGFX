@@ -45,7 +45,7 @@ namespace neogfx
     }
 
     terminal::terminal(i_widget& aParent) : 
-        base_type{ aParent, scrollbar_style::Normal, frame_style::NoFrame },
+        base_type( aParent, scrollbar_style::Normal, frame_style::NoFrame ),
         iTerminalSize{ 80, 25 },
         iBufferSize{ 80, 250 },
         iCursorAnimationStartTime{ neolib::this_process::elapsed_ms() },
@@ -59,7 +59,7 @@ namespace neogfx
     }
 
     terminal::terminal(i_layout& aLayout) :
-        base_type{ aLayout, scrollbar_style::Normal, frame_style::NoFrame },
+        base_type( aLayout, scrollbar_style::Normal, frame_style::NoFrame ),
         iTerminalSize{ 80, 25 },
         iBufferSize{ 80, 250 },
         iCursorAnimationStartTime{ neolib::this_process::elapsed_ms() },
@@ -1174,7 +1174,7 @@ namespace neogfx
     void terminal::enable_alternate_buffer()
     {
         iActiveBuffer = &iAlternateBuffer;
-        iAlternateBuffer = {};
+        iAlternateBuffer = buffer{};
         iAlternateBuffer.cursor.set_style(cursor_style::Xor);
         iAlternateBuffer.cursor.set_width(character_extents().cx);
         set_cursor_pos({});

@@ -34,8 +34,6 @@ namespace neogfx
         define_declared_event(Input, input, i_string const&)
         define_declared_event(TerminalResized, terminal_resized, size_type)
     private:
-        typedef scrollable_widget<framed_widget<widget<i_terminal>>> base_type;
-    private:
         struct attribute
         {
             color ink;

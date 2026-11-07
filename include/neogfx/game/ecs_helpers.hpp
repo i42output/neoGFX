@@ -58,7 +58,7 @@ namespace neogfx
         return to_ecs_component(result, aRect, aMeshType, aTransformation, aOffset);
     }
 
-    template <typename T, std::size_t D>
+    template <typename T, std::uint32_t D>
     inline std::array<basic_vector<T, D>, 4u> center_quad(const std::array<basic_vector<T, D>, 4u>& aQuad, basic_vector<T, D>& aCenteringTranslation)
     {
         // todo: this is a naive solution

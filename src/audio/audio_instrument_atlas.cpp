@@ -159,7 +159,7 @@ namespace neogfx
 		std::vector<float> entireSample;
 
 		thread_local std::array<float, 16384> partSample;
-		std::uint64_t framesRead;
+		ma_uint64 framesRead;
 		for (;;)
 		{
 			ma_decoder_read_pcm_frames(&decoder, &partSample[0], partSample.size(), &framesRead);

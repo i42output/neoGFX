@@ -129,7 +129,7 @@ namespace neogfx
     public:
         template <typename... Args>
         decorated(neogfx::decoration_style aStyle, Args&&... aArgs) :
-            widget_type{ std::forward<Args>(aArgs)... }, 
+            widget_type( std::forward<Args>(aArgs)... ), 
             iInitialized{ false }, 
             iStyle{ aStyle }, 
             iDecoration{ default_decoration(aStyle) }

@@ -45,7 +45,7 @@ namespace neogfx::game
     private:
         using base_type = game::system<rigid_body, ColliderType>;
     public:
-        using base_type::cannot_apply;
+        using typename base_type::cannot_apply;
         using collider_type = ColliderType;
     public:
         simple_physics(i_ecs& aEcs);

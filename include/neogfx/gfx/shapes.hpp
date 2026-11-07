@@ -37,7 +37,7 @@ namespace neogfx
     template <typename Vertex, std::size_t VertexCount, typename CoordinateType, logical_coordinate_system CoordinateSystem>
     inline void calc_rect_vertices(neolib::static_vector<Vertex, VertexCount>& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, const optional_mat44f& aTransformation = {})
     {
-        auto const& transformableRect = (aTransformation ? aRect.with_centered_origin() : aRect).as<typename Vertex::value_type>();
+        auto const& transformableRect = (aTransformation ? aRect.with_centered_origin() : aRect).template as<typename Vertex::value_type>();
         aResult.clear();
         switch(aType)
         {
@@ -68,7 +68,7 @@ namespace neogfx
             aResult.push_back(transformableRect.top_left().to_vec3());
             break;
         }
-        auto const center = aRect.center().to_vec3().as<typename Vertex::value_type>();
+        auto const center = aRect.center().to_vec3().template as<typename Vertex::value_type>();
         if (aTransformation)
             for (auto& v : aResult)
                 v = *aTransformation * v + center;

@@ -179,6 +179,20 @@ namespace neogfx
             else
                 PresentationModelChanged(presentation_model(), *oldModel);
         }
+        void unset_presentation_model() override
+        {
+            if (iModel == nullptr)
+                return;
+
+            iSink.clear();
+
+            clear_current_index();
+            auto oldModel = iModel;
+            iModel = nullptr;
+            iSavedModelIndex = std::nullopt;
+            iSelection = {};
+            PresentationModelRemoved(*oldModel);
+        }
     public:
         item_selection_mode mode() const override
         {

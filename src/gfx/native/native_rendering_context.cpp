@@ -231,7 +231,7 @@ namespace neogfx
             {
                 auto const& value = static_variant_cast<const gradient&>(aColor).bounding_box();
                 if (value != std::nullopt)
-                    return (*value + aContext.origin()).as<float>().to_vec4();
+                    return (*value + aContext.origin()).template as<float>().to_vec4();
             }
             return aBoundingRect.as<float>().to_vec4();
         }
@@ -2823,11 +2823,13 @@ namespace neogfx
                         if (!theGlyph.has_outline_texture())
                             continue;
 
-                        for (auto textEffect : drawOp.appearance->being_filtered() ?
-                            std::initializer_list<text_effect const*>{ drawOp.appearance->being_filtered() } :
-                            std::initializer_list<text_effect const*>{
+                        // (an array, not a choice of std::initializer_lists: the chosen list would be a copy whose elements die with the other)
+                        auto const textEffects = drawOp.appearance->being_filtered() ?
+                            std::array<text_effect const*, 2>{ drawOp.appearance->being_filtered(), nullptr } :
+                            std::array<text_effect const*, 2>{
                                 drawOp.appearance->effect() ? &*drawOp.appearance->effect() : nullptr,
-                                drawOp.appearance->effect2() ? &*drawOp.appearance->effect2() : nullptr })
+                                drawOp.appearance->effect2() ? &*drawOp.appearance->effect2() : nullptr };
+                        for (auto textEffect : textEffects)
                         {
                             if (!textEffect)
                                 continue;

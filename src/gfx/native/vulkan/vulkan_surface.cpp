@@ -23,6 +23,15 @@
 #include <windows.h>
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_win32.h>
+#elif defined(__linux__)
+#include <vulkan/vulkan.h>
+// (without Xlib's and Wayland's headers: see x11.hpp)
+typedef struct _XDisplay Display;
+typedef unsigned long Window;
+typedef unsigned long VisualID;
+#include <vulkan/vulkan_xlib.h>
+#include <vulkan/vulkan_wayland.h>
+#include <neogfx/app/i_basic_services.hpp>
 #endif
 
 #include <neogfx/hid/i_surface_window.hpp>
@@ -199,6 +208,31 @@ namespace neogfx
         if (createWin32Surface == nullptr)
             throw vk_error("vkCreateWin32SurfaceKHR unavailable");
         vkCheck(createWin32Surface(backend().vk_instance(), &createInfo, nullptr, &iSwapchain.surface));
+#elif defined(__linux__)
+        // n.b. the window's target handle is its surface (a wl_surface* or an X11 Window), and its target device handle
+        // the display server's connection (a wl_display* or an Xlib Display*)
+        if (service<i_basic_services>().windowing_system() == windowing_system::Wayland)
+        {
+            VkWaylandSurfaceCreateInfoKHR createInfo{ VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR };
+            createInfo.display = static_cast<wl_display*>(target_device_handle());
+            createInfo.surface = static_cast<wl_surface*>(target_handle());
+            auto const createWaylandSurface = reinterpret_cast<PFN_vkCreateWaylandSurfaceKHR>(
+                vkGetInstanceProcAddr(backend().vk_instance(), "vkCreateWaylandSurfaceKHR"));
+            if (createWaylandSurface == nullptr)
+                throw vk_error("vkCreateWaylandSurfaceKHR unavailable");
+            vkCheck(createWaylandSurface(backend().vk_instance(), &createInfo, nullptr, &iSwapchain.surface));
+        }
+        else
+        {
+            VkXlibSurfaceCreateInfoKHR createInfo{ VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR };
+            createInfo.dpy = static_cast<Display*>(target_device_handle());
+            createInfo.window = reinterpret_cast<Window>(target_handle());
+            auto const createXlibSurface = reinterpret_cast<PFN_vkCreateXlibSurfaceKHR>(
+                vkGetInstanceProcAddr(backend().vk_instance(), "vkCreateXlibSurfaceKHR"));
+            if (createXlibSurface == nullptr)
+                throw vk_error("vkCreateXlibSurfaceKHR unavailable");
+            vkCheck(createXlibSurface(backend().vk_instance(), &createInfo, nullptr, &iSwapchain.surface));
+        }
 #else
         throw std::logic_error("neogfx::vulkan_surface: platform not supported");
 #endif

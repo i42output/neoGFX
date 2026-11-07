@@ -30,13 +30,13 @@
 #include FT_BITMAP_H
 #ifdef u8
 #undef u8
-#include <harfbuzz\hb.h>
-#include <harfbuzz\hb-ft.h>
-#include <harfbuzz\hb-ucdn\ucdn.h>
+#include <harfbuzz/hb.h>
+#include <harfbuzz/hb-ft.h>
+#include <harfbuzz/hb-ucdn/ucdn.h>
 #define u8
 #else
-#include <harfbuzz\hb.h>
-#include <harfbuzz\hb-ot.h>
+#include <harfbuzz/hb.h>
+#include <harfbuzz/hb-ot.h>
 #endif
 #ifdef _WIN32
 #include <Shlobj.h>
@@ -100,6 +100,12 @@ namespace neogfx
                 }
                 else
                     return {};
+#elif defined(__linux__)
+                // (the first of the usual desktops' sans serif fonts that there is)
+                for (auto const& family : { "Noto Sans", "Cantarell", "Ubuntu", "DejaVu Sans", "Liberation Sans", "FreeSans" })
+                    if (service<i_font_manager>().has_font(family, "Regular") || service<i_font_manager>().has_font(family, "Book"))
+                        return font_info{ family, font_style::Normal, 9 };
+                return {};
 #else
                 return {};
 #endif
@@ -113,6 +119,8 @@ namespace neogfx
                     return neolib::tidy_path(szPath);
                 else
                     throw std::logic_error("neogfx::detail::platform_specific::get_system_font_directory: Error");
+#elif defined(__linux__)
+                return "/usr/share/fonts";
 #else
                 throw std::logic_error("neogfx::detail::platform_specific::get_system_font_directory: Unknown system");
 #endif
@@ -131,6 +139,14 @@ namespace neogfx
                 std::string const adobeFonts = neolib::user_settings_directory() + "/Adobe/CoreSync/plugins/livetype/r";
                 if (std::filesystem::exists(adobeFonts))
                     result.push_back(adobeFonts);
+#elif defined(__linux__)
+                result.push_back("/usr/local/share/fonts");
+                if (auto const dataHome = std::getenv("XDG_DATA_HOME"); dataHome != nullptr && *dataHome != '\0')
+                    result.push_back(std::string{ dataHome } + "/fonts");
+                else if (auto const home = std::getenv("HOME"); home != nullptr)
+                    result.push_back(std::string{ home } + "/.local/share/fonts");
+                if (auto const home = std::getenv("HOME"); home != nullptr)
+                    result.push_back(std::string{ home } + "/.fonts");
 #else
                 throw std::logic_error("neogfx::detail::platform_specific::get_local_font_directory: Unknown system");
 #endif
@@ -182,6 +198,15 @@ namespace neogfx
                     "Microsoft PhagsPa", "Microsoft Tai Le", "Microsoft Yi Baiti", "Sylfaen",
                     "Noto Sans CJK JP", "Arial Unicode MS" })
                     add_family(family);
+                return fallback_font_info{ std::move(fallbackFontFamilies) };
+#elif defined(__linux__)
+                // (the Noto fonts, as the usual desktops (with fontconfig) fall back to, then the other usual fonts)
+                std::vector<string> fallbackFontFamilies;
+                for (auto const& family : {
+                    "Noto Sans", "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK KR", "Noto Sans Arabic", "Noto Sans Hebrew",
+                    "Noto Sans Devanagari", "Noto Sans Thai", "Noto Sans Symbols", "Noto Sans Symbols2", "Noto Sans Math",
+                    "DejaVu Sans", "FreeSans", "FreeSerif", "Droid Sans Fallback", "WenQuanYi Micro Hei" })
+                    fallbackFontFamilies.push_back(family);
                 return fallback_font_info{ std::move(fallbackFontFamilies) };
 #else
                 throw std::logic_error("neogfx::detail::platform_specific::default_fallback_font_info: Unknown system");
@@ -973,8 +998,16 @@ namespace neogfx
             throw error_initializing_font_library();
         auto enumerate = [this](const std::string fontsDirectory)
         {
+#ifdef _WIN32
+            using directory_iterator = std::filesystem::directory_iterator;
+            auto constexpr options = std::filesystem::directory_options::none;
+#else
+            // (font directories have subdirectories (e.g. one for each package of fonts) outside Windows)
+            using directory_iterator = std::filesystem::recursive_directory_iterator;
+            auto constexpr options = std::filesystem::directory_options::skip_permission_denied;
+#endif
             if (std::filesystem::exists(fontsDirectory))
-                for (std::filesystem::directory_iterator file(fontsDirectory); file != std::filesystem::directory_iterator(); ++file)
+                for (directory_iterator file(fontsDirectory, options); file != directory_iterator(); ++file)
                 {
                     if (!std::filesystem::is_regular_file(file->status()) || (!has_font_extension(file->path()) && sniff(file->path()) == sfnt_kind::none))
                         continue;

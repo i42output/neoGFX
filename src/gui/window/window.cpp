@@ -115,7 +115,7 @@ namespace neogfx
     };
 
     window::client::client(i_widget& aParent, neogfx::scrollbar_style aScrollbarStyle) :
-        framed_scrollable_widget{ aParent, aScrollbarStyle, frame_style::NoFrame },
+        framed_scrollable_widget( aParent, aScrollbarStyle, frame_style::NoFrame ),
         iLayout{ *this }
     {
         set_padding(neogfx::padding{});
@@ -221,7 +221,7 @@ namespace neogfx
     }
 
     window::window(i_widget* aParent, const window_placement& aPlacement, const std::optional<string>& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
-        base_type{ window_style_to_decoration_style(aStyle), aScrollbarStyle, default_window_frame_style(aStyle, aFrameStyle) },
+        base_type( window_style_to_decoration_style(aStyle), aScrollbarStyle, default_window_frame_style(aStyle, aFrameStyle) ),
         iWindowManager{ service<i_window_manager>() },
         iParentWindow{ nullptr },
         iPlacement{ aPlacement },

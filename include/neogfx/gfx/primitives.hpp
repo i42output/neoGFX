@@ -1171,7 +1171,7 @@ namespace neogfx
     class text_format_spans
     {
     public:
-        typedef neolib::vecarray<text_format_span, 1, -1> spans;
+        typedef neolib::vecarray<text_format_span, 1, static_cast<std::size_t>(-1)> spans;
     public:
         text_format_spans()
         {

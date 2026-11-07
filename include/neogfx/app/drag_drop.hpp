@@ -165,7 +165,7 @@ namespace neogfx
     public:
         template <typename... Args>
         drag_drop_source(Args&&... aArgs) :
-            base_type{ std::forward<Args>(aArgs)... }, iEnabled{ false }, iObject{ nullptr }, iMonitor{ nullptr }
+            base_type( std::forward<Args>(aArgs)... ), iEnabled{ false }, iObject{ nullptr }, iMonitor{ nullptr }
         {
         }
         ~drag_drop_source()
@@ -383,7 +383,7 @@ namespace neogfx
     public:
         template <typename... Args>
         drag_drop_target(Args&&... aArgs) : 
-            base_type{ std::forward<Args>(aArgs)... }, iEnabled{ false }
+            base_type( std::forward<Args>(aArgs)... ), iEnabled{ false }
         {
         }
         ~drag_drop_target()

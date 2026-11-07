@@ -4524,7 +4524,7 @@ frontmost of process \\\"Python\\\" to true' ''');");
 		strcat ( lDialogString , "'" ) ;
 		if ( !gWarningDisplayed && !tinyfd_forceConsole)
 		{
-			tinyfd_messageBox(gTitle,gMessageUnix,"ok","warning",0);
+			tinyfd_messageBox(NULL,gTitle,gMessageUnix,"ok","warning",0);
 			gWarningDisplayed = 1 ;
 		}
 		if ( aTitle && strlen(aTitle) && !tinyfd_forceConsole)
@@ -4554,7 +4554,7 @@ frontmost of process \\\"Python\\\" to true' ''');");
 		if (aTitle&&!strcmp(aTitle,"tinyfd_query")){strcpy(tinyfd_response,"basicinput");return (char const *)0;}
 		if ( !gWarningDisplayed && !tinyfd_forceConsole)
 		{
-			tinyfd_messageBox(gTitle,gMessageUnix,"ok","warning",0);
+			tinyfd_messageBox(NULL,gTitle,gMessageUnix,"ok","warning",0);
 			gWarningDisplayed = 1 ;
 		}
 		if ( aTitle && strlen(aTitle) )

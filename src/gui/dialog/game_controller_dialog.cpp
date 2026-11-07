@@ -68,6 +68,7 @@ namespace neogfx
     {
         auto gameControllerModel = make_ref<basic_item_model<ref_ptr<i_game_controller>>>();
         iControllerSelector.set_model(gameControllerModel);
+        iControllerSelector.set_presentation_model(make_ref<default_drop_list_presentation_model<basic_item_model<ref_ptr<i_game_controller>>>>(iControllerSelector, *gameControllerModel));
         iControllerSelector.SelectionChanged([&, gameControllerModel](optional_item_model_index aIndex)
         {
             iSink1.clear();

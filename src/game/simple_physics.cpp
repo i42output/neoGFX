@@ -158,19 +158,19 @@ namespace neogfx::game
     template <typename ColliderType>
     bool simple_physics<ColliderType>::universal_gravitation_enabled() const
     {
-        return this->ecs().system<game_world>().universal_gravitation_enabled();
+        return this->ecs().template system<game_world>().universal_gravitation_enabled();
     }
 
     template <typename ColliderType>
     void simple_physics<ColliderType>::enable_universal_gravitation()
     {
-        return this->ecs().system<game_world>().enable_universal_gravitation();
+        return this->ecs().template system<game_world>().enable_universal_gravitation();
     }
 
     template <typename ColliderType>
     void simple_physics<ColliderType>::disable_universal_gravitation()
     {
-        return this->ecs().system<game_world>().disable_universal_gravitation();
+        return this->ecs().template system<game_world>().disable_universal_gravitation();
     }
 
     template <typename ColliderType>

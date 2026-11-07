@@ -114,10 +114,10 @@ namespace neogfx
         typedef std::vector<row, typename std::allocator_traits<allocator_type>::template rebind_alloc<row>> container_type;
         typedef typename container_type::iterator iterator;
         typedef typename container_type::const_iterator const_iterator;
-        typedef typename iterator sibling_iterator;
-        typedef typename const_iterator const_sibling_iterator;
-        typedef typename iterator skip_iterator;
-        typedef typename const_iterator const_skip_iterator;
+        typedef iterator sibling_iterator;
+        typedef const_iterator const_sibling_iterator;
+        typedef iterator skip_iterator;
+        typedef const_iterator const_skip_iterator;
     public:
         template <typename T2, typename CellType2, bool CellsCached2 = CellsCached>
         struct rebind
@@ -168,10 +168,10 @@ namespace neogfx
         typedef std::vector<row, typename std::allocator_traits<allocator_type>::template rebind_alloc<row>> container_type;
         typedef typename container_type::iterator iterator;
         typedef typename container_type::const_iterator const_iterator;
-        typedef typename iterator sibling_iterator;
-        typedef typename const_iterator const_sibling_iterator;
-        typedef typename iterator skip_iterator;
-        typedef typename const_iterator const_skip_iterator;
+        typedef iterator sibling_iterator;
+        typedef const_iterator const_sibling_iterator;
+        typedef iterator skip_iterator;
+        typedef const_iterator const_skip_iterator;
     public:
         template <typename T2, typename CellType2, bool CellsCached2 = CellsCached>
         struct rebind
@@ -270,7 +270,7 @@ namespace neogfx
         i_string const& column_name(item_model_index::value_type aColumnIndex) const final
         {
             if (iColumns.size() < aColumnIndex + 1u)
-                throw base_type::bad_column_index();
+                throw typename base_type::bad_column_index();
             return iColumns[aColumnIndex].name;
         }
         using i_item_model::set_column_name;
@@ -334,7 +334,7 @@ namespace neogfx
         item_model_index iterator_to_index(i_item_model::const_iterator aPosition) const final
         {
             auto const iter = const_base_iterator{ aPosition }.
-                get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>();
+                template get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>();
             return item_model_index{ static_cast<std::uint32_t>(std::distance(iItems.begin(), iter)), 0 };
         }
         i_item_model::iterator begin() final
@@ -358,28 +358,28 @@ namespace neogfx
             if constexpr (container_traits::is_tree)
                 return base_iterator{ iItems.sbegin() };
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         i_item_model::const_iterator sbegin() const final
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ iItems.sbegin() };
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         i_item_model::iterator send() final
         {
             if constexpr (container_traits::is_tree)
                 return base_iterator{ iItems.send() };
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         i_item_model::const_iterator send() const final
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ iItems.send() };
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         bool has_children(i_item_model::const_iterator aParent) const final
         {
@@ -389,7 +389,7 @@ namespace neogfx
                 return iter.descendent_count() != 0;
             }
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         bool has_children(const item_model_index& aParentIndex) const final
         {
@@ -399,7 +399,7 @@ namespace neogfx
                 return has_children(iter);
             }
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         bool has_parent(i_item_model::const_iterator aChild) const final
         {
@@ -409,7 +409,7 @@ namespace neogfx
                 return !iter.parent_is_root();
             }
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         bool has_parent(const item_model_index& aChildIndex) const final
         {
@@ -419,7 +419,7 @@ namespace neogfx
                 return has_parent(iter);
             }
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         i_item_model::iterator parent(i_item_model::iterator aChild) final
         {
@@ -430,7 +430,7 @@ namespace neogfx
                 return base_iterator{ iterParent };
             }
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         i_item_model::const_iterator parent(i_item_model::const_iterator aChild) const final
         {
@@ -441,7 +441,7 @@ namespace neogfx
                 return const_base_iterator{ iterParent };
             }
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         item_model_index parent(const item_model_index& aChildIndex) const final
         {
@@ -452,35 +452,35 @@ namespace neogfx
                 return iterator_to_index(iterParent);
             }
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         i_item_model::iterator sbegin(i_item_model::iterator aParent) final
         {
             if constexpr (container_traits::is_tree)
                 return base_iterator{ aParent.get<iterator, iterator, sibling_iterator>().begin() };
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         i_item_model::const_iterator sbegin(i_item_model::const_iterator aParent) const final
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().begin() };
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         i_item_model::iterator send(i_item_model::iterator aParent) final
         {
             if constexpr (container_traits::is_tree)
                 return base_iterator{ aParent.get<iterator, iterator, sibling_iterator>().end() };
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         i_item_model::const_iterator send(i_item_model::const_iterator aParent) const final
         {
             if constexpr (container_traits::is_tree)
                 return const_base_iterator{ aParent.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().end() };
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
     public:
         item_cell_data const& cell_data(item_model_index const& aIndex) const override
@@ -504,14 +504,14 @@ namespace neogfx
             if constexpr (container_traits::is_flat)
                 iItems.reserve(aItemCount);
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         std::uint32_t capacity() const final
         {
             if constexpr (container_traits::is_flat)
                 return static_cast<std::uint32_t>(iItems.capacity());
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, value_type const& aValue) final
         {
@@ -560,7 +560,7 @@ namespace neogfx
                 return result;
             }
             else
-                throw base_type::wrong_model_type();
+                throw typename base_type::wrong_model_type();
         }
         i_item_model::iterator append_item(i_item_model::const_iterator aParent, value_type const& aValue, item_cell_data const& aCellData) final
         {
@@ -665,7 +665,7 @@ namespace neogfx
         item_cell_info const& default_cell_info(item_model_index::column_type aColumnIndex) const
         {
             if (iColumns.size() < aColumnIndex + 1)
-                throw base_type::bad_column_index();
+                throw typename base_type::bad_column_index();
             if (iColumns[aColumnIndex].defaultDataInfo != std::nullopt)
                 return *iColumns[aColumnIndex].defaultDataInfo;
             else

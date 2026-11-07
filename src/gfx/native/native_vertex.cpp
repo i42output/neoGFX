@@ -32,14 +32,8 @@ namespace neogfx
     template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::xyz)>;
     template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::rgba)>;
     template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::st)>;
-    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::xyzw)>;
-    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::abcd)>;
-    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::efgh)>;
-    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::ijkl)>;
-    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::mnop)>;
-    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::abcd2)>;
-    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::efgh2)>;
-    template class native_vertex_attrib_array<standard_vertex, decltype(standard_vertex::debug)>;
+    // (the other attributes (xyzw, abcd, efgh, ijkl, mnop, abcd2, efgh2 and debug) are of these types too, and a
+    // specialization can only be explicitly instantiated once)
 
     native_scene_buffer::native_scene_buffer() :
         iVertices{ *this, true, 0u, true }, iIndices{ *this, true, 0u, true }

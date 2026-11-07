@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neolib/core/vecarray.hpp>
+#include <neogfx/core/units.hpp>
 
 namespace neogfx
 {
@@ -48,8 +49,8 @@ namespace neogfx
         typedef basic_delta<coordinate_type> delta_type;
         typedef basic_rect<coordinate_type> mesh_type;
         typedef basic_line<coordinate_type> line_type;
-        typedef neolib::vecarray<point_type, 16, -1> sub_path_type;
-        typedef neolib::vecarray<sub_path_type, 1, -1> sub_paths_type;
+        typedef neolib::vecarray<point_type, 16, static_cast<std::size_t>(-1)> sub_path_type;
+        typedef neolib::vecarray<sub_path_type, 1, static_cast<std::size_t>(-1)> sub_paths_type;
         typedef typename sub_paths_type::size_type sub_paths_size_type;
         struct clip_rect_list : std::vector<mesh_type>
         {
@@ -124,7 +125,7 @@ namespace neogfx
             return iSubPaths; 
         }
         template <typename VertexContainer>
-        VertexContainer& to_vertices(const typename sub_path_type& aPath, VertexContainer& aResult) const
+        VertexContainer& to_vertices(const sub_path_type& aPath, VertexContainer& aResult) const
         {
             aResult.clear();
             aResult.reserve((aPath.size()) * (iShape == path_shape::Quads ? 6 : 1));

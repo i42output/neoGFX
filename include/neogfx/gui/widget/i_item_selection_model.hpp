@@ -292,6 +292,7 @@ namespace neogfx
         virtual bool has_presentation_model() const = 0;
         virtual i_item_presentation_model& presentation_model() const = 0;
         virtual void set_presentation_model(i_item_presentation_model& aModel) = 0;
+        virtual void unset_presentation_model() = 0;
     public:
         virtual item_selection_mode mode() const = 0;
         virtual void set_mode(item_selection_mode aType) = 0;

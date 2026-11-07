@@ -815,9 +815,10 @@ namespace neogfx
         basic_rect(const aabb_2df& aBoundingBox) : basic_rect{ aBoundingBox.min.x, aBoundingBox.min.y, aBoundingBox.max.x, aBoundingBox.max.y } {}
         basic_rect(const basic_box_areas<coordinate_type>& aBoxAreas) : basic_rect{ aBoxAreas.top_left(), aBoxAreas.bottom_right() } {}
     public:
-        basic_rect(const basic_rect& aOther) : point_type{ aOther }, size_type{ aOther } {}
+        basic_rect(const basic_rect& aOther) : point_type{ static_cast<point_type const&>(aOther) }, size_type{ static_cast<size_type const&>(aOther) } {}
         template <typename CoordinateType2, logical_coordinate_system CoordinateSystem2>
-        basic_rect(const basic_rect<CoordinateType2, CoordinateSystem2>& aOther) : point_type{ aOther }, size_type{ aOther } {}
+        basic_rect(const basic_rect<CoordinateType2, CoordinateSystem2>& aOther) : 
+            point_type{ static_cast<basic_point<CoordinateType2> const&>(aOther) }, size_type{ static_cast<basic_size<CoordinateType2> const&>(aOther) } {}
         // assignment
     public:
         basic_rect& operator=(const basic_rect& aOther) { static_cast<point_type&>(*this) = aOther; static_cast<size_type&>(*this) = aOther; epsilon = aOther.epsilon; return *this; }
@@ -850,6 +851,14 @@ namespace neogfx
         dimension_type height() const { return cy; }
         bool operator==(const basic_rect& aOther) const { return x == aOther.x && y == aOther.y && cx == aOther.cx && cy == aOther.cy; }
         bool operator!=(const basic_rect& aOther) const { return !operator==(aOther); }
+        // (a rect's own ordering: its point and size bases have one each, so it would otherwise be ambiguous)
+        auto operator<=>(const basic_rect& aOther) const
+        {
+            if (auto const c = position() <=> aOther.position(); c != 0)
+                return c;
+            return extents() <=> aOther.extents();
+        }
+        basic_rect operator-() const = delete; // (hides the unary minus of both bases, which made rect - point ambiguous)
         basic_rect& operator*=(const basic_rect& aOther) { position() *= aOther.position(); extents() *= aOther.extents(); return *this; }
         basic_rect& operator*=(const size_type& size) { position() *= size; extents() *= size; return *this; }
         basic_rect& operator*=(dimension_type value) { position() *= value; extents() *= value; return *this; }
@@ -1051,9 +1060,9 @@ namespace neogfx
         aabb_2df to_aabb_2df() const
         {
             if constexpr (gui)
-                return aabb_2df{ top_left().to_vec2().as<float>(), bottom_right().to_vec2().as<float>() };
+                return aabb_2df{ top_left().to_vec2().template as<float>(), bottom_right().to_vec2().template as<float>() };
             else
-                return aabb_2df{ bottom_left().to_vec2().as<float>(), top_right().to_vec2().as<float>() };
+                return aabb_2df{ bottom_left().to_vec2().template as<float>(), top_right().to_vec2().template as<float>() };
         }
         basic_vector<coordinate_type, 4> to_vec4() const
         {
@@ -1065,7 +1074,7 @@ namespace neogfx
         }
         quadf to_quadf() const
         {
-            return quadf{ top_left().to_vec3().as<float>(), top_right().to_vec3().as<float>(), bottom_right().to_vec3().as<float>(), bottom_left().to_vec3().as<float>() };
+            return quadf{ top_left().to_vec3().template as<float>(), top_right().to_vec3().template as<float>(), bottom_right().to_vec3().template as<float>(), bottom_left().to_vec3().template as<float>() };
         }
     public:
         template <typename T>

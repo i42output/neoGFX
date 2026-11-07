@@ -1493,7 +1493,7 @@ namespace neogfx
     }
 
     text_edit::text_edit(text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle, 2.0 },
+        framed_scrollable_widget( (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle, 2.0 ),
         iCaps{ aCaps },
         iLineEnding{ text_edit_line_ending::AutomaticLf },
         iPersistDefaultStyle{ false },
@@ -1518,7 +1518,7 @@ namespace neogfx
     }
 
     text_edit::text_edit(i_widget& aParent, text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aParent, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle, 2.0 },
+        framed_scrollable_widget( aParent, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle, 2.0 ),
         iCaps{ aCaps },
         iLineEnding{ text_edit_line_ending::AutomaticLf },
         iPersistDefaultStyle{ false },
@@ -1543,7 +1543,7 @@ namespace neogfx
     }
 
     text_edit::text_edit(i_layout& aLayout, text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aLayout, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle, 2.0 },
+        framed_scrollable_widget( aLayout, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle, 2.0 ),
         iCaps{ aCaps },
         iLineEnding{ text_edit_line_ending::AutomaticLf },
         iPersistDefaultStyle{ false },

@@ -28,13 +28,13 @@
 #include FT_FREETYPE_H
 #ifdef u8
 #undef u8
-#include <harfbuzz\hb.h>
-#include <harfbuzz\hb-ot.h>
-#include <harfbuzz\hb-ucdn\ucdn.h>
+#include <harfbuzz/hb.h>
+#include <harfbuzz/hb-ot.h>
+#include <harfbuzz/hb-ucdn/ucdn.h>
 #define u8
 #else
-#include <harfbuzz\hb.h>
-#include <harfbuzz\hb-ot.h>
+#include <harfbuzz/hb.h>
+#include <harfbuzz/hb-ot.h>
 #endif
 
 #include <neolib/core/reference_counted.hpp>

@@ -50,8 +50,6 @@ namespace neogfx
         declare_event(selection_cleared)
         declare_event(open_sub_menu, i_menu&)
     public:
-        typedef std::uint32_t item_index;
-    public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_menu::no_parent") {} };
         struct bad_item_index : std::logic_error { bad_item_index() : std::logic_error("neogfx::i_menu::bad_item_index") {} };
         struct item_not_found : std::logic_error { item_not_found() : std::logic_error("neogfx::i_menu::item_not_found") {} };

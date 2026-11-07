@@ -47,7 +47,7 @@ namespace neogfx
 
     drop_list_view::~drop_list_view()
     {
-        if (presentation_model().attached_to(*this))
+        if (has_presentation_model() && presentation_model().attached_to(*this))
         {
             presentation_model().detach();
             presentation_model().attach(ref_ptr<i_widget>{ iDropList });
@@ -406,7 +406,7 @@ namespace neogfx
 
     void drop_list::list_proxy::show_view()
     {
-        if (iDropList.model().empty() && !iDropList.editable())
+        if (!iDropList.has_presentation_model() || (iDropList.model().empty() && !iDropList.editable()))
             return;
         if (!view_created())
         {
@@ -808,6 +808,8 @@ namespace neogfx
         if (has_presentation_model() && presentation_model().attached())
             presentation_model().detach();
         iPresentationModel = aPresentationModel;
+        if (!has_presentation_model() && has_selection_model())
+            selection_model().unset_presentation_model();
         if (has_presentation_model() && has_model())
             presentation_model().set_item_model(model());
         if (has_presentation_model() && has_selection_model())
@@ -819,7 +821,7 @@ namespace neogfx
 
         iSelectionSink = selection_model().current_index_changed([this](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& /* aPreviousIndex */)
         {
-            if (!presentation_model().filtering() && !handling_text_change() && !checkable())
+            if (has_presentation_model() && !presentation_model().filtering() && !handling_text_change() && !checkable())
             {
                 neolib::scoped_flag sf{ iChangingText };
                 texture image;
@@ -892,7 +894,7 @@ namespace neogfx
 
     bool drop_list::input_matches_current_item() const
     {
-        return selection_model().has_current_index() &&
+        return has_presentation_model() && selection_model().has_current_index() &&
             model().cell_data(presentation_model().to_item_model_index(
                 selection_model().current_index())).to_string() == input_widget().text();
     }
@@ -915,7 +917,7 @@ namespace neogfx
     void drop_list::show_view()
     {
         iListProxy.show_view();
-        if (editable() && !accepting_selection())
+        if (editable() && !accepting_selection() && has_presentation_model())
         {
             if (filter_enabled())
                 presentation_model().filter_by(0, input_widget().text());
@@ -951,11 +953,12 @@ namespace neogfx
     {
         neolib::scoped_flag sf{ iAcceptingSelection };
 
-        optional_item_model_index newSelection = (selection_model().has_current_index() ?
+        optional_item_model_index newSelection = (has_presentation_model() && selection_model().has_current_index() ?
             presentation_model().to_item_model_index(selection_model().current_index()) : optional_item_model_index{});
 
         hide_view();
-        presentation_model().reset_filter();
+        if (has_presentation_model())
+            presentation_model().reset_filter();
 
         if (newSelection != std::nullopt)
         {
@@ -1078,7 +1081,7 @@ namespace neogfx
         iInputImageSize = aImageSize;
         if (iInputImageSize != std::nullopt)
             input_widget().set_image_size(iInputImageSize);
-        else if (selection_model().has_current_index())
+        else if (has_presentation_model() && selection_model().has_current_index())
             input_widget().set_image_size(presentation_model().cell_image_size(selection_model().current_index()));
     }
 
@@ -1279,16 +1282,17 @@ namespace neogfx
 
             texture image;
             string text;
-            if (selection_model().has_current_index())
+            if (has_presentation_model() && selection_model().has_current_index())
             {
                 auto const& maybeImage = presentation_model().cell_image(selection_model().current_index());
                 if (maybeImage != std::nullopt)
                     image = *maybeImage;
                 text = presentation_model().cell_to_string(selection_model().current_index());
             }
-            input_widget().set_spacing(presentation_model().cell_spacing(*this));
+            if (has_presentation_model())
+                input_widget().set_spacing(presentation_model().cell_spacing(*this));
             input_widget().set_image(image);
-            if (selection_model().has_current_index())
+            if (has_presentation_model() && selection_model().has_current_index())
                 input_widget().set_image_size(iInputImageSize != std::nullopt ? iInputImageSize : presentation_model().cell_image_size(selection_model().current_index()));
             if (changed)
                 input_widget().set_text(text);
@@ -1351,7 +1355,7 @@ namespace neogfx
     {
         if (!view_visible())
         {
-            if (selection_model().has_current_index())
+            if (has_presentation_model() && selection_model().has_current_index())
                 iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
             show_view();
         }
@@ -1366,10 +1370,11 @@ namespace neogfx
         if (view_created())
             hide_view();
 
-        presentation_model().reset_filter();
+        if (has_presentation_model())
+            presentation_model().reset_filter();
 
         auto const previousSelection = iSelection;
-        if (aRestoreSavedSelection && iSavedSelection != std::nullopt)
+        if (aRestoreSavedSelection && iSavedSelection != std::nullopt && has_presentation_model())
         {
             iSelection = iSavedSelection;
             iSavedSelection = std::nullopt;
@@ -1389,12 +1394,16 @@ namespace neogfx
             string text;
             if (iSelection)
             {
-                auto const& maybeImage = presentation_model().cell_image(presentation_model().from_item_model_index(*iSelection));
-                if (maybeImage != std::nullopt)
-                    image = *maybeImage;
+                if (has_presentation_model())
+                {
+                    auto const& maybeImage = presentation_model().cell_image(presentation_model().from_item_model_index(*iSelection));
+                    if (maybeImage != std::nullopt)
+                        image = *maybeImage;
+                }
                 text = model().cell_data(*iSelection).to_string();
             }
-            input_widget().set_spacing(presentation_model().cell_spacing(*this));
+            if (has_presentation_model())
+                input_widget().set_spacing(presentation_model().cell_spacing(*this));
             input_widget().set_image(image);
             input_widget().set_text(text);
         }
@@ -1402,7 +1411,7 @@ namespace neogfx
 
     bool drop_list::handle_proxy_key_event(const neogfx::keyboard_event& aEvent)
     {
-        if (presentation_model().rows() == 0)
+        if (!has_presentation_model() || presentation_model().rows() == 0)
             return false;
         if (aEvent.type() == keyboard_event_type::KeyPressed)
         {

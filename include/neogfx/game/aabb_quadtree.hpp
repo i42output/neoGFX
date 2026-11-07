@@ -49,7 +49,7 @@ namespace neogfx::game
         class node : public neolib::lifetime<>
         {
         private:
-            typedef neolib::vecarray<entity_id, BucketSize, -1> entity_list;
+            typedef neolib::vecarray<entity_id, BucketSize, static_cast<std::size_t>(-1)> entity_list;
             typedef std::array<std::array<aabb_2df, 2>, 2> quadrants;
             typedef std::array<std::array<node*, 2>, 2> children;
         private:

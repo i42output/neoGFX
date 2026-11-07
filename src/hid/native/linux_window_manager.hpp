@@ -1,0 +1,59 @@
+// linux_window_manager.hpp
+/*
+  neogfx C++ App/Game Engine
+  Copyright (c) 2026 Leigh Johnston.  All Rights Reserved.
+
+  This program is free software: you can redistribute it and / or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#pragma once
+
+#include <neogfx/neogfx.hpp>
+
+#include <neogfx/hid/window_manager.hpp>
+
+namespace neogfx
+{
+    namespace native::linux
+    {
+        class window_manager : public neogfx::window_manager
+        {
+        public:
+            struct no_cursors_saved : std::logic_error { no_cursors_saved() : std::logic_error("neogfx::native::linux::window_manager::no_cursors_saved") {} };
+        public:
+            window_manager();
+            ~window_manager();
+        public:
+            i_window* window_from_position(const point& aPosition) const final;
+            i_window* window_from_position(const point& aPosition, i_widget const& aIgnore) const final;
+        public:
+            void save_mouse_cursor() final;
+            void set_mouse_cursor(mouse_system_cursor aSystemCursor, bool aOverride = false) final;
+            void restore_mouse_cursor(const i_window& aWindow) final;
+            void update_mouse_cursor(const i_window& aWindow) final;
+            bool cursor_locked() const final;
+            void lock_mouse_cursor(i_window& aWindow) final;
+            void unlock_mouse_cursor() final;
+        private:
+            struct cursor_setting
+            {
+                mouse_system_cursor cursor = mouse_system_cursor::Arrow;
+                bool override = false;
+            };
+            std::optional<cursor_setting> iCurrentCursor;
+            std::vector<cursor_setting> iSavedCursors;
+            neolib::weak_ref_ptr<i_window> iCursorLock;
+        };
+    }
+}

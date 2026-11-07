@@ -38,7 +38,6 @@ namespace neogfx
         // types
     public:
     private:
-        using base_type = widget<i_web_view>;
         // construction
     public:
         web_view();

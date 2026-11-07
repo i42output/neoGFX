@@ -99,14 +99,14 @@ namespace neogfx::game
         {
             if ((aCycle & collision_detection_cycle::UpdateColliders) == collision_detection_cycle::UpdateColliders ||
                 ((aCycle & collision_detection_cycle::DetectCollisions) == collision_detection_cycle::DetectCollisions &&
-                    !this->ecs().system_instantiated<simple_physics_2d>()))
+                    !this->ecs().template system_instantiated<simple_physics_2d>()))
                 update();
         }
         else if constexpr (std::is_same_v<ColliderType, box_collider_3d>)
         {
             if ((aCycle & collision_detection_cycle::UpdateColliders) == collision_detection_cycle::UpdateColliders ||
                 ((aCycle & collision_detection_cycle::DetectCollisions) == collision_detection_cycle::DetectCollisions &&
-                    !this->ecs().system_instantiated<simple_physics_3d>()))
+                    !this->ecs().template system_instantiated<simple_physics_3d>()))
                 update();
         }
         if (!iUpdated)

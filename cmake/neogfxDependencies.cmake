@@ -87,8 +87,26 @@ if(NOT TARGET JPEG::JPEG)
     _neogfx_find_dependency(JPEG)
 endif()
 
-# OpenGL
-_neogfx_find_dependency(OpenGL)
+# OpenGL (on Linux by EGL)
+if(UNIX AND NOT APPLE)
+    _neogfx_find_dependency(OpenGL COMPONENTS OpenGL EGL)
+else()
+    _neogfx_find_dependency(OpenGL)
+endif()
+
+# Linux: Wayland (with xkbcommon for its keyboard) and X11 (Xlib, XRandR and Xcursor)
+if(UNIX AND NOT APPLE)
+    _neogfx_find_dependency(PkgConfig)
+    if(NOT TARGET PkgConfig::NEOGFX_WAYLAND)
+        pkg_check_modules(NEOGFX_WAYLAND REQUIRED IMPORTED_TARGET GLOBAL wayland-client wayland-cursor wayland-egl xkbcommon)
+    endif()
+    _neogfx_find_dependency(X11)
+    foreach(_neogfx_x11_component IN ITEMS Xrandr Xcursor)
+        if(NOT TARGET X11::${_neogfx_x11_component})
+            message(FATAL_ERROR "neoGFX: X11 ${_neogfx_x11_component} (lib${_neogfx_x11_component}) not found")
+        endif()
+    endforeach()
+endif()
 
 # Vulkan
 _neogfx_find_dependency(Vulkan)

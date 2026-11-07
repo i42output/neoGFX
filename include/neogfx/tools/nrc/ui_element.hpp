@@ -44,13 +44,13 @@ namespace neogfx::nrc
     {
         typedef neolib::reference_counted<Base> base_type;
     public:
-        using i_ui_element::no_parent;
-        using i_ui_element::wrong_type;
+        typedef i_ui_element::no_parent no_parent;
+        typedef i_ui_element::wrong_type wrong_type;
     public:
         typedef neolib::ref_ptr<i_ui_element> element_ptr_t;
         typedef neolib::vector<element_ptr_t> children_t;
-        using i_ui_element::data_t;
-        using i_ui_element::array_data_t;
+        typedef i_ui_element::data_t data_t;
+        typedef i_ui_element::array_data_t array_data_t;
         typedef neolib::vector<neolib::simple_variant> concrete_array_data_t;
     protected:
         typedef std::set<neolib::string> data_names_t;
@@ -256,55 +256,55 @@ namespace neogfx::nrc
                     add_header("neogfx/app/drag_drop.hpp");
             }
             if (aName == "type")
-                iWidgetType = get_enum<widget_type>(aData);
+                iWidgetType = this->template get_enum<widget_type>(aData);
             // (attributes that are object properties have the property's name; a composite property's component is "Property.Component", 
             // e.g. "MaximumSize.Width" or, in the .nrc, "MaximumSize: { Width: 100 }")
             if (aName == "Weight")
-                iWeight.emplace(get_scalar<double>(aData));
+                iWeight.emplace(this->template get_scalar<double>(aData));
             else if (aName == "SizePolicy")
-                iSizePolicy = get_enum<size_constraint>(aData);
+                iSizePolicy = this->template get_enum<size_constraint>(aData);
             else if (aName == "Alignment")
-                iAlignment = get_enum<alignment>(aData);
+                iAlignment = this->template get_enum<alignment>(aData);
             else if (aName == "FixedSize")
-                iFixedSize.emplace(get_scalar<length>(aData));
+                iFixedSize.emplace(this->template get_scalar<length>(aData));
             else if (aName == "MinimumSize")
-                iMinimumSize.emplace(get_scalar<length>(aData));
+                iMinimumSize.emplace(this->template get_scalar<length>(aData));
             else if (aName == "MinimumSize.Width")
-                iMinimumWidth.emplace(get_scalar<length>(aData));
+                iMinimumWidth.emplace(this->template get_scalar<length>(aData));
             else if (aName == "MinimumSize.Height")
-                iMinimumHeight.emplace(get_scalar<length>(aData));
+                iMinimumHeight.emplace(this->template get_scalar<length>(aData));
             else if (aName == "MaximumSize")
-                iMaximumSize.emplace(get_scalar<length>(aData));
+                iMaximumSize.emplace(this->template get_scalar<length>(aData));
             else if (aName == "MaximumSize.Width")
-                iMaximumWidth.emplace(get_scalar<length>(aData));
+                iMaximumWidth.emplace(this->template get_scalar<length>(aData));
             else if (aName == "MaximumSize.Height")
-                iMaximumHeight.emplace(get_scalar<length>(aData));
+                iMaximumHeight.emplace(this->template get_scalar<length>(aData));
             else if (aName == "FixedSize.Width")
-                iFixedWidth.emplace(get_scalar<length>(aData));
+                iFixedWidth.emplace(this->template get_scalar<length>(aData));
             else if (aName == "FixedSize.Height")
-                iFixedHeight.emplace(get_scalar<length>(aData));
+                iFixedHeight.emplace(this->template get_scalar<length>(aData));
             else if (aName == "Weight.Width")
-                iWeightWidth.emplace(get_scalar<double>(aData));
+                iWeightWidth.emplace(this->template get_scalar<double>(aData));
             else if (aName == "Weight.Height")
-                iWeightHeight.emplace(get_scalar<double>(aData));
+                iWeightHeight.emplace(this->template get_scalar<double>(aData));
             else if (aName == "Padding.Left")
-                iPaddingLeft.emplace(get_scalar<length>(aData));
+                iPaddingLeft.emplace(this->template get_scalar<length>(aData));
             else if (aName == "Padding.Top")
-                iPaddingTop.emplace(get_scalar<length>(aData));
+                iPaddingTop.emplace(this->template get_scalar<length>(aData));
             else if (aName == "Padding.Right")
-                iPaddingRight.emplace(get_scalar<length>(aData));
+                iPaddingRight.emplace(this->template get_scalar<length>(aData));
             else if (aName == "Padding.Bottom")
-                iPaddingBottom.emplace(get_scalar<length>(aData));
+                iPaddingBottom.emplace(this->template get_scalar<length>(aData));
             else if (aName == "SizePolicy.Horizontal")
-                iHorizontalSizePolicy = get_enum<size_constraint>(aData);
+                iHorizontalSizePolicy = this->template get_enum<size_constraint>(aData);
             else if (aName == "SizePolicy.Vertical")
-                iVerticalSizePolicy = get_enum<size_constraint>(aData);
+                iVerticalSizePolicy = this->template get_enum<size_constraint>(aData);
             else if (aName == "Padding")
-                iPadding.emplace(get_scalar<length>(aData));
+                iPadding.emplace(this->template get_scalar<length>(aData));
             else if (aName == "Enabled")
                 iEnabled = aData.get<bool>();
             else if (aName == "FocusPolicy")
-                iFocusPolicy.first = get_enum<focus_policy>(aData);
+                iFocusPolicy.first = this->template get_enum<focus_policy>(aData);
             else if (aName == "text")
                 iText = aData.get<neolib::i_string>();
             else if (aName == "label")
@@ -312,18 +312,18 @@ namespace neogfx::nrc
             else if (aName == "image" || (aName == "uri" && (type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget))
                 iImage = aData.get<neolib::i_string>();
             else if (aName == "AspectRatio")
-                iAspectRatio = get_enum<aspect_ratio>(aData);
+                iAspectRatio = this->template get_enum<aspect_ratio>(aData);
             else if (aName == "Placement" || aName == "placement") // (a label's or image's Placement property; a text field's placement)
             {
                 if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) != ui_element_type::TextField)
                 {
                     if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::Label || (type() & ui_element_type::HasLabel) == ui_element_type::HasLabel)
-                        iLabelPlacement = get_enum<label_placement>(aData);
+                        iLabelPlacement = this->template get_enum<label_placement>(aData);
                     else if ((type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::ImageWidget || (type() & ui_element_type::HasImage) == ui_element_type::HasImage)
-                        iImagePlacement = get_enum<cardinal>(aData);
+                        iImagePlacement = this->template get_enum<cardinal>(aData);
                 }
                 else
-                    iTextFieldPlacement = get_enum<text_field_placement>(aData);
+                    iTextFieldPlacement = this->template get_enum<text_field_placement>(aData);
             }
             else if (aName.to_std_string_view().starts_with("Palette."))
                 iPaletteColors[aName.to_std_string().substr(8u)] = get_color(aData);
@@ -344,19 +344,19 @@ namespace neogfx::nrc
                     aArrayData[0u].get<neolib::i_string>().to_std_string(),
                     aArrayData[std::min<std::size_t>(1u, aArrayData.size() - 1u)].get<neolib::i_string>().to_std_string());
             else if (aName == "Alignment")
-                iAlignment = get_enum<alignment>(aArrayData);
+                iAlignment = this->template get_enum<alignment>(aArrayData);
             else if (aName == "FixedSize")
-                emplace_2<length>("FixedSize", iFixedSize);
+                this->template emplace_2<length>("FixedSize", iFixedSize);
             else if (aName == "MinimumSize")
-                emplace_2<length>("MinimumSize", iMinimumSize);
+                this->template emplace_2<length>("MinimumSize", iMinimumSize);
             else if (aName == "MaximumSize")
-                emplace_2<length>("MaximumSize", iMaximumSize);
+                this->template emplace_2<length>("MaximumSize", iMaximumSize);
             else if (aName == "Padding")
-                emplace_4<length>("Padding", iPadding);
+                this->template emplace_4<length>("Padding", iPadding);
             else if (aName == "Weight")
-                emplace_2<double>("Weight", iWeight);
+                this->template emplace_2<double>("Weight", iWeight);
             else if (aName == "FocusPolicy")
-                iFocusPolicy.first = get_enum<focus_policy>(aArrayData, iFocusPolicy.second, "Default");
+                iFocusPolicy.first = this->template get_enum<focus_policy>(aArrayData, iFocusPolicy.second, "Default");
             else if (aName.to_std_string_view().starts_with("Palette."))
                 iPaletteColors[aName.to_std_string().substr(8u)] = get_color(aArrayData);
         }

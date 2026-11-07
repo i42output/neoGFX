@@ -208,7 +208,7 @@ namespace neogfx
             dimension width = 0.0;
         };
 
-        using document_columns = neolib::vecarray<document_column, 4, -1>;
+        using document_columns = neolib::vecarray<document_column, 4, static_cast<std::size_t>(-1)>;
 
         class i_tag
         {
@@ -425,14 +425,14 @@ namespace neogfx
 
         struct glyph_paragraph
         {
-            using column_breaks = neolib::vecarray<document_glyphs::difference_type, 4, -1>;
-            using line_breaks = neolib::vecarray<document_glyphs::difference_type, 8, -1>;
+            using column_breaks = neolib::vecarray<document_glyphs::difference_type, 4, static_cast<std::size_t>(-1)>;
+            using line_breaks = neolib::vecarray<document_glyphs::difference_type, 8, static_cast<std::size_t>(-1)>;
             struct height_map_entry
             {
                 document_glyphs::difference_type glyphIndex;
                 dimension height;
             };
-            using height_map = neolib::vecarray<height_map_entry, 8, -1>;
+            using height_map = neolib::vecarray<height_map_entry, 8, static_cast<std::size_t>(-1)>;
 
             text_edit* owner;
             document_span span;
@@ -564,7 +564,7 @@ namespace neogfx
                 return offset.y + paragraph().ypos;
             }
         };
-        using glyph_lines = neolib::vecarray<glyph_line, 8, -1>;
+        using glyph_lines = neolib::vecarray<glyph_line, 8, static_cast<std::size_t>(-1)>;
 
         struct glyph_column
         {
@@ -577,7 +577,7 @@ namespace neogfx
                 return std::distance(&*owner->iGlyphColumns.cbegin(), this);
             }
         };
-        using glyph_columns = neolib::vecarray<glyph_column, 4, -1>;
+        using glyph_columns = neolib::vecarray<glyph_column, 4, static_cast<std::size_t>(-1)>;
 
         struct position_info;
 

@@ -48,8 +48,6 @@ namespace neogfx
         struct widget_is_floating : std::logic_error { widget_is_floating() : std::logic_error("neogfx::layout::widget_is_floating") {} };
     public:
         using abstract_type = i_layout;
-    private:
-        using base_type = layout_item<object<i_layout>>;
     protected:
         typedef ref_ptr<i_layout_item> item;
         typedef std::list<item> item_list;

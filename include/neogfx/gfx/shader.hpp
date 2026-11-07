@@ -309,10 +309,10 @@ namespace neogfx
                             switch (u.value().which())
                             {
                             case shader_data_type::FloatArray:
-                                uniformDefinition = "    float %I%["_s + to_string(u.value().get<maybe_abstract_t<shader_float_array>>().size()) +"];\n"_s;
+                                uniformDefinition = "    float %I%["_s + to_string(u.value().template get<maybe_abstract_t<shader_float_array>>().size()) +"];\n"_s;
                                 break;
                             case shader_data_type::DoubleArray:
-                                uniformDefinition = "    double %I%["_s + to_string(u.value().get<maybe_abstract_t<shader_double_array>>().size()) +"];\n"_s;
+                                uniformDefinition = "    double %I%["_s + to_string(u.value().template get<maybe_abstract_t<shader_double_array>>().size()) +"];\n"_s;
                                 break;
                             default:
                                 if (!u.singular())
@@ -334,23 +334,23 @@ namespace neogfx
                         {
                             string variableDefinition = "layout (location = %L%) %I% in %T% %N%;\n"_s;
                             variableDefinition.replace_all("%I%"_s, 
-                                (v.qualifier().value<shader_variable_qualifier>() & shader_variable_qualifier::Flat) == shader_variable_qualifier::Flat ? 
+                                (v.qualifier().template value<shader_variable_qualifier>() & shader_variable_qualifier::Flat) == shader_variable_qualifier::Flat ? 
                                 "flat"_s : ""_s);
                             variableDefinition.replace_all("%T%"_s, enum_to_string<shader_data_type>(v.type()));
                             variableDefinition.replace_all("%L%"_s, to_string(v.location()));
                             variableDefinition.replace_all("%N%"_s, v.name());                            
-                            variableDefinitions[std::make_pair(v.qualifier().value<shader_variable_qualifier>(), v.location())] = variableDefinition;
+                            variableDefinitions[std::make_pair(v.qualifier().template value<shader_variable_qualifier>(), v.location())] = variableDefinition;
                         };
                         for (auto const& v : s->out_variables())
                         {
                             string variableDefinition = "layout (location = %L%) %I% out %T% %N%;\n"_s;
                             variableDefinition.replace_all("%I%"_s,
-                                (v.qualifier().value<shader_variable_qualifier>() & shader_variable_qualifier::Flat) == shader_variable_qualifier::Flat ?
+                                (v.qualifier().template value<shader_variable_qualifier>() & shader_variable_qualifier::Flat) == shader_variable_qualifier::Flat ?
                                 "flat"_s : ""_s);
                             variableDefinition.replace_all("%T%"_s, enum_to_string<shader_data_type>(v.type()));
                             variableDefinition.replace_all("%L%"_s, to_string(v.location()));
                             variableDefinition.replace_all("%N%"_s, v.name());
-                            variableDefinitions[std::make_pair(v.qualifier().value<shader_variable_qualifier>(), v.location())] = variableDefinition;
+                            variableDefinitions[std::make_pair(v.qualifier().template value<shader_variable_qualifier>(), v.location())] = variableDefinition;
                         };                        
                     }
                     for (std::size_t i = 0u; i < aProgram.ssbo_count(); ++i)

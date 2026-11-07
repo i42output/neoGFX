@@ -61,7 +61,7 @@ namespace neogfx::game
     public:
         define_event(Collision, collision, entity_id, entity_id)
     public:
-        using base_type::cannot_apply;
+        using typename base_type::cannot_apply;
         using box_collider_type = ColliderType;
     public:
         using broadphase_tree_type = BroadphaseTreeType;

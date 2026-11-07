@@ -53,7 +53,7 @@ namespace neogfx
         }
 
         template <typename T>
-        typename T& value_map_entry(std::string_view const& aSelector, std::string_view const& aProperty)
+        T& value_map_entry(std::string_view const& aSelector, std::string_view const& aProperty)
         {
             return value_map<T>()[typename value_map_t<T>::key_type{aSelector, aProperty}];
         }
