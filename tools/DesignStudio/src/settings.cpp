@@ -20,7 +20,7 @@
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>
-#include <neogfx/tools/DesignStudio/Settings.hpp>
+#include <neogfx/tools/DesignStudio/settings.hpp>
 
 namespace neogfx::DesignStudio
 {
