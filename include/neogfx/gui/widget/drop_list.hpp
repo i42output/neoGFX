@@ -49,25 +49,7 @@ namespace neogfx
             return base_type::column_flags(aColumn) & ~item_cell_flags::Editable;
         }
     public:
-        optional_color cell_color(item_presentation_model_index const& aIndex, color_role aColorRole) const override
-        {
-            if (iDropList.view_created())
-            {
-                if (aColorRole == color_role::Background)
-                {
-                    if ((base_type::cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
-                    {
-                        auto backgroundColor = iDropList.list_view().palette_color(color_role::Void);
-                        if (backgroundColor == iDropList.list_view().background_color())
-                            backgroundColor = backgroundColor.shaded(0x20);
-                        return backgroundColor;
-                    }
-                    else
-                        return iDropList.list_view().palette_color(color_role::AlternateBase);
-                }
-            }
-            return {};
-        }
+        optional_color cell_color(item_presentation_model_index const& aIndex, color_role aColorRole) const override;
     private:
         drop_list& iDropList;
     };
@@ -301,4 +283,26 @@ namespace neogfx
         bool iCancellingSelection;
         optional_size iInputImageSize;
     };
+
+    // (defined here, where drop_list is complete)
+    template <typename ItemModel>
+    inline optional_color default_drop_list_presentation_model<ItemModel>::cell_color(item_presentation_model_index const& aIndex, color_role aColorRole) const
+    {
+        if (iDropList.view_created())
+        {
+            if (aColorRole == color_role::Background)
+            {
+                if ((base_type::cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
+                {
+                    auto backgroundColor = iDropList.list_view().palette_color(color_role::Void);
+                    if (backgroundColor == iDropList.list_view().background_color())
+                        backgroundColor = backgroundColor.shaded(0x20);
+                    return backgroundColor;
+                }
+                else
+                    return iDropList.list_view().palette_color(color_role::AlternateBase);
+            }
+        }
+        return {};
+    }
 }
