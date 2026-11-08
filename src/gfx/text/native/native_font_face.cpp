@@ -479,9 +479,12 @@ namespace neogfx
                 neogfx::glyph{
                     subTexture,
                     useSubpixelFiltering,
+                    // n.b. horizontally the bitmap's own offset (bitmap_left), not the outline's bearing: an LCD filtered bitmap
+                    // can be padded (e.g. FreeType built with FT_CONFIG_OPTION_SUBPIXEL_RENDERING, as Fedora's is), its offset
+                    // then a pixel further left, so placing it by the outline's bearing shifts the glyph right
                     glyph_metrics{
                         vec2{ iHandle.freetypeFace->glyph->metrics.width / 64.0, iHandle.freetypeFace->glyph->metrics.height / 64.0 }.round(),
-                        vec2{ iHandle.freetypeFace->glyph->metrics.horiBearingX / 64.0, iHandle.freetypeFace->glyph->metrics.horiBearingY / 64.0 }.round() },
+                        vec2{ static_cast<double>(iHandle.freetypeFace->glyph->bitmap_left), std::round(iHandle.freetypeFace->glyph->metrics.horiBearingY / 64.0) } },
                     pixelMode })).first->second :
             existingGlyph->second);
 

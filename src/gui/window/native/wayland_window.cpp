@@ -469,9 +469,17 @@ namespace neogfx
 
         void window::extents_changed()
         {
+            // n.b. a buffer's extents must be a multiple of the surface's buffer scale (else the compositor ends the connection
+            // with a protocol error), so the window's are too (a whole number of logical pixels)
+            auto const scale = static_cast<scalar>(iScale);
+            if (auto const wholeLogical = (iExtents / scale).ceil() * scale; wholeLogical != iExtents)
+            {
+                set_extents(wholeLogical, false);
+                return;
+            }
             if (iEglWindow != nullptr)
             {
-                auto const extents = iExtents.max(size{ 1.0, 1.0 }).as<int>();
+                auto const extents = ((iExtents.max(size{ 1.0, 1.0 }) / scale).ceil() * scale).as<int>();
                 ::wl_egl_window_resize(iEglWindow, extents.cx, extents.cy, 0, 0);
             }
             if (iPopup != nullptr && !iRepositioning)
@@ -503,7 +511,9 @@ namespace neogfx
             auto& renderer = static_cast<linux::renderer&>(rendering_engine());
             if (!renderer.vulkan())
             {
-                auto const extents = iExtents.max(size{ 1.0, 1.0 }).as<int>();
+                // (a multiple of the buffer scale: see extents_changed)
+                auto const scale = static_cast<scalar>(iScale);
+                auto const extents = ((iExtents.max(size{ 1.0, 1.0 }) / scale).ceil() * scale).as<int>();
                 iEglWindow = ::wl_egl_window_create(iSurface, extents.cx, extents.cy);
                 if (iEglWindow == nullptr)
                     throw failed_to_create_window("wl_egl_window_create");
