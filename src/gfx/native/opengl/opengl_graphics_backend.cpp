@@ -994,6 +994,10 @@ namespace neogfx
         glCheck(glDepthMask(GL_TRUE));
         glCheck(glDisable(GL_CULL_FACE));
         glCheck(glDisable(GL_BLEND));
+        // n.b. the whole atlas is cleared at once rather than tile by tile (a scissored clear): with the VMware SVGA driver
+        // a scissored clear here left the scene's meshes drawn afterwards invisible
+        glCheck(glDisable(GL_SCISSOR_TEST));
+        glCheck(glClear(GL_DEPTH_BUFFER_BIT));
         glCheck(glEnable(GL_SCISSOR_TEST));
         // slope scaled depth bias against shadow acne
         glCheck(glEnable(GL_POLYGON_OFFSET_FILL));
@@ -1005,7 +1009,6 @@ namespace neogfx
             auto const tile = scene_shadow_atlas::tile(view);
             glCheck(glViewport(tile[0], tile[1], tile[2], tile[3]));
             glCheck(glScissor(tile[0], tile[1], tile[2], tile[3]));
-            glCheck(glClear(GL_DEPTH_BUFFER_BIT));
             auto const viewProjection = aViews[view].as<float>();
             glCheck(glUniformMatrix4fv(resources.viewProjection, 1, GL_FALSE, viewProjection.data()));
             for (std::size_t meshIndex = 0u; meshIndex < aMeshes.size(); ++meshIndex)
