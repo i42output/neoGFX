@@ -465,7 +465,9 @@ namespace neogfx
         if (pixelMode != glyph_pixel_mode::LCD)
             useSubpixelFiltering = false;
 
-        auto subTextureWidth = bitmap->width / (useSubpixelFiltering ? 3 : 1);
+        // n.b. an LCD bitmap's width needn't be a multiple of 3 (e.g. emboldened, see above): the last pixel's subpixels are
+        // then partly unused
+        auto subTextureWidth = useSubpixelFiltering ? (bitmap->width + 2) / 3 : bitmap->width;
 
         auto& subTexture = service<i_font_manager>().glyph_atlas().create_sub_texture(
             neogfx::size{ static_cast<dimension>(subTextureWidth), static_cast<dimension>(bitmap->rows) }.ceil(),
