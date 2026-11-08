@@ -617,7 +617,10 @@ namespace neogfx
 
     bool opengl_graphics_backend::discard_buffer(gpu_buffer)
     {
-        // n.b. unchanged: a persistently mapped buffer is not orphaned
+        // n.b. unchanged: a persistently mapped buffer is not orphaned, so it is rewritten (from the start) only once the GPU
+        // has finished reading it: the previous frame (of any surface; a surface's fences (see opengl_surface::sync) only wait
+        // for the frame before that) may still be drawing, its draws (and their scissor rects) then using the new vertices
+        glCheck(glFinish());
         return false;
     }
 
