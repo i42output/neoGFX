@@ -436,6 +436,9 @@ namespace neogfx
     namespace
     {
         int sGlslVersion = 460;
+        // the VMware (Mesa svga) driver can lose a draw's scissor if the draw is in a later command buffer than the scissor: a
+        // scissor change is flushed first so that it starts a command buffer with the draws that follow it
+        bool sFlushBeforeScissor = false;
     }
 
     std::string glsl_for_context(std::string aSource)
@@ -486,6 +489,7 @@ namespace neogfx
         iTextureBarrierNV = (!iTextureBarrier && has_extension("GL_NV_texture_barrier"));
         if (!iTextureBarrier && !iTextureBarrierNV)
             service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL: no texture barrier (no subpixel text rendering)" << std::endl;
+        sFlushBeforeScissor = (std::string_view{ reinterpret_cast<char const*>(glGetString(GL_RENDERER)) }.find("SVGA3D") != std::string_view::npos);
         // flat shaded attributes from the first vertex, as Vulkan
         glCheck(glProvokingVertex(GL_FIRST_VERTEX_CONVENTION));
     }
@@ -617,10 +621,7 @@ namespace neogfx
 
     bool opengl_graphics_backend::discard_buffer(gpu_buffer)
     {
-        // n.b. unchanged: a persistently mapped buffer is not orphaned, so it is rewritten (from the start) only once the GPU
-        // has finished reading it: the previous frame (of any surface; a surface's fences (see opengl_surface::sync) only wait
-        // for the frame before that) may still be drawing, its draws (and their scissor rects) then using the new vertices
-        glCheck(glFinish());
+        // n.b. unchanged: a persistently mapped buffer is not orphaned
         return false;
     }
 
@@ -726,11 +727,15 @@ namespace neogfx
 
     void opengl_graphics_backend::enable_scissor(bool aEnable)
     {
+        if (sFlushBeforeScissor)
+            glCheck(glFlush());
         glCheck((aEnable ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST)));
     }
 
     void opengl_graphics_backend::set_scissor(std::int32_t aX, std::int32_t aY, std::int32_t aWidth, std::int32_t aHeight)
     {
+        if (sFlushBeforeScissor)
+            glCheck(glFlush());
         glCheck(glScissor(static_cast<GLint>(aX), static_cast<GLint>(aY), static_cast<GLsizei>(aWidth), static_cast<GLsizei>(aHeight)));
     }
 
