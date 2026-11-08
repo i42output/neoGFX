@@ -495,7 +495,8 @@ namespace neogfx
 
         const std::uint8_t* textureData = 0;
         
-        if (subTextureWidth != 0)
+        // n.b. an emboldened (see above) empty glyph (e.g. a space) has width but no rows: nothing to copy
+        if (subTextureWidth != 0 && bitmap->rows != 0)
         {
             if (useSubpixelFiltering)
             {
