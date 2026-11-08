@@ -144,6 +144,9 @@ namespace neogfx
         popup_ptr() = nullptr;
         if (service<i_context_menu>().context_menu_active())
             service<i_context_menu>().deactivate_context_menu();
+        // n.b. an action's Triggered event is asynchronous, so choosing a menu item has only queued its call: it is made here,
+        // while the menu (and so its actions, which can be the caller's own, made for this menu only) still exists
+        service<i_async_task>().pump_events();
         return exitReason.value_or(exit_reason::Normal);
     }
 
