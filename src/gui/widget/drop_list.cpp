@@ -143,7 +143,7 @@ namespace neogfx
             window_placement{ 
                 aDropList.non_client_rect().bottom_left() + aDropList.root().window_position(),
                 aDropList.non_client_rect().extents() },
-            window_style::NoDecoration | window_style::NoActivate | window_style::RequiresOwnerFocus | window_style::DismissOnOwnerClick | window_style::InitiallyHidden | window_style::InitiallyRenderable | window_style::DropShadow },
+            window_style::NoDecoration | window_style::Popup | window_style::NoActivate | window_style::RequiresOwnerFocus | window_style::DismissOnOwnerClick | window_style::InitiallyHidden | window_style::InitiallyRenderable | window_style::DropShadow },
         iDropList{ aDropList },
         iView{ client_layout(), aDropList }
     {
@@ -808,12 +808,12 @@ namespace neogfx
         if (has_presentation_model() && presentation_model().attached())
             presentation_model().detach();
         iPresentationModel = aPresentationModel;
-        if (!has_presentation_model() && has_selection_model())
-            selection_model().unset_presentation_model();
         if (has_presentation_model() && has_model())
             presentation_model().set_item_model(model());
         if (has_presentation_model() && has_selection_model())
             selection_model().set_presentation_model(*aPresentationModel);
+        if (!has_presentation_model() && has_selection_model())
+            selection_model().unset_presentation_model();
         if (has_presentation_model())
             presentation_model().attach(ref_ptr<i_widget>{ *this });
         if (view_created())
