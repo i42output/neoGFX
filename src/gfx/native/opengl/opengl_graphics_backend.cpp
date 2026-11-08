@@ -467,8 +467,15 @@ namespace neogfx
         auto const has_extension = [&](std::string_view aExtension)
         {
             for (GLint e = 0; e < extensionCount; ++e)
-                if (reinterpret_cast<char const*>(glGetStringi(GL_EXTENSIONS, e)) == aExtension)
+            {
+                // n.b. can be null (an error, cleared here so that the next glCheck isn't blamed), e.g. under apitrace, which hides
+                // extensions but not from GL_NUM_EXTENSIONS
+                auto const name = reinterpret_cast<char const*>(glGetStringi(GL_EXTENSIONS, e));
+                if (name == nullptr)
+                    glGetError();
+                else if (name == aExtension)
                     return true;
+            }
             return false;
         };
         // (before 4.6 (see the platform renderers), the later versions' features neoGFX uses must be extensions)
