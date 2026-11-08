@@ -318,7 +318,10 @@ namespace neogfx
 
         bool window::is_popup() const
         {
-            return iParent != nullptr && (iStyle & window_style::Popup) == window_style::Popup;
+            // n.b. as X11 override-redirect windows (see x11_window.cpp window::init): also an undecorated window that is never activated
+            // (e.g. a drop list's list)
+            return iParent != nullptr && ((iStyle & window_style::Popup) == window_style::Popup ||
+                ((iStyle & window_style::NoActivate) == window_style::NoActivate && (iStyle & window_style::NoDecoration) == window_style::NoDecoration));
         }
 
         window* window::toplevel()
