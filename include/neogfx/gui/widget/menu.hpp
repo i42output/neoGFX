@@ -113,5 +113,6 @@ namespace neogfx
         std::optional<item_index> iSelection;
         bool iModal;
         bool iShowMnemonics = false;
+        sink iSink;
     };
 }

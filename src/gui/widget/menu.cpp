@@ -215,7 +215,7 @@ namespace neogfx
         aItemIndex = update_grouping_separators(aItemIndex);
         ItemAdded(aItemIndex);
         auto insertedAction = ref_ptr<i_action>{ aAction };
-        aAction->changed([this, insertedAction]()
+        iSink += aAction->changed([this, insertedAction]()
         {
             for (item_index i = 0; i < iItems.size(); ++i)
                 if (iItems[i]->type() == menu_item_type::Action && &(iItems[i]->action()) == &*insertedAction)
