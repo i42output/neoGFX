@@ -200,11 +200,13 @@ namespace neogfx
                     add_family(family);
                 return fallback_font_info{ std::move(fallbackFontFamilies) };
 #elif defined(__linux__)
-                // (the Noto fonts, as the usual desktops (with fontconfig) fall back to, then the other usual fonts)
+                // (the Noto fonts, as the usual desktops (with fontconfig) fall back to, then the other usual fonts; the "UI"
+                // variants first, if installed: they have Noto Sans's line height whereas e.g. Noto Sans Arabic's is half as tall again)
                 std::vector<string> fallbackFontFamilies;
                 for (auto const& family : {
-                    "Noto Sans", "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK KR", "Noto Sans Arabic", "Noto Sans Hebrew",
-                    "Noto Sans Devanagari", "Noto Sans Thai", "Noto Sans Symbols", "Noto Sans Symbols2", "Noto Sans Math",
+                    "Noto Sans", "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK KR", "Noto Sans Arabic UI", "Noto Sans Arabic",
+                    "Noto Sans Hebrew", "Noto Sans Devanagari UI", "Noto Sans Devanagari", "Noto Sans Thai UI", "Noto Sans Thai",
+                    "Noto Sans Symbols", "Noto Sans Symbols2", "Noto Sans Math",
                     "DejaVu Sans", "FreeSans", "FreeSerif", "Droid Sans Fallback", "WenQuanYi Micro Hei" })
                     fallbackFontFamilies.push_back(family);
                 return fallback_font_info{ std::move(fallbackFontFamilies) };
