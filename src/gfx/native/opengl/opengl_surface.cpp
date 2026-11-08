@@ -215,11 +215,13 @@ namespace neogfx
         glCheck(glGenFramebuffers(1, &iFrameBuffer));
         glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
 
-        target_texture();
+        // n.b. the depth/stencil buffer is the size of the colour texture's storage (which includes its bleed guard): attachments
+        // of different sizes are valid GL but not every driver handles them (e.g. VMware's)
+        auto const storageExtents = target_texture().storage_extents();
 
         glCheck(glGenRenderbuffers(1, &iDepthStencilBuffer));
         glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
-        glCheck(glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(iFrameBufferExtents.cx), static_cast<GLsizei>(iFrameBufferExtents.cy)));
+        glCheck(glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(storageExtents.cx), static_cast<GLsizei>(storageExtents.cy)));
         glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
         glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, iDepthStencilBuffer));
     }
