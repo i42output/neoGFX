@@ -78,7 +78,6 @@ namespace neogfx
             GLint textureWrap = -1;
             GLuint framebuffer = 0;
             GLuint atlas = 0;
-            GLuint colorBuffer = 0;
         };
 
         inline GLuint compile(GLenum aType, std::string const& aSource)
@@ -116,7 +115,8 @@ namespace neogfx
                 "layout (location = 11) in float VertexModel;\n"
                 "layout (location = 12) in vec4 VertexJoints;\n"
                 "layout (location = 13) in vec4 VertexWeights;\n"
-                "%SSBOS%"
+                "layout(std430, binding = %MATRICES%) buffer SSBO_bModelMatrices { mat4 bModelMatrices[]; };\n"
+                "layout(std430, binding = %TABLE%) buffer SSBO_bModelTable { uint bModelTable[]; };\n"
                 "uniform mat4 uViewProjection;\n"
                 "uniform uint uModelTableBase;\n"
                 "out vec2 TexCoord;\n"
@@ -145,20 +145,8 @@ namespace neogfx
                 {
                     vertexSource.replace(vertexSource.find(aWhat), aWhat.size(), aWith);
                 };
-            // n.b. all of the standard program's shader storage blocks, declared as it declares them (see shader.hpp), so that the
-            // two programs' blocks have the same indices
-            std::map<std::string, std::string> ssbos;
-            for (std::size_t i = 0u; i < aProgram.ssbo_count(); ++i)
-            {
-                auto const& ssbo = aProgram.ssbo(i);
-                auto const name = ssbo.name().to_std_string();
-                ssbos[name] = "layout(std430, binding = " + std::to_string(static_cast<std::uint32_t>(ssbo.id())) + ") buffer SSBO_" + name + " { " +
-                    enum_to_string<shader_data_type, std::string>(ssbo.data_type()) + " " + name + "[]; };\n";
-            }
-            std::string ssboDefinitions;
-            for (auto const& ssbo : ssbos)
-                ssboDefinitions += ssbo.second;
-            replace("%SSBOS%", ssboDefinitions);
+            replace("%MATRICES%", std::to_string(static_cast<std::uint32_t>(aProgram.model_matrices().id())));
+            replace("%TABLE%", std::to_string(static_cast<std::uint32_t>(aProgram.model_table().id())));
             // alpha tested (glTF alpha mode MASK) meshes' base colour alpha (wrapped as in standard-pbr.frag)
             std::string const fragmentSource =
                 "#version 460 core\n"
@@ -224,10 +212,7 @@ namespace neogfx
             glCheck(glTextureParameteri(sResources.atlas, GL_TEXTURE_COMPARE_MODE, GL_NONE));
             glCheck(glCreateFramebuffers(1, &sResources.framebuffer));
             glCheck(glNamedFramebufferTexture(sResources.framebuffer, GL_DEPTH_ATTACHMENT, sResources.atlas, 0));
-            glCheck(glCreateRenderbuffers(1, &sResources.colorBuffer));
-            glCheck(glNamedRenderbufferStorage(sResources.colorBuffer, GL_R8, AtlasSize, AtlasSize));
-            glCheck(glNamedFramebufferRenderbuffer(sResources.framebuffer, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, sResources.colorBuffer));
-            glCheck(glNamedFramebufferDrawBuffer(sResources.framebuffer, GL_COLOR_ATTACHMENT0));
+            glCheck(glNamedFramebufferDrawBuffer(sResources.framebuffer, GL_NONE));
             glCheck(glNamedFramebufferReadBuffer(sResources.framebuffer, GL_NONE));
             if (glCheckNamedFramebufferStatus(sResources.framebuffer, GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
                 return sResources;
@@ -501,6 +486,8 @@ namespace neogfx
         iTextureBarrierNV = (!iTextureBarrier && has_extension("GL_NV_texture_barrier"));
         if (!iTextureBarrier && !iTextureBarrierNV)
             service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL: no texture barrier (no subpixel text rendering)" << std::endl;
+        // flat shaded attributes from the first vertex, as Vulkan
+        glCheck(glProvokingVertex(GL_FIRST_VERTEX_CONVENTION));
     }
 
     void opengl_graphics_backend::cleanup()
@@ -987,14 +974,12 @@ namespace neogfx
         GLint previousScissor[4] = {};
         GLint previousDepthFunc = GL_LESS;
         GLboolean previousDepthMask = GL_TRUE;
-        GLboolean previousColorMask[4] = { GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE };
         glCheck(glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &previousDrawFramebuffer));
         glCheck(glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &previousReadFramebuffer));
         glCheck(glGetIntegerv(GL_VIEWPORT, previousViewport));
         glCheck(glGetIntegerv(GL_SCISSOR_BOX, previousScissor));
         glCheck(glGetIntegerv(GL_DEPTH_FUNC, &previousDepthFunc));
         glCheck(glGetBooleanv(GL_DEPTH_WRITEMASK, &previousDepthMask));
-        glCheck(glGetBooleanv(GL_COLOR_WRITEMASK, previousColorMask));
         bool const previousDepthTest = glIsEnabled(GL_DEPTH_TEST);
         bool const previousScissorTest = glIsEnabled(GL_SCISSOR_TEST);
         bool const previousCullFace = glIsEnabled(GL_CULL_FACE);
@@ -1009,11 +994,8 @@ namespace neogfx
         glCheck(glEnable(GL_DEPTH_TEST));
         glCheck(glDepthFunc(GL_LESS));
         glCheck(glDepthMask(GL_TRUE));
-        glCheck(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
         glCheck(glDisable(GL_CULL_FACE));
         glCheck(glDisable(GL_BLEND));
-        glCheck(glDisable(GL_SCISSOR_TEST));
-        glCheck(glClear(GL_DEPTH_BUFFER_BIT));
         glCheck(glEnable(GL_SCISSOR_TEST));
         // slope scaled depth bias against shadow acne
         glCheck(glEnable(GL_POLYGON_OFFSET_FILL));
@@ -1025,6 +1007,7 @@ namespace neogfx
             auto const tile = scene_shadow_atlas::tile(view);
             glCheck(glViewport(tile[0], tile[1], tile[2], tile[3]));
             glCheck(glScissor(tile[0], tile[1], tile[2], tile[3]));
+            glCheck(glClear(GL_DEPTH_BUFFER_BIT));
             auto const viewProjection = aViews[view].as<float>();
             glCheck(glUniformMatrix4fv(resources.viewProjection, 1, GL_FALSE, viewProjection.data()));
             for (std::size_t meshIndex = 0u; meshIndex < aMeshes.size(); ++meshIndex)
@@ -1052,7 +1035,6 @@ namespace neogfx
         glCheck(glScissor(previousScissor[0], previousScissor[1], previousScissor[2], previousScissor[3]));
         glCheck(glDepthFunc(static_cast<GLenum>(previousDepthFunc)));
         glCheck(glDepthMask(previousDepthMask));
-        glCheck(glColorMask(previousColorMask[0], previousColorMask[1], previousColorMask[2], previousColorMask[3]));
         if (!previousDepthTest)
             glCheck(glDisable(GL_DEPTH_TEST));
         if (!previousScissorTest)
