@@ -116,8 +116,7 @@ namespace neogfx
                 "layout (location = 11) in float VertexModel;\n"
                 "layout (location = 12) in vec4 VertexJoints;\n"
                 "layout (location = 13) in vec4 VertexWeights;\n"
-                "layout(std430, binding = %MATRICES%) buffer SSBO_bModelMatrices { mat4 bModelMatrices[]; };\n"
-                "layout(std430, binding = %TABLE%) buffer SSBO_bModelTable { uint bModelTable[]; };\n"
+                "%SSBOS%"
                 "uniform mat4 uViewProjection;\n"
                 "uniform uint uModelTableBase;\n"
                 "out vec2 TexCoord;\n"
@@ -146,8 +145,20 @@ namespace neogfx
                 {
                     vertexSource.replace(vertexSource.find(aWhat), aWhat.size(), aWith);
                 };
-            replace("%MATRICES%", std::to_string(static_cast<std::uint32_t>(aProgram.model_matrices().id())));
-            replace("%TABLE%", std::to_string(static_cast<std::uint32_t>(aProgram.model_table().id())));
+            // n.b. all of the standard program's shader storage blocks, declared as it declares them (see shader.hpp), so that the
+            // two programs' blocks have the same indices
+            std::map<std::string, std::string> ssbos;
+            for (std::size_t i = 0u; i < aProgram.ssbo_count(); ++i)
+            {
+                auto const& ssbo = aProgram.ssbo(i);
+                auto const name = ssbo.name().to_std_string();
+                ssbos[name] = "layout(std430, binding = " + std::to_string(static_cast<std::uint32_t>(ssbo.id())) + ") buffer SSBO_" + name + " { " +
+                    enum_to_string<shader_data_type, std::string>(ssbo.data_type()) + " " + name + "[]; };\n";
+            }
+            std::string ssboDefinitions;
+            for (auto const& ssbo : ssbos)
+                ssboDefinitions += ssbo.second;
+            replace("%SSBOS%", ssboDefinitions);
             // alpha tested (glTF alpha mode MASK) meshes' base colour alpha (wrapped as in standard-pbr.frag)
             std::string const fragmentSource =
                 "#version 460 core\n"
