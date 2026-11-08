@@ -493,7 +493,10 @@ namespace neogfx
             iDisplayServer.add_window(*this);
             if (wayland_parent() != nullptr)
                 iScale = wayland_parent()->scale();
-            else if (!iDisplayServer.has_preferred_buffer_scale())
+            else
+                // (the outputs' scale, as the window's extents (see linux::display), until the compositor says which scale it
+                // prefers (wl_surface.preferred_buffer_scale), which is only after the first commit: a first buffer at scale 1
+                // would be twice the size (on a scale 2 output), and e.g. GNOME maximizes a new window that large)
                 iScale = iDisplayServer.max_output_scale();
             if (iScale != 1u)
                 ::wl_surface_set_buffer_scale(iSurface, static_cast<std::int32_t>(iScale));
