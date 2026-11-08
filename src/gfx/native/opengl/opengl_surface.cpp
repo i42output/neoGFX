@@ -133,7 +133,6 @@ namespace neogfx
             create_frame_buffer();
 
         glCheck(glBindFramebuffer(GL_FRAMEBUFFER, iFrameBuffer));
-        glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(target_texture().native_texture().native_handle())));
         glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
 
         GLenum status;
