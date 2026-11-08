@@ -36,6 +36,10 @@ namespace neogfx
 {
     rect corrected_popup_rect(i_window& aPopup, rect aPopupRect)
     {
+        // n.b. on Wayland where a toplevel is on the desktop isn't known (it is assumed to be centred), so where its popups are on
+        // it isn't either: it is the compositor that keeps them on the screen
+        if (service<i_basic_services>().windowing_system() == windowing_system::Wayland)
+            return aPopupRect;
         auto desktopRect = service<i_window_manager>().desktop_rect(aPopup);
         if (aPopupRect.x < desktopRect.x)
             aPopupRect.x += (desktopRect.x - aPopupRect.x);

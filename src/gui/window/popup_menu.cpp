@@ -425,11 +425,14 @@ namespace neogfx
     void popup_menu::update_position()
     {
         auto& wm = service<i_window_manager>();
+        // n.b. on Wayland where a toplevel is on the desktop isn't known (it is assumed to be centred), so where its popups are on
+        // it isn't either: it is the compositor that keeps them on the screen
+        bool const onDesktopKnown = service<i_basic_services>().windowing_system() != windowing_system::Wayland;
         rect desktopRect{ wm.desktop_rect(*this) };
         rect ourRect{ wm.window_rect(*this) };
-        if (ourRect.bottom() > desktopRect.bottom())
+        if (onDesktopKnown && ourRect.bottom() > desktopRect.bottom())
             ourRect.position().y += (desktopRect.bottom() - ourRect.bottom());
-        if (ourRect.right() > desktopRect.right())
+        if (onDesktopKnown && ourRect.right() > desktopRect.right())
             ourRect.position().x += (desktopRect.right() - ourRect.right());
         if (has_menu() && menu().has_parent() && has_parent_window())
         {
@@ -440,7 +443,7 @@ namespace neogfx
                     rect menuBarRect = iParentWidget->to_window_coordinates(iParentWidget->client_rect(false)) + wm.window_rect(parent_window()).position();
                     if (!ourRect.intersection(menuBarRect).empty())
                     {
-                        if (desktopRect.bottom() - menuBarRect.bottom() > ourRect.height())
+                        if (!onDesktopKnown || desktopRect.bottom() - menuBarRect.bottom() > ourRect.height())
                             ourRect.position().y = menuBarRect.bottom();
                         else
                             ourRect.position().y = menuBarRect.top() - ourRect.height();
@@ -452,7 +455,7 @@ namespace neogfx
                 rect parentRect{ wm.window_rect(parent_window()) };
                 if (ourRect.intersection(parentRect).width() > 8.0)
                 {
-                    if (parentRect.right() + ourRect.width() < desktopRect.right())
+                    if (!onDesktopKnown || parentRect.right() + ourRect.width() < desktopRect.right())
                         ourRect.position().x = parentRect.right();
                     else
                         ourRect.position().x = parentRect.position().x - ourRect.width();

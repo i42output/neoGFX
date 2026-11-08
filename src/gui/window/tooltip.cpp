@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 
+#include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/gui/window/tooltip.hpp>
@@ -122,17 +123,20 @@ namespace neogfx
     {
 
         auto& wm = service<i_window_manager>();
+        // n.b. on Wayland where a toplevel is on the desktop isn't known (it is assumed to be centred), so where its popups are on
+        // it isn't either: it is the compositor that keeps them on the screen
+        bool const onDesktopKnown = service<i_basic_services>().windowing_system() != windowing_system::Wayland;
         rect const desktopRect{ wm.desktop_rect(*this) };
         rect ourRect{ wm.window_rect(*this) };
         point const mousePosition = wm.mouse_position();
         ourRect.position() = mousePosition + point{ 0.0, dpi_scale(20.0) };
-        if (ourRect.right() > desktopRect.right())
+        if (onDesktopKnown && ourRect.right() > desktopRect.right())
             ourRect.position().x = desktopRect.right() - ourRect.width();
-        if (ourRect.position().x < desktopRect.left())
+        if (onDesktopKnown && ourRect.position().x < desktopRect.left())
             ourRect.position().x = desktopRect.left();
-        if (ourRect.bottom() > desktopRect.bottom())
+        if (onDesktopKnown && ourRect.bottom() > desktopRect.bottom())
             ourRect.position().y = mousePosition.y - ourRect.height();
-        if (ourRect.position().y < desktopRect.top())
+        if (onDesktopKnown && ourRect.position().y < desktopRect.top())
             ourRect.position().y = desktopRect.top();
         if (ourRect.position() != wm.window_rect(*this).position())
             wm.move_window(*this, ourRect.position());
