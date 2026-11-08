@@ -78,6 +78,7 @@ namespace neogfx
             GLint textureWrap = -1;
             GLuint framebuffer = 0;
             GLuint atlas = 0;
+            GLuint colorBuffer = 0;
         };
 
         inline GLuint compile(GLenum aType, std::string const& aSource)
@@ -212,7 +213,10 @@ namespace neogfx
             glCheck(glTextureParameteri(sResources.atlas, GL_TEXTURE_COMPARE_MODE, GL_NONE));
             glCheck(glCreateFramebuffers(1, &sResources.framebuffer));
             glCheck(glNamedFramebufferTexture(sResources.framebuffer, GL_DEPTH_ATTACHMENT, sResources.atlas, 0));
-            glCheck(glNamedFramebufferDrawBuffer(sResources.framebuffer, GL_NONE));
+            glCheck(glCreateRenderbuffers(1, &sResources.colorBuffer));
+            glCheck(glNamedRenderbufferStorage(sResources.colorBuffer, GL_R8, AtlasSize, AtlasSize));
+            glCheck(glNamedFramebufferRenderbuffer(sResources.framebuffer, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, sResources.colorBuffer));
+            glCheck(glNamedFramebufferDrawBuffer(sResources.framebuffer, GL_COLOR_ATTACHMENT0));
             glCheck(glNamedFramebufferReadBuffer(sResources.framebuffer, GL_NONE));
             if (glCheckNamedFramebufferStatus(sResources.framebuffer, GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
                 return sResources;
@@ -972,12 +976,14 @@ namespace neogfx
         GLint previousScissor[4] = {};
         GLint previousDepthFunc = GL_LESS;
         GLboolean previousDepthMask = GL_TRUE;
+        GLboolean previousColorMask[4] = { GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE };
         glCheck(glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &previousDrawFramebuffer));
         glCheck(glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &previousReadFramebuffer));
         glCheck(glGetIntegerv(GL_VIEWPORT, previousViewport));
         glCheck(glGetIntegerv(GL_SCISSOR_BOX, previousScissor));
         glCheck(glGetIntegerv(GL_DEPTH_FUNC, &previousDepthFunc));
         glCheck(glGetBooleanv(GL_DEPTH_WRITEMASK, &previousDepthMask));
+        glCheck(glGetBooleanv(GL_COLOR_WRITEMASK, previousColorMask));
         bool const previousDepthTest = glIsEnabled(GL_DEPTH_TEST);
         bool const previousScissorTest = glIsEnabled(GL_SCISSOR_TEST);
         bool const previousCullFace = glIsEnabled(GL_CULL_FACE);
@@ -992,10 +998,9 @@ namespace neogfx
         glCheck(glEnable(GL_DEPTH_TEST));
         glCheck(glDepthFunc(GL_LESS));
         glCheck(glDepthMask(GL_TRUE));
+        glCheck(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
         glCheck(glDisable(GL_CULL_FACE));
         glCheck(glDisable(GL_BLEND));
-        // n.b. the whole atlas is cleared at once rather than tile by tile (a scissored clear): with the VMware SVGA driver
-        // a scissored clear here left the scene's meshes drawn afterwards invisible
         glCheck(glDisable(GL_SCISSOR_TEST));
         glCheck(glClear(GL_DEPTH_BUFFER_BIT));
         glCheck(glEnable(GL_SCISSOR_TEST));
@@ -1036,6 +1041,7 @@ namespace neogfx
         glCheck(glScissor(previousScissor[0], previousScissor[1], previousScissor[2], previousScissor[3]));
         glCheck(glDepthFunc(static_cast<GLenum>(previousDepthFunc)));
         glCheck(glDepthMask(previousDepthMask));
+        glCheck(glColorMask(previousColorMask[0], previousColorMask[1], previousColorMask[2], previousColorMask[3]));
         if (!previousDepthTest)
             glCheck(glDisable(GL_DEPTH_TEST));
         if (!previousScissorTest)
