@@ -146,6 +146,18 @@ namespace neogfx
                 surface.as_surface_window().native_window().push_event(mouseEvent);
                 return;
             }
+            // a move replaces a move still queued (as Windows coalesces WM_MOUSEMOVE): otherwise, if handling them is slower
+            // than they arrive (e.g. dragging a scroll bar), they queue up and the window stops responding
+            if (mouseEvent.type() == mouse_event_type::Moved && !iEventQueue.empty() && std::holds_alternative<mouse_event>(iEventQueue.back()))
+            {
+                auto& queuedEvent = static_variant_cast<mouse_event&>(iEventQueue.back());
+                if (queuedEvent.type() == mouse_event_type::Moved && queuedEvent.mouse_button() == mouseEvent.mouse_button() &&
+                    queuedEvent.key_modifiers() == mouseEvent.key_modifiers())
+                {
+                    queuedEvent = mouseEvent;
+                    return;
+                }
+            }
         }
 
         iEventQueue.push_back(aEvent);
