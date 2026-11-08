@@ -90,7 +90,7 @@ float sdSegment( in vec2 p, in vec2 a, in vec2 b )
 
 void draw_line(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
-    vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+    vec2 fragPos = interpolateAtSample(Coord, gl_SampleID).xy;
 
     float d0 = sdSegment(fragPos, function1.xy, function1.zw);
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
@@ -135,7 +135,7 @@ float bezier_udBezier(vec2 p0, vec2 p1, vec2 p2, vec2 p3, vec2 pos)
 
 void draw_cubic_bezier(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
-    vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+    vec2 fragPos = interpolateAtSample(Coord, gl_SampleID).xy;
 
     float d0 = bezier_udBezier(function1.xy, function1.zw, function2.xy, function2.zw, fragPos.xy);
     // (smoothstep's edges must be in order (else its result is undefined: e.g. the whole of the curve's bounding rect drawn): a curve 
@@ -161,7 +161,7 @@ float sdTriangle(vec2 p, vec2 p0, vec2 p1, vec2 p2)
 
 void draw_triangle(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
-    vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+    vec2 fragPos = interpolateAtSample(Coord, gl_SampleID).xy;
 
     float d0 = sdTriangle(fragPos.xy, function1.xy, function1.zw, function2.xy);
     color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
@@ -179,7 +179,7 @@ float sdBox(vec2 p, vec2 b)
 
 void draw_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
-    vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+    vec2 fragPos = interpolateAtSample(Coord, gl_SampleID).xy;
 
     float d0 = sdBox(fragPos.xy - function1.xy, function1.zw * 0.5);
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
@@ -195,7 +195,7 @@ float sdCircle(vec2 p, float r)
 
 void draw_circle(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
-    vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+    vec2 fragPos = interpolateAtSample(Coord, gl_SampleID).xy;
 
     float d0 = sdCircle(fragPos.xy - function1.xy, function1.z);
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
@@ -243,7 +243,7 @@ float sdEllipse(vec2 p, vec2 ab)
 
 void draw_ellipse(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
-    vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+    vec2 fragPos = interpolateAtSample(Coord, gl_SampleID).xy;
 
     float d0 = sdEllipse(fragPos.xy - function1.xy, function1.zw);
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
@@ -262,7 +262,7 @@ float sdPie(vec2 p, vec2 c, in float r)
 
 void draw_pie(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
-    vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+    vec2 fragPos = interpolateAtSample(Coord, gl_SampleID).xy;
 
     // the shape is symmetric about the bisector of its start and end angles
     float a0 = PI * 0.5 + (function1.w + function2.x) * 0.5;
@@ -284,7 +284,7 @@ float sdArc(vec2 p, vec2 c, in float r)
 
 void draw_arc(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
-    vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+    vec2 fragPos = interpolateAtSample(Coord, gl_SampleID).xy;
 
     vec4 noOutline = vec4(0.0);
     draw_pie(color, function1, function2, noOutline, function4, function5);
@@ -310,7 +310,7 @@ float sdRoundedBox(vec2 p, vec2 b, vec4 r)
                 
 void draw_rounded_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
-    vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+    vec2 fragPos = interpolateAtSample(Coord, gl_SampleID).xy;
 
     float d0 = sdRoundedBox(fragPos.xy - function1.xy, function1.zw * 0.5, function2);
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
@@ -355,7 +355,7 @@ float sdEllipseBox(vec2 f, vec2 c, vec2 b, vec4 rx, vec4 ry)
 
 void draw_ellipse_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
 {
-    vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+    vec2 fragPos = interpolateAtSample(Coord, gl_SampleID).xy;
 
     float d0 = sdEllipseBox(fragPos.xy, function1.xy, function1.zw * 0.5, function2, function6);
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
@@ -390,7 +390,7 @@ float sdPolygon(in vec2 p, in vec2 meta)
 
 void draw_polygon(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
-    vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+    vec2 fragPos = interpolateAtSample(Coord, gl_SampleID).xy;
 
     float d0 = sdPolygon(fragPos - function2.xy, function1.xy);
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && (d0 < 0.0 ? -d0 > inner_outline_width(function3) / 2.0 : d0 > function3.w / 2.0))))
@@ -401,7 +401,7 @@ void draw_polygon(inout vec4 color, inout vec4 function1, inout vec4 function2, 
 
 void draw_checkerboard(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
-    vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+    vec2 fragPos = interpolateAtSample(Coord, gl_SampleID).xy;
     vec2 shapePos = fragPos.xy - function1.xy;
     
     float d0 = sdBox(shapePos, function1.zw * 0.5);
