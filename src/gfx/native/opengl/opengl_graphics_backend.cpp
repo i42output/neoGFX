@@ -436,6 +436,17 @@ namespace neogfx
     namespace
     {
         int sGlslVersion = 460;
+
+        // true if the scissor test is on and its box is empty: a draw or clear then does nothing, so it isn't issued (n.b. the
+        // VMware (svga) driver draws one regardless: it passes an empty box on as all zeros, which the host doesn't treat as empty)
+        bool scissored_out()
+        {
+            if (!glIsEnabled(GL_SCISSOR_TEST))
+                return false;
+            GLint box[4] = {};
+            glGetIntegerv(GL_SCISSOR_BOX, box);
+            return box[2] <= 0 || box[3] <= 0;
+        }
     }
 
     std::string glsl_for_context(std::string aSource)
@@ -702,11 +713,15 @@ namespace neogfx
 
     void opengl_graphics_backend::draw_arrays(gpu_primitive aPrimitive, std::size_t aFirst, std::size_t aCount)
     {
+        if (scissored_out())
+            return;
         glCheck(glDrawArrays(to_gl_enum(aPrimitive), static_cast<GLint>(aFirst), static_cast<GLsizei>(aCount)));
     }
 
     void opengl_graphics_backend::draw_elements(gpu_primitive aPrimitive, std::size_t aFirstIndex, std::size_t aCount)
     {
+        if (scissored_out())
+            return;
         glCheck(glDrawElements(to_gl_enum(aPrimitive), static_cast<GLsizei>(aCount), GL_UNSIGNED_INT,
             reinterpret_cast<const void*>(aFirstIndex * sizeof(std::uint32_t))));
     }
@@ -866,12 +881,16 @@ namespace neogfx
 
     void opengl_graphics_backend::clear(color const& aColor)
     {
+        if (scissored_out())
+            return;
         glCheck(glClearColor(aColor.red<GLclampf>(), aColor.green<GLclampf>(), aColor.blue<GLclampf>(), aColor.alpha<GLclampf>()));
         glCheck(glClear(GL_COLOR_BUFFER_BIT));
     }
 
     void opengl_graphics_backend::clear_depth_buffer()
     {
+        if (scissored_out())
+            return;
         GLboolean depthMask;
         glCheck(glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask));
         if (!depthMask)
@@ -884,6 +903,8 @@ namespace neogfx
 
     void opengl_graphics_backend::clear_stencil_buffer(std::int32_t aValue)
     {
+        if (scissored_out())
+            return;
         glCheck(glStencilMask(0xFF));
         glCheck(glClearStencil(static_cast<GLint>(aValue)));
         glCheck(glClear(GL_STENCIL_BUFFER_BIT));
