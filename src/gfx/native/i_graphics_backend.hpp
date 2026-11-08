@@ -168,6 +168,8 @@ namespace neogfx
         virtual void draw_elements(gpu_primitive aPrimitive, std::size_t aFirstIndex, std::size_t aCount) = 0;
         // make what has been drawn so far visible to what is drawn next (glTextureBarrier)
         virtual void texture_barrier() = 0;
+        // whether texture_barrier() can do that (if not, nothing may sample the render target it is drawing to)
+        virtual bool has_texture_barrier() const = 0;
         // fixed function state (see native_rendering_context)
     public:
         virtual void enable_scissor(bool aEnable) = 0;

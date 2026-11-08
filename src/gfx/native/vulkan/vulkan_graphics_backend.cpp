@@ -828,6 +828,9 @@ namespace neogfx
         iPhysicalDevice = best->second;
         iQueueFamily = bestQueueFamily;
         vkGetPhysicalDeviceProperties(iPhysicalDevice, &iProperties);
+        // (software rendering (e.g. lavapipe) only if Vulkan is asked for (--vk): OpenGL, which may be hardware accelerated, otherwise)
+        if (iProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU && service<i_app>().program_options().options().count("vk") == 0)
+            throw failed_to_initialize(std::string{ "software rendering only (" } + iProperties.deviceName + ")");
         vkGetPhysicalDeviceMemoryProperties(iPhysicalDevice, &iMemoryProperties);
 
         VkPhysicalDeviceFeatures supported;

@@ -258,6 +258,7 @@ namespace neogfx
         void draw_arrays(gpu_primitive aPrimitive, std::size_t aFirst, std::size_t aCount) final;
         void draw_elements(gpu_primitive aPrimitive, std::size_t aFirstIndex, std::size_t aCount) final;
         void texture_barrier() final;
+        bool has_texture_barrier() const final { return true; }
     public:
         void enable_scissor(bool aEnable) final;
         void set_scissor(std::int32_t aX, std::int32_t aY, std::int32_t aWidth, std::int32_t aHeight) final;

@@ -27,8 +27,14 @@
 namespace neogfx
 {
     // the OpenGL calls made by the shared native code (see i_graphics_backend)
+    // the GLSL source for the current context: the shaders are written for GLSL 4.60 and a context of an earlier
+    // version (4.3 or later: see the platform renderers) is given its own GLSL version
+    std::string glsl_for_context(std::string aSource);
+
     class opengl_graphics_backend : public i_graphics_backend
     {
+    public:
+        struct failed_to_initialize : std::runtime_error { failed_to_initialize(std::string const& aReason) : std::runtime_error{ "neogfx::opengl_graphics_backend::failed_to_initialize: " + aReason } {} };
     public:
         opengl_graphics_backend(neogfx::renderer aRenderer);
         ~opengl_graphics_backend();
@@ -71,6 +77,7 @@ namespace neogfx
         void draw_arrays(gpu_primitive aPrimitive, std::size_t aFirst, std::size_t aCount) final;
         void draw_elements(gpu_primitive aPrimitive, std::size_t aFirstIndex, std::size_t aCount) final;
         void texture_barrier() final;
+        bool has_texture_barrier() const final;
     public:
         void enable_scissor(bool aEnable) final;
         void set_scissor(std::int32_t aX, std::int32_t aY, std::int32_t aWidth, std::int32_t aHeight) final;
@@ -102,5 +109,7 @@ namespace neogfx
             i_texture const* aBackgroundTexture, i_texture const* aEnvironment, double aBlur, double aIntensity) final;
     private:
         neogfx::renderer iRenderer;
+        bool iTextureBarrier = true;
+        bool iTextureBarrierNV = false;
     };
 }

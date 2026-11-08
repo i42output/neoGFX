@@ -2255,6 +2255,9 @@ namespace neogfx
     {
         if (render_target().target_type() == render_target_type::Texture)
             return neogfx::subpixel_format::None;
+        // (subpixel glyphs are blended with the render target in the glyph shader, which reads it)
+        if (!graphics_backend().has_texture_barrier())
+            return neogfx::subpixel_format::None;
         else if (iWidget != nullptr)
             return service<i_surface_manager>().display(iWidget->surface()).subpixel_format();
         // todo: might not be monitor 0!

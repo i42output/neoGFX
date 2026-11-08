@@ -146,18 +146,27 @@ namespace neogfx
             if (hDC == NULL)
                 throw renderer::failed_to_create_opengl_context("No device context!");
 
-            int contextAttributes[] =
+            // OpenGL 4.6 or, if the driver has no 4.6, 4.3 (see opengl_graphics_backend::initialize); once found, every
+            // context is of the same version
+            static int sMinorVersion = 6;
+            HGLRC hRC = NULL;
+            for (;;)
             {
-                WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-                WGL_CONTEXT_MINOR_VERSION_ARB, 6,
+                int contextAttributes[] =
+                {
+                    WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+                    WGL_CONTEXT_MINOR_VERSION_ARB, sMinorVersion,
 #ifdef DEBUG_GL
-                WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-                WGL_CONTEXT_FLAGS_ARB,         WGL_CONTEXT_DEBUG_BIT_ARB,
+                    WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                    WGL_CONTEXT_FLAGS_ARB,         WGL_CONTEXT_DEBUG_BIT_ARB,
 #endif
-                0, 0
-            };
-
-            HGLRC hRC = wglCreateContextAttribsARB(hDC, hShareContext, contextAttributes);
+                    0, 0
+                };
+                hRC = wglCreateContextAttribsARB(hDC, hShareContext, contextAttributes);
+                if (hRC != NULL || sMinorVersion == 3)
+                    break;
+                sMinorVersion = 3;
+            }
             if (hRC == NULL)
                 throw renderer::failed_to_create_opengl_context(GetLastErrorText());
 

@@ -573,21 +573,27 @@ namespace neogfx
                 }
             }
 
-            EGLint const contextAttributes[] =
+            // OpenGL 4.6 core or, if the driver has no 4.6, 4.3 core (see opengl_graphics_backend::initialize)
+            for (EGLint const minorVersion : { 6, 3 })
             {
-                EGL_CONTEXT_MAJOR_VERSION, 4,
-                EGL_CONTEXT_MINOR_VERSION, 6,
-                EGL_CONTEXT_OPENGL_PROFILE_MASK, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
+                EGLint const contextAttributes[] =
+                {
+                    EGL_CONTEXT_MAJOR_VERSION, 4,
+                    EGL_CONTEXT_MINOR_VERSION, minorVersion,
+                    EGL_CONTEXT_OPENGL_PROFILE_MASK, EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
 #ifdef DEBUG_GL
-                EGL_CONTEXT_OPENGL_DEBUG, EGL_TRUE,
+                    EGL_CONTEXT_OPENGL_DEBUG, EGL_TRUE,
 #endif
-                EGL_NONE
-            };
-            iContext = ::eglCreateContext(iEglDisplay, iEglConfig, EGL_NO_CONTEXT, contextAttributes);
+                    EGL_NONE
+                };
+                iContext = ::eglCreateContext(iEglDisplay, iEglConfig, EGL_NO_CONTEXT, contextAttributes);
+                if (iContext != EGL_NO_CONTEXT)
+                    break;
+            }
             if (iContext == EGL_NO_CONTEXT)
             {
                 iContext = nullptr;
-                throw failed_to_create_opengl_context("eglCreateContext (OpenGL 4.6 core): " + egl_error_text());
+                throw failed_to_create_opengl_context("eglCreateContext (OpenGL 4.3 core or later): " + egl_error_text());
             }
 
             if (surfaceless)

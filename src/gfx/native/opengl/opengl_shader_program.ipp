@@ -24,6 +24,7 @@
 #include <neolib/core/set.hpp>
 
 #include "opengl_shader_program.hpp"
+#include "opengl_graphics_backend.hpp"
 
 namespace neogfx
 {
@@ -95,7 +96,8 @@ namespace neogfx
             code += mainFunction;
             code.replace_all("%INVOKES%"_s, invokeDeclarations + invokes + invokeResults);
             auto shaderHandle = to_gl_handle<GLuint>(shaders[0]->handle(*this));
-            const char* codeArray[] = { code.c_str() };
+            auto const glsl = glsl_for_context(code.to_std_string());
+            const char* codeArray[] = { glsl.c_str() };
             glCheck(glShaderSource(shaderHandle, 1, codeArray, NULL));
             glCheck(glCompileShader(shaderHandle));
             GLint result;

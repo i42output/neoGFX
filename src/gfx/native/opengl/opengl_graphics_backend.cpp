@@ -83,7 +83,8 @@ namespace neogfx
         inline GLuint compile(GLenum aType, std::string const& aSource)
         {
             GLuint const shader = glCreateShader(aType);
-            char const* source = aSource.c_str();
+            std::string const glsl = glsl_for_context(aSource);
+            char const* source = glsl.c_str();
             glShaderSource(shader, 1, &source, nullptr);
             glCompileShader(shader);
             GLint ok = GL_FALSE;
@@ -432,12 +433,59 @@ namespace neogfx
         return iRenderer;
     }
 
+    namespace
+    {
+        int sGlslVersion = 460;
+    }
+
+    std::string glsl_for_context(std::string aSource)
+    {
+        static std::string const sDirective = "#version 460 core";
+        if (sGlslVersion != 460)
+            if (auto const directive = aSource.find(sDirective); directive != std::string::npos)
+                aSource.replace(directive, sDirective.size(), "#version " + std::to_string(sGlslVersion) + " core");
+        return aSource;
+    }
+
     void opengl_graphics_backend::initialize()
     {
         service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL vendor: " << reinterpret_cast<const char*>(glGetString(GL_VENDOR)) << std::endl;
         service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL renderer: " << reinterpret_cast<const char*>(glGetString(GL_RENDERER)) << std::endl;
         service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL version: " << reinterpret_cast<const char*>(glGetString(GL_VERSION)) << std::endl;
         service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL shading language version: " << reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)) << std::endl;
+
+        GLint major = 0;
+        GLint minor = 0;
+        glGetIntegerv(GL_MAJOR_VERSION, &major);
+        glGetIntegerv(GL_MINOR_VERSION, &minor);
+        int const version = major * 10 + minor;
+        GLint extensionCount = 0;
+        glGetIntegerv(GL_NUM_EXTENSIONS, &extensionCount);
+        auto const has_extension = [&](std::string_view aExtension)
+        {
+            for (GLint e = 0; e < extensionCount; ++e)
+                if (reinterpret_cast<char const*>(glGetStringi(GL_EXTENSIONS, e)) == aExtension)
+                    return true;
+            return false;
+        };
+        // (before 4.6 (see the platform renderers), the later versions' features neoGFX uses must be extensions)
+        if (version < 43)
+            throw failed_to_initialize("OpenGL 4.3 or later required (" + std::to_string(major) + "." + std::to_string(minor) + ")");
+        std::string missing;
+        for (auto const& [extension, coreVersion] : {
+            std::pair{ "GL_ARB_buffer_storage", 44 },
+            std::pair{ "GL_ARB_clear_texture", 44 },
+            std::pair{ "GL_ARB_direct_state_access", 45 },
+            std::pair{ "GL_ARB_get_texture_sub_image", 45 } })
+            if (version < coreVersion && !has_extension(extension))
+                missing += (missing.empty() ? "" : ", ") + std::string{ extension };
+        if (!missing.empty())
+            throw failed_to_initialize("OpenGL " + std::to_string(major) + "." + std::to_string(minor) + " without " + missing);
+        sGlslVersion = std::min(version, 46) * 10;
+        iTextureBarrier = (version >= 45 || has_extension("GL_ARB_texture_barrier"));
+        iTextureBarrierNV = (!iTextureBarrier && has_extension("GL_NV_texture_barrier"));
+        if (!iTextureBarrier && !iTextureBarrierNV)
+            service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL: no texture barrier (no subpixel text rendering)" << std::endl;
     }
 
     void opengl_graphics_backend::cleanup()
@@ -656,7 +704,19 @@ namespace neogfx
 
     void opengl_graphics_backend::texture_barrier()
     {
-        glCheck(glTextureBarrier());
+        if (iTextureBarrier)
+        {
+            glCheck(glTextureBarrier());
+        }
+        else if (iTextureBarrierNV)
+        {
+            glCheck(glTextureBarrierNV());
+        }
+    }
+
+    bool opengl_graphics_backend::has_texture_barrier() const
+    {
+        return iTextureBarrier || iTextureBarrierNV;
     }
 
     void opengl_graphics_backend::enable_scissor(bool aEnable)

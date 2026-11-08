@@ -24,6 +24,7 @@
 #include "opengl_error.hpp"
 #include "../native_vertex.hpp"
 #include "../native_rendering_context.hpp"
+#include "../i_graphics_backend.hpp"
 #include "opengl_texture.hpp"
 
 namespace neogfx
@@ -949,7 +950,7 @@ namespace neogfx
             service<i_rendering_engine>().activate_context(*this);
         }
 
-        glCheck(glTextureBarrier());
+        graphics_backend().texture_barrier();
 
         bind();
 
