@@ -230,7 +230,11 @@ namespace neogfx
 
         void window::resize_surface(const size& aExtents)
         {
-            set_extents(aExtents, false);
+            // n.b. rounded as extents_changed rounds it, so that asking for a size that rounds to the current one changes nothing
+            // (else a popup sized by its content, e.g. 201 pixels at a scale of 2, is resized to 202, resizes itself back, and
+            // so on forever, its popup made again each time)
+            auto const scale = static_cast<scalar>(iScale);
+            set_extents((aExtents / scale).ceil() * scale, false);
         }
 
         bool window::resizing_or_moving() const
