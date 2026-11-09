@@ -34,6 +34,21 @@ namespace neogfx
     {
         namespace
         {
+            // a window taking the mouse capture takes it from any other window that has it, which releases it as on
+            // Windows (where that window is sent WM_CAPTURECHANGED: see windows_window.cpp), e.g. a widget that took it on
+            // a mouse press that opened a dialog, the release then going to the dialog
+            void take_capture_from_other_window(i_surface_window& aTaker)
+            {
+                auto& mouse = service<i_mouse>();
+                if (!mouse.capturing() || &mouse.capture_target().as_surface_window() == &aTaker)
+                    return;
+                auto& other = mouse.capture_target().as_surface_window();
+                if (other.has_capturing_widget())
+                    other.release_capture(other.capturing_widget());
+                else
+                    other.native_window().release_capture();
+            }
+
             // (as the hit test codes Windows sends non-client mouse messages for: see windows_window.cpp)
             bool is_non_client(widget_part aPart)
             {
@@ -253,6 +268,7 @@ namespace neogfx
         {
             if (!iCapturingMouse)
             {
+                take_capture_from_other_window(surface_window());
                 iCapturingMouse = true;
                 iNonClientCapturing = false;
                 service<i_mouse>().capture(surface_window(), aLockCursor);
@@ -278,6 +294,7 @@ namespace neogfx
         {
             if (!iCapturingMouse)
             {
+                take_capture_from_other_window(surface_window());
                 iCapturingMouse = true;
                 iNonClientCapturing = true;
                 service<i_mouse>().capture_raw(surface_window());
