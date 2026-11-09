@@ -199,6 +199,17 @@ namespace neogfx
             uniformOffsets.resize(uniformIndices.size());
             glCheck(glGetActiveUniformsiv(gl_handle(), static_cast<GLsizei>(uniformIndices.size()), uniformIndices.data(), GL_UNIFORM_OFFSET, uniformOffsets.data()))
 
+            // n.b. the block's layout is "shared", so an array's stride is the implementation's: e.g. std430's (packed
+            // elements) for llvmpipe but std140's (16 bytes an element) for VMware's driver (svga)
+            thread_local std::vector<GLint> uniformArrayStrides;
+            uniformArrayStrides.resize(uniformIndices.size());
+            glCheck(glGetActiveUniformsiv(gl_handle(), static_cast<GLsizei>(uniformIndices.size()), uniformIndices.data(), GL_UNIFORM_ARRAY_STRIDE, uniformArrayStrides.data()))
+            auto& arrayStrides = iUbos[static_cast<std::size_t>(stage->type())].arrayStrides;
+            arrayStrides.clear();
+            for (std::size_t i = 0; i < uniformIndices.size(); ++i)
+                if (uniformArrayStrides[i] > 0)
+                    arrayStrides[uniformOffsets[i]] = uniformArrayStrides[i];
+
             for (auto uniformRef = uniformRefs.begin(); uniformRef != uniformRefs.end(); ++uniformRef)
                 (*uniformRef).first->update_uniform_storage((*uniformRef).second->id(), std::next(ubo_block_buffer(stage->type()).data(), uniformOffsets[std::distance(uniformRefs.begin(), uniformRef)]));
         }
@@ -233,6 +244,7 @@ namespace neogfx
             glCheck(glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle(stage->type())))
             
             auto& blockBuffer = ubo_block_buffer(stage->type());
+            auto const& arrayStrides = iUbos[static_cast<std::size_t>(stage->type())].arrayStrides;
             
             for (auto& shader : stage->shaders())
                 if (shader->enabled() || shader->has_shared_uniforms())
@@ -248,7 +260,7 @@ namespace neogfx
                         if (!uniform.singular())
                         {
                             auto const storage = uniform.storage();
-                            std::visit([this, &blockBuffer, storage, updateAllUniforms](auto&& v)
+                            std::visit([this, &blockBuffer, &arrayStrides, storage, updateAllUniforms](auto&& v)
                             {
                                 typedef std::decay_t<decltype(v)> data_type;
                                 void const* src = &v;
@@ -273,6 +285,16 @@ namespace neogfx
                                     std::is_same_v<maybe_abstract_t<shader_float_array>, data_type> || 
                                     std::is_same_v<maybe_abstract_t<shader_double_array>, data_type>)
                                 {
+                                    // n.b. at the array's stride (see update_uniform_storage)
+                                    auto const stride = arrayStrides.find(dataOffset);
+                                    if (stride != arrayStrides.end() && static_cast<std::size_t>(stride->second) != sizeof(v[0]) && !v.empty())
+                                    {
+                                        for (std::size_t i = 0; i < v.size(); ++i)
+                                            std::memcpy(static_cast<GLubyte*>(storage) + i * stride->second, &v[i], sizeof(v[i]));
+                                        if (!updateAllUniforms)
+                                            glCheck(glBufferSubData(GL_UNIFORM_BUFFER, dataOffset, stride->second * (v.size() - 1u) + sizeof(v[0]), storage));
+                                        return;
+                                    }
                                     src = v.data();
                                     dataSize = sizeof(v[0]) * v.size();
                                 }

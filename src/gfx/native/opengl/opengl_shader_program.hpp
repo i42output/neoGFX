@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <unordered_map>
 #include <neogfx/gfx/shader_program.hpp>
 #include <neogfx/gfx/standard_shader_program.hpp>
 #include "../native_buffer.hpp"
@@ -79,6 +80,7 @@ namespace neogfx
         struct ubo
         {
             ubo_block_buffer_t uniformBlockBuffer;
+            std::unordered_map<std::ptrdiff_t, GLint> arrayStrides; // by offset
             mutable std::optional<GLuint> uboHandle;
         } iUbos[static_cast<std::size_t>(shader_type::COUNT)];
         neolib::std_vector_jar<weak_ref_ptr<i_ssbo>> iSsbos;
