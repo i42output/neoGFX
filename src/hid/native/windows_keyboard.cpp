@@ -396,10 +396,10 @@ namespace neogfx
 
             update_keymap();
 
-            BYTE kbdState[256];
-            GetKeyboardState(kbdState);
-            kbdState[VK_INSERT] |= 0x01;
-            SetKeyboardState(kbdState);
+            // n.b. Insert lock is on at startup: it is Windows' toggle of the Insert key relative to its state now (setting
+            // that toggle instead, with SetKeyboardState, doesn't last: it changes only this thread's copy of the keyboard
+            // state, which Windows replaces)
+            iInsertLockInverted = (GetKeyState(VK_INSERT) & 0x0001) != 0x0001;
         }
 
         i_keyboard_layout& keyboard::layout() const
@@ -422,7 +422,7 @@ namespace neogfx
                 result = result | keyboard_locks::NumLock;
             if ((GetKeyState(VK_SCROLL) & 0x0001) == 0x0001)
                 result = result | keyboard_locks::ScrollLock;
-            if ((GetKeyState(VK_INSERT) & 0x0001) == 0x0001)
+            if (((GetKeyState(VK_INSERT) & 0x0001) == 0x0001) != iInsertLockInverted)
                 result = result | keyboard_locks::InsertLock;
             return result;
         }

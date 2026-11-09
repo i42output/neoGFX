@@ -88,6 +88,7 @@ namespace neogfx
         private:
             keymap_t iKeymap;
             std::unique_ptr<i_keyboard_layout> iLayout;
+            bool iInsertLockInverted = false;
         };
     }
 }

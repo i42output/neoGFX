@@ -2309,7 +2309,7 @@ int main(int argc, char* argv[])
         {
             auto const t = static_cast<ng::scalar>(std::chrono::duration_cast<std::chrono::microseconds>(neolib::chrono::fast_clock::now() - t0).count());
 
-            bool const justAnimation = ((ng::service<ng::i_keyboard>().locks() & ng::keyboard_locks::InsertLock) == ng::keyboard_locks::InsertLock);
+            bool const justAnimation = ((ng::service<ng::i_keyboard>().locks() & ng::keyboard_locks::InsertLock) != ng::keyboard_locks::InsertLock);
 
             // easing function demo
             auto const d = 1000000.0;
