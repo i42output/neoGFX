@@ -552,6 +552,14 @@ namespace neogfx
                 return;
             iVisible = true;
 
+            // n.b. not shown until its first frame has been displayed (see display()), so that it isn't seen empty while that
+            // frame is rendered (the first one can take a while, e.g. Vulkan pipelines being compiled)
+            if (!iDisplayed)
+            {
+                iShowPending = aActivate;
+                return;
+            }
+
             ::ShowWindow(iHandle, aActivate ? SW_SHOW : SW_SHOWNA);
 
             if (aActivate)
@@ -563,6 +571,7 @@ namespace neogfx
             if (!iVisible)
                 return;
             iVisible = false;
+            iShowPending = std::nullopt;
             ::ShowWindow(iHandle, SW_HIDE);
         }
 
@@ -1736,6 +1745,20 @@ namespace neogfx
             // n.b. a Vulkan surface presents itself (see vulkan_surface::do_render)
             if (rendering_engine().renderer() != neogfx::renderer::Vulkan)
                 ::SwapBuffers(static_cast<HDC>(iHdc));
+
+            if (!iDisplayed)
+            {
+                iDisplayed = true;
+                if (iShowPending)
+                {
+                    // (see show())
+                    bool const activateWindow = *iShowPending;
+                    iShowPending = std::nullopt;
+                    ::ShowWindow(iHandle, activateWindow ? SW_SHOW : SW_SHOWNA);
+                    if (activateWindow)
+                        activate();
+                }
+            }
         }
 
     }

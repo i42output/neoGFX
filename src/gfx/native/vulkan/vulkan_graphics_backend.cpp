@@ -656,6 +656,11 @@ namespace neogfx
         }
         iCommandBuffer = VK_NULL_HANDLE;
         save_pipeline_cache();
+        if (iPipelineCache != VK_NULL_HANDLE)
+        {
+            vkDestroyPipelineCache(iDevice, iPipelineCache, nullptr);
+            iPipelineCache = VK_NULL_HANDLE;
+        }
         if (iCacheFolder)
             prune_cache_folder(*iCacheFolder);
         vkDestroyDevice(iDevice, nullptr);
@@ -1613,6 +1618,7 @@ namespace neogfx
         pipelineInfo.layout = aProgram.pipelineLayout;
         VkPipeline result = VK_NULL_HANDLE;
         vkCheck(vkCreateGraphicsPipelines(iDevice, pipeline_cache(), 1u, &pipelineInfo, nullptr, &result));
+        save_pipeline_cache();
         aProgram.pipelines.emplace(key, result);
         ++iStatistics.pipelinesCreated;
         return result;
@@ -2509,6 +2515,7 @@ namespace neogfx
         return iPipelineCache;
     }
 
+    // n.b. whenever a pipeline is compiled (so that the cache isn't lost if the application doesn't exit normally)
     void vulkan_graphics_backend::save_pipeline_cache()
     {
         if (iPipelineCache == VK_NULL_HANDLE)
@@ -2533,8 +2540,6 @@ namespace neogfx
                     write_cache_file(*folder / PipelineCacheFileName, contents);
                 }
             }
-        vkDestroyPipelineCache(iDevice, iPipelineCache, nullptr);
-        iPipelineCache = VK_NULL_HANDLE;
     }
 
     VkShaderModule vulkan_graphics_backend::create_shader_module(std::vector<std::uint32_t> const& aSpirv)
@@ -3013,6 +3018,7 @@ namespace neogfx
             pipelineInfo.pDynamicState = &dynamicInfo;
             pipelineInfo.layout = resources.pipelineLayout;
             vkCheck(vkCreateGraphicsPipelines(iDevice, pipeline_cache(), 1u, &pipelineInfo, nullptr, &resources.pipeline));
+            save_pipeline_cache();
             resources.failed = false;
         }
         catch (std::exception const& e)
@@ -3230,6 +3236,7 @@ namespace neogfx
             pipelineInfo.layout = resources.pipelineLayout;
             VkPipeline newPipeline = VK_NULL_HANDLE;
             vkCheck(vkCreateGraphicsPipelines(iDevice, pipeline_cache(), 1u, &pipelineInfo, nullptr, &newPipeline));
+            save_pipeline_cache();
             existing = resources.pipelines.emplace(key, newPipeline).first;
         }
 

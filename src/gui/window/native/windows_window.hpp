@@ -156,6 +156,8 @@ namespace neogfx
             bool iInMoveResizeCall = false;
             bool iInWindowPosChanged = false;
             bool iVisible = false;
+            bool iDisplayed = false;
+            std::optional<bool> iShowPending; // (whether to activate)
             bool iActive = false;
             std::optional<char16_t> iHighSurrogate;
             std::optional<point> iActivationMousePos;
