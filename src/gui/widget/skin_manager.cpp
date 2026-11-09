@@ -20,6 +20,8 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/hid/i_surface_manager.hpp>
+#include <neogfx/hid/i_surface_window.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/skin_manager.hpp>
 #include "native/native_skin.hpp"
 
@@ -110,6 +112,19 @@ namespace neogfx
         {
             // skin metrics (e.g. check box size) may differ so relayout as well as repaint
             service<i_surface_manager>().layout_surfaces();
+            // (a widget's items are only laid out again when the widget's size changes, so lay out every widget's: a check
+            // box's box, say, can change size within a check box that doesn't)
+            auto const layout_widget = [](auto const& aSelf, i_widget& aWidget) -> void
+            {
+                if (aWidget.has_layout())
+                    aWidget.layout_items();
+                for (auto const& child : aWidget.children())
+                    aSelf(aSelf, *child);
+            };
+            auto& surfaceManager = service<i_surface_manager>();
+            for (std::size_t surfaceIndex = 0u; surfaceIndex < surfaceManager.surface_count(); ++surfaceIndex)
+                if (surfaceManager.surface(surfaceIndex).is_window())
+                    layout_widget(layout_widget, surfaceManager.surface(surfaceIndex).as_surface_window().as_widget());
             service<i_surface_manager>().invalidate_surfaces();
         }
     }

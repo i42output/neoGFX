@@ -56,6 +56,9 @@ namespace neogfx
                 struct cairo_t;
                 struct cairo_surface_t;
                 struct GDBusConnection;
+                struct GtkIconTheme;
+                struct GtkIconInfo;
+                struct GdkPixbuf;
                 struct GVariant;
                 struct GError { std::uint32_t domain; int code; char* message; };
                 struct GtkBorder { std::int16_t left, right, top, bottom; };
@@ -74,11 +77,13 @@ namespace neogfx
                 constexpr int OrientationVertical = 1;
                 constexpr int CairoFormatArgb32 = 0;
                 constexpr int BusTypeSession = 2; // G_BUS_TYPE_SESSION
+                constexpr int IconLookupForceSize = 1 << 4; // GTK_ICON_LOOKUP_FORCE_SIZE
                 constexpr double Pi = 3.14159265358979323846;
 
                 struct api
                 {
                     void* library = nullptr;
+                    bool icons = false;
 
                     void (*gtk_disable_setlocale)() = nullptr;
                     int (*gtk_init_check)(int*, char***) = nullptr;
@@ -110,6 +115,12 @@ namespace neogfx
                     void (*gtk_render_expander)(GtkStyleContext*, cairo_t*, double, double, double, double) = nullptr;
                     void (*gtk_render_slider)(GtkStyleContext*, cairo_t*, double, double, double, double, int) = nullptr;
                     void (*gtk_render_arrow)(GtkStyleContext*, cairo_t*, double, double, double, double) = nullptr;
+                    // (icons: optional)
+                    GtkIconTheme* (*gtk_icon_theme_get_default)() = nullptr;
+                    GtkIconInfo* (*gtk_icon_theme_lookup_icon_for_scale)(GtkIconTheme*, char const*, int, int, int) = nullptr;
+                    GdkPixbuf* (*gtk_icon_info_load_symbolic_for_context)(GtkIconInfo*, GtkStyleContext*, int*, GError**) = nullptr;
+                    cairo_surface_t* (*gdk_cairo_surface_create_from_pixbuf)(GdkPixbuf const*, int, void*) = nullptr;
+                    void (*gtk_render_icon_surface)(GtkStyleContext*, cairo_t*, cairo_surface_t*, double, double) = nullptr;
 
                     void (*g_object_get)(void*, char const*, ...) = nullptr;
                     void (*g_object_unref)(void*) = nullptr;
@@ -196,6 +207,12 @@ namespace neogfx
                         resolve(cairo_surface_destroy, "cairo_surface_destroy");
                         if (!all)
                             return false;
+                        resolve(gtk_icon_theme_get_default, "gtk_icon_theme_get_default");
+                        resolve(gtk_icon_theme_lookup_icon_for_scale, "gtk_icon_theme_lookup_icon_for_scale");
+                        resolve(gtk_icon_info_load_symbolic_for_context, "gtk_icon_info_load_symbolic_for_context");
+                        resolve(gdk_cairo_surface_create_from_pixbuf, "gdk_cairo_surface_create_from_pixbuf");
+                        resolve(gtk_render_icon_surface, "gtk_render_icon_surface");
+                        icons = all;
 
                         // n.b. GTK must not change the process's locale; and on X11 GDK replaces the Xlib error handlers (with ones
                         // that abort on an error it hasn't trapped) so whatever was installed (e.g. by neoGFX's X11 display server) is
@@ -232,6 +249,7 @@ namespace neogfx
             }
 
             constexpr std::size_t kMaxCachedParts = 512u;
+            constexpr int kTitleBarIconSize = 16; // (CSS pixels: GTK's title bar buttons' icon size)
 
             // the desktop's appearance settings, from the XDG desktop portal (org.freedesktop.portal.Settings)
             struct desktop_settings
@@ -391,6 +409,9 @@ namespace neogfx
                 void adjust_title_bar_appearance(const i_skinnable_item& aItem, title_bar_appearance& aAppearance) const override
                 {
                     iFallback.adjust_title_bar_appearance(aItem, aAppearance);
+                    // (the buttons' glyphs are the icon theme's (draw_title_bar_button))
+                    if (title_bar_icons())
+                        aAppearance.buttonImages = false;
                 }
             public:
                 void draw_push_button(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_push_button& aButton, const push_button_appearance& aAppearance) const override
@@ -688,7 +709,29 @@ namespace neogfx
                 }
                 void draw_title_bar_button(i_graphics_context& aGc, const i_skinnable_item& aItem, widget_part_e aButton, const title_bar_appearance& aAppearance) const override
                 {
-                    iFallback.draw_title_bar_button(aGc, aItem, aButton, aAppearance);
+                    if (!title_bar_icons())
+                    {
+                        iFallback.draw_title_bar_button(aGc, aItem, aButton, aAppearance);
+                        return;
+                    }
+                    auto const& widget = aItem.as_widget();
+                    scoped_units su{ widget, units::Pixels };
+                    bool const enabled = widget.effectively_enabled();
+                    bool const hot = enabled && widget.entered();
+                    auto const state = state_flags(enabled, hot, hot && widget.capturing());
+                    auto const icon = title_bar_icon(aButton);
+                    auto const ctx = title_bar_icon_context(aButton, dark_background(aItem));
+                    auto const scale = item_scale(aItem);
+                    auto const iconSize = std::ceil(kTitleBarIconSize * scale);
+                    auto const buttonRect = widget.client_rect();
+                    rect const iconRect{
+                        point{ std::floor(buttonRect.center().x - iconSize / 2.0), std::floor(buttonRect.center().y - iconSize / 2.0) },
+                        size{ iconSize } };
+                    draw_part(aGc, ctx, state, part_name(aItem, icon, state), iconRect, scale,
+                        [&](gtk::cairo_t* aCr, double, double)
+                        {
+                            render_icon(ctx, aCr, icon, scale);
+                        });
                 }
                 void draw_container_frame(i_graphics_context& aGc, const i_skinnable_item& aItem, const rect& aFrameRect, dimension aFrameWidth, const color& aFrameColor, const color& aInnerFrameColor) const override
                 {
@@ -931,9 +974,71 @@ namespace neogfx
                         std::floor(aRect.y + (aRect.cy - extents.cy) / 2.0) };
                     draw_part(aGc, aContext, aState, aPart, rect{ position, extents }, aScale, aRender);
                 }
+                static char const* title_bar_icon(widget_part_e aButton)
+                {
+                    switch (aButton)
+                    {
+                    case widget_part::MinimizeButton:
+                        return "window-minimize-symbolic";
+                    case widget_part::MaximizeButton:
+                        return "window-maximize-symbolic";
+                    case widget_part::RestoreButton:
+                        return "window-restore-symbolic";
+                    default:
+                        return "window-close-symbolic";
+                    }
+                }
+                gtk::GtkStyleContext* title_bar_icon_context(widget_part_e aButton, bool aDark) const
+                {
+                    std::string const button = aButton == widget_part::CloseButton ? "button.titlebutton.close" :
+                        aButton == widget_part::MinimizeButton ? "button.titlebutton.minimize" : "button.titlebutton.maximize";
+                    return context({ "headerbar.titlebar", button, "image" }, aDark);
+                }
+                // an icon (symbolic: in the context's colour) drawn in CSS pixels at (0, 0); false if the icon theme hasn't the icon
+                // or it can't be loaded
+                static bool render_icon(gtk::GtkStyleContext* aContext, gtk::cairo_t* aCr, char const* aIcon, double aScale)
+                {
+                    auto& api = *gtk::instance();
+                    auto const integralScale = static_cast<int>(std::ceil(aScale));
+                    auto const info = api.gtk_icon_theme_lookup_icon_for_scale(api.gtk_icon_theme_get_default(), aIcon, kTitleBarIconSize, integralScale, gtk::IconLookupForceSize);
+                    if (info == nullptr)
+                        return false;
+                    gtk::GError* error = nullptr;
+                    auto const pixbuf = api.gtk_icon_info_load_symbolic_for_context(info, aContext, nullptr, &error);
+                    api.g_object_unref(info);
+                    if (pixbuf == nullptr)
+                    {
+                        if (error != nullptr)
+                            api.g_error_free(error);
+                        return false;
+                    }
+                    if (aCr != nullptr)
+                    {
+                        auto const surface = api.gdk_cairo_surface_create_from_pixbuf(pixbuf, integralScale, nullptr);
+                        api.gtk_render_icon_surface(aContext, aCr, surface, 0.0, 0.0);
+                        api.cairo_surface_destroy(surface);
+                    }
+                    api.g_object_unref(pixbuf);
+                    return true;
+                }
+                // true if the title bar buttons' glyphs can be the icon theme's (e.g. not if there is no SVG image loader for its
+                // symbolic icons)
+                bool title_bar_icons() const
+                {
+                    if (iTitleBarIcons == std::nullopt)
+                    {
+                        auto const gtk = gtk::instance();
+                        iTitleBarIcons = gtk != nullptr && gtk->icons;
+                        for (auto button : { widget_part::MinimizeButton, widget_part::MaximizeButton, widget_part::RestoreButton, widget_part::CloseButton })
+                            if (*iTitleBarIcons)
+                                iTitleBarIcons = render_icon(title_bar_icon_context(button, false), nullptr, title_bar_icon(button), 1.0);
+                    }
+                    return *iTitleBarIcons;
+                }
                 void reset() const
                 {
                     iParts.clear();
+                    iTitleBarIcons = std::nullopt;
                     if (auto const gtk = gtk::instance())
                     {
                         for (auto const& c : iContexts)
@@ -954,6 +1059,7 @@ namespace neogfx
                 mutable gtk::GtkCssProvider* iLightTheme = nullptr;
                 mutable gtk::GtkCssProvider* iDarkTheme = nullptr;
                 mutable gtk::GtkCssProvider* iAccent = nullptr;
+                mutable std::optional<bool> iTitleBarIcons;
                 mutable std::map<std::string, gtk::GtkStyleContext*> iContexts;
                 mutable std::map<part_key, ref_ptr<i_texture>> iParts;
             };
