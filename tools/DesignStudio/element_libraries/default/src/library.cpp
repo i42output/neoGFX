@@ -480,6 +480,20 @@ namespace neogfx::DesignStudio
                 }
             },
             {
+                "separator",
+                [](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/separator.png" });
+                }
+            },
+            {
+                "web_view",
+                [](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/webview.png" });
+                }
+            },
+            {
                 "canvas",
                 [](texture& aTexture)
                 {
@@ -777,7 +791,7 @@ namespace neogfx::DesignStudio
             return icons[aElementType];
         }
         if (icons.find("default") == icons.end())
-            icons["default"] = texture{ size{32.0, 32.0} };
+            icons["default"] = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/widget.png" }); // (not an uninitialized texture)
         return icons["default"];
     }
 }

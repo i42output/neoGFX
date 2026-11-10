@@ -26,6 +26,8 @@
         file: resources/window.png
         file: resources/dialog.png
         file: resources/statusbar.png
+        file: resources/separator.png
+        file: resources/webview.png
         file: resources/group.png
         file: resources/button.png
         file: resources/check.png
