@@ -23,17 +23,20 @@ namespace neogfx
 {
     texture colored_icon(const texture& aSource, const optional_color& aColor, scalar const aOutline)
     {
-        texture result{ aSource.extents(), 1.0, texture_sampling::Multisample };
+        // (an outline is outside the icon: the result is larger than the icon by the outline's extent)
+        auto const outset = aColor ? std::ceil(blur_filter{ rect{}, aOutline }.outset()) : 0.0;
+
+        texture result{ aSource.extents() + size{ outset * 2.0 }, 1.0, texture_sampling::Multisample };
 
         graphics_context gc{ result };
         scoped_render_target srt{ gc };
 
-        rect const targetRect{ point{}, aSource.extents() };
+        rect const targetRect{ point{ outset, outset }, aSource.extents() };
 
         if (aColor)
         {
             // draw a black outline for a non-text color icon...
-            scoped_filter sf{ gc, blur_filter{ targetRect, aOutline } };
+            scoped_filter sf{ gc, blur_filter{ rect{ point{}, result.extents() }, aOutline } };
             sf.front_buffer().draw_texture(targetRect, aSource, color::Black);
         }
 
