@@ -350,13 +350,15 @@ namespace neogfx
          
     i_glyph& native_font_face::glyph(const glyph_char& aGlyphChar) const
     {
-        // todo: investigate why turning off sub-pixel doesn't produce same grayscale bitmap as Windows with ClearType disabled
-        bool useSubpixelFiltering = true;
+        // (sub-pixel (LCD) glyphs only if sub-pixel rendering is on: an LCD glyph drawn as grayscale (its sub-pixels averaged) is
+        // blurred (by its filter) compared with a grayscale glyph)
+        bool useSubpixelFiltering = service<i_rendering_engine>().is_subpixel_rendering_on();
+        auto& glyphs = (useSubpixelFiltering ? iSubpixelGlyphs : iGlyphs);
 
         thread_local bool tRenderOutlineGlyph = false;
 
-        auto existingGlyph = iGlyphs.find(aGlyphChar.value);
-        if (existingGlyph != iGlyphs.end())
+        auto existingGlyph = glyphs.find(aGlyphChar.value);
+        if (existingGlyph != glyphs.end())
         {
             if (!tRenderOutlineGlyph)
                 return existingGlyph->second;
@@ -475,7 +477,7 @@ namespace neogfx
 
         rect glyphRect{ subTexture.atlas_location() };
         i_glyph& theGlyph = (!tRenderOutlineGlyph ?
-            iGlyphs.insert(std::make_pair(aGlyphChar.value,
+            glyphs.insert(std::make_pair(aGlyphChar.value,
                 neogfx::glyph{
                     subTexture,
                     useSubpixelFiltering,

@@ -165,6 +165,7 @@ namespace neogfx
         std::optional<FT_Size_Metrics> iMetrics;
         mutable ref_ptr<i_native_font_face> iFallbackFont;
         mutable glyph_map iGlyphs;
+        mutable glyph_map iSubpixelGlyphs;
         bool iHasKerning = false;
         neogfx::kerning_method iKerningMethod = neogfx::kerning_method::Harfbuzz;
         mutable kerning_table iKerningTable;
