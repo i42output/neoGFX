@@ -3,7 +3,7 @@
 
 # Introduction
 neoGFX is a C++ app/game engine and development platform targeted at app and game developers that wish to leverage modern GPUs for performant application user interfaces and game graphics.
-neoGFX is still a work in progress (incomplete) so is not yet suitable for making apps or games. Currently neoGFX has only been built for and tested on Windows.
+neoGFX is still a work in progress (incomplete) so is officially not yet suitable for making apps or games. Currently neoGFX has only been built for and tested on Windows and Linux.
 
 # Features (when version 1.0 released)
 - clean modern C++ design leveraging C++20 and including full exception safety supporting various widget allocation patterns (stack, member variable or free store);
@@ -34,8 +34,8 @@ neoGFX is still a work in progress (incomplete) so is not yet suitable for makin
 
 Version | ETA             | Features
 --------|-----------------|---------------------------------------------------
-v0.99   | WID\*           | Windows OpenGL + Vulkan; widget library feature complete; UI design tool
-v1.00   | WID + 3 months  | Linux OpenGL + Vulkan; scripting engine
+v0.99   | WID\*           | Windows + Linux OpenGL + Vulkan; widget library feature complete; UI design tool
+v1.00   | WID + 3 months  | Scripting engine
 v1.10   | WID + 6 months  | Android support; physics engine
 v1.20   | WID + 12 months | macOS support
 
@@ -91,7 +91,7 @@ l10n                            | 0       |
 HID: Game Controllers           | 80      |     Calibration/settings UI; DirectInput button mapping
 Multi-monitor					| 50      |     DPI changes when changing or dragging between monitors
 Scene Graph						| 90      |		
-Skins                           | 60      |
+Skins                           | 90      |
 
 
 
