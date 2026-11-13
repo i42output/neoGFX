@@ -562,6 +562,25 @@ namespace neogfx::DesignStudio
             aTop = (iFrame == 0u);
             return true;
         }
+        void execute(command aCommand) final
+        {
+            switch (aCommand)
+            {
+            case command::Continue:
+                if (iStop)
+                    resume(neos::debug::action::Continue);
+                break;
+            case command::StepInto:
+                step(neos::debug::action::StepInto);
+                break;
+            case command::StepOver:
+                step(neos::debug::action::StepOver);
+                break;
+            case command::StepOut:
+                step(neos::debug::action::StepOut);
+                break;
+            }
+        }
     public:
         // (the library's actions)
         // F5: the program continues (if it is stopped), else the active script is run under the debugger (F10, F11: stopping at its

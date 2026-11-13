@@ -27,6 +27,7 @@
 #include <mutex>
 #include <optional>
 #include <functional>
+#include <set>
 #include <sstream>
 #include <thread>
 #include <vector>
@@ -258,6 +259,9 @@ namespace neogfx::DesignStudio
             iGraph{ iSplitter.layout() },
             iDebug{ "Debug"_t, debug_image() },
             iRun{ "Run"_t, run_image() },
+            iStepInto{ "Step Into"_t, svg_image("script_step_into.svg", sStepIntoImage) },
+            iStepOver{ "Step Over"_t, svg_image("script_step_over.svg", sStepOverImage) },
+            iStepOut{ "Step Out"_t, svg_image("script_step_out.svg", sStepOutImage) },
             iShowGraph{ "Node Graph"_t, toolbar_image(sNodeGraphImagePattern) },
             iFitGraph{ "Zoom to Fit"_t, toolbar_image(sZoomToFitImagePattern) },
             iResetGraph{ "Reset Layout"_t, toolbar_image(sResetLayoutImagePattern) }
@@ -323,6 +327,10 @@ namespace neogfx::DesignStudio
             iToolbar.add_action(iDebug);
             iToolbar.add_action(iRun);
             iToolbar.add_separator();
+            iToolbar.add_action(iStepInto);
+            iToolbar.add_action(iStepOver);
+            iToolbar.add_action(iStepOut);
+            iToolbar.add_separator();
             iToolbar.add_action(iShowGraph);
             iToolbar.add_action(iFitGraph);
             iToolbar.add_action(iResetGraph);
@@ -332,9 +340,26 @@ namespace neogfx::DesignStudio
             iRun.set_tool_tip_text("Run the script in a neos console, without debugging it (Ctrl+F5)"_t);
             iRun.set_enabled(false); // (unless its language is one that neos runs: see open_file)
             iSink += iRun.triggered([this]() { run(false); });
-            iDebug.set_tool_tip_text("Debug the script in a neos console (F5)"_t);
+            iDebug.set_tool_tip_text("Debug the script in a neos console, or continue it if it is being debugged (F5)"_t);
             iDebug.set_enabled(false);
-            iSink += iDebug.triggered([this]() { run(true); });
+            iSink += iDebug.triggered([this]() 
+            { 
+                // (the program being debugged (stopped) continued, else the script debugged)
+                if (iDebugger && iDebugger->debugging())
+                    iDebugger->execute(i_script_debugger::command::Continue);
+                else
+                    run(true); 
+            });
+            // (the program being debugged stepped (see update_debug_actions))
+            iStepInto.set_tool_tip_text("Step into the next statement (F11)"_t);
+            iStepOver.set_tool_tip_text("Step over the next statement (F10)"_t);
+            iStepOut.set_tool_tip_text("Step out of the current function (Shift+F11)"_t);
+            iStepInto.set_enabled(false);
+            iStepOver.set_enabled(false);
+            iStepOut.set_enabled(false);
+            iSink += iStepInto.triggered([this]() { step(i_script_debugger::command::StepInto); });
+            iSink += iStepOver.triggered([this]() { step(i_script_debugger::command::StepOver); });
+            iSink += iStepOut.triggered([this]() { step(i_script_debugger::command::StepOut); });
             iFitGraph.set_tool_tip_text("Zoom the node graph to fit"_t);
             iResetGraph.set_tool_tip_text("Reset the node graph to its automatic layout"_t);
             iSink += iShowGraph.checked([this]() { iGraph.show(); iFitGraph.enable(); iResetGraph.enable(); });
@@ -545,7 +570,6 @@ namespace neogfx::DesignStudio
             if (!neolib::services::get_service_provider().service_registered(i_script_debugger::iid()))
                 return;
             iDebugger = &neolib::services::get_service_provider().service<i_script_debugger>();
-            iDebug.set_enabled(iScriptHighlighter != nullptr);
             iEditor.set_breakpoint_query([this](std::uint32_t aLine) { return iDebugger->breakpoint_at(string{ iPath }, aLine); });
             iGraph.set_breakpoint_query([this](script_graph::position_type aFirst)
             {
@@ -601,8 +625,33 @@ namespace neogfx::DesignStudio
                 iEditor.update();
                 iGraph.update();
             });
-            iSink += iDebugger->location_changed([this]() { show_location(true, true); });
+            iSink += iDebugger->location_changed([this]() 
+            { 
+                show_location(true, true); 
+                update_debug_actions();
+            });
             show_location(true, false);
+            update_debug_actions();
+        }
+        // (Debug: the script debugged, if none is being debugged (and it can be run), else the program continued if it is stopped; Step Into 
+        // and Step Over, if it is stopped (or the script can be debugged: it is, stopping at its first statement); Step Out, if it is stopped)
+        void update_debug_actions()
+        {
+            bool const stopped = iDebugger->stopped();
+            bool const canStart = !iDebugger->debugging() && iScriptHighlighter != nullptr;
+            iDebug.set_enabled(stopped || canStart);
+            iStepInto.set_enabled(stopped || canStart);
+            iStepOver.set_enabled(stopped || canStart);
+            iStepOut.set_enabled(stopped);
+        }
+        // (a step: if no program is being debugged, ours is to be the one started (the debugger's requests are the active script's))
+        void step(i_script_debugger::command aCommand)
+        {
+            if (!iDebugger)
+                return;
+            if (!iDebugger->debugging())
+                iDebugger->set_active_script(string{ iPath });
+            iDebugger->execute(aCommand);
         }
         // (the statement that the program being debugged is at (in its frame selected), shown if it is in our script (aFollow: the cursor 
         // moved to it; aActivate: and we are activated); if no editor has its script open, the active script's editor opens it)
@@ -798,6 +847,40 @@ namespace neogfx::DesignStudio
         {
             return image{ string{ aPattern }, { { "paper", color{} }, { "ink1", service<i_app>().current_style().palette().color(color_role::Text) } } };
         }
+        // (a toolbar image (an SVG, a resource of its own, as the Run button's is))
+        static image svg_image(char const* aName, char const* aSvg)
+        {
+            string const uri{ std::string{ ":/neogfx/DesignStudio/default_nel/resources/" } + aName };
+            static std::set<std::string> sAdded;
+            if (sAdded.insert(uri.to_std_string()).second)
+                service<i_resource_manager>().add_resource(uri, aSvg, std::char_traits<char>::length(aSvg));
+            return image{ uri };
+        }
+        // (Step Into: an arrow down into a statement (a dot); Step Over: an arc over it; Step Out: an arrow up out of it)
+        static constexpr char const* sStepIntoImage
+        {
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"64\" height=\"64\" viewBox=\"0 0 24 24\">"
+            "<path d=\"M12 2.5 V13\" fill=\"none\" stroke=\"#75BEFF\" stroke-width=\"2\" stroke-linecap=\"round\"/>"
+            "<path d=\"M7.5 9 L12 13.5 L16.5 9\" fill=\"none\" stroke=\"#75BEFF\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>"
+            "<circle cx=\"12\" cy=\"19\" r=\"2.5\" fill=\"#75BEFF\"/>"
+            "</svg>"
+        };
+        static constexpr char const* sStepOutImage
+        {
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"64\" height=\"64\" viewBox=\"0 0 24 24\">"
+            "<path d=\"M12 14.5 V3\" fill=\"none\" stroke=\"#75BEFF\" stroke-width=\"2\" stroke-linecap=\"round\"/>"
+            "<path d=\"M7.5 7 L12 2.5 L16.5 7\" fill=\"none\" stroke=\"#75BEFF\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>"
+            "<circle cx=\"12\" cy=\"19.5\" r=\"2.5\" fill=\"#75BEFF\"/>"
+            "</svg>"
+        };
+        static constexpr char const* sStepOverImage
+        {
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"64\" height=\"64\" viewBox=\"0 0 24 24\">"
+            "<path d=\"M4 13 A8 8 0 0 1 19.5 10\" fill=\"none\" stroke=\"#75BEFF\" stroke-width=\"2\" stroke-linecap=\"round\"/>"
+            "<path d=\"M20.5 4.5 L19.7 10.4 L14 9.2\" fill=\"none\" stroke=\"#75BEFF\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>"
+            "<circle cx=\"12\" cy=\"19\" r=\"2.5\" fill=\"#75BEFF\"/>"
+            "</svg>"
+        };
         // (the Debug button's image: the Run button's triangle, filled)
         static image debug_image()
         {
@@ -904,6 +987,9 @@ namespace neogfx::DesignStudio
         script_graph iGraph;
         neogfx::action iDebug;
         neogfx::action iRun;
+        neogfx::action iStepInto;
+        neogfx::action iStepOver;
+        neogfx::action iStepOut;
         neogfx::action iShowGraph;
         neogfx::action iFitGraph;
         neogfx::action iResetGraph;

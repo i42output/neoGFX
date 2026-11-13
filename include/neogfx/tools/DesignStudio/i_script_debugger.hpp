@@ -48,6 +48,15 @@ namespace neogfx::DesignStudio
             StartWithoutDebugging,
             ToggleBreakpoint
         };
+        // (the program being debugged: Continue, if it is stopped; StepInto, StepOver, a step, if it is stopped (else the active script is 
+        // run, stopping at its first statement); StepOut, if it is stopped)
+        enum class command : std::uint32_t
+        {
+            Continue,
+            StepInto,
+            StepOver,
+            StepOut
+        };
     public:
         declare_event(requested, request)
         declare_event(breakpoints_changed)  ///< (the breakpoints, or their states, have changed)
@@ -68,6 +77,8 @@ namespace neogfx::DesignStudio
         // not known); the statement's text runs from aLine:aColumn to aEndLine:aEndColumn (the column after its last; 0s: not known),
         // aTop is false if the frame is not the innermost
         virtual bool location(neolib::i_string& aPath, std::uint32_t& aLine, std::uint32_t& aColumn, std::uint32_t& aEndLine, std::uint32_t& aEndColumn, bool& aTop) const = 0;
+        // a command (see command) carried out (as the Script menu's actions are)
+        virtual void execute(command aCommand) = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x5c2e9a41, 0x7f0b, 0x4d36, 0x8a1e, { 0x3b, 0x94, 0xc7, 0x52, 0x0d, 0xe6 } }; return sIid; }
     };

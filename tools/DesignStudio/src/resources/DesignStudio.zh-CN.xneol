@@ -134,8 +134,8 @@
 		<target>调试</target>
 	</text>
 	<text>
-		<source>Debug the script in a neos console (F5)</source>
-		<target>在 neos 控制台中调试脚本 (F5)</target>
+		<source>Debug the script in a neos console, or continue it if it is being debugged (F5)</source>
+		<target>在 neos 控制台中调试脚本，或在调试时继续运行 (F5)</target>
 	</text>
 	<text>
 		<source>Debugging</source>
@@ -496,6 +496,18 @@
 	<text>
 		<source>Step Over</source>
 		<target>单步跳过</target>
+	</text>
+	<text>
+		<source>Step into the next statement (F11)</source>
+		<target>单步执行下一条语句 (F11)</target>
+	</text>
+	<text>
+		<source>Step out of the current function (Shift+F11)</source>
+		<target>单步跳出当前函数 (Shift+F11)</target>
+	</text>
+	<text>
+		<source>Step over the next statement (F10)</source>
+		<target>单步跳过下一条语句 (F10)</target>
 	</text>
 	<text>
 		<source>Stop Debugging</source>

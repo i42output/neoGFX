@@ -3757,7 +3757,7 @@ namespace neogfx
                         {
                             std::prev(next)->character = '\n';
                             if (is_automatic(iLineEnding))
-                                iLineEnding = text_edit_line_ending::AutomaticLfCr;
+                                iLineEnding = text_edit_line_ending::AutomaticCrLf;
                             discard = true;
                         }
                         else
@@ -3770,7 +3770,7 @@ namespace neogfx
                         if (previousChar == '\n')
                         {
                             if (is_automatic(iLineEnding))
-                                iLineEnding = text_edit_line_ending::AutomaticCrLf;
+                                iLineEnding = text_edit_line_ending::AutomaticLfCr;
                             discard = true;
                         }
                         break;
@@ -3787,7 +3787,8 @@ namespace neogfx
                     ++insertionSize;
                 }
                 readPos += (ch < 0x80 ? 1 : ch < 0x800 ? 2 : ch < 0x10000 ? 3 : 4); // indexMap is keyed on UTF-8 byte offsets into aText
-                previousChar = ch;
+                // (a character that ended a line ending (its second) is not the first of another: "\r\n\r\n" is two lines' endings)
+                previousChar = discard ? 0 : ch;
             }
             return std::next(iText.begin(), pos);
         };
