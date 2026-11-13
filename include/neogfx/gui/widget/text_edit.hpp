@@ -795,6 +795,9 @@ namespace neogfx
         std::pair<position_type, bool> document_hit_test_ex(const point& aPosition, bool aAdjustForScrollPosition = true) const;
         virtual bool same_word(position_type aTextPositionLeft, position_type aTextPositionRight) const;
         virtual std::pair<position_type, position_type> word_at(position_type aTextPosition, bool aWordBreakIsWhitespace = false) const;
+        // the rect of the line (as laid out: a line that wraps is several) that the character at aTextPosition is on, in the widget's
+        // coordinates (as scrolled); none: it is not laid out
+        std::optional<rect> line_rect(position_type aTextPosition) const;
     public:
         neogfx::cursor& cursor() const;
         void set_cursor_position(const point& aPosition, bool aMoveAnchor = true, bool aEnableDragger = false);

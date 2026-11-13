@@ -21,6 +21,7 @@
 
 #include <neogfx/app/i_action.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
+#include <neogfx/gui/widget/i_dockable.hpp>
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 
 namespace neogfx::DesignStudio
@@ -38,6 +39,8 @@ namespace neogfx::DesignStudio
     public:
         virtual void add_action(uuid const& aMenuId, i_action& aAction) = 0;
         virtual void add_sub_menu(uuid const& aMenuId, i_menu& aSubMenu) = 0;
+        // a pane (e.g. a debugger's) docked in the first of the main window's docks (right, then left) that it can be docked in
+        virtual void add_dockable(i_dockable& aDockable) = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x7ca9ec87, 0xda34, 0x4c28, 0xb843, { 0xc1, 0x3e, 0x93, 0x81, 0xe0, 0xcf } }; return sIid; }
     };

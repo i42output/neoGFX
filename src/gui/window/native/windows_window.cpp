@@ -1757,6 +1757,9 @@ namespace neogfx
                     ::ShowWindow(iHandle, activateWindow ? SW_SHOW : SW_SHOWNA);
                     if (activateWindow)
                         activate();
+                    // and drawn again, as it now is: it was drawn while hidden (e.g. as inactive), and a repaint asked for as it
+                    // is shown and activated (it is still displaying this frame) is lost
+                    ::InvalidateRect(iHandle, NULL, FALSE);
                 }
             }
         }

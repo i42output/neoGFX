@@ -40,6 +40,7 @@
 namespace neogfx::DesignStudio
 {
     class neos_script_highlighter;
+    class neos_script_debugger;
 
     class neos_element_library : public neolib::reference_counted<i_element_library>
     {
@@ -85,6 +86,7 @@ namespace neogfx::DesignStudio
         std::string iPluginPath;
         ref_ptr<i_console_client_manager> iClientManager;
         std::unique_ptr<neos_script_highlighter> iScriptHighlighter;
+        std::unique_ptr<neos_script_debugger> iScriptDebugger;
         elements_ordered_t iElementsOrdered;
         elements_t iElements;
         mutable std::map<color, std::map<string, texture>> iIcons;
@@ -94,6 +96,9 @@ namespace neogfx::DesignStudio
         action iStartWithoutDebugging;
         action iStepInto;
         action iStepOver;
+        action iStepOut;
+        action iBreakAll;
+        action iStopDebugging;
         action iToggleBreakpoint;
         action iNewBreakpoint;
         action iDeleteAllBreakpoints;
@@ -101,5 +106,6 @@ namespace neogfx::DesignStudio
         action iImportScriptingLanguage;
         action iEditScriptingLanguage;
         menu iScriptMenu;
+        sink iSink;
     };
 }

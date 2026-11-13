@@ -29,7 +29,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <optional>
 #include <utility>
 #include <map>
+#include <set>
 #include <vector>
+#include <functional>
+#include <chrono>
 #include <string_view>
 #include <filesystem>
 #include <cctype>
@@ -47,14 +50,930 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
 #include <neogfx/tools/DesignStudio/console_client.hpp>
+#include <neogfx/gui/layout/vertical_layout.hpp>
+#include <neogfx/gui/layout/horizontal_layout.hpp>
+#include <neogfx/gui/widget/dockable.hpp>
+#include <neogfx/gui/widget/tab_page_container.hpp>
+#include <neogfx/gui/widget/tab_page.hpp>
+#include <neogfx/gui/widget/table_view.hpp>
+#include <neogfx/gui/widget/line_edit.hpp>
+#include <neogfx/gui/widget/push_button.hpp>
+#include <neogfx/gui/widget/text_widget.hpp>
+#include <neogfx/gui/widget/item_model.hpp>
+#include <neogfx/gui/widget/item_presentation_model.hpp>
+#include <neogfx/tools/DesignStudio/i_ide.hpp>
 #include <neogfx/tools/DesignStudio/i_script_highlighter.hpp>
+#include <neogfx/tools/DesignStudio/i_script_debugger.hpp>
 #include <neos/context.hpp>
+#include <neos/debug.hpp>
 #include <neos/console.hpp>
 #include <neos/language/schema.hpp>
 #include "library.hpp"
 
 namespace neogfx::DesignStudio
 {
+    // the debugger's panes (docked in the main window while a program is being debugged): its call stack (and why it stopped), the
+    // variables of the frame selected (its locals, then the globals), its watches (expressions evaluated in that frame), its threads
+    // and its breakpoints (and catchpoints)
+    class neos_debug_pane : public tab_page_container<>
+    {
+    public:
+        // (a value shown (a variable, a watch): its parts (shown as its children) as many as were fetched)
+        struct value
+        {
+            std::string name;
+            std::string type;
+            std::string text;
+            std::vector<value> parts;
+        };
+        struct breakpoint_row
+        {
+            std::uint32_t id;
+            std::string text;
+            std::string condition;
+            std::uint32_t hits;
+            bool enabled;
+        };
+    public:
+        define_event(FrameSelected, frame_selected, std::size_t)
+        define_event(ThreadSelected, thread_selected, std::uint32_t)
+        define_event(WatchAdded, watch_added, std::string const&)
+        define_event(WatchRemoved, watch_removed, std::size_t)
+        define_event(BreakpointAdded, breakpoint_added, std::string const&)
+        define_event(BreakpointRemoved, breakpoint_removed, std::uint32_t)
+        define_event(BreakpointToggled, breakpoint_toggled, std::uint32_t)
+    private:
+        // (a tree of values (Locals, Watch): the values expanded stay expanded (by their names' paths) as they are shown again)
+        class value_table
+        {
+        public:
+            value_table(i_layout& aLayout) :
+                iView{ aLayout, true, frame_style::NoFrame }
+            {
+                iModel.set_column_name(0u, "Name"_t);
+                iModel.set_column_name(1u, "Value"_t);
+                iModel.set_column_name(2u, "Type"_t);
+                iPresentation.set_item_model(iModel);
+                for (item_model_index::column_type c = 0u; c < 3u; ++c)
+                    iPresentation.set_column_read_only(c);
+                iPresentation.set_alternating_row_color(true);
+                iView.set_minimum_size(size{ 128.0_dip, 96.0_dip });
+                iView.set_presentation_model(iPresentation);
+                iView.column_header().set_expand_last_column(last_column_expansion::ExpandToFitView);
+                iSink += iPresentation.ItemExpanded([this](item_presentation_model_index const& aIndex)
+                {
+                    if (auto const path = path_of(aIndex))
+                        iExpanded.insert(*path);
+                });
+                iSink += iPresentation.ItemCollapsed([this](item_presentation_model_index const& aIndex)
+                {
+                    if (auto const path = path_of(aIndex))
+                        iExpanded.erase(*path);
+                });
+            }
+        public:
+            table_view& view() { return iView; }
+            std::optional<std::size_t> selected_row() const
+            {
+                if (!iView.selection_model().has_current_index())
+                    return {};
+                // (the top-level row that it is in: its place among the top-level rows)
+                auto index = iPresentation.to_item_model_index(iView.selection_model().current_index());
+                while (iModel.has_parent(index))
+                    index = iModel.parent(index);
+                std::size_t result = 0u;
+                for (item_model_index::row_type row = 0u; row < index.row(); ++row)
+                    if (!iModel.has_parent(item_model_index{ row, 0u }))
+                        ++result;
+                return result;
+            }
+            void set(std::vector<value> const& aValues)
+            {
+                iUpdating = true;
+                iModel.clear();
+                iPaths.clear();
+                std::vector<i_item_model::iterator> expand;
+                for (auto const& v : aValues)
+                    add(std::nullopt, v, v.name, expand);
+                // (parents first (pre-order): a child is expanded once its parent has been)
+                for (auto const& node : expand)
+                    iPresentation.expand(iPresentation.from_item_model_index(iModel.iterator_to_index(node)));
+                iUpdating = false;
+            }
+        private:
+            void add(std::optional<i_item_model::iterator> const& aParent, value const& aValue, std::string const& aPath, std::vector<i_item_model::iterator>& aExpand)
+            {
+                iPaths.push_back(aPath);
+                auto* const tag = reinterpret_cast<void*>(iPaths.size()); // (its path: iPaths[tag - 1])
+                auto const node = aParent ?
+                    iModel.append_item(*aParent, tag, item_cell_data{ string{ aValue.name } }) :
+                    iModel.append_item(tag, item_cell_data{ string{ aValue.name } });
+                iModel.insert_cell_data(node, 1u, item_cell_data{ string{ aValue.text } });
+                iModel.insert_cell_data(node, 2u, item_cell_data{ string{ aValue.type } });
+                if (!aValue.parts.empty() && iExpanded.contains(aPath))
+                    aExpand.push_back(node);
+                for (auto const& part : aValue.parts)
+                    add(node, part, aPath + '\x1F' + part.name, aExpand);
+            }
+            std::optional<std::string> path_of(item_presentation_model_index const& aIndex) const
+            {
+                if (iUpdating)
+                    return {};
+                auto const tag = reinterpret_cast<std::size_t>(iModel.item(iPresentation.to_item_model_index(aIndex)));
+                if (tag == 0u || tag > iPaths.size())
+                    return {};
+                return iPaths[tag - 1u];
+            }
+        private:
+            table_view iView;
+            item_tree_model iModel;
+            basic_item_presentation_model<item_tree_model> iPresentation;
+            std::vector<std::string> iPaths;
+            std::set<std::string> iExpanded;
+            bool iUpdating = false;
+            sink iSink;
+        };
+        // (a table of rows (Call Stack, Threads, Breakpoints): the row selected is reported (not as it is filled))
+        class row_table
+        {
+        public:
+            row_table(i_layout& aLayout, std::initializer_list<string> aColumns) :
+                iView{ aLayout, true, frame_style::NoFrame }
+            {
+                item_model_index::column_type column = 0u;
+                for (auto const& name : aColumns)
+                    iModel.set_column_name(column++, name);
+                iPresentation.set_item_model(iModel);
+                for (item_model_index::column_type c = 0u; c < column; ++c)
+                    iPresentation.set_column_read_only(c);
+                iPresentation.set_alternating_row_color(true);
+                iView.set_minimum_size(size{ 128.0_dip, 96.0_dip });
+                iView.set_presentation_model(iPresentation);
+                iView.column_header().set_expand_last_column(last_column_expansion::ExpandToFitView);
+                iSink += iView.selection_model().current_index_changed([this](optional_item_presentation_model_index const& aCurrent, optional_item_presentation_model_index const&)
+                {
+                    if (!iUpdating && aCurrent)
+                        RowSelected(iPresentation.to_item_model_index(*aCurrent).row());
+                });
+            }
+        public:
+            define_event(RowSelected, row_selected, std::size_t)
+        public:
+            table_view& view() { return iView; }
+            std::optional<std::size_t> selected_row() const
+            {
+                if (!iView.selection_model().has_current_index())
+                    return {};
+                return iPresentation.to_item_model_index(iView.selection_model().current_index()).row();
+            }
+            void set(std::vector<std::vector<std::string>> const& aRows, std::optional<std::size_t> aSelected = {})
+            {
+                iUpdating = true;
+                iModel.clear();
+                for (auto const& row : aRows)
+                {
+                    auto const item = iModel.append_item(static_cast<void*>(nullptr), item_cell_data{ string{ row.empty() ? std::string{} : row[0] } });
+                    for (std::size_t c = 1u; c < row.size(); ++c)
+                        iModel.insert_cell_data(item, static_cast<item_model_index::column_type>(c), item_cell_data{ string{ row[c] } });
+                }
+                if (aSelected && *aSelected < aRows.size())
+                    iView.selection_model().set_current_index(iPresentation.from_item_model_index(item_model_index{ static_cast<item_model_index::row_type>(*aSelected), 0u }));
+                iUpdating = false;
+            }
+        private:
+            table_view iView;
+            item_model iModel;
+            item_presentation_model iPresentation;
+            bool iUpdating = false;
+            sink iSink;
+        };
+    public:
+        neos_debug_pane() :
+            tab_page_container<>{ false, tab_container_style::TabAlignmentBottom },
+            iCallStackTab{ *this, "Call Stack"_t },
+            iCallStackLayout{ iCallStackTab },
+            iStatus{ iCallStackLayout },
+            iCallStack{ iCallStackLayout, { "Function"_t, "Location"_t } },
+            iLocalsTab{ *this, "Locals"_t },
+            iLocalsLayout{ iLocalsTab },
+            iLocals{ iLocalsLayout },
+            iWatchTab{ *this, "Watch"_t },
+            iWatchLayout{ iWatchTab },
+            iWatchEntryLayout{ iWatchLayout },
+            iWatchEntry{ iWatchEntryLayout },
+            iAddWatch{ iWatchEntryLayout, "Add"_t },
+            iRemoveWatch{ iWatchEntryLayout, "Remove"_t },
+            iWatches{ iWatchLayout },
+            iThreadsTab{ *this, "Threads"_t },
+            iThreadsLayout{ iThreadsTab },
+            iThreads{ iThreadsLayout, { "Thread"_t, "State"_t, "Location"_t } },
+            iBreakpointsTab{ *this, "Breakpoints"_t },
+            iBreakpointsLayout{ iBreakpointsTab },
+            iBreakpointHelp{ iBreakpointsLayout, "A breakpoint: [file:]line [if condition]; a catchpoint: throw [exception] [if condition]"_t },
+            iBreakpointEntryLayout{ iBreakpointsLayout },
+            iBreakpointEntry{ iBreakpointEntryLayout },
+            iAddBreakpoint{ iBreakpointEntryLayout, "Add"_t },
+            iRemoveBreakpoint{ iBreakpointEntryLayout, "Remove"_t },
+            iToggleBreakpoint{ iBreakpointEntryLayout, "Enable/Disable"_t },
+            iBreakpoints{ iBreakpointsLayout, { "Breakpoint"_t, "Condition"_t, "Hits"_t, "State"_t } }
+        {
+            for (i_layout* layout : std::initializer_list<i_layout*>{ &iCallStackLayout, &iLocalsLayout, &iWatchLayout, &iThreadsLayout, &iBreakpointsLayout })
+            {
+                layout->set_padding(neogfx::padding{});
+                layout->set_spacing(size{});
+            }
+            iWatchEntry.set_size_policy(size_constraint::Expanding, size_constraint::Minimum);
+            iBreakpointEntry.set_size_policy(size_constraint::Expanding, size_constraint::Minimum);
+            iSink += iCallStack.RowSelected([this](std::size_t aRow) { FrameSelected(aRow); });
+            iSink += iThreads.RowSelected([this](std::size_t aRow)
+            {
+                if (aRow < iThreadIds.size())
+                    ThreadSelected(iThreadIds[aRow]);
+            });
+            iSink += iAddWatch.Clicked([this]()
+            {
+                auto const text = trimmed(iWatchEntry.text().to_std_string());
+                if (text.empty())
+                    return;
+                iWatchEntry.set_text(string{});
+                WatchAdded(text);
+            });
+            iSink += iRemoveWatch.Clicked([this]()
+            {
+                if (auto const row = iWatches.selected_row())
+                    WatchRemoved(*row);
+            });
+            iSink += iAddBreakpoint.Clicked([this]()
+            {
+                auto const text = trimmed(iBreakpointEntry.text().to_std_string());
+                if (text.empty())
+                    return;
+                iBreakpointEntry.set_text(string{});
+                BreakpointAdded(text);
+            });
+            iSink += iRemoveBreakpoint.Clicked([this]()
+            {
+                if (auto const row = iBreakpoints.selected_row(); row && *row < iBreakpointIds.size())
+                    BreakpointRemoved(iBreakpointIds[*row]);
+            });
+            iSink += iToggleBreakpoint.Clicked([this]()
+            {
+                if (auto const row = iBreakpoints.selected_row(); row && *row < iBreakpointIds.size())
+                    BreakpointToggled(iBreakpointIds[*row]);
+            });
+            set_status({});
+        }
+    public:
+        void set_status(std::string const& aStatus)
+        {
+            iStatus.set_text(string{ aStatus });
+            iStatus.show(!aStatus.empty());
+        }
+        void set_call_stack(std::vector<std::vector<std::string>> const& aRows, std::size_t aSelected)
+        {
+            iCallStack.set(aRows, aSelected);
+        }
+        void set_locals(std::vector<value> const& aValues)
+        {
+            iLocals.set(aValues);
+        }
+        void set_watches(std::vector<value> const& aValues)
+        {
+            iWatches.set(aValues);
+        }
+        void set_threads(std::vector<std::uint32_t> const& aIds, std::vector<std::vector<std::string>> const& aRows, std::optional<std::size_t> aSelected)
+        {
+            iThreadIds = aIds;
+            iThreads.set(aRows, aSelected);
+        }
+        void set_breakpoints(std::vector<breakpoint_row> const& aBreakpoints)
+        {
+            iBreakpointIds.clear();
+            std::vector<std::vector<std::string>> rows;
+            for (auto const& b : aBreakpoints)
+            {
+                iBreakpointIds.push_back(b.id);
+                rows.push_back({ b.text, b.condition, std::to_string(b.hits), b.enabled ? "Enabled"_t.to_std_string() : "Disabled"_t.to_std_string() });
+            }
+            iBreakpoints.set(rows);
+        }
+        // (the program is running (or has ended): what it was stopped at is no longer shown)
+        void clear_stop()
+        {
+            iCallStack.set({});
+            iLocals.set({});
+            iThreads.set({});
+            iThreadIds.clear();
+        }
+        void show_breakpoints()
+        {
+            iBreakpointsTab.tab().select();
+            iBreakpointEntry.set_focus();
+        }
+    private:
+        static std::string trimmed(std::string const& aText)
+        {
+            auto const first = aText.find_first_not_of(" \t");
+            if (first == std::string::npos)
+                return {};
+            return aText.substr(first, aText.find_last_not_of(" \t") - first + 1u);
+        }
+    private:
+        neogfx::tab_page iCallStackTab;
+        vertical_layout iCallStackLayout;
+        text_widget iStatus;
+        row_table iCallStack;
+        neogfx::tab_page iLocalsTab;
+        vertical_layout iLocalsLayout;
+        value_table iLocals;
+        neogfx::tab_page iWatchTab;
+        vertical_layout iWatchLayout;
+        horizontal_layout iWatchEntryLayout;
+        line_edit iWatchEntry;
+        push_button iAddWatch;
+        push_button iRemoveWatch;
+        value_table iWatches;
+        neogfx::tab_page iThreadsTab;
+        vertical_layout iThreadsLayout;
+        row_table iThreads;
+        std::vector<std::uint32_t> iThreadIds;
+        neogfx::tab_page iBreakpointsTab;
+        vertical_layout iBreakpointsLayout;
+        text_widget iBreakpointHelp;
+        horizontal_layout iBreakpointEntryLayout;
+        line_edit iBreakpointEntry;
+        push_button iAddBreakpoint;
+        push_button iRemoveBreakpoint;
+        push_button iToggleBreakpoint;
+        row_table iBreakpoints;
+        std::vector<std::uint32_t> iBreakpointIds;
+        sink iSink;
+    };
+
+    // the debugging of the programs that neos runs (see i_script_debugger): one debugging session (and so one set of breakpoints) for
+    // the program that a console's neos session runs with "debug <program>" (see neos_session); it stops, and is examined, on its own
+    // thread (see neos::debug::remote_frontend) while the GUI thread polls for what it has done (as neos_session polls for its output)
+    // and asks it (a request run on its thread, waited for) what it is doing when it has stopped
+    class neos_script_debugger : public i_script_debugger
+    {
+    public:
+        define_declared_event(Requested, requested, request)
+        define_declared_event(BreakpointsChanged, breakpoints_changed)
+        define_declared_event(LocationChanged, location_changed)
+    private:
+        using value = neos_debug_pane::value;
+        static constexpr std::chrono::milliseconds Poll{ 20 };
+        static constexpr std::size_t MaxDepth = 4u;         ///< (the depth to which a value's parts are fetched)
+        static constexpr std::size_t MaxParts = 256u;       ///< (of a value, at most)
+        static constexpr std::size_t MaxValues = 4096u;     ///< (fetched for a stop's locals (and watches), at most)
+        struct stop_state
+        {
+            neos::debug::stop_reason reason;
+            std::uint32_t thread;
+            std::optional<std::uint32_t> breakpoint;
+            std::string message;
+        };
+    public:
+        neos_script_debugger() :
+            iFrontend{
+                [this](neos::debug::stop_reason aReason, std::uint32_t aThread, std::optional<std::uint32_t> aBreakpoint, std::string const& aMessage)
+                {
+                    std::lock_guard<std::mutex> lock{ iMutex };
+                    iPendingStop = stop_state{ aReason, aThread, aBreakpoint, aMessage };
+                },
+                [this](neos::debug::breakpoint const&)
+                {
+                    std::lock_guard<std::mutex> lock{ iMutex };
+                    iBreakpointsDirty = true;
+                } },
+            iSession{ std::make_shared<neos::debug::session>(iFrontend) }
+        {
+        }
+    public:
+        // (the GUI is ready: the panes docked (hidden until a program is debugged), and polling begins)
+        void ide_ready(i_ide& aIde)
+        {
+            iPane.emplace(std::make_shared<neos_debug_pane>(), "Debug"_t, dock_area::Right);
+            aIde.add_dockable(*iPane);
+            iPane->hide();
+            auto& pane = this->pane();
+            iSink += pane.FrameSelected([this](std::size_t aFrame)
+            {
+                if (aFrame == iFrame || aFrame >= iFrames.size())
+                    return;
+                iFrame = aFrame;
+                refresh(false);
+                LocationChanged();
+            });
+            iSink += pane.ThreadSelected([this](std::uint32_t aThread)
+            {
+                if (iThread == aThread || (!iThread && iStop && iStop->thread == aThread))
+                    return;
+                iThread = aThread;
+                iFrame = 0u;
+                refresh(true);
+                LocationChanged();
+            });
+            iSink += pane.WatchAdded([this](std::string const& aExpression)
+            {
+                iWatches.push_back(aExpression);
+                refresh_watches();
+            });
+            iSink += pane.WatchRemoved([this](std::size_t aIndex)
+            {
+                if (aIndex < iWatches.size())
+                    iWatches.erase(std::next(iWatches.begin(), aIndex));
+                refresh_watches();
+            });
+            iSink += pane.BreakpointAdded([this](std::string const& aText) { add_breakpoint(aText); });
+            iSink += pane.BreakpointRemoved([this](std::uint32_t aId)
+            {
+                iSession->remove_breakpoint(aId);
+                breakpoints_changed_here();
+            });
+            iSink += pane.BreakpointToggled([this](std::uint32_t aId)
+            {
+                if (auto const b = iSession->find_breakpoint(aId))
+                    iSession->enable_breakpoint(aId, !b->enabled);
+                breakpoints_changed_here();
+            });
+            refresh_watches();
+            refresh_breakpoints();
+            iPoller.emplace(neolib::service<neolib::i_async_task>(), [this](neolib::callback_timer& aTimer)
+            {
+                poll();
+                aTimer.again();
+            }, Poll);
+        }
+    public:
+        void set_active_script(neolib::i_string const& aPath) final
+        {
+            iActiveScript = aPath;
+        }
+        neolib::i_string const& active_script() const final
+        {
+            return iActiveScript;
+        }
+        bool debugging() const final
+        {
+            return iDebugging;
+        }
+        bool stopped() const final
+        {
+            return iStop.has_value();
+        }
+        breakpoint_state breakpoint_at(neolib::i_string const& aPath, std::uint32_t aLine, std::uint32_t aColumn) const final
+        {
+            auto const& path = canonical(aPath.to_std_string());
+            auto result = breakpoint_state::None;
+            for (auto const& b : iBreakpoints)
+                if (!b.first.exception && b.second == path && b.first.line.value_or(b.first.requested.line) == aLine &&
+                    (aColumn == 0u || b.first.requested.column == aColumn))
+                {
+                    if (b.first.enabled)
+                        return breakpoint_state::Enabled;
+                    result = breakpoint_state::Disabled;
+                }
+            return result;
+        }
+        void toggle_breakpoint(neolib::i_string const& aPath, std::uint32_t aLine, std::uint32_t aColumn) final
+        {
+            // (a line's: all of the breakpoints on the line removed (if it has any); a statement's (a column): that one)
+            auto const path = canonical(aPath.to_std_string());
+            bool removed = false;
+            for (auto const& b : iBreakpoints)
+                if (!b.first.exception && b.second == path && b.first.line.value_or(b.first.requested.line) == aLine &&
+                    (aColumn == 0u || b.first.requested.column == aColumn))
+                    removed = iSession->remove_breakpoint(b.first.id) || removed;
+            if (!removed)
+                iSession->add_breakpoint(neos::debug::location{ aPath.to_std_string(), aLine, aColumn });
+            breakpoints_changed_here();
+        }
+        bool location(neolib::i_string& aPath, std::uint32_t& aLine, std::uint32_t& aColumn, std::uint32_t& aEndLine, std::uint32_t& aEndColumn, bool& aTop) const final
+        {
+            if (!iStop || iFrame >= iFrames.size() || iFrames[iFrame].source.empty() || iFrames[iFrame].line == 0u)
+                return false;
+            auto const& frame = iFrames[iFrame];
+            aPath = neolib::string{ frame.source };
+            aLine = frame.line;
+            aColumn = frame.column;
+            aEndLine = frame.endLine;
+            aEndColumn = frame.endColumn;
+            aTop = (iFrame == 0u);
+            return true;
+        }
+    public:
+        // (the library's actions)
+        // F5: the program continues (if it is stopped), else the active script is run under the debugger (F10, F11: stopping at its
+        // first statement); Ctrl+F5: it is run (not debugged)
+        void start(bool aStopOnEntry)
+        {
+            if (iStop)
+                resume(neos::debug::action::Continue);
+            else if (!iDebugging)
+            {
+                {
+                    std::lock_guard<std::mutex> lock{ iMutex };
+                    iStopOnEntry = aStopOnEntry;
+                }
+                Requested(request::Start);
+            }
+        }
+        void start_without_debugging()
+        {
+            if (!iDebugging)
+                Requested(request::StartWithoutDebugging);
+        }
+        void step(neos::debug::action aAction)
+        {
+            if (iStop)
+                resume(aAction);
+            else if (!iDebugging && aAction != neos::debug::action::StepOut)
+                start(true);
+        }
+        void stop_debugging()
+        {
+            if (!iDebugging)
+                return;
+            iSession->terminate();
+            if (iStop)
+                resume(neos::debug::action::Terminate);
+            else
+                interrupt_input();
+        }
+        void break_all()
+        {
+            if (!iDebugging || iStop)
+                return;
+            iSession->pause();
+            interrupt_input();
+        }
+        void toggle_breakpoint()
+        {
+            Requested(request::ToggleBreakpoint);
+        }
+        void new_breakpoint()
+        {
+            iPane->show();
+            pane().show_breakpoints();
+        }
+        void delete_all_breakpoints()
+        {
+            iSession->clear_breakpoints();
+            breakpoints_changed_here();
+        }
+        void disable_all_breakpoints()
+        {
+            for (auto const& b : iSession->breakpoints())
+                iSession->enable_breakpoint(b.id, false);
+            breakpoints_changed_here();
+        }
+    public:
+        // (a console's neos session's worker thread: a program is to be debugged (the debugging session that it runs under, set up to
+        // run it; none: another program is being debugged); aInterruptInput, if a read of its input is waiting, it fails (see
+        // neos::debug::blocking_read: that read is then read again, once the program has stopped if it is to stop))
+        std::shared_ptr<neos::debug::session> begin_run(std::function<void()> aInterruptInput)
+        {
+            std::lock_guard<std::mutex> lock{ iMutex };
+            if (iRunning)
+                return {};
+            iRunning = true;
+            ++iRunSerial;
+            iPendingStop.reset();
+            iInterruptInput = std::move(aInterruptInput);
+            iSession->set_stop_on_entry(std::exchange(iStopOnEntry, false));
+            iSession->begin_run();
+            return iSession;
+        }
+        // (the worker thread: the program has ended)
+        void end_run()
+        {
+            std::lock_guard<std::mutex> lock{ iMutex };
+            iRunning = false;
+            iPendingStop.reset();
+            iInterruptInput = {};
+            iSession->set_stop_on_entry(false);
+        }
+        // (a console's neos session: Ctrl+C, while the program that it runs is debugged)
+        void interrupt()
+        {
+            break_all();
+        }
+    private:
+        neos_debug_pane& pane()
+        {
+            return iPane->docked_widget<neos_debug_pane>();
+        }
+        void interrupt_input()
+        {
+            std::function<void()> interrupt;
+            {
+                std::lock_guard<std::mutex> lock{ iMutex };
+                interrupt = iInterruptInput;
+            }
+            if (interrupt)
+                interrupt();
+        }
+        // (GUI thread: what the program has done since the last poll)
+        void poll()
+        {
+            bool running = false;
+            std::uint64_t runSerial = 0u;
+            std::optional<stop_state> stop;
+            bool breakpointsDirty = false;
+            {
+                std::lock_guard<std::mutex> lock{ iMutex };
+                running = iRunning;
+                runSerial = iRunSerial;
+                stop = std::exchange(iPendingStop, std::nullopt);
+                breakpointsDirty = std::exchange(iBreakpointsDirty, false);
+            }
+            bool changed = false;
+            if (runSerial != iRunSerialSeen)
+            {
+                // (a program is being debugged (and its breakpoints' hits reset))
+                iRunSerialSeen = runSerial;
+                iDebugging = true;
+                iStop.reset();
+                iFrames.clear();
+                pane().clear_stop();
+                pane().set_status("Running"_t.to_std_string());
+                iPane->show();
+                breakpointsDirty = true;
+                changed = true;
+            }
+            if (stop && running)
+            {
+                iStop = stop;
+                iThread.reset();
+                iFrame = 0u;
+                refresh(true);
+                breakpointsDirty = true; // (hits)
+                changed = true;
+            }
+            if (!running && iDebugging)
+            {
+                iDebugging = false;
+                iStop.reset();
+                iFrames.clear();
+                pane().clear_stop();
+                pane().set_status({});
+                iPane->hide();
+                changed = true;
+            }
+            if (breakpointsDirty)
+                refresh_breakpoints();
+            if (changed)
+                LocationChanged();
+        }
+        // (the program resumed: what it stopped at is no longer shown)
+        void resume(neos::debug::action aAction)
+        {
+            if (!iStop)
+                return;
+            iStop.reset();
+            iFrames.clear();
+            pane().clear_stop();
+            pane().set_status("Running"_t.to_std_string());
+            iFrontend.resume(aAction);
+            LocationChanged();
+        }
+        // (what the stopped program is doing, asked of it: its threads, the frames of the thread selected (aFrames), the variables of the
+        // frame selected and its watches)
+        void refresh(bool aFrames)
+        {
+            if (!iStop)
+                return;
+            auto const thread = iThread;
+            auto frame = iFrame;
+            std::vector<neos::debug::thread_info> threads;
+            std::vector<neos::debug::frame> frames;
+            std::vector<value> locals;
+            std::vector<value> watches;
+            auto const watchExpressions = iWatches;
+            bool const posted = iFrontend.post([&](neos::debug::i_stop& aStop)
+            {
+                threads = aStop.threads();
+                frames = aStop.frames(thread);
+                if (frame >= frames.size())
+                    frame = 0u;
+                if (frames.empty())
+                    return;
+                std::size_t budget = MaxValues;
+                for (auto const& v : aStop.locals(frame, thread))
+                    fetch(aStop, v, locals.emplace_back(), MaxDepth, budget);
+                auto const globals = aStop.globals(frame, thread);
+                if (!globals.empty())
+                {
+                    auto& node = locals.emplace_back();
+                    node.name = "Globals"_t.to_std_string();
+                    for (auto const& v : globals)
+                        fetch(aStop, v, node.parts.emplace_back(), MaxDepth, budget);
+                }
+                watches = evaluate(aStop, watchExpressions, frame, thread, budget);
+            });
+            if (!posted)
+            {
+                // (it has resumed (e.g. it was ended))
+                iStop.reset();
+                return;
+            }
+            iFrame = frame;
+            iFrames = std::move(frames);
+            if (aFrames)
+            {
+                std::vector<std::vector<std::string>> rows;
+                for (auto const& f : iFrames)
+                    rows.push_back({ f.function.empty() ? std::string{ "?" } : f.function,
+                        f.source.empty() ? std::string{} : std::filesystem::path{ f.source }.filename().string() + (f.line != 0u ? ":" + std::to_string(f.line) : std::string{}) });
+                pane().set_call_stack(rows, iFrame);
+                std::vector<std::uint32_t> ids;
+                std::vector<std::vector<std::string>> threadRows;
+                std::optional<std::size_t> selected;
+                auto const selectedThread = iThread.value_or(iStop->thread);
+                for (auto const& t : threads)
+                {
+                    if (t.id == selectedThread)
+                        selected = ids.size();
+                    ids.push_back(t.id);
+                    threadRows.push_back({ std::to_string(t.id), t.state,
+                        t.top ? t.top->function + (t.top->source.empty() ? std::string{} : " (" + std::filesystem::path{ t.top->source }.filename().string() + ":" + std::to_string(t.top->line) + ")") : std::string{} });
+                }
+                pane().set_threads(ids, threadRows, selected);
+                pane().set_status(status());
+            }
+            pane().set_locals(locals);
+            pane().set_watches(watches);
+        }
+        void refresh_watches()
+        {
+            if (!iStop)
+            {
+                std::vector<value> watches;
+                for (auto const& w : iWatches)
+                    watches.push_back(value{ w, {}, {}, {} });
+                pane().set_watches(watches);
+                return;
+            }
+            refresh(false);
+        }
+        std::string status() const
+        {
+            if (!iStop)
+                return {};
+            using neos::debug::stop_reason;
+            switch (iStop->reason)
+            {
+            case stop_reason::Entry:
+                return "Stopped at the program's entry"_t.to_std_string();
+            case stop_reason::Breakpoint:
+                return "Stopped at breakpoint"_t.to_std_string() + (iStop->breakpoint ? " " + std::to_string(*iStop->breakpoint) : std::string{});
+            case stop_reason::Step:
+                return "Stopped (step)"_t.to_std_string();
+            case stop_reason::Pause:
+                return "Paused"_t.to_std_string();
+            case stop_reason::Throw:
+                return "Exception thrown"_t.to_std_string() + ": " + iStop->message;
+            case stop_reason::Error:
+            default:
+                return "Error"_t.to_std_string() + ": " + iStop->message;
+            }
+        }
+        // (the breakpoints as they now are: shown in the panes and the editors (they may have been changed by the program's thread: e.g.
+        // found on the line of a statement))
+        void breakpoints_changed_here()
+        {
+            refresh_breakpoints();
+        }
+        void refresh_breakpoints()
+        {
+            iBreakpoints.clear();
+            std::vector<neos_debug_pane::breakpoint_row> rows;
+            for (auto const& b : iSession->breakpoints())
+            {
+                iBreakpoints.emplace_back(b, b.exception ? std::string{} : canonical(b.requested.source));
+                std::string text;
+                if (b.exception)
+                    text = "throw" + (b.exception->empty() ? std::string{} : " " + *b.exception);
+                else
+                {
+                    text = std::filesystem::path{ b.requested.source }.filename().string() + ":" + std::to_string(b.line.value_or(b.requested.line));
+                    if (b.requested.column != 0u)
+                        text += ":" + std::to_string(b.requested.column);
+                }
+                if (b.temporary)
+                    text += " (" + "temporary"_t.to_std_string() + ")";
+                rows.push_back(neos_debug_pane::breakpoint_row{ b.id, text, b.condition, b.hits, b.enabled });
+            }
+            if (iPane)
+                pane().set_breakpoints(rows);
+            BreakpointsChanged();
+        }
+        // ("[file:]line [if condition]" or "throw [exception] [if condition]" (see the Breakpoints pane))
+        void add_breakpoint(std::string const& aText)
+        {
+            auto text = aText;
+            std::string condition;
+            if (auto const pos = text.find(" if "); pos != std::string::npos)
+            {
+                condition = text.substr(pos + 4u);
+                text.erase(pos);
+            }
+            if (text == "throw" || text.rfind("throw ", 0u) == 0u)
+            {
+                auto exception = text.substr(5u);
+                exception.erase(0u, exception.find_first_not_of(' '));
+                iSession->add_catchpoint(exception, condition);
+            }
+            else
+            {
+                auto const colon = text.rfind(':');
+                auto const lineText = colon == std::string::npos ? text : text.substr(colon + 1u);
+                auto const file = colon == std::string::npos ? iActiveScript.to_std_string() : text.substr(0u, colon);
+                if (lineText.empty() || file.empty() || lineText.find_first_not_of("0123456789") != std::string::npos)
+                {
+                    service<i_basic_services>().system_beep();
+                    return;
+                }
+                iSession->add_breakpoint(neos::debug::location{ file, static_cast<std::uint32_t>(std::stoul(lineText)) }, condition);
+            }
+            breakpoints_changed_here();
+        }
+        // (the program's thread: a variable's value, and its parts (as many as the budget allows))
+        static void fetch(neos::debug::i_stop& aStop, neos::debug::variable const& aVariable, value& aValue, std::size_t aDepth, std::size_t& aBudget)
+        {
+            aValue.name = aVariable.name;
+            aValue.type = aVariable.type;
+            aValue.text = aVariable.value;
+            if (aBudget > 0u)
+                --aBudget;
+            if (aVariable.reference == 0u || aDepth == 0u || aBudget == 0u)
+                return;
+            for (auto const& part : aStop.parts(aVariable.reference, 0u, std::min(MaxParts, aBudget)))
+            {
+                if (aBudget == 0u)
+                    break;
+                fetch(aStop, part, aValue.parts.emplace_back(), aDepth - 1u, aBudget);
+            }
+        }
+        static std::vector<value> evaluate(neos::debug::i_stop& aStop, std::vector<std::string> const& aExpressions, std::size_t aFrame,
+            std::optional<std::uint32_t> aThread, std::size_t& aBudget)
+        {
+            std::vector<value> result;
+            for (auto const& expression : aExpressions)
+            {
+                std::string error;
+                if (auto const v = aStop.evaluate(aFrame, expression, error, aThread))
+                {
+                    fetch(aStop, *v, result.emplace_back(), MaxDepth, aBudget);
+                    result.back().name = expression;
+                }
+                else
+                    result.push_back(value{ expression, {}, error, {} });
+            }
+            return result;
+        }
+        // (a file's path as compared: the same file, however it is named (the last asked for remembered: the editors ask for theirs as 
+        // they paint))
+        std::string const& canonical(std::string const& aPath) const
+        {
+            if (aPath != iCanonicalFor)
+            {
+                std::error_code ec;
+                auto const result = std::filesystem::weakly_canonical(std::filesystem::path{ aPath }, ec);
+                iCanonicalFor = aPath;
+                iCanonical = ec ? aPath : result.string();
+            }
+            return iCanonical;
+        }
+    private:
+        neos::debug::remote_frontend iFrontend;
+        std::shared_ptr<neos::debug::session> iSession;
+        // (worker and program threads -> GUI thread)
+        std::mutex iMutex;
+        bool iRunning = false;
+        std::uint64_t iRunSerial = 0u;
+        std::optional<stop_state> iPendingStop;
+        bool iBreakpointsDirty = false;
+        std::function<void()> iInterruptInput;
+        bool iStopOnEntry = false;      ///< (the next program debugged stops at its first statement (read by begin_run: under the mutex))
+        // (GUI thread)
+        neolib::string iActiveScript;
+        std::optional<dockable> iPane;
+        std::optional<neolib::callback_timer> iPoller;
+        std::uint64_t iRunSerialSeen = 0u;
+        bool iDebugging = false;
+        std::optional<stop_state> iStop;
+        std::optional<std::uint32_t> iThread;   ///< (the thread selected; none: the one that stopped)
+        std::size_t iFrame = 0u;                ///< (the frame selected)
+        std::vector<neos::debug::frame> iFrames;
+        std::vector<std::string> iWatches;
+        std::vector<std::pair<neos::debug::breakpoint, std::string>> iBreakpoints;  ///< (and their sources' canonical paths)
+        mutable std::string iCanonicalFor;
+        mutable std::string iCanonical;
+        sink iSink;
+    };
+
     // a neos session in a console window (the "neos" command): the neos console's commands (see neos::process_command) on a neos
     // context whose standard streams are the window's (the output of the context and of the programs it runs goes to the window; 
     // what is typed into the window while a command runs is its programs' input). Commands run on a worker thread (each session 
@@ -107,10 +1026,15 @@ namespace neogfx::DesignStudio
                     if (gptr() < egptr())
                         return traits_type::to_int_type(*gptr());
                     std::unique_lock<std::mutex> lock{ iShared.mutex };
-                    iShared.wake.wait(lock, [&]() { return !iShared.input.empty() || iShared.endOfInput || iShared.cancelled; });
+                    iShared.reading = true;
+                    iShared.wake.wait(lock, [&]() { return !iShared.input.empty() || iShared.endOfInput || iShared.cancelled || iShared.interrupted; });
+                    iShared.reading = false;
+                    // (the debugger interrupted the read (see neos_script_debugger::begin_run): it fails, and is then read again)
+                    bool const interrupted = std::exchange(iShared.interrupted, false);
                     if (iShared.input.empty())
                     {
-                        iShared.endOfInput = false;
+                        if (!interrupted)
+                            iShared.endOfInput = false; // (the end of input: read once)
                         return traits_type::eof();
                     }
                     // (the last character read is kept, so that it can be put back)
@@ -140,6 +1064,11 @@ namespace neogfx::DesignStudio
             bool busy = false;      ///< (a command is running: lines typed are its programs' input)
             bool closed = false;
             bool runOnly = false;   ///< (programs are run (each command is a program's path): only their input and output is shown)
+            bool debug = false;     ///< (runOnly: the command's program is debugged (see neos_script_debugger))
+            bool debugging = false; ///< (a program that it runs is being debugged)
+            bool reading = false;   ///< (a read of the input is waiting)
+            bool interrupted = false;
+            neos_script_debugger* debugger = nullptr;
             // (the context's standard streams (destroyed after it))
             output_buffer outputBuffer{ *this };
             input_buffer inputBuffer{ *this };
@@ -150,13 +1079,16 @@ namespace neogfx::DesignStudio
     public:
         // (a program, if any: the session only runs programs (it and those that it is asked to run (see execute)), showing only 
         // their input and output: it has no prompt, and nothing typed while none is running is a command (the "neos <program>" command))
-        neos_session(neolib::i_service_provider& aServiceProvider, std::string const& aProgram = {}) :
+        // ("-g <program>": the program is debugged)
+        neos_session(neolib::i_service_provider& aServiceProvider, neos_script_debugger& aDebugger, std::string const& aProgram = {}) :
             iShared{ std::make_shared<shared_state>() }
         {
+            iShared->debugger = &aDebugger;
             if (!aProgram.empty())
             {
                 iShared->runOnly = true;
-                iShared->command = aProgram;
+                iShared->debug = aProgram.rfind("-g ", 0u) == 0u;
+                iShared->command = iShared->debug ? aProgram.substr(aProgram.find_first_not_of(' ', 3u)) : aProgram;
                 iShared->busy = true;
             }
             try
@@ -206,10 +1138,19 @@ namespace neogfx::DesignStudio
                     return false;
                 if (iShared->runOnly)
                 {
-                    // ("run <program>": the program run (as the session's first was))
-                    if (aCommand.rfind("run ", 0u) != 0u)
+                    // ("run <program>": the program run (as the session's first was); "debug <program>": debugged)
+                    if (aCommand.rfind("run ", 0u) == 0u)
+                    {
+                        iShared->command = aCommand.substr(4u);
+                        iShared->debug = false;
+                    }
+                    else if (aCommand.rfind("debug ", 0u) == 0u)
+                    {
+                        iShared->command = aCommand.substr(6u);
+                        iShared->debug = true;
+                    }
+                    else
                         return false;
-                    iShared->command = aCommand.substr(4u);
                     iShared->busy = true;
                 }
                 prompt = iShared->prompt;
@@ -268,11 +1209,17 @@ namespace neogfx::DesignStudio
                 }
                 else if (ch == '\t')
                     echo += complete(repeatedTab);
-                else if (ch == '\x03') // (Ctrl+C: the line is discarded (a running program is not interrupted))
+                else if (ch == '\x03') // (Ctrl+C: the line is discarded (a running program is not interrupted, unless it is debugged: it pauses))
                 {
                     iLine.clear();
-                    std::lock_guard<std::mutex> lock{ iShared->mutex };
-                    echo += "^C\r\n" + (iShared->busy ? std::string{} : iShared->prompt);
+                    bool debugging = false;
+                    {
+                        std::lock_guard<std::mutex> lock{ iShared->mutex };
+                        echo += "^C\r\n" + (iShared->busy ? std::string{} : iShared->prompt);
+                        debugging = iShared->debugging;
+                    }
+                    if (debugging)
+                        iShared->debugger->interrupt();
                 }
                 else if ((ch == '\x04' || ch == '\x1A') && iLine.empty()) // (Ctrl+D or Ctrl+Z: the end of input (no command running: the end of the session))
                 {
@@ -485,13 +1432,64 @@ namespace neogfx::DesignStudio
                     bool more = true;
                     if (shared.runOnly)
                     {
+                        bool debug = false;
+                        {
+                            std::lock_guard<std::mutex> lock{ shared.mutex };
+                            debug = shared.debug;
+                        }
                         // (the program (cleared: only its input and output shown), and its errors)
                         shared.out << "\x1B[3J" << std::flush;
                         try
                         {
+                            // (a program debugged: compiled to be (see neos::language::i_code_generator::debug_info), and run under 
+                            // the debugger's session)
+                            auto& compiler = context.compiler();
+                            auto const debugInfo = compiler.debug_info();
+                            compiler.set_debug_info(debug);
+                            struct restore { neos::language::compiler& c; bool d; ~restore() { c.set_debug_info(d); } } const restoreDebugInfo{ compiler, debugInfo };
                             context.load_program(command);
                             context.compile_program();
-                            context.run();
+                            if (!debug)
+                                context.run();
+                            else if (auto const session = shared.debugger->begin_run([weakShared = std::weak_ptr<shared_state>{ aShared }]()
+                                {
+                                    // (a read of the program's input that is waiting fails (and is then read again))
+                                    if (auto const shared = weakShared.lock())
+                                    {
+                                        {
+                                            std::lock_guard<std::mutex> lock{ shared->mutex };
+                                            if (!shared->reading)
+                                                return;
+                                            shared->interrupted = true;
+                                        }
+                                        shared->wake.notify_all();
+                                    }
+                                }))
+                            {
+                                {
+                                    std::lock_guard<std::mutex> lock{ shared.mutex };
+                                    shared.debugging = true;
+                                }
+                                struct end_run 
+                                { 
+                                    shared_state& s; 
+                                    neos::context& c;
+                                    ~end_run() 
+                                    { 
+                                        c.set_debug_session(nullptr);
+                                        s.debugger->end_run();
+                                        std::lock_guard<std::mutex> lock{ s.mutex };
+                                        s.debugging = false;
+                                    } 
+                                } const endRun{ shared, context };
+                                context.set_debug_session(session);
+                                context.run();
+                                shared.out << std::flush;
+                                if (session->terminate_requested())
+                                    shared.out << "[Program terminated]" << std::endl;
+                            }
+                            else
+                                shared.out << "Error: another program is being debugged" << std::endl;
                         }
                         catch (std::exception const& e)
                         {
@@ -653,6 +1651,9 @@ namespace neogfx::DesignStudio
         iStartWithoutDebugging{ "Start Without Debugging"_t },
         iStepInto{ "Step Into"_t },
         iStepOver{ "Step Over"_t },
+        iStepOut{ "Step Out"_t },
+        iBreakAll{ "Break All"_t },
+        iStopDebugging{ "Stop Debugging"_t },
         iToggleBreakpoint{ "Toggle Breakpoint"_t },
         iNewBreakpoint{ "New Breakpoint"_t },
         iDeleteAllBreakpoints{ "Delete All Breakpoints"_t },
@@ -667,6 +1668,9 @@ namespace neogfx::DesignStudio
         iStartWithoutDebugging.set_group(library_id()).set_shortcut("Ctrl+F5");
         iStepInto.set_group(library_id()).set_shortcut("F11");
         iStepOver.set_group(library_id()).set_shortcut("F10");
+        iStepOut.set_group(library_id()).set_shortcut("Shift+F11");
+        iBreakAll.set_group(library_id()).set_shortcut("Ctrl+Alt+Break");
+        iStopDebugging.set_group(library_id()).set_shortcut("Shift+F5");
         iToggleBreakpoint.set_group(library_id()).set_shortcut("F9");
         iNewBreakpoint.set_group(library_id());
         iDeleteAllBreakpoints.set_group(library_id());
@@ -682,13 +1686,19 @@ namespace neogfx::DesignStudio
         // (the syntax highlighting of scripts: a service, for the script editors of other libraries)
         iScriptHighlighter = std::make_unique<neos_script_highlighter>();
         neolib::services::register_service<i_script_highlighter>(*iScriptHighlighter);
+        // (and the debugging of scripts: a service, for their editors (see i_script_debugger))
+        iScriptDebugger = std::make_unique<neos_script_debugger>();
+        neolib::services::register_service<i_script_debugger>(*iScriptDebugger);
         iScriptMenu.add_action(iNewScript);
         iScriptMenu.add_action(iSeparator);
         iScriptMenu.add_action(iStartDebugging);
         iScriptMenu.add_action(iStartWithoutDebugging);
+        iScriptMenu.add_action(iBreakAll);
+        iScriptMenu.add_action(iStopDebugging);
         iScriptMenu.add_action(iSeparator);
         iScriptMenu.add_action(iStepInto);
         iScriptMenu.add_action(iStepOver);
+        iScriptMenu.add_action(iStepOut);
         iScriptMenu.add_action(iSeparator);
         iScriptMenu.add_action(iToggleBreakpoint);
         iScriptMenu.add_action(iNewBreakpoint);
@@ -706,10 +1716,10 @@ namespace neogfx::DesignStudio
                 {
                     if (bits[0] == "neos")
                     {
-                        // ("neos <program>": a session that only runs programs (see neos_session))
+                        // ("neos <program>": a session that only runs programs (see neos_session); "neos -g <program>": debugged)
                         auto const command = aCommand.to_std_string();
                         auto const program = command.find_first_not_of(' ', command.find("neos") + 4u);
-                        aClient = make_ref<neos_session>(neolib::get_service_provider(), 
+                        aClient = make_ref<neos_session>(neolib::get_service_provider(), *iScriptDebugger,
                             program == std::string::npos ? std::string{} : command.substr(program));
                     }
                 }
@@ -718,6 +1728,7 @@ namespace neogfx::DesignStudio
 
     neos_element_library::~neos_element_library()
     {
+        neolib::services::unregister_service<i_script_debugger>(*iScriptDebugger);
         neolib::services::unregister_service<i_script_highlighter>(*iScriptHighlighter);
     }
 
@@ -729,6 +1740,35 @@ namespace neogfx::DesignStudio
     void neos_element_library::ide_ready(i_ide& aIde)
     {
         aIde.add_sub_menu(id::MenuBar, iScriptMenu);
+        // (the debugger: its panes, and its actions (enabled as it is debugging, or not))
+        auto& debugger = *iScriptDebugger;
+        debugger.ide_ready(aIde);
+        iSink += iStartDebugging.triggered([&debugger]() { debugger.start(false); });
+        iSink += iStartWithoutDebugging.triggered([&debugger]() { debugger.start_without_debugging(); });
+        iSink += iStepInto.triggered([&debugger]() { debugger.step(neos::debug::action::StepInto); });
+        iSink += iStepOver.triggered([&debugger]() { debugger.step(neos::debug::action::StepOver); });
+        iSink += iStepOut.triggered([&debugger]() { debugger.step(neos::debug::action::StepOut); });
+        iSink += iBreakAll.triggered([&debugger]() { debugger.break_all(); });
+        iSink += iStopDebugging.triggered([&debugger]() { debugger.stop_debugging(); });
+        iSink += iToggleBreakpoint.triggered([&debugger]() { debugger.toggle_breakpoint(); });
+        iSink += iNewBreakpoint.triggered([&debugger]() { debugger.new_breakpoint(); });
+        iSink += iDeleteAllBreakpoints.triggered([&debugger]() { debugger.delete_all_breakpoints(); });
+        iSink += iDisableAllBreakpoints.triggered([&debugger]() { debugger.disable_all_breakpoints(); });
+        auto update_actions = [this, &debugger]()
+        {
+            bool const debugging = debugger.debugging();
+            bool const stopped = debugger.stopped();
+            iStartDebugging.set_text(debugging ? "Continue"_t : "Start Debugging"_t);
+            iStartDebugging.enable(!debugging || stopped);
+            iStartWithoutDebugging.enable(!debugging);
+            iBreakAll.enable(debugging && !stopped);
+            iStopDebugging.enable(debugging);
+            iStepInto.enable(!debugging || stopped);
+            iStepOver.enable(!debugging || stopped);
+            iStepOut.enable(stopped);
+        };
+        iSink += debugger.LocationChanged(update_actions);
+        update_actions();
     }
 
     const neos_element_library::elements_t& neos_element_library::elements() const

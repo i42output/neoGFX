@@ -111,9 +111,11 @@ namespace neogfx
                         other->restore();
                 }
             });
-            // a window is created maximized unless there is already a window that isn't
-            if (std::none_of(iNestedWindows.begin(), iNestedWindows.end(), 
-                [&](i_native_window* aOther) { return aOther != &aNestedWindow && !aOther->is_maximized(); }))
+            // a window is created maximized if the windows already in the nest are (as they are maximized together)
+            auto const isOther = [&](i_native_window* aOther) { return aOther != &aNestedWindow; };
+            if (std::any_of(iNestedWindows.begin(), iNestedWindows.end(), isOther) &&
+                std::none_of(iNestedWindows.begin(), iNestedWindows.end(),
+                    [&](i_native_window* aOther) { return isOther(aOther) && !aOther->is_maximized(); }))
                 aNestedWindow.maximize();
         }
         if (type() == nest_type::Caddy)

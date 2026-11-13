@@ -1894,6 +1894,14 @@ namespace neogfx::DesignStudio
         }
     }
 
+    void main_window_ex::add_dockable(i_dockable& aDockable)
+    {
+        if (aDockable.can_dock(iRightDock))
+            aDockable.dock(iRightDock);
+        else if (aDockable.can_dock(iLeftDock))
+            aDockable.dock(iLeftDock);
+    }
+
     bool main_window_ex::can_undo() const
     {
         // todo

@@ -25,6 +25,8 @@
 #include <cmath>
 #include <map>
 #include <optional>
+#include <functional>
+#include <utility>
 #include <string>
 #include <vector>
 
@@ -38,6 +40,7 @@
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
 #include <neogfx/tools/DesignStudio/i_script_highlighter.hpp>
+#include <neogfx/tools/DesignStudio/i_script_debugger.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -262,6 +265,26 @@ namespace neogfx::DesignStudio
             iFitPending = true;
             update();
         }
+        // (debugging: the state of the breakpoint at a statement (its text's first position), as its node shows it; the statement that 
+        // the program being debugged is at (its text [first, last); top: its innermost frame's, else a frame that called it), its node 
+        // outlined; the statement of the node selected (none: none, or the module's), for a breakpoint)
+        void set_breakpoint_query(std::function<i_script_debugger::breakpoint_state(position_type)> aQuery)
+        {
+            iBreakpointAt = std::move(aQuery);
+            update();
+        }
+        void set_statement(std::optional<std::pair<position_type, position_type>> const& aStatement, bool aTop)
+        {
+            iStatement = aStatement;
+            iStatementTop = aTop;
+            update();
+        }
+        std::optional<position_type> selected_statement() const
+        {
+            if (iSelected == NoNode || iSelected >= iNodes.size() || iNodes[iSelected].outline.kind == outline_kind::Module)
+                return {};
+            return iNodes[iSelected].outline.first;
+        }
         // the node that a position of the script is in (the innermost) selected (as the editor's cursor moves)
         void select_at(position_type aPosition)
         {
@@ -329,6 +352,12 @@ namespace neogfx::DesignStudio
             }
             auto const& zoomedFont = zoomed_font();
             auto const& zoomedLabelFont = zoomed_label_font();
+            // (the node of the statement that the program being debugged is at: the innermost that it is in)
+            std::uint32_t current = NoNode;
+            if (iStatement)
+                for (std::uint32_t i = 1u; i < iNodes.size(); ++i)
+                    if (iStatement->first >= iNodes[i].outline.first && iStatement->first < std::max(iNodes[i].outline.last, iNodes[i].outline.first + 1u))
+                        current = i;
             auto const paint_node = [&](std::uint32_t i)
             {
                 auto const& n = iNodes[i];
@@ -346,6 +375,27 @@ namespace neogfx::DesignStudio
                 bool const selected = (i == iSelected);
                 aGc.draw_rounded_rect(r, radius,
                     pen{ selected ? accent : accent.with_alpha(0.55), selected ? 2.0 : 1.0, n.outline.kind == outline_kind::Module ? line_style::Dash : line_style::Solid });
+                // (debugging: the node that the program is at outlined (as the editor highlights its statement); a breakpoint's dot at 
+                // the start of its header)
+                if (i == current)
+                    aGc.draw_rounded_rect(r.inflated(size{ 3.0 }), radius + 3.0, 
+                        pen{ (iStatementTop ? color{ 0xFF, 0xE0, 0x66 } : color{ 0x8C, 0xD8, 0x8C }), 3.0 });
+                if (iBreakpointAt && n.outline.kind != outline_kind::Module)
+                {
+                    point const dot{ header.x, header.y };
+                    auto const dotRadius = std::max(3.0, 5.0 * iZoom);
+                    switch (iBreakpointAt(n.outline.first))
+                    {
+                    case i_script_debugger::breakpoint_state::Enabled:
+                        aGc.fill_circle(dot, dotRadius, color{ 0xE5, 0x14, 0x00 });
+                        break;
+                    case i_script_debugger::breakpoint_state::Disabled:
+                        aGc.draw_circle(dot, dotRadius, pen{ color{ 0xE5, 0x14, 0x00 }, 1.5 });
+                        break;
+                    default:
+                        break;
+                    }
+                }
                 // (a renamed parameter or variable: its button that propagates its rename to its uses)
                 bool const renamed = (i == iRenameNode && !iScriptStale);
                 if (zoomedFont.height() < MinTextHeight)
@@ -1218,6 +1268,9 @@ namespace neogfx::DesignStudio
         std::vector<std::optional<category>> iCategories;
         std::vector<node> iNodes;
         std::uint32_t iSelected = NoNode;
+        std::function<i_script_debugger::breakpoint_state(position_type)> iBreakpointAt;
+        std::optional<std::pair<position_type, position_type>> iStatement;
+        bool iStatementTop = true;
         std::vector<std::optional<color>> iCategoryColours;
         std::optional<color> iTextColour;
         std::optional<color> iBackgroundColour;

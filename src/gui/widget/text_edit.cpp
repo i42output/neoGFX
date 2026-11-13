@@ -5046,6 +5046,33 @@ namespace neogfx
         }
     }
 
+    std::optional<rect> text_edit::line_rect(position_type aTextPosition) const
+    {
+        // (the line that the character is on: the last that begins at or before it (of any column), as draw_bookmarks finds lines)
+        glyph_line const* match = nullptr;
+        std::size_t matchColumn = 0u;
+        for (std::size_t c = 0u; c < iGlyphColumns.size(); ++c)
+        {
+            auto const& column = iGlyphColumns[c];
+            auto line = std::upper_bound(column.lines.begin(), column.lines.end(), aTextPosition,
+                [](position_type cp, glyph_line const& l) { return cp < l.text_begin_index(); });
+            if (line == column.lines.begin())
+                continue;
+            --line;
+            if (match == nullptr || match->text_begin_index() < line->text_begin_index())
+            {
+                match = &*line;
+                matchColumn = c;
+            }
+        }
+        if (match == nullptr)
+            return {};
+        auto const columnRect = column_rect(matchColumn);
+        return rect{
+            point{ columnRect.left() - horizontal_scrollbar().position(), columnRect.top() - vertical_scrollbar().position() + match->ypos() },
+            size{ columnRect.cx, match->extents.cy } };
+    }
+
     void text_edit::draw_bookmarks(i_graphics_context& aGc) const
     {
         if (iBookmarks.empty() || iGlyphColumns.empty())

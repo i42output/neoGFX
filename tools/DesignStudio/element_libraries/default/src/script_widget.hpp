@@ -26,6 +26,7 @@
 #include <fstream>
 #include <mutex>
 #include <optional>
+#include <functional>
 #include <sstream>
 #include <thread>
 #include <vector>
@@ -50,12 +51,182 @@
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
 #include <neogfx/tools/DesignStudio/script.hpp>
 #include <neogfx/tools/DesignStudio/i_script_highlighter.hpp>
+#include <neogfx/tools/DesignStudio/i_script_debugger.hpp>
 #include <neogfx/tools/DesignStudio/settings.hpp>
 #include "script_graph.hpp"
 #include "console_widget.hpp"
 
 namespace neogfx::DesignStudio
 {
+    // a script's code (see script_widget): its editor, with a gutter (beside the text: the editor's left padding) that shows the 
+    // script's breakpoints (clicked: a breakpoint toggled on the line) and, while a program being debugged is stopped in the script, 
+    // the statement that it is at (highlighted, and an arrow in the gutter)
+    class script_editor : public text_edit
+    {
+        typedef text_edit base_type;
+    public:
+        using breakpoint_state = i_script_debugger::breakpoint_state;
+        // (a statement: its text [first, last) (code points); top: the program's innermost frame is at it (else a frame that called it))
+        struct statement
+        {
+            position_type first;
+            position_type last;
+            bool top;
+        };
+    public:
+        define_event(GutterClicked, gutter_clicked, std::uint32_t) ///< (a line (1-based))
+    private:
+        static constexpr dimension GutterWidth = 16.0;  ///< (device-independent pixels)
+    public:
+        script_editor(i_layout& aLayout) :
+            base_type{ aLayout }
+        {
+            auto gutter = padding();
+            gutter.left += dpi_scale(GutterWidth);
+            set_padding(gutter);
+            iSink += TextChanged([this]() { iLineStarts.reset(); });
+        }
+    public:
+        // (the state of the breakpoints on a line (1-based), as the gutter shows them)
+        void set_breakpoint_query(std::function<breakpoint_state(std::uint32_t)> aQuery)
+        {
+            iBreakpointAt = std::move(aQuery);
+            update();
+        }
+        void set_statement(std::optional<statement> const& aStatement)
+        {
+            iStatement = aStatement;
+            update();
+        }
+        // (a position's line (1-based); the position of a line's start; positions and (1-based) columns in bytes of the text (UTF-8))
+        std::uint32_t line_of(position_type aPosition) const
+        {
+            auto const& starts = line_starts();
+            return static_cast<std::uint32_t>(std::upper_bound(starts.begin(), starts.end(), aPosition) - starts.begin());
+        }
+        position_type line_start(std::uint32_t aLine) const
+        {
+            auto const& starts = line_starts();
+            return starts[std::clamp<std::size_t>(aLine, 1u, starts.size()) - 1u];
+        }
+        position_type to_position(std::uint32_t aLine, std::uint32_t aColumn) const
+        {
+            auto const text = plain_text().to_std_string_view();
+            auto const start = line_start(aLine);
+            auto result = start;
+            // (the column's byte, in the line (not past its end): its code point)
+            for (auto byte = byte_of(start); aColumn > 1u && byte < text.size() && text[byte] != '\n'; --aColumn)
+                if (++byte < text.size() && lead_byte(text[byte]))
+                    ++result;
+            return result;
+        }
+        std::uint32_t column_of(position_type aPosition) const
+        {
+            return static_cast<std::uint32_t>(byte_of(aPosition) - byte_of(line_start(line_of(aPosition))) + 1u);
+        }
+    protected:
+        void paint(i_graphics_context& aGc) const override
+        {
+            base_type::paint(aGc);
+            auto const inner = client_rect(false);
+            auto const gutterWidth = dpi_scale(GutterWidth);
+            rect const gutter{ point{ inner.left() - gutterWidth, client_rect().top() }, size{ gutterWidth, client_rect().cy } };
+            // (the gutter in the text's background (the text, scrolled horizontally, is not drawn there))
+            auto const& paper = default_style().character().paper_color();
+            aGc.fill_rect(gutter, std::holds_alternative<color>(paper) ? std::get<color>(paper) : background_color());
+            auto const& starts = line_starts();
+            auto const firstVisible = line_of(document_hit_test(point{ inner.left(), inner.top() }));
+            auto const statementFirst = iStatement ? line_of(iStatement->first) : 0u;
+            auto const statementLast = iStatement ? std::max(statementFirst, line_of(std::max(iStatement->first, iStatement->last - 1))) : 0u;
+            color const statementColour = iStatement && iStatement->top ? color{ 0xFF, 0xE0, 0x66 } : color{ 0x8C, 0xD8, 0x8C };
+            for (auto line = std::max(firstVisible, 1u); line <= starts.size(); ++line)
+            {
+                auto const r = line_rect(starts[line - 1u]);
+                if (!r || r->top() > client_rect().bottom())
+                    break;
+                if (r->bottom() < client_rect().top())
+                    continue;
+                point const centre{ gutter.left() + gutterWidth / 2.0, r->top() + r->cy / 2.0 };
+                auto const radius = std::max(2.0, std::min(gutterWidth, r->cy) * 0.33);
+                if (line >= statementFirst && line <= statementLast)
+                    aGc.fill_rect(rect{ point{ inner.left(), r->top() }, size{ inner.cx, r->cy } }, statementColour.with_alpha(0.3));
+                if (iBreakpointAt)
+                    switch (iBreakpointAt(line))
+                    {
+                    case breakpoint_state::Enabled:
+                        aGc.fill_circle(centre, radius, color{ 0xE5, 0x14, 0x00 });
+                        break;
+                    case breakpoint_state::Disabled:
+                        aGc.draw_circle(centre, radius, pen{ color{ 0xE5, 0x14, 0x00 }, std::max(1.0, dpi_scale(1.0)) });
+                        break;
+                    default:
+                        break;
+                    }
+                if (line == statementFirst)
+                {
+                    // (the arrow: on the breakpoint, if there is one)
+                    auto const half = radius * 1.1;
+                    aGc.fill_triangle(
+                        point{ centre.x - half, centre.y - half }, point{ centre.x + half, centre.y }, point{ centre.x - half, centre.y + half },
+                        statementColour);
+                    aGc.draw_triangle(
+                        point{ centre.x - half, centre.y - half }, point{ centre.x + half, centre.y }, point{ centre.x - half, centre.y + half },
+                        pen{ statementColour.darker(0x60), 1.0 });
+                }
+            }
+        }
+        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override
+        {
+            auto const inner = client_rect(false);
+            if (aButton == mouse_button::Left && aPosition.x < inner.left() && aPosition.x >= inner.left() - dpi_scale(GutterWidth))
+            {
+                // (the line beside the click)
+                GutterClicked(line_of(document_hit_test(point{ inner.left(), aPosition.y })));
+                return;
+            }
+            base_type::mouse_button_clicked(aButton, aPosition, aKeyModifier);
+        }
+    private:
+        static bool lead_byte(char aByte)
+        {
+            return (static_cast<unsigned char>(aByte) & 0xC0u) != 0x80u;
+        }
+        // (the byte (of the text: UTF-8) that a position's code point begins at)
+        std::size_t byte_of(position_type aPosition) const
+        {
+            auto const text = plain_text().to_std_string_view();
+            position_type character = -1;
+            for (std::size_t byte = 0u; byte < text.size(); ++byte)
+                if (lead_byte(text[byte]) && ++character == aPosition)
+                    return byte;
+            return text.size();
+        }
+        // (the position (code point) of each line's start)
+        std::vector<position_type> const& line_starts() const
+        {
+            if (!iLineStarts)
+            {
+                iLineStarts.emplace(1u, position_type{ 0 });
+                auto const text = plain_text().to_std_string_view();
+                position_type character = 0;
+                for (auto ch : text)
+                {
+                    if (!lead_byte(ch))
+                        continue;
+                    ++character;
+                    if (ch == '\n')
+                        iLineStarts->push_back(character);
+                }
+            }
+            return *iLineStarts;
+        }
+    private:
+        std::function<breakpoint_state(std::uint32_t)> iBreakpointAt;
+        std::optional<statement> iStatement;
+        mutable std::optional<std::vector<position_type>> iLineStarts;
+        sink iSink;
+    };
+
     // a script's editor; a script file (the element's id is its path) is opened in it and, if there is a script highlighter for its 
     // language (see i_script_highlighter), syntax highlighted and outlined (its node graph, beside the code (see script_graph), shown or 
     // hidden by the toolbar's Node Graph button): on a worker thread once typing has paused, the highlighting being applied only if the 
@@ -85,12 +256,23 @@ namespace neogfx::DesignStudio
             iSplitter{ client_layout(), splitter_style::Horizontal | splitter_style::DrawGrip },
             iEditor{ iSplitter.layout() },
             iGraph{ iSplitter.layout() },
+            iDebug{ "Debug"_t, debug_image() },
             iRun{ "Run"_t, run_image() },
             iShowGraph{ "Node Graph"_t, toolbar_image(sNodeGraphImagePattern) },
             iFitGraph{ "Zoom to Fit"_t, toolbar_image(sZoomToFitImagePattern) },
             iResetGraph{ "Reset Layout"_t, toolbar_image(sResetLayoutImagePattern) }
         {
             set_minimum_size(size{ 256.0_dip, 160.0_dip });
+            // (a script's file: its window sized to 75% of the workspace once nested (MDI) in it, unless it is maximized there)
+            if (is_file(aElement.id().to_std_string()) && has_native_window())
+                iSink += native_window().added_to_nest([this]()
+                {
+                    auto& nest = service<i_surface_manager>().find_nest(native_window());
+                    if (iSizedToWorkspace || nest.type() != nest_type::MDI || native_window().is_maximized())
+                        return;
+                    iSizedToWorkspace = true;
+                    resize(nest.widget().client_rect(false).extents() * 0.75);
+                });
             title_bar().set_icon(aElement.library().element_icon(aElement.type()));
             title_bar().set_title(""_s);
             create_status_bar<neogfx::status_bar>(
@@ -138,6 +320,7 @@ namespace neogfx::DesignStudio
             iSplitter.set_size_policy(size_constraint::Expanding); // (a horizontal splitter's height is otherwise its minimum)
             iEditor.set_weight(size{ 2.0, 1.0 });
             iGraph.set_weight(size{ 3.0, 1.0 });
+            iToolbar.add_action(iDebug);
             iToolbar.add_action(iRun);
             iToolbar.add_separator();
             iToolbar.add_action(iShowGraph);
@@ -146,9 +329,12 @@ namespace neogfx::DesignStudio
             iShowGraph.set_checkable(true);
             iShowGraph.set_checked(true);
             iShowGraph.set_tool_tip_text("Show or hide the script's node graph"_t);
-            iRun.set_tool_tip_text("Run the script in a neos console"_t);
-            iRun.set_enabled(false); // (until the script has been checked: it can be run only if it has no syntax errors (see poll_highlighting))
-            iSink += iRun.triggered([this]() { run(); });
+            iRun.set_tool_tip_text("Run the script in a neos console, without debugging it (Ctrl+F5)"_t);
+            iRun.set_enabled(false); // (unless its language is one that neos runs: see open_file)
+            iSink += iRun.triggered([this]() { run(false); });
+            iDebug.set_tool_tip_text("Debug the script in a neos console (F5)"_t);
+            iDebug.set_enabled(false);
+            iSink += iDebug.triggered([this]() { run(true); });
             iFitGraph.set_tool_tip_text("Zoom the node graph to fit"_t);
             iResetGraph.set_tool_tip_text("Reset the node graph to its automatic layout"_t);
             iSink += iShowGraph.checked([this]() { iGraph.show(); iFitGraph.enable(); iResetGraph.enable(); });
@@ -234,6 +420,8 @@ namespace neogfx::DesignStudio
             text_changed();
             position_changed();
             if (!iPath.empty())
+                connect_debugger();
+            if (!iPath.empty())
             {
                 iSink += iEditor.TextChanged([this, &aElement]()
                 {
@@ -253,6 +441,9 @@ namespace neogfx::DesignStudio
         }
         ~script_widget()
         {
+            std::erase(editors(), this);
+            if (iDebugger && iDebugger->active_script().to_std_string() == iPath)
+                iDebugger->set_active_script(string{});
             if (iHighlighter.joinable())
                 iHighlighter.join();
         }
@@ -284,12 +475,14 @@ namespace neogfx::DesignStudio
             if (!highlighter.can_highlight(string{ iExtension }))
                 return;
             iScriptHighlighter = &highlighter;
+            // (it can be run (its syntax errors, if any, are neos's to report when it is compiled: the highlighter's grammar, which the 
+            // node graph's outline comes from, need not be all of the language's))
+            iRun.set_enabled(true);
             iLastEdit = std::chrono::steady_clock::now() - HighlightDelay; // (the file as opened: highlighted straight away)
             iSink += iEditor.TextChanged([this]()
             {
                 ++iVersion;
                 iLastEdit = std::chrono::steady_clock::now();
-                iRun.set_enabled(false); // (until the text as changed has been checked)
                 iGraph.script_changed();
             });
             iHighlightPoller.emplace(neolib::service<neolib::i_async_task>(), [this](neolib::callback_timer& aTimer)
@@ -298,10 +491,10 @@ namespace neogfx::DesignStudio
                 aTimer.again();
             }, HighlightPoll);
         }
-        // (the script (saved, if it has changed) run in a neos console: the one that it was last run in, if it is still open (its 
-        // neos session reused if it has one), else a new one (opened in the workspace as a console dropped on it is); a beep if it 
-        // cannot be (e.g. the script is still running))
-        void run()
+        // (the script (saved, if it has changed) run (debugged, if aDebug) in a neos console: the one that it was last run in, if it is 
+        // still open (its neos session reused if it has one), else a new one (opened in the workspace as a console dropped on it is); a 
+        // beep if it cannot be (e.g. the script is still running))
+        void run(bool aDebug)
         {
             if (iPath.empty() || !has_parent())
             {
@@ -309,10 +502,13 @@ namespace neogfx::DesignStudio
                 return;
             }
             save_file();
+            if (iDebugger)
+                iDebugger->set_active_script(string{ iPath }); // (if it stops in another script, we open it (see show_location))
             if (!iConsole)
                 open_console();
             // (a neos session that only runs programs (only the script's input and output is shown in the console))
-            if (!iConsole || !(iConsole->has_session() ? iConsole->execute("run " + iPath) : iConsole->start_session("neos " + iPath)))
+            if (!iConsole || !(iConsole->has_session() ? 
+                iConsole->execute((aDebug ? "debug " : "run ") + iPath) : iConsole->start_session((aDebug ? "neos -g " : "neos ") + iPath)))
             {
                 service<i_basic_services>().system_beep();
                 return;
@@ -339,6 +535,148 @@ namespace neogfx::DesignStudio
             iConsoleSink.clear();
             if (iConsole)
                 iConsoleSink += iConsole->destroying([this]() { iConsole = nullptr; });
+        }
+        // (the script's debugging (see i_script_debugger), if there is a debugger: its breakpoints in the gutter and the node graph, the 
+        // statement that the program being debugged is at, and the debugger's requests of the active script's editor (ours, once we are 
+        // activated (or our code or graph has the focus)))
+        void connect_debugger()
+        {
+            editors().push_back(this);
+            if (!neolib::services::get_service_provider().service_registered(i_script_debugger::iid()))
+                return;
+            iDebugger = &neolib::services::get_service_provider().service<i_script_debugger>();
+            iDebug.set_enabled(iScriptHighlighter != nullptr);
+            iEditor.set_breakpoint_query([this](std::uint32_t aLine) { return iDebugger->breakpoint_at(string{ iPath }, aLine); });
+            iGraph.set_breakpoint_query([this](script_graph::position_type aFirst)
+            {
+                // (a statement's (its column's), or (its line's first statement) its line's)
+                auto const position = static_cast<text_edit::position_type>(aFirst);
+                auto const line = iEditor.line_of(position);
+                auto const column = iEditor.column_of(position);
+                auto const statement = iDebugger->breakpoint_at(string{ iPath }, line, column);
+                if (statement != i_script_debugger::breakpoint_state::None)
+                    return statement;
+                auto const text = iEditor.plain_text().to_std_string_view();
+                auto const lineByte = column_byte(iEditor.line_start(line));
+                auto const firstByte = text.find_first_not_of(" \t", lineByte);
+                if (firstByte == std::string_view::npos || column != firstByte - lineByte + 1u)
+                    return i_script_debugger::breakpoint_state::None;
+                return iDebugger->breakpoint_at(string{ iPath }, line);
+            });
+            iSink += iEditor.GutterClicked([this](std::uint32_t aLine) { iDebugger->toggle_breakpoint(string{ iPath }, aLine); });
+            auto activated = [this]() { iDebugger->set_active_script(string{ iPath }); };
+            iSink += Activated(activated);
+            iSink += iEditor.Focus([activated](neogfx::focus_event aEvent, focus_reason) { if (aEvent == neogfx::focus_event::FocusGained) activated(); });
+            iSink += iGraph.Focus([activated](neogfx::focus_event aEvent, focus_reason) { if (aEvent == neogfx::focus_event::FocusGained) activated(); });
+            iSink += iDebugger->requested([this](i_script_debugger::request aRequest)
+            {
+                if (iDebugger->active_script().to_std_string() != iPath)
+                    return;
+                switch (aRequest)
+                {
+                case i_script_debugger::request::Start:
+                case i_script_debugger::request::StartWithoutDebugging:
+                    if (iRun.is_enabled())
+                        run(aRequest == i_script_debugger::request::Start);
+                    else
+                        service<i_basic_services>().system_beep(); // (it is not in a language that neos runs)
+                    break;
+                case i_script_debugger::request::ToggleBreakpoint:
+                    // (the graph's node selected (its statement), if the graph has the focus; else the cursor's line)
+                    if (iGraph.has_focus())
+                    {
+                        if (auto const first = iGraph.selected_statement())
+                        {
+                            auto const position = static_cast<text_edit::position_type>(*first);
+                            iDebugger->toggle_breakpoint(string{ iPath }, iEditor.line_of(position), iEditor.column_of(position));
+                        }
+                    }
+                    else
+                        iDebugger->toggle_breakpoint(string{ iPath }, iEditor.line_of(static_cast<text_edit::position_type>(iEditor.cursor().position())));
+                    break;
+                }
+            });
+            iSink += iDebugger->breakpoints_changed([this]()
+            {
+                iEditor.update();
+                iGraph.update();
+            });
+            iSink += iDebugger->location_changed([this]() { show_location(true, true); });
+            show_location(true, false);
+        }
+        // (the statement that the program being debugged is at (in its frame selected), shown if it is in our script (aFollow: the cursor 
+        // moved to it; aActivate: and we are activated); if no editor has its script open, the active script's editor opens it)
+        void show_location(bool aFollow, bool aActivate)
+        {
+            neolib::string path;
+            std::uint32_t line = 0u, column = 0u, endLine = 0u, endColumn = 0u;
+            bool top = true;
+            if (!iDebugger->location(path, line, column, endLine, endColumn, top) || !same_file(path.to_std_string(), iPath))
+            {
+                iEditor.set_statement({});
+                iGraph.set_statement({}, true);
+                if (aActivate && !path.empty() && iDebugger->active_script().to_std_string() == iPath &&
+                    std::none_of(editors().begin(), editors().end(), [&](script_widget* aEditor) { return same_file(path.to_std_string(), aEditor->iPath); }))
+                    open_script(path.to_std_string());
+                return;
+            }
+            auto const first = column != 0u ? iEditor.to_position(line, column) : iEditor.line_start(line);
+            auto const last = endLine != 0u && endColumn != 0u ? iEditor.to_position(endLine, endColumn) : 
+                (line < iEditor.line_of(static_cast<text_edit::position_type>(iEditor.plain_text().size())) ? iEditor.line_start(line + 1u) - 1 : 
+                    static_cast<text_edit::position_type>(iEditor.plain_text().size()));
+            iEditor.set_statement(script_editor::statement{ first, std::max(first + 1, last), top });
+            iGraph.set_statement(std::make_pair(static_cast<script_graph::position_type>(first), static_cast<script_graph::position_type>(std::max(first + 1, last))), top);
+            if (aFollow)
+                iEditor.cursor().set_position(static_cast<neogfx::cursor::position_type>(first));
+            // (activated for the innermost frame (where it has stopped), not as callers' frames are selected in the call stack)
+            if (aActivate && top)
+            {
+                root().activate();
+                iEditor.set_focus();
+            }
+        }
+        // (the byte that a position's code point begins at, in the text)
+        std::size_t column_byte(text_edit::position_type aPosition) const
+        {
+            auto const text = iEditor.plain_text().to_std_string_view();
+            text_edit::position_type character = -1;
+            for (std::size_t byte = 0u; byte < text.size(); ++byte)
+                if ((static_cast<unsigned char>(text[byte]) & 0xC0u) != 0x80u && ++character == aPosition)
+                    return byte;
+            return text.size();
+        }
+        static bool same_file(std::string const& aLhs, std::string const& aRhs)
+        {
+            if (aLhs == aRhs)
+                return true;
+            std::error_code ec;
+            return std::filesystem::equivalent(std::filesystem::path{ aLhs }, std::filesystem::path{ aRhs }, ec) && !ec;
+        }
+        // (the script editors (of this library) open)
+        static std::vector<script_widget*>& editors()
+        {
+            static std::vector<script_widget*> sEditors;
+            return sEditors;
+        }
+        // (a script opened in the workspace (our parent) beside us, as the main window's Open Script opens one)
+        void open_script(std::string const& aPath)
+        {
+            if (!has_parent())
+                return;
+            auto& workspace = parent();
+            auto& project = iElement.project();
+            auto& element = project.create_element(project.root(), "script"_s, string{ aPath });
+            auto scratch = make_ref<widget<>>(workspace.root().as_widget());
+            element.create_layout_item(*scratch);
+            if (!element.has_layout_item() || !element.layout_item().is_widget())
+                return;
+            auto scriptWindow = ref_ptr<i_widget>{ element.layout_item().as_widget() };
+            workspace.add(scriptWindow);
+            if (scriptWindow->is_root() && scriptWindow->root().is_nested())
+                service<i_surface_manager>().nest_for(workspace, nest_type::MDI).add(scriptWindow->root().native_window());
+            scriptWindow->move(position() + point{ 32.0_dip, 32.0_dip });
+            if (scriptWindow->is_root())
+                scriptWindow->root().activate();
         }
         void update_title()
         {
@@ -380,8 +718,6 @@ namespace neogfx::DesignStudio
                     iHighlightedVersion = iVersion;
                     if (done->spans)
                         apply_highlighting(*done->spans);
-                    // (the script can be run only if it has no syntax errors: if it parses (it has an outline))
-                    iRun.set_enabled(done->outline.has_value());
                     // (the graph shows the last outline (the script may not parse as it is being edited))
                     if (done->outline)
                         iGraph.set_script(neolib::utf8_to_utf32(iEditor.plain_text().to_std_string()), done->spans ? *done->spans : std::vector<span>{}, *done->outline);
@@ -462,6 +798,20 @@ namespace neogfx::DesignStudio
         {
             return image{ string{ aPattern }, { { "paper", color{} }, { "ink1", service<i_app>().current_style().palette().color(color_role::Text) } } };
         }
+        // (the Debug button's image: the Run button's triangle, filled)
+        static image debug_image()
+        {
+            static string const sUri{ ":/neogfx/DesignStudio/default_nel/resources/script_debug.svg" };
+            static bool const sAdded = (service<i_resource_manager>().add_resource(sUri, sDebugImage, std::char_traits<char>::length(sDebugImage)), true);
+            (void)sAdded;
+            return image{ sUri };
+        }
+        static constexpr char const* sDebugImage
+        {
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"64\" height=\"64\" viewBox=\"0 0 24 24\">"
+            "<path d=\"M6.5 6 Q6.5 4.5 7.82 5.21 L19.18 11.29 Q20.5 12 19.18 12.71 L7.82 18.79 Q6.5 19.5 6.5 18 Z\" fill=\"#94F591\" stroke=\"#94F591\" stroke-width=\"2\" stroke-linejoin=\"round\"/>"
+            "</svg>"
+        };
         // (the Run button's image: a light green outlined play triangle, its corners slightly rounded (an SVG, a resource of its own: 
         // rasterised larger than the largest toolbar icon size, so that it is sharp at any))
         static image run_image()
@@ -550,8 +900,9 @@ namespace neogfx::DesignStudio
         i_element& iElement;
         neogfx::toolbar iToolbar;
         splitter iSplitter;
-        text_edit iEditor;
+        script_editor iEditor;
         script_graph iGraph;
+        neogfx::action iDebug;
         neogfx::action iRun;
         neogfx::action iShowGraph;
         neogfx::action iFitGraph;
@@ -573,6 +924,8 @@ namespace neogfx::DesignStudio
         std::optional<std::vector<text_edit::style>> iCategoryStyles;
         std::optional<neolib::callback_timer> iHighlightPoller;
         console_widget* iConsole = nullptr;             ///< (the console that the script was last run in (while it is open))
+        i_script_debugger* iDebugger = nullptr;
+        bool iSizedToWorkspace = false;
         sink iConsoleSink;
         sink iSink;
     };

@@ -42,6 +42,10 @@
 		<target>3D 游戏</target>
 	</text>
 	<text>
+		<source>A breakpoint: [file:]line [if condition]; a catchpoint: throw [exception] [if condition]</source>
+		<target>断点：[文件:]行 [if 条件]；捕获点：throw [异常] [if 条件]</target>
+	</text>
+	<text>
 		<source>Abnormal Program Termination</source>
 		<target>程序异常终止</target>
 	</text>
@@ -56,6 +60,10 @@
 	<text>
 		<source>Accounts and Licensing</source>
 		<target>帐户和许可</target>
+	</text>
+	<text>
+		<source>Add</source>
+		<target>添加</target>
 	</text>
 	<text>
 		<source>Add .nrc File to Project</source>
@@ -82,12 +90,32 @@
 		<target>自动缩放停靠区：%?%</target>
 	</text>
 	<text>
+		<source>Break All</source>
+		<target>全部中断</target>
+	</text>
+	<text>
+		<source>Breakpoint</source>
+		<target>断点</target>
+	</text>
+	<text>
+		<source>Breakpoints</source>
+		<target>断点</target>
+	</text>
+	<text>
 		<source>Bring To Front</source>
 		<target>置于顶层</target>
 	</text>
 	<text>
+		<source>Call Stack</source>
+		<target>调用堆栈</target>
+	</text>
+	<text>
 		<source>Coding font: %?%</source>
 		<target>代码字体：%?%</target>
+	</text>
+	<text>
+		<source>Condition</source>
+		<target>条件</target>
 	</text>
 	<text>
 		<source>Console font: %?%</source>
@@ -96,6 +124,18 @@
 	<text>
 		<source>Context</source>
 		<target>上下文</target>
+	</text>
+	<text>
+		<source>Continue</source>
+		<target>继续</target>
+	</text>
+	<text>
+		<source>Debug</source>
+		<target>调试</target>
+	</text>
+	<text>
+		<source>Debug the script in a neos console (F5)</source>
+		<target>在 neos 控制台中调试脚本 (F5)</target>
 	</text>
 	<text>
 		<source>Debugging</source>
@@ -112,6 +152,10 @@
 	<text>
 		<source>Disable All Breakpoints</source>
 		<target>禁用所有断点</target>
+	</text>
+	<text>
+		<source>Disabled</source>
+		<target>已禁用</target>
 	</text>
 	<text>
 		<source>Display IDs</source>
@@ -134,8 +178,24 @@
 		<target>空项目</target>
 	</text>
 	<text>
+		<source>Enable/Disable</source>
+		<target>启用/禁用</target>
+	</text>
+	<text>
+		<source>Enabled</source>
+		<target>已启用</target>
+	</text>
+	<text>
 		<source>Environment</source>
 		<target>环境</target>
+	</text>
+	<text>
+		<source>Error</source>
+		<target>错误</target>
+	</text>
+	<text>
+		<source>Exception thrown</source>
+		<target>引发了异常</target>
 	</text>
 	<text>
 		<source>Font...</source>
@@ -146,8 +206,16 @@
 		<target>字体和颜色</target>
 	</text>
 	<text>
+		<source>Function</source>
+		<target>函数</target>
+	</text>
+	<text>
 		<source>General</source>
 		<target>常规</target>
+	</text>
+	<text>
+		<source>Globals</source>
+		<target>全局变量</target>
 	</text>
 	<text>
 		<source>Grid color: %?%</source>
@@ -156,6 +224,10 @@
 	<text>
 		<source>Grid type: %?%&#10;Grid size: %environment.workspace.grid_size:?%&#10;Grid subdivisions: %environment.workspace.grid_subdivisions:?%</source>
 		<target>网格类型：%?%&#10;网格大小：%environment.workspace.grid_size:?%&#10;网格细分：%environment.workspace.grid_subdivisions:?%</target>
+	</text>
+	<text>
+		<source>Hits</source>
+		<target>命中次数</target>
 	</text>
 	<text>
 		<source>Icon size: %?%</source>
@@ -178,6 +250,14 @@
 		<target>语言</target>
 	</text>
 	<text>
+		<source>Locals</source>
+		<target>局部变量</target>
+	</text>
+	<text>
+		<source>Location</source>
+		<target>位置</target>
+	</text>
+	<text>
 		<source>Location:</source>
 		<target>位置：</target>
 	</text>
@@ -196,6 +276,10 @@
 	<text>
 		<source>Mixed case with underscores</source>
 		<target>大小写混合加下划线</target>
+	</text>
+	<text>
+		<source>Name</source>
+		<target>名称</target>
 	</text>
 	<text>
 		<source>Name:</source>
@@ -258,6 +342,10 @@
 		<target>段落...</target>
 	</text>
 	<text>
+		<source>Paused</source>
+		<target>已暂停</target>
+	</text>
+	<text>
 		<source>Plugins</source>
 		<target>插件</target>
 	</text>
@@ -298,6 +386,10 @@
 		<target>属性</target>
 	</text>
 	<text>
+		<source>Remove</source>
+		<target>移除</target>
+	</text>
+	<text>
 		<source>Reset Layout</source>
 		<target>重置布局</target>
 	</text>
@@ -310,8 +402,12 @@
 		<target>运行</target>
 	</text>
 	<text>
-		<source>Run the script in a neos console</source>
-		<target>在 neos 控制台中运行脚本</target>
+		<source>Run the script in a neos console, without debugging it (Ctrl+F5)</source>
+		<target>在 neos 控制台中运行脚本，不进行调试 (Ctrl+F5)</target>
+	</text>
+	<text>
+		<source>Running</source>
+		<target>正在运行</target>
 	</text>
 	<text>
 		<source>Save Project</source>
@@ -382,6 +478,10 @@
 		<target>开始执行（不调试）</target>
 	</text>
 	<text>
+		<source>State</source>
+		<target>状态</target>
+	</text>
+	<text>
 		<source>Status Bar</source>
 		<target>状态栏</target>
 	</text>
@@ -390,8 +490,28 @@
 		<target>单步执行</target>
 	</text>
 	<text>
+		<source>Step Out</source>
+		<target>单步跳出</target>
+	</text>
+	<text>
 		<source>Step Over</source>
 		<target>单步跳过</target>
+	</text>
+	<text>
+		<source>Stop Debugging</source>
+		<target>停止调试</target>
+	</text>
+	<text>
+		<source>Stopped (step)</source>
+		<target>已停止（单步）</target>
+	</text>
+	<text>
+		<source>Stopped at breakpoint</source>
+		<target>已在断点处停止</target>
+	</text>
+	<text>
+		<source>Stopped at the program's entry</source>
+		<target>已在程序入口处停止</target>
 	</text>
 	<text>
 		<source>Subpixel text rendering: %?%</source>
@@ -420,6 +540,14 @@
 	<text>
 		<source>Theme color: %?%</source>
 		<target>主题颜色：%?%</target>
+	</text>
+	<text>
+		<source>Thread</source>
+		<target>线程</target>
+	</text>
+	<text>
+		<source>Threads</source>
+		<target>线程</target>
 	</text>
 	<text>
 		<source>Toggle Breakpoint</source>
@@ -460,6 +588,10 @@
 	<text>
 		<source>Value</source>
 		<target>值</target>
+	</text>
+	<text>
+		<source>Watch</source>
+		<target>监视</target>
 	</text>
 	<text>
 		<source>Windows and Tabs</source>
@@ -536,5 +668,9 @@
 	<text>
 		<source>statement</source>
 		<target>语句</target>
+	</text>
+	<text>
+		<source>temporary</source>
+		<target>临时</target>
 	</text>
 </xneol>
