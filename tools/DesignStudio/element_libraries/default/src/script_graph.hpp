@@ -93,9 +93,13 @@ namespace neogfx::DesignStudio
             std::u32string header;                          ///< (its header's code, on one line)
             std::vector<std::optional<category>> headerCategories;
             std::vector<run> runs;                          ///< (its header's runs, measured when laid out: painting only draws them)
+            std::vector<dimension> zoomedOffsets;           ///< (its runs' offsets as measured in the zoomed font (see measure_zoomed))
+            dimension textWidth = 0.0;                      ///< (its header's code's width, in the font (unzoomed))
             string label;                                   ///< (its kind)
-            dimension labelWidth = 0.0;
-            dimension headerWidth = 0.0;
+            dimension labelWidth = 0.0;                     ///< (graph coordinates: as measured in the font, or the zoomed font (if wider))
+            dimension zoomedLabelWidth = 0.0;
+            dimension headerWidth = 0.0;                    ///< (graph coordinates: its code's and its label's, as measured in the font, or the 
+                                                            ///< zoomed font if wider (see measure_zoomed))
             std::u32string key;                             ///< (which node it is, as the script is edited: where it was dragged to is kept by it)
             point offset;                                   ///< (where it has been dragged to: from its place (graph coordinates))
             dimension parametersWidth = 0.0;
@@ -317,6 +321,8 @@ namespace neogfx::DesignStudio
                 const_cast<script_graph&>(*this).fit();
                 iFitPending = false;
             }
+            if (iMeasuredZoom != iZoom)
+                const_cast<script_graph&>(*this).measure_zoomed(aGc);
             auto const cr = client_rect();
             aGc.fill_rect(cr, background_colour());
             // (the grid: its minor lines (if not too close together) in the workspace's grid colour, then its major lines)
@@ -407,10 +413,10 @@ namespace neogfx::DesignStudio
                 // (its code, in the colours of its syntax highlighting (its runs as measured when laid out))
                 scoped_scissor ss{ aGc, header.deflated(size{ 2.0 }).intersection(cr) };
                 point const textPos{ header.x + padding_x() * iZoom, header.y + (header.cy - zoomedFont.height()) / 2.0 };
-                for (auto const& run : n.runs)
-                    aGc.draw_text(point{ textPos.x + run.offset * iZoom, textPos.y }, run.text, zoomedFont, text_format{ category_colour(run.kind) });
+                for (std::size_t r = 0u; r < n.runs.size() && r < n.zoomedOffsets.size(); ++r)
+                    aGc.draw_text(point{ textPos.x + n.zoomedOffsets[r], textPos.y }, n.runs[r].text, zoomedFont, text_format{ category_colour(n.runs[r].kind) });
                 if (zoomedLabelFont.height() >= MinTextHeight)
-                    aGc.draw_text(point{ header.right() - (padding_x() + n.labelWidth) * iZoom, header.y + (header.cy - zoomedLabelFont.height()) / 2.0 },
+                    aGc.draw_text(point{ header.right() - padding_x() * iZoom - n.zoomedLabelWidth, header.y + (header.cy - zoomedLabelFont.height()) / 2.0 },
                         n.label, zoomedLabelFont, text_format{ text_colour().with_alpha(0.55) });
                 if (renamed)
                     draw_propagate(aGc, propagate_rect(n), accent);
@@ -752,10 +758,40 @@ namespace neogfx::DesignStudio
                     first = last;
                 }
                 n.label = kind_label(n);
+                n.textWidth = textWidth;
                 n.labelWidth = aGc.text_extent(n.label, labelFont).cx;
                 n.headerWidth = textWidth + n.labelWidth + padding * 3.0;
             }
             arrange_nodes();
+            iMeasuredZoom = 0.0; // (measured in the zoomed font when next painted)
+        }
+        // (the nodes' headers measured in the zoomed font, as they are drawn (a font's glyphs do not scale exactly with its size: they 
+        // are hinted): their runs' offsets, and their boxes widened (and the nodes arranged again) where the zoomed text is wider)
+        void measure_zoomed(i_graphics_context const& aGc)
+        {
+            iMeasuredZoom = iZoom;
+            auto const labelFont = font().with_size(font().size() * 0.8);
+            bool widened = false;
+            for (auto& n : iNodes)
+            {
+                n.zoomedOffsets.clear();
+                dimension offset = 0.0;
+                for (auto const& run : n.runs)
+                {
+                    n.zoomedOffsets.push_back(offset);
+                    offset += aGc.text_extent(run.text, zoomed_font()).cx;
+                }
+                n.zoomedLabelWidth = aGc.text_extent(n.label, zoomed_label_font()).cx;
+                n.labelWidth = std::max(aGc.text_extent(n.label, labelFont).cx, n.zoomedLabelWidth / iZoom);
+                auto const headerWidth = std::max(n.textWidth, offset / iZoom) + n.labelWidth + padding_x() * 3.0;
+                if (headerWidth != n.headerWidth)
+                {
+                    n.headerWidth = headerWidth;
+                    widened = true;
+                }
+            }
+            if (widened)
+                arrange_nodes();
         }
         // (the nodes' extents and positions, in graph coordinates, from their headers as measured: a body's statements left to right, a 
         // function's parameters before them; a node that has been dragged is where it was dragged to, 
@@ -1282,6 +1318,7 @@ namespace neogfx::DesignStudio
         mutable bool iFitPending = true;
         mutable std::optional<neogfx::font> iZoomedFont;
         mutable std::optional<neogfx::font> iZoomedLabelFont;
+        double iMeasuredZoom = 0.0;     ///< (the zoom that the nodes' headers were last measured at (see measure_zoomed))
         std::map<std::u32string, point> iMoved;     ///< (where nodes have been dragged to (by key))
         std::optional<drag> iDrag;
         std::optional<pan> iPan;
