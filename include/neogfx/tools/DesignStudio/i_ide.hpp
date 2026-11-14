@@ -22,6 +22,7 @@
 #include <neogfx/app/i_action.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/gui/widget/i_dockable.hpp>
+#include <neogfx/tools/DesignStudio/i_project_manager.hpp>
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 
 namespace neogfx::DesignStudio
@@ -41,6 +42,10 @@ namespace neogfx::DesignStudio
         virtual void add_sub_menu(uuid const& aMenuId, i_menu& aSubMenu) = 0;
         // a pane (e.g. a debugger's) docked in the first of the main window's docks (right, then left) that it can be docked in
         virtual void add_dockable(i_dockable& aDockable) = 0;
+        // the IDE's projects (its project manager: e.g. the active project, that a library's action opens a script in)
+        virtual i_project_manager& projects() = 0;
+        // the workspace: where a library's windows (e.g. a script's editor) are opened, nested (MDI) in it
+        virtual i_widget& workspace() = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x7ca9ec87, 0xda34, 0x4c28, 0xb843, { 0xc1, 0x3e, 0x93, 0x81, 0xe0, 0xcf } }; return sIid; }
     };

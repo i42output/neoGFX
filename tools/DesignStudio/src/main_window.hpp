@@ -86,6 +86,8 @@ namespace neogfx::DesignStudio
         void add_action(uuid const& aMenuId, i_action& aAction) override;
         void add_sub_menu(uuid const& aMenuId, i_menu& aSubMenu) override;
         void add_dockable(i_dockable& aDockable) override;
+        i_project_manager& projects() override;
+        i_widget& workspace() override;
     protected:
         bool can_undo() const override;
         bool can_redo() const override;

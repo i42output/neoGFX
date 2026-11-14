@@ -24,6 +24,8 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <locale>
+#include <map>
 #include <mutex>
 #include <optional>
 #include <functional>
@@ -500,6 +502,9 @@ namespace neogfx::DesignStudio
             if (!highlighter.can_highlight(string{ iExtension }))
                 return;
             iScriptHighlighter = &highlighter;
+            // (its node graph's nodes where they were dragged to (when it was last open), and kept as they are dragged)
+            iGraph.set_node_layout(load_layout());
+            iSink += iGraph.LayoutChanged([this]() { save_layout(); });
             // (it can be run (its syntax errors, if any, are neos's to report when it is compiled: the highlighter's grammar, which the 
             // node graph's outline comes from, need not be all of the language's))
             iRun.set_enabled(true);
@@ -515,6 +520,73 @@ namespace neogfx::DesignStudio
                 poll_highlighting();
                 aTimer.again();
             }, HighlightPoll);
+        }
+        // (a script's node graph's layout (where its nodes have been dragged to: see script_graph::node_layout), kept between sessions in 
+        // a file of its own, in the app's data folder (by its path), as lines: a header, its path, then each node's offset and key)
+        static constexpr std::string_view LayoutHeader = "DesignStudio script graph layout 1";
+        std::string canonical_path() const
+        {
+            std::error_code ec;
+            auto const canonical = std::filesystem::canonical(std::filesystem::path{ iPath }, ec);
+            auto const path = (ec ? std::filesystem::path{ iPath } : canonical).generic_u8string();
+            return std::string{ path.begin(), path.end() };
+        }
+        std::filesystem::path layout_file() const
+        {
+            std::uint64_t hash = 14695981039346656037ull; // (FNV-1a: the same in every build)
+            for (unsigned char ch : canonical_path())
+            {
+                hash ^= ch;
+                hash *= 1099511628211ull;
+            }
+            std::ostringstream name;
+            name << std::hex << hash << ".layout";
+            return std::filesystem::path{ service<i_app>().info().data_folder().to_std_string() } / "script graphs" / name.str();
+        }
+        std::map<std::u32string, point> load_layout() const
+        {
+            std::map<std::u32string, point> result;
+            std::ifstream input{ layout_file(), std::ios::binary };
+            std::string line;
+            if (!std::getline(input, line) || line != LayoutHeader || !std::getline(input, line) || line != canonical_path())
+                return result;
+            while (std::getline(input, line))
+            {
+                std::istringstream entry{ line };
+                entry.imbue(std::locale::classic());
+                point offset;
+                if (!(entry >> offset.x >> offset.y) || entry.get() != ' ')
+                    continue;
+                std::string key;
+                for (char ch; entry.get(ch);)
+                    key += (ch == '\\' && entry.get(ch)) ? (ch == 'n' ? '\n' : ch == 'r' ? '\r' : ch) : ch;
+                result[neolib::utf8_to_utf32(key)] = offset;
+            }
+            return result;
+        }
+        // (if it cannot be written, the layout is not kept: it is only a convenience)
+        void save_layout() const
+        {
+            auto const layout = iGraph.node_layout();
+            auto const file = layout_file();
+            std::error_code ec;
+            if (layout.empty())
+            {
+                std::filesystem::remove(file, ec);
+                return;
+            }
+            std::filesystem::create_directories(file.parent_path(), ec);
+            std::ofstream output{ file, std::ios::binary | std::ios::trunc };
+            output.imbue(std::locale::classic());
+            output.precision(10);
+            output << LayoutHeader << '\n' << canonical_path() << '\n';
+            for (auto const& [key, offset] : layout)
+            {
+                output << offset.x << ' ' << offset.y << ' ';
+                for (char ch : neolib::utf32_to_utf8(key))
+                    output << (ch == '\\' ? "\\\\" : ch == '\n' ? "\\n" : ch == '\r' ? "\\r" : std::string(1, ch));
+                output << '\n';
+            }
         }
         // (the script (saved, if it has changed) run (debugged, if aDebug) in a neos console: the one that it was last run in, if it is 
         // still open (its neos session reused if it has one), else a new one (opened in the workspace as a console dropped on it is); a 

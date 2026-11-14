@@ -45,6 +45,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neolib/task/timer.hpp>
 
 #include <neogfx/app/i_basic_services.hpp>
+#include <neogfx/app/file_dialog.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/utility.hpp>
 #include <neogfx/tools/DesignStudio/i_project.hpp>
@@ -1666,6 +1668,7 @@ namespace neogfx::DesignStudio
         iElements{ elements_ordered().begin(), elements_ordered().end() },
         iSeparator{},
         iNewScript{ "New Script..."_t },
+        iOpenScript{ "Open Script..."_t },
         iStartDebugging{ "Start Debugging"_t },
         iStartWithoutDebugging{ "Start Without Debugging"_t },
         iStepInto{ "Step Into"_t },
@@ -1683,6 +1686,7 @@ namespace neogfx::DesignStudio
     {
         iSeparator.set_group(library_id());
         iNewScript.set_group(library_id());
+        iOpenScript.set_group(library_id());
         iStartDebugging.set_group(library_id()).set_shortcut("F5");
         iStartWithoutDebugging.set_group(library_id()).set_shortcut("Ctrl+F5");
         iStepInto.set_group(library_id()).set_shortcut("F11");
@@ -1709,6 +1713,7 @@ namespace neogfx::DesignStudio
         iScriptDebugger = std::make_unique<neos_script_debugger>();
         neolib::services::register_service<i_script_debugger>(*iScriptDebugger);
         iScriptMenu.add_action(iNewScript);
+        iScriptMenu.add_action(iOpenScript);
         iScriptMenu.add_action(iSeparator);
         iScriptMenu.add_action(iStartDebugging);
         iScriptMenu.add_action(iStartWithoutDebugging);
@@ -1759,6 +1764,56 @@ namespace neogfx::DesignStudio
     void neos_element_library::ide_ready(i_ide& aIde)
     {
         aIde.add_sub_menu(id::MenuBar, iScriptMenu);
+        // (opening script files into the active project (enabled while there is one): each in a script editor (a nested window on the 
+        // IDE's workspace), as a window dropped on the workspace from the toolbox is)
+        auto& projectManager = aIde.projects();
+        auto& workspace = aIde.workspace();
+        auto update_open_script = [this, &projectManager]() { iOpenScript.enable(projectManager.project_active()); };
+        iSink += projectManager.project_activated([update_open_script](i_project&) { update_open_script(); });
+        iSink += projectManager.project_deactivated([update_open_script](i_project&) { update_open_script(); });
+        update_open_script();
+        iSink += iOpenScript.triggered([this, &projectManager, &workspace]()
+        {
+            if (!projectManager.project_active())
+                return;
+            // (the files of the languages that can be highlighted)
+            filter_patterns patterns;
+            neolib::vector<neolib::string> extensions;
+            iScriptHighlighter->extensions(extensions);
+            for (auto const& extension : extensions)
+                patterns.push_back("*" + extension.to_std_string());
+            if (patterns.empty())
+                patterns.push_back("*.*");
+            auto files = open_file_dialog(workspace.root().as_widget(), file_dialog_spec{ "Open Script", {}, patterns, "Script Files" }, true);
+            if (!files)
+                return;
+            auto& project = projectManager.active_project();
+            point position{ 32.0_dip, 32.0_dip };
+            for (auto const& file : files.value())
+            {
+                try
+                {
+                    auto& element = project.create_element(project.root(), "script"_s, string{ file });
+                    // (its window is made for a scratch parent (whose caddy nest it is added to, which would make it follow the scratch's 
+                    // geometry: gone with it) and then nested (MDI) in the workspace)
+                    auto scratch = make_ref<widget<>>(workspace.root().as_widget());
+                    element.create_layout_item(*scratch);
+                    if (element.has_layout_item() && element.layout_item().is_widget())
+                    {
+                        auto script = ref_ptr<i_widget>{ element.layout_item().as_widget() };
+                        workspace.add(script);
+                        if (script->is_root() && script->root().is_nested())
+                            service<i_surface_manager>().nest_for(workspace, nest_type::MDI).add(script->root().native_window());
+                        script->move(position);
+                        position += point{ 32.0_dip, 32.0_dip };
+                    }
+                }
+                catch (std::exception const& e)
+                {
+                    service<i_surface_manager>().display_error_message("Open Script"_t, string{ e.what() });
+                }
+            }
+        });
         // (the debugger: its panes, and its actions (enabled as it is debugging, or not))
         auto& debugger = *iScriptDebugger;
         debugger.ide_ready(aIde);

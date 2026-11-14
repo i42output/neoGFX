@@ -92,6 +92,7 @@ namespace neogfx::DesignStudio
         mutable std::map<color, std::map<string, texture>> iIcons;
         action iSeparator;
         action iNewScript;
+        action iOpenScript;
         action iStartDebugging;
         action iStartWithoutDebugging;
         action iStepInto;

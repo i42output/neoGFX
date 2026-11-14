@@ -23,9 +23,11 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <map>
 #include <optional>
 #include <functional>
+#include <queue>
 #include <utility>
 #include <string>
 #include <vector>
@@ -69,6 +71,8 @@ namespace neogfx::DesignStudio
         define_event(NodeSelected, node_selected, position_type, position_type)
         // (an edit of the script: its text [first, last) replaced (edits of one change are in the order that they are made))
         define_event(ScriptEdit, script_edit, position_type, position_type, i_string const&)
+        // (its nodes have been dragged (or put back): where they are (see node_layout) is to be kept with the script)
+        define_event(LayoutChanged, layout_changed)
     private:
         static constexpr std::uint32_t NoNode = ~std::uint32_t{};
         static constexpr std::size_t MaxHeaderLength = 64u;
@@ -77,12 +81,21 @@ namespace neogfx::DesignStudio
         static constexpr double MaxFitZoom = 1.5;
         static constexpr double GridSubdivisions = 8.0;     ///< (minor grid lines to a major one (as the workspace's grid's default))
         static constexpr dimension MinTextHeight = 5.0;     ///< (text smaller than this (in pixels) is not drawn: it cannot be read)
-        // (a run of a node's header in one syntax highlighting category: its text and its offset from the header's start (graph coordinates))
+        static constexpr std::size_t WrapLength = 28u;      ///< (a node's code is wrapped to lines of at most this many characters (see wrap))
+        static constexpr dimension IconSpace = 18.0;        ///< (before a node's kind, in its title bar: its kind's icon)
+        static constexpr dimension CodeInset = 20.0;        ///< (a node's code from its sides: its pins are beside it)
+        static constexpr dimension PinInset = 10.0;         ///< (a node's pins' centres from its sides)
+        static constexpr dimension PinSize = 5.0;           ///< (half a pin's height)
+        static constexpr dimension RouteMargin = 14.0;      ///< (how far a flow that is routed keeps from nodes)
+        static constexpr dimension CornerRadius = 28.0;     ///< (a routed flow rounded where it turns)
+        // (a run of a node's header in one syntax highlighting category: its text, its offset from its line's start (graph coordinates) 
+        // and its line (the header's code is wrapped: see wrap))
         struct run
         {
             string text;
             std::optional<category> kind;
             dimension offset = 0.0;
+            std::uint32_t line = 0u;
         };
         struct node
         {
@@ -94,18 +107,27 @@ namespace neogfx::DesignStudio
             std::vector<std::optional<category>> headerCategories;
             std::vector<run> runs;                          ///< (its header's runs, measured when laid out: painting only draws them)
             std::vector<dimension> zoomedOffsets;           ///< (its runs' offsets as measured in the zoomed font (see measure_zoomed))
-            dimension textWidth = 0.0;                      ///< (its header's code's width, in the font (unzoomed))
+            dimension textWidth = 0.0;                      ///< (its header's code's width (its widest line's), in the font (unzoomed))
+            std::uint32_t lineCount = 0u;                   ///< (its header's code's lines, below its title row (its kind): none, a module's)
             string label;                                   ///< (its kind)
-            dimension labelWidth = 0.0;                     ///< (graph coordinates: as measured in the font, or the zoomed font (if wider))
+            dimension labelWidth = 0.0;                     ///< (graph coordinates: as measured in its font (see label_font))
             dimension zoomedLabelWidth = 0.0;
-            dimension headerWidth = 0.0;                    ///< (graph coordinates: its code's and its label's, as measured in the font, or the 
-                                                            ///< zoomed font if wider (see measure_zoomed))
+            dimension headerWidth = 0.0;                    ///< (graph coordinates: its code's, its label's and its inputs', as measured 
+                                                            ///< unzoomed (see header_width))
             std::u32string key;                             ///< (which node it is, as the script is edited: where it was dragged to is kept by it)
             point offset;                                   ///< (where it has been dragged to: from its place (graph coordinates))
             dimension parametersWidth = 0.0;
             dimension parametersTop = 0.0;                  ///< (its parameters' top: below its body's statements (from its body's top))
             neogfx::size laneExtents;
             std::vector<std::uint32_t> uses;                ///< (a parameter: the nodes whose headers use it)
+            std::vector<std::uint32_t> inputs;              ///< (the parameters that its header uses: each on a row of its own, below its code)
+            std::vector<string> inputNames;
+            dimension inputsWidth = 0.0;                    ///< (its inputs' names' width (graph coordinates))
+            point place;                                    ///< (where it is (from its container's lane's start) if it has not been dragged: 
+                                                            ///< a statement is after the one before it, wherever that is)
+            bool flowsOut = false;                          ///< (the flow passes from it to another (its out pin is connected))
+            std::size_t firstFlow = 0u;                     ///< (its flows (see flow): iFlows [firstFlow, firstFlow + flowCount))
+            std::size_t flowCount = 0u;
             neogfx::size extents;                           ///< (graph coordinates)
             neogfx::rect bounds;
             neogfx::rect lane;                              ///< (its body's statements)
@@ -131,6 +153,14 @@ namespace neogfx::DesignStudio
             std::u32string from;
             std::u32string to;
             std::vector<position_type> uses;                ///< (where its old name is used (in the script as renamed), in order)
+        };
+        // (a flow in a node's body: its route (graph coordinates), from its start to its end: an S-curve between them if it has two 
+        // points, else straight lines, rounded where they turn; an entry's start dotted; a loop's flow back to its start dashed)
+        struct flow
+        {
+            std::vector<point> route;
+            bool entry = false;
+            bool loop = false;
         };
         struct inline_edit
         {
@@ -228,6 +258,7 @@ namespace neogfx::DesignStudio
             iCategoryColours = aCategoryColours;
             iTextColour = aText;
             iBackgroundColour = aBackground;
+            iTitleGradients.clear();
             update();
         }
         // (the grid in the workspace's grid colour (a setting): its minor lines in it, its major lines (every GridSubdivisions'th) in the 
@@ -237,12 +268,29 @@ namespace neogfx::DesignStudio
             iGridColour = aGridColour;
             update();
         }
+        // (where its nodes have been dragged to (by key: see set_script), as kept with the script between sessions (see LayoutChanged))
+        std::map<std::u32string, point> node_layout() const
+        {
+            std::map<std::u32string, point> result;
+            for (auto const& n : iNodes)
+                if (auto const moved = iMoved.find(n.key); moved != iMoved.end())
+                    result.insert(*moved);
+            return result;
+        }
+        void set_node_layout(std::map<std::u32string, point> const& aLayout)
+        {
+            iMoved = aLayout;
+            iLayoutPending = true;
+            update();
+        }
         // (laid out again: e.g. its font has changed)
         void refresh_layout()
         {
             iLayoutPending = true;
             iZoomedFont = std::nullopt;
             iZoomedLabelFont = std::nullopt;
+            iLabelFont = std::nullopt;
+            iGraphFont = std::nullopt;
             if (!iUserView)
                 iFitPending = true;
             update();
@@ -262,6 +310,7 @@ namespace neogfx::DesignStudio
             iMoved.clear();
             arrange_nodes();
             zoom_to_fit();
+            LayoutChanged.trigger();
         }
         void zoom_to_fit()
         {
@@ -364,6 +413,7 @@ namespace neogfx::DesignStudio
                 for (std::uint32_t i = 1u; i < iNodes.size(); ++i)
                     if (iStatement->first >= iNodes[i].outline.first && iStatement->first < std::max(iNodes[i].outline.last, iNodes[i].outline.first + 1u))
                         current = i;
+            auto const flowColour = mix(text_colour(), color::White, 0.5);
             auto const paint_node = [&](std::uint32_t i)
             {
                 auto const& n = iNodes[i];
@@ -372,36 +422,69 @@ namespace neogfx::DesignStudio
                     return;
                 auto const accent = accent_colour(n);
                 auto const radius = 6.0 * iZoom;
-                auto const header = rect{ r.top_left(), size{ r.cx, header_height() * iZoom } };
+                bool const module = (n.outline.kind == outline_kind::Module);
+                // (its shadow and its body; its title bar (its kind) textured (see title_gradient): lit along its top edge, finely grained 
+                // and edged below; then its code (wrapped) and its inputs)
+                auto const header = rect{ r.top_left(), size{ r.cx, header_height(n) * iZoom } };
+                auto const title = rect{ r.top_left(), size{ r.cx, title_height() * iZoom } };
+                if (!module)
+                    for (int shadow = 3; shadow >= 1; --shadow)
+                    {
+                        auto const s = r.inflated(size{ shadow * iZoom });
+                        aGc.fill_rounded_rect(rect{ s.top_left() + point{ 0.0, 2.0 * iZoom }, s.extents() }, radius + shadow * iZoom, color::Black.with_alpha(0.12));
+                    }
                 aGc.fill_rounded_rect(r, radius, node_colour(n));
                 {
-                    scoped_scissor ss{ aGc, header.intersection(cr) };
-                    aGc.fill_rounded_rect(r, radius, accent.with_alpha(n.outline.kind == outline_kind::Module ? 0.06 : 0.22));
+                    scoped_scissor ss{ aGc, title.intersection(cr) };
+                    aGc.fill_rounded_rect(r, radius, title_gradient(accent).with_bounding_box(title));
+                    aGc.fill_rounded_rect(r, radius, gloss_gradient().with_bounding_box(title));
+                    if (title.cy >= 12.0)
+                    {
+                        pen const grain{ color::White.with_alpha(0.05), 1.0 };
+                        auto x = title.x - title.cy;
+                        if (cr.x - title.cy > x)
+                            x += std::floor((cr.x - title.cy - x) / 5.0) * 5.0; // (from the first that is visible)
+                        for (; x < std::min(title.right(), cr.right()); x += 5.0)
+                            aGc.draw_line(point{ x, title.bottom() }, point{ x + title.cy, title.y }, grain);
+                    }
+                    aGc.draw_line(point{ title.x + radius, title.y + 0.5 }, point{ title.right() - radius, title.y + 0.5 }, pen{ color::White.with_alpha(0.3), 1.0 });
                 }
+                aGc.draw_line(point{ title.x, title.bottom() }, point{ title.right(), title.bottom() }, pen{ color::Black.with_alpha(0.6), 1.0 });
                 bool const selected = (i == iSelected);
-                aGc.draw_rounded_rect(r, radius,
-                    pen{ selected ? accent : accent.with_alpha(0.55), selected ? 2.0 : 1.0, n.outline.kind == outline_kind::Module ? line_style::Dash : line_style::Solid });
-                // (debugging: the node that the program is at outlined (as the editor highlights its statement); a breakpoint's dot at 
-                // the start of its header)
+                if (module)
+                    aGc.draw_rounded_rect(r, radius, pen{ selected ? accent : accent.with_alpha(0.55), selected ? 2.0 : 1.0, line_style::Dash });
+                else
+                    aGc.draw_rounded_rect(r, radius, selected ? pen{ color{ 0xF5, 0xA6, 0x23 }, 2.0 } : pen{ color::Black.with_alpha(0.7), 1.0 });
+                // (debugging: the node that the program is at outlined (as the editor highlights its statement); a breakpoint's dot on 
+                // its top left corner)
                 if (i == current)
                     aGc.draw_rounded_rect(r.inflated(size{ 3.0 }), radius + 3.0, 
                         pen{ (iStatementTop ? color{ 0xFF, 0xE0, 0x66 } : color{ 0x8C, 0xD8, 0x8C }), 3.0 });
-                if (iBreakpointAt && n.outline.kind != outline_kind::Module)
+                if (iBreakpointAt && !module)
                 {
-                    point const dot{ header.x, header.y };
                     auto const dotRadius = std::max(3.0, 5.0 * iZoom);
-                    switch (iBreakpointAt(n.outline.first))
-                    {
-                    case i_script_debugger::breakpoint_state::Enabled:
-                        aGc.fill_circle(dot, dotRadius, color{ 0xE5, 0x14, 0x00 });
-                        break;
-                    case i_script_debugger::breakpoint_state::Disabled:
-                        aGc.draw_circle(dot, dotRadius, pen{ color{ 0xE5, 0x14, 0x00 }, 1.5 });
-                        break;
-                    default:
-                        break;
-                    }
+                    auto const state = iBreakpointAt(n.outline.first);
+                    if (state != i_script_debugger::breakpoint_state::None)
+                        aGc.fill_circle(r.top_left(), dotRadius + 1.5, background_colour());
+                    if (state == i_script_debugger::breakpoint_state::Enabled)
+                        aGc.fill_circle(r.top_left(), dotRadius, color{ 0xE5, 0x14, 0x00 });
+                    else if (state == i_script_debugger::breakpoint_state::Disabled)
+                        aGc.draw_circle(r.top_left(), dotRadius, pen{ color{ 0xE5, 0x14, 0x00 }, 1.5 });
                 }
+                // (its pins: where the flow passes into and out of it (filled if it does), a parameter's where it passes to its uses, 
+                // and its inputs')
+                auto const pinY = to_screen(point{ 0.0, flow_y(n) }).y;
+                if (n.outline.kind == outline_kind::Parameter)
+                    aGc.fill_circle(point{ r.right() - PinInset * iZoom, pinY }, 4.0 * iZoom, category_colour(category::Parameter));
+                else if (!module)
+                {
+                    draw_pin(aGc, point{ r.x + PinInset * iZoom, pinY }, true, flowColour);
+                    draw_pin(aGc, point{ r.right() - PinInset * iZoom, pinY }, n.flowsOut, flowColour);
+                }
+                for (std::size_t input = 0u; input < n.inputs.size(); ++input)
+                    aGc.fill_circle(point{ r.x + PinInset * iZoom, to_screen(point{ 0.0, input_y(n, input) }).y }, 4.0 * iZoom, category_colour(category::Parameter));
+                if (title.cy >= 8.0)
+                    draw_icon(aGc, n, point{ title.x + (padding_x() + IconSpace / 2.0) * iZoom, title.center().y }, 5.0 * iZoom, mix(accent, color::White, 0.6));
                 // (a renamed parameter or variable: its button that propagates its rename to its uses)
                 bool const renamed = (i == iRenameNode && !iScriptStale);
                 if (zoomedFont.height() < MinTextHeight)
@@ -410,87 +493,58 @@ namespace neogfx::DesignStudio
                         draw_propagate(aGc, propagate_rect(n), accent);
                     return;
                 }
-                // (its code, in the colours of its syntax highlighting (its runs as measured when laid out))
                 scoped_scissor ss{ aGc, header.deflated(size{ 2.0 }).intersection(cr) };
-                point const textPos{ header.x + padding_x() * iZoom, header.y + (header.cy - zoomedFont.height()) / 2.0 };
-                for (std::size_t r = 0u; r < n.runs.size() && r < n.zoomedOffsets.size(); ++r)
-                    aGc.draw_text(point{ textPos.x + n.zoomedOffsets[r], textPos.y }, n.runs[r].text, zoomedFont, text_format{ category_colour(n.runs[r].kind) });
                 if (zoomedLabelFont.height() >= MinTextHeight)
-                    aGc.draw_text(point{ header.right() - padding_x() * iZoom - n.zoomedLabelWidth, header.y + (header.cy - zoomedLabelFont.height()) / 2.0 },
-                        n.label, zoomedLabelFont, text_format{ text_colour().with_alpha(0.55) });
+                    aGc.draw_text(point{ title.x + (padding_x() + IconSpace + 4.0) * iZoom, title.y + (title.cy - zoomedLabelFont.height()) / 2.0 },
+                        n.label, zoomedLabelFont, text_format{ color::White.with_alpha(0.95) });
+                auto const lineHeight = line_height() * iZoom;
+                point const textPos{ header.x + CodeInset * iZoom, title.bottom() + CodePadding * iZoom + (lineHeight - zoomedFont.height()) / 2.0 };
+                for (std::size_t run = 0u; run < n.runs.size() && run < n.zoomedOffsets.size(); ++run)
+                    aGc.draw_text(point{ textPos.x + n.zoomedOffsets[run], textPos.y + n.runs[run].line * lineHeight }, n.runs[run].text, zoomedFont, 
+                        text_format{ category_colour(n.runs[run].kind) });
+                for (std::size_t input = 0u; input < n.inputNames.size(); ++input)
+                    aGc.draw_text(point{ textPos.x, to_screen(point{ 0.0, input_y(n, input) }).y - zoomedFont.height() / 2.0 }, n.inputNames[input], zoomedFont, 
+                        text_format{ text_colour().with_alpha(0.8) });
                 if (renamed)
                     draw_propagate(aGc, propagate_rect(n), accent);
             };
-            // (a node being dragged (and its contents) over the others)
+            // (a node, then the flows in its body (under what is in it); a node being dragged (and its contents) over the others)
+            auto const paint = [&](std::uint32_t i)
+            {
+                paint_node(i);
+                auto const& n = iNodes[i];
+                if (!to_screen(n.bounds).intersects(cr))
+                    return;
+                for (auto f = n.firstFlow; f < n.firstFlow + n.flowCount && f < iFlows.size(); ++f)
+                {
+                    auto const& flow = iFlows[f];
+                    if (flow.entry)
+                        aGc.fill_circle(to_screen(flow.route.front()), 3.0 * iZoom, flowColour);
+                    draw_route(aGc, flow.route, flow.loop ? pen{ flowColour.with_alpha(0.6), 1.5 * iZoom, line_style::Dash } : pen{ flowColour, 2.0 * iZoom });
+                }
+            };
             auto const dragged = iDrag && iDrag->dragging ? iDrag->node : NoNode;
             for (std::uint32_t i = 0u; i < iNodes.size(); ++i)
                 if (dragged == NoNode || (i != dragged && !is_descendant(i, dragged)))
-                    paint_node(i);
+                    paint(i);
             if (dragged != NoNode)
                 for (auto i = dragged; i < iNodes.size() && (i == dragged || is_descendant(i, dragged)); ++i)
-                    paint_node(i);
-            // (the flow of each body (and a loop's back to its start), and the parameters' wires)
-            auto const flowColour = mix(text_colour(), color::White, 0.5);
-            for (auto const& n : iNodes)
-            {
-                // (each alternative entered on its own lane (the flow does not pass from the body to it))
-                for (auto const a : n.alternatives)
-                {
-                    auto const& alternative = iNodes[a];
-                    auto const entry = to_screen(point{ alternative.bounds.x - 18.0, flow_y(alternative) });
-                    aGc.fill_circle(entry, 3.0 * iZoom, flowColour);
-                    draw_flow(aGc, entry, to_screen(point{ alternative.bounds.x, flow_y(alternative) }), flowColour);
-                }
-                if (n.children.empty())
-                    continue;
-                auto const& first = iNodes[n.children.front()];
-                auto const entry = to_screen(point{ n.lane.x - 18.0, flow_y(first) });
-                aGc.fill_circle(entry, 3.0 * iZoom, flowColour);
-                draw_flow(aGc, entry, to_screen(point{ first.bounds.x, flow_y(first) }), flowColour);
-                for (std::size_t c = 1u; c < n.children.size(); ++c)
-                {
-                    auto const& from = iNodes[n.children[c - 1u]];
-                    auto const& to = iNodes[n.children[c]];
-                    draw_flow(aGc, to_screen(point{ from.bounds.right(), flow_y(from) }), to_screen(point{ to.bounds.x, flow_y(to) }), flowColour);
-                }
-                if (n.outline.kind == outline_kind::Loop)
-                {
-                    auto const& last = iNodes[n.children.back()];
-                    auto const bottom = n.lane.bottom() + 6.0;
-                    pen const loopPen{ flowColour.with_alpha(0.6), 1.5 * iZoom, line_style::Dash };
-                    point const p0 = to_screen(point{ last.bounds.right(), flow_y(last) });
-                    point const p1 = to_screen(point{ last.bounds.right() + 8.0, flow_y(last) });
-                    point const p2 = to_screen(point{ last.bounds.right() + 8.0, bottom });
-                    point const p3 = to_screen(point{ n.lane.x - 10.0, bottom });
-                    point const p4 = to_screen(point{ n.lane.x - 10.0, flow_y(first) });
-                    aGc.draw_line(p0, p1, loopPen);
-                    aGc.draw_line(p1, p2, loopPen);
-                    aGc.draw_line(p2, p3, loopPen);
-                    aGc.draw_line(p3, p4, loopPen);
-                }
-            }
-            for (auto const& n : iNodes)
-                for (auto const use : n.uses)
-                {
-                    auto const& user = iNodes[use];
-                    auto const wireColour = category_colour(category::Parameter);
-                    point const from = to_screen(point{ n.bounds.right(), n.bounds.y + n.bounds.cy / 2.0 });
-                    point const to = to_screen(point{ user.bounds.x, data_y(user) });
-                    pen const wirePen{ wireColour, 2.0 * iZoom };
-                    auto const dx = std::max(std::abs(to.x - from.x) / 2.0, 24.0 * iZoom);
-                    aGc.draw_cubic_bezier(from, point{ from.x + dx, from.y }, point{ to.x - dx, to.y }, to, wirePen);
-                    aGc.fill_circle(from, 3.5 * iZoom, wireColour);
-                    aGc.fill_circle(to, 3.5 * iZoom, wireColour);
-                }
-            // (where a statement being dragged would be moved to)
+                    paint(i);
+            // (the parameters' wires to their uses' inputs (routed: see route_flows), over the nodes (a use may be in a statement in 
+            // another's body))
+            for (auto const& wire : iWires)
+                draw_route(aGc, wire.route, pen{ category_colour(category::Parameter), 2.0 * iZoom });
+            // (where a statement being dragged would be moved to: after the sibling before that place, if it is in the row that the 
+            // statement is level with, else before the sibling at it)
             if (iDrag && iDrag->dragging && iDrag->dropIndex)
             {
                 auto const& n = iNodes[iDrag->node];
                 auto const& siblings = iNodes[n.outline.parent].children;
-                auto const x = *iDrag->dropIndex < siblings.size() ?
-                    iNodes[siblings[*iDrag->dropIndex]].bounds.x - gap() / 2.0 : iNodes[siblings.back()].bounds.right() + gap() / 2.0;
-                auto const& lane = iNodes[n.outline.parent].lane;
-                aGc.draw_line(to_screen(point{ x, lane.y - 4.0 }), to_screen(point{ x, lane.bottom() + 4.0 }), pen{ accent_colour(n), 3.0 });
+                auto const index = *iDrag->dropIndex;
+                bool const after = index > 0u && (index == siblings.size() || in_row(iNodes[siblings[index - 1u]], n.bounds.center()));
+                auto const& sibling = iNodes[siblings[after ? index - 1u : index]];
+                auto const x = after ? sibling.bounds.right() + gap() / 2.0 : sibling.bounds.x - gap() / 2.0;
+                aGc.draw_line(to_screen(point{ x, sibling.bounds.y - 4.0 }), to_screen(point{ x, sibling.bounds.bottom() + 4.0 }), pen{ color{ 0xF5, 0xA6, 0x23 }, 3.0 });
             }
             // (the zoom)
             auto const zoomText = string{ std::to_string(static_cast<int>(std::round(iZoom * 100.0))) + "%" };
@@ -592,8 +646,8 @@ namespace neogfx::DesignStudio
                 iDrag = std::nullopt;
                 if (drag.dragging)
                 {
-                    // (moved past a sibling: the statement moved there in the script (and laid out in its place); else left where it was 
-                    // dropped)
+                    // (moved among its siblings in a row: the statement moved there in the script (and laid out in its place); else left 
+                    // where it was dropped (put back in its place if it was dropped near it), the statements after it following it)
                     auto const& n = iNodes[drag.node];
                     if (drag.dropIndex)
                     {
@@ -601,8 +655,12 @@ namespace neogfx::DesignStudio
                         arrange_nodes();
                         move_node(drag.node, *drag.dropIndex);
                     }
+                    else if (std::hypot(n.offset.x, n.offset.y) < gap() / 3.0)
+                        iMoved.erase(n.key);
                     else
                         iMoved[n.key] = n.offset;
+                    arrange_nodes();
+                    LayoutChanged.trigger();
                 }
                 update();
             }
@@ -699,7 +757,7 @@ namespace neogfx::DesignStudio
                 auto const function = n.outline.parent;
                 for (std::uint32_t i = function + 1u; i < iNodes.size() && is_descendant(i, function); ++i)
                 {
-                    auto const& user = iNodes[i];
+                    auto& user = iNodes[i];
                     if (user.outline.kind == outline_kind::Parameter)
                         continue;
                     auto const end = std::max(user.outline.first, user.outline.headerLast);
@@ -708,6 +766,7 @@ namespace neogfx::DesignStudio
                             (p == user.outline.first || !is_name(iText[p - 1u])) && (p + name.size() == iText.size() || !is_name(iText[p + name.size()])))
                         {
                             n.uses.push_back(i);
+                            iNodes[i].inputs.push_back(static_cast<std::uint32_t>(&n - &iNodes[0]));
                             break;
                         }
                 }
@@ -724,6 +783,10 @@ namespace neogfx::DesignStudio
         {
             return aCh == U' ' || aCh == U'\t' || aCh == U'\n' || aCh == U'\r';
         }
+        static bool is_operator(char32_t aCh)
+        {
+            return std::u32string_view{ U"=+-*/%<>!&|^~:.@" }.find(aCh) != std::u32string_view::npos;
+        }
         static bool is_name(char32_t aCh)
         {
             return aCh == U'_' || aCh == U'$' || aCh > 0x7Fu || (aCh < 0x80u && std::isalnum(static_cast<int>(aCh)));
@@ -731,71 +794,149 @@ namespace neogfx::DesignStudio
     private:
         dimension padding_x() const { return 10.0; }
         dimension gap() const { return 36.0; }
-        dimension header_height() const { return std::ceil(font().height()) + 12.0; }
-        dimension flow_y(node const& aNode) const { return aNode.bounds.y + header_height() / 2.0; }  // (its header's vertical middle)
-        dimension data_y(node const& aNode) const { return aNode.bounds.y + header_height() - 7.0; }
+        // (a node's header: its title bar (its kind), then its code's lines (if it has code), above and below which is CodePadding, then 
+        // a row for each parameter that its code uses (its inputs))
+        static constexpr dimension CodePadding = 4.0;
+        dimension title_height() const { return std::ceil(label_font().height()) + 10.0; }
+        dimension line_height() const { return std::ceil(graph_font().height()) + 2.0; }
+        dimension code_height(node const& aNode) const 
+        { 
+            return aNode.lineCount == 0u ? 0.0 : aNode.lineCount * line_height() + CodePadding * 2.0;
+        }
+        dimension header_height(node const& aNode) const 
+        { 
+            return title_height() + code_height(aNode) + (aNode.inputs.empty() ? 0.0 : aNode.inputs.size() * line_height() + CodePadding);
+        }
+        // (its code's (between its pins), its title's (its icon, its kind and room for a propagate button) and its inputs' (after their 
+        // pins), whichever is widest)
+        dimension header_width(dimension aTextWidth, dimension aLabelWidth, dimension aInputsWidth) const
+        {
+            return std::max({ aTextWidth + CodeInset * 2.0, padding_x() * 2.0 + IconSpace + 4.0 + aLabelWidth + title_height(), 
+                CodeInset + aInputsWidth + padding_x() });
+        }
+        // (where the flow passes into and out of a node: its first line of code's middle (a module's title bar's))
+        dimension flow_y(node const& aNode) const 
+        { 
+            return aNode.bounds.y + title_height() + (aNode.lineCount == 0u ? -title_height() / 2.0 : CodePadding + line_height() / 2.0);
+        }
+        point in_pin(node const& aNode) const { return point{ aNode.bounds.x + PinInset - PinSize * 0.8, flow_y(aNode) }; }
+        point out_pin(node const& aNode) const { return point{ aNode.bounds.right() - PinInset + PinSize, flow_y(aNode) }; }
+        // (an input's row's middle)
+        dimension input_y(node const& aNode, std::size_t aInput) const 
+        { 
+            return aNode.bounds.y + title_height() + code_height(aNode) + (aInput + 0.5) * line_height();
+        }
+        // (a node's header's code wrapped: its lines (each [first, last) of it), of at most WrapLength characters (a continuation line, 
+        // indented when drawn, two fewer), broken after the last space, opening bracket, comma or operator that fits (not in a string), 
+        // else after the last space in a string that fits, else at the length)
+        std::vector<std::pair<std::size_t, std::size_t>> wrap(node const& aNode) const
+        {
+            auto const& text = aNode.header;
+            std::vector<std::pair<std::size_t, std::size_t>> lines;
+            std::size_t start = 0u;
+            while (start < text.size())
+            {
+                auto const limit = WrapLength - (lines.empty() ? 0u : 2u);
+                if (text.size() - start <= limit)
+                {
+                    lines.emplace_back(start, text.size());
+                    break;
+                }
+                // (else after a space in a string, else at the length)
+                auto end = start + limit;
+                bool found = false;
+                for (bool const inStrings : { false, true })
+                    for (auto p = start + limit; !found && p > start + 1u; --p)
+                    {
+                        auto const before = text[p - 1u];
+                        bool const inString = aNode.headerCategories[p - 1u] == category::String && aNode.headerCategories[p] == category::String;
+                        // (not within an operator of more than one character, e.g. ->, ==, **)
+                        bool const withinOperator = is_operator(before) && is_operator(text[p]);
+                        if (inStrings ? before == U' ' : 
+                            !inString && !withinOperator && std::u32string_view{ U" ([{,=+-*/:" }.find(before) != std::u32string_view::npos)
+                        {
+                            end = p;
+                            found = true;
+                        }
+                    }
+                auto lineEnd = end;
+                while (lineEnd > start && text[lineEnd - 1u] == U' ')
+                    --lineEnd;
+                lines.emplace_back(start, lineEnd);
+                start = end;
+                while (start < text.size() && text[start] == U' ')
+                    ++start;
+            }
+            return lines;
+        }
         // (the nodes' headers measured, then the nodes arranged (see arrange_nodes))
         void layout_nodes(i_graphics_context const& aGc)
         {
             if (iNodes.empty())
                 return;
-            auto const labelFont = font().with_size(font().size() * 0.8);
-            auto const padding = padding_x();
+            auto const& labelFont = label_font();
             // (bottom up: a node is before its descendants)
             for (auto i = iNodes.size(); i-- > 0u;)
             {
                 auto& n = iNodes[i];
-                // (its header's runs and its kind measured (once: painting only draws them))
+                // (its header's code wrapped (its runs line by line: a continuation line indented) and its kind measured (once: painting 
+                // only draws them))
                 n.runs.clear();
+                auto const lines = wrap(n);
+                n.lineCount = static_cast<std::uint32_t>(lines.size());
                 dimension textWidth = 0.0;
-                for (std::size_t first = 0u; first < n.header.size();)
+                for (std::uint32_t line = 0u; line < lines.size(); ++line)
                 {
-                    auto last = first + 1u;
-                    while (last < n.header.size() && n.headerCategories[last] == n.headerCategories[first])
-                        ++last;
-                    auto& r = n.runs.emplace_back(run{ string{ neolib::utf32_to_utf8(n.header.substr(first, last - first)) }, n.headerCategories[first], textWidth });
-                    textWidth += aGc.text_extent(r.text, font()).cx;
-                    first = last;
+                    dimension lineWidth = 0.0;
+                    if (line > 0u)
+                        lineWidth += aGc.text_extent(n.runs.emplace_back(run{ string{ "  " }, std::nullopt, 0.0, line }).text, graph_font()).cx;
+                    for (auto first = lines[line].first; first < lines[line].second;)
+                    {
+                        auto last = first + 1u;
+                        while (last < lines[line].second && n.headerCategories[last] == n.headerCategories[first])
+                            ++last;
+                        auto& r = n.runs.emplace_back(run{ string{ neolib::utf32_to_utf8(n.header.substr(first, last - first)) }, n.headerCategories[first], lineWidth, line });
+                        lineWidth += aGc.text_extent(r.text, graph_font()).cx;
+                        first = last;
+                    }
+                    textWidth = std::max(textWidth, lineWidth);
                 }
                 n.label = kind_label(n);
                 n.textWidth = textWidth;
                 n.labelWidth = aGc.text_extent(n.label, labelFont).cx;
-                n.headerWidth = textWidth + n.labelWidth + padding * 3.0;
+                n.inputNames.clear();
+                n.inputsWidth = 0.0;
+                for (auto input : n.inputs)
+                    n.inputsWidth = std::max(n.inputsWidth, 
+                        aGc.text_extent(n.inputNames.emplace_back(neolib::utf32_to_utf8(leading_name(iNodes[input].header))), graph_font()).cx);
+                n.headerWidth = header_width(textWidth, n.labelWidth, n.inputsWidth);
             }
             arrange_nodes();
             iMeasuredZoom = 0.0; // (measured in the zoomed font when next painted)
         }
-        // (the nodes' headers measured in the zoomed font, as they are drawn (a font's glyphs do not scale exactly with its size: they 
-        // are hinted): their runs' offsets, and their boxes widened (and the nodes arranged again) where the zoomed text is wider)
+        // (the nodes' headers' runs' offsets measured in the zoomed font, as they are drawn (their boxes are as measured unzoomed: the 
+        // graph's fonts are unhinted (see graph_font), so their text scales with them))
         void measure_zoomed(i_graphics_context const& aGc)
         {
             iMeasuredZoom = iZoom;
-            auto const labelFont = font().with_size(font().size() * 0.8);
-            bool widened = false;
             for (auto& n : iNodes)
             {
                 n.zoomedOffsets.clear();
                 dimension offset = 0.0;
-                for (auto const& run : n.runs)
+                for (std::size_t r = 0u; r < n.runs.size(); ++r)
                 {
+                    if (r > 0u && n.runs[r].line != n.runs[r - 1u].line)
+                        offset = 0.0;
                     n.zoomedOffsets.push_back(offset);
-                    offset += aGc.text_extent(run.text, zoomed_font()).cx;
+                    offset += aGc.text_extent(n.runs[r].text, zoomed_font()).cx;
                 }
                 n.zoomedLabelWidth = aGc.text_extent(n.label, zoomed_label_font()).cx;
-                n.labelWidth = std::max(aGc.text_extent(n.label, labelFont).cx, n.zoomedLabelWidth / iZoom);
-                auto const headerWidth = std::max(n.textWidth, offset / iZoom) + n.labelWidth + padding_x() * 3.0;
-                if (headerWidth != n.headerWidth)
-                {
-                    n.headerWidth = headerWidth;
-                    widened = true;
-                }
             }
-            if (widened)
-                arrange_nodes();
         }
         // (the nodes' extents and positions, in graph coordinates, from their headers as measured: a body's statements left to right, a 
         // function's parameters before them; a node that has been dragged is where it was dragged to, 
-        // from its place (but not before its container's first), its container enclosing it)
+        // from its place (but not before its container's first), its container enclosing it, and the statements after it follow it (as 
+        // they would if it were not being dragged, while it is: see drop_index); then the flows routed (see route_flows))
         void arrange_nodes()
         {
             if (iNodes.empty())
@@ -806,14 +947,17 @@ namespace neogfx::DesignStudio
             {
                 auto& n = iNodes[i];
                 size lane;
-                dimension slotX = 0.0;
+                point place;
                 for (auto c : n.children)
                 {
                     auto& child = iNodes[c];
-                    child.offset = moved_offset(child, point{ slotX, 0.0 });
-                    lane.cx = std::max(lane.cx, slotX + child.offset.x + child.extents.cx);
-                    lane.cy = std::max(lane.cy, child.offset.y + child.extents.cy);
-                    slotX += child.extents.cx + gap();
+                    child.place = place;
+                    child.offset = moved_offset(child, place);
+                    auto const at = place + child.offset;
+                    lane.cx = std::max(lane.cx, at.x + child.extents.cx);
+                    lane.cy = std::max(lane.cy, at.y + child.extents.cy);
+                    auto const followed = (iDrag && iDrag->dragging && c == iDrag->node) ? place + iDrag->offset : at;
+                    place = point{ followed.x + child.extents.cx + gap(), followed.y };
                 }
                 // (its alternatives below its body, each on a lane of its own)
                 size content = lane;
@@ -840,7 +984,7 @@ namespace neogfx::DesignStudio
                 }
                 n.parametersWidth = parameters.cx;
                 n.laneExtents = lane;
-                n.extents = size{ std::max(n.headerWidth, 80.0), header_height() };
+                n.extents = size{ std::max(n.headerWidth, 80.0), header_height(n) };
                 if (!n.parameters.empty() || !n.children.empty() || !n.alternatives.empty())
                 {
                     auto const laneStart = padding + (n.parameters.empty() ? 24.0 : parameters.cx + 48.0);
@@ -852,7 +996,7 @@ namespace neogfx::DesignStudio
             iNodes[0].bounds = rect{ point{}, iNodes[0].extents };
             for (auto& n : iNodes)
             {
-                auto const top = n.bounds.y + header_height() + padding;
+                auto const top = n.bounds.y + header_height(n) + padding;
                 point p{ n.bounds.x + padding, top + n.parametersTop };
                 for (auto i : n.parameters)
                 {
@@ -860,12 +1004,8 @@ namespace neogfx::DesignStudio
                     p.y += iNodes[i].extents.cy + 8.0;
                 }
                 auto const laneStart = n.bounds.x + padding + (n.parameters.empty() ? 24.0 : n.parametersWidth + 48.0);
-                p = point{ laneStart, top };
                 for (auto i : n.children)
-                {
-                    iNodes[i].bounds = rect{ p + iNodes[i].offset, iNodes[i].extents };
-                    p.x += iNodes[i].extents.cx + gap();
-                }
+                    iNodes[i].bounds = rect{ point{ laneStart, top } + iNodes[i].place + iNodes[i].offset, iNodes[i].extents };
                 n.lane = rect{ point{ laneStart, top }, n.laneExtents };
                 p = point{ laneStart, top + (n.children.empty() ? 0.0 : n.laneExtents.cy + gap() / 2.0) };
                 for (auto i : n.alternatives)
@@ -874,6 +1014,295 @@ namespace neogfx::DesignStudio
                     p.y += iNodes[i].extents.cy + gap() / 2.0;
                 }
             }
+            route_flows();
+        }
+        // (the flows in each node's body: into its first statement (from its entry), from each statement to the next, back to a loop's 
+        // start, and into each alternative of a branch; and a function's parameters' wires to their uses; each routed (see route) around 
+        // what else is in the body)
+        void route_flows()
+        {
+            iFlows.clear();
+            iWires.clear();
+            for (auto& n : iNodes)
+                n.flowsOut = false;
+            for (auto& n : iNodes)
+            {
+                n.firstFlow = iFlows.size();
+                n.flowCount = 0u;
+                if (n.children.empty() && n.alternatives.empty() && n.parameters.empty())
+                    continue;
+                auto const headerHeight = header_height(n);
+                std::vector<rect> obstacles{ rect{ n.bounds.top_left(), size{ n.bounds.cx, headerHeight } } };
+                for (auto const* members : { &n.children, &n.alternatives, &n.parameters })
+                    for (auto m : *members)
+                        obstacles.push_back(iNodes[m].bounds);
+                rect const area{ point{ n.bounds.x, n.bounds.y + headerHeight }, size{ n.bounds.cx, n.bounds.cy - headerHeight } };
+                // (its parameters' wires to their uses' inputs)
+                for (auto p : n.parameters)
+                    for (auto use : iNodes[p].uses)
+                    {
+                        auto const& user = iNodes[use];
+                        auto const input = static_cast<std::size_t>(std::find(user.inputs.begin(), user.inputs.end(), p) - user.inputs.begin());
+                        if (input < user.inputs.size())
+                            iWires.push_back(flow{ route(point{ iNodes[p].bounds.right() - PinInset, flow_y(iNodes[p]) }, 
+                                point{ user.bounds.x + PinInset, input_y(user, input) }, obstacles, area, true) });
+                    }
+                for (auto a : n.alternatives)
+                {
+                    auto const& alternative = iNodes[a];
+                    iFlows.push_back(flow{ { point{ alternative.bounds.x - 14.0, flow_y(alternative) }, in_pin(alternative) }, true });
+                }
+                if (!n.children.empty())
+                {
+                    auto const& first = iNodes[n.children.front()];
+                    point const entry{ n.lane.x - 18.0, flow_y(first) };
+                    iFlows.push_back(flow{ route(entry, in_pin(first), obstacles, area, true), true });
+                    for (std::size_t c = 1u; c < n.children.size(); ++c)
+                    {
+                        auto& from = iNodes[n.children[c - 1u]];
+                        from.flowsOut = true;
+                        iFlows.push_back(flow{ route(out_pin(from), in_pin(iNodes[n.children[c]]), obstacles, area, true) });
+                    }
+                    if (n.outline.kind == outline_kind::Loop)
+                    {
+                        auto& last = iNodes[n.children.back()];
+                        last.flowsOut = true;
+                        iFlows.push_back(flow{ route(out_pin(last), point{ n.lane.x - 10.0, entry.y }, obstacles, area, false), false, true });
+                    }
+                }
+                n.flowCount = iFlows.size() - n.firstFlow;
+            }
+        }
+        // (a flow's route from a point (going right) to a point (going right into it, else up into it), within an area: an S-curve (a 
+        // straight line, if they are level) if that passes none of the obstacles (nodes), else the cheapest path along the lines that are a margin from them (a path's cost: 
+        // its length, more where it is within the margin of an obstacle, much more where it crosses one, and more for each turn), so that 
+        // it crosses nodes only if it must)
+        std::vector<point> route(point const& aFrom, point const& aTo, std::vector<rect> const& aObstacles, rect const& aArea, bool aIntoRight) const
+        {
+            auto const margin = RouteMargin;
+            auto const inside = [](point const& aPoint, rect const& aRect, dimension aInset)
+            {
+                return aPoint.x > aRect.x + aInset && aPoint.x < aRect.right() - aInset && aPoint.y > aRect.y + aInset && aPoint.y < aRect.bottom() - aInset;
+            };
+            // (the nodes that it starts and ends in (its pins are inside them): an S-curve leaves and enters them level with its pins)
+            auto const containing = [&](point const& aPoint) -> rect const*
+            {
+                rect const* result = nullptr;
+                for (auto const& o : aObstacles)
+                    if (inside(aPoint, o, 0.0) && (!result || o.cx * o.cy < result->cx * result->cy))
+                        result = &o;
+                return result;
+            };
+            auto const fromNode = containing(aFrom);
+            auto const toNode = containing(aTo);
+            if (aIntoRight && aTo.x - aFrom.x > (std::abs(aTo.y - aFrom.y) < 0.5 ? 0.0 : margin * 2.0))
+            {
+                auto const dx = (aTo.x - aFrom.x) / 2.0;
+                bool clear = true;
+                for (int sample = 1; clear && sample < 24; ++sample)
+                {
+                    auto const t = sample / 24.0;
+                    auto const u = 1.0 - t;
+                    point const p{ u * u * u * aFrom.x + 3.0 * u * u * t * (aFrom.x + dx) + 3.0 * u * t * t * (aTo.x - dx) + t * t * t * aTo.x,
+                        u * u * u * aFrom.y + 3.0 * u * u * t * aFrom.y + 3.0 * u * t * t * aTo.y + t * t * t * aTo.y };
+                    clear = std::none_of(aObstacles.begin(), aObstacles.end(), 
+                        [&](rect const& o) { return &o != fromNode && &o != toNode && inside(p, o, 3.0); });
+                }
+                if (clear)
+                    return { aFrom, aTo };
+            }
+            point const start{ (fromNode ? fromNode->right() : aFrom.x) + margin, aFrom.y };
+            point const end = aIntoRight ? point{ (toNode ? toNode->x : aTo.x) - margin, aTo.y } : point{ aTo.x, aTo.y + margin };
+            // (the lines: through the start and the end, a margin from each obstacle and inside the area's edges)
+            std::vector<coordinate> xs{ start.x, end.x, aArea.x + 4.0, aArea.right() - 4.0 };
+            std::vector<coordinate> ys{ start.y, end.y, aArea.bottom() - 4.0 };
+            for (auto const& o : aObstacles)
+            {
+                xs.push_back(o.x - margin);
+                xs.push_back(o.right() + margin);
+                ys.push_back(o.y - margin);
+                ys.push_back(o.bottom() + margin);
+            }
+            auto const tidy = [](std::vector<coordinate>& aLines, coordinate aMin, coordinate aMax, coordinate aStart, coordinate aEnd)
+            {
+                std::erase_if(aLines, [&](coordinate c) { return (c < aMin || c > aMax) && c != aStart && c != aEnd; });
+                std::sort(aLines.begin(), aLines.end());
+                aLines.erase(std::unique(aLines.begin(), aLines.end(), [](coordinate a, coordinate b) { return b - a < 0.5; }), aLines.end());
+            };
+            tidy(xs, aArea.x + 1.0, aArea.right() - 1.0, start.x, end.x);
+            tidy(ys, aArea.y + 1.0, aArea.bottom() - 1.0, start.y, end.y);
+            auto const nearest = [](std::vector<coordinate> const& aLines, coordinate c)
+            {
+                return static_cast<std::size_t>(std::min_element(aLines.begin(), aLines.end(), 
+                    [&](coordinate a, coordinate b) { return std::abs(a - c) < std::abs(b - c); }) - aLines.begin());
+            };
+            auto const nx = xs.size();
+            auto const ny = ys.size();
+            // (each step's cost (from a crossing to the next, right or down))
+            auto const cost = [&](point const& p, point const& q)
+            {
+                bool const horizontal = (p.y == q.y);
+                auto const lo = horizontal ? std::min(p.x, q.x) : std::min(p.y, q.y);
+                auto const hi = horizontal ? std::max(p.x, q.x) : std::max(p.y, q.y);
+                double result = hi - lo;
+                for (auto const& o : aObstacles)
+                    for (auto const& [inflation, weight] : { std::pair{ 0.0, 40.0 }, std::pair{ margin - 1.0, 1.5 } })
+                    {
+                        auto const r = o.inflated(size{ inflation });
+                        if (horizontal ? (p.y <= r.y || p.y >= r.bottom()) : (p.x <= r.x || p.x >= r.right()))
+                            continue;
+                        auto const overlap = std::min(hi, horizontal ? r.right() : r.bottom()) - std::max(lo, horizontal ? r.x : r.y);
+                        if (overlap > 0.0)
+                            result += overlap * weight;
+                    }
+                return result;
+            };
+            std::vector<double> across(nx * ny, 0.0);
+            std::vector<double> down(nx * ny, 0.0);
+            for (std::size_t y = 0u; y < ny; ++y)
+                for (std::size_t x = 0u; x < nx; ++x)
+                {
+                    if (x + 1u < nx)
+                        across[y * nx + x] = cost(point{ xs[x], ys[y] }, point{ xs[x + 1u], ys[y] });
+                    if (y + 1u < ny)
+                        down[y * nx + x] = cost(point{ xs[x], ys[y] }, point{ xs[x], ys[y + 1u] });
+                }
+            // (the cheapest path: its states each a crossing and the direction that it was arrived at in (right, left, down, up))
+            auto const turn = margin * 2.0;
+            auto const state = [nx](std::size_t x, std::size_t y, std::size_t d) { return (y * nx + x) * 4u + d; };
+            auto const none = std::numeric_limits<std::size_t>::max();
+            std::vector<double> distance(nx * ny * 4u, std::numeric_limits<double>::infinity());
+            std::vector<std::size_t> previous(nx * ny * 4u, none);
+            using entry = std::pair<double, std::size_t>;
+            std::priority_queue<entry, std::vector<entry>, std::greater<entry>> queue;
+            auto const sx = nearest(xs, start.x);
+            auto const sy = nearest(ys, start.y);
+            auto const ex = nearest(xs, end.x);
+            auto const ey = nearest(ys, end.y);
+            distance[state(sx, sy, 0u)] = 0.0;
+            queue.emplace(0.0, state(sx, sy, 0u));
+            while (!queue.empty())
+            {
+                auto const [d, current] = queue.top();
+                queue.pop();
+                if (d > distance[current])
+                    continue;
+                auto const direction = current % 4u;
+                auto const x = (current / 4u) % nx;
+                auto const y = (current / 4u) / nx;
+                for (std::size_t next = 0u; next < 4u; ++next)
+                {
+                    if ((next ^ 1u) == direction)
+                        continue; // (not back the way it came)
+                    std::size_t nextX = x;
+                    std::size_t nextY = y;
+                    double step = 0.0;
+                    switch (next)
+                    {
+                    case 0u: if (x + 1u >= nx) continue; nextX = x + 1u; step = across[y * nx + x]; break;
+                    case 1u: if (x == 0u) continue; nextX = x - 1u; step = across[y * nx + nextX]; break;
+                    case 2u: if (y + 1u >= ny) continue; nextY = y + 1u; step = down[y * nx + x]; break;
+                    default: if (y == 0u) continue; nextY = y - 1u; step = down[nextY * nx + x]; break;
+                    }
+                    auto const nextState = state(nextX, nextY, next);
+                    auto const nextDistance = d + step + (next != direction ? turn : 0.0);
+                    if (nextDistance < distance[nextState])
+                    {
+                        distance[nextState] = nextDistance;
+                        previous[nextState] = current;
+                        queue.emplace(nextDistance, nextState);
+                    }
+                }
+            }
+            // (arriving going right (into its end), else up)
+            auto const arrival = aIntoRight ? 0u : 3u;
+            std::size_t best = none;
+            double bestDistance = std::numeric_limits<double>::infinity();
+            for (std::size_t direction = 0u; direction < 4u; ++direction)
+            {
+                auto const d = distance[state(ex, ey, direction)] + (direction != arrival ? turn : 0.0);
+                if (d < bestDistance)
+                {
+                    bestDistance = d;
+                    best = state(ex, ey, direction);
+                }
+            }
+            if (best == none || bestDistance == std::numeric_limits<double>::infinity())
+                return { aFrom, aTo };
+            std::vector<point> path{ aTo };
+            for (auto s = best; s != none; s = previous[s])
+                path.push_back(point{ xs[(s / 4u) % nx], ys[(s / 4u) / nx] });
+            path.push_back(aFrom);
+            std::reverse(path.begin(), path.end());
+            // (its corners only: no point between two in line with them)
+            auto const corners = [](std::vector<point> const& aPath)
+            {
+                std::vector<point> result;
+                for (auto const& p : aPath)
+                {
+                    if (!result.empty() && result.back() == p)
+                        continue;
+                    if (result.size() >= 2u)
+                    {
+                        auto const& a = result[result.size() - 2u];
+                        auto const& b = result.back();
+                        if ((a.x == b.x && b.x == p.x) || (a.y == b.y && b.y == p.y))
+                            result.pop_back();
+                    }
+                    result.push_back(p);
+                }
+                return result;
+            };
+            auto result = corners(path);
+            // (each of its segments between corners (not its first or last) in the middle of the channel that it is in (between what 
+            // is on either side of it, or the area's edge): so that it moves smoothly as the nodes do, not from one of the lines that it 
+            // was routed along to another; but not past the far ends of the segments before and after it (it would turn back on itself), 
+            // nor nearer its start or its end than the margin (its pins are there))
+            for (std::size_t i = 1u; i + 2u < result.size(); ++i)
+            {
+                auto& p = result[i];
+                auto& q = result[i + 1u];
+                bool const horizontal = (p.y == q.y);
+                auto lowest = -std::numeric_limits<coordinate>::infinity();
+                auto highest = std::numeric_limits<coordinate>::infinity();
+                for (std::size_t neighbour : { i - 1u, i + 2u })
+                {
+                    auto const c = horizontal ? result[neighbour].y : result[neighbour].x;
+                    auto const old = horizontal ? p.y : p.x;
+                    auto const gap = (neighbour == 0u || neighbour + 1u == result.size()) ? margin : 0.0;
+                    if (old > c)
+                        lowest = std::max(lowest, c + gap);
+                    else if (old < c)
+                        highest = std::min(highest, c - gap);
+                }
+                auto const position = horizontal ? p.y : p.x;
+                auto const lo = horizontal ? std::min(p.x, q.x) : std::min(p.y, q.y);
+                auto const hi = horizontal ? std::max(p.x, q.x) : std::max(p.y, q.y);
+                auto before = horizontal ? aArea.y : aArea.x;
+                auto after = horizontal ? aArea.bottom() : aArea.right();
+                bool crosses = false;
+                for (auto const& o : aObstacles)
+                {
+                    auto const oLo = horizontal ? o.x : o.y;
+                    auto const oHi = horizontal ? o.right() : o.bottom();
+                    if (oHi <= lo || oLo >= hi)
+                        continue;
+                    auto const oStart = horizontal ? o.y : o.x;
+                    auto const oEnd = horizontal ? o.bottom() : o.right();
+                    if (oEnd <= position + 0.5)
+                        before = std::max(before, oEnd);
+                    else if (oStart >= position - 0.5)
+                        after = std::min(after, oStart);
+                    else
+                        crosses = true;
+                }
+                if (crosses || after <= before || highest < lowest)
+                    continue;
+                auto const middle = std::clamp((before + after) / 2.0, lowest, highest);
+                (horizontal ? p.y : p.x) = middle;
+                (horizontal ? q.y : q.x) = middle;
+            }
+            return corners(result);
         }
         // (where a node has been dragged to, from its place (its offset from its container's first): not before its container's first)
         point moved_offset(node const& aNode, point const& aPlace) const
@@ -883,8 +1312,14 @@ namespace neogfx::DesignStudio
                 return point{};
             return point{ std::max(moved->second.x, -aPlace.x), std::max(moved->second.y, -aPlace.y) };
         }
-        // (the place among its siblings that a statement being dragged would be moved to: before the first sibling whose centre is to 
-        // the right of its centre (none: its own place, or a parameter))
+        // (whether a node is in the row (of its siblings) that a point is level with)
+        static bool in_row(node const& aNode, point const& aPoint)
+        {
+            return aPoint.y >= aNode.bounds.y && aPoint.y <= aNode.bounds.bottom();
+        }
+        // (the place among its siblings that a statement being dragged would be moved to: among those in the row that its centre is 
+        // level with (statements dragged under others are in rows of their own), before the first whose centre is to the right of its 
+        // centre, else after the last (none: its own place, a row with none of its siblings in it (it is only moved there), or a parameter))
         std::optional<std::size_t> drop_index(std::uint32_t aNode) const
         {
             auto const& n = iNodes[aNode];
@@ -892,12 +1327,21 @@ namespace neogfx::DesignStudio
                 return std::nullopt;
             auto const& siblings = iNodes[n.outline.parent].children;
             auto const current = static_cast<std::size_t>(std::find(siblings.begin(), siblings.end(), aNode) - siblings.begin());
-            std::size_t before = 0u;
-            for (auto s : siblings)
-                if (s != aNode && iNodes[s].bounds.center().x < n.bounds.center().x)
-                    ++before;
-            auto const index = before <= current ? before : before + 1u;
-            return (index == current || index == current + 1u) ? std::nullopt : std::optional<std::size_t>{ index };
+            auto const centre = n.bounds.center();
+            std::optional<std::size_t> index;
+            for (std::size_t s = 0u; s < siblings.size(); ++s)
+            {
+                auto const& sibling = iNodes[siblings[s]];
+                if (siblings[s] == aNode || !in_row(sibling, centre))
+                    continue;
+                if (sibling.bounds.center().x > centre.x)
+                {
+                    index = s;
+                    break;
+                }
+                index = s + 1u;
+            }
+            return (!index || *index == current || *index == current + 1u) ? std::nullopt : index;
         }
         void fit()
         {
@@ -936,29 +1380,154 @@ namespace neogfx::DesignStudio
         neogfx::font const& zoomed_font() const
         {
             if (!iZoomedFont)
-                iZoomedFont = font().with_size(std::max(font().size() * iZoom, 1.0));
+                iZoomedFont = graph_font().with_size(std::max(font().size() * iZoom, 1.0));
             return *iZoomedFont;
+        }
+        // (its text: in its font (the coding font), unhinted, so that its glyphs are where they are exactly, at any zoom (a hinted font's 
+        // are on whole pixels): its text, and so its nodes, scale smoothly as it is zoomed)
+        neogfx::font const& graph_font() const
+        {
+            if (!iGraphFont)
+                iGraphFont = font().with_hinting(false);
+            return *iGraphFont;
+        }
+        // (a node's kind, in its title bar: in the app's font, bold, as large as the coding font, unhinted)
+        neogfx::font const& label_font() const
+        {
+            if (!iLabelFont)
+                iLabelFont = service<i_app>().current_style().font().with_style(font_style::Bold).with_size(std::max(font().size() * 0.9, 1.0)).with_hinting(false);
+            return *iLabelFont;
         }
         neogfx::font const& zoomed_label_font() const
         {
             if (!iZoomedLabelFont)
-                iZoomedLabelFont = font().with_size(std::max(font().size() * 0.8 * iZoom, 1.0));
+                iZoomedLabelFont = label_font().with_size(std::max(font().size() * 0.9 * iZoom, 1.0));
             return *iZoomedLabelFont;
         }
-        void draw_flow(i_graphics_context& aGc, point const& aFrom, point const& aTo, color const& aColour) const
+        // (a title bar's texture: its kind's colour fading to the right, then glossy above and shaded below)
+        neogfx::gradient const& title_gradient(color const& aAccent) const
         {
-            // (its arrow head in the direction of its line (nodes that have been dragged may be anywhere))
-            auto const arrow = 6.0 * iZoom;
-            auto const dx = aTo.x - aFrom.x;
-            auto const dy = aTo.y - aFrom.y;
-            auto const length = std::hypot(dx, dy);
-            point const direction = length > 0.0 ? point{ dx / length, dy / length } : point{ 1.0, 0.0 };
-            point const normal{ -direction.y, direction.x };
-            point const base{ aTo.x - direction.x * arrow, aTo.y - direction.y * arrow };
-            aGc.draw_line(aFrom, base, pen{ aColour, 2.0 * iZoom });
-            aGc.draw_triangle(
-                point{ base.x + normal.x * arrow * 0.6, base.y + normal.y * arrow * 0.6 }, aTo, 
-                point{ base.x - normal.x * arrow * 0.6, base.y - normal.y * arrow * 0.6 }, pen{ aColour, 1.0 }, aColour);
+            auto existing = iTitleGradients.find(aAccent);
+            if (existing == iTitleGradients.end())
+                existing = iTitleGradients.emplace(aAccent, neogfx::gradient{ 
+                    { mix(aAccent, color::Black, 0.35), mix(aAccent, color::Black, 0.65), mix(aAccent, color::Black, 0.8) }, gradient_direction::Horizontal }).first;
+            return existing->second;
+        }
+        neogfx::gradient const& gloss_gradient() const
+        {
+            if (!iGloss)
+                iGloss = neogfx::gradient{ { color::White.with_alpha(0.24), color::White.with_alpha(0.04), color::Black.with_alpha(0.0), color::Black.with_alpha(0.3) }, 
+                    gradient_direction::Vertical };
+            return *iGloss;
+        }
+        // (a flow's route (see flow) drawn: an S-curve, else its corners rounded)
+        void draw_route(i_graphics_context& aGc, std::vector<point> const& aRoute, pen const& aPen) const
+        {
+            if (aRoute.size() < 2u)
+                return;
+            if (aRoute.size() == 2u)
+            {
+                auto const a = to_screen(aRoute[0]);
+                auto const b = to_screen(aRoute[1]);
+                auto const dx = (b.x - a.x) / 2.0;
+                if (std::abs(a.y - b.y) < 0.5 || dx <= 0.0)
+                    aGc.draw_line(a, b, aPen);
+                else
+                    aGc.draw_cubic_bezier(a, point{ a.x + dx, a.y }, point{ b.x - dx, b.y }, b, aPen);
+                return;
+            }
+            point current = aRoute.front();
+            for (std::size_t i = 1u; i + 1u < aRoute.size(); ++i)
+            {
+                auto const& corner = aRoute[i];
+                auto const in = corner - aRoute[i - 1u];
+                auto const out = aRoute[i + 1u] - corner;
+                auto const inLength = std::hypot(in.x, in.y);
+                auto const outLength = std::hypot(out.x, out.y);
+                if (inLength == 0.0 || outLength == 0.0)
+                    continue;
+                auto const radius = std::min({ CornerRadius, inLength / 2.0, outLength / 2.0 });
+                point const before = corner - in * (radius / inLength);
+                point const after = corner + out * (radius / outLength);
+                aGc.draw_line(to_screen(current), to_screen(before), aPen);
+                aGc.draw_cubic_bezier(to_screen(before), to_screen(before + (corner - before) * 0.6), to_screen(after + (corner - after) * 0.6), 
+                    to_screen(after), aPen);
+                current = after;
+            }
+            aGc.draw_line(to_screen(current), to_screen(aRoute.back()), aPen);
+        }
+        // (a pin where the flow passes into or out of a node (pointing the way that it passes): its outline, filled if it does)
+        void draw_pin(i_graphics_context& aGc, point const& aCentre, bool aConnected, color const& aColour) const
+        {
+            auto const s = PinSize * iZoom;
+            path outline;
+            outline.move_to(point{ aCentre.x - s * 0.8, aCentre.y - s });
+            outline.line_to(point{ aCentre.x + s * 0.2, aCentre.y - s });
+            outline.line_to(point{ aCentre.x + s, aCentre.y });
+            outline.line_to(point{ aCentre.x + s * 0.2, aCentre.y + s });
+            outline.line_to(point{ aCentre.x - s * 0.8, aCentre.y + s });
+            outline.line_to(point{ aCentre.x - s * 0.8, aCentre.y - s });
+            aGc.draw_path(outline, pen{ aColour, std::max(1.0, 1.3 * iZoom) }, aConnected ? brush{ aColour } : brush{});
+        }
+        // (a node's kind's icon, in its title bar, about a centre (h: its half size))
+        void draw_icon(i_graphics_context& aGc, node const& aNode, point const& c, dimension h, color const& aColour) const
+        {
+            pen const stroke{ aColour, std::max(1.0, 1.5 * iZoom) };
+            auto const line = [&](double x0, double y0, double x1, double y1) { aGc.draw_line(point{ c.x + x0 * h, c.y + y0 * h }, point{ c.x + x1 * h, c.y + y1 * h }, stroke); };
+            switch (aNode.outline.kind)
+            {
+            case outline_kind::Module:
+                line(0.0, -1.0, 1.0, 0.0);
+                line(1.0, 0.0, 0.0, 1.0);
+                line(0.0, 1.0, -1.0, 0.0);
+                line(-1.0, 0.0, 0.0, -1.0);
+                break;
+            case outline_kind::Function:
+                aGc.draw_cubic_bezier(point{ c.x + 0.8 * h, c.y - 0.85 * h }, point{ c.x + 0.3 * h, c.y - 1.15 * h }, point{ c.x, c.y - 0.85 * h }, 
+                    point{ c.x - 0.05 * h, c.y - 0.3 * h }, stroke);
+                line(-0.05, -0.3, -0.35, 1.0);
+                line(-0.6, -0.25, 0.5, -0.25);
+                break;
+            case outline_kind::Class:
+                aGc.draw_rect(rect{ point{ c.x - 0.8 * h, c.y - 0.8 * h }, size{ 1.6 * h, 1.6 * h } }, stroke);
+                line(-0.8, -0.2, 0.8, -0.2);
+                break;
+            case outline_kind::Parameter:
+                aGc.draw_circle(c, 0.6 * h, stroke);
+                break;
+            case outline_kind::Loop:
+                for (int segment = 0; segment < 12; ++segment)
+                {
+                    auto const a0 = -0.7 + 5.1 * segment / 12.0;
+                    auto const a1 = -0.7 + 5.1 * (segment + 1) / 12.0;
+                    line(0.75 * std::cos(a0), 0.75 * std::sin(a0), 0.75 * std::cos(a1), 0.75 * std::sin(a1));
+                }
+                line(0.57, -0.48, 0.95, -0.95);
+                line(0.57, -0.48, 0.05, -0.55);
+                break;
+            case outline_kind::Branch:
+            case outline_kind::Alternative:
+                line(-1.0, 0.0, -0.1, 0.0);
+                line(-0.1, 0.0, 0.9, -0.8);
+                line(-0.1, 0.0, 0.9, 0.8);
+                break;
+            case outline_kind::Return:
+                line(0.8, -0.8, 0.8, 0.3);
+                line(0.8, 0.3, -0.8, 0.3);
+                line(-0.8, 0.3, -0.35, -0.15);
+                line(-0.8, 0.3, -0.35, 0.75);
+                break;
+            case outline_kind::Jump:
+                line(-1.0, 0.0, 1.0, 0.0);
+                line(1.0, 0.0, 0.5, -0.5);
+                line(1.0, 0.0, 0.5, 0.5);
+                break;
+            default:
+                line(-0.8, -0.7, -0.1, 0.0);
+                line(-0.1, 0.0, -0.8, 0.7);
+                line(0.1, 0.7, 0.9, 0.7);
+                break;
+            }
         }
     private:
         color text_colour() const
@@ -996,11 +1565,12 @@ namespace neogfx::DesignStudio
                 return text_colour();
             }
         }
+        // (a node's body's colour: darker than the background (a module's lighter: it is the canvas that the others are on))
         color node_colour(node const& aNode) const
         {
             if (aNode.outline.kind == outline_kind::Module)
                 return mix(background_colour(), text_colour(), 0.02);
-            return mix(background_colour(), text_colour(), 0.05);
+            return mix(background_colour(), color::Black, 0.35);
         }
         // (a node's kind, as its label shows it (translated))
         string kind_label(node const& aNode) const
@@ -1128,9 +1698,9 @@ namespace neogfx::DesignStudio
             iEditing = inline_edit{ aNode, aInsert };
             auto const& n = iNodes[aNode];
             auto editRect = to_screen(n.bounds);
-            editRect.cy = header_height() * iZoom;
+            editRect.cy = header_height(n) * iZoom;
             if (aInsert)
-                editRect.y += aNode == 0u ? header_height() * iZoom : editRect.cy + 4.0;
+                editRect.y += editRect.cy + (aNode == 0u ? 0.0 : 4.0);
             editRect.cx = std::max(editRect.cx, 280.0 * std::max(iZoom, 1.0));
             auto editor = make_ref<text_edit>(*this, text_edit_caps::SingleLine, frame_style::SolidFrame);
             // (in the font as zoomed: as the node's text is)
@@ -1276,14 +1846,13 @@ namespace neogfx::DesignStudio
                 edit(*use, static_cast<position_type>(*use + rename.from.size()), rename.to);
             update();
         }
-        // (where a rename's propagate button is: in its node's header, before its label)
+        // (where a rename's propagate button is: at the end of its node's title row)
         rect propagate_rect(node const& aNode) const
         {
             auto const r = to_screen(aNode.bounds);
-            auto const headerHeight = header_height() * iZoom;
-            auto const extent = std::max(std::floor(headerHeight * 0.75), 8.0);
-            return rect{ point{ r.right() - (padding_x() * 2.0 + aNode.labelWidth) * iZoom - extent, r.y + (headerHeight - extent) / 2.0 }, 
-                neogfx::size{ extent } };
+            auto const titleHeight = title_height() * iZoom;
+            auto const extent = std::max(std::floor(titleHeight * 0.8), 8.0);
+            return rect{ point{ r.right() - padding_x() * iZoom - extent, r.y + (titleHeight - extent) / 2.0 }, neogfx::size{ extent } };
         }
         // (the propagate button: one name fanning out to its uses)
         void draw_propagate(i_graphics_context& aGc, rect const& aRect, color const& aColour) const
@@ -1318,8 +1887,14 @@ namespace neogfx::DesignStudio
         mutable bool iFitPending = true;
         mutable std::optional<neogfx::font> iZoomedFont;
         mutable std::optional<neogfx::font> iZoomedLabelFont;
+        mutable std::optional<neogfx::font> iLabelFont;
+        mutable std::optional<neogfx::font> iGraphFont;
+        mutable std::map<color, neogfx::gradient> iTitleGradients;    ///< (by colour (see title_gradient))
+        mutable std::optional<neogfx::gradient> iGloss;
         double iMeasuredZoom = 0.0;     ///< (the zoom that the nodes' headers were last measured at (see measure_zoomed))
         std::map<std::u32string, point> iMoved;     ///< (where nodes have been dragged to (by key))
+        std::vector<flow> iFlows;                   ///< (by the node whose body they are in (see route_flows))
+        std::vector<flow> iWires;                   ///< (the parameters' wires to their uses (see route_flows))
         std::optional<drag> iDrag;
         std::optional<pan> iPan;
         std::optional<inline_edit> iEditing;
