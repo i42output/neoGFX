@@ -289,11 +289,13 @@ namespace neogfx
         if (iSectionWidths.empty())
             return 0.0;
         auto const lastColumn = presentation_model().columns() - 1u;
-        // (a last column that is expanded to fit the view isn't as wide as its contents: as the rest of the view unless resized wider)
-        auto result = units_converter{ *this }.from_device_units(iSectionWidths[aSectionIndex].manual != std::nullopt ?
-            *iSectionWidths[aSectionIndex].manual :
-            aSectionIndex == lastColumn && expand_last_column() == last_column_expansion::ExpandToFitView ? 0.0 : 
-            iSectionWidths[aSectionIndex].calculated);
+        // (a last column that is expanded to fit the view isn't as wide as its contents: as the rest of the view unless resized wider, but 
+        // at least as wide as its heading (until resized): its heading isn't truncated)
+        auto result = iSectionWidths[aSectionIndex].manual != std::nullopt ?
+            units_converter{ *this }.from_device_units(*iSectionWidths[aSectionIndex].manual) :
+            aSectionIndex == lastColumn && expand_last_column() == last_column_expansion::ExpandToFitView ? 
+                presentation_model().column_heading_extents(aSectionIndex, *this).cx + presentation_model().cell_padding(*this).size().cx * 2.0 :
+                units_converter{ *this }.from_device_units(iSectionWidths[aSectionIndex].calculated);
         thread_local bool tInSectionWidth = false;
         if (aSectionIndex == lastColumn && expand_last_column() != last_column_expansion::DontExpand && !tInSectionWidth && !iUpdatingSectionWidth)
         {

@@ -287,6 +287,9 @@ namespace neogfx
 
     void virtual_window::activate()
     {
+        // (a closed window (see close) is neither activated nor deactivated: its window's widgets have been removed)
+        if (!is_alive())
+            return;
         if ((surface_window().style() & window_style::NoActivate) == window_style::NoActivate)
             return;
         if (!enabled())
@@ -314,6 +317,8 @@ namespace neogfx
     void virtual_window::deactivate()
     {
         iActive = false;
+        if (!is_alive())
+            return; // (see activate)
         surface_window().as_window().deactivated()();
         parent().surface_window().as_widget().update(true);
         surface_window().as_widget().update(true);

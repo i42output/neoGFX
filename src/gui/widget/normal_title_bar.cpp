@@ -356,6 +356,9 @@ namespace neogfx
 
         auto update_widgets = [this](bool aUpdateLayout = false)
         {
+            if (!has_root())
+                return; // (removed from its window: e.g. its window is being closed (see window::close))
+
             scoped_units su{ *this, units::Pixels };
 
             // the title bar's usual appearance, as adjusted by the active skin
@@ -707,6 +710,9 @@ namespace neogfx
 
     void normal_title_bar::update_merge()
     {
+        if (!has_root())
+            return; // (see update_widgets)
+
         i_window* host = nullptr;
         i_widget* menuBar = nullptr;
         if (root().has_native_window() && root().native_window().is_nested() && root().is_maximized())

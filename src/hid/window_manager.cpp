@@ -173,14 +173,15 @@ namespace neogfx
     point window_manager::mouse_position(const i_window& aWindow) const
     {
         auto const mousePosition = mouse_position();
-        auto const surfacePosition = aWindow.surface().surface_position();
         if ((aWindow.style() & window_style::Nested) != window_style::Nested)
         {
-            point const result{ mousePosition - surfacePosition };
+            point const result{ mousePosition - aWindow.surface().surface_position() };
             return result;
         }
         else
         {
+            // (relative to its hosting window: its own surface position is not needed, and a nested window that has been closed 
+            // (but not yet destroyed, so still under the mouse) is in no nest: asking for its surface position throws)
             auto const hostingWindowSurfacePosition = hosting_window(aWindow).surface().surface_position();
             point const result{ mousePosition - hostingWindowSurfacePosition };
             return result;

@@ -1095,7 +1095,7 @@ namespace neogfx::DesignStudio
             };
             auto const fromNode = containing(aFrom);
             auto const toNode = containing(aTo);
-            if (aIntoRight && aTo.x - aFrom.x > (std::abs(aTo.y - aFrom.y) < 0.5 ? 0.0 : margin * 2.0))
+            if (aIntoRight && aTo.x - aFrom.x > (std::abs(aTo.y - aFrom.y) < 0.5 ? 0.0 : PinSize * 2.0))
             {
                 auto const dx = (aTo.x - aFrom.x) / 2.0;
                 bool clear = true;
