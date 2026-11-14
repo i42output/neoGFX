@@ -382,8 +382,10 @@ namespace neogfx
                 }
                 else
                 {
+                    // (light hinting (vertical only), as an LCD glyph's: a glyph is placed by its unhinted advance (see the glyph 
+                    // text factory), so hinting it horizontally (normal hinting) moves its strokes, and its spacing, off them)
                     freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyphChar.value, 
-                        (hinting() ? FT_LOAD_FORCE_AUTOHINT : FT_LOAD_NO_HINTING) | FT_LOAD_TARGET_NORMAL | FT_LOAD_NO_BITMAP));
+                        (hinting() ? FT_LOAD_FORCE_AUTOHINT : FT_LOAD_NO_HINTING) | FT_LOAD_TARGET_LIGHT | FT_LOAD_NO_BITMAP));
                 }
             }
             catch (freetype_error fe)
@@ -483,10 +485,15 @@ namespace neogfx
                     useSubpixelFiltering,
                     // n.b. horizontally the bitmap's own offset (bitmap_left), not the outline's bearing: an LCD filtered bitmap
                     // can be padded (e.g. FreeType built with FT_CONFIG_OPTION_SUBPIXEL_RENDERING, as Fedora's is), its offset
-                    // then a pixel further left, so placing it by the outline's bearing shifts the glyph right
+                    // then a pixel further left, so placing it by the outline's bearing shifts the glyph right; vertically, an 
+                    // unhinted glyph's bitmap's own offset (bitmap_top) and height (rows): its outline is not on whole pixels (its 
+                    // bitmap is), so placing it by its outline's rounded bearing and height puts it up to a pixel off the baseline
                     glyph_metrics{
-                        vec2{ iHandle.freetypeFace->glyph->metrics.width / 64.0, iHandle.freetypeFace->glyph->metrics.height / 64.0 }.round(),
-                        vec2{ static_cast<double>(iHandle.freetypeFace->glyph->bitmap_left), std::round(iHandle.freetypeFace->glyph->metrics.horiBearingY / 64.0) } },
+                        hinting() ?
+                            vec2{ iHandle.freetypeFace->glyph->metrics.width / 64.0, iHandle.freetypeFace->glyph->metrics.height / 64.0 }.round() :
+                            vec2{ std::round(iHandle.freetypeFace->glyph->metrics.width / 64.0), static_cast<double>(bitmap->rows) },
+                        vec2{ static_cast<double>(iHandle.freetypeFace->glyph->bitmap_left), hinting() ? 
+                            std::round(iHandle.freetypeFace->glyph->metrics.horiBearingY / 64.0) : static_cast<double>(iHandle.freetypeFace->glyph->bitmap_top) } },
                     pixelMode })).first->second :
             existingGlyph->second);
 
