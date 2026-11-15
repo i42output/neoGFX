@@ -423,13 +423,14 @@ namespace neogfx
                     iSpacer.set_minimum_size(size{});
                 }
 
-                enable(menu_item().action().is_enabled());
+                enable(menu_item().action().is_enabled() && menu().is_enabled()); // (a disabled menu's items are disabled)
             };
             iSink += menu_item().action().changed(action_changed);
             iSink += menu_item().action().checked(action_changed);
             iSink += menu_item().action().unchecked(action_changed);
             iSink += menu_item().action().enabled(action_changed);
             iSink += menu_item().action().disabled(action_changed);
+            iSink += menu().menu_changed(action_changed); // (the menu enabled or disabled)
             action_changed();
         }
         else
@@ -440,7 +441,6 @@ namespace neogfx
                 { 
                     iIcon.set_image(menu_item().sub_menu().image());
                     iText.set_text(menu_item().sub_menu().title());
-                    enable(menu_item().sub_menu().is_enabled()); // (as an action's item is (see action_changed))
                 };
             iSink += menu_item().sub_menu().menu_changed(menu_changed);
             menu_changed();

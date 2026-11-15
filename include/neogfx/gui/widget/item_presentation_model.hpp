@@ -1181,13 +1181,11 @@ namespace neogfx
         void item_model_column_info_changed(item_model_index::column_type aColumnIndex)
         {
             reset_column_map(false);
-            if (has_item_model_index(item_model_index{ 0, aColumnIndex }))
-            {
-                auto const index = from_item_model_index(item_model_index{ 0, aColumnIndex });
-                reset_cell_meta(index.column());
-                reset_column_meta(index.column());
-                ColumnInfoChanged(index.column());
-            }
+            // (the column whatever its rows: the item model may have none (e.g. a column name translated again while it is empty))
+            auto const col = mapped_column(aColumnIndex);
+            reset_cell_meta(col);
+            reset_column_meta(col);
+            ColumnInfoChanged(col);
         }
         void item_added(const item_model_index& aItemIndex)
         {

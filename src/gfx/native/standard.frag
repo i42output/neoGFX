@@ -12,6 +12,7 @@
 #define SHAPE_EllipseRect 0x0A
 #define SHAPE_Polygon 0x0B
 #define SHAPE_Checkerboard 0x0C
+#define SHAPE_LineStrip 0x0D
 #define SHADER_EFFECT_None 0
 #define SHADER_EFFECT_Colorize 1
 #define SHADER_EFFECT_ColorizeAverage 1

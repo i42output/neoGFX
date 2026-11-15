@@ -131,7 +131,8 @@ namespace neogfx
 
     bool menu::is_enabled() const
     {
-        return iEnabled;
+        // (a menu in a disabled menu is disabled)
+        return iEnabled && (iParent == nullptr || iParent->is_enabled());
     }
 
     void menu::enable(bool aEnable)
@@ -200,7 +201,7 @@ namespace neogfx
 
     void menu::insert_sub_menu_at(item_index aItemIndex, i_menu& aSubMenu)
     {
-        auto& newItem = **iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aSubMenu));
+        auto& newItem = **iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aSubMenu, this));
         newItem.sub_menu().set_parent(*this);
         aItemIndex = update_grouping_separators(aItemIndex);
         ItemAdded(aItemIndex);
@@ -208,7 +209,7 @@ namespace neogfx
 
     i_menu& menu::insert_sub_menu_at(item_index aItemIndex, i_string const& aSubMenuTitle, uuid const& aGroup)
     {
-        auto& newItem = **iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(aSubMenuTitle)));
+        auto& newItem = **iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(aSubMenuTitle), this));
         newItem.sub_menu().set_parent(*this);
         newItem.sub_menu().set_group(aGroup);
         newItem.sub_menu().set_title(aSubMenuTitle); // (aSubMenuTitle itself: a translatable string's translation is kept up to date)
@@ -224,7 +225,7 @@ namespace neogfx
     
     void menu::insert_action_at(item_index aItemIndex, i_ref_ptr<i_action> const& aAction)
     {
-        iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aAction));
+        iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aAction, this));
         aItemIndex = update_grouping_separators(aItemIndex);
         ItemAdded(aItemIndex);
         auto insertedAction = ref_ptr<i_action>{ aAction };

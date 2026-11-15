@@ -1420,23 +1420,42 @@ namespace neogfx::DesignStudio
                     gradient_direction::Vertical };
             return *iGloss;
         }
-        // (a flow's route (see flow) drawn: an S-curve, else its corners rounded)
+        // (a flow's route (see flow) drawn as one stroke (a path's line strip: each pixel drawn once, however translucent or thick the 
+        // pen): an S-curve, else its corners rounded; its curves flattened to within a tenth of a pixel)
         void draw_route(i_graphics_context& aGc, std::vector<point> const& aRoute, pen const& aPen) const
         {
             if (aRoute.size() < 2u)
                 return;
+            path strip{ path_shape::LineStrip };
+            // (a cubic Bezier from the strip's last point: segments enough that none is further than a tenth of a pixel from the curve 
+            // (a cubic's are at most three quarters of the larger of its control points' second differences over their number squared))
+            auto const curve = [&](point const& aP0, point const& aP1, point const& aP2, point const& aP3)
+            {
+                auto const second = std::max(std::hypot(aP0.x - 2.0 * aP1.x + aP2.x, aP0.y - 2.0 * aP1.y + aP2.y),
+                    std::hypot(aP1.x - 2.0 * aP2.x + aP3.x, aP1.y - 2.0 * aP2.y + aP3.y));
+                auto const segments = std::clamp(static_cast<int>(std::ceil(std::sqrt(0.75 * second / 0.1))), 1, 256);
+                for (int segment = 1; segment <= segments; ++segment)
+                {
+                    auto const t = static_cast<double>(segment) / segments;
+                    auto const u = 1.0 - t;
+                    strip.line_to(point{ 
+                        u * u * u * aP0.x + 3.0 * u * u * t * aP1.x + 3.0 * u * t * t * aP2.x + t * t * t * aP3.x,
+                        u * u * u * aP0.y + 3.0 * u * u * t * aP1.y + 3.0 * u * t * t * aP2.y + t * t * t * aP3.y });
+                }
+            };
+            strip.move_to(to_screen(aRoute.front()));
             if (aRoute.size() == 2u)
             {
                 auto const a = to_screen(aRoute[0]);
                 auto const b = to_screen(aRoute[1]);
                 auto const dx = (b.x - a.x) / 2.0;
                 if (std::abs(a.y - b.y) < 0.5 || dx <= 0.0)
-                    aGc.draw_line(a, b, aPen);
+                    strip.line_to(b);
                 else
-                    aGc.draw_cubic_bezier(a, point{ a.x + dx, a.y }, point{ b.x - dx, b.y }, b, aPen);
+                    curve(a, point{ a.x + dx, a.y }, point{ b.x - dx, b.y }, b);
+                aGc.draw_path(strip, aPen);
                 return;
             }
-            point current = aRoute.front();
             for (std::size_t i = 1u; i + 1u < aRoute.size(); ++i)
             {
                 auto const& corner = aRoute[i];
@@ -1449,12 +1468,11 @@ namespace neogfx::DesignStudio
                 auto const radius = std::min({ CornerRadius, inLength / 2.0, outLength / 2.0 });
                 point const before = corner - in * (radius / inLength);
                 point const after = corner + out * (radius / outLength);
-                aGc.draw_line(to_screen(current), to_screen(before), aPen);
-                aGc.draw_cubic_bezier(to_screen(before), to_screen(before + (corner - before) * 0.6), to_screen(after + (corner - after) * 0.6), 
-                    to_screen(after), aPen);
-                current = after;
+                strip.line_to(to_screen(before));
+                curve(to_screen(before), to_screen(before + (corner - before) * 0.6), to_screen(after + (corner - after) * 0.6), to_screen(after));
             }
-            aGc.draw_line(to_screen(current), to_screen(aRoute.back()), aPen);
+            strip.line_to(to_screen(aRoute.back()));
+            aGc.draw_path(strip, aPen);
         }
         // (a pin where the flow passes into or out of a node (pointing the way that it passes): its outline, filled if it does)
         void draw_pin(i_graphics_context& aGc, point const& aCentre, bool aConnected, color const& aColour) const

@@ -1978,6 +1978,41 @@ namespace neogfx
             }
         }
         break;
+        case path_shape::LineStrip:
+        {
+            // (stroked as one shape (see the shape shader's draw_line_strip): where its segments meet or overlap each pixel is drawn once)
+            if (!aPen.width())
+                break;
+
+            if (std::holds_alternative<gradient>(aPen.color()))
+                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aPen.color()));
+
+            rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::LineStrip);
+
+            {
+                native_triangle_renderer triangleRenderer{ as_vertex_provider<>(*this), *this, static_cast<std::size_t>(2u * 3u) };
+
+                auto boundingRect = aBoundingRect.inflated(std::max(aPen.width(), 1.0)) + origin();
+                auto boundingRectVertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(*this, aPen.color(), boundingRect);
+
+                for (auto const& v : boundingRectVertices)
+                    triangleRenderer.push_back({ v,
+                        std::holds_alternative<color>(aPen.color()) ?
+                            static_variant_cast<color>(aPen.color()).as<float>() :
+                            vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(aPen.color()) ? 0.0f : 1.0f },
+                        {},
+                        function,
+                        vec4u32{ aPath.first, aPath.last }.as<float>(),
+                        vec4{ origin().to_vec3() }.as<float>(),
+                        vec4{
+                            0.0,
+                            !logical_operation_active() && aPen.anti_aliased() ? 0.5 : 0.0,
+                            0.0,
+                            aPen.width() }.as<float>() });
+            }
+        }
+        break;
         default:
             throw std::logic_error("native_rendering_context::draw_path: path shape not yet implemented");
         }

@@ -399,6 +399,38 @@ void draw_polygon(inout vec4 color, inout vec4 function1, inout vec4 function2, 
         color = shape_color(d0, color, function3.x, function3.w, inner_outline_width(function3), function3.y, function4, function5);
 }
 
+// the distance to an open polyline (its vertices: those of the shape vertices from meta.x to (not including) meta.y): not signed (it 
+// has no inside)
+float sdLineStrip(in vec2 p, in vec2 meta)
+{
+    const uint first = uint(meta.x);
+    const uint last = uint(meta.y);
+    float d = dot(p - bShapeVertices[first].xy, p - bShapeVertices[first].xy);
+    for (uint i = first + 1; i < last; ++i)
+    {
+        vec2 e = bShapeVertices[i].xy - bShapeVertices[i - 1].xy;
+        vec2 w = p - bShapeVertices[i - 1].xy;
+        float ee = dot(e, e);
+        vec2 b = w - e * (ee > 0.0 ? clamp(dot(w, e) / ee, 0.0, 1.0) : 0.0);
+        d = min(d, dot(b, b));
+    }
+    return sqrt(d);
+}
+
+// a path's line strip stroked as one shape: each pixel is drawn once (where its segments meet or overlap as elsewhere) so that a 
+// translucent or thick pen is even along its whole length
+void draw_line_strip(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
+{
+    vec2 fragPos = interpolateAtSample(Coord, gl_SampleID).xy;
+
+    float d0 = sdLineStrip(fragPos - function2.xy, function1.xy);
+    if (function3.y == 0.0 && d0 > function3.w / 2.0)
+        discard;
+    // solid out to the pen's half width, anti-aliased beyond it (as a line is)
+    float a = function3.y == 0.0 ? 1.0 : spot_alpha(1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, d0), function3.y);
+    color = vec4(color.xyz, color.a * a);
+}
+
 void draw_checkerboard(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     vec2 fragPos = interpolateAtSample(Coord, gl_SampleID).xy;
@@ -463,6 +495,9 @@ void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 fu
             break;
         case SHAPE_Checkerboard:
             draw_checkerboard(color, function1, function2, function3, function4, function5);
+            break;
+        case SHAPE_LineStrip:
+            draw_line_strip(color, function1, function2, function3, function4, function5);
             break;
         }
     }

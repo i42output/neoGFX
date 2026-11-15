@@ -71,6 +71,30 @@ void standard_stipple_shader(inout vec4 color, inout vec4 function0, inout vec4 
                     d += distance(bShapeVertices[closest + offset].xy, pixelPos);
                 d = floor(d);
             }
+            else if (uShape == SHAPE_LineStrip)
+            {
+                // (the distance along the strip to its point nearest the pixel (the strip's vertices are of the origin))
+                const uint first = uint(function1.x);
+                const uint last = uint(function1.y);
+                vec2 p = pixelPos - function2.xy;
+                float nearest = dot(p - bShapeVertices[first].xy, p - bShapeVertices[first].xy);
+                float along = 0.0;
+                for (uint i = first + 1; i < last; ++i)
+                {
+                    vec2 e = bShapeVertices[i].xy - bShapeVertices[i - 1].xy;
+                    vec2 w = p - bShapeVertices[i - 1].xy;
+                    float l = length(e);
+                    float h = l > 0.0 ? clamp(dot(w, e) / (l * l), 0.0, 1.0) : 0.0;
+                    vec2 b = w - e * h;
+                    if (dot(b, b) < nearest)
+                    {
+                        nearest = dot(b, b);
+                        d = along + h * l;
+                    }
+                    along += l;
+                }
+                d = floor(d);
+            }
         }
         d = mod(d + uStipplePosition, uStipplePatternLength);
         bool draw = true;

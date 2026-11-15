@@ -37,10 +37,11 @@ namespace neogfx
         typedef std::shared_ptr<i_menu> menu_pointer;
         typedef std::variant<std::monostate, action_pointer, menu_pointer> contents;
     public:
-        menu_item(i_action& aAction);
-        menu_item(i_ref_ptr<i_action> const& aAction);
-        menu_item(i_menu& aSubMenu);
-        menu_item(std::shared_ptr<i_menu> aSubMenu);
+        // (aMenu: the menu the item is in (if it is disabled so are its items: see available))
+        menu_item(i_action& aAction, i_menu const* aMenu = nullptr);
+        menu_item(i_ref_ptr<i_action> const& aAction, i_menu const* aMenu = nullptr);
+        menu_item(i_menu& aSubMenu, i_menu const* aMenu = nullptr);
+        menu_item(std::shared_ptr<i_menu> aSubMenu, i_menu const* aMenu = nullptr);
     public:
         menu_item_type type() const override;
         uuid const& group() const override;
@@ -59,6 +60,7 @@ namespace neogfx
         bool open_any_sub_menu() const override;
     private:
         contents iContents;
+        i_menu const* iMenu;
         bool iOpenAnySubMenu;
         i_menu_item_widget* iWidget;
     };

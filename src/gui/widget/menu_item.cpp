@@ -26,23 +26,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    menu_item::menu_item(i_action& aAction) : 
-        iContents{ ref_ptr<i_action>{ ref_ptr<i_action>{}, &aAction } }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
+    menu_item::menu_item(i_action& aAction, i_menu const* aMenu) : 
+        iContents{ ref_ptr<i_action>{ ref_ptr<i_action>{}, &aAction } }, iMenu{ aMenu }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
     {
     }
 
-    menu_item::menu_item(i_ref_ptr<i_action> const& aAction) : 
-        iContents{ aAction }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
+    menu_item::menu_item(i_ref_ptr<i_action> const& aAction, i_menu const* aMenu) : 
+        iContents{ aAction }, iMenu{ aMenu }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
     {
     }
 
-    menu_item::menu_item(i_menu& aSubMenu) : 
-        iContents{ std::shared_ptr<i_menu>{std::shared_ptr<i_menu>{}, &aSubMenu } }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
+    menu_item::menu_item(i_menu& aSubMenu, i_menu const* aMenu) : 
+        iContents{ std::shared_ptr<i_menu>{std::shared_ptr<i_menu>{}, &aSubMenu } }, iMenu{ aMenu }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
     {
     }
 
-    menu_item::menu_item(std::shared_ptr<i_menu> aSubMenu) : 
-        iContents{ aSubMenu }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
+    menu_item::menu_item(std::shared_ptr<i_menu> aSubMenu, i_menu const* aMenu) : 
+        iContents{ aSubMenu }, iMenu{ aMenu }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
     {
     }
 
@@ -114,7 +114,10 @@ namespace neogfx
     {
         if (type() == menu_item_type::Action && (action().is_separator() || action().is_disabled()))
             return false;
-        if (type() == menu_item_type::SubMenu && (sub_menu().count() == 0 || !sub_menu().is_enabled()))
+        // (a disabled menu's actions are disabled; its sub menus can still be opened, as it can (their actions are disabled too))
+        if (type() == menu_item_type::Action && iMenu != nullptr && !iMenu->is_enabled())
+            return false;
+        if (type() == menu_item_type::SubMenu && sub_menu().count() == 0)
             return false;
         return true;
     }
