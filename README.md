@@ -47,6 +47,7 @@ v1.20   | WID + 12 months | macOS support
 ![](screenshots/mod_tracker.png)
 ![](screenshots/select_font.png)
 ![](screenshots/gradient2.png)
+![](https://github.com/i42output/neos/blob/master/ada_nodes.png)
 ![](screenshots/lol.png)
 
 
