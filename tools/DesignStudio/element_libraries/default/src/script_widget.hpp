@@ -266,6 +266,7 @@ namespace neogfx::DesignStudio
             iStepOut{ "Step Out"_t, svg_image("script_step_out.svg", sStepOutImage) },
             iShowGraph{ "Node Graph"_t, toolbar_image(sNodeGraphImagePattern) },
             iFitGraph{ "Zoom to Fit"_t, toolbar_image(sZoomToFitImagePattern) },
+            iWrapGraph{ "Wrap Layout"_t, toolbar_image(sWrapLayoutImagePattern) },
             iResetGraph{ "Reset Layout"_t, toolbar_image(sResetLayoutImagePattern) }
         {
             set_minimum_size(size{ 256.0_dip, 160.0_dip });
@@ -335,6 +336,7 @@ namespace neogfx::DesignStudio
             iToolbar.add_separator();
             iToolbar.add_action(iShowGraph);
             iToolbar.add_action(iFitGraph);
+            iToolbar.add_action(iWrapGraph);
             iToolbar.add_action(iResetGraph);
             iShowGraph.set_checkable(true);
             iShowGraph.set_checked(true);
@@ -363,10 +365,12 @@ namespace neogfx::DesignStudio
             iSink += iStepOver.triggered([this]() { step(i_script_debugger::command::StepOver); });
             iSink += iStepOut.triggered([this]() { step(i_script_debugger::command::StepOut); });
             iFitGraph.set_tool_tip_text("Zoom the node graph to fit"_t);
+            iWrapGraph.set_tool_tip_text("Lay out the node graph left to right, then top to bottom, wrapped to fit its window at its current zoom"_t);
             iResetGraph.set_tool_tip_text("Reset the node graph to its automatic layout"_t);
-            iSink += iShowGraph.checked([this]() { iGraph.show(); iFitGraph.enable(); iResetGraph.enable(); });
-            iSink += iShowGraph.unchecked([this]() { iGraph.hide(); iFitGraph.disable(); iResetGraph.disable(); });
+            iSink += iShowGraph.checked([this]() { iGraph.show(); iFitGraph.enable(); iWrapGraph.enable(); iResetGraph.enable(); });
+            iSink += iShowGraph.unchecked([this]() { iGraph.hide(); iFitGraph.disable(); iWrapGraph.disable(); iResetGraph.disable(); });
             iSink += iFitGraph.triggered([this]() { iGraph.zoom_to_fit(); });
+            iSink += iWrapGraph.triggered([this]() { iGraph.wrap_layout(); });
             iSink += iResetGraph.triggered([this]() { iGraph.reset_layout(); });
             iSink += iEditor.cursor().PositionChanged([this]()
             {
@@ -1040,6 +1044,29 @@ namespace neogfx::DesignStudio
             "0111100000011110"
             "0000000000000000"
         };
+        static constexpr char const* sWrapLayoutImagePattern
+        {
+            "[16,16]"
+            "{0,paper}"
+            "{1,ink1}"
+
+            "0000000000000000"
+            "0000000000000000"
+            "0111001110011100"
+            "0101001010010100"
+            "0111001110011100"
+            "0000000000001000"
+            "0000000000001000"
+            "0011111111111000"
+            "0010000000000000"
+            "0010000000000000"
+            "0111001110000000"
+            "0101001010000000"
+            "0111001110000000"
+            "0000000000000000"
+            "0000000000000000"
+            "0000000000000000"
+        };
         static constexpr char const* sResetLayoutImagePattern
         {
             "[16,16]"
@@ -1076,6 +1103,7 @@ namespace neogfx::DesignStudio
         neogfx::action iStepOut;
         neogfx::action iShowGraph;
         neogfx::action iFitGraph;
+        neogfx::action iWrapGraph;
         neogfx::action iResetGraph;
         bool iSelectingFromGraph = false;
         ref_ptr<text_widget> iDocInfo;

@@ -250,6 +250,10 @@
 		<target>语言</target>
 	</text>
 	<text>
+		<source>Lay out the node graph left to right, then top to bottom, wrapped to fit its window at its current zoom</source>
+		<target>按当前缩放将节点图从左到右、从上到下排列，并换行以适应窗口</target>
+	</text>
+	<text>
 		<source>Locals</source>
 		<target>局部变量</target>
 	</text>
@@ -620,6 +624,10 @@
 	<text>
 		<source>Workspace font: %?%</source>
 		<target>工作区字体：%?%</target>
+	</text>
+	<text>
+		<source>Wrap Layout</source>
+		<target>换行布局</target>
 	</text>
 	<text>
 		<source>Zoom the node graph to fit</source>

@@ -312,6 +312,12 @@ namespace neogfx::DesignStudio
             zoom_to_fit();
             LayoutChanged.trigger();
         }
+        // (its statements laid out left to right, then top to bottom: wrapped to fit its window's width at its current zoom (see wrap))
+        void wrap_layout()
+        {
+            iWrapPending = true;
+            update();
+        }
         void zoom_to_fit()
         {
             iUserView = false;
@@ -369,6 +375,11 @@ namespace neogfx::DesignStudio
             {
                 const_cast<script_graph&>(*this).fit();
                 iFitPending = false;
+            }
+            if (iWrapPending && !iNodes.empty())
+            {
+                const_cast<script_graph&>(*this).wrap();
+                iWrapPending = false;
             }
             if (iMeasuredZoom != iZoom)
                 const_cast<script_graph&>(*this).measure_zoomed(aGc);
@@ -952,6 +963,10 @@ namespace neogfx::DesignStudio
                 {
                     auto& child = iNodes[c];
                     child.place = place;
+                    // (wrapping (see wrap): a statement that would not fit in its container's width moved to the start of a row below 
+                    // those before it, as if it had been dragged there (the statements after it follow it))
+                    if (!iWrap.empty() && place.x > 0.0 && place.x + child.extents.cx > iWrap[i])
+                        iMoved[child.key] = point{ -place.x, lane.cy + gap() - place.y };
                     child.offset = moved_offset(child, place);
                     auto const at = place + child.offset;
                     lane.cx = std::max(lane.cx, at.x + child.extents.cx);
@@ -1354,6 +1369,34 @@ namespace neogfx::DesignStudio
             iOffset = point{ (cr.cx - extents.cx * iZoom) / 2.0, (cr.cy - extents.cy * iZoom) / 2.0 };
             iZoomedFont = std::nullopt;
             iZoomedLabelFont = std::nullopt;
+        }
+        // (wrapped to its window's width at its zoom (see wrap_layout): where nodes had been dragged to forgotten, each body's statements 
+        // left to right, one that would not fit in its container's width at the start of a row below (see arrange_nodes); each 
+        // container's width its container's lane's (top down: a node is before its descendants), less its own lane's margins (as last 
+        // arranged: its parameters' width does not depend on wrapping); the module's top left at the window's top left, at its zoom)
+        void wrap()
+        {
+            auto const margin = 16.0;
+            auto const padding = padding_x();
+            iMoved.clear();
+            std::vector<dimension> available(iNodes.size(), std::max((client_rect().cx - margin * 2.0) / iZoom, 0.0));
+            iWrap.assign(iNodes.size(), 0.0);
+            for (std::size_t i = 0u; i < iNodes.size(); ++i)
+            {
+                auto const& n = iNodes[i];
+                iWrap[i] = available[i] - (padding + (n.parameters.empty() ? 24.0 : n.parametersWidth + 48.0)) - 
+                    (padding + (n.outline.kind == outline_kind::Loop ? 12.0 : 0.0));
+                for (auto c : n.children)
+                    available[c] = iWrap[i];
+                for (auto a : n.alternatives)
+                    available[a] = iWrap[i];
+            }
+            arrange_nodes();
+            iWrap.clear();
+            iUserView = true;
+            iOffset = point{ margin, margin };
+            update();
+            LayoutChanged.trigger();
         }
         point to_screen(point const& aPoint) const
         {
@@ -1903,6 +1946,8 @@ namespace neogfx::DesignStudio
         bool iUserView = false;                     ///< (zoomed or panned by the user: not fitted when resized)
         mutable bool iLayoutPending = false;
         mutable bool iFitPending = true;
+        mutable bool iWrapPending = false;
+        std::vector<dimension> iWrap;               ///< (while wrapping (see wrap): each node's lane's width)
         mutable std::optional<neogfx::font> iZoomedFont;
         mutable std::optional<neogfx::font> iZoomedLabelFont;
         mutable std::optional<neogfx::font> iLabelFont;
