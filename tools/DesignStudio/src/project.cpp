@@ -812,6 +812,14 @@ namespace neogfx::DesignStudio
     void project::remove_element(i_element& aElement)
     {
         ref_ptr<i_element> temp = aElement;
+        // (its own windows opened in the workspace (it has no caddy), and its descendants' (e.g. a script's editor and the consoles that 
+        // it has been run in), are closed with it)
+        aElement.visit([](i_element& aRemoved)
+        {
+            if (!aRemoved.needs_caddy() && aRemoved.has_layout_item() && aRemoved.layout_item().is_widget() && 
+                aRemoved.layout_item().as_widget().is_root() && !aRemoved.layout_item().as_widget().root().is_closed())
+                aRemoved.layout_item().as_widget().root().close();
+        });
         aElement.parent().remove_child(aElement);
         ElementRemoved(*temp);
         set_dirty();

@@ -615,8 +615,10 @@ namespace neogfx::DesignStudio
             {
                 auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*aCurrentIndex));
                 element.set_mode(element_mode::Edit);
-                // (sticky notes are workflow annotations, not objects with properties: they aren't shown in the property explorer)
-                if (element.type().to_std_string_view() != "sticky_note")
+                // (sticky notes are workflow annotations, consoles are tools and scripts are files, not objects with properties: they 
+                // aren't shown in the property explorer)
+                if (element.type().to_std_string_view() != "sticky_note" && element.type().to_std_string_view() != "console" && 
+                    element.group() != element_group::Script)
                     iPropertyElement = weak_ref_ptr<i_element>{ element };
                 else
                     iPropertyElement = weak_ref_ptr<i_element>{};
@@ -651,6 +653,32 @@ namespace neogfx::DesignStudio
                     element.select(false, false);
                 }
             }
+        });
+
+        // double clicking an element whose own window opens in the workspace (it has no caddy: e.g. a script, whose window is its editor) 
+        // opens its window again if it has been closed (as the main window's Open Script opens one), else activates it
+        objectTree.cell_action([this, &objectTree](ng::item_presentation_model_index const& aIndex)
+        {
+            auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(aIndex));
+            if (element.needs_caddy() || (element.has_layout_item() && 
+                (!element.layout_item().is_widget() || !element.layout_item().as_widget().is_root())))
+                return;
+            if (!element.has_layout_item() || element.layout_item().as_widget().root().is_closed())
+            {
+                auto& workspace = iWorkspace.view_stack();
+                auto scratch = ng::make_ref<ng::widget<>>(workspace.root().as_widget());
+                element.create_layout_item(*scratch);
+                if (!element.has_layout_item() || !element.layout_item().is_widget())
+                    return;
+                auto window = ng::ref_ptr<ng::i_widget>{ element.layout_item().as_widget() };
+                workspace.add(window);
+                if (window->is_root() && window->root().is_nested())
+                    ng::service<ng::i_surface_manager>().nest_for(workspace, ng::nest_type::MDI).add(window->root().native_window());
+                window->move(ng::point{ 32.0_dip, 32.0_dip });
+            }
+            if (element.layout_item().as_widget().is_root())
+                element.layout_item().as_widget().root().activate();
+            objectTree.cell_action().accept();
         });
 
         // dragging elements onto Object Explorer (from within it, from the Toolbox and from the design surface) moves them (or, from the 

@@ -114,7 +114,7 @@ namespace neogfx
     {
         if (type() == menu_item_type::Action && (action().is_separator() || action().is_disabled()))
             return false;
-        if (type() == menu_item_type::SubMenu && sub_menu().count() == 0)
+        if (type() == menu_item_type::SubMenu && (sub_menu().count() == 0 || !sub_menu().is_enabled()))
             return false;
         return true;
     }

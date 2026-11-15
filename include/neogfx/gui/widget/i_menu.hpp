@@ -74,6 +74,9 @@ namespace neogfx
         virtual void set_image(i_string const& aUri) = 0;
         virtual void set_image(i_image const& aImage) = 0;
         virtual void set_image(i_texture const& aTexture) = 0;
+        // (a disabled sub menu is shown disabled in its parent menu (e.g. a menu bar) and can't be opened)
+        virtual bool is_enabled() const = 0;
+        virtual void enable(bool aEnable) = 0;
         virtual std::uint32_t count() const = 0;
         virtual std::uint32_t ideal_insert_index(uuid const& aGroup) const = 0;
         virtual const i_menu_item& item_at(item_index aItemIndex) const = 0;

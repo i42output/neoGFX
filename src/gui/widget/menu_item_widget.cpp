@@ -440,6 +440,7 @@ namespace neogfx
                 { 
                     iIcon.set_image(menu_item().sub_menu().image());
                     iText.set_text(menu_item().sub_menu().title());
+                    enable(menu_item().sub_menu().is_enabled()); // (as an action's item is (see action_changed))
                 };
             iSink += menu_item().sub_menu().menu_changed(menu_changed);
             menu_changed();

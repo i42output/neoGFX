@@ -63,6 +63,8 @@ namespace neogfx
         void set_image(i_string const& aUri) override;
         void set_image(const i_image& aImage) override;
         void set_image(const i_texture& aTexture) override;
+        bool is_enabled() const override;
+        void enable(bool aEnable) override;
         std::uint32_t count() const override;
         std::uint32_t ideal_insert_index(uuid const& aGroup) const override;
         const i_menu_item& item_at(item_index aItemIndex) const override;
@@ -113,6 +115,7 @@ namespace neogfx
         std::optional<item_index> iSelection;
         bool iModal;
         bool iShowMnemonics = false;
+        bool iEnabled = true;
         sink iSink;
     };
 }

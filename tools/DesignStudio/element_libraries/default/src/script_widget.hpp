@@ -613,12 +613,12 @@ namespace neogfx::DesignStudio
             iConsole->activate_console();
         }
         // (a console opened in the workspace (its view stack: our parent) beside us, as a window opened in it is (see the main window's 
-        // Open Script))
+        // Open Script); its element is the script's child (removing the script closes it))
         void open_console()
         {
             auto& workspace = parent();
             auto& project = iElement.project();
-            auto& element = project.create_element(project.root(), "console"_s);
+            auto& element = project.create_element(iElement, "console"_s);
             auto scratch = make_ref<widget<>>(workspace.root().as_widget());
             element.create_layout_item(*scratch);
             if (!element.has_layout_item() || !element.layout_item().is_widget())
@@ -628,10 +628,9 @@ namespace neogfx::DesignStudio
             if (consoleWindow->is_root() && consoleWindow->root().is_nested())
                 service<i_surface_manager>().nest_for(workspace, nest_type::MDI).add(consoleWindow->root().native_window());
             consoleWindow->move(position() + point{ 48.0_dip, 48.0_dip });
-            iConsole = dynamic_cast<console_widget*>(&*consoleWindow);
+            iConsole = &static_cast<console_widget&>(*consoleWindow); // (a console element's window is a console_widget)
             iConsoleSink.clear();
-            if (iConsole)
-                iConsoleSink += iConsole->destroying([this]() { iConsole = nullptr; });
+            iConsoleSink += iConsole->destroying([this]() { iConsole = nullptr; });
         }
         // (the script's debugging (see i_script_debugger), if there is a debugger: its breakpoints in the gutter and the node graph, the 
         // statement that the program being debugged is at, and the debugger's requests of the active script's editor (ours, once we are 
@@ -639,6 +638,14 @@ namespace neogfx::DesignStudio
         void connect_debugger()
         {
             editors().push_back(this);
+            // (closed (its element stays in the project, to be opened again (see the main window's Object Explorer)): no longer an 
+            // editor that a script is open in)
+            iSink += closed([this]()
+            {
+                std::erase(editors(), this);
+                if (iDebugger && iDebugger->active_script().to_std_string() == iPath)
+                    iDebugger->set_active_script(string{});
+            });
             if (!neolib::services::get_service_provider().service_registered(i_script_debugger::iid()))
                 return;
             iDebugger = &neolib::services::get_service_provider().service<i_script_debugger>();
@@ -786,7 +793,12 @@ namespace neogfx::DesignStudio
                 return;
             auto& workspace = parent();
             auto& project = iElement.project();
-            auto& element = project.create_element(project.root(), "script"_s, string{ aPath });
+            // (the script's element, if it is in the project (its editor has been closed), else a new one)
+            i_element* existing = nullptr;
+            for (auto const& child : project.root().children())
+                if (child->type().to_std_string_view() == "script" && same_file(child->id().to_std_string(), aPath))
+                    existing = &*child;
+            auto& element = existing ? *existing : project.create_element(project.root(), "script"_s, string{ aPath });
             auto scratch = make_ref<widget<>>(workspace.root().as_widget());
             element.create_layout_item(*scratch);
             if (!element.has_layout_item() || !element.layout_item().is_widget())

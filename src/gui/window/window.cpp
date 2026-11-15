@@ -539,6 +539,12 @@ namespace neogfx
             return;
         iClosed = true;
         Closed();
+        if (destroyed)
+            return;
+        // (a nested window that has been closed is taken out of the widget that it is nested in: else it would be left there, an 
+        // empty frame, for as long as anything else (e.g. its owner) has it)
+        if (is_nested() && has_parent())
+            parent().remove(*this);
     }
 
     color window::frame_color() const

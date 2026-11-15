@@ -39,7 +39,8 @@ namespace neogfx::DesignStudio
         auto& actionPaste = service<i_app>().action_paste();
         auto& actionDelete = service<i_app>().action_delete();
         auto& actionSelectAll = service<i_app>().action_select_all();
-        if (aElement.has_layout_item() && aElement.layout_item().is_widget())
+        // (an element on the design surface (in its caddy): not, e.g., a script, whose window (its editor) is in the workspace)
+        if (aElement.has_caddy() && aElement.has_layout_item() && aElement.layout_item().is_widget() && aElement.layout_item().as_widget().has_parent())
         {
             auto& caddyWidget = aElement.layout_item().as_widget().parent();
             if (&*caddyWidget.parent().children().back() == &caddyWidget)

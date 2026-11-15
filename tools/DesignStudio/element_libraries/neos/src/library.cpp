@@ -1764,11 +1764,15 @@ namespace neogfx::DesignStudio
     void neos_element_library::ide_ready(i_ide& aIde)
     {
         aIde.add_sub_menu(id::MenuBar, iScriptMenu);
-        // (opening script files into the active project (enabled while there is one): each in a script editor (a nested window on the 
-        // IDE's workspace), as a window dropped on the workspace from the toolbox is)
+        // (the Script menu is enabled while there is an active project; opening script files into it: each in a script editor (a nested 
+        // window on the IDE's workspace), as a window dropped on the workspace from the toolbox is)
         auto& projectManager = aIde.projects();
         auto& workspace = aIde.workspace();
-        auto update_open_script = [this, &projectManager]() { iOpenScript.enable(projectManager.project_active()); };
+        auto update_open_script = [this, &projectManager]() 
+        { 
+            iScriptMenu.enable(projectManager.project_active());
+            iOpenScript.enable(projectManager.project_active()); 
+        };
         iSink += projectManager.project_activated([update_open_script](i_project&) { update_open_script(); });
         iSink += projectManager.project_deactivated([update_open_script](i_project&) { update_open_script(); });
         update_open_script();

@@ -1221,6 +1221,9 @@ namespace neogfx::DesignStudio
         }
         void create_layout_item(i_widget& aParent) override
         {
+            // (the element's own window (e.g. a script's editor) that has been closed: made again)
+            if (iLayoutItem && iLayoutItem->is_widget() && iLayoutItem->as_widget().is_root() && iLayoutItem->as_widget().root().is_closed())
+                iLayoutItem.reset();
             if (!iLayoutItem)
             {
                 if constexpr (std::is_base_of_v<i_tab_page, Type>)

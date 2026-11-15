@@ -110,7 +110,7 @@ namespace neogfx::DesignStudio
         // (whether a session (e.g. neos's) has been started in it (else its own commands are typed at its prompt))
         bool has_session() const
         {
-            return iConsole && dynamic_cast<console const*>(iConsole.ptr()) == nullptr;
+            return iConsole && iSession;
         }
         // a session started (as if its command (e.g. "neos <program>") had been typed at its prompt, but not echoed): false if no 
         // client starts one for the command
@@ -125,6 +125,7 @@ namespace neogfx::DesignStudio
                     create_console<>();
                 });
             attach_console(newConsole);
+            iSession = true;
             return true;
         }
         // (its window activated and its terminal given the focus (e.g. when a script is run in it: its input is typed there))
@@ -152,6 +153,7 @@ namespace neogfx::DesignStudio
         ConsoleT& create_console()
         {
             attach_console(make_ref<ConsoleT>());
+            iSession = !std::is_same_v<ConsoleT, console>;
             auto& newConsole = static_cast<ConsoleT&>(*iConsole);
 
             if constexpr (std::is_same_v<ConsoleT, console>)
@@ -166,6 +168,7 @@ namespace neogfx::DesignStudio
                                     create_console<>();
                                 });
                             attach_console(newConsole);
+                            iSession = true;
                         }
                     });
 
@@ -200,6 +203,7 @@ namespace neogfx::DesignStudio
         ref_ptr<i_console_client_manager> iClientManager;
         terminal iTerminal;
         ref_ptr<i_console_client> iConsole;
+        bool iSession = false;  ///< (iConsole is a session's (e.g. neos's), not its own console's (see has_session))
         sink iSink;
     };
 

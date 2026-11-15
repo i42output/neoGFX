@@ -129,6 +129,19 @@ namespace neogfx
         MenuChanged();
     }
 
+    bool menu::is_enabled() const
+    {
+        return iEnabled;
+    }
+
+    void menu::enable(bool aEnable)
+    {
+        if (iEnabled == aEnable)
+            return;
+        iEnabled = aEnable;
+        MenuChanged();
+    }
+
     std::uint32_t menu::count() const
     {
         return static_cast<std::uint32_t>(iItems.size());
