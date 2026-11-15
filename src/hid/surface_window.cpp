@@ -48,9 +48,16 @@ namespace neogfx
         set_alive();
     }
 
-    surface_window::~surface_window()
-    {
-        close();
+    surface_window::~surface_window()
+    {
+        close();
+        // (destroyed while closing (its window destroyed by a handler of the window's closed event, e.g. released by its owner, which 
+        // close() is in the middle of): it has closed, so those tracking it (e.g. a native window's entered window) are told)
+        if (!iClosed)
+        {
+            iClosed = true;
+            Closed();
+        }
     }
 
     window_style surface_window::style() const

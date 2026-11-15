@@ -1106,6 +1106,7 @@ namespace neogfx::DesignStudio
         }
         ~element()
         {
+            iSink.clear(); // (before the layout item is released: its window, if closed by being destroyed, isn't released again)
         }
     public:
         i_element_library const& library() const override
@@ -1316,6 +1317,10 @@ namespace neogfx::DesignStudio
                     }
                     if (iLayoutItem->is_widget() && iLayoutItem->as_widget().is_root() && iLayoutItem->as_widget().root().is_nested())
                         service<i_surface_manager>().nest_for(aParent, nest_type::Caddy).add(iLayoutItem->as_widget().root().native_window());
+                    // (the element's own window (it has no caddy: e.g. a script's editor) is released when it is closed, so it is destroyed 
+                    // (once nothing else has it: e.g. the widget it is nested in) rather than kept, closed, until it is opened again)
+                    if (!needs_caddy() && iLayoutItem->is_widget() && iLayoutItem->as_widget().is_root())
+                        iSink = iLayoutItem->as_widget().root().closed([this]() { iLayoutItem.reset(); });
                 }
                 else if constexpr (std::is_base_of_v<i_layout, Type>)
                 {

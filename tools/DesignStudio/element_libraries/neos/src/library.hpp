@@ -93,6 +93,7 @@ namespace neogfx::DesignStudio
         action iSeparator;
         action iNewScript;
         action iOpenScript;
+        action iAddScript;
         action iStartDebugging;
         action iStartWithoutDebugging;
         action iStepInto;

@@ -44,11 +44,35 @@ namespace neogfx::DesignStudio
             }
         }
 
+        // (an element opened beside the project rather than added to it (see i_project::open_element): one of the root's children whose 
+        // node is beside the project's (after it, with any others, in the order of the root's children) rather than in it)
+        bool beside_project(i_element const& aElement)
+        {
+            return aElement.has_parent() && !aElement.parent().has_parent() && !aElement.project().in_project(aElement);
+        }
+
         // (the model's iterators step through the whole tree, into a node's children, rather than through a node's siblings so 
         // siblings are stepped through with the tree's sibling iterator)
         object_model::sibling_iterator as_sibling(i_item_model::iterator const& aNode)
         {
             return aNode.get<object_model::sibling_iterator, object_model::iterator, object_model::sibling_iterator>();
+        }
+
+        // where the node of an element beside the project is (or goes) among the model's top level nodes, and their end
+        std::pair<object_model::sibling_iterator, object_model::sibling_iterator> beside_position(object_model& aModel, i_element& aElement)
+        {
+            auto position = as_sibling(aModel.sbegin());
+            auto const end = as_sibling(aModel.send());
+            if (position != end)
+                ++position; // (the project's node)
+            for (auto const& sibling : aElement.parent())
+            {
+                if (&*sibling == &aElement)
+                    break;
+                if (shown(*sibling) && beside_project(*sibling) && position != end)
+                    ++position;
+            }
+            return { position, end };
         }
 
         // the node showing an element: the model's nodes are in the same order as the elements they show so it is found by 
@@ -64,6 +88,13 @@ namespace neogfx::DesignStudio
                     return {};
                 return aModel.sbegin();
             }
+            if (beside_project(aElement))
+            {
+                auto [node, end] = beside_position(aModel, aElement);
+                if (node == end || node->value != &aElement)
+                    return {};
+                return object_model::base_iterator{ node };
+            }
             auto const parentNode = node_of(aModel, aElement.parent());
             if (!parentNode)
                 return {};
@@ -73,7 +104,7 @@ namespace neogfx::DesignStudio
             {
                 if (&*sibling == &aElement)
                     break;
-                if (shown(*sibling) && node != end)
+                if (shown(*sibling) && !beside_project(*sibling) && node != end)
                     ++node;
             }
             if (node == end || node->value != &aElement)
@@ -85,7 +116,7 @@ namespace neogfx::DesignStudio
         void add_child_nodes(object_model& aModel, i_item_model::iterator aNode, i_element& aElement)
         {
             for (auto& child : aElement)
-                if (shown(*child))
+                if (shown(*child) && !beside_project(*child))
                 {
                     auto const childNode = aModel.append_item(aNode, &*child, child->id());
                     aModel.insert_cell_data(childNode, 1u, child->type());
@@ -99,6 +130,18 @@ namespace neogfx::DesignStudio
         {
             if (!shown(aElement) || !aElement.has_parent())
                 return;
+            if (beside_project(aElement))
+            {
+                auto [position, end] = beside_position(aModel, aElement);
+                if (position != end && position->value == &aElement)
+                    return; // (already shown)
+                auto const node = position != end ?
+                    aModel.insert_item(object_model::base_iterator{ position }, &aElement, aElement.id()) :
+                    aModel.insert_item(aModel.send(), &aElement, aElement.id());
+                aModel.insert_cell_data(node, 1u, aElement.type());
+                add_child_nodes(aModel, node, aElement);
+                return;
+            }
             auto const parentNode = node_of(aModel, aElement.parent());
             if (!parentNode)
             {
@@ -111,7 +154,7 @@ namespace neogfx::DesignStudio
             {
                 if (&*sibling == &aElement)
                     break;
-                if (shown(*sibling) && position != end)
+                if (shown(*sibling) && !beside_project(*sibling) && position != end)
                     ++position;
             }
             if (position != end && position->value == &aElement)
@@ -149,12 +192,13 @@ namespace neogfx::DesignStudio
                     case element_group::Layout:
                     case element_group::Workflow:
                     {
-                        auto node = aElement.group() != element_group::Project ?
+                        auto node = aElement.group() != element_group::Project && !beside_project(aElement) ?
                             item_model().append_item(aPosition, &aElement, aElement.id()) :
                             item_model().insert_item(aPosition, &aElement, aElement.id());
                         item_model().insert_cell_data(node, 1u, aElement.type());
                         for (auto& child : aElement)
-                            addNode(node, *child);
+                            if (!beside_project(*child))
+                                addNode(node, *child);
                     }
                     break;
                     case element_group::Action:
@@ -162,6 +206,10 @@ namespace neogfx::DesignStudio
                     }
                 };
                 addNode(item_model().send(), aProjectManager.active_project().root());
+                // (elements opened beside the project: their nodes are beside (after) its node)
+                for (auto& child : aProjectManager.active_project().root())
+                    if (beside_project(*child))
+                        addNode(item_model().send(), *child);
             }
             else
                 item_model().clear();
@@ -265,10 +313,11 @@ namespace neogfx::DesignStudio
     {
         auto result = basic_item_presentation_model::cell_flags(aIndex);
         auto const& e = *item_model().item(to_item_model_index(aIndex));
-        // widgets and layouts can be dragged to move them
+        // widgets and layouts can be dragged to move them; an element beside the project (e.g. a script opened rather than added) can be 
+        // dragged onto the project to add it to it
         bool const movable = (e.group() == element_group::Widget || e.group() == element_group::Layout) && e.has_caddy() &&
             !(e.has_layout_item() && e.layout_item().is_widget() && e.layout_item().as_widget().is_root());
-        if (movable)
+        if (movable || beside_project(e))
             result |= ng::item_cell_flags::Draggable;
         return result;
     }

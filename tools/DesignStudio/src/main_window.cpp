@@ -672,9 +672,10 @@ namespace neogfx::DesignStudio
                     return;
                 auto window = ng::ref_ptr<ng::i_widget>{ element.layout_item().as_widget() };
                 workspace.add(window);
+                // (placed, then nested: once nested, a window that remembers where it was (e.g. a script's editor) is put back there)
+                window->move(ng::point{ 32.0_dip, 32.0_dip });
                 if (window->is_root() && window->root().is_nested())
                     ng::service<ng::i_surface_manager>().nest_for(workspace, ng::nest_type::MDI).add(window->root().native_window());
-                window->move(ng::point{ 32.0_dip, 32.0_dip });
             }
             if (element.layout_item().as_widget().is_root())
                 element.layout_item().as_widget().root().activate();
@@ -683,7 +684,8 @@ namespace neogfx::DesignStudio
 
         // dragging elements onto Object Explorer (from within it, from the Toolbox and from the design surface) moves them (or, from the 
         // Toolbox, adds them): onto a container (layout, window, group box, tab page) appends to it, onto any other element inserts before it, 
-        // onto the project/user interface makes a widget top level (not from the Toolbox)
+        // onto the project/user interface makes a widget top level (not from the Toolbox); an element opened beside the project (e.g. a 
+        // script: Script|Open Script...) dropped onto the project is added to it
         auto& toolboxTree = iToolbox.docked_widget<ng::tree_view>();
         objectTree.enable_drag_drop_source();
         objectTree.enable_drag_drop_target();
@@ -692,6 +694,7 @@ namespace neogfx::DesignStudio
             i_element* container = nullptr;
             i_element const* before = nullptr;
             bool toCanvas = false;
+            bool toProject = false;
         };
         // where an element dropped at a position in Object Explorer goes (aDragged: the element being moved, if any (a new element from the 
         // Toolbox has none yet))
@@ -700,12 +703,22 @@ namespace neogfx::DesignStudio
             object_drop result;
             if (preview_mode() || !iProjectManager.project_active())
                 return result;
-            if (aDragged != nullptr && !can_be_moved(*aDragged))
+            bool const besideProject = (aDragged != nullptr && !aDragged->project().in_project(*aDragged));
+            if (aDragged != nullptr && !besideProject && !can_be_moved(*aDragged))
                 return result;
             auto const targetIndex = objectTree.item_at(aPosition);
             if (!targetIndex)
                 return result;
             auto& target = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*targetIndex));
+            if (besideProject)
+            {
+                if (target.group() == element_group::Project)
+                {
+                    result.container = &target;
+                    result.toProject = true;
+                }
+                return result;
+            }
             if (aDragged != nullptr)
             {
                 if (&target == aDragged)
@@ -753,7 +766,9 @@ namespace neogfx::DesignStudio
             auto& project = iProjectManager.active_project();
             try
             {
-                if (aDrop.toCanvas)
+                if (aDrop.toProject)
+                    project.add_to_project(aElement);
+                else if (aDrop.toCanvas)
                 {
                     auto& workspace = iWorkspace.view_stack();
                     move_element_to_canvas(project, aElement, *aDrop.container, workspace, design_rect(workspace).top_left() + point{ 128.0_dip, 128.0_dip });
@@ -919,7 +934,7 @@ namespace neogfx::DesignStudio
                 return;
             // (once dragged out of Object Explorer it is a design drag (as on the design surface): layouts there show where things can be dropped)
             auto const position = aEvent.position() - objectTree.origin();
-            if (!design_drag_active() && !objectTree.client_rect().contains(position))
+            if (!design_drag_active() && can_be_moved(*dragged) && !objectTree.client_rect().contains(position))
                 set_design_drag_active(true);
             update_drop_indicators(dragged, objectTree.to_window_coordinates(position) + objectTree.root().window_position(), true);
         });
@@ -1713,13 +1728,16 @@ namespace neogfx::DesignStudio
                 return;
             auto& project = aProjectManager.active_project();
             std::string path;
-            // a project of more than one .nrc file is saved as a project file (.dsproj) listing them
-            bool const multipleFiles = project.file_count() > 1u;
-            if (project.has_path() && (!multipleFiles || std::filesystem::path{ project.path().to_std_string() }.extension() == ".dsproj"))
+            // a project of more than one .nrc file, or with scripts (files) added to it, is saved as a project file (.dsproj) listing them
+            bool needsProjectFile = project.file_count() > 1u;
+            for (auto const& e : project.root().children())
+                if (e->group() == element_group::Script && project.in_project(*e) && std::filesystem::path{ e->id().to_std_string() }.is_absolute())
+                    needsProjectFile = true;
+            if (project.has_path() && (!needsProjectFile || std::filesystem::path{ project.path().to_std_string() }.extension() == ".dsproj"))
                 path = project.path().to_std_string();
             else
             {
-                auto const extension = multipleFiles ? std::string{ ".dsproj" } : std::string{ ".nrc" };
+                auto const extension = needsProjectFile ? std::string{ ".dsproj" } : std::string{ ".nrc" };
                 auto file = ng::save_file_dialog(mainWindow, ng::file_dialog_spec{ "Save Project", project.name().to_std_string() + extension, { "*" + extension }, "Project Files" });
                 if (!file)
                     return;

@@ -73,6 +73,10 @@ namespace neogfx::DesignStudio
         i_element& create_element(i_element& aParent, const i_string& aType, const i_string& aElementId = string{}) override;
         void remove_element(i_element& aElement) override;
         void move_element(i_element& aElement, i_element& aNewParent, i_element const* aBefore = nullptr) override;
+    public:
+        i_element& open_element(const i_string& aType, const i_string& aElementId = string{}) override;
+        bool in_project(i_element const& aElement) const override;
+        void add_to_project(i_element& aElement) override;
     private:
         struct nrc_file
         {
@@ -103,6 +107,7 @@ namespace neogfx::DesignStudio
         std::vector<translation_tables> iTranslations; // (by file: the primary file's can exist before it does (a new project))
         string iDesignLanguage;
         ref_ptr<i_element> iRoot;
+        std::vector<i_element const*> iOpenedElements; // (opened beside the project rather than part of it: see open_element)
         string iName;
         string iNamespace;
         string iPath;

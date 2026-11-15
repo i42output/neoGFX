@@ -36,9 +36,14 @@ namespace neogfx
         {
             if (!service<i_app>().help().help_active())
                 return false;
+            // (a status bar that is no longer in a window (e.g. its window has been closed) shows no help)
+            if (!aStatusBar.has_root())
+                return false;
             auto const* const widget = service<i_app>().help().active_help().help_widget();
             if (widget == nullptr)
                 return true;
+            if (!widget->has_root())
+                return false;
             i_window const* window = &widget->root();
             while (dynamic_cast<popup_menu const*>(window) != nullptr && window->has_parent_window())
                 window = &window->parent_window();

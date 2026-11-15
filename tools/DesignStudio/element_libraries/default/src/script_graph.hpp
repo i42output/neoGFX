@@ -88,6 +88,7 @@ namespace neogfx::DesignStudio
         static constexpr dimension PinSize = 5.0;           ///< (half a pin's height)
         static constexpr dimension RouteMargin = 14.0;      ///< (how far a flow that is routed keeps from nodes)
         static constexpr dimension CornerRadius = 28.0;     ///< (a routed flow rounded where it turns)
+        static constexpr dimension WrapRoom = 24.0;         ///< (right of a row's last statement, for its flow to the row below it to turn back in)
         // (a run of a node's header in one syntax highlighting category: its text, its offset from its line's start (graph coordinates) 
         // and its line (the header's code is wrapped: see wrap))
         struct run
@@ -252,10 +253,13 @@ namespace neogfx::DesignStudio
         {
             return !iNodes.empty();
         }
-        // the colours of the syntax highlighting categories (by category; none: the text colour), of text and of the background
-        void set_colours(std::vector<std::optional<color>> const& aCategoryColours, color const& aText, color const& aBackground)
+        // the colours of the syntax highlighting categories (by category; none: the text colour), of the kinds of node (by kind; none: a 
+        // category's (see accent_colour)), of text and of the background
+        void set_colours(std::vector<std::optional<color>> const& aCategoryColours, std::vector<std::optional<color>> const& aKindColours, 
+            color const& aText, color const& aBackground)
         {
             iCategoryColours = aCategoryColours;
+            iKindColours = aKindColours;
             iTextColour = aText;
             iBackgroundColour = aBackground;
             iTitleGradients.clear();
@@ -959,6 +963,8 @@ namespace neogfx::DesignStudio
                 auto& n = iNodes[i];
                 size lane;
                 point place;
+                std::optional<dimension> previousRight;
+                dimension wrapRight = 0.0;
                 for (auto c : n.children)
                 {
                     auto& child = iNodes[c];
@@ -969,6 +975,12 @@ namespace neogfx::DesignStudio
                         iMoved[child.key] = point{ -place.x, lane.cy + gap() - place.y };
                     child.offset = moved_offset(child, place);
                     auto const at = place + child.offset;
+                    // (a statement that is not to the right of the one before it (it is on a row below: wrapped, or dragged there): the 
+                    // flow to it from that one turns back right of that one, so there is room there (WrapRoom) between it and its 
+                    // container's edge, as there is left of the row's first for the flow to turn in to it)
+                    if (previousRight && at.x < *previousRight)
+                        wrapRight = std::max(wrapRight, *previousRight + WrapRoom);
+                    previousRight = at.x + child.extents.cx;
                     lane.cx = std::max(lane.cx, at.x + child.extents.cx);
                     lane.cy = std::max(lane.cy, at.y + child.extents.cy);
                     auto const followed = (iDrag && iDrag->dragging && c == iDrag->node) ? place + iDrag->offset : at;
@@ -976,6 +988,7 @@ namespace neogfx::DesignStudio
                 }
                 // (its alternatives below its body, each on a lane of its own)
                 size content = lane;
+                content.cx = std::max(content.cx, wrapRight);
                 dimension alternativeY = n.children.empty() ? 0.0 : lane.cy + gap() / 2.0;
                 for (auto a : n.alternatives)
                 {
@@ -1373,7 +1386,8 @@ namespace neogfx::DesignStudio
         // (wrapped to its window's width at its zoom (see wrap_layout): where nodes had been dragged to forgotten, each body's statements 
         // left to right, one that would not fit in its container's width at the start of a row below (see arrange_nodes); each 
         // container's width its container's lane's (top down: a node is before its descendants), less its own lane's margins (as last 
-        // arranged: its parameters' width does not depend on wrapping); the module's top left at the window's top left, at its zoom)
+        // arranged: its parameters' width does not depend on wrapping) and the room right of a row for its flow to the row below it 
+        // (WrapRoom); the module's top left at the window's top left, at its zoom)
         void wrap()
         {
             auto const margin = 16.0;
@@ -1385,7 +1399,7 @@ namespace neogfx::DesignStudio
             {
                 auto const& n = iNodes[i];
                 iWrap[i] = available[i] - (padding + (n.parameters.empty() ? 24.0 : n.parametersWidth + 48.0)) - 
-                    (padding + (n.outline.kind == outline_kind::Loop ? 12.0 : 0.0));
+                    (padding + (n.outline.kind == outline_kind::Loop ? 12.0 : 0.0)) - WrapRoom;
                 for (auto c : n.children)
                     available[c] = iWrap[i];
                 for (auto a : n.alternatives)
@@ -1583,6 +1597,24 @@ namespace neogfx::DesignStudio
                 line(1.0, 0.0, 0.5, -0.5);
                 line(1.0, 0.0, 0.5, 0.5);
                 break;
+            case outline_kind::Declaration:
+                // (brackets: something defined)
+                line(-0.4, -0.8, -0.8, -0.8);
+                line(-0.8, -0.8, -0.8, 0.8);
+                line(-0.8, 0.8, -0.4, 0.8);
+                line(0.4, -0.8, 0.8, -0.8);
+                line(0.8, -0.8, 0.8, 0.8);
+                line(0.8, 0.8, 0.4, 0.8);
+                break;
+            case outline_kind::Import:
+                // (an arrow down into a tray)
+                line(0.0, -0.9, 0.0, 0.3);
+                line(0.0, 0.3, -0.45, -0.15);
+                line(0.0, 0.3, 0.45, -0.15);
+                line(-0.8, 0.3, -0.8, 0.8);
+                line(-0.8, 0.8, 0.8, 0.8);
+                line(0.8, 0.8, 0.8, 0.3);
+                break;
             default:
                 line(-0.8, -0.7, -0.1, 0.0);
                 line(-0.1, 0.0, -0.8, 0.7);
@@ -1605,9 +1637,11 @@ namespace neogfx::DesignStudio
                 return *iCategoryColours[static_cast<std::size_t>(*aCategory)];
             return text_colour();
         }
-        // (a node's colour: its kind's syntax highlighting category's)
+        // (a node's colour: its kind's, if it has one (see set_colours), else its kind's syntax highlighting category's)
         color accent_colour(node const& aNode) const
         {
+            if (auto const kind = static_cast<std::size_t>(aNode.outline.kind); kind < iKindColours.size() && iKindColours[kind])
+                return *iKindColours[kind];
             switch (aNode.outline.kind)
             {
             case outline_kind::Function:
@@ -1616,6 +1650,9 @@ namespace neogfx::DesignStudio
                 return category_colour(category::Type);
             case outline_kind::Parameter:
                 return category_colour(category::Parameter);
+            case outline_kind::Declaration:
+                return category_colour(category::Variable);
+            case outline_kind::Import:
             case outline_kind::Loop:
             case outline_kind::Branch:
             case outline_kind::Alternative:
@@ -1656,6 +1693,10 @@ namespace neogfx::DesignStudio
                 return "return"_t;
             case outline_kind::Jump:
                 return "jump"_t;
+            case outline_kind::Declaration:
+                return "declaration"_t;
+            case outline_kind::Import:
+                return "import"_t;
             default:
                 return "statement"_t;
             }
@@ -1938,6 +1979,7 @@ namespace neogfx::DesignStudio
         std::optional<std::pair<position_type, position_type>> iStatement;
         bool iStatementTop = true;
         std::vector<std::optional<color>> iCategoryColours;
+        std::vector<std::optional<color>> iKindColours;
         std::optional<color> iTextColour;
         std::optional<color> iBackgroundColour;
         std::optional<neogfx::gradient> iGridColour;

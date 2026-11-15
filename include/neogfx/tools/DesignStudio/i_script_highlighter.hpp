@@ -65,7 +65,9 @@ namespace neogfx::DesignStudio
             Return,
             Statement,
             Alternative,    ///< (of the branch that it is in: e.g. an else, an elif, an except)
-            Jump            ///< (a break, a continue or a throw (a return is Return))
+            Jump,           ///< (a break, a continue or a throw (a return is Return))
+            Declaration,    ///< (of a type, an object or another entity (not a function or a class, which have kinds of their own))
+            Import          ///< (what makes another module's declarations available: e.g. an import, or Ada's with and use clauses)
         };
         struct outline_node
         {
@@ -92,6 +94,9 @@ namespace neogfx::DesignStudio
         // the outline of the script aScript (of a file with the extension aExtension): its nodes, each after the node that it is in (the 
         // module, the first); called as highlight is; false if the script cannot be outlined (e.g. it does not parse)
         virtual bool outline(neolib::i_string const& aExtension, neolib::i_string const& aScript, neolib::i_vector<outline_node>& aOutline) const = 0;
+        // the colours ("#RRGGBB") of an outline's kinds of node (by kind; empty: none) in a theme, as colours gives the categories' (empty: 
+        // not configured)
+        virtual void outline_colours(neolib::i_string const& aExtension, neolib::i_string const& aTheme, neolib::i_vector<neolib::i_string>& aColours) const = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x140bbee0, 0xbdef, 0x4232, 0x95d9, { 0xe0, 0xa7, 0x68, 0xdd, 0x83, 0x44 } }; return sIid; }
     };

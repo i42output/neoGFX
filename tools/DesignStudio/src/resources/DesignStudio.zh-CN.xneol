@@ -78,6 +78,14 @@
 		<target>添加语言</target>
 	</text>
 	<text>
+		<source>Add Script</source>
+		<target>添加脚本</target>
+	</text>
+	<text>
+		<source>Add Script...</source>
+		<target>添加脚本...</target>
+	</text>
+	<text>
 		<source>Advanced</source>
 		<target>高级</target>
 	</text>
@@ -650,8 +658,16 @@
 		<target>类</target>
 	</text>
 	<text>
+		<source>declaration</source>
+		<target>声明</target>
+	</text>
+	<text>
 		<source>function</source>
 		<target>函数</target>
+	</text>
+	<text>
+		<source>import</source>
+		<target>导入</target>
 	</text>
 	<text>
 		<source>jump</source>

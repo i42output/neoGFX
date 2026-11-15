@@ -1571,6 +1571,13 @@ namespace neogfx::DesignStudio
                 for (auto const& colour : neos::context::highlight_colours(*path, aTheme.to_std_string()))
                     aColours.push_back(neolib::string{ colour });
         }
+        void outline_colours(neolib::i_string const& aExtension, neolib::i_string const& aTheme, neolib::i_vector<neolib::i_string>& aColours) const final
+        {
+            aColours.clear();
+            if (auto const path = schema_path(aExtension.to_std_string()))
+                for (auto const& colour : neos::context::outline_colours(*path, aTheme.to_std_string()))
+                    aColours.push_back(neolib::string{ colour });
+        }
         bool highlight(neolib::i_string const& aExtension, neolib::i_string const& aScript, neolib::i_vector<span>& aSpans) const final
         {
             aSpans.clear();
@@ -1611,6 +1618,8 @@ namespace neogfx::DesignStudio
                 auto const codePoints = code_points(source);
                 // (neos's kinds are i_script_highlighter's)
                 static_assert(static_cast<std::uint32_t>(neos::context::outline_kind::Statement) == static_cast<std::uint32_t>(outline_kind::Statement));
+                static_assert(static_cast<std::uint32_t>(neos::context::outline_kind::Declaration) == static_cast<std::uint32_t>(outline_kind::Declaration));
+                static_assert(static_cast<std::uint32_t>(neos::context::outline_kind::Import) == static_cast<std::uint32_t>(outline_kind::Import));
                 static_assert(neos::context::outline_node::NoParent == outline_node::NoParent);
                 auto const at = [&](std::size_t aByte) { return codePoints[std::min(aByte, source.size())]; };
                 for (auto const& n : iContext->outline(*path, source))
@@ -1669,6 +1678,7 @@ namespace neogfx::DesignStudio
         iSeparator{},
         iNewScript{ "New Script..."_t },
         iOpenScript{ "Open Script..."_t },
+        iAddScript{ "Add Script..."_t },
         iStartDebugging{ "Start Debugging"_t },
         iStartWithoutDebugging{ "Start Without Debugging"_t },
         iStepInto{ "Step Into"_t },
@@ -1687,6 +1697,7 @@ namespace neogfx::DesignStudio
         iSeparator.set_group(library_id());
         iNewScript.set_group(library_id());
         iOpenScript.set_group(library_id());
+        iAddScript.set_group(library_id());
         iStartDebugging.set_group(library_id()).set_shortcut("F5");
         iStartWithoutDebugging.set_group(library_id()).set_shortcut("Ctrl+F5");
         iStepInto.set_group(library_id()).set_shortcut("F11");
@@ -1714,6 +1725,7 @@ namespace neogfx::DesignStudio
         neolib::services::register_service<i_script_debugger>(*iScriptDebugger);
         iScriptMenu.add_action(iNewScript);
         iScriptMenu.add_action(iOpenScript);
+        iScriptMenu.add_action(iAddScript);
         iScriptMenu.add_action(iSeparator);
         iScriptMenu.add_action(iStartDebugging);
         iScriptMenu.add_action(iStartWithoutDebugging);
@@ -1764,23 +1776,24 @@ namespace neogfx::DesignStudio
     void neos_element_library::ide_ready(i_ide& aIde)
     {
         aIde.add_sub_menu(id::MenuBar, iScriptMenu);
-        // (the Script menu is enabled while there is an active project; opening script files into it: each in a script editor (a nested 
-        // window on the IDE's workspace), as a window dropped on the workspace from the toolbox is)
+        // (the Script menu is enabled while there is an active project; Open Script opens script files beside it (they aren't part of it: 
+        // see i_project::open_element): each in a script editor (a nested window on the IDE's workspace), as a window dropped on the 
+        // workspace from the toolbox is; Add Script adds script files to it without opening them (its editor is opened from the script's 
+        // element, e.g. in Object Explorer))
         auto& projectManager = aIde.projects();
         auto& workspace = aIde.workspace();
         auto update_open_script = [this, &projectManager]() 
         { 
             iScriptMenu.enable(projectManager.project_active());
             iOpenScript.enable(projectManager.project_active()); 
+            iAddScript.enable(projectManager.project_active()); 
         };
         iSink += projectManager.project_activated([update_open_script](i_project&) { update_open_script(); });
         iSink += projectManager.project_deactivated([update_open_script](i_project&) { update_open_script(); });
         update_open_script();
-        iSink += iOpenScript.triggered([this, &projectManager, &workspace]()
+        // (the script files chosen: the files of the languages that can be highlighted)
+        auto choose_scripts = [this, &workspace](char const* aTitle)
         {
-            if (!projectManager.project_active())
-                return;
-            // (the files of the languages that can be highlighted)
             filter_patterns patterns;
             neolib::vector<neolib::string> extensions;
             iScriptHighlighter->extensions(extensions);
@@ -1788,7 +1801,45 @@ namespace neogfx::DesignStudio
                 patterns.push_back("*" + extension.to_std_string());
             if (patterns.empty())
                 patterns.push_back("*.*");
-            auto files = open_file_dialog(workspace.root().as_widget(), file_dialog_spec{ "Open Script", {}, patterns, "Script Files" }, true);
+            return open_file_dialog(workspace.root().as_widget(), file_dialog_spec{ aTitle, {}, patterns, "Script Files" }, true);
+        };
+        iSink += iAddScript.triggered([&projectManager, choose_scripts]()
+        {
+            if (!projectManager.project_active())
+                return;
+            auto files = choose_scripts("Add Script");
+            if (!files)
+                return;
+            auto& project = projectManager.active_project();
+            for (auto const& file : files.value())
+            {
+                try
+                {
+                    // (a script already opened beside the project is added to it; one already in it isn't added again)
+                    i_element* existing = nullptr;
+                    for (auto const& child : project.root().children())
+                    {
+                        std::error_code ec;
+                        if (child->type().to_std_string_view() == "script" && 
+                            std::filesystem::equivalent(std::filesystem::path{ child->id().to_std_string() }, std::filesystem::path{ file }, ec) && !ec)
+                            existing = &*child;
+                    }
+                    if (existing != nullptr)
+                        project.add_to_project(*existing);
+                    else
+                        project.create_element(project.root(), "script"_s, string{ file });
+                }
+                catch (std::exception const& e)
+                {
+                    service<i_surface_manager>().display_error_message("Add Script"_t, string{ e.what() });
+                }
+            }
+        });
+        iSink += iOpenScript.triggered([&projectManager, &workspace, choose_scripts]()
+        {
+            if (!projectManager.project_active())
+                return;
+            auto files = choose_scripts("Open Script");
             if (!files)
                 return;
             auto& project = projectManager.active_project();
@@ -1797,7 +1848,7 @@ namespace neogfx::DesignStudio
             {
                 try
                 {
-                    auto& element = project.create_element(project.root(), "script"_s, string{ file });
+                    auto& element = project.open_element("script"_s, string{ file });
                     // (its window is made for a scratch parent (whose caddy nest it is added to, which would make it follow the scratch's 
                     // geometry: gone with it) and then nested (MDI) in the workspace)
                     auto scratch = make_ref<widget<>>(workspace.root().as_widget());
@@ -1806,9 +1857,10 @@ namespace neogfx::DesignStudio
                     {
                         auto script = ref_ptr<i_widget>{ element.layout_item().as_widget() };
                         workspace.add(script);
+                        // (placed, then nested: once nested, a script's editor that was open before is put back where it was)
+                        script->move(position);
                         if (script->is_root() && script->root().is_nested())
                             service<i_surface_manager>().nest_for(workspace, nest_type::MDI).add(script->root().native_window());
-                        script->move(position);
                         position += point{ 32.0_dip, 32.0_dip };
                     }
                 }

@@ -75,5 +75,11 @@ namespace neogfx::DesignStudio
         virtual i_element& create_element(i_element& aParent, const i_string& aType, const i_string& aElementId = string{}) = 0;
         virtual void remove_element(i_element& aElement) = 0;
         virtual void move_element(i_element& aElement, i_element& aNewParent, i_element const* aBefore = nullptr) = 0;
+    public:
+        // an element opened beside the project rather than added to it (e.g. a script: Script|Open Script...): it isn't part of the 
+        // project (it isn't saved with it and Object Explorer shows it beside the project rather than in it) until it is added to it
+        virtual i_element& open_element(const i_string& aType, const i_string& aElementId = string{}) = 0;
+        virtual bool in_project(i_element const& aElement) const = 0;
+        virtual void add_to_project(i_element& aElement) = 0;
     };
 }

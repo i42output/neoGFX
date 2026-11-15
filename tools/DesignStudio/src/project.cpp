@@ -243,15 +243,17 @@ namespace neogfx::DesignStudio
         iName = aName;
         iNamespace = aNamespace;
         iTranslations.clear();
+        iOpenedElements.clear();
         iRoot = manager().library("project"_s).create_element(*this, "project", aName.to_std_string());
     }
 
     void project::open(const i_string& aPath)
     {
-        // a project is either a single .nrc file or a project file (.dsproj) listing the .nrc files it consists of
+        // a project is either a single .nrc file or a project file (.dsproj) listing the .nrc files it consists of (and its scripts)
         std::filesystem::path const projectFileName{ std::filesystem::absolute(std::filesystem::path{ aPath.to_std_string() }) };
         iFiles.clear();
         iTranslations.clear();
+        iOpenedElements.clear();
         iPath = aPath;
         iName = projectFileName.stem().string();
         iRoot = manager().library("project"_s).create_element(*this, "project", projectFileName.stem().string());
@@ -263,6 +265,11 @@ namespace neogfx::DesignStudio
                 throw invalid_project_file("no .nrc files");
             for (auto const& nrcFile : input.root().as<neolib::fjson_object>().at("nrc"))
                 load_nrc(projectFileName.parent_path() / std::string{ nrcFile.text().begin(), nrcFile.text().end() });
+            // (its scripts' elements: their editors are opened from Object Explorer)
+            if (input.root().as<neolib::fjson_object>().has("scripts"))
+                for (auto const& script : input.root().as<neolib::fjson_object>().at("scripts"))
+                    create_element(*iRoot, "script"_s, string{ (projectFileName.parent_path() / 
+                        std::string{ script.text().begin(), script.text().end() }).lexically_normal().string() });
         }
         else
             load_nrc(projectFileName);
@@ -751,18 +758,37 @@ namespace neogfx::DesignStudio
             }
             save_translations(i);
         }
-        // project file listing them (paths relative to it)
+        // project file listing them, and the project's scripts (paths relative to it)
         if (isProjectFile)
         {
             std::ostringstream output;
-            output << "{\n" << indent(1u) << "nrc: [\n";
-            for (auto const& file : iFiles)
+            auto list_file = [&](std::filesystem::path const& aFilePath)
             {
                 std::error_code ec;
-                auto relative = std::filesystem::relative(file.path, projectFileName.parent_path(), ec);
-                output << indent(2u) << quoted((ec || relative.empty() ? file.path : relative).generic_string()) << "\n";
+                auto relative = std::filesystem::relative(aFilePath, projectFileName.parent_path(), ec);
+                output << indent(2u) << quoted((ec || relative.empty() ? aFilePath : relative).generic_string()) << "\n";
+            };
+            output << "{\n" << indent(1u) << "nrc: [\n";
+            for (auto const& file : iFiles)
+                list_file(file.path);
+            output << indent(1u) << "]\n";
+            // (the scripts added to it (not those only opened: see open_element) that are files (their elements' ids are their paths))
+            std::vector<std::filesystem::path> scripts;
+            for (auto const& e : root().children())
+                if (e->group() == element_group::Script && in_project(*e))
+                {
+                    std::filesystem::path const script{ e->id().to_std_string() };
+                    if (script.is_absolute())
+                        scripts.push_back(script);
+                }
+            if (!scripts.empty())
+            {
+                output << indent(1u) << "scripts: [\n";
+                for (auto const& script : scripts)
+                    list_file(script);
+                output << indent(1u) << "]\n";
             }
-            output << indent(1u) << "]\n" << "}\n";
+            output << "}\n";
             write(projectFileName, output.str());
         }
         iPath = aPath;
@@ -821,6 +847,7 @@ namespace neogfx::DesignStudio
                 aRemoved.layout_item().as_widget().root().close();
         });
         aElement.parent().remove_child(aElement);
+        std::erase(iOpenedElements, &aElement);
         ElementRemoved(*temp);
         set_dirty();
     }
@@ -837,6 +864,33 @@ namespace neogfx::DesignStudio
         else
             siblings.push_back(temp);
         ElementMoved(aElement);
+        set_dirty();
+    }
+
+    i_element& project::open_element(const i_string& aType, const i_string& aElementId)
+    {
+        // (it is one of the root's children, as an element added to the project is, but isn't part of the project: see in_project)
+        auto result = manager().library(aType).create_element(*iRoot, aType.to_std_string(), aElementId.to_std_string());
+        iOpenedElements.push_back(&*result);
+        ElementAdded(*result);
+        result->create_default_children();
+        return *result;
+    }
+
+    bool project::in_project(i_element const& aElement) const
+    {
+        // (as its top level element is)
+        i_element const* topLevel = &aElement;
+        while (topLevel->has_parent() && topLevel->parent().has_parent())
+            topLevel = &topLevel->parent();
+        return std::find(iOpenedElements.begin(), iOpenedElements.end(), topLevel) == iOpenedElements.end();
+    }
+
+    void project::add_to_project(i_element& aElement)
+    {
+        if (std::erase(iOpenedElements, &aElement) == 0u)
+            return; // (already part of it)
+        ElementMoved(aElement); // (e.g. Object Explorer: from beside the project to in it)
         set_dirty();
     }
 }

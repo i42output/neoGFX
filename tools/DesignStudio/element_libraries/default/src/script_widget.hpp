@@ -270,16 +270,36 @@ namespace neogfx::DesignStudio
             iResetGraph{ "Reset Layout"_t, toolbar_image(sResetLayoutImagePattern) }
         {
             set_minimum_size(size{ 256.0_dip, 160.0_dip });
-            // (a script's file: its window sized to 75% of the workspace once nested (MDI) in it, unless it is maximized there)
+            // (a script's file: once nested (MDI) in the workspace (unless it is maximized there) its window is put where it was, at the 
+            // size it was, when it was last closed (see save_placement: its title bar kept within the workspace), else it is sized to 75% 
+            // of the workspace, where what opened it placed it (it is placed before it is nested); and where it is when it is closed is 
+            // kept for when it is next opened)
             if (is_file(aElement.id().to_std_string()) && has_native_window())
+            {
                 iSink += native_window().added_to_nest([this]()
                 {
                     auto& nest = service<i_surface_manager>().find_nest(native_window());
-                    if (iSizedToWorkspace || nest.type() != nest_type::MDI || native_window().is_maximized())
+                    if (nest.type() != nest_type::MDI)
+                        return;
+                    iInWorkspace = true;
+                    if (iSizedToWorkspace || native_window().is_maximized())
                         return;
                     iSizedToWorkspace = true;
-                    resize(nest.widget().client_rect(false).extents() * 0.75);
+                    auto const workspace = nest.widget().client_rect(false).extents();
+                    auto const remembered = load_placement();
+                    auto at = position();
+                    if (remembered)
+                    {
+                        dimension const reach = 64.0_dip;
+                        at = point{ std::clamp(remembered->x, 0.0, std::max(workspace.cx - reach, 0.0)), 
+                            std::clamp(remembered->y, 0.0, std::max(workspace.cy - reach, 0.0)) };
+                    }
+                    // (moved once resized: a window that is resized is centred (see window::resized))
+                    resize(remembered ? remembered->extents() : workspace * 0.75);
+                    move(at);
                 });
+                iSink += closed([this]() { save_placement(); });
+            }
             title_bar().set_icon(aElement.library().element_icon(aElement.type()));
             title_bar().set_title(""_s);
             create_status_bar<neogfx::status_bar>(
@@ -472,6 +492,8 @@ namespace neogfx::DesignStudio
         }
         ~script_widget()
         {
+            if (!is_closed())
+                save_placement();
             std::erase(editors(), this);
             if (iDebugger && iDebugger->active_script().to_std_string() == iPath)
                 iDebugger->set_active_script(string{});
@@ -591,6 +613,40 @@ namespace neogfx::DesignStudio
                     output << (ch == '\\' ? "\\\\" : ch == '\n' ? "\\n" : ch == '\r' ? "\\r" : std::string(1, ch));
                 output << '\n';
             }
+        }
+        // (where a script's window is in the workspace, and its size, when it is closed: kept between sessions, as its node graph's 
+        // layout is (beside it), as lines: a header, its path, then its position and its size; not while it is maximized or iconized 
+        // (where it was last, when it was neither, is kept))
+        static constexpr std::string_view PlacementHeader = "DesignStudio script window 1";
+        std::filesystem::path placement_file() const
+        {
+            return layout_file().replace_extension(".window");
+        }
+        std::optional<rect> load_placement() const
+        {
+            std::ifstream input{ placement_file(), std::ios::binary };
+            std::string line;
+            if (!std::getline(input, line) || line != PlacementHeader || !std::getline(input, line) || line != canonical_path())
+                return std::nullopt;
+            input.imbue(std::locale::classic());
+            rect result;
+            if (!(input >> result.x >> result.y >> result.cx >> result.cy) || result.cx <= 0.0 || result.cy <= 0.0)
+                return std::nullopt;
+            return result;
+        }
+        // (if it cannot be written, the placement is not kept: it is only a convenience)
+        void save_placement()
+        {
+            if (iPath.empty() || !iInWorkspace || !has_native_window() || native_window().is_maximized() || native_window().is_iconic())
+                return;
+            auto const file = placement_file();
+            std::error_code ec;
+            std::filesystem::create_directories(file.parent_path(), ec);
+            std::ofstream output{ file, std::ios::binary | std::ios::trunc };
+            output.imbue(std::locale::classic());
+            output.precision(10);
+            output << PlacementHeader << '\n' << canonical_path() << '\n' << 
+                position().x << ' ' << position().y << ' ' << extents().cx << ' ' << extents().cy << '\n';
         }
         // (the script (saved, if it has changed) run (debugged, if aDebug) in a neos console: the one that it was last run in, if it is 
         // still open (its neos session reused if it has one), else a new one (opened in the workspace as a console dropped on it is); a 
@@ -797,21 +853,22 @@ namespace neogfx::DesignStudio
                 return;
             auto& workspace = parent();
             auto& project = iElement.project();
-            // (the script's element, if it is in the project (its editor has been closed), else a new one)
+            // (the script's element, if it has one (its editor has been closed), else a new one (opened beside the project, not added to it))
             i_element* existing = nullptr;
             for (auto const& child : project.root().children())
                 if (child->type().to_std_string_view() == "script" && same_file(child->id().to_std_string(), aPath))
                     existing = &*child;
-            auto& element = existing ? *existing : project.create_element(project.root(), "script"_s, string{ aPath });
+            auto& element = existing ? *existing : project.open_element("script"_s, string{ aPath });
             auto scratch = make_ref<widget<>>(workspace.root().as_widget());
             element.create_layout_item(*scratch);
             if (!element.has_layout_item() || !element.layout_item().is_widget())
                 return;
             auto scriptWindow = ref_ptr<i_widget>{ element.layout_item().as_widget() };
             workspace.add(scriptWindow);
+            // (placed, then nested: once nested, a window that was open before is put back where it was (see our constructor))
+            scriptWindow->move(position() + point{ 32.0_dip, 32.0_dip });
             if (scriptWindow->is_root() && scriptWindow->root().is_nested())
                 service<i_surface_manager>().nest_for(workspace, nest_type::MDI).add(scriptWindow->root().native_window());
-            scriptWindow->move(position() + point{ 32.0_dip, 32.0_dip });
             if (scriptWindow->is_root())
                 scriptWindow->root().activate();
         }
@@ -904,8 +961,9 @@ namespace neogfx::DesignStudio
             {
                 // (the syntax highlighting configuration's colours (see i_script_highlighter::colours): its dark theme's if the text is light; 
                 // a category without a colour is in the editor's default style)
+                string const theme{ iEditor.default_text_color().light() ? "dark" : "light" };
                 neolib::vector<neolib::string> colours;
-                iScriptHighlighter->colours(string{ iExtension }, string{ iEditor.default_text_color().light() ? "dark" : "light" }, colours);
+                iScriptHighlighter->colours(string{ iExtension }, theme, colours);
                 iCategoryStyles.emplace();
                 std::vector<std::optional<color>> graphColours;
                 for (std::uint32_t c = 0u; c <= static_cast<std::uint32_t>(i_script_highlighter::category::Variable); ++c)
@@ -914,9 +972,15 @@ namespace neogfx::DesignStudio
                         text_edit::style{ text_edit::character_style{}.set_text_color(color{ colours[c].to_std_string() }) } : iEditor.default_style());
                     graphColours.push_back(c < colours.size() && !colours[c].empty() ? std::optional<color>{ color{ colours[c].to_std_string() } } : std::nullopt);
                 }
+                // (the graph's kinds of node's colours: the theme's outline colours (see i_script_highlighter::outline_colours))
+                neolib::vector<neolib::string> outlineColours;
+                iScriptHighlighter->outline_colours(string{ iExtension }, theme, outlineColours);
+                std::vector<std::optional<color>> kindColours;
+                for (auto const& colour : outlineColours)
+                    kindColours.push_back(!colour.empty() ? std::optional<color>{ color{ colour.to_std_string() } } : std::nullopt);
                 // (the graph's background the editor's: its paper colour, else its background colour)
                 auto const& paper = iEditor.default_style().character().paper_color();
-                iGraph.set_colours(graphColours, iEditor.default_text_color(), 
+                iGraph.set_colours(graphColours, kindColours, iEditor.default_text_color(), 
                     std::holds_alternative<color>(paper) ? std::get<color>(paper) : iEditor.background_color());
             }
             for (std::size_t first = 0u; first < length;)
@@ -1124,6 +1188,7 @@ namespace neogfx::DesignStudio
         console_widget* iConsole = nullptr;             ///< (the console that the script was last run in (while it is open))
         i_script_debugger* iDebugger = nullptr;
         bool iSizedToWorkspace = false;
+        bool iInWorkspace = false;                      ///< (nested (MDI) in the workspace: where it is there is kept when it is closed)
         sink iConsoleSink;
         sink iSink;
     };
