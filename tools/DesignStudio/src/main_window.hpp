@@ -192,6 +192,7 @@ namespace neogfx::DesignStudio
         bool iTranslationRowNeeded = false;
         bool iDesignSurfaceNeedsUpdate = false; // (its texts in the project's design language: see update_translations)
         std::vector<std::pair<ng::string, std::unique_ptr<ng::action>>> iLanguageActions; // (View | Language)
+        std::vector<std::pair<std::string, std::unique_ptr<ng::action>>> iRecentProjects; // (File | Recent Projects: each's file (none: not in the menu) and its action)
         std::set<i_property const*> iChangedProperties; // changed since their rows were last updated (a batch update every 20ms: see iPropertiesUpdater); emptied if their object is destroyed before then
     };
 }

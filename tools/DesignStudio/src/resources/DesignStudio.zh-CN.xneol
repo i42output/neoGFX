@@ -206,6 +206,10 @@
 		<target>引发了异常</target>
 	</text>
 	<text>
+		<source>File not found</source>
+		<target>找不到文件</target>
+	</text>
+	<text>
 		<source>Font...</source>
 		<target>字体...</target>
 	</text>
@@ -396,6 +400,10 @@
 	<text>
 		<source>Property</source>
 		<target>属性</target>
+	</text>
+	<text>
+		<source>Recent Projects</source>
+		<target>最近的项目</target>
 	</text>
 	<text>
 		<source>Remove</source>

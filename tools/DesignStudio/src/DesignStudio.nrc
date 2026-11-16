@@ -77,6 +77,11 @@
                         action: separator
                         action: mainApp.actionFileSave
                         action: separator
+                        menu: {
+                            id: menuRecentProjects
+                            title: "Recent Projects"
+                        }
+                        action: separator
                         action: mainApp.actionFileExit
                     }
                     menu: {

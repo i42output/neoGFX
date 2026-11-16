@@ -1189,9 +1189,7 @@ namespace neogfx
         }
         void item_added(const item_model_index& aItemIndex)
         {
-            if constexpr (container_traits::is_tree)
-                if (item_model().has_parent(aItemIndex) && !has_item_model_index(item_model().parent(aItemIndex)))
-                    return;
+            // (the rows of the items after it are renumbered whether or not it is given a row)
             for (auto& row : iRows)
                 if (row.value >= aItemIndex.row())
                     ++row.value;
@@ -1210,19 +1208,29 @@ namespace neogfx
                 }
                 else
                 {
-                    auto const parentIndex = from_item_model_index(item_model().parent(aItemIndex));
-                    auto const parent = const_sibling_iterator{ std::next(iRows.cbegin(), parentIndex.row()) };
-                    auto pos = parent.begin();
-                    while (pos != parent.end() && pos->value < aItemIndex.row())
-                        ++pos;
-                    iRows.insert(pos, row_type{ aItemIndex.row() });
+                    // (its parent's row: if it is shown, found with begin(), which skips collapsed rows' children as rows do 
+                    // (iRows.begin() does not); otherwise, if any rows are collapsed (it may be in one), found by its item; a 
+                    // parent that has no row (e.g. it is filtered out) has no rows for its children)
+                    auto const parentModelIndex = item_model().parent(aItemIndex);
+                    auto const parent = has_item_model_index(parentModelIndex) ?
+                        sibling_iterator{ std::next(begin(), from_item_model_index(parentModelIndex).row()) } :
+                        sibling_iterator{ iRows.ksize() == iRows.size() ? iRows.end() :
+                            std::find_if(iRows.begin(), iRows.end(), [&](row_type const& aRow) { return aRow.value == parentModelIndex.row(); }) };
+                    if (parent != iRows.end())
+                    {
+                        auto pos = parent.begin();
+                        while (pos != parent.end() && pos->value < aItemIndex.row())
+                            ++pos;
+                        iRows.insert(pos, row_type{ aItemIndex.row() });
+                    }
                 }
             }
 
             if (!updating() || container_traits::is_tree)
                 reset_row_map(aItemIndex);
 
-            if (!updating())
+            // (an item added in a collapsed row is not shown until that row is expanded)
+            if (!updating() && has_item_model_index(aItemIndex))
             {
                 reset_position_meta(aItemIndex.row());
                 execute_sort();
@@ -1250,7 +1258,28 @@ namespace neogfx
         void item_removing(const item_model_index& aItemIndex)
         {
             if (!has_item_model_index(aItemIndex))
+            {
+                // (an item whose row is not shown (it is in a collapsed row), or that has no row (e.g. it is filtered out): its row is 
+                // removed, and the rows of the items after it and the row map are renumbered)
+                if constexpr (container_traits::is_tree)
+                {
+                    auto const hiddenRow = iRows.ksize() == iRows.size() ? iRows.end() : // (no rows are collapsed: it has no row)
+                        std::find_if(iRows.begin(), iRows.end(), [&](row_type const& aRow) { return aRow.value == aItemIndex.row(); });
+                    if (hiddenRow != iRows.end())
+                    {
+                        for (item_presentation_model_index::column_type col = 0; col < hiddenRow->cells.size(); ++col)
+                            if (hiddenRow->cells[col].extents)
+                                column(col).remove_cell_width(hiddenRow->cells[col].extents->cx);
+                        iRows.erase(hiddenRow);
+                    }
+                }
+                for (auto& row : iRows)
+                    if (row.value > aItemIndex.row())
+                        --row.value;
+                if (aItemIndex.row() < iRowMap.size())
+                    iRowMap.erase(std::next(iRowMap.begin(), aItemIndex.row()));
                 return;
+            }
             auto const index = from_item_model_index(aItemIndex);
             for (item_presentation_model_index::column_type col = 0; col < columns(); ++col)
                 cache_cell_meta_extents(index.with_column(col), std::nullopt);

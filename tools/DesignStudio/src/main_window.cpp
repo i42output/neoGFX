@@ -1691,7 +1691,7 @@ namespace neogfx::DesignStudio
         });
     }
 
-    // File menu (new, open, add .nrc file, save, close) and settings; enabling actions and docks for the active project
+    // File menu (new, open, add .nrc file, save, close, recent projects) and settings; enabling actions and docks for the active project
     void main_window_ex::init_file_actions(main_app& aApp, settings& aSettings, project_manager& aProjectManager)
     {
         auto update_ui = [&]()
@@ -1705,9 +1705,123 @@ namespace neogfx::DesignStudio
 
         update_ui();
 
-        iSink += aProjectManager.ProjectAdded([&, update_ui](i_project& aProject) 
+        auto open_files = [&](ng::file_paths const& aFiles)
+        {
+            loading_popup loadingPopup{ mainWindow, aProjectManager };
+            // .nrc files opened together form one project (the first being its primary file); a project file (.dsproj) lists them
+            i_project* nrcProject = nullptr;
+            for (auto const& file : aFiles)
+            {
+                std::filesystem::path const filePath{ file };
+                if (filePath.extension() == ".dsproj")
+                {
+                    auto& project = aProjectManager.open_project(file);
+                    create_caddies(project, iWorkspace.view_stack());
+                }
+                else if (filePath.extension() == ".nrc")
+                {
+                    try
+                    {
+                        if (nrcProject == nullptr)
+                            nrcProject = &aProjectManager.open_project(file);
+                        else
+                            nrcProject->add_file(ng::string{ file });
+                    }
+                    catch (std::exception const& e)
+                    {
+                        ng::service<ng::i_surface_manager>().display_error_message("Open Project"_t, ng::string{ e.what() });
+                    }
+                }
+                else if (aProjectManager.project_active())
+                    aProjectManager.active_project().create_element(aProjectManager.active_project().root(), "file"_s, ng::string{ file });
+                else
+                {
+                    ng::sink sink = aProjectManager.project_added([&](i_project& aProject)
+                    {
+                        aProject.create_element(aProject.root(), "file"_s, ng::string{ file });
+                    });
+                    aApp.action_file_new().triggered()();
+                }
+            }
+            // (caddies once all of its files are loaded so resources from any of them are available)
+            if (nrcProject != nullptr)
+                create_caddies(*nrcProject, iWorkspace.view_stack());
+        };
+
+        // File | Recent Projects: the files of the projects most recently opened or saved (the most recent first; up to 10), as saved in 
+        // the settings (separated by '|'); each of the menu's actions is in it while it has a file
+        auto& recentProjects = aSettings.setting("environment.documents.recent_projects"_s);
+        auto same_file = [](std::string const& aLhs, std::string const& aRhs)
+        {
+            std::error_code ec;
+            return aLhs == aRhs || (std::filesystem::equivalent(std::filesystem::path{ aLhs }, std::filesystem::path{ aRhs }, ec) && !ec);
+        };
+        auto set_recent_projects = [this, &recentProjects](std::vector<std::string> const& aFiles)
+        {
+            while (menuRecentProjects.count() != 0u)
+                menuRecentProjects.remove_at(0u);
+            std::string saved;
+            for (std::size_t i = 0u; i < iRecentProjects.size(); ++i)
+            {
+                iRecentProjects[i].first = i < aFiles.size() ? aFiles[i] : std::string{};
+                if (i >= aFiles.size())
+                    continue;
+                iRecentProjects[i].second->set_text(ng::string{ aFiles[i] });
+                menuRecentProjects.add_action(*iRecentProjects[i].second);
+                saved += (i != 0u ? "|" : "") + aFiles[i];
+            }
+            if (recentProjects.value<ng::string>(true).to_std_string() != saved)
+                recentProjects.set_value(ng::string{ saved });
+        };
+        // (a file becomes the most recent (aAdd), or is no longer one)
+        auto add_recent_project = [this, same_file, set_recent_projects](std::string const& aFile, bool aAdd = true)
+        {
+            std::vector<std::string> files;
+            if (aAdd)
+                files.push_back(aFile);
+            for (auto const& recent : iRecentProjects)
+                if (!recent.first.empty() && !same_file(recent.first, aFile) && files.size() < iRecentProjects.size())
+                    files.push_back(recent.first);
+            set_recent_projects(files);
+        };
+        for (std::size_t i = 0u; i < 10u; ++i)
+        {
+            auto& recentAction = *iRecentProjects.emplace_back(std::string{}, std::make_unique<ng::action>(ng::string{})).second; // (with a text: not a separator)
+            iSink += recentAction.triggered([&, i, same_file, open_files, add_recent_project]()
+            {
+                std::string const file = iRecentProjects[i].first;
+                std::error_code ec;
+                if (!std::filesystem::exists(std::filesystem::path{ file }, ec))
+                {
+                    ng::service<ng::i_surface_manager>().display_error_message("Open Project"_t, ng::string{ "File not found"_t.to_std_string() + ":\n" + file });
+                    add_recent_project(file, false);
+                    return;
+                }
+                // (a project that is already open is activated)
+                for (auto const& project : aProjectManager.projects())
+                    if (project->has_path() && same_file(project->path().to_std_string(), file))
+                    {
+                        aProjectManager.activate_project(*project);
+                        add_recent_project(file);
+                        return;
+                    }
+                open_files({ file });
+            });
+        }
+        {
+            std::vector<std::string> files;
+            std::istringstream saved{ recentProjects.value<ng::string>(true).to_std_string() };
+            for (std::string file; files.size() < iRecentProjects.size() && std::getline(saved, file, '|');)
+                if (!file.empty())
+                    files.push_back(file);
+            set_recent_projects(files);
+        }
+
+        iSink += aProjectManager.ProjectAdded([&, update_ui, add_recent_project](i_project& aProject) 
         { 
             iSink += aProject.modified([update_ui]() { update_ui(); });
+            if (aProject.has_path())
+                add_recent_project(aProject.path().to_std_string());
             update_ui(); 
         });
         iSink += aProjectManager.ProjectRemoved([update_ui](i_project&) { update_ui(); });
@@ -1722,7 +1836,7 @@ namespace neogfx::DesignStudio
             }
         });
 
-        iSink += aApp.actionFileSave.triggered([&, update_ui]()
+        iSink += aApp.actionFileSave.triggered([&, update_ui, add_recent_project]()
         {
             if (!aProjectManager.project_active())
                 return;
@@ -1748,6 +1862,7 @@ namespace neogfx::DesignStudio
             try
             {
                 project.save(ng::string{ path });
+                add_recent_project(path);
             }
             catch (std::exception const& e)
             {
@@ -1757,51 +1872,11 @@ namespace neogfx::DesignStudio
             update_ui();
         });
 
-        aApp.action_file_open().triggered([&]()
+        aApp.action_file_open().triggered([&, open_files]()
         {
             auto files = ng::open_file_dialog(mainWindow, ng::file_dialog_spec{ "Open Project", {}, { "*.dsproj", "*.nrc" }, "Project Files" });
             if (files)
-            {
-                loading_popup loadingPopup{ mainWindow, aProjectManager };
-                // .nrc files opened together form one project (the first being its primary file); a project file (.dsproj) lists them
-                i_project* nrcProject = nullptr;
-                for (auto const& file : files.value())
-                {
-                    std::filesystem::path const filePath{ file };
-                    if (filePath.extension() == ".dsproj")
-                    {
-                        auto& project = aProjectManager.open_project(file);
-                        create_caddies(project, iWorkspace.view_stack());
-                    }
-                    else if (filePath.extension() == ".nrc")
-                    {
-                        try
-                        {
-                            if (nrcProject == nullptr)
-                                nrcProject = &aProjectManager.open_project(file);
-                            else
-                                nrcProject->add_file(ng::string{ file });
-                        }
-                        catch (std::exception const& e)
-                        {
-                            ng::service<ng::i_surface_manager>().display_error_message("Open Project"_t, ng::string{ e.what() });
-                        }
-                    }
-                    else if (aProjectManager.project_active())
-                        aProjectManager.active_project().create_element(aProjectManager.active_project().root(), "file"_s, ng::string{ file });
-                    else
-                    {
-                        ng::sink sink = aProjectManager.project_added([&](i_project& aProject)
-                        {
-                            aProject.create_element(aProject.root(), "file"_s, ng::string{ file });
-                        });
-                        aApp.action_file_new().triggered()();
-                    }
-                }
-                // (caddies once all of its files are loaded so resources from any of them are available)
-                if (nrcProject != nullptr)
-                    create_caddies(*nrcProject, iWorkspace.view_stack());
-            }
+                open_files(files.value());
         });
 
         // adding .nrc files to the open project (e.g. one with resources it uses)

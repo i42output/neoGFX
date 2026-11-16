@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <algorithm>
 #include <charconv>
+#include <cstdlib>
 #include <concepts>
 #include <string>
 #include <string_view>
@@ -282,18 +283,16 @@ namespace neogfx::DesignStudio
         // a length (e.g. "32dip", "max" or a number of pixels) in device units
         inline std::optional<dimension> to_dimension(i_units_context const& aContext, std::string const& aText)
         {
+            // (a number (of pixels) first, and by std::strtod rather than std::stod, so that neither it nor a length with units throws: 
+            // length::from_string throws for a length that has no units)
+            char* end = nullptr;
+            auto const result = std::strtod(aText.c_str(), &end);
+            if (!aText.empty() && end == aText.c_str() + aText.size())
+                return result;
             scoped_units_context suc{ aContext };
             try
             {
                 return length::from_string(string{ aText }).value();
-            }
-            catch (...) {}
-            try
-            {
-                std::size_t used = 0u;
-                auto const result = std::stod(aText, &used);
-                if (used == aText.size())
-                    return result;
             }
             catch (...) {}
             return {};
