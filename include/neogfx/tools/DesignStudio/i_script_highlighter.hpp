@@ -97,6 +97,13 @@ namespace neogfx::DesignStudio
         // the colours ("#RRGGBB") of an outline's kinds of node (by kind; empty: none) in a theme, as colours gives the categories' (empty: 
         // not configured)
         virtual void outline_colours(neolib::i_string const& aExtension, neolib::i_string const& aTheme, neolib::i_vector<neolib::i_string>& aColours) const = 0;
+        // where else in the script aScript (of the file aPath, which has the extension aExtension) the name at aPosition (a code point of 
+        // it: a declaration's defining name, e.g. a function's) denotes what is declared there (the first code point of each: its uses, and 
+        // its other declarations), by meaning: as the language's compiler resolves the script's names (e.g. not another function of the 
+        // same name); the script is compiled, so it may take a while: it is called on a thread other than the GUI's; false if they are not 
+        // known (e.g. the script does not compile, or the language's compiler cannot tell them)
+        virtual bool references(neolib::i_string const& aExtension, neolib::i_string const& aPath, neolib::i_string const& aScript, std::uint32_t aPosition, 
+            neolib::i_vector<std::uint32_t>& aReferences) const = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x140bbee0, 0xbdef, 0x4232, 0x95d9, { 0xe0, 0xa7, 0x68, 0xdd, 0x83, 0x44 } }; return sIid; }
     };

@@ -596,6 +596,17 @@ namespace neogfx::DesignStudio
         return property_visit_text_type(aProperty, [](auto) {}, property_text_types{});
     }
 
+    // does the property's type have a default? (one that has none (a size policy): a component of it that is not set has no value)
+    inline bool property_type_has_default(ng::i_property const& aProperty)
+    {
+        bool result = true;
+        property_visit_text_type(aProperty, [&](auto const* aType)
+        {
+            result = std::is_default_constructible_v<std::decay_t<decltype(*aType)>>;
+        }, property_text_types{});
+        return result;
+    }
+
     inline bool property_value_editable(ng::i_property const& aProperty)
     {
         if (aProperty.read_only())
@@ -693,7 +704,7 @@ namespace neogfx::DesignStudio
     // a component of a T property that is a Component (as text: see property_component_text and property_component_parse)
     template <typename T, typename Component>
     inline ng::ref_ptr<i_property_component> property_component_of(std::string const& aName, std::function<Component(T const&)> aGet, std::function<void(T&, Component const&)> aSet,
-        typename basic_property_component<T>::choices_function aChoices = {})
+        typename basic_property_component<T>::choices_function aChoices = {}, typename basic_property_component<T>::unset_function aUnset = {})
     {
         if constexpr (std::is_enum_v<Component>)
             if (!aChoices && !property_enum_is_flags<Component>)
@@ -708,7 +719,7 @@ namespace neogfx::DesignStudio
                 aSet(aValue, *component);
                 return true;
             },
-            aChoices);
+            aChoices, aUnset);
     }
 
     // a component of a T property that is a length (e.g. a size's width): its text can have units (see property_text_length)
@@ -813,6 +824,9 @@ namespace neogfx::DesignStudio
         static bool const sInitialized = []()
         {
             sRegistry.add_ref(); // (lives as long as the application)
+            // (a size policy has no default: a component of an unset one (a layout's, e.g.) is set in a layout item's default; its attribute 
+            // is applied to what the object effectively has (see nrc_attributes::apply))
+            auto const unset_size_policy = []() { return ng::size_policy{ ng::size_constraint::Minimum }; };
             sRegistry.register_component<ng::size>(*property_length_component_of<ng::size>("Width", [](ng::size const& v) { return v.cx; }, [](ng::size& v, double const& c) { v.cx = c; }));
             sRegistry.register_component<ng::size>(*property_length_component_of<ng::size>("Height", [](ng::size const& v) { return v.cy; }, [](ng::size& v, double const& c) { v.cy = c; }));
             sRegistry.register_component<ng::point>(*property_length_component_of<ng::point>("X", [](ng::point const& v) { return v.x; }, [](ng::point& v, double const& c) { v.x = c; }));
@@ -828,7 +842,7 @@ namespace neogfx::DesignStudio
             sRegistry.register_component<ng::font>(*property_component_of<ng::font, double>("Size", [](ng::font const& v) { return static_cast<double>(v.size()); }, 
                 [](ng::font& v, double const& c) { v = ng::font{ ng::string{ v.family_name() }, ng::string{ v.style_name() }, c }; }));
             sRegistry.register_component<ng::size_policy>(*property_component_of<ng::size_policy, ng::size_constraint>("Horizontal", [](ng::size_policy const& v) { return v.horizontal_constraint(false); }, 
-                [](ng::size_policy& v, ng::size_constraint const& c) { v.set_horizontal_constraint(c); }));
+                [](ng::size_policy& v, ng::size_constraint const& c) { v.set_horizontal_constraint(c); }, {}, unset_size_policy));
             for (auto const& [name, role] : std::initializer_list<std::pair<char const*, ng::color_role>>{
                 { "Theme", ng::color_role::Theme }, { "Background", ng::color_role::Background }, { "Foreground", ng::color_role::Foreground }, 
                 { "Base", ng::color_role::Base }, { "Alternate Base", ng::color_role::AlternateBase }, { "Text", ng::color_role::Text }, 
@@ -837,7 +851,7 @@ namespace neogfx::DesignStudio
                 { "Primary Accent", ng::color_role::PrimaryAccent }, { "Secondary Accent", ng::color_role::SecondaryAccent }, { "Void", ng::color_role::Void } })
                 sRegistry.register_component<ng::palette>(*property_palette_component_of(name, role));
             sRegistry.register_component<ng::size_policy>(*property_component_of<ng::size_policy, ng::size_constraint>("Vertical", [](ng::size_policy const& v) { return v.vertical_constraint(false); }, 
-                [](ng::size_policy& v, ng::size_constraint const& c) { v.set_vertical_constraint(c); }));
+                [](ng::size_policy& v, ng::size_constraint const& c) { v.set_vertical_constraint(c); }, {}, unset_size_policy));
             return true;
         }();
         (void)sInitialized;

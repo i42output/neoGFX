@@ -139,9 +139,10 @@ namespace neogfx::DesignStudio
         typedef std::function<std::string(T const&)> get_function;
         typedef std::function<bool(T&, std::string const&)> set_function; // false if the text can't be parsed
         typedef std::function<std::vector<std::string>(T const*)> choices_function; // (nullptr if the property is unset)
+        typedef std::function<T()> unset_function; // (the value that a component of an unset property is set in: for a T with no default)
     public:
-        basic_property_component(std::string const& aName, get_function aGet, set_function aSet, choices_function aChoices = {}) :
-            iName{ aName }, iGet{ aGet }, iSet{ aSet }, iChoices{ aChoices }
+        basic_property_component(std::string const& aName, get_function aGet, set_function aSet, choices_function aChoices = {}, unset_function aUnset = {}) :
+            iName{ aName }, iGet{ aGet }, iSet{ aSet }, iChoices{ aChoices }, iUnset{ aUnset }
         {
         }
     public:
@@ -162,6 +163,8 @@ namespace neogfx::DesignStudio
             std::optional<T> value;
             if (current)
                 value.emplace(*current);
+            else if (iUnset)
+                value.emplace(iUnset());
             else if constexpr (std::is_default_constructible_v<T>)
                 value.emplace(); // (an unset optional property)
             else
@@ -187,5 +190,6 @@ namespace neogfx::DesignStudio
         get_function iGet;
         set_function iSet;
         choices_function iChoices;
+        unset_function iUnset;
     };
 }

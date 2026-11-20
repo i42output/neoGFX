@@ -251,6 +251,14 @@ namespace neogfx::DesignStudio
             std::optional<std::vector<span>> spans;             ///< (none: the script could not be highlighted)
             std::optional<std::vector<outline_node>> outline;   ///< (none: the script could not be outlined (e.g. it does not parse))
         };
+        // (the references that the node graph wants (see script_graph::ReferencesWanted): of the name at a position of a script (as it 
+        // was then); found by a worker thread (the script is compiled: see i_script_highlighter::references); none: not known)
+        struct references
+        {
+            std::string script;
+            std::uint32_t position = 0u;
+            std::optional<std::vector<std::uint32_t>> found;
+        };
     public:
         script_widget(i_element& aElement, i_widget& aParent, window_style aStyle) :
             window{ aParent, window_placement{ rect{ point{}, is_file(aElement.id().to_std_string()) ? size{ 1024.0_dip, 600.0_dip } : size{ 256.0_dip, 160.0_dip } } }, aStyle },
@@ -410,6 +418,12 @@ namespace neogfx::DesignStudio
                 if (!aText.empty())
                     iEditor.insert_text(static_cast<text_edit::position_type>(aFirst), aText);
             });
+            // (found by a worker thread (see poll_references): the last wanted, if more are wanted before it is free)
+            iSink += iGraph.ReferencesWanted([this](i_string const& aScript, script_graph::position_type aPosition)
+            {
+                if (iScriptHighlighter)
+                    iReferencesWanted = references{ aScript.to_std_string(), aPosition };
+            });
             // (the script in the coding font (a setting))
             ref_ptr<i_settings> settings{ aElement.library().application() };
             auto& codingFont = settings->setting("environment.fonts_and_colors.coding_font"_s);
@@ -499,6 +513,8 @@ namespace neogfx::DesignStudio
                 iDebugger->set_active_script(string{});
             if (iHighlighter.joinable())
                 iHighlighter.join();
+            if (iReferencer.joinable())
+                iReferencer.join();
         }
     private:
         // (whether an element's id is a file's path (the window that a file is opened in is larger: its size is placed when it is made 
@@ -897,6 +913,7 @@ namespace neogfx::DesignStudio
         // typing has paused, if it has changed since it was last highlighted)
         void poll_highlighting()
         {
+            poll_references();
             std::optional<highlighting> done;
             {
                 std::lock_guard<std::mutex> lock{ iHighlightingMutex };
@@ -941,6 +958,43 @@ namespace neogfx::DesignStudio
                 }
                 std::lock_guard<std::mutex> lock{ iHighlightingMutex };
                 iHighlighted = std::move(result);
+            } };
+        }
+        // GUI thread: the references that a worker thread has found given to the node graph that wanted them, and those that it wants 
+        // now (if any) found by one (a thread of its own: finding them (the script is compiled) does not wait for the highlighting, nor 
+        // the highlighting for it)
+        void poll_references()
+        {
+            std::optional<references> done;
+            {
+                std::lock_guard<std::mutex> lock{ iHighlightingMutex };
+                done = std::exchange(iReferenced, std::nullopt);
+            }
+            if (done)
+            {
+                iReferencing = false;
+                if (iReferencer.joinable())
+                    iReferencer.join();
+                iGraph.set_references(done->position, done->found);
+            }
+            if (iReferencing || !iReferencesWanted)
+                return;
+            iReferencing = true;
+            iReferencer = std::thread{ [this, highlighter = iScriptHighlighter, extension = iExtension, path = iPath, 
+                wanted = *std::exchange(iReferencesWanted, std::nullopt)]()
+            {
+                references result{ {}, wanted.position };
+                try
+                {
+                    neolib::vector<std::uint32_t> found;
+                    if (highlighter->references(string{ extension }, string{ path }, string{ wanted.script }, wanted.position, found))
+                        result.found.emplace(found.begin(), found.end());
+                }
+                catch (...)
+                {
+                }
+                std::lock_guard<std::mutex> lock{ iHighlightingMutex };
+                iReferenced = std::move(result);
             } };
         }
         // GUI thread: each run of the text (code points) in the style of its category (else the editor's default style); the styles of 
@@ -1183,6 +1237,10 @@ namespace neogfx::DesignStudio
         std::mutex iHighlightingMutex;
         std::optional<highlighting> iHighlighted;
         std::thread iHighlighter;
+        std::optional<references> iReferencesWanted;    ///< (by the node graph: not yet being found)
+        bool iReferencing = false;
+        std::optional<references> iReferenced;          ///< (found by iReferencer (as iHighlighted is by iHighlighter: iHighlightingMutex))
+        std::thread iReferencer;
         std::optional<std::vector<text_edit::style>> iCategoryStyles;
         std::optional<neolib::callback_timer> iHighlightPoller;
         console_widget* iConsole = nullptr;             ///< (the console that the script was last run in (while it is open))

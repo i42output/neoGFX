@@ -2474,13 +2474,27 @@ namespace neogfx::DesignStudio
                 }
                 else if (auto const text = nrc_attributes::member(value, *member); text && !text->empty())
                     return nrc_attributes::unquote(*text);
+                // (a component that is not set of a property whose type has no default (a size policy): no value (what the object has for 
+                // it is what it effectively had: not a value of the property's))
+                if (!value.empty() && !property_type_has_default(aProperty))
+                    return {};
                 return property_component_to_string(aProperty, *aComponent);
             }
         if (auto const name = property_attribute(aProperty))
         {
             std::vector<std::string> items;
-            if (auto const value = attribute_text(*name, property_member(aProperty)); !nrc_attributes::is_object(value)) // (an object's members are its components: its value is shown)
+            auto const value = attribute_text(*name, property_member(aProperty));
+            if (!nrc_attributes::is_object(value)) // (an object's members are its components: its value is shown)
                 items = attribute_items(value);
+            else if (!aComponent && !property_type_has_default(aProperty))
+            {
+                // (unless its type has no default: its components that are set)
+                for (auto const& component : property_components(aProperty))
+                    if (auto const text = nrc_attributes::member(value, member_name_of(component)); text && !text->empty())
+                        items.push_back(nrc_attributes::unquote(*text));
+                if (items.empty())
+                    return {};
+            }
             if (!items.empty())
             {
                 if (aComponent)

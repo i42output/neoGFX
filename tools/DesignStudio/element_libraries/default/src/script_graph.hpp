@@ -54,8 +54,8 @@ namespace neogfx::DesignStudio
     // the mouse wheel (initially to fit) and panned by dragging it. A node is dragged (with its contents) to where it is dropped (within its
     // container, which encloses it). It edits the script: a node's code is edited in place (double click or F2; Return accepts, Escape 
     // cancels), a statement is inserted after a node (Insert), a node is deleted (Delete) or duplicated (Ctrl+D), and a statement dragged 
-    // past another statement of the same body is moved before or after it; a parameter or a variable renamed in it has a button (in 
-    // its node's header) that renames its uses too; each edit is of the script's text (see ScriptEdit), whose outline the graph then shows (the script's 
+    // past another statement of the same body is moved before or after it; a parameter, a variable or a function renamed in it has a 
+    // button (in its node's header) that renames its uses too; each edit is of the script's text (see ScriptEdit), whose outline the graph then shows (the script's 
     // changes are told it (see script_changed)).
     class script_graph : public widget<>
     {
@@ -73,6 +73,9 @@ namespace neogfx::DesignStudio
         define_event(ScriptEdit, script_edit, position_type, position_type, i_string const&)
         // (its nodes have been dragged (or put back): where they are (see node_layout) is to be kept with the script)
         define_event(LayoutChanged, layout_changed)
+        // (a function is being renamed in it: what its name (at a position of the script as it is (given): before it is edited) is 
+        // elsewhere in the script, by meaning (see i_script_highlighter::references), is wanted (see set_references))
+        define_event(ReferencesWanted, references_wanted, i_string const&, position_type)
     private:
         static constexpr std::uint32_t NoNode = ~std::uint32_t{};
         static constexpr std::size_t MaxHeaderLength = 64u;
@@ -82,6 +85,7 @@ namespace neogfx::DesignStudio
         static constexpr double GridSubdivisions = 8.0;     ///< (minor grid lines to a major one (as the workspace's grid's default))
         static constexpr dimension MinTextHeight = 5.0;     ///< (text smaller than this (in pixels) is not drawn: it cannot be read)
         static constexpr std::size_t WrapLength = 28u;      ///< (a node's code is wrapped to lines of at most this many characters (see wrap))
+        static inline const std::u32string WrappedKey = U"wrapped"; ///< (in a node layout: the width that it is wrapped to (see node_layout))
         static constexpr dimension IconSpace = 18.0;        ///< (before a node's kind, in its title bar: its kind's icon)
         static constexpr dimension CodeInset = 20.0;        ///< (a node's code from its sides: its pins are beside it)
         static constexpr dimension PinInset = 10.0;         ///< (a node's pins' centres from its sides)
@@ -146,14 +150,23 @@ namespace neogfx::DesignStudio
             point from;
             point offset;
         };
-        // (a parameter or a variable renamed in the graph (a header that starts with its name edited): the uses of its old name, which 
-        // can be renamed too (propagated))
+        // (a parameter or a variable (a header that starts with its name edited), or a function (its name in its header edited), renamed 
+        // in the graph: the uses of its old name, which can be renamed too (propagated); a function's are those that the language's 
+        // compiler resolves to it (see ReferencesWanted): until they are known its rename is a query (the end of its header as it was, 
+        // and how much longer the script became when it was edited: its references are of the script as it was))
         struct pending_rename
         {
             position_type definition;                       ///< (where it is (as renamed))
+            position_type name;                             ///< (where its name is (as renamed): there, or in its header (a function's))
             std::u32string from;
             std::u32string to;
             std::vector<position_type> uses;                ///< (where its old name is used (in the script as renamed), in order)
+        };
+        struct rename_query
+        {
+            pending_rename rename;
+            position_type headerEnd;
+            std::ptrdiff_t delta;
         };
         // (a flow in a node's body: its route (graph coordinates), from its start to its end: an S-curve between them if it has two 
         // points, else straight lines, rounded where they turn; an entry's start dotted; a loop's flow back to its start dashed)
@@ -226,25 +239,14 @@ namespace neogfx::DesignStudio
                 for (std::uint32_t i = 0u; i < iNodes.size(); ++i)
                     if (iNodes[i].outline.first == selected->first && iNodes[i].outline.kind == selected->second)
                         iSelected = i;
-            // (a parameter or a variable renamed in the graph: its node, if it is still where it was, as renamed, and its old name still is 
-            // where it was used (else its uses are no longer known: its rename cannot be propagated))
-            iRenameNode = NoNode;
-            if (iRename)
-            {
-                for (std::uint32_t i = 0u; i < iNodes.size(); ++i)
-                    if (iNodes[i].outline.first == iRename->definition && leading_name(iNodes[i].header) == iRename->to)
-                        iRenameNode = i;
-                bool const valid = iRenameNode != NoNode && std::all_of(iRename->uses.begin(), iRename->uses.end(), [&](position_type aUse)
-                    { return aUse + iRename->from.size() <= iText.size() && iText.compare(aUse, iRename->from.size(), iRename->from) == 0; });
-                if (!valid)
-                {
-                    iRename = std::nullopt;
-                    iRenameNode = NoNode;
-                }
-            }
             iScriptStale = false;
+            find_rename();
             iDrag = std::nullopt;
             iLayoutPending = true;
+            // (wrapped (see wrap): wrapped again as it was, as where its nodes were wrapped to is kept by their keys, which, with their 
+            // extents, may have changed (e.g. a parameter renamed: its function's header, which its nodes' keys start with, has changed))
+            if (iWrapWidth)
+                iWrapPending = true;
             if (!iUserView)
                 iFitPending = true;
             update();
@@ -252,6 +254,29 @@ namespace neogfx::DesignStudio
         bool has_script() const
         {
             return !iNodes.empty();
+        }
+        // the references that it wanted (see ReferencesWanted: of the name at aPosition of the script as it was then; none: not known): 
+        // the uses of the function that is being renamed (not those in its header, which was edited; as they are now that it has been)
+        void set_references(position_type aPosition, std::optional<std::vector<position_type>> const& aReferences)
+        {
+            if (!iRenameQuery || iRenameQuery->rename.name != aPosition)
+                return;
+            auto const query = *iRenameQuery;
+            iRenameQuery = std::nullopt;
+            if (!aReferences)
+                return;
+            auto rename = query.rename;
+            for (auto const reference : *aReferences)
+                if (reference < rename.definition || reference >= query.headerEnd)
+                    rename.uses.push_back(reference >= query.headerEnd ? 
+                        static_cast<position_type>(static_cast<std::ptrdiff_t>(reference) + query.delta) : reference);
+            if (rename.uses.empty())
+                return;
+            iRename = rename;
+            // (its node is found when the script as edited has been outlined, if it has not yet been)
+            if (!iScriptStale)
+                find_rename();
+            update();
         }
         // the colours of the syntax highlighting categories (by category; none: the text colour), of the kinds of node (by kind; none: a 
         // category's (see accent_colour)), of text and of the background
@@ -272,18 +297,28 @@ namespace neogfx::DesignStudio
             iGridColour = aGridColour;
             update();
         }
-        // (where its nodes have been dragged to (by key: see set_script), as kept with the script between sessions (see LayoutChanged))
+        // (where its nodes have been dragged to (by key: see set_script), as kept with the script between sessions (see LayoutChanged); 
+        // with them, if it is wrapped (see wrap), the width that it is wrapped to (as the x of WrappedKey, which is not a node's key: 
+        // they start with '/'))
         std::map<std::u32string, point> node_layout() const
         {
             std::map<std::u32string, point> result;
             for (auto const& n : iNodes)
                 if (auto const moved = iMoved.find(n.key); moved != iMoved.end())
                     result.insert(*moved);
+            if (iWrapWidth)
+                result[WrappedKey] = point{ *iWrapWidth, 0.0 };
             return result;
         }
         void set_node_layout(std::map<std::u32string, point> const& aLayout)
         {
             iMoved = aLayout;
+            iWrapWidth = std::nullopt;
+            if (auto const wrapped = iMoved.find(WrappedKey); wrapped != iMoved.end())
+            {
+                iWrapWidth = wrapped->second.x;
+                iMoved.erase(wrapped);
+            }
             iLayoutPending = true;
             update();
         }
@@ -312,6 +347,7 @@ namespace neogfx::DesignStudio
         void reset_layout()
         {
             iMoved.clear();
+            iWrapWidth = std::nullopt;
             arrange_nodes();
             zoom_to_fit();
             LayoutChanged.trigger();
@@ -319,6 +355,7 @@ namespace neogfx::DesignStudio
         // (its statements laid out left to right, then top to bottom: wrapped to fit its window's width at its current zoom (see wrap))
         void wrap_layout()
         {
+            iWrapWidth = std::nullopt; // (to its window's width as it is now)
             iWrapPending = true;
             update();
         }
@@ -374,6 +411,12 @@ namespace neogfx::DesignStudio
             {
                 const_cast<script_graph&>(*this).layout_nodes(aGc);
                 iLayoutPending = false;
+            }
+            // (wrapped again as it was (see set_script): before it is fitted, as its extents may change)
+            if (iWrapPending && iWrapWidth && !iNodes.empty())
+            {
+                const_cast<script_graph&>(*this).wrap();
+                iWrapPending = false;
             }
             if (iFitPending && !iNodes.empty())
             {
@@ -500,7 +543,7 @@ namespace neogfx::DesignStudio
                     aGc.fill_circle(point{ r.x + PinInset * iZoom, to_screen(point{ 0.0, input_y(n, input) }).y }, 4.0 * iZoom, category_colour(category::Parameter));
                 if (title.cy >= 8.0)
                     draw_icon(aGc, n, point{ title.x + (padding_x() + IconSpace / 2.0) * iZoom, title.center().y }, 5.0 * iZoom, mix(accent, color::White, 0.6));
-                // (a renamed parameter or variable: its button that propagates its rename to its uses)
+                // (a renamed parameter, variable or function: its button that propagates its rename to its uses)
                 bool const renamed = (i == iRenameNode && !iScriptStale);
                 if (zoomedFont.height() < MinTextHeight)
                 {
@@ -673,7 +716,13 @@ namespace neogfx::DesignStudio
                     else if (std::hypot(n.offset.x, n.offset.y) < gap() / 3.0)
                         iMoved.erase(n.key);
                     else
+                    {
                         iMoved[n.key] = n.offset;
+                        iWrapWidth = std::nullopt; // (its layout is no longer as it was wrapped)
+                    }
+                    // (still wrapped: as it was (the node may have been one that was wrapped to the start of a row))
+                    if (iWrapWidth)
+                        iWrapPending = true;
                     arrange_nodes();
                     LayoutChanged.trigger();
                 }
@@ -754,6 +803,32 @@ namespace neogfx::DesignStudio
             }
         }
         // (the nodes whose headers use a function's parameters: their names there, highlighted as parameters)
+        // (a parameter, a variable or a function renamed in the graph: its node, if it is still where it was, as renamed, and its old 
+        // name still is where it was used (but for the case of its letters: a language's names may not depend on it); else its uses are 
+        // no longer known: its rename cannot be propagated)
+        void find_rename()
+        {
+            iRenameNode = NoNode;
+            if (!iRename)
+                return;
+            bool const renamed = iRename->name <= iText.size() && 
+                leading_name(iText.substr(iRename->name, iRename->to.size() + 1u)) == iRename->to;
+            for (std::uint32_t i = 0u; i < iNodes.size(); ++i)
+                if (iNodes[i].outline.first == iRename->definition && renamed)
+                    iRenameNode = i;
+            auto const folded = [](char32_t aCh) { return aCh < 0x80u ? static_cast<char32_t>(std::tolower(static_cast<int>(aCh))) : aCh; };
+            bool const valid = iRenameNode != NoNode && std::all_of(iRename->uses.begin(), iRename->uses.end(), [&](position_type aUse)
+            { 
+                return aUse + iRename->from.size() <= iText.size() && 
+                    std::equal(iRename->from.begin(), iRename->from.end(), iText.begin() + aUse, [&](char32_t aLhs, char32_t aRhs) { return folded(aLhs) == folded(aRhs); }) &&
+                    (aUse + iRename->from.size() == iText.size() || !is_name(iText[aUse + iRename->from.size()]));
+            });
+            if (!valid)
+            {
+                iRename = std::nullopt;
+                iRenameNode = NoNode;
+            }
+        }
         void find_uses()
         {
             for (auto& n : iNodes)
@@ -1383,7 +1458,8 @@ namespace neogfx::DesignStudio
             iZoomedFont = std::nullopt;
             iZoomedLabelFont = std::nullopt;
         }
-        // (wrapped to its window's width at its zoom (see wrap_layout): where nodes had been dragged to forgotten, each body's statements 
+        // (wrapped to its window's width at its zoom (see wrap_layout), or, if it is wrapped (its script has changed: see set_script), 
+        // again to the width that it was wrapped to, its view left as it is: where nodes had been dragged to forgotten, each body's statements 
         // left to right, one that would not fit in its container's width at the start of a row below (see arrange_nodes); each 
         // container's width its container's lane's (top down: a node is before its descendants), less its own lane's margins (as last 
         // arranged: its parameters' width does not depend on wrapping) and the room right of a row for its flow to the row below it 
@@ -1392,8 +1468,12 @@ namespace neogfx::DesignStudio
         {
             auto const margin = 16.0;
             auto const padding = padding_x();
+            bool const again = iWrapWidth != std::nullopt;
+            if (!again)
+                iWrapWidth = std::max((client_rect().cx - margin * 2.0) / iZoom, 0.0);
+            auto const before = node_layout();
             iMoved.clear();
-            std::vector<dimension> available(iNodes.size(), std::max((client_rect().cx - margin * 2.0) / iZoom, 0.0));
+            std::vector<dimension> available(iNodes.size(), *iWrapWidth);
             iWrap.assign(iNodes.size(), 0.0);
             for (std::size_t i = 0u; i < iNodes.size(); ++i)
             {
@@ -1407,10 +1487,14 @@ namespace neogfx::DesignStudio
             }
             arrange_nodes();
             iWrap.clear();
-            iUserView = true;
-            iOffset = point{ margin, margin };
+            if (!again)
+            {
+                iUserView = true;
+                iOffset = point{ margin, margin };
+            }
             update();
-            LayoutChanged.trigger();
+            if (!again || node_layout() != before)
+                LayoutChanged.trigger();
         }
         point to_screen(point const& aPoint) const
         {
@@ -1902,30 +1986,70 @@ namespace neogfx::DesignStudio
                 ++length;
             return aText.substr(0u, length);
         }
+        // (where a function's name is in its header [aFirst, aEnd): the name before its parameters' bracket, if it has one, else its 
+        // first name; one that is not highlighted, or is as a function's (e.g. not a keyword); none: it has none there (e.g. an operator's))
+        std::optional<position_type> function_name(position_type aFirst, position_type aEnd) const
+        {
+            auto const plain = [&](position_type aPosition) { return !iCategories[aPosition] || iCategories[aPosition] == category::Function; };
+            auto const bracket = iText.find(U'(', aFirst);
+            if (bracket != std::u32string::npos && bracket < aEnd)
+            {
+                auto last = static_cast<position_type>(bracket);
+                while (last > aFirst && is_space(iText[last - 1u]))
+                    --last;
+                auto first = last;
+                while (first > aFirst && is_name(iText[first - 1u]))
+                    --first;
+                if (first == last || !plain(first))
+                    return {};
+                return first;
+            }
+            for (auto p = aFirst; p < aEnd; ++p)
+                if (is_name(iText[p]) && (p == aFirst || !is_name(iText[p - 1u])) && plain(p))
+                    return p;
+            return {};
+        }
         // (a node's header [its first, aEnd) about to be edited (to aText): if it starts with a parameter's or a variable's name (as 
-        // highlighted) and its name changes, the uses of its old name (the names so highlighted where it is: in its function (a 
-        // parameter's, or a variable's if it is in one), else in the script; as they will be once it is edited) can be renamed too (see 
-        // propagate))
+        // highlighted), or it is a function's (its name is in it: see function_name; it is unchanged before its name), and its name 
+        // changes, the uses of its old name (where it is: in its function (a parameter's, or a variable's if it is in one), else in the 
+        // script, the names highlighted as it is; as they will be once it is edited) can be renamed too (see propagate); a function's 
+        // uses are those that the language's compiler resolves to it, wherever they are: they are wanted (see ReferencesWanted) of the 
+        // script as it is now, before it is edited)
         void begin_rename(std::uint32_t aNode, position_type aEnd, std::u32string const& aText)
         {
             iRename = std::nullopt;
+            iRenameQuery = std::nullopt;
             iRenameNode = NoNode;
             auto const& n = iNodes[aNode];
-            if (n.outline.first >= iCategories.size() || 
-                (iCategories[n.outline.first] != category::Parameter && iCategories[n.outline.first] != category::Variable))
+            if (n.outline.first >= iCategories.size() || n.outline.parent == outline_node::NoParent)
                 return;
-            auto const kind = *iCategories[n.outline.first];
-            auto const from = leading_name(iText.substr(n.outline.first, aEnd - n.outline.first));
-            auto const to = leading_name(aText);
-            if (from.empty() || to.empty() || from == to || n.outline.parent == outline_node::NoParent)
+            auto const kind = iCategories[n.outline.first];
+            bool const function = (kind != category::Parameter && kind != category::Variable);
+            auto name = n.outline.first;
+            if (function)
+            {
+                auto const functionName = n.outline.kind == outline_kind::Function ? function_name(n.outline.first, aEnd) : std::nullopt;
+                if (!functionName || aText.compare(0u, *functionName - n.outline.first, iText, n.outline.first, *functionName - n.outline.first) != 0)
+                    return;
+                name = *functionName;
+            }
+            auto const from = leading_name(iText.substr(name, aEnd - name));
+            auto const to = leading_name(aText.substr(name - n.outline.first));
+            if (from.empty() || to.empty() || from == to)
                 return;
             auto const delta = static_cast<std::ptrdiff_t>(aText.size()) - static_cast<std::ptrdiff_t>(aEnd - n.outline.first);
+            pending_rename rename{ n.outline.first, name, from, to, {} };
+            if (function)
+            {
+                iRenameQuery = rename_query{ rename, aEnd, delta };
+                ReferencesWanted(string{ neolib::utf32_to_utf8(iText) }, name);
+                return;
+            }
             auto scope = n.outline.parent;
             if (kind == category::Variable)
                 while (scope != 0u && iNodes[scope].outline.kind != outline_kind::Function)
                     scope = iNodes[scope].outline.parent;
             auto const& within = iNodes[scope];
-            pending_rename rename{ n.outline.first, from, to, {} };
             for (auto p = within.outline.first; p + from.size() <= std::min<std::size_t>(within.outline.last, iText.size()); ++p)
                 if ((p < n.outline.first || p >= aEnd) && iCategories[p] == kind && iText.compare(p, from.size(), from) == 0 &&
                     (p == 0u || !is_name(iText[p - 1u])) && (p + from.size() == iText.size() || !is_name(iText[p + from.size()])))
@@ -1933,7 +2057,7 @@ namespace neogfx::DesignStudio
             if (!rename.uses.empty())
                 iRename = rename;
         }
-        // (a renamed parameter's or variable's uses renamed too (the last first: the positions of those before it are unchanged))
+        // (a renamed parameter's, variable's or function's uses renamed too (the last first: the positions of those before it are unchanged))
         void propagate()
         {
             if (!iRename || iScriptStale)
@@ -1990,6 +2114,7 @@ namespace neogfx::DesignStudio
         mutable bool iFitPending = true;
         mutable bool iWrapPending = false;
         std::vector<dimension> iWrap;               ///< (while wrapping (see wrap): each node's lane's width)
+        std::optional<dimension> iWrapWidth;        ///< (wrapped (see wrap): the width, in graph coordinates, that it is wrapped to)
         mutable std::optional<neogfx::font> iZoomedFont;
         mutable std::optional<neogfx::font> iZoomedLabelFont;
         mutable std::optional<neogfx::font> iLabelFont;
@@ -2004,6 +2129,7 @@ namespace neogfx::DesignStudio
         std::optional<pan> iPan;
         std::optional<inline_edit> iEditing;
         std::optional<pending_rename> iRename;
+        std::optional<rename_query> iRenameQuery;   ///< (a function's rename whose uses are not yet known (see ReferencesWanted))
         std::uint32_t iRenameNode = NoNode;         ///< (the node whose header was renamed (see pending_rename))
         bool iScriptStale = false;                  ///< (the script has changed since it was last outlined)
         std::optional<bool> iEndEdit;

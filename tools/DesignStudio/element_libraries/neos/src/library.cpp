@@ -1632,6 +1632,37 @@ namespace neogfx::DesignStudio
                 return false;
             }
         }
+        // (compiled in a context of its own (neos::context::references changes its context's schema and program), so highlighting does 
+        // not wait for it; calls are serialized, as those of the highlighting's context are)
+        bool references(neolib::i_string const& aExtension, neolib::i_string const& aPath, neolib::i_string const& aScript, std::uint32_t aPosition, 
+            neolib::i_vector<std::uint32_t>& aReferences) const final
+        {
+            aReferences.clear();
+            auto const path = schema_path(aExtension.to_std_string());
+            if (!path)
+                return false;
+            std::lock_guard<std::mutex> lock{ iReferencesMutex };
+            try
+            {
+                if (!iReferencesContext)
+                    iReferencesContext.emplace(iReferencesInput, iReferencesOutput, iReferencesOutput, neolib::get_service_provider());
+                std::string_view const source = aScript.to_std_string_view();
+                auto const codePoints = code_points(source);
+                // (the byte that the code point begins at)
+                auto const byte = static_cast<std::size_t>(std::lower_bound(codePoints.begin(), codePoints.end(), aPosition) - codePoints.begin());
+                auto const references = iReferencesContext->references(*path, aPath.to_std_string(), source, byte);
+                if (!references)
+                    return false;
+                for (auto const reference : *references)
+                    aReferences.push_back(codePoints[std::min(reference, source.size())]);
+                return true;
+            }
+            catch (...)
+            {
+                aReferences.clear();
+                return false;
+            }
+        }
     private:
         // (the code point of each byte of a source (and of its end): spans and outlines are of code points, as the text_edit's positions are)
         static std::vector<std::uint32_t> code_points(std::string_view aSource)
@@ -1665,6 +1696,11 @@ namespace neogfx::DesignStudio
         mutable std::istream iInput{ nullptr };
         mutable std::ostream iOutput{ nullptr };
         mutable std::optional<neos::context> iContext;
+        // (the context that scripts are compiled in for their references (see references), and its standard streams (unused))
+        mutable std::mutex iReferencesMutex;
+        mutable std::istream iReferencesInput{ nullptr };
+        mutable std::ostream iReferencesOutput{ nullptr };
+        mutable std::optional<neos::context> iReferencesContext;
     };
 
     neos_element_library::neos_element_library(neolib::i_application& aApplication, std::string const& aPluginPath) :
