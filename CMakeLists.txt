@@ -126,6 +126,10 @@ if(NOT NEOGFX_FFTS_INCLUDE_DIR)
     configure_file("${PROJECT_SOURCE_DIR}/3rdparty/ffts/include/ffts.h" "${PROJECT_BINARY_DIR}/neogfx_ffts/ffts/ffts.h" COPYONLY)
     set(NEOGFX_FFTS_INCLUDE_DIR "${PROJECT_BINARY_DIR}/neogfx_ffts" CACHE PATH "Directory containing ffts/ffts.h" FORCE)
 endif()
+neogfx_find_library(NEOGFX_FFTS_LIBRARY
+    NAMES ffts_static ffts
+    DEBUG_NAMES ffts_staticd
+    HINTS "${NEOGFX_3RDPARTY_LIBDIR}")
 
 foreach(_dir IN ITEMS NEOGFX_PNG_INCLUDE_DIR NEOGFX_GLEW_INCLUDE_DIR)
     if(NOT ${_dir})
@@ -426,7 +430,8 @@ target_link_libraries(neogfx PRIVATE
     ${NEOGFX_GLEW_LIBRARY}
     OpenGL::GL
     Vulkan::Vulkan
-    ${NEOGFX_SHADERC_LIBRARY})
+    ${NEOGFX_SHADERC_LIBRARY}
+    ${NEOGFX_FFTS_LIBRARY})
 if(WIN32)
     target_link_libraries(neogfx PRIVATE crypt32 imm32 version winmm d2d1 shcore uxtheme $<$<CXX_COMPILER_ID:MSVC>:delayimp>)
 elseif(UNIX AND NOT APPLE)

@@ -20,6 +20,7 @@ Windows builds use the static C runtime (/MT, /MTd), as neolib does.
 The install prefix defaults to /usr/local; set CMAKE_INSTALL_PREFIX to change it.
 Programs and the plugins they load (.nrl, .nel, .plg) are built into out/bin (out/bin/<config> with Visual Studio generators) and installed into <prefix>/bin.
 The example apps are installed into <prefix>/share/neogfx/examples and the GUI test app into <prefix>/share/neogfx/test.
+When the example apps are built, the card game headers they share (card_games) are installed into <prefix>/include, with neoGFX's own.
 
 Options (default):
 
