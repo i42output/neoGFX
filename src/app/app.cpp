@@ -431,8 +431,8 @@ namespace neogfx
         {
             service<i_surface_manager>().layout_surfaces();
             service<i_surface_manager>().invalidate_surfaces();
-            // the language of the user interface: chosen once (if there is a choice) and saved (see save_language)
-            if (!saved_language() && !languages().empty())
+            // the language of the user interface: chosen once (if the app has translations: neoGFX's own are not reason enough to ask) and saved (see save_language)
+            if (!saved_language() && iAppTranslations && !languages().empty())
             {
                 neolib::scoped_flag sfQuit{ iQuitWhenLastWindowClosed, false };
                 // (owned by the main window (if there is one yet) which is activated again when the dialog is dismissed)
@@ -602,6 +602,7 @@ namespace neogfx
             std::scoped_lock lock{ iTranslationMutex };
             iTranslations.clear();
             iLanguages.clear();
+            iAppTranslations = false;
             update_current_translations();
         }
         if (!language().empty())
@@ -626,6 +627,9 @@ namespace neogfx
                 embedded.push_back(resource.first().to_std_string());
         for (auto const& uri : embedded)
         {
+            // (neoGFX's own translations are ":/neogfx/resources/neogfx.<language>.xneol": see resources.nrc)
+            if (!uri.starts_with(":/neogfx/resources/"))
+                iAppTranslations = true;
             auto const resource = service<i_resource_manager>().load_resource(uri);
             std::istringstream input{ std::string{ static_cast<char const*>(resource->data()), resource->size() } };
             string fileLanguage;
@@ -643,6 +647,7 @@ namespace neogfx
 
     void app::load_translations(std::filesystem::path const& aTranslationFile)
     {
+        iAppTranslations = true;
         string fileLanguage;
         translation_list translations;
         read_translation_file(aTranslationFile, fileLanguage, translations);

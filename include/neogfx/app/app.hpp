@@ -205,6 +205,7 @@ namespace neogfx
         mutable std::mutex iTranslatablesMutex;
         std::unordered_map<i_string const*, std::tuple<string, string, std::int64_t>> iTranslatables; // translatable_string objects that exist
         std::set<string> iEmbeddedTranslations; // (the .xneol resources loaded: see load_embedded_translations)
+        bool iAppTranslations = false; // (translations other than neoGFX's own have been loaded: only then is the user asked to choose a language (see exec))
         std::unique_ptr<app_thread> iThread;
         neogfx::program_options iProgramOptions;
         std::unique_ptr<loader> iLoader;
