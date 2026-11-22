@@ -42,6 +42,8 @@ namespace neogfx
     public:
         fallback_font_info(std::vector<string> aFallbackFontFamilies);
     public:
+        void add_first(string const& aFontFamilyName);
+    public:
         bool has_fallback_for(i_string const& aFontFamilyName) const final;
         i_string const& fallback_for(i_string const& aFontFamilyName) const final;
     private:
@@ -67,6 +69,7 @@ namespace neogfx
         void* font_library_handle() const final;
         i_optional<font_info> const& default_system_font_info(system_font_role aRole) const final;
         const i_fallback_font_info& default_fallback_font_info() const final;
+        void add_fallback_font_family(i_string const& aFontFamilyName) final;
         i_native_font_face& create_default_font(const i_device_resolution& aDevice) final;
         bool has_fallback_font(const i_native_font_face& aExistingFont) const final;
         i_native_font_face& create_fallback_font(const i_native_font_face& aExistingFont) final;

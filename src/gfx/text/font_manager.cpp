@@ -222,6 +222,14 @@ namespace neogfx
     {
     }
 
+    void fallback_font_info::add_first(string const& aFontFamilyName)
+    {
+        auto existing = std::find(iFallbackFontFamilies.begin(), iFallbackFontFamilies.end(), aFontFamilyName);
+        if (existing != iFallbackFontFamilies.end())
+            iFallbackFontFamilies.erase(existing);
+        iFallbackFontFamilies.insert(iFallbackFontFamilies.begin(), aFontFamilyName);
+    }
+
     bool fallback_font_info::has_fallback_for(i_string const& aFontFamilyName) const
     {
         if (iFallbackFontFamilies.empty())
@@ -1110,6 +1118,12 @@ namespace neogfx
         return *iDefaultFallbackFontInfo;
     }
 
+    void font_manager::add_fallback_font_family(i_string const& aFontFamilyName)
+    {
+        (void)default_fallback_font_info();
+        iDefaultFallbackFontInfo->add_first(string{ aFontFamilyName });
+    }
+
     i_native_font_face& font_manager::create_default_font(const i_device_resolution& aDevice)
     {
         return create_font(service<i_app>().current_style().font_info(), aDevice);
@@ -1147,7 +1161,10 @@ namespace neogfx
         catch (...)
         {
         }
-        auto& fallbackFont = create_font(fallbackFontFamily, (aExistingFont.style() & ~font_style::Emulated), aExistingFont.size(), deviceResolution);
+        // (the fallback font has the existing font's outline and hinting so that substituted glyphs match the glyphs around them)
+        auto const fallbackStyle = (aExistingFont.style() & ~font_style::Emulated);
+        auto& fallbackFont = add_font(find_best_font(fallbackFontFamily, fallbackStyle, aExistingFont.size()).create_face(
+            fallbackStyle, aExistingFont.size(), aExistingFont.outline(), aExistingFont.hinting(), deviceResolution));
         return fallbackFont;
     }
 

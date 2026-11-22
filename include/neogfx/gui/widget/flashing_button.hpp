@@ -35,7 +35,8 @@ namespace neogfx
         /// @todo custom/variable blink interval
         static constexpr std::chrono::milliseconds DEFAULT_BLINK_INTERVAL_ms{ 250 };
     public:
-        flashing_button(const std::string aText) :
+        // (text is taken as given, so that a translatable string (e.g. "Foo"_t) stays translated: see translatable<>)
+        flashing_button(string const& aText) :
             push_button{ aText }
         {
             service<i_rendering_engine>().register_frame_counter(*this, DEFAULT_BLINK_INTERVAL_ms);
@@ -45,12 +46,12 @@ namespace neogfx
         {
             service<i_rendering_engine>().register_frame_counter(*this, DEFAULT_BLINK_INTERVAL_ms);
         }
-        flashing_button(const std::string aText, const neogfx::image& aImage) :
+        flashing_button(string const& aText, const neogfx::image& aImage) :
             push_button{ aText, aImage }
         {
             service<i_rendering_engine>().register_frame_counter(*this, DEFAULT_BLINK_INTERVAL_ms);
         }
-        flashing_button(i_layout& aLayout, const std::string aText) :
+        flashing_button(i_layout& aLayout, string const& aText) :
             push_button{ aLayout, aText }
         {
             service<i_rendering_engine>().register_frame_counter(*this, DEFAULT_BLINK_INTERVAL_ms);

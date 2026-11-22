@@ -107,7 +107,11 @@ namespace neogfx
             return widget::minimum_size(aAvailableSpace);
         else
         {
-            size extent = text_extent().max(size_hint_extent());
+            size textExtent = text_extent();
+            // (text scaled to its source text is as wide as its source text: wider text is scaled (see horizontal_scale) and narrower text is aligned)
+            if (scales_to_source())
+                textExtent.cx = source_text_extent().cx;
+            size extent = textExtent.max(size_hint_extent());
             if (Rotation.value() != 0.0)
                 // rotated, the measured height becomes our width; that height is measured from the
                 // glyph run, so it varies with the string, and quantising it to whole lines keeps
@@ -163,6 +167,9 @@ namespace neogfx
         scoped_mnemonics sm{ aGc, showMnemonics };
 
         size textSize = text_extent();
+        // (see text_widget_flags::ScaleToSource)
+        auto const horizontalScale = horizontal_scale();
+        auto const scaledTextWidth = textSize.cx * horizontalScale;
         auto const clientRect = client_rect(false);
         // when rotated the text is laid out in the box the client rect came from, i.e. the one that
         // maps onto the client rect under the rotation, and is then rotated about its centre
@@ -188,10 +195,10 @@ namespace neogfx
             textPosition.x = textRect.left();
             break;
         case neogfx::alignment::Center:
-            textPosition.x = std::floor(textRect.left() + (textRect.width() - textSize.cx) / 2.0);
+            textPosition.x = std::floor(textRect.left() + (textRect.width() - scaledTextWidth) / 2.0);
             break;
         case neogfx::alignment::Right:
-            textPosition.x = std::floor((textRect.right() - textSize.cx));
+            textPosition.x = std::floor((textRect.right() - scaledTextWidth));
             break;
         default:
             break;
@@ -210,6 +217,15 @@ namespace neogfx
         default:
             break;
         }
+        // the text (including its outline and effects) is scaled horizontally about its left edge
+        std::optional<scoped_transform> scale;
+        if (horizontalScale != 1.0)
+            scale.emplace(aGc, mat44{
+                { horizontalScale, 0.0, 0.0, 0.0 },
+                { 0.0, 1.0, 0.0, 0.0 },
+                { 0.0, 0.0, 1.0, 0.0 },
+                { textPosition.x - horizontalScale * textPosition.x, 0.0, 0.0, 1.0 } });
+
         auto appearance = text_format();
         if (appearance.ink() == neolib::none)
             appearance.set_ink(text_color());
@@ -553,6 +569,52 @@ namespace neogfx
         return *iTextExtent;
     }
 
+    size text_widget::source_text_extent() const
+    {
+        if (iSourceTextExtent != std::nullopt)
+            return *iSourceTextExtent;
+        else if (!has_surface())
+            return size{};
+        graphics_context gc{ *this, graphics_context::type::Unattached };
+        scoped_mnemonics sm{ gc, service<i_keyboard>().is_key_pressed(ScanCode_LALT) };
+        // (measured as text_extent measures the text)
+        if (multi_line())
+        {
+            auto const sourceGlyphText = gc.to_multiline_glyph_text(iText.source(), font(), 0.0, Alignment.value() & neogfx::alignment::Horizontal);
+            iSourceTextExtent = size{ sourceGlyphText.bbox[2] - sourceGlyphText.bbox[0] };
+        }
+        else
+            iSourceTextExtent = gc.glyph_text_extent(gc.to_glyph_text(iText.source(), font()));
+        if (iSourceTextExtent->cy == 0.0)
+            iSourceTextExtent->cy = font().height();
+        *iSourceTextExtent += size{ font().info().outline().radius * 2.0 };
+        scalar textEffectOutset = 0.0;
+        if (text_format().effect())
+            textEffectOutset = std::max(textEffectOutset, text_format().effect()->outset());
+        if (text_format().effect2())
+            textEffectOutset = std::max(textEffectOutset, text_format().effect2()->outset());
+        *iSourceTextExtent += size{ textEffectOutset * 2.0 };
+        iSourceTextExtent = iSourceTextExtent->ceil();
+        return *iSourceTextExtent;
+    }
+
+    bool text_widget::scales_to_source() const
+    {
+        // (not for rotated text)
+        return (flags() & text_widget_flags::ScaleToSource) == text_widget_flags::ScaleToSource && iText.active() && Rotation.value() == 0.0;
+    }
+
+    scalar text_widget::horizontal_scale() const
+    {
+        if (!scales_to_source() || iText == iText.source())
+            return 1.0;
+        auto const textWidth = text_extent().cx;
+        auto const sourceWidth = source_text_extent().cx;
+        if (sourceWidth <= 0.0 || textWidth <= sourceWidth)
+            return 1.0;
+        return sourceWidth / textWidth;
+    }
+
     size text_widget::size_hint_extent() const
     {
         if (iSizeHintExtent != std::nullopt)
@@ -676,6 +738,7 @@ namespace neogfx
     void text_widget::reset_cache()
     {
         iTextExtent = std::nullopt;
+        iSourceTextExtent = std::nullopt;
         iSizeHintExtent = std::nullopt;
         iGlyphText = std::monostate{};
         iCacheTexture = std::nullopt;

@@ -92,6 +92,7 @@ namespace neogfx
         translatable_base& operator=(translatable_base const&) = delete;
     public:
         bool active() const noexcept;
+        string const& source() const noexcept; ///< the untranslated text (if active)
         void track(i_string const& aText);
         void track(neolib::i_optional<i_string> const& aText);
         void untrack();
@@ -169,6 +170,9 @@ namespace neogfx
     neolib::i_map<i_string, i_string> const& language_codes();
     // e.g. "German (Germany)" for "de-DE"; the tag itself if its language is unknown
     string language_name(i_string const& aLanguageTag);
+    // the language's name in that language, e.g. "Deutsch" for "de" (or "Deutsch (Germany)" for "de-DE": a region without a name 
+    // of its own is named as language_name names it); language_name if the language has no name of its own
+    string native_language_name(i_string const& aLanguageTag);
 }
 
 namespace neolib

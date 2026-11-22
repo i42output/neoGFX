@@ -41,7 +41,8 @@ namespace neogfx
         CutOff              = 0x04,
         UseEllipsis         = 0x08,
         CacheToTexture      = 0x10,
-        UseFade             = 0x20 // truncate by fading the text out rather than by ending it with an ellipsis
+        UseFade             = 0x20, // truncate by fading the text out rather than by ending it with an ellipsis
+        ScaleToSource       = 0x40  // translated text is as wide as its untranslated source text: wider text is scaled horizontally to that width; narrower text is aligned within it
     };
 
     inline constexpr text_widget_flags operator|(text_widget_flags aLhs, text_widget_flags aRhs)

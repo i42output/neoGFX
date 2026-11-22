@@ -104,12 +104,12 @@ namespace neogfx
         set_ready_to_render(true);
     }
 
-    // the languages' names (in the language used)
+    // the languages' names (each in that language, so that a language can be found whichever language is used)
     void language_dialog::update_language_names()
     {
         neolib::scoped_flag sf{ iUpdating };
         for (std::uint32_t row = 0u; row < iLanguages.size(); ++row)
             iLanguageList.model().update_cell_data(item_model_index{ row, 0u },
-                row == 0u ? string{ "English"_t } : string{ translate(language_name(iLanguages[row])) });
+                row == 0u ? string{ "English" } : native_language_name(iLanguages[row]));
     }
 }

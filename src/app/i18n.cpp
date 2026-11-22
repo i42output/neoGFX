@@ -99,38 +99,176 @@ namespace neogfx
         return registry().languageCodes;
     }
 
+    namespace
+    {
+        std::vector<std::string> language_subtags(std::string const& aLanguageTag)
+        {
+            std::vector<std::string> subtags;
+            for (std::size_t start = 0; start <= aLanguageTag.size();)
+            {
+                auto const end = std::min(aLanguageTag.find_first_of("-_", start), aLanguageTag.size());
+                subtags.push_back(aLanguageTag.substr(start, end - start));
+                start = end + 1;
+            }
+            return subtags;
+        }
+
+        // e.g. " (Germany)" for "de-DE"; empty if there is no (known) region
+        std::string region_suffix(std::vector<std::string> const& aSubtags)
+        {
+            for (std::size_t i = 1; i < aSubtags.size(); ++i)
+            {
+                std::string region = aSubtags[i];
+                // (a region subtag is two letters or three digits; others (e.g. a script subtag) are ignored)
+                if (!((region.size() == 2 && std::isalpha(static_cast<unsigned char>(region[0])) && std::isalpha(static_cast<unsigned char>(region[1]))) ||
+                    (region.size() == 3 && std::all_of(region.begin(), region.end(), [](char ch) { return std::isdigit(static_cast<unsigned char>(ch)); }))))
+                    continue;
+                for (auto& ch : region)
+                    ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
+                auto const existingRegion = registry().regions.find(region);
+                if (existingRegion != registry().regions.end())
+                    return " (" + existingRegion->second + ")";
+                break;
+            }
+            return {};
+        }
+    }
+
     string language_name(i_string const& aLanguageTag)
     {
         std::string const tag = aLanguageTag.to_std_string();
-        std::vector<std::string> subtags;
-        for (std::size_t start = 0; start <= tag.size();)
-        {
-            auto const end = std::min(tag.find_first_of("-_", start), tag.size());
-            subtags.push_back(tag.substr(start, end - start));
-            start = end + 1;
-        }
+        auto const subtags = language_subtags(tag);
         std::string language = subtags[0];
         for (auto& ch : language)
             ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
         auto const existingLanguage = registry().languages.find(language);
         if (existingLanguage == registry().languages.end())
             return string{ tag };
-        std::string result = existingLanguage->second;
-        for (std::size_t i = 1; i < subtags.size(); ++i)
-        {
-            std::string region = subtags[i];
-            // (a region subtag is two letters or three digits; others (e.g. a script subtag) are ignored)
-            if (!((region.size() == 2 && std::isalpha(static_cast<unsigned char>(region[0])) && std::isalpha(static_cast<unsigned char>(region[1]))) ||
-                (region.size() == 3 && std::all_of(region.begin(), region.end(), [](char ch) { return std::isdigit(static_cast<unsigned char>(ch)); }))))
-                continue;
-            for (auto& ch : region)
-                ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
-            auto const existingRegion = registry().regions.find(region);
-            if (existingRegion != registry().regions.end())
-                result += " (" + existingRegion->second + ")";
-            break;
-        }
-        return string{ result };
+        return string{ existingLanguage->second + region_suffix(subtags) };
+    }
+
+    string native_language_name(i_string const& aLanguageTag)
+    {
+        // (whole tags (a language in a region or script) and then languages, in lower case)
+        static std::map<std::string, std::string> const sNativeNames = []()
+            {
+                struct native_name { char const* tag; char8_t const* name; };
+                native_name const names[] =
+                {
+                    { "zh-cn", u8"\u7B80\u4F53\u4E2D\u6587" },
+                    { "zh-sg", u8"\u7B80\u4F53\u4E2D\u6587" },
+                    { "zh-hans", u8"\u7B80\u4F53\u4E2D\u6587" },
+                    { "zh-tw", u8"\u7E41\u9AD4\u4E2D\u6587" },
+                    { "zh-hk", u8"\u7E41\u9AD4\u4E2D\u6587" },
+                    { "zh-mo", u8"\u7E41\u9AD4\u4E2D\u6587" },
+                    { "zh-hant", u8"\u7E41\u9AD4\u4E2D\u6587" },
+                    { "pt-br", u8"Portugu\u00EAs (Brasil)" },
+                    { "pt-pt", u8"Portugu\u00EAs (Portugal)" },
+                    { "en-gb", u8"English (United Kingdom)" },
+                    { "en-us", u8"English (United States)" },
+                    { "es-es", u8"Espa\u00F1ol (Espa\u00F1a)" },
+                    { "es-mx", u8"Espa\u00F1ol (M\u00E9xico)" },
+                    { "es-419", u8"Espa\u00F1ol (Latinoam\u00E9rica)" },
+                    { "fr-fr", u8"Fran\u00E7ais (France)" },
+                    { "fr-ca", u8"Fran\u00E7ais (Canada)" },
+                    { "de-de", u8"Deutsch (Deutschland)" },
+                    { "de-at", u8"Deutsch (\u00D6sterreich)" },
+                    { "de-ch", u8"Deutsch (Schweiz)" },
+                    { "af", u8"Afrikaans" },
+                    { "am", u8"\u12A0\u121B\u122D\u129B" },
+                    { "ar", u8"\u0627\u0644\u0639\u0631\u0628\u064A\u0629" },
+                    { "az", u8"Az\u0259rbaycan" },
+                    { "be", u8"\u0411\u0435\u043B\u0430\u0440\u0443\u0441\u043A\u0430\u044F" },
+                    { "bg", u8"\u0411\u044A\u043B\u0433\u0430\u0440\u0441\u043A\u0438" },
+                    { "bn", u8"\u09AC\u09BE\u0982\u09B2\u09BE" },
+                    { "bs", u8"Bosanski" },
+                    { "ca", u8"Catal\u00E0" },
+                    { "cs", u8"\u010Ce\u0161tina" },
+                    { "cy", u8"Cymraeg" },
+                    { "da", u8"Dansk" },
+                    { "de", u8"Deutsch" },
+                    { "el", u8"\u0395\u03BB\u03BB\u03B7\u03BD\u03B9\u03BA\u03AC" },
+                    { "en", u8"English" },
+                    { "eo", u8"Esperanto" },
+                    { "es", u8"Espa\u00F1ol" },
+                    { "et", u8"Eesti" },
+                    { "eu", u8"Euskara" },
+                    { "fa", u8"\u0641\u0627\u0631\u0633\u06CC" },
+                    { "fi", u8"Suomi" },
+                    { "fil", u8"Filipino" },
+                    { "fr", u8"Fran\u00E7ais" },
+                    { "ga", u8"Gaeilge" },
+                    { "gd", u8"G\u00E0idhlig" },
+                    { "gl", u8"Galego" },
+                    { "gu", u8"\u0A97\u0AC1\u0A9C\u0AB0\u0ABE\u0AA4\u0AC0" },
+                    { "he", u8"\u05E2\u05D1\u05E8\u05D9\u05EA" },
+                    { "hi", u8"\u0939\u093F\u0928\u094D\u0926\u0940" },
+                    { "hr", u8"Hrvatski" },
+                    { "hu", u8"Magyar" },
+                    { "hy", u8"\u0540\u0561\u0575\u0565\u0580\u0565\u0576" },
+                    { "id", u8"Bahasa Indonesia" },
+                    { "is", u8"\u00CDslenska" },
+                    { "it", u8"Italiano" },
+                    { "ja", u8"\u65E5\u672C\u8A9E" },
+                    { "ka", u8"\u10E5\u10D0\u10E0\u10D7\u10E3\u10DA\u10D8" },
+                    { "kk", u8"\u049A\u0430\u0437\u0430\u049B \u0442\u0456\u043B\u0456" },
+                    { "km", u8"\u1781\u17D2\u1798\u17C2\u179A" },
+                    { "kn", u8"\u0C95\u0CA8\u0CCD\u0CA8\u0CA1" },
+                    { "ko", u8"\uD55C\uAD6D\uC5B4" },
+                    { "ky", u8"\u041A\u044B\u0440\u0433\u044B\u0437\u0447\u0430" },
+                    { "lo", u8"\u0EA5\u0EB2\u0EA7" },
+                    { "lt", u8"Lietuvi\u0173" },
+                    { "lv", u8"Latvie\u0161u" },
+                    { "mk", u8"\u041C\u0430\u043A\u0435\u0434\u043E\u043D\u0441\u043A\u0438" },
+                    { "ml", u8"\u0D2E\u0D32\u0D2F\u0D3E\u0D33\u0D02" },
+                    { "mn", u8"\u041C\u043E\u043D\u0433\u043E\u043B" },
+                    { "mr", u8"\u092E\u0930\u093E\u0920\u0940" },
+                    { "ms", u8"Bahasa Melayu" },
+                    { "mt", u8"Malti" },
+                    { "my", u8"\u1019\u103C\u1014\u103A\u1019\u102C" },
+                    { "nb", u8"Norsk bokm\u00E5l" },
+                    { "ne", u8"\u0928\u0947\u092A\u093E\u0932\u0940" },
+                    { "nl", u8"Nederlands" },
+                    { "nn", u8"Norsk nynorsk" },
+                    { "no", u8"Norsk" },
+                    { "pa", u8"\u0A2A\u0A70\u0A1C\u0A3E\u0A2C\u0A40" },
+                    { "pl", u8"Polski" },
+                    { "pt", u8"Portugu\u00EAs" },
+                    { "ro", u8"Rom\u00E2n\u0103" },
+                    { "ru", u8"\u0420\u0443\u0441\u0441\u043A\u0438\u0439" },
+                    { "si", u8"\u0DC3\u0DD2\u0D82\u0DC4\u0DBD" },
+                    { "sk", u8"Sloven\u010Dina" },
+                    { "sl", u8"Sloven\u0161\u010Dina" },
+                    { "sq", u8"Shqip" },
+                    { "sr", u8"\u0421\u0440\u043F\u0441\u043A\u0438" },
+                    { "sv", u8"Svenska" },
+                    { "sw", u8"Kiswahili" },
+                    { "ta", u8"\u0BA4\u0BAE\u0BBF\u0BB4\u0BCD" },
+                    { "te", u8"\u0C24\u0C46\u0C32\u0C41\u0C17\u0C41" },
+                    { "th", u8"\u0E44\u0E17\u0E22" },
+                    { "tl", u8"Tagalog" },
+                    { "tr", u8"T\u00FCrk\u00E7e" },
+                    { "uk", u8"\u0423\u043A\u0440\u0430\u0457\u043D\u0441\u044C\u043A\u0430" },
+                    { "ur", u8"\u0627\u0631\u062F\u0648" },
+                    { "uz", u8"O\u02BBzbek" },
+                    { "vi", u8"Ti\u1EBFng Vi\u1EC7t" },
+                    { "zh", u8"\u4E2D\u6587" },
+                    { "zu", u8"isiZulu" },
+                };
+                std::map<std::string, std::string> result;
+                for (auto const& name : names)
+                    result.emplace(name.tag, reinterpret_cast<char const*>(name.name));
+                return result;
+            }();
+        std::string tag = aLanguageTag.to_std_string();
+        for (auto& ch : tag)
+            ch = (ch == '_' ? '-' : static_cast<char>(std::tolower(static_cast<unsigned char>(ch))));
+        if (auto const existing = sNativeNames.find(tag); existing != sNativeNames.end())
+            return string{ existing->second };
+        auto const subtags = language_subtags(tag);
+        if (auto const existing = sNativeNames.find(subtags[0]); existing != sNativeNames.end())
+            return string{ existing->second + region_suffix(subtags) };
+        return language_name(aLanguageTag);
     }
 
     std::pair<std::int64_t, std::int64_t> plurality_range(string const& aPlurality)
@@ -401,6 +539,11 @@ namespace neogfx
     bool translatable_base::active() const noexcept
     {
         return iActive;
+    }
+
+    string const& translatable_base::source() const noexcept
+    {
+        return iSource;
     }
 
     void translatable_base::track(i_string const& aText)

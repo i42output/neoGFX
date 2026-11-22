@@ -105,6 +105,9 @@ namespace neogfx
         virtual void* font_library_handle() const = 0;
         virtual i_optional<font_info> const& default_system_font_info(system_font_role aRole) const = 0;
         virtual const i_fallback_font_info& default_fallback_font_info() const = 0;
+        // Makes aFontFamilyName the first fallback font: a font lacking a glyph tries it before the default fallback fonts.
+        // Fallback fonts are cached when first used so call this before any text is drawn.
+        virtual void add_fallback_font_family(i_string const& aFontFamilyName) = 0;
         virtual i_native_font_face& create_default_font(const i_device_resolution& aDevice) = 0;
         virtual bool has_fallback_font(i_native_font_face const& aExistingFont) const = 0;
         virtual i_native_font_face& create_fallback_font(i_native_font_face const& aExistingFont) = 0;

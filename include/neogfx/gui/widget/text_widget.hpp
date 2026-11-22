@@ -78,6 +78,9 @@ namespace neogfx
         void set_text_format(optional_text_format const& aTextAppearance) override;
     protected:
         size text_extent() const;
+        size source_text_extent() const;
+        bool scales_to_source() const;
+        scalar horizontal_scale() const;
         size size_hint_extent() const;
     private:
         void init();
@@ -90,6 +93,7 @@ namespace neogfx
         mutable glyph_text_t iGlyphText;
         mutable std::optional<texture> iCacheTexture;
         mutable optional_size iTextExtent;
+        mutable optional_size iSourceTextExtent;
         size_hint iSizeHint;
         mutable optional_size iSizeHintExtent;
         text_widget_type iType;
