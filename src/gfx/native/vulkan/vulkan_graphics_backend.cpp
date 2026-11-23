@@ -783,6 +783,8 @@ namespace neogfx
 
         char const* const requiredExtensions[] = { VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME };
 
+        // (software rendering (--software): a CPU device only)
+        bool const software = (service<i_app>().program_options().options().count("software") != 0);
         std::optional<std::pair<int, VkPhysicalDevice>> best;
         std::uint32_t bestQueueFamily = 0u;
         for (auto device : devices)
@@ -790,6 +792,8 @@ namespace neogfx
             VkPhysicalDeviceProperties properties;
             vkGetPhysicalDeviceProperties(device, &properties);
             if (properties.apiVersion < VK_API_VERSION_1_3)
+                continue;
+            if (software && properties.deviceType != VK_PHYSICAL_DEVICE_TYPE_CPU)
                 continue;
             std::uint32_t extensionCount = 0u;
             vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -827,14 +831,15 @@ namespace neogfx
             }
         }
         if (!best)
-            throw failed_to_initialize("no Vulkan 1.3 device with dynamic rendering, synchronization2, "
+            throw failed_to_initialize(std::string{ software ? "no software (CPU, e.g. lavapipe) " : "no " } + "Vulkan 1.3 device with dynamic rendering, synchronization2, "
                 VK_KHR_SWAPCHAIN_EXTENSION_NAME " and " VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME);
 
         iPhysicalDevice = best->second;
         iQueueFamily = bestQueueFamily;
         vkGetPhysicalDeviceProperties(iPhysicalDevice, &iProperties);
-        // (software rendering (e.g. lavapipe) only if Vulkan is asked for (--vk): OpenGL, which may be hardware accelerated, otherwise)
-        if (iProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU && service<i_app>().program_options().options().count("vk") == 0)
+        // (software rendering (e.g. lavapipe) only if Vulkan (--vk) or software rendering (--software) is asked for: OpenGL, which
+        // may be hardware accelerated, otherwise)
+        if (iProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU && service<i_app>().program_options().options().count("vk") == 0 && !software)
             throw failed_to_initialize(std::string{ "software rendering only (" } + iProperties.deviceName + ")");
         vkGetPhysicalDeviceMemoryProperties(iPhysicalDevice, &iMemoryProperties);
 

@@ -168,7 +168,8 @@ namespace neogfx
         i_graphics_backend& backend() const;
         std::uint64_t frame() const;
     protected:
-        bool fall_back_to_opengl(std::exception const& aVulkanFailure);
+        // the next renderer of the fallback route (see native_renderer.cpp), if the current one fails to initialize
+        bool fall_back(std::exception const& aFailure);
     private:
         neogfx::renderer iRenderer;
         std::unique_ptr<i_graphics_backend> iBackend;

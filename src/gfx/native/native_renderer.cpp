@@ -41,6 +41,9 @@
 #include "opengl/opengl_shader_program.hpp"
 #include "opengl/opengl_graphics_backend.hpp"
 #include "vulkan/vulkan_graphics_backend.hpp"
+#ifdef _WIN32
+#include "d3d12/d3d12_graphics_backend.hpp"
+#endif
 #include "i_native_texture.hpp"
 
 #include <neogfx/gfx/vertex_shader.hpp>
@@ -56,6 +59,17 @@ namespace neogfx
             {
             case neogfx::renderer::Vulkan:
                 return std::make_unique<vulkan_graphics_backend>();
+#ifdef _WIN32
+            case neogfx::renderer::DirectX:
+                return std::make_unique<d3d12_graphics_backend>();
+            // n.b. software rendering is DirectX on WARP (see d3d12_graphics_backend::create_device)
+            case neogfx::renderer::Software:
+                return std::make_unique<d3d12_graphics_backend>();
+#else
+            // n.b. software rendering is Vulkan on a CPU device, e.g. lavapipe (see vulkan_graphics_backend::create_device)
+            case neogfx::renderer::Software:
+                return std::make_unique<vulkan_graphics_backend>();
+#endif
             default:
                 return std::make_unique<opengl_graphics_backend>(aRenderer);
             }
@@ -136,16 +150,35 @@ namespace neogfx
         iDefaultShaderProgram = add_shader_program(backend().create_standard_shader_program()).as<i_standard_shader_program>();
     }
 
-    bool native_renderer::fall_back_to_opengl(std::exception const& aVulkanFailure)
+    bool native_renderer::fall_back(std::exception const& aFailure)
     {
-        // (only when Vulkan is the default rather than asked for (--vk))
-        if (iRenderer != neogfx::renderer::Vulkan || service<i_app>().program_options().options().count("vk") != 0)
+        // the route: Vulkan, then DirectX (Windows), then OpenGL (only when Vulkan is the default rather than a renderer being
+        // asked for (--vk or --dx))
+        auto const& options = service<i_app>().program_options().options();
+        if (options.count("vk") != 0 || options.count("dx") != 0)
             return false;
-        service<debug::logger>() << neolib::logger::severity::Debug << "Vulkan unavailable (" << aVulkanFailure.what() << "): using OpenGL" << std::endl;
+        neogfx::renderer next;
+        switch (iRenderer)
+        {
+        case neogfx::renderer::Vulkan:
+#ifdef _WIN32
+            next = neogfx::renderer::DirectX;
+#else
+            next = neogfx::renderer::OpenGL;
+#endif
+            break;
+        case neogfx::renderer::DirectX:
+            next = neogfx::renderer::OpenGL;
+            break;
+        default:
+            return false;
+        }
+        service<debug::logger>() << neolib::logger::severity::Debug << (iRenderer == neogfx::renderer::Vulkan ? "Vulkan" : "DirectX") <<
+            " unavailable (" << aFailure.what() << "): using " << (next == neogfx::renderer::DirectX ? "DirectX" : "OpenGL") << std::endl;
         iDefaultShaderProgram.reset();
         iShaderPrograms.clear();
         iTextureManager = nullptr;
-        iRenderer = neogfx::renderer::OpenGL;
+        iRenderer = next;
         iBackend = create_graphics_backend(iRenderer);
         return true;
     }

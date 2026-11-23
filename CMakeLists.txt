@@ -248,6 +248,13 @@ if(WIN32)
         src/app/native/windows_basic_services.cpp
         src/app/native/windows_drag_drop.cpp
         src/app/native/windows_services.cpp
+        src/gfx/native/d3d12/d3d12_error.cpp
+        src/gfx/native/d3d12/d3d12_graphics_backend.cpp
+        src/gfx/native/d3d12/d3d12_hlsl.cpp
+        src/gfx/native/d3d12/d3d12_shader_program.cpp
+        src/gfx/native/d3d12/d3d12_surface.cpp
+        src/gfx/native/d3d12/d3d12_texture.cpp
+        src/gfx/native/d3d12/d3d12_texture_manager.cpp
         src/gfx/native/windows_renderer.cpp
         src/gui/widget/native/windows_skin.cpp
         src/gui/window/native/windows_window.cpp
@@ -413,7 +420,8 @@ target_compile_definitions(neogfx PUBLIC NEOLIB_HOSTED_ENVIRONMENT $<$<BOOL:${NE
 
 target_link_libraries(neogfx PUBLIC neolib::neolib Boost::program_options)
 # every neoGFX app (executable) reserves a 100MB stack and delay loads the Vulkan backend's DLLs, so that it runs
-# without them (with OpenGL); see vulkan_graphics_backend::initialize
+# without them (with OpenGL); see vulkan_graphics_backend::initialize (the DirectX backend checks for shaderc_shared.dll in
+# the same way and loads its other DLLs, spirv-cross-c-shared.dll among them, itself; see d3d12_graphics_backend::load_libraries)
 target_link_options(neogfx INTERFACE
     $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>>:/STACK:104857600>
     $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>>:/DELAYLOAD:vulkan-1.dll>

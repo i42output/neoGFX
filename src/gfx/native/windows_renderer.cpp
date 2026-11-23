@@ -36,6 +36,8 @@
 #include "opengl/opengl_surface.hpp"
 #include "vulkan/vulkan_graphics_backend.hpp"
 #include "vulkan/vulkan_surface.hpp"
+#include "d3d12/d3d12_graphics_backend.hpp"
+#include "d3d12/d3d12_surface.hpp"
 #include "windows_renderer.hpp"
 
 #ifndef NDEBUG
@@ -243,12 +245,10 @@ namespace neogfx
             {
                 switch (aRenderer)
                 {
-                case neogfx::renderer::Software:
-                case neogfx::renderer::DirectX: // ANGLE
-                    throw unsupported_renderer();
-                    break;
                 case neogfx::renderer::OpenGL:
                 case neogfx::renderer::Vulkan:
+                case neogfx::renderer::DirectX:
+                case neogfx::renderer::Software: // (DirectX on WARP)
                     break;
                 default:
                     break;
@@ -277,19 +277,21 @@ namespace neogfx
                 wc.lpszMenuName = NULL;
                 wc.lpszClassName = sWindowClassName.c_str();
                 ::RegisterClass(&wc);
-                if (vulkan())
+                // n.b. Vulkan, falling back to DirectX and then OpenGL (see native_renderer::fall_back)
+                while (!opengl())
                 {
                     try
                     {
                         native_renderer::initialize();
+                        break;
                     }
                     catch (std::exception const& e)
                     {
-                        if (!fall_back_to_opengl(e))
+                        if (!fall_back(e))
                             throw;
                     }
                 }
-                if (!vulkan())
+                if (opengl())
                 {
                     init_opengl();
                     auto dow = allocate_offscreen_window(nullptr);
@@ -330,6 +332,8 @@ namespace neogfx
             {
                 if (vulkan())
                     static_cast<vulkan_graphics_backend&>(backend()).set_vsync(true);
+                else if (directx())
+                    static_cast<d3d12_graphics_backend&>(backend()).set_vsync(true);
                 else
                     wglSwapIntervalEXT(1);
                 iVsyncEnabled = true;
@@ -342,6 +346,8 @@ namespace neogfx
             {
                 if (vulkan())
                     static_cast<vulkan_graphics_backend&>(backend()).set_vsync(false);
+                else if (directx())
+                    static_cast<d3d12_graphics_backend&>(backend()).set_vsync(false);
                 else
                     wglSwapIntervalEXT(0);
                 iVsyncEnabled = false;
@@ -350,7 +356,7 @@ namespace neogfx
 
         pixel_format_t renderer::set_pixel_format(const i_render_target& aTarget)
         {
-            if (vulkan())
+            if (!opengl())
                 return 0;
             return set_pixel_format(aTarget.target_device_handle());
         }
@@ -406,7 +412,7 @@ namespace neogfx
 
         renderer::handle renderer::create_context(const i_render_target& aTarget)
         {
-            if (vulkan())
+            if (!opengl())
                 return nullptr;
             if (aTarget.target_type() == render_target_type::Surface)
             {
@@ -632,11 +638,27 @@ namespace neogfx
             return native_renderer::renderer() == neogfx::renderer::Vulkan;
         }
 
+        bool renderer::directx() const
+        {
+            // n.b. software rendering is DirectX on WARP
+            return native_renderer::renderer() == neogfx::renderer::DirectX || native_renderer::renderer() == neogfx::renderer::Software;
+        }
+
+        bool renderer::opengl() const
+        {
+            return !vulkan() && !directx();
+        }
+
         void renderer::attach_surface(i_surface_window& aWindow, i_native_window& aNativeWindow)
         {
             if (vulkan())
             {
                 auto newSurface = make_ref<vulkan_surface>(*this, aWindow);
+                aNativeWindow.attach(*newSurface);
+            }
+            else if (directx())
+            {
+                auto newSurface = make_ref<d3d12_surface>(*this, aWindow);
                 aNativeWindow.attach(*newSurface);
             }
             else
@@ -684,7 +706,7 @@ namespace neogfx
 
             ++iTargetActivationCounter[static_cast<std::size_t>(aTarget.target_type())];
 
-            if (vulkan())
+            if (!opengl())
             {
                 disable_vsync();
                 return;

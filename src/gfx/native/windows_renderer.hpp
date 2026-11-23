@@ -98,6 +98,8 @@ namespace neogfx
         private:
             const i_render_target* current_target() const;
             bool vulkan() const;
+            bool directx() const;
+            bool opengl() const;
             void attach_surface(i_surface_window& aWindow, i_native_window& aNativeWindow);
         private:
             std::shared_ptr<neogfx::offscreen_window> allocate_offscreen_window(const i_render_target* aRenderTarget);

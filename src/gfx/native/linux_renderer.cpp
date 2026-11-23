@@ -94,12 +94,12 @@ namespace neogfx
             {
                 switch (aRenderer)
                 {
-                case neogfx::renderer::Software:
                 case neogfx::renderer::DirectX:
                     throw unsupported_renderer();
                     break;
                 case neogfx::renderer::OpenGL:
                 case neogfx::renderer::Vulkan:
+                case neogfx::renderer::Software: // (Vulkan on a CPU device)
                     break;
                 default:
                     break;
@@ -124,7 +124,7 @@ namespace neogfx
                     }
                     catch (std::exception const& e)
                     {
-                        if (!fall_back_to_opengl(e))
+                        if (!fall_back(e))
                             throw;
                     }
                 }
@@ -448,7 +448,8 @@ namespace neogfx
 
         bool renderer::vulkan() const
         {
-            return native_renderer::renderer() == neogfx::renderer::Vulkan;
+            // n.b. software rendering is Vulkan on a CPU device (e.g. lavapipe)
+            return native_renderer::renderer() == neogfx::renderer::Vulkan || native_renderer::renderer() == neogfx::renderer::Software;
         }
 
         void renderer::create_window_surface(void* aTargetHandle, void* aPlatformWindow)

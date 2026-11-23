@@ -15,7 +15,7 @@ void standard_filter_shader(inout vec4 color, inout vec4 function0, inout vec4 f
                 for (int f = -d; f <= d; ++f)
                 {
                     float w = texelFetch(uFilterKernel, ivec2(f + d, 0)).r;
-                    vec4 texel = texel_at(TexCoord + (axis * float(f)) / uTextureExtents);
+                    vec4 texel = base_texel_at(TexCoord + (axis * float(f)) / uTextureExtents, gl_SampleID);
                     sum += texel * w;
                     weightSum += w;
                 }
@@ -32,7 +32,7 @@ void standard_filter_shader(inout vec4 color, inout vec4 function0, inout vec4 f
                     for (int x = -d; x <= d; ++x)
                     {
                         float w = texelFetch(uFilterKernel, ivec2(x + d, y + d)).r;
-                        vec4 texel = texel_at(TexCoord + vec2(float(x), float(y)) / uTextureExtents);
+                        vec4 texel = base_texel_at(TexCoord + vec2(float(x), float(y)) / uTextureExtents, gl_SampleID);
                         sum += texel * w;
                         weightSum += w;
                     }

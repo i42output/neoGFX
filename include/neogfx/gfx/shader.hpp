@@ -281,10 +281,8 @@ namespace neogfx
                     case renderer::OpenGL:
                     case renderer::Software:
                     default:
+                        // n.b. also for Vulkan and DirectX, which adapt it (see vulkan_glsl and d3d12_glsl)
                         aOutput = glsl::Shader;
-                        break;
-                    case renderer::DirectX:
-                        aOutput = glsl::gles::Shader;
                         break;
                     }
                 }

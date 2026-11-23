@@ -1742,8 +1742,8 @@ namespace neogfx
 
         void window::display()
         {
-            // n.b. a Vulkan surface presents itself (see vulkan_surface::do_render)
-            if (rendering_engine().renderer() != neogfx::renderer::Vulkan)
+            // n.b. a Vulkan or DirectX surface presents itself (see vulkan_surface::do_render and d3d12_surface::do_render)
+            if (rendering_engine().renderer() == neogfx::renderer::OpenGL)
                 ::SwapBuffers(static_cast<HDC>(iHdc));
 
             if (!iDisplayed)

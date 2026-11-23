@@ -73,12 +73,12 @@ namespace neogfx
             ("dpi", boost::program_options::value<std::string>()->implicit_value(""s), "DPI override")
             ("nest", "display child windows nested within main window rather than using the main desktop")
             ("gl", "use OpenGL renderer")
-            ("vk", "use Vulkan renderer (default: without this option OpenGL is used if Vulkan is unavailable)")
-            ("directx", "use DirectX (ANGLE) renderer")
-            ("software", "use software renderer")
+            ("vk", "use Vulkan renderer (default: without this option DirectX (Windows) and then OpenGL are tried if Vulkan is unavailable)")
+            ("dx", "use DirectX (Direct3D 12) renderer (default: tried, if Vulkan is unavailable, before OpenGL)")
+            ("software", "use software renderer (Windows: DirectX on WARP; Linux: Vulkan on a CPU device such as lavapipe)")
             ("turbo", "use turbo mode");
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, description), iOptions);
-        if (options().count("gl") + options().count("vk") + options().count("directx") + options().count("software") > 1)
+        if (options().count("gl") + options().count("vk") + options().count("dx") + options().count("software") > 1)
             throw invalid_options("more than one renderer specified");
     }
 
@@ -96,7 +96,7 @@ namespace neogfx
     {
         if (options().count("gl") == 1)
             return neogfx::renderer::OpenGL;
-        else if (options().count("directx") == 1)
+        else if (options().count("dx") == 1)
             return neogfx::renderer::DirectX;
         else if (options().count("software") == 1)
             return neogfx::renderer::Software;

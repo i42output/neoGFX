@@ -28,6 +28,35 @@ vec4 texel_at(vec2 texCoord)
 {
     return texel_at(texCoord, gl_SampleID);
 }
+// n.b. as texel_at but the base level, so without implicit derivatives (which are undefined in non-uniform control flow, and
+// which Direct3D's shader compiler only allows in a loop it can unroll): for sampling in loops (the filters' source textures
+// have no mipmaps)
+vec4 base_texel_at(vec2 texCoord, int sampleId)
+{
+    vec4 texel = vec4(0.0);
+    if (uTextureMultisample < 5) // Scaled
+    {
+        texel = textureLod(tex, texCoord, 0.0).rgba;
+    }
+    else
+    {
+        texel = texelFetch(texMS, ivec2(texCoord * uTextureExtents), sampleId).rgba;
+    }
+    switch(uTextureDataFormat)
+    {
+    case 1: // RGBA
+    case 2: // BGRA
+    default:
+        break;
+    case 3: // Red
+        texel = vec4(1.0, 1.0, 1.0, texel.r);
+        break;
+    case 4: // SubPixel
+        texel = vec4(1.0, 1.0, 1.0, (texel.r + texel.g + texel.b) / 3.0);
+        break;
+    }
+    return texel;
+}
 // texture coordinates wrapped (0 clamp to edge, 1 repeat, 2 mirrored repeat)
 float wrap_texture_coordinate(float c, int mode)
 {
@@ -62,7 +91,7 @@ vec4 combined_texel_at(vec2 texCoord)
     vec4 sum = vec4(0.0, 0.0, 0.0, 0.0);
     for (int i = 0; i < gl_NumSamples; ++i)
     {
-        sum += texel_at(texCoord, i);
+        sum += base_texel_at(texCoord, i);
     }
     return sum / float(gl_NumSamples);
 }

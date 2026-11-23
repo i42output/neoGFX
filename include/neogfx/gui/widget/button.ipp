@@ -454,7 +454,10 @@ namespace neogfx
     inline void button<ButtonInterface>::handle_double_clicked()
     {
         destroyed_flag destroyed{ *this };
-        DoubleClicked();
+        if (DoubleClicked.has_slots())
+            DoubleClicked();
+        else
+            Clicked();
         if (!destroyed && iCheckable == button_checkable::BiState)
             toggle();
     }
