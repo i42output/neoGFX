@@ -23,6 +23,7 @@
 
 #include <cstring>
 #include <sstream>
+#include <regex>
 
 #include <neolib/core/set.hpp>
 
@@ -119,7 +120,16 @@ namespace neogfx
             };
             code += mainFunction;
             code.replace_all("%INVOKES%"_s, invokeDeclarations + invokes + invokeResults);
-            auto const vulkanCode = vulkan_glsl(code.to_std_string(), to_vk_shader_stage(stage->type()), iSamplers,
+            std::string glsl = code.to_std_string();
+            // n.b. no multisample textures if drawing is without multisampling (software rendering: see
+            // vulkan_graphics_backend::sample_count), so a multisample sampler is a 2D one (texelFetch's sample index then its
+            // level of detail: 0, as the only sample is sample 0)
+            if (backend().sample_count(4u) == VK_SAMPLE_COUNT_1_BIT)
+            {
+                static std::regex const sMultisampleSampler{ R"(\buniform\s+sampler2DMS\b)" };
+                glsl = std::regex_replace(glsl, sMultisampleSampler, "uniform sampler2D");
+            }
+            auto const vulkanCode = vulkan_glsl(glsl, to_vk_shader_stage(stage->type()), iSamplers,
                 vulkan_graphics_backend::StorageBindingBase, vulkan_graphics_backend::SamplerBindingBase);
             auto dump = [&](std::string const& why)
             {

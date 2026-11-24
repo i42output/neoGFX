@@ -2122,6 +2122,11 @@ namespace neogfx
 
     VkSampleCountFlagBits vulkan_graphics_backend::sample_count(std::uint32_t aSamples) const
     {
+        // n.b. no multisampling when software rendering (a CPU device, e.g. lavapipe): the fragment shaders (which run per sample)
+        // on the CPU four times over otherwise; multisample textures are single sample textures then (see
+        // basic_vulkan_shader_program::compile)
+        if (iProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
+            return VK_SAMPLE_COUNT_1_BIT;
         auto const supported = iProperties.limits.framebufferColorSampleCounts & iProperties.limits.framebufferDepthSampleCounts &
             iProperties.limits.framebufferStencilSampleCounts & iProperties.limits.sampledImageColorSampleCounts;
         for (std::uint32_t samples = std::min(aSamples, 64u); samples > 1u; samples /= 2u)

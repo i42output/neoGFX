@@ -23,6 +23,7 @@
 
 #include <cstring>
 #include <sstream>
+#include <regex>
 
 #include <neolib/core/set.hpp>
 
@@ -174,8 +175,25 @@ namespace neogfx
             };
             code += mainFunction;
             code.replace_all("%INVOKES%"_s, invokeDeclarations + invokes + invokeResults);
-            auto const dxCode = d3d12_glsl(vulkan_glsl(code.to_std_string(), to_d3d12_glsl_stage(stage->type()), iSamplers,
+            std::string glsl = code.to_std_string();
+            // n.b. no multisample textures if drawing is without multisampling (software rendering: see
+            // d3d12_graphics_backend::sample_count), so a multisample sampler is a 2D one (texelFetch's sample index then its
+            // level of detail: 0, as the only sample is sample 0)
+            if (backend().sample_count(4u) == 1u)
+            {
+                static std::regex const sMultisampleSampler{ R"(\buniform\s+sampler2DMS\b)" };
+                glsl = std::regex_replace(glsl, sMultisampleSampler, "uniform sampler2D");
+            }
+            auto dxCode = d3d12_glsl(vulkan_glsl(glsl, to_d3d12_glsl_stage(stage->type()), iSamplers,
                 d3d12_graphics_backend::StorageBindingBase, d3d12_graphics_backend::SamplerBindingBase));
+            // n.b. only one render target is ever bound (as with OpenGL's and Vulkan's single colour attachment), so the fragment
+            // shader's other outputs (see fragment_shader: FragFunction0 to FragFunction6, locations 1 to 7) are made private
+            // variables: the pixel shader writes SV_Target0 only (rather than to render target slots the PSO has none for)
+            if (stage->type() == shader_type::Fragment)
+            {
+                static std::regex const sOtherOutput{ R"(layout\s*\(\s*location\s*=\s*[1-9]\d*\s*\)\s*(?:flat\s+)?out\s+)" };
+                dxCode = std::regex_replace(dxCode, sOtherOutput, "");
+            }
             auto dump = [&](std::string const& why)
             {
                 service<debug::logger>() << neolib::logger::severity::Debug << why << std::endl;

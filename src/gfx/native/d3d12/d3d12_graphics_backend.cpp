@@ -993,6 +993,7 @@ namespace neogfx
             if (FAILED(iFactory->EnumWarpAdapter(IID_PPV_ARGS(&warp))) || FAILED(createDevice(warp.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&iDevice))))
                 throw failed_to_initialize("no Direct3D 12 (feature level 11.0) adapter");
             iAdapter = warp;
+            iWarp = true;
         }
 
         D3D12_COMMAND_QUEUE_DESC queueDesc = {};
@@ -2168,6 +2169,10 @@ namespace neogfx
 
     std::uint32_t d3d12_graphics_backend::sample_count(std::uint32_t aSamples) const
     {
+        // n.b. no multisampling when software rendering (WARP): the pixel shaders (which run per sample) on the CPU four times
+        // over otherwise; multisample textures are single sample textures then (see basic_d3d12_shader_program::compile)
+        if (iWarp)
+            return 1u;
         // the largest count up to that asked for that the colour and depth/stencil formats of the render targets support
         for (std::uint32_t samples = std::min(aSamples, 32u); samples > 1u; samples /= 2u)
         {

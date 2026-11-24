@@ -520,6 +520,7 @@ namespace neogfx
         com_ptr<ID3D12Fence> iFence;
         HANDLE iFenceEvent = nullptr;
         bool iTearing = false;
+        bool iWarp = false;
         mutable std::optional<std::filesystem::path> iCacheFolder;
         d3d12_descriptor_allocator iRtvDescriptors;
         d3d12_descriptor_allocator iDsvDescriptors;
